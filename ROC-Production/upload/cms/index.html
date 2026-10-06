@@ -721,7 +721,7 @@ function renderShell(){
       item('blogs','Blog posts','✎',S.blogs.length)+
       item('media','Media library','❖',S.media.length)+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
-      item('users','CMS users','◉')+item('audit','Audit log','◴')+'</div>':'')+
+      item('users','CMS users','◉')+item('audit','Audit log','◴')+item('settings','Settings','⚙')+'</div>':'')+
     '<div class="sfoot"><div class="who"><div class="av">'+
       esc((S.user.username||'?').slice(0,2).toUpperCase())+'</div>'+
       '<div><div style="font-size:12.5px">'+esc(S.user.username)+'</div>'+
@@ -753,6 +753,7 @@ function renderView(){
   if(S.view==='dashboard') return renderDash(m);
   if(S.view==='media') return renderMedia(m);
   if(S.view==='users') return renderSimple(m,'users.php','users','CMS users & roles',['id','username','email','role']);
+  if(S.view==='settings') return renderSettings(m);
   if(S.view==='audit') return renderSimple(m,'audit-logs.php','logs','Audit log',['created_at','action','entity_type','entity_id','username']);
   return renderBlogs(m);
 }
@@ -1442,6 +1443,50 @@ async function renderSimple(m, endpoint, key, title, cols){
       }).join('')+'</tr>';
     }).join(''):'<tr><td colspan="'+cols.length+'" class="empty">Nothing here yet.</td></tr>')+
     '</tbody></table></div>';
+}
+
+/* ------------------------------------------------------------- settings */
+
+// Same format the products API accepts before it will use a tag.
+var AMAZON_TAG_FORMAT = /^[A-Za-z0-9][A-Za-z0-9._-]{1,62}-\d{2}$/;
+var AMAZON_TAG_DEFAULT = 'roc2602-20';
+
+async function renderSettings(m){
+  m.innerHTML = head('Settings','Site-wide values used by the public website')+
+    '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var settings={};
+  try{ settings=(await api('settings.php')).settings||{}; }
+  catch(e){ toast(e.message,'bad'); }
+  var tag=settings.amazon_tag||'';
+
+  $('.body',m).innerHTML =
+    '<div class="card"><div class="chead"><h3>Amazon Associates</h3></div><div class="cbody">'+
+      '<div class="field"><label for="s-amazon-tag">Amazon Store ID</label>'+
+        '<input type="text" id="s-amazon-tag" value="'+esc(tag)+'" placeholder="'+AMAZON_TAG_DEFAULT+'" autocomplete="off" spellcheck="false">'+
+        '<div class="hint" id="s-amazon-hint">Added to every Amazon link on the site (tag=…). '+
+          'Find it in Amazon Associates, top right. Leave empty to use '+AMAZON_TAG_DEFAULT+'.</div></div>'+
+      '<button class="btn primary" id="s-save">Save</button>'+
+    '</div></div>';
+
+  var input=$('#s-amazon-tag',m), hint=$('#s-amazon-hint',m), btn=$('#s-save',m);
+  var hintText=hint.textContent;
+  function check(){
+    var v=input.value.trim(), ok=!v||AMAZON_TAG_FORMAT.test(v);
+    hint.textContent=ok?hintText:'Store IDs look like name-20 (letters, numbers, dots or dashes, then a dash and two digits).';
+    hint.classList.toggle('warn',!ok);
+    btn.disabled=!ok;
+    return ok;
+  }
+  input.addEventListener('input',check);
+  btn.addEventListener('click',async function(){
+    if(!check())return;
+    btn.disabled=true;
+    try{
+      await api('settings.php',{amazon_tag:input.value.trim()});
+      toast('Saved. New visitors get the updated Amazon links.','good');
+    }catch(e){ toast(e.message,'bad'); }
+    btn.disabled=false;
+  });
 }
 
 /* ---------------------------------------------------------------- modal */

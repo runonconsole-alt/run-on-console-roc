@@ -21,6 +21,7 @@ import {
   INITIAL_SITE_METAS,
   INITIAL_INTERNAL_LINKS
 } from '../data/adminInitialData.js';
+import { setAmazonTag } from '../utils/amazon';
 
 // â”€â”€â”€ Public API endpoint (no auth needed) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const PRODUCTS_API = '/api/v1/products-public.php';
@@ -38,6 +39,8 @@ async function fetchLiveProducts() {
     if (!res.ok) throw new Error('API ' + res.status);
     const data = await res.json();
     if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+      // Store ID set in CMS Settings; falls back to the default when empty.
+      setAmazonTag(data.amazon_tag);
       return { products: data.products, categories: data.categories || [], fromApi: true };
     }
     throw new Error('Empty or invalid API response');

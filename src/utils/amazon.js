@@ -1,8 +1,22 @@
 // Amazon Associates links. Every Amazon URL on the site should go through
 // amazonAffiliateLink() so the store ID lives in exactly one place.
+//
+// The store ID is editable in the CMS (Settings > Amazon Store ID); the
+// products API returns it and AppContext passes it to setAmazonTag().
+// DEFAULT_AMAZON_TAG is used until then, or if the CMS value is empty.
 
-export const AMAZON_TAG = 'roc2602-20';
+export const DEFAULT_AMAZON_TAG = 'roc2602-20';
 const AMAZON_ORIGIN = 'https://www.amazon.com';
+
+// Same format the PHP API accepts: "name-20"
+const TAG_FORMAT = /^[A-Za-z0-9][A-Za-z0-9._-]{1,62}-\d{2}$/;
+let currentTag = DEFAULT_AMAZON_TAG;
+
+export const setAmazonTag = (tag) => {
+  currentTag = typeof tag === 'string' && TAG_FORMAT.test(tag.trim()) ? tag.trim() : DEFAULT_AMAZON_TAG;
+};
+
+export const getAmazonTag = () => currentTag;
 
 // Matches /dp/ASIN, /gp/product/ASIN, /gp/aw/d/ASIN, /product/ASIN and /ASIN/ASIN
 const ASIN_PATH = /\/(?:dp|gp\/product|gp\/aw\/d|product|ASIN)\/([A-Z0-9]{10})(?=[/?#]|$)/i;
@@ -26,10 +40,10 @@ export const extractAsin = (url) => {
   return match ? match[1].toUpperCase() : '';
 };
 
-export const amazonProductLink = (asin) => `${AMAZON_ORIGIN}/dp/${asin}?tag=${AMAZON_TAG}`;
+export const amazonProductLink = (asin) => `${AMAZON_ORIGIN}/dp/${asin}?tag=${currentTag}`;
 
 export const amazonSearchLink = (query) =>
-  `${AMAZON_ORIGIN}/s?k=${encodeURIComponent(query.trim())}&tag=${AMAZON_TAG}`;
+  `${AMAZON_ORIGIN}/s?k=${encodeURIComponent(query.trim())}&tag=${currentTag}`;
 
 // Best affiliate link for a product:
 //   1. a product URL with an ASIN -> clean /dp/ASIN link with our tag
@@ -43,10 +57,10 @@ export const amazonAffiliateLink = (url, productName = '') => {
   const parsed = url && parseUrl(url);
   if (parsed) {
     if (!isAmazonHost(parsed.hostname)) return url;
-    parsed.searchParams.set('tag', AMAZON_TAG);
+    parsed.searchParams.set('tag', currentTag);
     return parsed.toString();
   }
 
   if (productName && productName.trim()) return amazonSearchLink(productName);
-  return `${AMAZON_ORIGIN}/?tag=${AMAZON_TAG}`;
+  return `${AMAZON_ORIGIN}/?tag=${currentTag}`;
 };
