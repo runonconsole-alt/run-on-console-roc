@@ -66,7 +66,10 @@ export const CompareDrawer = () => {
                       </button>
                       <img src={item.image} alt={item.title} className="w-full h-24 object-cover rounded-xl mb-2" />
                       <h4 className="font-display font-bold text-xs sm:text-sm text-slate-900 line-clamp-1">{item.title}</h4>
-                      <div className="text-emerald-600 font-extrabold text-xs mt-1">★ {item.rocScore || item.rating} / 10</div>
+                      {item.rocScore ? <div className="text-emerald-600 font-extrabold text-xs mt-1">★ {item.rocScore} / 10</div> : <div className="text-slate-500 font-bold text-[11px] mt-1">{item.brand}</div>}
+                      {item.affiliateLinks?.amazon && (
+                        <a href={item.affiliateLinks.amazon} target="_blank" rel="sponsored nofollow noopener noreferrer" className="inline-block mt-2 text-[10px] font-extrabold text-white bg-emerald-600 hover:bg-emerald-700 px-2.5 py-1 rounded-lg no-underline">Amazon →</a>
+                      )}
                     </div>
                   </th>
                 ))}
@@ -82,15 +85,17 @@ export const CompareDrawer = () => {
                 ))}
               </tr>
 
-              {/* ROC Score */}
+              {/* ROC Score (only when a product has one) */}
+              {compareItems.some(item => item.rocScore) && (
               <tr className="hover:bg-slate-50">
                 <td className="p-3 font-bold text-slate-600">ROC Score</td>
                 {compareItems.map(item => (
                   <td key={item.id} className="p-3 text-emerald-600 font-extrabold text-sm">
-                    {item.rocScore ? item.rocScore.toFixed(1) : "9.5"} / 10.0
+                    {item.rocScore ? `${Number(item.rocScore).toFixed(1)} / 10.0` : '-'}
                   </td>
                 ))}
               </tr>
+              )}
 
               {/* Dynamic Specs Rows */}
               {allSpecKeys.map(specKey => (

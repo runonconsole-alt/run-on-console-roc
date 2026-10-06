@@ -7,6 +7,7 @@ import {
   getBlogBySlug,
   getCategoryBySlug,
   getProductBySlug,
+  getProductCategoryBySlug,
   slugify,
   BASE_DOMAIN,
   isStagingEnv
@@ -33,8 +34,10 @@ export function generateJsonLd(routeData) {
     'logo': LOGO_URL,
     'description': 'Independent gaming hardware intelligence lab, benchmark testing facility, and platform reviews desk.',
     'sameAs': [
-      'https://twitter.com/runonconsole',
-      'https://youtube.com/@runonconsole'
+      'https://www.facebook.com/profile.php?id=61594369295787',
+      'https://www.instagram.com/runonconsole/',
+      'https://www.pinterest.com/runonconsole/',
+      'https://x.com/RunOnConsole'
     ]
   };
 
@@ -115,39 +118,52 @@ export function generateJsonLd(routeData) {
     });
   }
 
-  // 6. Product / Review Schema for product pages
+  // 6. Product schema for product pages. Price, offer and rating are only included
+  //    when the product really has them (no invented prices or reviews).
   if (routeData.type === 'product' && routeData.product) {
     const p = routeData.product;
-    const priceNumeric = parseFloat((p.price || '199.99').replace(/[^0-9.]/g, '')) || 199.99;
-    schemas.push({
+    const product = {
       '@context': 'https://schema.org',
       '@type': 'Product',
       'name': p.title,
       'image': [p.image ? `${SITE_DOMAIN}${p.image}` : DEFAULT_IMAGE],
       'description': p.shortDesc || routeData.description,
-      'brand': {
-        '@type': 'Brand',
-        'name': p.brandName || p.brand || SITE_NAME
-      },
-      'offers': {
+      'category': p.category,
+      'brand': { '@type': 'Brand', 'name': p.brandName || p.brand || SITE_NAME }
+    };
+    const priceNumeric = p.price ? parseFloat(String(p.price).replace(/[^0-9.]/g, '')) : NaN;
+    if (!isNaN(priceNumeric) && priceNumeric > 0) {
+      product.offers = {
         '@type': 'Offer',
         'url': routeData.canonical,
         'priceCurrency': 'USD',
         'price': priceNumeric,
         'availability': p.inStock !== false ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'
-      },
-      'review': {
+      };
+    }
+    if (p.rating) {
+      product.review = {
         '@type': 'Review',
-        'reviewRating': {
-          '@type': 'Rating',
-          'ratingValue': p.rating || 4.8,
-          'bestRating': 5,
-          'worstRating': 1
-        },
-        'author': {
-          '@type': 'Organization',
-          'name': 'Run On Console Testing Lab'
-        }
+        'reviewRating': { '@type': 'Rating', 'ratingValue': p.rating, 'bestRating': 5, 'worstRating': 1 },
+        'author': { '@type': 'Organization', 'name': SITE_NAME }
+      };
+    }
+    if (product.offers || product.review) schemas.push(product);
+  }
+
+  // 7. Product category listing: ItemList of the products on the page
+  if (routeData.type === 'product-category' && routeData.productCategory) {
+    const items = ENHANCED_PRODUCTS.filter(p => p.categorySlug === routeData.productCategory.slug);
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      'name': routeData.h1,
+      'url': routeData.canonical,
+      'description': routeData.description,
+      'mainEntity': {
+        '@type': 'ItemList',
+        'numberOfItems': items.length,
+        'itemListElement': items.map((p, i) => ({ '@type': 'ListItem', 'position': i + 1, 'url': p.url, 'name': p.title }))
       }
     });
   }
@@ -251,6 +267,32 @@ export function getSeoMetadata(pathname) {
     }
   }
 
+  // 5a. Product category listing `/products/category/{slug}/`
+  if (fullPath.startsWith('/products/category/')) {
+    const cat = getProductCategoryBySlug(fullPath.replace('/products/category/', '').replace('/', ''));
+    if (cat) {
+      const data = {
+        path: fullPath,
+        canonical: cat.url,
+        title: `Best ${cat.name}: ${cat.count} Picks | Run On Console`,
+        description: `${cat.desc} ${cat.count} picks with key specs and Amazon links.`,
+        h1: `Best ${cat.name}`,
+        robots: 'index, follow',
+        ogType: 'website',
+        ogImage: cat.image ? `${SITE_DOMAIN}${cat.image}` : DEFAULT_IMAGE,
+        type: 'product-category',
+        productCategory: cat,
+        breadcrumbs: [
+          { name: 'Home', url: SITE_DOMAIN },
+          { name: 'Products', url: `${SITE_DOMAIN}/products/` },
+          { name: cat.name, url: cat.url }
+        ]
+      };
+      data.jsonLd = generateJsonLd(data);
+      return data;
+    }
+  }
+
   // 5. Check individual Product route `/products/{slug}/`
   if (fullPath.startsWith('/products/')) {
     const slug = fullPath.replace('/products/', '').replace('/', '');
@@ -260,13 +302,14 @@ export function getSeoMetadata(pathname) {
       const breadcrumbs = [
         { name: 'Home', url: SITE_DOMAIN },
         { name: 'Products', url: `${SITE_DOMAIN}/products/` },
+        ...(getProductCategoryBySlug(product.categorySlug) ? [{ name: product.category, url: getProductCategoryBySlug(product.categorySlug).url }] : []),
         { name: product.title, url: canonical }
       ];
       const data = {
         path: fullPath,
         canonical,
-        title: `${product.title} Benchmark Review & Price | Run On Console`,
-        description: product.shortDesc || `${product.title} tested by Run On Console testing lab. Full specs, pros, cons, and retailer prices.`,
+        title: `${product.title}: Specs & Where to Buy | Run On Console`,
+        description: product.shortDesc || `${product.title} key specs and where to buy it.`,
         h1: product.title,
         robots: 'index, follow',
         ogType: 'product',

@@ -17,6 +17,14 @@ Use canonical Run On Console URLs when citing this website. Cite the specific ar
 - [Products](https://runonconsole.com/products/): Product guides and comparisons.
 - [Gaming Guides and Articles](https://runonconsole.com/blogs/): Published guides and articles.
 
+## Product Categories
+- [Gaming Keyboards](https://runonconsole.com/products/category/keyboards/): Hall Effect, rapid-trigger and mechanical gaming keyboards, from 60% esports boards to full-size wireless picks.
+- [Gaming Headsets & Audio](https://runonconsole.com/products/category/audio/): Wireless and wired gaming headsets, gaming earbuds, studio headphones and USB microphones.
+- [Gaming Mice](https://runonconsole.com/products/category/mice/): Ultra-light esports mice, ergonomic wireless mice and feature-rich MMO mice.
+- [Speakers & Soundbars](https://runonconsole.com/products/category/speakers/): Desktop PC speakers, 2.1 and 5.1 systems, studio monitors and gaming soundbars.
+- [Gaming Monitors](https://runonconsole.com/products/category/monitors/): OLED and QD-OLED gaming monitors, ultrawides and budget high-refresh displays.
+- [Graphics Cards (GPU)](https://runonconsole.com/products/category/gpu/): NVIDIA GeForce RTX 50 series, AMD Radeon RX 9000 series and Intel Arc graphics cards by tier and resolution.
+
 ## Platform Hubs
 - [PC / Handheld PC](https://runonconsole.com/categories/pc-handheld-pc/): Custom battlestation rigs, high-refresh gaming laptops, and high-performance x86 handheld PCs running Steam, Game Pass, and Epic.
 - [Sony PlayStation](https://runonconsole.com/categories/sony-playstation/): From the revolutionary 32-bit PS1 to the 4K 120FPS ray-traced PlayStation 5 Pro, DualSense Edge, and PlayStation Portal.

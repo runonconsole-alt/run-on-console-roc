@@ -7,7 +7,8 @@ import {
   PRIVATE_ROUTES, 
   ENHANCED_BLOGS, 
   ENHANCED_CATEGORIES, 
-  ENHANCED_PRODUCTS 
+  ENHANCED_PRODUCTS,
+  ENHANCED_PRODUCT_CATEGORIES
 } from '../src/seo/routeRegistry.js';
 import { getSeoMetadata } from '../src/seo/seoConfig.js';
 
@@ -45,6 +46,7 @@ const routes = [
   ...STATIC_PUBLIC_ROUTES.map(r => r.path),
   ...ENHANCED_BLOGS.map(b => `/blogs/${b.slug}/`),
   ...ENHANCED_CATEGORIES.map(c => `/categories/${c.slug}/`),
+  ...ENHANCED_PRODUCT_CATEGORIES.map(c => c.path),
   ...ENHANCED_PRODUCTS.map(p => `/products/${p.slug}/`),
   ...PRIVATE_ROUTES.map(r => r.path),
   '/404.html'

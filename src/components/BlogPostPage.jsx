@@ -18,7 +18,7 @@ export const BlogPostPage = () => {
   if (!selectedArticle) return null;
 
   const isComparing = compareIds.includes(selectedArticle.id);
-  const amazonLink = selectedArticle.affiliateLinks?.amazon || "https://amazon.com?tag=fragreviews-20";
+  const amazonLink = selectedArticle.affiliateLinks?.amazon || "/products/";
   const bestbuyLink = selectedArticle.affiliateLinks?.bestbuy || "https://bestbuy.com";
   const officialLink = selectedArticle.affiliateLinks?.official || "https://store.com";
 

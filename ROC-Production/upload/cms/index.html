@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Run On Console — CMS</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23064e3b'/><text y='68' x='50' text-anchor='middle' font-size='42' font-family='system-ui' font-weight='700' fill='%236ee7b7'>R</text></svg>">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="theme-color" content="#064E3B">
 <style>
 /* Self-contained. The previous build pulled Tailwind and Font Awesome from CDNs;
    the Tailwind CDN compiles in the browser and is not meant for production, and
    an admin panel should not depend on two third-party hosts staying up. */
 :root{
-  --bg:#080f0d; --panel:#0f1a17; --panel-2:#16241f; --line:#1f312b; --line-2:#284038;
-  --ink:#e8f0ed; --ink-2:#9fb3ac; --ink-3:#6b827a;
-  --brand:#10b981; --brand-2:#059669; --brand-ink:#04231a;
+  --bg:#f8fafc; --panel:#ffffff; --panel-2:#f1f5f9; --line:#e2e8f0; --line-2:#cbd5e1;
+  --ink:#0f172a; --ink-2:#334155; --ink-3:#64748b;
+  --brand:#059669; --brand-2:#047857; --brand-ink:#ffffff;
   --amber:#f59e0b; --red:#f43f5e; --blue:#60a5fa;
   --radius:12px; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
@@ -27,12 +28,13 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 /* layout */
 .shell{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
-.side{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.side{background:linear-gradient(180deg,#064e3b 0%,#022c22 100%);border-right:0;
+  --ink:#ecfdf5;--ink-2:#a7f3d0;--ink-3:#6ee7b7;--panel-2:rgba(255,255,255,.09);--line:rgba(255,255,255,.12);color:var(--ink);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
 .side-top{padding:18px 16px 14px;border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:10px}
-.mark{width:32px;height:32px;border-radius:9px;flex:none;background:linear-gradient(140deg,#34d399,#059669);display:grid;place-items:center;color:var(--brand-ink);font-weight:800;font-size:11px}
+.mark{width:34px;height:34px;border-radius:10px;flex:none;background:linear-gradient(135deg,#10b981,#0d9488);box-shadow:0 4px 12px rgba(5,150,105,.35);display:grid;place-items:center;color:var(--brand-ink);font-weight:800;font-size:11px}
 .bname{font-weight:640;line-height:1.15}
-.bsub{font-size:10px;color:var(--brand);text-transform:uppercase;letter-spacing:.09em;font-weight:640}
+.bsub{font-size:10px;color:#34d399;text-transform:uppercase;letter-spacing:.09em;font-weight:640}
 .snav{padding:12px 9px 0}
 .slabel{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:0 8px 6px;font-weight:640}
 .sitem{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;background:none;border-radius:9px;color:var(--ink-2);cursor:pointer;text-align:left;font-size:13.5px}
@@ -42,9 +44,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 .sitem .ct{margin-left:auto;font-size:11px;color:var(--ink-3);background:rgba(255,255,255,.05);padding:1px 7px;border-radius:20px}
 .sfoot{margin-top:auto;padding:12px 9px 16px;border-top:1px solid var(--line)}
 .who{display:flex;align-items:center;gap:9px;padding:6px 8px}
-.av{width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;background:#17332a;color:#6ee7b7;font-weight:700;font-size:11px}
+.av{width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;background:linear-gradient(135deg,#059669,#14b8a6);color:#fff;font-weight:700;font-size:11px}
 .main{min-width:0;display:flex;flex-direction:column}
-.bar{position:sticky;top:0;z-index:30;background:rgba(8,15,13,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 24px;display:flex;align-items:center;gap:12px;min-height:58px}
+.bar{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 24px;display:flex;align-items:center;gap:12px;min-height:58px}
 .bar h1{font-size:16.5px}
 .bar .sub{font-size:12px;color:var(--ink-3)}
 .bar .right{margin-left:auto;display:flex;align-items:center;gap:8px}
@@ -56,8 +58,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 .btn:hover{background:var(--panel-2);color:var(--ink)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink);font-weight:640}
-.btn.primary:hover{background:#34d399}
-.btn.danger{color:var(--red);border-color:#40222c}
+.btn.primary:hover{background:#047857;border-color:#047857}
+.btn.danger{color:#e11d48;border-color:#fecdd3}
 .btn.ghost{border-color:transparent;background:none}
 .btn.ghost:hover{background:var(--panel-2)}
 .btn.sm{padding:4px 9px;font-size:12px}
@@ -95,7 +97,7 @@ table.list tbody tr:hover{background:var(--panel-2)}
 .t-slug{font-size:11px;color:var(--ink-3);font-family:var(--mono)}
 .tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:580;padding:2px 9px;border-radius:20px}
 .tag::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
-.tag.published{background:rgba(16,185,129,.12);color:#34d399}
+.tag.published{background:#d1fae5;color:#047857}
 .tag.draft{background:rgba(255,255,255,.06);color:var(--ink-3)}
 .empty{text-align:center;padding:48px 20px;color:var(--ink-3)}
 .empty .big{font-size:30px;margin-bottom:10px;opacity:.4}
@@ -152,10 +154,10 @@ table.list tbody tr:hover{background:var(--panel-2)}
 .meter i.over{background:var(--amber)}
 .advice{display:flex;flex-direction:column;gap:6px}
 .advice .a{display:flex;gap:8px;font-size:12px;line-height:1.45;padding:8px 10px;border-radius:7px}
-.advice .a.error{background:rgba(244,63,94,.1);color:#fda4af}
-.advice .a.warn{background:rgba(245,158,11,.1);color:#fcd34d}
-.advice .a.info{background:rgba(96,165,250,.1);color:#93c5fd}
-.advice .a.ok{background:rgba(16,185,129,.1);color:#6ee7b7}
+.advice .a.error{background:#fff1f2;color:#be123c}
+.advice .a.warn{background:#fffbeb;color:#b45309}
+.advice .a.info{background:#eff6ff;color:#1d4ed8}
+.advice .a.ok{background:#ecfdf5;color:#047857}
 .advice .a .m{flex:none}
 .codebox{background:#060b09;color:#9fb8b0;border-radius:8px;padding:12px 14px;font-family:var(--mono);font-size:11.5px;line-height:1.55;max-height:250px;overflow:auto;white-space:pre-wrap;word-break:break-word}
 
@@ -181,14 +183,14 @@ table.list tbody tr:hover{background:var(--panel-2)}
 .mfoot{padding:13px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
 .toasts{position:fixed;bottom:18px;right:18px;z-index:200;display:flex;flex-direction:column;gap:8px}
 .toast{background:var(--panel-2);border:1px solid var(--line-2);color:var(--ink);padding:10px 15px;border-radius:9px;font-size:13px;max-width:380px}
-.toast.bad{background:#3b1220;border-color:#5c1f33;color:#fda4af}
-.toast.good{background:#06281d;border-color:#0d4a36;color:#6ee7b7}
+.toast.bad{background:#fff1f2;border-color:#fecdd3;color:#be123c}
+.toast.good{background:#ecfdf5;border-color:#a7f3d0;color:#047857}
 .gate{min-height:100vh;display:grid;place-items:center;padding:20px}
 .gcard{background:var(--panel);border:1px solid var(--line-2);border-radius:16px;padding:30px;width:100%;max-width:392px}
 .alert{padding:10px 13px;border-radius:9px;font-size:12.5px;margin-bottom:13px}
-.alert.bad{background:rgba(244,63,94,.1);color:#fda4af}
-.alert.warn{background:rgba(245,158,11,.1);color:#fcd34d}
-.alert.info{background:rgba(96,165,250,.1);color:#93c5fd}
+.alert.bad{background:#fff1f2;color:#be123c}
+.alert.warn{background:#fffbeb;color:#b45309}
+.alert.info{background:#eff6ff;color:#1d4ed8}
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0;padding:0 8px}
 .tab{padding:9px 12px;border:0;background:none;cursor:pointer;font-size:12.5px;color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:520}
 .tab:hover{color:var(--ink)}
@@ -199,7 +201,38 @@ table.list tbody tr:hover{background:var(--panel-2)}
 .spin{display:inline-block;width:13px;height:13px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:turn .6s linear infinite}
 @keyframes turn{to{transform:rotate(360deg)}}
 .dirty{width:7px;height:7px;border-radius:50%;background:var(--amber);display:inline-block}
+/* phase 2 */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line-2);background:var(--panel);color:var(--ink-2);border-radius:20px;padding:4px 11px;font-size:12px;cursor:pointer}
+.chip.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink);font-weight:620}
+.chip .n{opacity:.7;margin-left:4px}
+.flag.used{left:6px;right:auto;background:rgba(8,15,13,.85);color:#6ee7b7}
+.flag.unused{left:6px;right:auto;background:rgba(8,15,13,.85);color:var(--ink-3)}
+.flag.lock{left:6px;right:auto;top:auto;bottom:6px;background:rgba(8,15,13,.85);color:#93c5fd}
+.ulist{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto}
+.uitem{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px}
+.uitem .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);white-space:nowrap;min-width:92px}
+.matrix{width:100%;border-collapse:collapse;font-size:12.5px}
+.matrix th,.matrix td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:center}
+.matrix th:first-child,.matrix td:first-child{text-align:left}
+.matrix input{width:15px;height:15px;accent-color:var(--brand)}
+.thumbs{display:flex;gap:4px;flex-wrap:wrap}
+.thumbs i{width:34px;height:26px;border-radius:4px;background:var(--bg) center/cover no-repeat;border:1px solid var(--line-2);display:block}
+.tag.off{background:#fff1f2;color:#be123c}
+.tag.admin{background:#dbeafe;color:#1d4ed8}
+.tag.ro{background:rgba(255,255,255,.06);color:var(--ink-3)}
+.pw{font-family:var(--mono);font-size:16px;letter-spacing:.04em}
 @media(max-width:860px){.shell{grid-template-columns:1fr}.side{position:static;height:auto}.row{grid-template-columns:1fr}.body,.bar{padding-left:14px;padding-right:14px}}
+.gate{background:radial-gradient(1200px 500px at 50% -10%,#d1fae5,transparent),var(--bg)}
+.sitem.on{background:rgba(255,255,255,.14);color:#fff}
+.sitem .ct.new{background:#f59e0b;color:#1f2937;font-weight:700}
+.act{display:flex;gap:12px;padding:12px 15px;border-bottom:1px solid var(--line);align-items:flex-start}
+.act:last-child{border-bottom:0}
+.act .i{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex:none;font-size:15px}
+.act .t{font-weight:600}.act .d{font-size:12.5px;color:var(--ink-3);margin-top:1px;word-break:break-word}
+.act .w{margin-left:auto;font-size:11.5px;color:var(--ink-3);white-space:nowrap}
+.act.new{background:#f0fdf4}
+.dayh{padding:8px 15px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);background:var(--panel-2);border-bottom:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -645,7 +678,35 @@ var $ = function (s, r) { return (r || document).querySelector(s); };
 var app = $('#app');
 
 var S = { user:null, csrf:'', view:'dashboard', blogs:[], media:[], editing:null,
-          dirty:false, editor:null, tab:'image', search:'', filter:'all', warn:[] };
+          dirty:false, editor:null, tab:'image', search:'', filter:'all', warn:[],
+          sections:[], mediaLoaded:false, mfilter:'all', mq:'', pfilter:'all', pq:'', pages:[], seo:null };
+
+/* Two kinds of editable content share one editor: blog posts and CMS pages. */
+var KINDS={
+  blog:{key:'blog',ep:'blogs.php',sec:'blogs',base:'/blogs/',noun:'post',Noun:'Post',list:'blogs'},
+  page:{key:'page',ep:'pages.php',sec:'pages',base:'/',noun:'page',Noun:'Page',list:'pages'}
+};
+function K(x){ var k=(x&&x._kind)||(S.editing&&S.editing._kind)||'blog'; return KINDS[k]; }
+function liveUrl(kind, slug){ return KINDS[kind].base+slug+'/'; }
+/* Public path of a post or page (category guides live under their category). */
+function itemPath(x, slug){
+  if(slug==null) slug=x.slug||'…';
+  if(K(x)===KINDS.page && x.page_type==='category' && x.category_slug) return '/categories/'+x.category_slug+'/'+slug+'/';
+  return K(x).base+slug+'/';
+}
+var PAGE_TYPES={general:{label:'General page',hint:'About, policy, info pages. URL: /your-page/'},
+  category:{label:'Category guide',hint:'Belongs to a category. URL: /categories/{category}/your-page/, with breadcrumb and “More in category”.'},
+  product:{label:'Product page / comparison',hint:'Built around chosen products: shows their cards, prices and Buy buttons. URL: /your-page/'},
+  landing:{label:'Landing page',hint:'For ads and campaigns. Not placed in menus. URL: /your-page/'}};
+var PLACEMENTS={header:'Header menu',footer:'Footer links',category_guides:'“Guides” box on the category page'};
+
+/* Permission check for the UI. The server enforces the same rules; this only hides controls. */
+function can(sec, act){
+  if(!S.user) return false;
+  if(S.user.is_admin || S.user.role==='administrator') return true;
+  var p=(S.user.permissions||{})[sec]||[];
+  return p.indexOf(act)!==-1;
+}
 
 /* ------------------------------------------------------------- helpers */
 
@@ -669,7 +730,8 @@ async function api(endpoint, body, method){
   var data;
   try { data = await res.json(); }
   catch(e){ throw new Error('The server returned something unexpected. Your session may have expired — reload and sign in again.'); }
-  if (!res.ok || data.success === false) throw new Error(data.error || 'Request failed.');
+  if (data && data.code === 'PASSWORD_CHANGE_REQUIRED') { renderChangePassword(true); }
+  if (!res.ok || data.success === false) { var err=new Error(data.error || 'Request failed.'); err.fields=data.errors||null; err.code=data.code||null; err.data=data; throw err; }
   return data;
 }
 
@@ -678,7 +740,7 @@ async function api(endpoint, body, method){
 function renderLogin(error){
   app.innerHTML =
   '<div class="gate"><div class="gcard">'+
-    '<div class="brand" style="margin-bottom:18px"><div class="mark">ROC</div>'+
+    '<div class="brand" style="margin-bottom:18px"><div class="mark"><svg viewBox="0 0 100 100" width="24" height="24" fill="none" aria-hidden="true"><path d="M12 28 C8 28 4 36 2 54 C0 72 8 88 22 88 C30 88 36 78 44 68 L56 68 C64 78 70 88 78 88 C92 88 100 72 98 54 C96 36 92 28 88 28 C76 28 68 36 50 36 C32 36 24 28 12 28 Z" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 44 V64 M16 54 H36" stroke="#fff" stroke-width="7" stroke-linecap="round"/><circle cx="74" cy="48" r="4.5" fill="#fff"/><circle cx="84" cy="58" r="4.5" fill="#fff"/><circle cx="64" cy="58" r="4.5" fill="#fff"/><circle cx="74" cy="68" r="4.5" fill="#fff"/></svg></div>'+
     '<div><div class="bname">Run On Console</div><div class="bsub">Content management</div></div></div>'+
     '<h2 style="font-size:19px;margin-bottom:5px">Sign in</h2>'+
     '<p style="color:var(--ink-3);font-size:13px;margin:0 0 18px">Use the account your administrator created.</p>'+
@@ -696,7 +758,9 @@ function renderLogin(error){
     b.disabled=true; b.innerHTML='<span class="spin"></span>';
     try{
       var d=await api('auth.php',{action:'login',username:f.get('username'),password:f.get('password')});
-      S.user=d.user; S.csrf=d.csrf_token; await load();
+      S.user=d.user; S.csrf=d.csrf_token; S.sections=d.sections||[];
+      if(S.user.must_change_password) return renderChangePassword(true);
+      await load();
     }catch(err){
       renderLogin(err.message);
     }
@@ -710,28 +774,34 @@ function renderShell(){
   function item(v,label,ic,ct){
     return '<button class="sitem'+(S.view===v?' on':'')+'" data-go="'+v+'">'+
       '<span class="ic">'+ic+'</span><span>'+esc(label)+'</span>'+
-      (ct!==undefined?'<span class="ct">'+ct+'</span>':'')+'</button>';
+      (ct!==undefined?'<span class="ct'+(v==='activity'?' new':'')+'">'+ct+'</span>':'')+'</button>';
   }
   app.innerHTML =
   '<div class="shell"><aside class="side">'+
-    '<div class="side-top"><div class="brand"><div class="mark">ROC</div>'+
-    '<div><div class="bname">ROC CMS</div><div class="bsub">Content</div></div></div></div>'+
-    '<div class="snav"><div class="slabel">Workspace</div>'+item('dashboard','Dashboard','◱')+'</div>'+
+    '<div class="side-top"><div class="brand"><div class="mark"><svg viewBox="0 0 100 100" width="24" height="24" fill="none" aria-hidden="true"><path d="M12 28 C8 28 4 36 2 54 C0 72 8 88 22 88 C30 88 36 78 44 68 L56 68 C64 78 70 88 78 88 C92 88 100 72 98 54 C96 36 92 28 88 28 C76 28 68 36 50 36 C32 36 24 28 12 28 Z" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 44 V64 M16 54 H36" stroke="#fff" stroke-width="7" stroke-linecap="round"/><circle cx="74" cy="48" r="4.5" fill="#fff"/><circle cx="84" cy="58" r="4.5" fill="#fff"/><circle cx="64" cy="58" r="4.5" fill="#fff"/><circle cx="74" cy="68" r="4.5" fill="#fff"/></svg></div>'+
+    '<div><div class="bname">RUN ON <span style="color:#6ee7b7">CONSOLE</span></div><div class="bsub">Content management</div></div></div></div>'+
+    '<div class="snav"><div class="slabel">Workspace</div>'+item('dashboard','Dashboard','◱')+
+      (can('activity','view')?item('activity','Live activity','⚡',S.actUnseen?S.actUnseen:undefined):'')+'</div>'+
     '<div class="snav"><div class="slabel">Content</div>'+
-      item('blogs','Blog posts','✎',S.blogs.length)+
-      item('media','Media library','❖',S.media.length)+'</div>'+
+      (can('blogs','view')?item('blogs','Blog posts','✎',S.blogs.length):'')+
+      (can('media','view')?item('media','Media library','❖',S.media.length):'')+
+      (can('pages','view')?item('cmspages','Pages','▦',S.pages.length):'')+
+      (can('pages','view')?item('pages','Website pages & SEO','▤'):'')+
+      (can('products','view')?item('products','Products','▣'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
-      item('users','CMS users','◉')+item('audit','Audit log','◴')+'</div>':'')+
+      item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+'</div>':'')+
     '<div class="sfoot"><div class="who"><div class="av">'+
       esc((S.user.username||'?').slice(0,2).toUpperCase())+'</div>'+
       '<div><div style="font-size:12.5px">'+esc(S.user.username)+'</div>'+
-      '<div style="font-size:11px;color:var(--ink-3);text-transform:capitalize">'+esc(S.user.role)+'</div></div></div>'+
+      '<div style="font-size:11px;color:var(--ink-3)">'+(admin?'Full access':'Limited access')+'</div></div></div>'+
+      '<button class="sitem" id="chpw"><span class="ic">⚿</span><span>Change password</span></button>'+
       '<button class="sitem" id="out"><span class="ic">⏻</span><span>Sign out</span></button>'+
     '</div></aside><main class="main" id="main"></main></div>';
 
   app.querySelectorAll('[data-go]').forEach(function(b){
     b.addEventListener('click',function(){ go(b.dataset.go); });
   });
+  $('#chpw').addEventListener('click', function(){ renderChangePassword(false); });
   $('#out').addEventListener('click', async function(){
     if(S.dirty && !confirm('You have unsaved changes. Sign out anyway?'))return;
     try{ await api('auth.php',{action:'logout'}); }catch(e){}
@@ -743,7 +813,7 @@ function renderShell(){
 function go(v){
   if(S.dirty && !confirm('You have unsaved changes. Leave without saving?'))return;
   if(S.editing) releaseLock(S.editing.id);
-  S.dirty=false; S.editing=null; S.view=v; S.search=''; S.filter='all';
+  S.dirty=false; S.editing=null; S.view=v; S.search=''; S.filter='all'; S.mediaLoaded=false; S.sitePages=null;
   renderShell();
 }
 
@@ -752,9 +822,15 @@ function renderView(){
   if(S.editing) return renderEditor(m);
   if(S.view==='dashboard') return renderDash(m);
   if(S.view==='media') return renderMedia(m);
-  if(S.view==='users') return renderSimple(m,'users.php','users','CMS users & roles',['id','username','email','role']);
-  if(S.view==='audit') return renderSimple(m,'audit-logs.php','logs','Audit log',['created_at','action','entity_type','entity_id','username']);
-  return renderBlogs(m);
+  if(S.view==='pages') return renderPages(m);
+  if(S.view==='activity') return renderActivity(m);
+  if(S.view==='social') return renderSocial(m);
+  if(S.view==='products' && can('products','view')) return renderProducts(m);
+  if(S.view==='cmspages'){ if(!S.pageMeta){ loadPageMeta().then(function(){ if(S.view==='cmspages'&&!S.editing) renderCmsPages(m); }); } return renderCmsPages(m); }
+  if(S.view==='users') return renderUsers(m);
+  if(S.view==='audit') return renderSimple(m,'audit-logs.php','logs','Audit log',['created_at','username','action','target_type','target_id']);
+  if(S.view==='blogs' && can('blogs','view')) return renderBlogs(m);
+  return renderDash(m);
 }
 
 function head(title, sub, right){
@@ -796,16 +872,18 @@ function renderDash(m){
       (noAlt.length?'<div class="a error"><span class="m">●</span><span>'+noAlt.length+' image(s) have no alt text.</span></div>':'')+
       (heavy.length?'<div class="a warn"><span class="m">▲</span><span>'+heavy.length+' image(s) are over 100 KB.</span></div>':'')+
       '</div></div></div>':'')+
+    '<div id="dash-site"></div>'+
     '<div class="card"><div class="chead"><h3>Recently edited</h3></div>'+
     '<table class="list"><thead><tr><th>Title</th><th>Status</th><th>Updated</th></tr></thead><tbody>'+
     (S.blogs.slice(0,8).map(function(b){
       return '<tr><td><div class="t-title" data-open="'+esc(b.id)+'">'+esc(b.title)+'</div>'+
-        '<div class="t-slug">/blogs/'+esc(b.slug||'')+'/</div></td>'+
+        '<div class="t-slug">/blogs/'+esc(b.slug||'')+'/</div>'+viewLiveLink(b)+'</td>'+
         '<td><span class="tag '+(b.status==='published'?'published':'draft')+'">'+esc(b.status)+'</span></td>'+
         '<td style="color:var(--ink-3)">'+when(b.updated_at)+'</td></tr>';
     }).join('')||'<tr><td colspan="3" class="empty">No posts yet.</td></tr>')+
     '</tbody></table></div></div>';
   wireOpen(m);
+  fillDashSite(m);
 }
 
 function stat(n,l){ return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>'; }
@@ -827,7 +905,7 @@ function renderBlogs(m){
   });
 
   m.innerHTML = head('Blog posts', rows.length+' of '+S.blogs.length+' shown',
-    '<button class="btn primary" id="newpost">＋ New post</button>')+
+    can('blogs','edit')?'<button class="btn primary" id="newpost">＋ New post</button>':'')+
   '<div class="body"><div class="card">'+
     '<div class="chead" style="gap:8px">'+
       '<div class="search" style="max-width:280px;flex:1"><input type="text" id="q" placeholder="Search title or slug" value="'+esc(S.search)+'"></div>'+
@@ -846,7 +924,7 @@ function renderBlogs(m){
           (Date.now() - new Date(String(b.locked_at).replace(' ','T')).getTime()) < 900000;
         return '<tr><td><div class="t-title" data-open="'+esc(b.id)+'">'+esc(b.title)+
           (locked?' <span style="color:var(--amber);font-size:11px">● being edited</span>':'')+'</div>'+
-          '<div class="t-slug">/blogs/'+esc(b.slug||'')+'/</div></td>'+
+          '<div class="t-slug">/blogs/'+esc(b.slug||'')+'/</div>'+viewLiveLink(b)+'</td>'+
           '<td><span class="tag '+(b.status==='published'?'published':'draft')+'">'+esc(b.status)+'</span></td>'+
           '<td>'+(g.length?'<span style="color:var(--amber);font-size:12px">▲ '+esc(g.join(', '))+'</span>'
                           :'<span style="color:var(--brand);font-size:12px">✓ complete</span>')+'</td>'+
@@ -861,25 +939,52 @@ function renderBlogs(m){
     var f=$('#q',$('#main')); if(f){f.focus();f.setSelectionRange(at,at);}
   });
   $('#f',m).addEventListener('change',function(){ S.filter=this.value; renderView(); });
-  $('#newpost',m).addEventListener('click',newBlog);
+  var np=$('#newpost',m); if(np) np.addEventListener('click',newBlog);
   wireOpen(m);
 }
 
 function blankBlog(){
-  return { id:null, version:0, title:'', slug:'', excerpt:'', content:'', category:'general',
+  return { id:null, version:0, title:'', slug:'', excerpt:'', content:'', category:'',
     author_name:(S.user&&S.user.username)||'', image:'', image_alt:'',
-    meta_title:'', meta_description:'', canonical_url:'', focus_keyword:'',
-    is_noindex:0, is_nofollow:0, og_title:'', og_description:'', og_image:'', og_type:'',
-    twitter_card:'summary_large_image', twitter_title:'', twitter_description:'', twitter_image:'',
-    schema_type:'', schema_json:'', status:'draft' };
+    meta_title:'', meta_description:'', focus_keyword:'', status:'draft' };
 }
 
-function newBlog(){ S.editing=blankBlog(); S.dirty=false; S.tab='image'; renderShell(); }
+function blankPage(){
+  return { _kind:'page', id:null, version:0, title:'', slug:'', excerpt:'', content:'', image:'', image_alt:'',
+    meta_title:'', meta_description:'', focus_keyword:'', faqs:[], status:'draft',
+    page_type:'general', category_slug:'', product_ids:[], placements:[], index_page:1 };
+}
+function newBlog(){ S.editing=blankBlog(); S.editing._kind='blog'; S.validationAttempted=false; S.dirty=false; S.tab='image'; renderShell(); }
+async function loadPageMeta(){
+  if(S.pageMeta) return;
+  try{ S.pageMeta=await api('pages.php?meta=1'); }catch(e){ S.pageMeta={categories:[],products:[]}; }
+}
+async function newPage(){ await loadPageMeta(); S.editing=blankPage(); S.validationAttempted=false; S.dirty=false; S.tab='page'; renderShell(); }
+
+async function openPage(id){
+  try{
+    await loadPageMeta();
+    var d=await api('pages.php?id='+encodeURIComponent(id));
+    S.editing=d.page; S.editing._kind='page'; S.dirty=false; S.tab='page';
+    S.editing.page_type=S.editing.page_type||'general'; S.editing.product_ids=S.editing.product_ids||[]; S.editing.placements=S.editing.placements||[];
+    // Answers are stored as simple HTML; edit them as plain text with blank lines between paragraphs.
+    S.editing.faqs=(S.editing.faqs||[]).map(function(f){
+      var t=String(f.a||'').replace(/<\/p>\s*<p>/gi,'\n\n').replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,'');
+      var ta=document.createElement('textarea'); ta.innerHTML=t; return {q:f.q||'',a:ta.value.trim()};
+    });
+    if(d.page.lock_warning) toast(d.page.lock_warning,'bad');
+    if(d.page.has_draft) toast('Showing your unsaved draft, not the published version.');
+    renderShell();
+  }catch(e){ toast(e.message,'bad'); }
+}
 
 async function openBlog(id){
   try{
     var d=await api('blogs.php?id='+encodeURIComponent(id));
-    S.editing=d.blog; S.dirty=false; S.tab='image';
+    S.editing=d.blog; S.editing._kind='blog'; S.dirty=false; S.tab='image';
+    ['canonical_url','is_noindex','is_nofollow','og_title','og_description','og_image','og_type',
+     'twitter_card','twitter_title','twitter_description','twitter_image','schema_type','schema_json']
+      .forEach(function(k){ delete S.editing[k]; });
     if(d.blog.lock_warning) toast(d.blog.lock_warning,'bad');
     if(d.blog.has_draft) toast('Showing your unsaved draft, not the published version.');
     renderShell();
@@ -888,10 +993,53 @@ async function openBlog(id){
 
 function releaseLock(id){
   if(!id)return;
-  try{ api('blogs.php',{action:'release_lock',id:id}).catch(function(){}); }catch(e){}
+  try{ api(K().ep,{action:'release_lock',id:id}).catch(function(){}); }catch(e){}
 }
 
 /* -------------------------------------------------------------- editor */
+
+var publishLabels={title:'Title',excerpt:'Short description',category:'Category',image:'Featured image',
+  image_alt:'Image alt text',meta_title:'Meta title',meta_description:'Meta description',content:'Content',slug:'URL slug'};
+var pageLabels={title:'Title',meta_title:'Meta title',meta_description:'Meta description',content:'Content',slug:'URL slug',image_alt:'Image alt text',category_slug:'Category',product_ids:'Products'};
+function publishErrors(post){
+  var errors={};
+  if(K()===KINDS.page){
+    var has=function(v){return String(v||'').replace(/<[^>]*>/g,'').replace(/[\s\u00a0\u200b\ufeff]/g,'').length>0;};
+    ['title','meta_title','meta_description','content'].forEach(function(k){ if(!has(post[k])) errors[k]=pageLabels[k]+' is required before publishing.'; });
+    if(post.image && !has(post.image_alt)) errors.image_alt='Add alt text for the page image.';
+    if(post.page_type==='category' && !post.category_slug) errors.category_slug='Choose the category this guide belongs to.';
+    if(post.page_type==='product' && !(post.product_ids||[]).length) errors.product_ids='Choose at least one product.';
+    if(!slugify(post.slug||post.title||'')) errors.slug='URL slug must contain letters or numbers.';
+    return errors;
+  }
+  function filled(v){return String(v||'').replace(/[\s\u00a0\u200b\ufeff]/g,'').length>0;}
+  Object.keys(publishLabels).forEach(function(k){
+    if(k!=='content' && k!=='slug' && !filled(post[k])) errors[k]=publishLabels[k]+' is required before publishing.';
+  });
+  var doc=new DOMParser().parseFromString(post.content||'','text/html');
+  doc.querySelectorAll('script,style,template').forEach(function(n){n.remove();});
+  if(!filled(doc.body.textContent)) errors.content='Add body content before publishing.';
+  if(!slugify(post.slug||post.title||'')) errors.slug='URL slug must contain letters or numbers.';
+  return errors;
+}
+function paintPublishErrors(){
+  document.querySelectorAll('.publish-error').forEach(function(n){n.remove();});
+  document.querySelectorAll('[aria-invalid="true"]').forEach(function(n){n.removeAttribute('aria-invalid');});
+  if(!S.validationAttempted || !S.editing)return;
+  var errors=publishErrors(draftPayload());
+  Object.keys(errors).forEach(function(k){
+    var input=$('#f-'+k), host=input?input.closest('.field'):k==='image'?document.querySelector('[data-pick="image"]'):k==='content'?$('#mount'):null;
+    if(!host)return;
+    if(k==='image')host=host.closest('.field');
+    var note=document.createElement('div'); note.className='hint publish-error'; note.style.color='#fb7185';
+    note.setAttribute('role','alert'); note.textContent=errors[k]; host.appendChild(note);
+    if(input)input.setAttribute('aria-invalid','true');
+  });
+}
+function viewLiveLink(post){
+  var slug=post.live_slug||post.slug;
+  return post.status==='published' && slug ? '<a class="btn sm" target="_blank" rel="noopener noreferrer" href="'+esc(itemPath(post, encodeURIComponent(slug)))+'">View Live ↗</a>' : '';
+}
 
 function fieldHtml(key,label,opts){
   opts=opts||{};
@@ -911,7 +1059,8 @@ function fieldHtml(key,label,opts){
       '<div class="hint'+(v.length>opts.max?' warn':'')+'" data-count="'+opts.max+'">'+v.length+' / '+opts.max+
       ' characters'+(opts.note?' · '+esc(opts.note):'')+'</div>';
   } else if(opts.note) extra='<div class="hint">'+esc(opts.note)+'</div>';
-  return '<div class="field"><label for="'+id+'">'+esc(label)+'</label>'+input+extra+'</div>';
+  var req=K()===KINDS.page ? (pageLabels[key] && key!=='image_alt') : publishLabels[key];
+  return '<div class="field"><label for="'+id+'">'+esc(label)+(req?' *':'')+'</label>'+input+extra+'</div>';
 }
 
 function imageField(key,label,note){
@@ -934,75 +1083,97 @@ function imageField(key,label,note){
 
 function panelBody(){
   var e=S.editing;
+  if(K()===KINDS.page && S.tab==='page'){
+    var meta=S.pageMeta||{categories:[],products:[]}, t=e.page_type||'general';
+    var cats=meta.categories||[], prods=meta.products||[], chosen=e.product_ids||[];
+    return '<div class="field"><label>Page type</label>'+Object.keys(PAGE_TYPES).map(function(k){
+        return '<label class="check" style="align-items:flex-start"><input type="radio" name="ptype" data-k="page_type" value="'+k+'"'+(t===k?' checked':'')+'>'+
+          '<span><b>'+esc(PAGE_TYPES[k].label)+'</b><span class="hint" style="display:block;margin-top:1px">'+esc(PAGE_TYPES[k].hint)+'</span></span></label>';
+      }).join('')+'</div>'+
+      '<div class="field"><label for="f-category_slug">Category'+(t==='category'?' *':' (optional)')+'</label>'+
+        '<select id="f-category_slug" data-k="category_slug"><option value="">— none —</option>'+cats.map(function(c){
+          return '<option value="'+esc(c.slug)+'"'+(e.category_slug===c.slug?' selected':'')+'>'+esc(c.name)+'</option>'; }).join('')+'</select>'+
+        '<div class="hint">'+(t==='category'?'The page URL goes under this category.':'Used to group pages in the CMS.')+'</div></div>'+
+      '<div class="field"><label>Products'+(t==='product'?' *':' (optional)')+' <span class="hint" style="font-weight:400">· '+chosen.length+' chosen</span></label>'+
+        '<input type="text" id="prodq" placeholder="Search products" style="margin-bottom:6px">'+
+        '<div id="prodlist" style="max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px 8px">'+
+        prods.map(function(pr){
+          var on=chosen.indexOf(String(pr.id))!==-1;
+          return '<label class="check" data-ptext="'+esc((pr.title+' '+(pr.category||'')).toLowerCase())+'" style="margin-bottom:4px"><input type="checkbox" data-pid="'+esc(pr.id)+'"'+(on?' checked':'')+'>'+
+            '<span>'+esc(pr.title)+(pr.price?' <span class="hint">$'+esc(pr.price)+'</span>':'')+'</span></label>';
+        }).join('')+'</div><div class="hint">Shown on the page as product cards with price and Buy buttons.</div></div>'+
+      '<div class="field"><label>Google</label>'+
+        '<label class="check"><input type="checkbox" data-k="index_page"'+(+(e.index_page==null?1:e.index_page)?' checked':'')+'> Show this page in Google search and add it to the sitemap</label>'+
+        '<div class="hint">Untick for thank-you pages, private offers or test pages: the page stays reachable by link but gets <b>noindex</b> and is left out of the sitemap.</div></div>'+
+      '<div class="field"><label>Show a link to this page in</label>'+Object.keys(PLACEMENTS).map(function(k){
+          return '<label class="check"><input type="checkbox" data-place="'+k+'"'+((e.placements||[]).indexOf(k)!==-1?' checked':'')+'> '+esc(PLACEMENTS[k])+'</label>';
+        }).join('')+
+        '<div class="hint">Saved now; menus, footer and category “Guides” boxes start showing these links after the React update. The page itself is live as soon as you publish.</div></div>';
+  }
+  if(K()===KINDS.page && S.tab==='image'){
+    return imageField('image','Page image','Optional. Shown at the top of the page and used for link previews.')+
+      fieldHtml('image_alt','Alt text',{note:'Required if the page has an image.'});
+  }
+  if(K()===KINDS.page && S.tab==='faq'){
+    var fq=e.faqs||[];
+    return '<div class="hint" style="margin-bottom:10px">Shown at the bottom of the page and added as FAQ schema for Google.</div>'+
+      fq.map(function(f,i){
+        return '<div class="card" style="margin-bottom:10px"><div class="cbody">'+
+          '<div class="field"><label>Question '+(i+1)+'</label><input type="text" data-fq="'+i+'" data-fk="q" value="'+esc(f.q||'')+'"></div>'+
+          '<div class="field" style="margin-bottom:6px"><label>Answer</label><textarea rows="3" data-fq="'+i+'" data-fk="a">'+esc(f.a||'')+'</textarea></div>'+
+          '<button class="btn sm ghost danger" data-fdel="'+i+'">Remove</button></div></div>';
+      }).join('')+
+      '<button class="btn sm" id="fadd">＋ Add question</button>';
+  }
   if(S.tab==='image'){
-    return imageField('image','Cover image')+
+    return imageField('image','Cover image *','Required before publishing.')+
       fieldHtml('image_alt','Alt text',{note:'Describe the image. Required before publishing.'})+
       fieldHtml('category','Category')+
       fieldHtml('author_name','Author');
   }
   if(S.tab==='seo'){
-    var url='https://runonconsole.com/blogs/'+(e.slug||'…')+'/';
+    var url='https://runonconsole.com'+itemPath(e);
     return '<div class="field"><label>Google preview</label><div class="serp">'+
       '<div class="u" id="pv-url">'+esc(url)+'</div>'+
       '<div class="t" id="pv-title">'+esc(e.meta_title||e.title||'Untitled')+'</div>'+
       '<div class="d" id="pv-desc">'+esc(e.meta_description||'No meta description yet.')+'</div></div></div>'+
-      fieldHtml('meta_title','Meta title',{max:60,note:'Falls back to the post title'})+
+      fieldHtml('meta_title','Meta title',{max:60,note:'Required. Suggested maximum: 60 characters.'})+
       fieldHtml('meta_description','Meta description',{type:'textarea',max:160,rows:3})+
       fieldHtml('focus_keyword','Focus keyword',{note:'Optional. Used only by the checks below.'})+
-      fieldHtml('canonical_url','Canonical URL',{note:'Leave empty to self-canonicalise.'})+
-      '<label class="check"><input type="checkbox" data-k="is_noindex"'+(+e.is_noindex?' checked':'')+'> noindex</label>'+
-      '<label class="check"><input type="checkbox" data-k="is_nofollow"'+(+e.is_nofollow?' checked':'')+'> nofollow</label>';
+      '<div class="hint">'+(K()===KINDS.page
+        ? 'Google indexing for this page is set on the Page tab. Canonical, sharing tags and WebPage schema are generated automatically.'
+        : 'Published posts are always indexable (index, follow) with a self canonical. Sharing tags and BlogPosting schema are generated automatically from the fields above and the cover image.')+'</div>';
   }
-  if(S.tab==='social'){
-    var img=e.og_image||e.image||'';
-    return '<div class="field"><label>Share preview</label><div class="og">'+
-      '<div class="pic" id="pv-og-img" style="'+(img?"background-image:url('"+esc(img)+"')":'')+'">'+(img?'':'No image')+'</div>'+
-      '<div class="meta"><div class="host">runonconsole.com</div>'+
-      '<div class="h" id="pv-og-title">'+esc(e.og_title||e.meta_title||e.title||'Untitled')+'</div>'+
-      '<div class="p" id="pv-og-desc">'+esc(e.og_description||e.meta_description||'')+'</div></div></div>'+
-      '<div class="hint">WhatsApp and Facebook do not run JavaScript, so these are rendered by index.php on the server.</div></div>'+
-      fieldHtml('og_title','OG title',{note:'Falls back to the meta title'})+
-      fieldHtml('og_description','OG description',{type:'textarea',rows:2})+
-      imageField('og_image','OG image','1200×630 works best. Falls back to the cover image.')+
-      fieldHtml('og_type','OG type',{type:'select',options:['','article','website','product']})+
-      '<hr style="border:0;border-top:1px solid var(--line);margin:14px 0">'+
-      fieldHtml('twitter_card','Twitter card',{type:'select',options:['summary_large_image','summary']})+
-      fieldHtml('twitter_title','Twitter title',{note:'Falls back to the OG title'})+
-      fieldHtml('twitter_description','Twitter description',{type:'textarea',rows:2});
-  }
-  return fieldHtml('schema_type','Schema type',{type:'select',
-      options:['','Article','BlogPosting','NewsArticle','Review','HowTo','FAQPage','WebPage'],
-      note:'Leave empty for BlogPosting.'})+
-    '<div class="field"><label>Generated JSON-LD</label><div class="codebox" id="schemaout">…</div>'+
-    '<div class="hint">This is what index.php will output. Paste your own below to override it.</div></div>'+
-    fieldHtml('schema_json','Manual override',{type:'textarea',rows:6,note:'Valid JSON only.'});
+  return '';
 }
-
 function renderEditor(m){
   var e=S.editing, isNew=!e.id;
-  m.innerHTML = head(isNew?'New post':(e.title||'Untitled'),
-    isNew?'Draft · not saved yet':('/blogs/'+(e.slug||'')+'/ · v'+e.version),
+  var k=K();
+  m.innerHTML = head(isNew?'New '+k.noun:(e.title||'Untitled'),
+    isNew?'Draft · not saved yet':(itemPath(e, e.slug||'')+' · v'+e.version),
     (S.dirty?'<span class="dirty" title="Unsaved changes"></span>':'')+
-    '<button class="btn ghost" id="close">Close</button>'+
-    '<button class="btn" id="savedraft">Save draft</button>'+
-    '<button class="btn primary" id="publish">'+(e.status==='published'?'Update live post':'Publish')+'</button>'+
-    (e.status==='published'?'<button class="btn danger" id="unpub">Unpublish</button>':''))+
+    viewLiveLink(e)+'<button class="btn ghost" id="close">Close</button>'+
+    (can(k.sec,'edit')?'<button class="btn" id="savedraft">Save draft</button>':'')+
+    (can(k.sec,'publish')?'<button class="btn primary" id="publish">'+(e.status==='published'?'Update live '+k.noun:'Publish')+'</button>':'')+
+    (e.status==='published'&&can(k.sec,'publish')?'<button class="btn danger" id="unpub">Unpublish</button>':'')+
+    (e.id&&can(k.sec,'delete')?'<button class="btn danger ghost" id="delpost" title="Remove from the site and the CMS list">Delete</button>':''))+
   '<div class="body"><div class="egrid"><div>'+
     '<div class="card"><div class="cbody">'+
       fieldHtml('title','Title',{placeholder:'Give this post a title'})+
       '<div class="field"><label for="f-slug">URL slug</label>'+
       '<div style="display:flex;gap:6px"><input type="text" id="f-slug" data-k="slug" value="'+esc(e.slug||'')+'">'+
       '<button class="btn sm" id="reslug" title="Generate from title">↻</button></div>'+
-      '<div class="hint">runonconsole.com<b>/blogs/'+esc(e.slug||'…')+'/</b></div></div>'+
-      fieldHtml('excerpt','Short description',{type:'textarea',rows:2,note:'Used in listings and as the meta description fallback.'})+
+      '<div class="hint">runonconsole.com<b>'+esc(itemPath(e))+'</b></div></div>'+
+      (k===KINDS.page?fieldHtml('excerpt','Intro line',{type:'textarea',rows:2,note:'Optional. Shown under the page title.'})
+        :fieldHtml('excerpt','Short description',{type:'textarea',rows:2,note:'Required before publishing. Used in blog listings.'}))+
     '</div></div>'+
     '<div class="card"><div class="chead"><h3>Content</h3>'+
       '<span class="note">Paste from anywhere — formatting is cleaned</span></div>'+
       '<div id="mount"></div></div>'+
   '</div><div class="scol">'+
     '<div class="card"><div class="tabs">'+
-      ['image','seo','social','schema'].map(function(t){
-        var L={image:'Image',seo:'SEO',social:'Social',schema:'Schema'};
+      (k===KINDS.page?['page','seo','image','faq']:['image','seo']).map(function(t){
+        var L={page:'Page',image:'Image',seo:'SEO',faq:'FAQ'};
         return '<button class="tab'+(S.tab===t?' on':'')+'" data-tab="'+t+'">'+L[t]+'</button>';
       }).join('')+'</div><div class="cbody" id="panel">'+panelBody()+'</div></div>'+
     '<div class="card"><div class="chead"><h3>Checks</h3></div>'+
@@ -1020,6 +1191,7 @@ function renderEditor(m){
   S.editor.setHtml(e.content||'');
 
   wireFields(m,false);
+  wireFaq(m);
   $('#close',m).addEventListener('click',function(){
     if(S.dirty && !confirm('Close without saving? Your changes will be lost.'))return;
     releaseLock(S.editing.id); S.dirty=false; S.editing=null; renderShell();
@@ -1027,21 +1199,23 @@ function renderEditor(m){
   $('#reslug',m).addEventListener('click',function(){
     S.editing.slug=slugify(S.editing.title||''); $('#f-slug',m).value=S.editing.slug; markDirty();
   });
-  $('#savedraft',m).addEventListener('click',function(){ save(false); });
-  $('#publish',m).addEventListener('click',function(){ save(true); });
+  var sd=$('#savedraft',m); if(sd) sd.addEventListener('click',function(){ save(false); });
+  var pb=$('#publish',m); if(pb) pb.addEventListener('click',function(){ save(true); });
   var un=$('#unpub',m);
   if(un) un.addEventListener('click', unpublish);
+  var dp=$('#delpost',m);
+  if(dp) dp.addEventListener('click', deletePost);
   document.addEventListener('keydown', hotkey);
   checks();
 }
 
 function hotkey(ev){
-  if((ev.ctrlKey||ev.metaKey)&&ev.key==='s'){ ev.preventDefault(); if(S.editing) save(false); }
+  if((ev.ctrlKey||ev.metaKey)&&ev.key==='s'){ ev.preventDefault(); if(S.editing && can(K().sec,'edit')) save(false); }
 }
 
 function wireFields(root, panelOnly){
   root.querySelectorAll('[data-k]').forEach(function(el){
-    var evt = (el.type==='checkbox'||el.tagName==='SELECT') ? 'change' : 'input';
+    var evt = (el.type==='checkbox'||el.type==='radio'||el.tagName==='SELECT') ? 'change' : 'input';
     el.addEventListener(evt, function(){
       var k=el.dataset.k;
       S.editing[k] = el.type==='checkbox' ? (el.checked?1:0) : el.value;
@@ -1081,7 +1255,7 @@ function wireFields(root, panelOnly){
 function livePreview(){
   var e=S.editing; if(!e)return;
   var set=function(id,text){ var n=document.getElementById(id); if(n) n.textContent=text; };
-  set('pv-url','https://runonconsole.com/blogs/'+(e.slug||'\u2026')+'/');
+  set('pv-url','https://runonconsole.com'+itemPath(e));
   set('pv-title', e.meta_title||e.title||'Untitled');
   set('pv-desc', e.meta_description||'No meta description yet.');
   set('pv-og-title', e.og_title||e.meta_title||e.title||'Untitled');
@@ -1089,7 +1263,7 @@ function livePreview(){
   var slugHint=document.querySelector('#f-slug');
   if(slugHint){
     var h=slugHint.closest('.field').querySelector('.hint b');
-    if(h) h.textContent='/blogs/'+(e.slug||'\u2026')+'/';
+    if(h) h.textContent=itemPath(e);
   }
   var pic=document.getElementById('pv-og-img');
   if(pic){
@@ -1119,6 +1293,48 @@ function markDirty(){
   }
 }
 
+function wirePageMeta(root){
+  root.querySelectorAll('[data-pid]').forEach(function(c){
+    c.addEventListener('change',function(){
+      var list=S.editing.product_ids=(S.editing.product_ids||[]).map(String), id=String(c.dataset.pid), i=list.indexOf(id);
+      if(c.checked && i===-1) list.push(id); if(!c.checked && i!==-1) list.splice(i,1);
+      markDirty(); checks();
+      var lab=c.closest('.field').querySelector('label .hint'); if(lab) lab.textContent='· '+list.length+' chosen';
+    });
+  });
+  root.querySelectorAll('[data-place]').forEach(function(c){
+    c.addEventListener('change',function(){
+      var list=S.editing.placements=S.editing.placements||[], k=c.dataset.place, i=list.indexOf(k);
+      if(c.checked && i===-1) list.push(k); if(!c.checked && i!==-1) list.splice(i,1); markDirty();
+    });
+  });
+  var pq=root.querySelector('#prodq');
+  if(pq) pq.addEventListener('input',function(){
+    var t=pq.value.toLowerCase();
+    root.querySelectorAll('[data-ptext]').forEach(function(l){ l.style.display=!t||l.dataset.ptext.indexOf(t)!==-1?'':'none'; });
+  });
+  // Type or category changes the public URL.
+  root.querySelectorAll('[data-k=page_type],[data-k=category_slug]').forEach(function(el){
+    el.addEventListener('change',function(){ var h=document.querySelector('.bar .sub');
+      if(h && S.editing.id) h.textContent=itemPath(S.editing)+' · v'+S.editing.version; livePreview(); });
+  });
+}
+
+function wireFaq(root){
+  wirePageMeta(root);
+  root.querySelectorAll('[data-fq]').forEach(function(el){
+    el.addEventListener('input',function(){
+      var f=S.editing.faqs[+el.dataset.fq]; if(!f)return;
+      f[el.dataset.fk]=el.value; markDirty();
+    });
+  });
+  root.querySelectorAll('[data-fdel]').forEach(function(b){
+    b.addEventListener('click',function(){ S.editing.faqs.splice(+b.dataset.fdel,1); markDirty(); refreshPanel(); });
+  });
+  var add=root.querySelector('#fadd');
+  if(add) add.addEventListener('click',function(){ (S.editing.faqs=S.editing.faqs||[]).push({q:'',a:''}); markDirty(); refreshPanel(); });
+}
+
 function refreshPanel(tabs){
   var p=$('#panel'); if(!p)return;
   if(tabs) document.querySelectorAll('[data-tab]').forEach(function(b){
@@ -1126,26 +1342,25 @@ function refreshPanel(tabs){
   });
   p.innerHTML=panelBody();
   wireFields(p,true);
+  wireFaq(p);
   if(S.tab==='schema') paintSchema();
+  paintPublishErrors();
 }
 
 /* ---------------------------------------------------------- SEO checks */
 
 function checks(){
   var e=S.editing; if(!e)return;
-  var out=[], text=(S.editor?S.editor.area.textContent:'').trim();
+  var out=Object.values(publishErrors(draftPayload())).map(function(msg){return ['error',msg];}), text=(S.editor?S.editor.area.textContent:'').trim();
   var words=text?text.split(/\s+/).length:0;
 
   var t=(e.meta_title||e.title||'').trim();
-  if(!t) out.push(['error','No meta title. Search engines will invent one.']);
-  else if(t.length>60) out.push(['warn','Meta title is '+t.length+' characters. Google truncates past about 60.']);
+  if(t.length>60) out.push(['warn','Meta title is '+t.length+' characters. Google truncates past about 60.']);
 
   var d=(e.meta_description||'').trim();
-  if(!d) out.push(['error','No meta description.']);
-  else if(d.length>160) out.push(['warn','Meta description is '+d.length+' characters. Google truncates past about 160.']);
+  if(d.length>160) out.push(['warn','Meta description is '+d.length+' characters. Google truncates past about 160.']);
 
-  if(!e.image) out.push(['warn','No cover image, so shares will have no preview picture.']);
-  else if(!(e.image_alt||'').trim()) out.push(['error','Cover image has no alt text. This blocks publishing.']);
+
 
   if(words<300) out.push(['warn','Body is about '+words+' words. Thin posts rarely rank.']);
 
@@ -1153,12 +1368,6 @@ function checks(){
   if(k){
     if(t.toLowerCase().indexOf(k)===-1) out.push(['warn','Focus keyword is not in the meta title.']);
     if(text.toLowerCase().indexOf(k)===-1) out.push(['warn','Focus keyword does not appear in the body.']);
-  }
-  if(+e.is_noindex) out.push(['warn','This post is set to noindex, so it will stay out of search results.']);
-
-  if(e.schema_json && e.schema_json.trim()){
-    try{ JSON.parse(e.schema_json); }
-    catch(err){ out.push(['error','Schema JSON is not valid: '+err.message]); }
   }
 
   var box=$('#advice');
@@ -1169,6 +1378,7 @@ function checks(){
       : '<div class="a ok"><span class="m">✓</span><span>No issues found.</span></div>';
   }
   if(S.tab==='schema') paintSchema();
+  paintPublishErrors();
 }
 
 function paintSchema(){
@@ -1200,11 +1410,16 @@ function paintSchema(){
 
 function draftPayload(){
   var e=S.editing, out={};
+  if(K()===KINDS.page){
+    ['title','slug','excerpt','image','image_alt','meta_title','meta_description','focus_keyword','page_type','category_slug'].forEach(function(k){ out[k]=e[k]==null?'':e[k]; });
+    out.index_page = e.index_page==null ? 1 : (+e.index_page ? 1 : 0);
+    out.product_ids=(e.product_ids||[]).map(String); out.placements=e.placements||[];
+    out.faqs=(e.faqs||[]).filter(function(f){ return (f.q||'').trim()||(f.a||'').trim(); });
+    out.content = S.editor ? S.editor.getHtml() : (e.content||'');
+    return out;
+  }
   ['title','slug','excerpt','content','category','author_name','image','image_alt',
-   'meta_title','meta_description','canonical_url','focus_keyword',
-   'is_noindex','is_nofollow','og_title','og_description','og_image','og_type',
-   'twitter_card','twitter_title','twitter_description','twitter_image',
-   'schema_type','schema_json'].forEach(function(k){
+   'meta_title','meta_description','focus_keyword'].forEach(function(k){
      out[k] = e[k]==null ? '' : e[k];
    });
   out.content = S.editor ? S.editor.getHtml() : (e.content||'');
@@ -1214,7 +1429,22 @@ function draftPayload(){
 async function save(publish){
   var e=S.editing;
   if(!e) return;
-  if(!(e.title||'').trim()){ toast('Give the post a title first.','bad'); return; }
+  if(S.saving)return;
+  if(publish){
+    S.validationAttempted=true;
+    var errors=publishErrors(draftPayload()), keys=Object.keys(errors);
+    if(keys.length){
+      S.tab=keys.some(function(k){return ['image','image_alt','category'].indexOf(k)!==-1;})?'image':'seo';
+      var labels=K()===KINDS.page?pageLabels:publishLabels;
+      if(K()===KINDS.page) S.tab=keys.some(function(k){return k==='category_slug'||k==='product_ids';})?'page'
+        :keys.some(function(k){return k==='image_alt';})?'image':'seo';
+      refreshPanel(true); checks(); paintPublishErrors();
+      toast('Complete: '+keys.map(function(k){return labels[k]||k;}).join(', ')+'.','bad');
+      var first=$('#f-'+keys[0]); if(first)first.focus();
+      return;
+    }
+  }
+  S.saving=true;
 
   var btn = publish ? $('#publish') : $('#savedraft');
   var label = btn ? btn.textContent : '';
@@ -1223,13 +1453,13 @@ async function save(publish){
   try{
     // A post must exist before it can hold a draft, so create it first.
     if(!e.id){
-      var created = await api('blogs.php',{ action:'create', draft: draftPayload() });
+      var created = await api(K().ep,{ action:'create', draft: draftPayload() });
       e.id = created.id;
       e.slug = created.slug;
       e.version = created.version;
     }
 
-    var res = await api('blogs.php',{
+    var res = await api(K().ep,{
       action: publish ? 'publish' : 'save_draft',
       id: e.id,
       version: e.version,
@@ -1238,29 +1468,89 @@ async function save(publish){
 
     e.version = res.version;
     if(res.slug) e.slug = res.slug;
-    if(publish) e.status = 'published';
+    if(publish){ e.status = 'published'; e.live_slug=res.slug||e.slug; S.validationAttempted=false; }
     S.dirty = false;
 
-    toast(publish ? ('Published — live at '+(res.url||('/blogs/'+e.slug+'/'))) : 'Draft saved.', 'good');
-    await refreshBlogs();
+    toast(publish ? ('Published — live at '+(res.url||itemPath(e))) : 'Draft saved.', 'good');
+    await refreshList();
     renderShell();
 
   }catch(err){
-    toast(err.message,'bad');
+    toast(err.fields?Object.values(err.fields).join(' '):err.message,'bad');
+    paintPublishErrors();
     if(btn){ btn.disabled=false; btn.textContent=label; }
-  }
+  } finally { S.saving=false; }
 }
 
 async function unpublish(){
   if(!confirm('Take this post off the live site? It goes back to draft.'))return;
   try{
-    var res = await api('blogs.php',{action:'update',id:S.editing.id,version:S.editing.version,status:'draft'});
+    var res = await api(K().ep,{action:K()===KINDS.page?'unpublish':'update',id:S.editing.id,version:S.editing.version,status:'draft'});
     S.editing.version = res.version;
     S.editing.status = 'draft';
-    toast('Post moved back to draft.');
-    await refreshBlogs();
+    toast(K().Noun+' moved back to draft.');
+    await refreshList();
     renderShell();
   }catch(e){ toast(e.message,'bad'); }
+}
+
+async function deletePost(){
+  var e=S.editing; if(!e||!e.id)return;
+  if(!confirm('Delete "'+(e.title||'this '+K().noun)+'"?\n\nIt will be removed from the website and from this list. An administrator can still recover it from the database.'))return;
+  try{
+    await api(K().ep,{action:'delete',id:e.id,version:e.version});
+    toast(K().Noun+' deleted.','good');
+    var wasPage=K()===KINDS.page;
+    S.dirty=false; S.editing=null; await (wasPage?refreshPages():refreshBlogs()); renderShell();
+  }catch(err){ toast(err.message,'bad'); }
+}
+
+function catName(slug){
+  if(!slug) return '';
+  var c=((S.pageMeta&&S.pageMeta.categories)||[]).filter(function(x){return x.slug===slug;})[0];
+  return c?c.name:slug;
+}
+async function refreshPages(){
+  try{ S.pages = (await api('pages.php')).pages || []; }catch(e){}
+}
+async function refreshList(){ return K()===KINDS.page ? refreshPages() : refreshBlogs(); }
+
+/* ------------------------------------------------------------ CMS pages */
+
+function renderCmsPages(m){
+  S.ptype=S.ptype||'all';
+  var rows=S.pages.filter(function(p){
+    if(S.ptype!=='all' && (p.page_type||'general')!==S.ptype) return false;
+    return !S.search || (p.title+' '+p.slug+' '+(p.category_slug||'')).toLowerCase().indexOf(S.search.toLowerCase())!==-1;
+  });
+  var tcount=function(t){ return S.pages.filter(function(p){ return t==='all'||(p.page_type||'general')===t; }).length; };
+  m.innerHTML=head('Pages', 'New pages that live at runonconsole.com/your-page/',
+    can('pages','edit')?'<button class="btn primary" id="newpage">＋ New page</button>':'')+
+  '<div class="body"><div class="card">'+
+    '<div class="chead"><div class="search" style="max-width:280px;flex:1"><input type="text" id="q" placeholder="Search title or URL" value="'+esc(S.search)+'"></div>'+
+    '<div class="chips">'+['all'].concat(Object.keys(PAGE_TYPES)).map(function(t){
+      return '<button class="chip'+(S.ptype===t?' on':'')+'" data-pt="'+t+'">'+(t==='all'?'All':esc(PAGE_TYPES[t].label))+'<span class="n">'+tcount(t)+'</span></button>'; }).join('')+'</div>'+
+    '<span class="note">Existing site pages: <a href="#" id="gowp">Website pages & SEO</a></span></div>'+
+    (rows.length?'<table class="list"><thead><tr><th>Title</th><th>Type</th><th>Category</th><th>Status</th><th>Updated</th></tr></thead><tbody>'+
+      rows.map(function(p){
+        return '<tr><td><div class="t-title" data-openpage="'+p.id+'">'+esc(p.title)+'</div>'+
+          '<div class="t-slug">'+esc(p.path||('/'+p.slug+'/'))+'</div>'+
+          (p.status==='published'?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(p.path||('/'+p.slug+'/'))+'">View Live ↗</a>':'')+'</td>'+
+          '<td>'+esc((PAGE_TYPES[p.page_type||'general']||PAGE_TYPES.general).label)+'</td>'+
+          '<td style="color:var(--ink-2)">'+esc(catName(p.category_slug)||'—')+'</td>'+
+          '<td><span class="tag '+(p.status==='published'?'published':'draft')+'">'+esc(p.status)+'</span>'+
+            (+p.is_noindex?'<div class="hint">hidden from Google</div>':'')+'</td>'+
+          '<td style="color:var(--ink-3)">'+when(p.updated_at)+'</td></tr>';
+      }).join('')+'</tbody></table>'
+      :'<div class="empty"><div class="big">▦</div><div>No pages yet.'+(can('pages','edit')?' Click “New page” to create a landing page, guide or any other page.':'')+'</div></div>')+
+  '</div></div>';
+  var q=$('#q',m);
+  q.addEventListener('input',function(){ S.search=q.value; var at=q.selectionStart; renderCmsPages(m);
+    var f=$('#q',m); if(f){f.focus();f.setSelectionRange(at,at);} });
+  var np=$('#newpage',m); if(np) np.addEventListener('click',newPage);
+  m.querySelectorAll('[data-pt]').forEach(function(b){ b.addEventListener('click',function(){ S.ptype=b.dataset.pt; renderCmsPages(m); }); });
+  $('#gowp',m).addEventListener('click',function(e){ e.preventDefault(); go('pages'); });
+  m.querySelectorAll('[data-openpage]').forEach(function(el){ el.addEventListener('click',function(){ openPage(el.dataset.openpage); }); });
 }
 
 async function refreshBlogs(){
@@ -1269,92 +1559,181 @@ async function refreshBlogs(){
 
 /* ---------------------------------------------------------------- media */
 
-function mediaUrl(m){ return m.file_url || ''; }
+function mediaUrl(m){ return m.file_url || m.url || ''; }
 
-function renderMedia(m){
-  var heavy=S.media.filter(function(x){return +x.file_size>102400;});
-  var noAlt=S.media.filter(function(x){return !x.alt_text;});
+function mediaBadge(x){
+  var big=+x.file_size>102400;
+  return (big?'<span class="flag">'+bytes(x.file_size)+'</span>':'')+
+    (x.usage? (x.usage.length?'<span class="flag used">used · '+x.usage.length+'</span>':'<span class="flag unused">not used</span>'):'')+
+    (x.locked?'<span class="flag lock">site build</span>':'');
+}
+function mediaMatches(x){
+  var f=S.mfilter;
+  if(f==='uploads' && x.folder!=='uploads') return false;
+  if(f==='site' && x.folder!=='site') return false;
+  if(f==='heavy' && !(+x.file_size>102400)) return false;
+  if(f==='noalt' && x.alt_text) return false;
+  if(f==='unused' && !(x.usage && !x.usage.length)) return false;
+  if(S.mq && (x.filename+' '+x.file_url+' '+(x.alt_text||'')).toLowerCase().indexOf(S.mq.toLowerCase())===-1) return false;
+  return true;
+}
 
-  m.innerHTML = head('Media library', S.media.length+' images',
-    '<button class="btn primary" id="up">＋ Upload</button>')+
+async function renderMedia(m){
+  if(!S.mediaLoaded){
+    m.innerHTML = head('Media library','Scanning the website…')+
+      '<div class="body"><div class="card"><div class="empty"><span class="spin"></span>'+
+      '<div style="margin-top:10px">Finding every image and where it is used…</div></div></div></div>';
+    try{ var d=await api('media.php'); S.media=d.media||[]; S.mcan=d.can||{}; S.mediaLoaded=true; }
+    catch(e){ toast(e.message,'bad'); return; }
+    if(S.view!=='media' || S.editing) return;
+  }
+  var all=S.media, rows=all.filter(mediaMatches);
+  var heavy=all.filter(function(x){return +x.file_size>102400;});
+  var noAlt=all.filter(function(x){return !x.alt_text;});
+  var counts={all:all.length,
+    uploads:all.filter(function(x){return x.folder==='uploads';}).length,
+    site:all.filter(function(x){return x.folder==='site';}).length,
+    heavy:heavy.length, noalt:noAlt.length,
+    unused:all.filter(function(x){return x.usage&&!x.usage.length;}).length};
+  var labels={all:'All',uploads:'Uploaded in CMS',site:'Site images',heavy:'Over 100 KB',noalt:'No alt text',unused:'Not used'};
+
+  m.innerHTML = head('Media library', rows.length+' of '+all.length+' images',
+    can('media','upload')?'<button class="btn primary" id="up">＋ Upload</button>':'')+
   '<div class="body">'+
-  ((heavy.length||noAlt.length)?'<div class="card"><div class="cbody"><div class="advice">'+
-    (heavy.length?'<div class="a warn"><span class="m">▲</span><span><b>'+heavy.length+
-      '</b> image(s) are over 100 KB. Large images cost Core Web Vitals score.</span></div>':'')+
-    (noAlt.length?'<div class="a error"><span class="m">●</span><span><b>'+noAlt.length+
-      '</b> image(s) have no alt text. A post cannot publish with an alt-less cover.</span></div>':'')+
+  (heavy.length?'<div class="card"><div class="cbody"><div class="advice">'+
+    '<div class="a warn"><span class="m">▲</span><span><b>'+heavy.length+'</b> image(s) are over 100 KB and slow the site down. '+
+    'New uploads are converted to WebP and kept under 100 KB automatically. For a heavy image already on a page, upload a smaller version and swap it in.</span></div>'+
     '</div></div></div>':'')+
-  '<input type="file" id="file" accept="image/*" multiple hidden>'+
-  (S.media.length?'<div class="mgrid">'+S.media.map(function(x){
+  '<div class="card"><div class="chead" style="flex-wrap:wrap;gap:10px">'+
+    '<div class="search" style="max-width:260px;flex:1"><input type="text" id="mq" placeholder="Search file name or alt text" value="'+esc(S.mq)+'"></div>'+
+    '<div class="chips">'+Object.keys(labels).map(function(k){
+      return '<button class="chip'+(S.mfilter===k?' on':'')+'" data-mf="'+k+'">'+labels[k]+'<span class="n">'+counts[k]+'</span></button>';
+    }).join('')+'</div></div><div class="cbody">'+
+  '<input type="file" id="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden>'+
+  (rows.length?'<div class="mgrid">'+rows.map(function(x){
     return '<div class="mitem" data-m="'+esc(x.id)+'">'+
-      '<div class="mthumb" style="background-image:url(\''+esc(mediaUrl(x))+'\')">'+
-      (+x.file_size>102400?'<span class="flag">'+bytes(x.file_size)+'</span>':'')+'</div>'+
-      '<div class="mmeta"><div class="mname" title="'+esc(x.filename)+'">'+esc(x.filename)+'</div>'+
-      '<div class="msub">'+(x.width?x.width+'×'+x.height:'—')+
+      '<div class="mthumb" style="background-image:url(\''+esc(x.file_url)+'\')">'+mediaBadge(x)+'</div>'+
+      '<div class="mmeta"><div class="mname" title="'+esc(x.file_url)+'">'+esc(x.filename)+'</div>'+
+      '<div class="msub">'+(x.width?x.width+'×'+x.height+' · ':'')+bytes(x.file_size)+
       (x.alt_text?'':' <span class="noalt">· no alt</span>')+'</div></div></div>';
   }).join('')+'</div>'
-  :'<div class="card"><div class="empty"><div class="big">❖</div><div>No images yet.</div></div></div>')+
-  '</div>';
+  :'<div class="empty"><div class="big">❖</div><div>No images match.</div></div>')+
+  '</div></div></div>';
 
-  var input=$('#file',m);
-  $('#up',m).addEventListener('click',function(){ input.click(); });
-  input.addEventListener('change', async function(){
-    var files=Array.prototype.slice.call(input.files||[]);
-    for(var i=0;i<files.length;i++) await uploadOne(files[i]);
-    input.value='';
-    await refreshMedia();
-    renderShell();
-  });
+  var mq=$('#mq',m);
+  mq.addEventListener('input',function(){ S.mq=mq.value; var at=mq.selectionStart; renderMedia(m);
+    var f=$('#mq',m); if(f){f.focus();f.setSelectionRange(at,at);} });
+  m.querySelectorAll('[data-mf]').forEach(function(b){ b.addEventListener('click',function(){ S.mfilter=b.dataset.mf; renderMedia(m); }); });
+  var input=$('#file',m), up=$('#up',m);
+  if(up){
+    up.addEventListener('click',function(){ input.click(); });
+    input.addEventListener('change', async function(){
+      var files=Array.prototype.slice.call(input.files||[]);
+      for(var i=0;i<files.length;i++) await uploadOne(files[i]);
+      input.value=''; S.mediaLoaded=false; renderShell();
+    });
+  }
   m.querySelectorAll('[data-m]').forEach(function(el){
     el.addEventListener('click',function(){ mediaDetail(el.dataset.m); });
   });
 }
 
 async function uploadOne(file){
+  if(file.size>16*1024*1024){ toast(file.name+': larger than the 16 MB upload limit.','bad'); return null; }
   var fd=new FormData(); fd.append('file',file);
   try{
     var res=await fetch(API+'media.php',{method:'POST',headers:{'X-CMS-CSRF-Token':S.csrf},body:fd});
     var d=await res.json();
     if(!d.success) throw new Error(d.error||'Upload failed.');
-    toast(file.name+' uploaded.','good');
-  }catch(e){ toast(file.name+': '+e.message,'bad'); }
+    toast(file.name+' uploaded'+(d.notes&&d.notes.length?' — '+d.notes.join(' '):'.'),'good');
+    return d.media;
+  }catch(e){ toast(file.name+': '+e.message,'bad'); return null; }
 }
 
 async function refreshMedia(){
-  try{ S.media=(await api('media.php')).media||[]; }catch(e){}
+  try{ S.media=(await api('media.php?usage=0')).media||[]; S.mediaLoaded=false; }catch(e){}
+}
+
+function usageHtml(list){
+  if(!list) return '<div class="hint">Open the Media library to see where this image is used.</div>';
+  if(!list.length) return '<div class="hint">Not used anywhere on the website or in the CMS.</div>';
+  return '<div class="ulist">'+list.map(function(u){
+    var link=u.url?'<a href="'+esc(u.url)+'" target="_blank" rel="noopener">'+esc(u.url)+' ↗</a>':'';
+    var edit=u.editable&&u.type==='blogs'&&can('blogs','view')?' <button class="btn sm" data-editblog="'+esc(u.id)+'">Open in editor</button>':'';
+    return '<div class="uitem"><div class="k">'+esc(u.label)+'</div><div style="flex:1;min-width:0">'+
+      '<div style="font-weight:560">'+esc(u.title)+(u.status&&u.type==='blogs'?' <span class="tag '+(u.status==='published'?'published':'draft')+'">'+esc(u.status)+'</span>':'')+'</div>'+
+      '<div class="hint" style="margin-top:2px">'+esc(u.fields.join(', '))+(link?' · '+link:'')+'</div></div>'+edit+'</div>';
+  }).join('')+'</div>';
 }
 
 function mediaDetail(id){
   var x=S.media.filter(function(v){return String(v.id)===String(id);})[0];
   if(!x)return;
-  var big=+x.file_size>102400;
+  var big=+x.file_size>102400, canEdit=can('media','edit'), canDel=can('media','delete');
+  var used=x.usage?x.usage.length:0;
   modal('Image details',
-    '<div style="display:grid;grid-template-columns:190px 1fr;gap:16px">'+
-    '<div><img src="'+esc(mediaUrl(x))+'" alt="" style="width:100%;border-radius:8px;border:1px solid var(--line-2)"></div>'+
-    '<div><div class="field"><label>File</label><div style="font-size:13px">'+esc(x.filename)+'</div>'+
-    '<div class="hint">'+(x.width?x.width+' × '+x.height+' px · ':'')+bytes(x.file_size)+'</div></div>'+
-    (big?'<div class="alert warn">Over 100 KB. Uploads are re-encoded to WebP by the server; if this is still '+
-         'large, re-export it smaller before uploading.</div>':'')+
-    '<div class="field"><label>Alt text</label><textarea id="m-alt" rows="2">'+esc(x.alt_text||'')+'</textarea>'+
-    '<div class="hint">Describe what the image shows. Required before a post using it can be published.</div></div>'+
-    '<div class="field"><label>Caption</label><input type="text" id="m-cap" value="'+esc(x.caption||'')+'"></div>'+
-    '<div class="field"><label>URL</label><input type="text" readonly value="'+esc(mediaUrl(x))+'" onclick="this.select()"></div>'+
+    '<div style="display:grid;grid-template-columns:220px 1fr;gap:18px">'+
+    '<div><img src="'+esc(x.file_url)+'" alt="" style="width:100%;border-radius:8px;border:1px solid var(--line-2);background:var(--bg)">'+
+      '<div class="hint" style="margin-top:8px">'+(x.folder==='uploads'?'Uploaded through the CMS':'Site image (shipped with the website)')+'</div></div>'+
+    '<div>'+
+    '<div class="field"><label>File</label><div style="font-size:13px;word-break:break-all">'+esc(x.filename)+'</div>'+
+      '<div class="hint">'+(x.width?x.width+' × '+x.height+' px · ':'')+bytes(x.file_size)+(x.mime_type?' · '+esc(x.mime_type):'')+'</div></div>'+
+    (big?'<div class="alert warn">Over 100 KB. Large images slow pages down. Upload a smaller version (the CMS converts uploads to WebP under 100 KB) and use it instead.</div>':'')+
+    '<div class="field"><label>URL</label><div style="display:flex;gap:6px"><input type="text" id="m-url" readonly value="'+esc(x.file_url)+'">'+
+      '<button class="btn sm" id="m-copy">Copy</button></div></div>'+
+    '<div class="field"><label>Alt text</label><textarea id="m-alt" rows="2"'+(canEdit?'':' readonly')+'>'+esc(x.alt_text||'')+'</textarea>'+
+      '<div class="hint">Filled in automatically when you insert this image in a post. '+(x.folder==='site'?'Pages built into the site keep their own alt text.':'')+'</div></div>'+
+    '<div class="field"><label>Caption</label><input type="text" id="m-cap" value="'+esc(x.caption||'')+'"'+(canEdit?'':' readonly')+'></div>'+
+    '<div class="field"><label>Where it is used'+(x.usage?' ('+used+')':'')+'</label>'+usageHtml(x.usage)+'</div>'+
     '</div></div>',
-    '<button class="btn" data-a="close">Close</button><button class="btn primary" data-a="save">Save</button>',
+    (canDel?'<button class="btn danger" data-a="delete" style="margin-right:auto"'+(x.locked?' disabled title="Part of the built website; deleting it would break live pages"':'')+'>Delete</button>':'')+
+    '<button class="btn" data-a="close">Close</button>'+(canEdit?'<button class="btn primary" data-a="save">Save</button>':''),
     function(a,close){
       if(a==='close')return close();
-      api('media.php',{action:'update',id:x.id,alt_text:$('#m-alt').value,caption:$('#m-cap').value})
-        .then(async function(){ toast('Saved.','good'); await refreshMedia(); close(); renderShell(); })
-        .catch(function(e){ toast(e.message,'bad'); });
+      if(a==='save'){
+        api('media.php',{action:'update',id:x.id,file_url:x.file_url,alt_text:$('#m-alt').value,caption:$('#m-cap').value})
+          .then(function(r){ toast('Saved.','good'); x.alt_text=$('#m-alt').value; x.caption=$('#m-cap').value;
+            if(r.id) x.id=r.id; x.registered=true; close(); renderShell(); })
+          .catch(function(e){ toast(e.message,'bad'); });
+      }
+      if(a==='delete') deleteMedia(x, close);
     }, true);
+  var cp=$('#m-copy'); if(cp) cp.addEventListener('click',function(){
+    var i=$('#m-url'); i.select(); (navigator.clipboard?navigator.clipboard.writeText(location.origin+x.file_url):Promise.resolve()).then(function(){ toast('URL copied.'); });
+  });
+  document.querySelectorAll('[data-editblog]').forEach(function(b){
+    b.addEventListener('click',function(){ closeModal(); S.view='blogs'; openBlog(b.dataset.editblog); });
+  });
+}
+
+async function deleteMedia(x, close){
+  if(x.locked){ toast('This image is part of the built website and cannot be deleted here.','bad'); return; }
+  if(!confirm('Delete '+x.filename+'?\n\nThe file is moved to the server trash folder (~/roc-media-trash), so it can be restored by hand.'))return;
+  try{
+    var r=await api('media.php',{action:'delete',file_url:x.file_url});
+    toast(r.message,'good');
+  }catch(e){
+    if(e.code==='IN_USE' && e.data && e.data.usage){
+      var list=e.data.usage.map(function(u){return '• '+u.label+': '+u.title;}).join('\n');
+      if(!confirm('This image is still used on '+e.data.usage.length+' page(s):\n\n'+list+
+        '\n\nThose pages will show a broken image until you choose another one. Delete anyway?')) return;
+      try{ var r2=await api('media.php',{action:'delete',file_url:x.file_url,confirm_in_use:true}); toast(r2.message,'good'); }
+      catch(e2){ toast(e2.message,'bad'); return; }
+    } else { toast(e.message,'bad'); return; }
+  }
+  close(); S.mediaLoaded=false;
+  S.media=S.media.filter(function(v){return v.file_url!==x.file_url;});
+  renderShell();
 }
 
 function pickMedia(done){
   var chosen=null;
   modal('Choose an image',
     '<input type="file" id="pf" accept="image/*" hidden>'+
-    '<button class="btn" style="margin-bottom:12px" id="pu">＋ Upload new</button>'+
-    (S.media.length?'<div class="mgrid">'+S.media.map(function(x){
+    (can('media','upload')?'<button class="btn" style="margin-bottom:12px" id="pu">＋ Upload new</button>':'')+
+    (S.media.length?'<div class="mgrid">'+S.media.slice().sort(function(a,b){
+        return (a.folder==='uploads'?0:1)-(b.folder==='uploads'?0:1);
+      }).map(function(x){
       return '<div class="mitem" data-p="'+esc(x.id)+'">'+
         '<div class="mthumb" style="background-image:url(\''+esc(mediaUrl(x))+'\')">'+
         (+x.file_size>102400?'<span class="flag">'+bytes(x.file_size)+'</span>':'')+'</div>'+
@@ -1380,15 +1759,14 @@ function pickMedia(done){
       var use=document.querySelector('[data-a=use]'); if(use) use.disabled=false;
     });
   });
-  var pf=$('#pf');
-  $('#pu').addEventListener('click',function(){ pf.click(); });
+  var pf=$('#pf'), pu=$('#pu');
+  if(pu) pu.addEventListener('click',function(){ pf.click(); });
   pf.addEventListener('change', async function(){
     if(!pf.files[0])return;
-    await uploadOne(pf.files[0]);
+    var up=await uploadOne(pf.files[0]);
     await refreshMedia();
     closeModal();
-    var latest=S.media[0];
-    if(latest) done({url:mediaUrl(latest),alt:latest.alt_text||'',caption:latest.caption||'',width:latest.width,height:latest.height});
+    if(up) done({url:up.file_url||up.url,alt:up.alt_text||'',caption:'',width:up.width,height:up.height});
   });
 }
 
@@ -1407,7 +1785,7 @@ function pickInternal(done){
     $('#ill').innerHTML = rows.length
       ? '<table class="list"><tbody>'+rows.map(function(b){
           return '<tr><td><div class="t-title" data-il="'+esc(b.id)+'">'+esc(b.title)+'</div>'+
-            '<div class="t-slug">/blogs/'+esc(b.slug||'')+'/</div></td>'+
+            '<div class="t-slug">/blogs/'+esc(b.slug||'')+'/</div>'+viewLiveLink(b)+'</td>'+
             '<td style="text-align:right"><span class="tag '+(b.status==='published'?'published':'draft')+'">'+
             esc(b.status)+'</span></td></tr>';
         }).join('')+'</tbody></table>'
@@ -1423,6 +1801,448 @@ function pickInternal(done){
   paint('');
   $('#ilq').addEventListener('input',function(){ paint(this.value); });
   $('#ilq').focus();
+}
+
+/* ------------------------------------------------------ change password */
+
+function renderChangePassword(forced){
+  var form='<form id="cpf">'+
+    (forced?'<div class="alert info">For security, choose your own password before continuing.</div>':'')+
+    '<div class="field"><label>Current password'+(forced?' (the temporary one you were given)':'')+'</label>'+
+      '<input type="password" name="cur" required autocomplete="current-password"></div>'+
+    '<div class="field"><label>New password</label><input type="password" name="n1" required minlength="10" autocomplete="new-password">'+
+      '<div class="hint">At least 10 characters.</div></div>'+
+    '<div class="field"><label>Repeat new password</label><input type="password" name="n2" required minlength="10" autocomplete="new-password"></div>'+
+    '<div id="cperr"></div>'+
+    '<button class="btn primary" type="submit" style="width:100%;justify-content:center">Save new password</button></form>';
+  async function submit(e){
+    e.preventDefault();
+    var f=new FormData(e.target), box=$('#cperr');
+    if(f.get('n1')!==f.get('n2')){ box.innerHTML='<div class="alert bad">The new passwords do not match.</div>'; return; }
+    try{
+      await api('auth.php',{action:'change_password',current_password:f.get('cur'),new_password:f.get('n1')});
+      toast('Password changed.','good');
+      S.user.must_change_password=false;
+      if(forced) await load(); else closeModal();
+    }catch(err){ box.innerHTML='<div class="alert bad">'+esc(err.message)+'</div>'; }
+  }
+  if(forced){
+    app.innerHTML='<div class="gate"><div class="gcard">'+
+      '<div class="brand" style="margin-bottom:18px"><div class="mark"><svg viewBox="0 0 100 100" width="24" height="24" fill="none" aria-hidden="true"><path d="M12 28 C8 28 4 36 2 54 C0 72 8 88 22 88 C30 88 36 78 44 68 L56 68 C64 78 70 88 78 88 C92 88 100 72 98 54 C96 36 92 28 88 28 C76 28 68 36 50 36 C32 36 24 28 12 28 Z" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 44 V64 M16 54 H36" stroke="#fff" stroke-width="7" stroke-linecap="round"/><circle cx="74" cy="48" r="4.5" fill="#fff"/><circle cx="84" cy="58" r="4.5" fill="#fff"/><circle cx="64" cy="58" r="4.5" fill="#fff"/><circle cx="74" cy="68" r="4.5" fill="#fff"/></svg></div>'+
+      '<div><div class="bname">Run On Console</div><div class="bsub">Set your password</div></div></div>'+
+      '<h2 style="font-size:19px;margin-bottom:14px">Hi '+esc(S.user?S.user.username:'')+'</h2>'+form+
+      '<button class="btn ghost" id="cpout" style="width:100%;justify-content:center;margin-top:8px">Sign out</button></div></div>';
+    $('#cpf').addEventListener('submit',submit);
+    $('#cpout').addEventListener('click',async function(){ try{ await api('auth.php',{action:'logout'}); }catch(e){} location.reload(); });
+  } else {
+    modal('Change your password', form, '<button class="btn" data-a="close">Cancel</button>', function(a,close){ close(); });
+    $('#cpf').addEventListener('submit',submit);
+  }
+}
+
+/* ---------------------------------------------------------------- users */
+
+function accessSummary(u){
+  if(u.role==='administrator') return '<span class="tag admin">Full access</span>';
+  var parts=[];
+  (S.sections||[]).forEach(function(sec){
+    var a=(u.permissions||{})[sec.key];
+    if(a&&a.length) parts.push('<b>'+esc(sec.label)+'</b>: '+esc(a.join(', ')));
+  });
+  return parts.length?'<div style="font-size:12px;line-height:1.6">'+parts.join('<br>')+'</div>':'<span class="hint bad">No access</span>';
+}
+
+async function renderUsers(m){
+  m.innerHTML=head('CMS users','Who can sign in to the CMS and what they can do','')+
+    '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d;
+  try{ d=await api('users.php'); }catch(e){ toast(e.message,'bad'); return; }
+  if(d.sections) S.sections=d.sections;
+  S.cmsUsers=d.users||[];
+  $('.bar .right',m).innerHTML=d.migrated?'<button class="btn primary" id="adduser">＋ Add user</button>':'';
+  $('.body',m).innerHTML=
+    (!d.migrated?'<div class="alert warn">User management needs a one-time database upgrade. In cPanel Terminal run:<br>'+
+      '<code>php ~/public_html/api/v1/cron/cli-cms-users-upgrade.php --apply</code></div>':'')+
+    '<div class="card"><table class="list"><thead><tr><th>User</th><th>Access</th><th>Status</th><th>Last sign-in</th><th></th></tr></thead><tbody>'+
+    S.cmsUsers.map(function(u){
+      return '<tr><td><div style="font-weight:560">'+esc(u.username)+(u.is_you?' <span class="hint">(you)</span>':'')+'</div>'+
+        '<div class="t-slug">'+esc(u.email)+'</div></td>'+
+        '<td>'+accessSummary(u)+'</td>'+
+        '<td><span class="tag '+(u.status==='active'?'published':'off')+'">'+(u.status==='active'?'active':'deactivated')+'</span>'+
+          (u.must_change_password?'<div class="hint">must set a new password</div>':'')+'</td>'+
+        '<td style="color:var(--ink-3)">'+(u.last_login_at?when(u.last_login_at):'never')+'</td>'+
+        '<td style="text-align:right;white-space:nowrap">'+(d.migrated?
+          '<button class="btn sm" data-ue="'+u.id+'">Edit access</button> '+
+          (u.is_you?'':'<button class="btn sm" data-ur="'+u.id+'">Reset password</button> '+
+            '<button class="btn sm '+(u.status==='active'?'danger':'')+'" data-us="'+u.id+'">'+(u.status==='active'?'Deactivate':'Activate')+'</button>'):'')+
+        '</td></tr>';
+    }).join('')+'</tbody></table></div>'+
+    '<div class="hint">There must always be at least one active user with full access. Deactivated users are signed out immediately and cannot sign in; their history stays in the audit log.</div>';
+
+  var add=$('#adduser',m); if(add) add.addEventListener('click',function(){ userForm(null); });
+  m.querySelectorAll('[data-ue]').forEach(function(b){ b.addEventListener('click',function(){ userForm(findUser(b.dataset.ue)); }); });
+  m.querySelectorAll('[data-ur]').forEach(function(b){ b.addEventListener('click',async function(){
+    var u=findUser(b.dataset.ur);
+    if(!confirm('Reset the password for '+u.username+'?\n\nThey will be signed out and must choose a new password at their next sign-in.'))return;
+    try{ var r=await api('users.php',{action:'reset_password',id:u.id}); showTempPassword(u.username,r.temporary_password,false); renderUsers(m); }
+    catch(e){ toast(e.message,'bad'); }
+  }); });
+  m.querySelectorAll('[data-us]').forEach(function(b){ b.addEventListener('click',async function(){
+    var u=findUser(b.dataset.us), off=u.status==='active';
+    if(!confirm((off?'Deactivate ':'Activate ')+u.username+'?'+(off?'\n\nThey will be signed out now and cannot sign in until activated again.':'')))return;
+    try{ var r=await api('users.php',{action:'set_status',id:u.id,status:off?'disabled':'active'}); toast(r.message,'good'); renderUsers(m); }
+    catch(e){ toast(e.message,'bad'); }
+  }); });
+}
+function findUser(id){ return (S.cmsUsers||[]).filter(function(u){return String(u.id)===String(id);})[0]; }
+
+function userForm(u){
+  var isNew=!u, full=u?u.role==='administrator':false, perms=u?(u.permissions||{}):{blogs:['view','edit'],media:['view','upload']};
+  var actions=['view','edit','upload','publish','delete'];
+  var matrix='<table class="matrix"><thead><tr><th>Section</th>'+actions.map(function(a){return '<th>'+a+'</th>';}).join('')+'</tr></thead><tbody>'+
+    (S.sections||[]).map(function(sec){
+      return '<tr><td>'+esc(sec.label)+'</td>'+actions.map(function(a){
+        if(sec.actions.indexOf(a)===-1) return '<td style="color:var(--line-2)">—</td>';
+        var on=(perms[sec.key]||[]).indexOf(a)!==-1;
+        return '<td><input type="checkbox" data-sec="'+sec.key+'" data-act="'+a+'"'+(on?' checked':'')+'></td>';
+      }).join('')+'</tr>';
+    }).join('')+'</tbody></table>'+
+    '<div class="hint">"view" is switched on automatically with any other box. Products and Categories are CMS data only; the live product pages are built into the site code for now.</div>';
+  modal(isNew?'Add CMS user':'Edit access — '+u.username,
+    '<div class="row"><div class="field"><label>Username</label><input type="text" id="u-name" value="'+esc(u?u.username:'')+'"'+(isNew?'':' readonly')+' autocomplete="off"></div>'+
+    '<div class="field"><label>Email</label><input type="email" id="u-email" value="'+esc(u?u.email:'')+'" autocomplete="off"></div></div>'+
+    '<div class="field"><label>Access</label>'+
+      '<label class="check"><input type="radio" name="u-role" value="administrator"'+(full?' checked':'')+'> Full access — everything, including users and settings</label>'+
+      '<label class="check"><input type="radio" name="u-role" value="editor"'+(full?'':' checked')+'> Selected sections only</label></div>'+
+    '<div id="u-matrix"'+(full?' class="hide"':'')+'>'+matrix+'</div>'+
+    (isNew?'<div class="field" style="margin-top:14px"><label>Password</label><input type="text" id="u-pass" placeholder="Leave empty to generate a temporary password" autocomplete="off">'+
+      '<div class="hint">They must choose their own password at first sign-in.</div></div>':''),
+    '<button class="btn" data-a="close">Cancel</button><button class="btn primary" data-a="save">'+(isNew?'Create user':'Save access')+'</button>',
+    async function(a,close){
+      if(a==='close') return close();
+      var role=(document.querySelector('input[name=u-role]:checked')||{}).value||'editor', p={};
+      document.querySelectorAll('#u-matrix input[data-sec]').forEach(function(c){
+        if(!c.checked) return; (p[c.dataset.sec]=p[c.dataset.sec]||[]).push(c.dataset.act);
+      });
+      var body={action:isNew?'create':'update',id:u?u.id:undefined,username:$('#u-name').value.trim(),
+        email:$('#u-email').value.trim(),role:role,permissions:p};
+      if(isNew) body.password=$('#u-pass').value;
+      try{
+        var r=await api('users.php',body);
+        close();
+        if(isNew) showTempPassword(body.username,r.temporary_password,!r.generated);
+        else toast(r.message,'good');
+        renderUsers($('#main'));
+      }catch(e){ toast(e.message,'bad'); }
+    }, true);
+  document.querySelectorAll('input[name=u-role]').forEach(function(r){
+    r.addEventListener('change',function(){ $('#u-matrix').classList.toggle('hide', r.value==='administrator' && r.checked); });
+  });
+  document.querySelectorAll('#u-matrix input[data-sec]').forEach(function(c){
+    c.addEventListener('change',function(){
+      var sec=c.dataset.sec, view=document.querySelector('#u-matrix input[data-sec="'+sec+'"][data-act="view"]');
+      if(c.checked && c.dataset.act!=='view' && view) view.checked=true;
+      if(!c.checked && c.dataset.act==='view')
+        document.querySelectorAll('#u-matrix input[data-sec="'+sec+'"]').forEach(function(o){ o.checked=false; });
+    });
+  });
+}
+
+function showTempPassword(username, pwd, typed){
+  modal('Password for '+username,
+    '<p style="margin-top:0">'+(typed?'The password you typed is set.':'Give this temporary password to <b>'+esc(username)+'</b>.')+
+    ' It is shown <b>only once</b>. They will be asked to choose their own password when they sign in.</p>'+
+    '<div style="display:flex;gap:8px"><input type="text" id="tp" class="pw" readonly value="'+esc(pwd)+'"><button class="btn" id="tpc">Copy</button></div>'+
+    '<div class="hint" style="margin-top:10px">Sign-in page: '+esc(location.origin)+'/cms/</div>',
+    '<button class="btn primary" data-a="close">Done</button>', function(a,close){ close(); });
+  $('#tpc').addEventListener('click',function(){ var i=$('#tp'); i.select();
+    (navigator.clipboard?navigator.clipboard.writeText(i.value):Promise.resolve()).then(function(){ toast('Copied.'); }); });
+}
+
+/* ------------------------------------------------------------ page SEO */
+
+function seoEditor(path, draft){
+  var x=S.seo&&S.seo[path];
+  if(!x){ toast('SEO data is not available yet. Run the Phase 3a upgrade.','bad'); return; }
+  var o=x.override||{}, d=x.default||{}, edit=!!S.seoCan;
+  var val=draft||{meta_title:o.meta_title||'',meta_description:o.meta_description||'',og_image:o.og_image||''};
+  function counter(id,max){ var el=$('#'+id), c=$('#'+id+'-c'); if(!el||!c)return;
+    var len=(el.value||el.placeholder).length; c.textContent=len+' / '+max+(el.value?'':' (default)'); c.className='hint'+(len>max?' warn':''); }
+  modal('SEO — '+path,
+    '<div class="field"><label>Google preview</label><div class="serp"><div class="u">https://runonconsole.com'+esc(path)+'</div>'+
+      '<div class="t" id="sp-t">'+esc(val.meta_title||d.title)+'</div><div class="d" id="sp-d">'+esc(val.meta_description||d.description)+'</div></div></div>'+
+    '<div class="field"><label>Meta title</label><input type="text" id="s-t" value="'+esc(val.meta_title)+'" placeholder="'+esc(d.title)+'"'+(edit?'':' readonly')+'>'+
+      '<div class="hint" id="s-t-c"></div></div>'+
+    '<div class="field"><label>Meta description</label><textarea id="s-d" rows="3" placeholder="'+esc(d.description)+'"'+(edit?'':' readonly')+'>'+esc(val.meta_description)+'</textarea>'+
+      '<div class="hint" id="s-d-c"></div></div>'+
+    '<div class="field"><label>Share image (Open Graph)</label><div style="display:flex;gap:8px;align-items:center">'+
+      '<div id="s-img" style="width:120px;height:63px;border-radius:7px;border:1px solid var(--line-2);background:var(--bg) center/cover no-repeat;background-image:url(\''+esc(val.og_image||d.og_image)+'\')"></div>'+
+      (edit?'<button class="btn sm" id="s-pick">Choose</button><button class="btn sm ghost" id="s-clear">Use default</button>':'')+'</div>'+
+      '<div class="hint">Empty fields keep the built-in value shown in grey.</div></div>',
+    (edit&&x.override?'<button class="btn danger" data-a="reset" style="margin-right:auto">Reset to default</button>':'')+
+    '<button class="btn" data-a="close">Close</button>'+(edit?'<button class="btn primary" data-a="save">Save to live page</button>':''),
+    async function(a,close){
+      if(a==='close') return close();
+      try{
+        var r;
+        if(a==='reset'){ if(!confirm('Remove the custom SEO for '+path+'?'))return; r=await api('page-seo.php',{action:'reset',path:path}); x.override=null; }
+        if(a==='save'){
+          val.meta_title=$('#s-t').value.trim(); val.meta_description=$('#s-d').value.trim();
+          r=await api('page-seo.php',{action:'save',path:path,meta_title:val.meta_title,meta_description:val.meta_description,og_image:val.og_image});
+          x.override={meta_title:val.meta_title,meta_description:val.meta_description,og_image:val.og_image};
+        }
+        toast(r.message,'good'); close(); renderPages($('#main'));
+      }catch(e){ toast(e.message,'bad'); }
+    }, true);
+  ['s-t','s-d'].forEach(function(id){ var el=$('#'+id); if(!el)return;
+    el.addEventListener('input',function(){ counter(id,id==='s-t'?60:160);
+      $('#sp-t').textContent=$('#s-t').value||d.title; $('#sp-d').textContent=$('#s-d').value||d.description; }); });
+  counter('s-t',60); counter('s-d',160);
+  var pk=$('#s-pick'); if(pk) pk.addEventListener('click',function(){
+    // The picker replaces this dialog; reopen it afterwards with what was typed kept.
+    val.meta_title=$('#s-t').value; val.meta_description=$('#s-d').value;
+    pickMedia(function(img){ if(img) val.og_image=img.url; seoEditor(path, val); });
+  });
+  var cl=$('#s-clear'); if(cl) cl.addEventListener('click',function(){ val.og_image=''; $('#s-img').style.backgroundImage="url('"+(d.og_image||'')+"')"; });
+}
+/* -------------------------------------------------------- website pages */
+
+async function renderPages(m){
+  if(!S.sitePages){
+    m.innerHTML=head('Website pages','Scanning…','')+'<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+    try{ S.sitePages=(await api('site-pages.php')).pages||[]; }catch(e){ toast(e.message,'bad'); return; }
+    try{ var sd=await api('page-seo.php'); S.seo={}; S.seoCan=sd.can_edit; (sd.pages||[]).forEach(function(x){ S.seo[x.path]=x; }); }
+    catch(e){ S.seo=null; }
+    if(S.view!=='pages') return;
+  }
+  var groups=['all'].concat(S.sitePages.map(function(p){return p.group;}).filter(function(g,i,a){return a.indexOf(g)===i;}));
+  var rows=S.sitePages.filter(function(p){
+    if(S.pfilter!=='all' && p.group!==S.pfilter) return false;
+    if(S.pq && (p.title+' '+p.url).toLowerCase().indexOf(S.pq.toLowerCase())===-1) return false;
+    return true;
+  });
+  m.innerHTML=head('Website pages', S.sitePages.length+' pages on runonconsole.com','<button class="btn" id="prescan">Rescan</button>')+
+  '<div class="body">'+
+  '<div class="alert info"><b>Blog posts</b> are managed here: edit, publish and the live page updates. '+
+  'Built-in pages (home, products, categories, about…) are part of the website code: their <b>SEO</b> (meta title, description, share image) '+
+  'can be changed here with the SEO button; their text and images become editable in the next update.</div>'+
+  '<div class="card"><div class="chead" style="flex-wrap:wrap;gap:10px">'+
+    '<div class="search" style="max-width:260px;flex:1"><input type="text" id="pq" placeholder="Search title or URL" value="'+esc(S.pq)+'"></div>'+
+    '<div class="chips">'+groups.map(function(g){
+      var n=g==='all'?S.sitePages.length:S.sitePages.filter(function(p){return p.group===g;}).length;
+      return '<button class="chip'+(S.pfilter===g?' on':'')+'" data-pf="'+esc(g)+'">'+(g==='all'?'All':esc(g))+'<span class="n">'+n+'</span></button>';
+    }).join('')+'</div></div>'+
+  '<table class="list"><thead><tr><th>Page</th><th>Images</th><th>Content</th><th></th></tr></thead><tbody>'+
+  (rows.length?rows.map(function(p){
+    return '<tr><td><div style="font-weight:560">'+esc(p.title)+'</div><div class="t-slug">'+esc(p.url)+'</div></td>'+
+      '<td>'+(p.images.length?'<div class="thumbs">'+p.images.slice(0,8).map(function(i){
+          return '<i title="'+esc(i.filename+' · '+bytes(i.file_size))+'" style="background-image:url(\''+esc(i.file_url)+'\')" data-img="'+esc(i.file_url)+'"></i>';
+        }).join('')+(p.images.length>8?'<span class="hint">+'+(p.images.length-8)+'</span>':'')+'</div>':'<span class="hint">none</span>')+'</td>'+
+      '<td>'+(p.editable?'<span class="tag published">editable</span>':'<span class="tag ro">read-only</span>')+
+        (p.indexed===false?' <span class="tag off" title="Not indexed and not in the sitemap">private · noindex</span>':' <span class="tag admin" title="Indexed and listed in the sitemap">in Google</span>')+
+        '<div class="hint">'+esc(p.source)+'</div></td>'+
+      '<td style="text-align:right;white-space:nowrap">'+
+        (p.edit&&p.edit.type==='blog'&&can('blogs','view')?'<button class="btn sm" data-pe="'+esc(p.edit.id)+'">Edit</button> ':'')+
+        (p.edit&&p.edit.type==='page'?'<button class="btn sm" data-ppe="'+esc(p.edit.id)+'">Edit</button> ':'')+
+        (!p.editable&&p.group!=='Account pages'?'<button class="btn sm" data-seo="'+esc(p.url)+'">'+(S.seo&&S.seo[p.url]&&S.seo[p.url].override?'SEO ✓':'SEO')+'</button> ':'')+
+        '<a class="btn sm" href="'+esc(p.url)+'" target="_blank" rel="noopener">View ↗</a></td></tr>';
+  }).join(''):'<tr><td colspan="4" class="empty">No pages match.</td></tr>')+
+  '</tbody></table></div></div>';
+
+  var pq=$('#pq',m);
+  pq.addEventListener('input',function(){ S.pq=pq.value; var at=pq.selectionStart; renderPages(m);
+    var f=$('#pq',m); if(f){f.focus();f.setSelectionRange(at,at);} });
+  m.querySelectorAll('[data-pf]').forEach(function(b){ b.addEventListener('click',function(){ S.pfilter=b.dataset.pf; renderPages(m); }); });
+  $('#prescan',m).addEventListener('click',function(){ S.sitePages=null; renderPages(m); });
+  m.querySelectorAll('[data-pe]').forEach(function(b){ b.addEventListener('click',function(){ S.view='blogs'; openBlog(b.dataset.pe); }); });
+  m.querySelectorAll('[data-ppe]').forEach(function(b){ b.addEventListener('click',function(){ S.view='cmspages'; openPage(b.dataset.ppe); }); });
+  m.querySelectorAll('[data-seo]').forEach(function(b){ b.addEventListener('click',function(){ seoEditor(b.dataset.seo); }); });
+  m.querySelectorAll('[data-img]').forEach(function(i){ i.style.cursor='pointer'; i.addEventListener('click',async function(){
+    if(!can('media','view')) return;
+    if(!S.mediaLoaded){ try{ S.media=(await api('media.php')).media||[]; S.mediaLoaded=true; }catch(e){ return; } }
+    var x=S.media.filter(function(v){return v.file_url===i.dataset.img;})[0]; if(x) mediaDetail(x.id);
+  }); });
+}
+
+/* -------------------------------------------------------- live activity */
+
+var ACT_TYPES={signup:{label:'Sign-ups',icon:'👤',bg:'#dbeafe'},comment:{label:'Comments',icon:'💬',bg:'#fef3c7'},
+  request:{label:'Requests',icon:'✉️',bg:'#ede9fe'},alert:{label:'Price alerts',icon:'🔔',bg:'#fee2e2'},
+  save:{label:'Saved products',icon:'★',bg:'#fce7f3'},chat:{label:'AI chats',icon:'🤖',bg:'#e0f2fe'},
+  click:{label:'Buy clicks',icon:'🛒',bg:'#d1fae5'}};
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function ago(at){
+  var t=new Date(String(at).replace(' ','T')+'Z').getTime(), now=Date.now()-(S.actSkew||0), s=Math.max(0,(now-t)/1000);
+  if(isNaN(t)) return at;
+  return s<60?'just now':s<3600?Math.floor(s/60)+' min ago':s<86400?Math.floor(s/3600)+' h ago':Math.floor(s/86400)+' d ago';
+}
+async function pollActivity(){
+  if(!can('activity','view')) return;
+  try{
+    var d=await api('activity.php');
+    // server_time is UTC-less local server time; measure skew so "x min ago" is right.
+    if(d.server_time) S.actSkew=Date.now()-new Date(d.server_time.replace(' ','T')+'Z').getTime();
+    var items=d.items||[], seen=lsGet('roc_act_seen')||'', prevNewest=S.actNewest;
+    S.activity=items; S.actCounts=d.counts_24h||{};
+    S.actNewest=items.length?items[0].at:(prevNewest||'');
+    if(!seen && items.length){ seen=items[0].at; lsSet('roc_act_seen',seen); }
+    S.actUnseen=items.filter(function(i){return i.at>seen;}).length;
+    if(prevNewest && S.actNotify && window.Notification && Notification.permission==='granted'){
+      items.filter(function(i){return i.at>prevNewest;}).slice(0,3).forEach(function(i){
+        try{ new Notification('Run On Console — '+(ACT_TYPES[i.type]||{}).label, {body:i.title+(i.detail?'\n'+i.detail:''), icon:'/favicon.svg'}); }catch(e){}
+      });
+    }
+    var b=document.querySelector('.sitem[data-go=activity]');
+    if(b){ var ct=b.querySelector('.ct');
+      if(S.actUnseen){ if(!ct){ ct=document.createElement('span'); ct.className='ct new'; b.appendChild(ct);} ct.textContent=S.actUnseen; }
+      else if(ct) ct.remove(); }
+    if(S.view==='activity' && !S.editing) paintActivity($('#main'));
+  }catch(e){}
+}
+function startActivityPolling(){
+  if(S.actTimer || !can('activity','view')) return;
+  S.actNotify=lsGet('roc_act_notify')==='1';
+  pollActivity();
+  S.actTimer=setInterval(pollActivity, 30000);
+}
+function renderActivity(m){
+  m.innerHTML=head('Live activity','What visitors are doing on runonconsole.com · updates every 30 seconds',
+    '<button class="btn" id="actnotify"></button><button class="btn" id="actnow">Refresh</button>')+
+    '<div class="body narrow" id="actbody"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  $('#actnow',m).addEventListener('click',pollActivity);
+  var nb=$('#actnotify',m);
+  function label(){ nb.textContent=S.actNotify?'🔔 Notifications on':'🔕 Turn on notifications'; }
+  label();
+  nb.addEventListener('click',function(){
+    if(!window.Notification){ toast('This browser does not support notifications.','bad'); return; }
+    if(S.actNotify){ S.actNotify=false; lsSet('roc_act_notify','0'); label(); return; }
+    Notification.requestPermission().then(function(p){
+      S.actNotify=p==='granted'; lsSet('roc_act_notify',S.actNotify?'1':'0'); label();
+      if(!S.actNotify) toast('Notifications are blocked in this browser. Allow them in the site settings.','bad');
+    });
+  });
+  if(S.activity) paintActivity(m); else pollActivity();
+}
+function paintActivity(m){
+  var body=$('#actbody',m); if(!body) return;
+  var items=S.activity||[], f=S.actFilter||'all', seen=lsGet('roc_act_seen')||'';
+  var rows=items.filter(function(i){return f==='all'||i.type===f;});
+  var c=S.actCounts||{};
+  var html='<div class="stats">'+Object.keys(ACT_TYPES).map(function(k){
+      return '<div class="stat"><div class="n">'+(c[k]||0)+'</div><div class="l">'+ACT_TYPES[k].label+' · 24h</div></div>'; }).join('')+'</div>'+
+    '<div class="card"><div class="chead"><div class="chips">'+['all'].concat(Object.keys(ACT_TYPES)).map(function(k){
+      return '<button class="chip'+(f===k?' on':'')+'" data-af="'+k+'">'+(k==='all'?'All':ACT_TYPES[k].label)+'</button>'; }).join('')+'</div></div>';
+  if(!rows.length) html+='<div class="empty"><div class="big">⚡</div><div>No activity in the last 30 days'+(f==='all'?'':' for this filter')+'.</div></div>';
+  var day='';
+  rows.forEach(function(i){
+    var d=String(i.at).slice(0,10);
+    if(d!==day){ day=d; html+='<div class="dayh">'+when(i.at)+'</div>'; }
+    var t=ACT_TYPES[i.type]||{icon:'•',bg:'#e2e8f0'};
+    html+='<div class="act'+(i.at>seen?' new':'')+'"><div class="i" style="background:'+t.bg+'">'+t.icon+'</div>'+
+      '<div style="min-width:0"><div class="t">'+esc(i.title)+'</div>'+(i.detail?'<div class="d">'+esc(i.detail)+'</div>':'')+
+      (i.link?'<div class="d"><a href="'+esc(i.link)+'" target="_blank" rel="noopener">'+esc(i.link)+' ↗</a></div>':'')+'</div>'+
+      '<div class="w" title="'+esc(i.at)+'">'+ago(i.at)+'</div></div>';
+  });
+  body.innerHTML=html+'</div><div class="hint">Buy clicks show that someone clicked through to a store. Actual sales are reported in your Amazon Associates / store affiliate dashboard.</div>';
+  body.querySelectorAll('[data-af]').forEach(function(b){ b.addEventListener('click',function(){ S.actFilter=b.dataset.af; paintActivity(m); }); });
+  // Opening the page marks everything as seen.
+  if(items.length && S.view==='activity'){ lsSet('roc_act_seen',items[0].at); S.actUnseen=0;
+    var ct=document.querySelector('.sitem[data-go=activity] .ct'); if(ct) ct.remove(); }
+}
+
+/* -------------------------------------------------------- social profiles */
+
+async function renderSocial(m){
+  m.innerHTML=head('Social profiles & Amazon tag','Footer links and affiliate tag for the whole website','')+
+    '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d; try{ d=await api('social.php'); }catch(e){ toast(e.message,'bad'); return; }
+  $('.body',m).innerHTML=
+    '<div class="card"><div class="chead"><h3>Amazon affiliate tag</h3><span class="note">Added to every Amazon link on the website</span></div>'+
+    '<div class="cbody"><form id="amzf"><div class="field"><label for="amz-tag">Tracking ID</label>'+
+      '<input type="text" id="amz-tag" value="'+esc(d.amazon_tag||'')+'" placeholder="e.g. runonconsole-20" autocomplete="off"></div>'+
+      '<div class="hint" style="margin:-4px 0 12px">Find it in Amazon Associates → Account settings → Manage tracking IDs. '+
+      (d.amazon_tag?'Now active: every Amazon link opens with <b>tag='+esc(d.amazon_tag)+'</b>.':'<b style="color:#b45309">Not set: Amazon links currently earn no commission.</b>')+'</div>'+
+      '<button class="btn primary" type="submit">Save tag</button></form></div></div>'+
+    '<div class="card"><div class="chead"><h3>Your profiles</h3><span class="note">Leave a box empty to hide that card on the website</span></div>'+
+    '<div class="cbody"><form id="socf">'+d.platforms.map(function(p){
+      var v=d.links[p.key]||'';
+      return '<div class="field"><label for="so-'+p.key+'">'+esc(p.label)+
+        (v?' <a href="'+esc(v)+'" target="_blank" rel="noopener" style="font-weight:600;font-size:12px;margin-left:6px">open ↗</a>':'')+'</label>'+
+        '<input type="text" id="so-'+p.key+'" data-so="'+p.key+'" value="'+esc(v)+'" placeholder="'+esc(p.example)+'"></div>';
+    }).join('')+'<button class="btn primary" type="submit">Save to website</button></form></div></div>'+
+    '<div class="hint">The website footer updates as soon as you save.</div>';
+  $('#amzf',m).addEventListener('submit',async function(e){
+    e.preventDefault();
+    m.querySelectorAll('.publish-error').forEach(function(n){n.remove();});
+    try{ var r=await api('social.php',{amazon_tag:$('#amz-tag',m).value.trim()}); toast(r.message,'good'); renderSocial(m); }
+    catch(err){ toast(err.message,'bad'); }
+  });
+  $('#socf',m).addEventListener('submit',async function(e){
+    e.preventDefault();
+    var links={}; m.querySelectorAll('[data-so]').forEach(function(i){ links[i.dataset.so]=i.value.trim(); });
+    m.querySelectorAll('.publish-error').forEach(function(n){n.remove();});
+    try{ var r=await api('social.php',{links:links}); toast(r.message,'good');
+      Object.keys(r.links||{}).forEach(function(k){ var i=$('#so-'+k,m); if(i) i.value=r.links[k]; }); }
+    catch(err){
+      toast(err.message,'bad');
+      var errs=(err.data&&err.data.errors)||{};
+      Object.keys(errs).forEach(function(k){ var i=$('#so-'+k,m); if(!i)return;
+        var n=document.createElement('div'); n.className='hint publish-error'; n.style.color='#e11d48'; n.textContent=errs[k]; i.parentNode.appendChild(n); });
+    }
+  });
+}
+
+/* -------------------------------------------------------- products (read-only list) */
+
+async function renderProducts(m){
+  m.innerHTML=head('Products','Every product on the website, by category','')+
+    '<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d; try{ d=await api('products.php'); }catch(e){ toast(e.message,'bad'); return; }
+  var all=(d.products||[]).filter(function(p){return p.status!=='draft';});
+  var cats={}; all.forEach(function(p){ var c=p.category||'Other'; (cats[c]=cats[c]||[]).push(p); });
+  var q='', cat='all';
+  var body=$('.body',m);
+  body.innerHTML='<div class="hint" style="margin-bottom:12px">'+all.length+' products in '+Object.keys(cats).length+
+    ' categories. Each one has its own page on the website and an Amazon button. To add or change products, update the product sheet and send it for the next website update.</div>'+
+    '<div class="card"><div class="cbody" style="display:flex;gap:10px;flex-wrap:wrap">'+
+      '<input type="search" id="pr-q" placeholder="Search products or brands…" style="flex:1;min-width:200px">'+
+      '<select id="pr-c"><option value="all">All categories ('+all.length+')</option>'+Object.keys(cats).map(function(c){
+        return '<option value="'+esc(c)+'">'+esc(c)+' ('+cats[c].length+')</option>'; }).join('')+'</select></div></div>'+
+    '<div id="pr-list"></div>';
+  function draw(){
+    var list=all.filter(function(p){
+      if(cat!=='all' && (p.category||'Other')!==cat) return false;
+      return !q || ((p.title||'')+' '+(p.category||'')).toLowerCase().indexOf(q)>=0;
+    });
+    $('#pr-list',m).innerHTML='<div class="card"><table class="list"><thead><tr><th>Product</th><th>Category</th><th>Amazon</th></tr></thead><tbody>'+
+      (list.map(function(p){
+        var slug=p.slug||p.id;
+        return '<tr><td><div class="t-title">'+esc(p.title)+'</div>'+
+          '<div class="t-slug"><a href="/products/'+esc(slug)+'/" target="_blank" rel="noopener">/products/'+esc(slug)+'/ ↗</a></div></td>'+
+          '<td>'+esc(p.category||'')+'</td>'+
+          '<td>'+(p.affiliate_amazon?'<a href="'+esc(p.affiliate_amazon)+'" target="_blank" rel="noopener">Open ↗</a>':'<span style="color:#e11d48">missing</span>')+'</td></tr>';
+      }).join('')||'<tr><td colspan="3" class="empty">No products match.</td></tr>')+'</tbody></table></div>';
+  }
+  $('#pr-q',m).addEventListener('input',function(e){ q=e.target.value.toLowerCase().trim(); draw(); });
+  $('#pr-c',m).addEventListener('change',function(e){ cat=e.target.value; draw(); });
+  draw();
+}
+
+/* Dashboard card: social profiles + Amazon tag as the website shows them (/roc-site.json). */
+async function fillDashSite(m){
+  var box=$('#dash-site',m); if(!box) return;
+  var j=null; try{ var r=await fetch('/roc-site.json?ts='+Date.now(),{cache:'no-store'}); if(r.ok) j=await r.json(); }catch(e){}
+  var on=((j&&j.social)||[]).filter(function(x){return x.url;});
+  var canEdit=S.user&&(S.user.is_admin||S.user.role==='administrator');
+  box.innerHTML='<div class="card"><div class="chead"><h3>Social profiles on the website</h3>'+
+    (canEdit?'<button class="btn" data-go-social>Edit</button>':'')+'</div><div class="cbody">'+
+    (on.length?'<div style="display:flex;flex-wrap:wrap;gap:8px">'+on.map(function(x){
+      return '<a class="tag published" style="text-decoration:none" href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.label)+' ↗</a>';
+    }).join('')+'</div>':'<div class="hint">No profiles saved yet. The footer shows the links it was built with.</div>')+
+    '<div class="hint" style="margin-top:10px">Amazon tag: '+(j&&j.amazon_tag?'<b>'+esc(j.amazon_tag)+'</b>':'<b style="color:#b45309">not set</b> (Amazon links earn no commission until you add it)')+'</div>'+
+    '</div></div>';
+  var b=box.querySelector('[data-go-social]'); if(b) b.addEventListener('click',function(){ go('social'); });
 }
 
 /* -------------------------------------------------------- simple views */
@@ -1469,11 +2289,13 @@ function closeModal(){ var v=$('.veil'); if(v) v.remove(); document.removeEventL
 async function load(){
   try{
     var [b,md] = await Promise.all([
-      api('blogs.php').catch(function(){ return {blogs:[]}; }),
-      api('media.php').catch(function(){ return {media:[]}; })
-    ]);
+      can('blogs','view') ? api('blogs.php').catch(function(){ return {blogs:[]}; }) : {blogs:[]},
+      can('media','view') ? api('media.php?usage=0').catch(function(){ return {media:[]}; }) : {media:[]},
+      can('pages','view') ? api('pages.php').catch(function(){ return {pages:[]}; }) : {pages:[]}
+    ]).then(function(r){ S.pages=(r[2]&&r[2].pages)||[]; return r; });
     S.blogs=b.blogs||[]; S.media=md.media||[];
     renderShell();
+    startActivityPolling();
   }catch(e){
     app.innerHTML='<div class="gate"><div class="gcard"><h2 style="font-size:18px">Cannot reach the CMS</h2>'+
       '<p style="color:var(--ink-3);font-size:13px">'+esc(e.message)+'</p>'+
@@ -1484,7 +2306,11 @@ async function load(){
 async function boot(){
   try{
     var d=await api('auth.php');
-    if(d && d.authenticated){ S.user=d.user; S.csrf=d.csrf_token; await load(); }
+    if(d && d.authenticated){
+      S.user=d.user; S.csrf=d.csrf_token; S.sections=d.sections||[];
+      if(S.user.must_change_password) return renderChangePassword(true);
+      await load();
+    }
     else renderLogin();
   }catch(e){ renderLogin('Could not reach the CMS backend.'); }
 }

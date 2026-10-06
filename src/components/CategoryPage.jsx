@@ -134,7 +134,7 @@ export const CategoryPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((item) => {
             const isComparing = compareIds.includes(item.id);
-            const amazonLink = item.affiliateLinks?.amazon || "https://amazon.com?tag=fragreviews-20";
+            const amazonLink = item.affiliateLinks?.amazon || "/products/";
 
             return (
               <div 

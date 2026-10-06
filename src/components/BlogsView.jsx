@@ -187,7 +187,7 @@ export const BlogsView = () => {
                   </div>
 
                   <a 
-                    href={prod.affiliateLinks?.amazon || "https://amazon.com?tag=fragreviews-20"}
+                    href={prod.affiliateLinks?.amazon || `/products/${prod.slug}/`}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => playClickSound()}
