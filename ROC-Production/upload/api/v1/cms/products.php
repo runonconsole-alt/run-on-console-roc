@@ -74,6 +74,25 @@ if ($method === 'POST') {
         exit();
     }
 
+    // Show / hide on the website. Hidden products return 404 and leave the sitemap.
+    if ($action === 'set_status') {
+        $status = ($data['status'] ?? '') === 'published' ? 'published' : 'draft';
+        rocCmsAuthorize($session, 'products', 'publish');
+        $expectedVersion = (int)($data['version'] ?? 1);
+        // Showing a product again counts as a content change (new sitemap lastmod); hiding does not.
+        $touch = $status === 'published' ? ', content_modified_at = NOW()' : '';
+        $stmt = $pdo->prepare("UPDATE products SET status = ?, version = version + 1, updated_at = NOW(){$touch} WHERE id = ? AND version = ?");
+        $stmt->execute([$status, $id, $expectedVersion]);
+        if ($stmt->rowCount() === 0) {
+            http_response_code(409);
+            echo json_encode(['success' => false, 'error' => 'This product was changed by someone else. Reload and try again.']);
+            exit();
+        }
+        logCmsAudit($status === 'published' ? 'cms_product_show' : 'cms_product_hide', 'product', $id, ['version' => $expectedVersion + 1]);
+        echo json_encode(['success' => true, 'status' => $status, 'version' => $expectedVersion + 1]);
+        exit();
+    }
+
     if ($action === 'save_draft') {
         $expectedVersion = (int)($data['version'] ?? 1);
         $draftPayload = $data['draft'] ?? $data;
