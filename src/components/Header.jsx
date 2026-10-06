@@ -157,20 +157,20 @@ export const Header = () => {
           <div className="flex items-center justify-between h-16 sm:h-18 gap-1.5 sm:gap-3">
             
             {/* Brand Logo Anchor Link */}
-            <div className="pr-3 sm:pr-4 mr-2 sm:mr-4 border-r border-slate-200 shrink-0">
+            <div className="shrink-0 xl:pr-4 xl:mr-2 xl:border-r xl:border-slate-200">
               <a href="/" onClick={(e) => handleNavClick(e, 'home')} className="no-underline block">
                 <BrandLogo theme="light" />
               </a>
             </div>
 
             {/* 5 Pillar Crawlable Navigation Anchors */}
-            <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 flex-1 justify-center min-w-0 px-1">
+            <nav className="hidden xl:flex items-center gap-0.5 flex-1 justify-center px-1">
               
               {/* 0. HOME */}
               <a
                 href="/"
                 onClick={(e) => handleNavClick(e, 'home')}
-                className={`px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap ${
+                className={`px-2 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap ${
                   currentPage === 'home' 
                     ? 'bg-emerald-600 text-white shadow-sm' 
                     : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
@@ -188,7 +188,7 @@ export const Header = () => {
                 <a
                   href="/products/"
                   onClick={(e) => handleNavClick(e, 'products')}
-                  className={`px-1.5 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ${
+                  className={`px-2 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ${
                     activeDropdown === 'components'
                       ? 'bg-emerald-600 text-white shadow-sm' 
                       : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
@@ -249,7 +249,7 @@ export const Header = () => {
                 <a
                   href="/products/"
                   onClick={(e) => handleNavClick(e, 'products')}
-                  className={`px-1.5 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ${
+                  className={`px-2 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ${
                     activeDropdown === 'peripherals'
                       ? 'bg-emerald-600 text-white shadow-sm' 
                       : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
@@ -310,7 +310,7 @@ export const Header = () => {
                 <a
                   href="/categories/"
                   onClick={(e) => handleNavClick(e, 'categories', 'all')}
-                  className={`px-1.5 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ${
+                  className={`px-2 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ${
                     currentPage === 'categories' || activeDropdown === 'systems'
                       ? 'bg-emerald-600 text-white shadow-sm' 
                       : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
@@ -372,7 +372,7 @@ export const Header = () => {
                 <a
                   href="/blogs/"
                   onClick={(e) => handleNavClick(e, 'blogs')}
-                  className={`px-1.5 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ${
+                  className={`px-2 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ${
                     activeDropdown === 'guides'
                       ? 'bg-emerald-600 text-white shadow-sm' 
                       : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
@@ -429,7 +429,7 @@ export const Header = () => {
               <a
                 href="/compatibility/"
                 onClick={(e) => handleNavClick(e, 'compatibility')}
-                className={`px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap mr-1 lg:mr-2 ${
+                className={`px-2 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap mr-1 lg:mr-2 ${
                   currentPage === 'compatibility' 
                     ? 'bg-emerald-600 text-white shadow-sm' 
                     : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
@@ -438,31 +438,17 @@ export const Header = () => {
                 COMPATIBILITY
               </a>
 
-              {/* UNLOCKED MASTER DASHBOARD LINK */}
-              <a
-                href="/admin/"
-                onClick={(e) => handleNavClick(e, 'admin')}
-                className={`px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-black uppercase tracking-wide rounded-xl transition-all whitespace-nowrap flex items-center gap-1 border ${
-                  currentPage === 'admin' 
-                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' 
-                    : 'text-emerald-800 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-950 border-emerald-300'
-                }`}
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>DASHBOARD</span>
-              </a>
-
             </nav>
 
             {/* Right Actions */}
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               
               {/* Search Bar */}
-              <div ref={searchRef} className="relative hidden md:block w-32 lg:w-36 xl:w-48 shrink-0">
+              <div ref={searchRef} className="relative hidden md:block w-36 lg:w-56 xl:w-28 shrink-0">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
                 <input 
                   type="text"
-                  placeholder="Search gear & games..."
+                  placeholder="Search..."
                   aria-label="Search gaming hardware and games"
                   value={searchQuery}
                   onFocus={() => setSearchFocused(true)}
@@ -675,22 +661,24 @@ export const Header = () => {
                   <a
                     href="/admin/"
                     onClick={(e) => handleNavClick(e, 'admin')}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-display font-black bg-emerald-50 text-emerald-900 hover:bg-emerald-100 border border-emerald-300 transition-all no-underline shrink-0"
+                    className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-display font-black bg-emerald-50 text-emerald-900 hover:bg-emerald-100 border border-emerald-300 transition-all no-underline shrink-0"
                     title="Open Master Dashboard"
+                    aria-label="Dashboard"
                   >
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Dashboard</span>
+                    <span className="xl:hidden">Dashboard</span>
                   </a>
                   <a
                     href="/auth/login/"
                     onClick={(e) => handleNavClick(e, 'auth', 'login')}
-                    className="px-2.5 py-1.5 rounded-xl text-xs font-display font-extrabold text-slate-800 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200 transition-all no-underline shrink-0"
+                    className="hidden sm:block px-2.5 py-1.5 rounded-xl text-xs font-display font-extrabold text-slate-800 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200 transition-all no-underline shrink-0"
                   >
                     Sign In
                   </a>
                   <a
                     href="/auth/signup/"
                     onClick={(e) => handleNavClick(e, 'auth', 'signup')}
+                    aria-label="Join Free"
                     className="px-2.5 py-1.5 rounded-xl text-xs font-display font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-sm transition-all no-underline shrink-0 flex items-center gap-1"
                   >
                     <User className="w-3.5 h-3.5" />
@@ -703,8 +691,9 @@ export const Header = () => {
               <button
                 type="button"
                 aria-label="Toggle mobile navigation menu"
+                aria-expanded={mobileMenuOpen}
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
+                className="xl:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -716,7 +705,47 @@ export const Header = () => {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-xl animate-page-in">
+          <div className="xl:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-xl animate-page-in max-h-[calc(100vh-4rem)] overflow-y-auto">
+            {/* Search (the header search bar is hidden below md) */}
+            <form
+              className="relative md:hidden"
+              onSubmit={(e) => {
+                e.preventDefault();
+                setMobileMenuOpen(false);
+                handleNavClick(null, 'products');
+              }}
+            >
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <input
+                type="search"
+                placeholder="Search gear & games..."
+                aria-label="Search gaming hardware and games"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-100 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white"
+              />
+            </form>
+
+            {/* Sign in / join (hidden from the header bar below sm) */}
+            {!currentUser && (
+              <div className="grid grid-cols-2 gap-2 sm:hidden">
+                <a
+                  href="/auth/login/"
+                  onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'auth', 'login'); }}
+                  className="p-2.5 rounded-xl text-xs font-display font-extrabold text-center text-slate-800 border border-slate-200 no-underline"
+                >
+                  Sign In
+                </a>
+                <a
+                  href="/auth/signup/"
+                  onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'auth', 'signup'); }}
+                  className="p-2.5 rounded-xl text-xs font-display font-extrabold text-center bg-gradient-to-r from-emerald-600 to-teal-600 text-white no-underline"
+                >
+                  Join Free
+                </a>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-2 text-xs font-display font-extrabold">
               <a
                 href="/admin/"
