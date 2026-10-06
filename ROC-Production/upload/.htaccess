@@ -1,0 +1,126 @@
+
+# BEGIN cPanel-generated php ini directives, do not edit
+# Manual editing of this file may result in unexpected behavior.
+# To make changes to this file, use the cPanel MultiPHP INI Editor (Home >> Software >> MultiPHP INI Editor)
+# For more information, read our documentation (https://go.cpanel.net/EA4ModifyINI)
+<IfModule php7_module>
+   php_value error_log "/home2/runoncon/logs/php.error.log"
+   php_flag log_errors On
+   php_flag display_errors Off
+   php_value max_execution_time 300
+   php_value max_input_time 600
+   php_value max_input_vars 5000
+   php_value memory_limit 256M
+   php_value post_max_size 24M
+   php_value session.gc_maxlifetime 1440
+   php_value session.save_path "/var/cpanel/php/sessions/ea-php74"
+   php_value upload_max_filesize 16M
+   php_flag zlib.output_compression Off
+</IfModule>
+<IfModule lsapi_module>
+   php_value error_log "/home2/runoncon/logs/php.error.log"
+   php_flag log_errors On
+   php_flag display_errors Off
+   php_value max_execution_time 300
+   php_value max_input_time 600
+   php_value max_input_vars 5000
+   php_value memory_limit 256M
+   php_value post_max_size 24M
+   php_value session.gc_maxlifetime 1440
+   php_value session.save_path "/var/cpanel/php/sessions/ea-php74"
+   php_value upload_max_filesize 16M
+   php_flag zlib.output_compression Off
+</IfModule>
+# END cPanel-generated php ini directives, do not edit
+
+# ============================================================
+# Run On Console - security + routing (Phase 3b: blogs, CMS pages and sitemaps from the server)
+# Restored from .htaccess.bac WITHOUT the Passenger (Node) block.
+# ============================================================
+DirectoryIndex index.html index.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Private / internal paths -> 403
+  RewriteRule ^database\.sql$ - [F,L,NC]
+  RewriteRule ^release-manifest\.json$ - [F,L,NC]
+  RewriteRule ^migrations(/.*)?$ - [F,L,NC]
+  RewriteRule ^STEP-B(/.*)?$ - [F,L,NC]
+  RewriteRule ^cms-templates(/.*)?$ - [F,L,NC]
+  RewriteRule ^api/v1/cron(/.*)?$ - [F,L,NC]
+  RewriteRule ^api/v1/api(/.*)?$ - [F,L,NC]
+  RewriteRule ^api/v1/vendor(/.*)?$ - [F,L,NC]
+  RewriteRule ^api/v1/composer\.(json|lock)$ - [F,L,NC]
+  RewriteRule ^api/v1/DEPLOYMENT-README\.txt$ - [F,L,NC]
+  RewriteRule (^|/)error_log$ - [F,L,NC]
+  RewriteRule (^|/)(php\.ini|\.user\.ini)$ - [F,L,NC]
+  RewriteRule ^env\.example\.php$ - [F,L,NC]
+  RewriteRule \.(sql|gz|zip|log|env|yml|yaml|sh|git|bac|bak|config)$ - [F,L,NC]
+
+  # www -> non-www
+  RewriteCond %{HTTP_HOST} ^www\.runonconsole\.com$ [NC]
+  RewriteRule ^(.*)$ https://runonconsole.com/$1 [R=301,L]
+
+  # Force HTTPS
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+  # API passes straight through
+  RewriteCond %{REQUEST_URI} ^/api/ [NC]
+  RewriteRule ^ - [L]
+
+  # Auth aliases
+  RewriteRule ^login/?$ /auth/login/ [R=301,L]
+  RewriteRule ^signup/?$ /auth/signup/ [R=301,L]
+  RewriteRule ^register/?$ /auth/signup/ [R=301,L]
+
+  # Blogs come from the CMS database (blog-render.php), not the old static folders
+  RewriteRule ^blogs$ /blogs/ [R=301,L]
+  RewriteRule ^blogs/index\.html$ /blogs/ [R=301,L,NC]
+  RewriteRule ^blogs/([^/]+)/index\.html$ /blogs/$1/ [R=301,L,NC]
+  RewriteRule ^blogs/([a-z0-9-]+)$ /blogs/$1/ [R=301,L]
+  RewriteRule ^blogs/$ blog-render.php [L,QSA]
+  RewriteRule ^blogs/([a-z0-9-]+)/$ blog-render.php?slug=$1 [L,QSA]
+  # Sitemaps are generated automatically (private pages and noindex pages are never listed)
+  RewriteRule ^sitemap\.xml$ sitemap-render.php [L]
+  RewriteRule ^sitemaps/(pages|products|categories)-sitemap\.xml$ sitemap-render.php?map=$1 [L]
+  RewriteRule ^sitemaps/blogs-sitemap\.xml$ blog-render.php?sitemap=1 [L]
+  RewriteRule ^sitemaps/cms-pages-sitemap\.xml$ page-render.php?sitemap=1 [L]
+
+  # Real file or folder -> serve as-is
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # CMS category guides live at /categories/{category}/{slug}/ (when no real folder matched)
+  RewriteRule ^categories/([a-z0-9-]+)/([a-z0-9]+(?:-[a-z0-9]+)*)$ /categories/$1/$2/ [R=301,L]
+  RewriteRule ^categories/([a-z0-9-]+)/([a-z0-9]+(?:-[a-z0-9]+)*)/$ page-render.php?cat=$1&slug=$2 [L,QSA]
+
+  # CMS pages live at /{slug}/ - only reached when no real file or folder matched above
+  RewriteRule ^([a-z0-9]+(?:-[a-z0-9]+)*)$ /$1/ [R=301,L]
+  RewriteRule ^([a-z0-9]+(?:-[a-z0-9]+)*)/$ page-render.php?slug=$1 [L,QSA]
+
+  # Unknown route -> real 404
+  RewriteRule ^ - [R=404,L]
+</IfModule>
+
+ErrorDocument 404 /404.html
+ErrorDocument 403 /404.html
+
+<IfModule mod_headers.c>
+  <FilesMatch "^(robots\.txt|llms\.txt)$">
+    Header set Content-Type "text/plain; charset=utf-8"
+  </FilesMatch>
+  <IfModule mod_setenvif.c>
+    SetEnvIf Request_URI "^/(admin|auth|profile|api|cms)" PRIVATE_ROUTE
+    Header set X-Robots-Tag "noindex, nofollow" env=PRIVATE_ROUTE
+  </IfModule>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
