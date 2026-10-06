@@ -21,7 +21,7 @@ import { ValuePropsFooter } from './components/ValuePropsFooter';
 import { CompareDrawer } from './components/CompareDrawer';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { FragAIAssistantModal } from './components/FragAIAssistantModal';
-import { ROCAgentModal } from './components/ROCAgentModal';
+// ROC Agent (server chat) is not enabled yet; the built-in assistant is used, as on the live site.
 
 const MainRouter = () => {
   const { currentPage, is404 } = useApp();
@@ -89,7 +89,7 @@ const MainRouter = () => {
       <CompareDrawer />
 
       {/* Global ROC Gaming, Product & Hardware Assistant Agent */}
-      <ROCAgentModal />
+      <FragAIAssistantModal />
 
     </div>
   );

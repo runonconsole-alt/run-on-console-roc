@@ -105,20 +105,18 @@ export const Header = () => {
     closeDropdown();
   };
 
+  const productCount = (slug) => (products || []).filter(p => p.categorySlug === slug).length;
   const componentsMenu = [
-    { title: "Graphics Cards (GPUs)", desc: "NVIDIA RTX, AMD Radeon, DLSS & Ray Tracing", icon: Cpu, slug: "gpu" },
-    { title: "CPUs & Processors", desc: "AMD Ryzen 7000/9000, Intel Core 14th Gen", icon: Zap, slug: "cpu" },
-    { title: "Memory (RAM) & Storage", desc: "DDR5 CL30, PCIe Gen 4/5 NVMe SSDs", icon: HardDrive, slug: "storage-memory" },
-    { title: "Power Supplies & Cooling", desc: "ATX 3.1 12V-2x6, 360mm Liquid AIOs", icon: Flame, slug: "cables-accessories" },
-    { title: "Cases & PC Aesthetics", desc: "Dual-Chamber Fishtank Cases, ARGB Sync", icon: Layers, slug: "pc-gaming" },
+    { title: "Graphics Cards (GPUs)", desc: `NVIDIA RTX 50, AMD RX 9000, Intel Arc · ${productCount('gpu')} picks`, icon: Cpu, slug: "gpu" },
+    { title: "All Gaming Gear", desc: `Every category · ${(products || []).length} products`, icon: Layers, slug: null },
   ];
 
   const peripheralsMenu = [
-    { title: "Gaming Monitors & Displays", desc: "360Hz QD-OLED, 4K 144Hz, 0.03ms Fast IPS", icon: Monitor, slug: "monitors" },
-    { title: "Gaming Mice & Mousepads", desc: "63g Ultra-lightweight, 8000Hz Polling, PTFE", icon: Mouse, slug: "mice" },
-    { title: "Mechanical Keyboards", desc: "Magnetic Rapid-Trigger Hall Effect", icon: Cable, slug: "keyboards" },
-    { title: "Headsets & Audio Gear", desc: "Wireless DTS Headsets, USB DAC/Amps", icon: Headphones, slug: "audio" },
-    { title: "Speakers & Soundbars", desc: "THX AI Head-Tracking Soundbars", icon: Tv, slug: "speakers" },
+    { title: "Gaming Monitors & Displays", desc: `OLED, QD-OLED & ultrawide · ${productCount('monitors')} picks`, icon: Monitor, slug: "monitors" },
+    { title: "Gaming Mice", desc: `Ultra-light, ergonomic & MMO · ${productCount('mice')} picks`, icon: Mouse, slug: "mice" },
+    { title: "Gaming Keyboards", desc: `Hall Effect, rapid trigger & mechanical · ${productCount('keyboards')} picks`, icon: Cable, slug: "keyboards" },
+    { title: "Headsets & Audio Gear", desc: `Headsets, earbuds & USB mics · ${productCount('audio')} picks`, icon: Headphones, slug: "audio" },
+    { title: "Speakers & Soundbars", desc: `2.0, 2.1, 5.1 & soundbars · ${productCount('speakers')} picks`, icon: Tv, slug: "speakers" },
   ];
 
   const systemsMenu = [
@@ -145,9 +143,9 @@ export const Header = () => {
 
   const filteredProducts = products.filter(p => 
     !query || 
-    p.name.toLowerCase().includes(query) || 
-    p.category.toLowerCase().includes(query) ||
-    p.brand.toLowerCase().includes(query)
+    (p.title || p.name || '').toLowerCase().includes(query) || 
+    (p.category || '').toLowerCase().includes(query) ||
+    (p.brand || '').toLowerCase().includes(query)
   );
 
   return (
@@ -214,7 +212,7 @@ export const Header = () => {
                         return (
                           <a
                             key={idx}
-                            href={`/products/`}
+                            href={item.slug ? `/products/category/${item.slug}/` : '/products/'}
                             onClick={(e) => handleNavClick(e, 'products', item.slug)}
                             className="dropdown-tile p-2.5 rounded-xl cursor-pointer flex items-center justify-between gap-2.5 group no-underline"
                           >
@@ -275,7 +273,7 @@ export const Header = () => {
                         return (
                           <a
                             key={idx}
-                            href={`/products/`}
+                            href={item.slug ? `/products/category/${item.slug}/` : '/products/'}
                             onClick={(e) => handleNavClick(e, 'products', item.slug)}
                             className="dropdown-tile p-2.5 rounded-xl cursor-pointer flex items-center justify-between gap-2.5 group no-underline"
                           >
@@ -438,20 +436,6 @@ export const Header = () => {
                 COMPATIBILITY
               </a>
 
-              {/* UNLOCKED MASTER DASHBOARD LINK */}
-              <a
-                href="/admin/"
-                onClick={(e) => handleNavClick(e, 'admin')}
-                className={`px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-black uppercase tracking-wide rounded-xl transition-all whitespace-nowrap flex items-center gap-1 border ${
-                  currentPage === 'admin' 
-                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' 
-                    : 'text-emerald-800 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-950 border-emerald-300'
-                }`}
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>DASHBOARD</span>
-              </a>
-
             </nav>
 
             {/* Right Actions */}
@@ -552,10 +536,10 @@ export const Header = () => {
                             >
                               <div className="min-w-0">
                                 <div className="font-display font-bold text-xs text-slate-900 group-hover:text-cyan-700 truncate">
-                                  {prod.name}
+                                  {prod.title || prod.name}
                                 </div>
                                 <div className="text-[10px] text-slate-500">
-                                  {prod.brand} • <span className="text-emerald-700 font-bold">{prod.price}</span>
+                                  {prod.brand} • <span className="text-emerald-700 font-bold">{prod.price || prod.category}</span>
                                 </div>
                               </div>
                               <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-600 shrink-0" />
@@ -631,17 +615,19 @@ export const Header = () => {
                         <div className="text-[10px] text-emerald-700 font-mono font-bold">@{currentUser.username?.toLowerCase() || 'gamer'}</div>
                       </div>
                       
-                      <a
-                        href="/admin/"
-                        onClick={(e) => {
-                          setUserDropdownOpen(false);
-                          handleNavClick(e, 'admin');
-                        }}
-                        className="w-full text-left px-3 py-2 text-xs font-extrabold bg-emerald-50 text-emerald-950 hover:bg-emerald-100 rounded-xl flex items-center gap-2 transition-colors border border-emerald-300 no-underline"
-                      >
-                        <ShieldCheck className="w-4 h-4 text-emerald-700" />
-                        <span>ROC Admin Dashboard</span>
-                      </a>
+                      {(currentUser.role === 'Head Administrator' || currentUser.username === 'ROC' || currentUser.email === 'admin@runonconsole.com') && (
+                        <a
+                          href="/admin/"
+                          onClick={(e) => {
+                            setUserDropdownOpen(false);
+                            handleNavClick(e, 'admin');
+                          }}
+                          className="w-full text-left px-3 py-2 text-xs font-extrabold bg-amber-50 text-amber-900 hover:bg-amber-100 rounded-xl flex items-center gap-2 transition-colors border border-amber-300 no-underline"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-amber-700" />
+                          <span>ROC Admin Suite</span>
+                        </a>
+                      )}
 
                       <a
                         href="/profile/"
@@ -673,25 +659,16 @@ export const Header = () => {
               ) : (
                 <div className="flex items-center gap-1.5 shrink-0">
                   <a
-                    href="/admin/"
-                    onClick={(e) => handleNavClick(e, 'admin')}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-display font-black bg-emerald-50 text-emerald-900 hover:bg-emerald-100 border border-emerald-300 transition-all no-underline shrink-0"
-                    title="Open Master Dashboard"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Dashboard</span>
-                  </a>
-                  <a
                     href="/auth/login/"
                     onClick={(e) => handleNavClick(e, 'auth', 'login')}
-                    className="px-2.5 py-1.5 rounded-xl text-xs font-display font-extrabold text-slate-800 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200 transition-all no-underline shrink-0"
+                    className="px-3 py-1.5 rounded-xl text-xs font-display font-extrabold text-slate-800 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200 transition-all no-underline shrink-0"
                   >
                     Sign In
                   </a>
                   <a
                     href="/auth/signup/"
                     onClick={(e) => handleNavClick(e, 'auth', 'signup')}
-                    className="px-2.5 py-1.5 rounded-xl text-xs font-display font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-sm transition-all no-underline shrink-0 flex items-center gap-1"
+                    className="px-3 py-1.5 rounded-xl text-xs font-display font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-sm transition-all no-underline shrink-0 flex items-center gap-1"
                   >
                     <User className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Join Free</span>
@@ -718,17 +695,6 @@ export const Header = () => {
         {mobileMenuOpen && (
           <div className="lg:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-xl animate-page-in">
             <div className="grid grid-cols-2 gap-2 text-xs font-display font-extrabold">
-              <a
-                href="/admin/"
-                onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'admin'); }}
-                className="col-span-2 p-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-left font-display font-extrabold text-xs flex items-center justify-between no-underline shadow-sm"
-              >
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-200" />
-                  <span>MASTER DASHBOARD (ALL ACCESS)</span>
-                </div>
-                <ArrowRight className="w-3.5 h-3.5 text-emerald-200" />
-              </a>
               <a
                 href="/"
                 onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'home'); }}

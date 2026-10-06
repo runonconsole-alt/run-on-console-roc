@@ -30,13 +30,13 @@ export const ValuePropsFooter = () => {
     },
     {
       icon: Tag,
-      title: "VERIFIED AFFILIATE DEALS",
-      desc: "Direct official storefront links with daily synchronized pricing on Amazon & Best Buy."
+      title: "DIRECT AMAZON LINKS",
+      desc: "Every product links straight to Amazon, where you see the current price and stock."
     },
     {
       icon: Gamepad2,
-      title: "ACTIVE BUILD CALCULATOR",
-      desc: "Live loadout builder with latency debounce telemetry and 10-point compatibility score."
+      title: "GEAR PICKS BY CATEGORY",
+      desc: "Keyboards, mice, headsets, speakers, monitors and GPUs, grouped by what each is best for."
     }
   ];
 
@@ -51,16 +51,20 @@ export const ValuePropsFooter = () => {
     { name: "Battle.net", desc: "Blizzard & COD Ops", badge: "Activision", color: "hover:border-blue-400 hover:bg-blue-950/40", url: "https://battle.net", Logo: BattleNetLogo }
   ];
 
+  // Social profiles. Platforms without a URL stay hidden; the CMS (Social profiles)
+  // can change or add links later through /roc-site.json, read by /roc-nav.js.
   const socialPlatforms = [
-    { name: "Facebook", desc: "Official Page & Community", color: "hover:border-[#1877F2] hover:bg-[#1877F2]/20", url: "https://www.facebook.com/profile.php?id=61594369295787", Logo: FacebookLogo },
-    { name: "Instagram", desc: "Clean Desk Setups & Battlestations", color: "hover:border-[#E4405F] hover:bg-[#E4405F]/20", url: "https://www.instagram.com/runonconsole/", Logo: InstagramLogo },
-    { name: "Pinterest", desc: "Hardware & Setup Inspiration", color: "hover:border-[#E60023] hover:bg-[#E60023]/20", url: "https://www.pinterest.com/runonconsole/", Logo: PinterestLogo },
-    { name: "Twitter / X", desc: "Daily Deals & Breaking News", color: "hover:border-slate-400 hover:bg-slate-800/40", url: "https://x.com/RunOnConsole", Logo: TwitterXLogo },
-    { name: "Discord Server", desc: "Battlestation Hangout & Live Chat", color: "hover:border-[#5865F2] hover:bg-[#5865F2]/20", url: "https://discord.com", Logo: DiscordLogo },
-    { name: "Reddit Community", desc: "Hardware & Benchmark Discussions", color: "hover:border-[#FF4500] hover:bg-[#FF4500]/20", url: "https://reddit.com", Logo: RedditLogo },
-    { name: "YouTube Channel", desc: "Lab Benchmarks & Teardowns", color: "hover:border-[#FF0000] hover:bg-[#FF0000]/20", url: "https://youtube.com", Logo: YouTubeLogo },
-    { name: "LinkedIn Lab", desc: "Hardware Testing & Engineering", color: "hover:border-[#0A66C2] hover:bg-[#0A66C2]/20", url: "https://linkedin.com", Logo: LinkedInLogo }
+    { key: "facebook", name: "Facebook", desc: "News, gear picks & community", color: "hover:border-[#1877F2] hover:bg-[#1877F2]/20", url: "https://www.facebook.com/profile.php?id=61594369295787", Logo: FacebookLogo },
+    { key: "instagram", name: "Instagram", desc: "Setups, desks & gear photos", color: "hover:border-[#E4405F] hover:bg-[#E4405F]/20", url: "https://www.instagram.com/runonconsole/", Logo: InstagramLogo },
+    { key: "pinterest", name: "Pinterest", desc: "Setup ideas & gear boards", color: "hover:border-[#E60023] hover:bg-[#E60023]/20", url: "https://www.pinterest.com/runonconsole/", Logo: PinterestLogo },
+    { key: "twitter", name: "X (Twitter)", desc: "Updates & quick picks", color: "hover:border-slate-400 hover:bg-slate-800/40", url: "https://x.com/RunOnConsole", Logo: TwitterXLogo },
+    { key: "youtube", name: "YouTube", desc: "Videos & guides", color: "hover:border-[#FF0000] hover:bg-[#FF0000]/20", url: "", Logo: YouTubeLogo },
+    { key: "discord", name: "Discord", desc: "Community chat", color: "hover:border-[#5865F2] hover:bg-[#5865F2]/20", url: "", Logo: DiscordLogo },
+    { key: "reddit", name: "Reddit", desc: "Community discussions", color: "hover:border-[#FF4500] hover:bg-[#FF4500]/20", url: "", Logo: RedditLogo },
+    { key: "linkedin", name: "LinkedIn", desc: "Company page", color: "hover:border-[#0A66C2] hover:bg-[#0A66C2]/20", url: "", Logo: LinkedInLogo },
+    { key: "quora", name: "Quora", desc: "Questions & answers", color: "hover:border-[#B92B27] hover:bg-[#B92B27]/20", url: "", Logo: QuoraLogo }
   ];
+
 
   return (
     <footer className="footer-emerald-gradient text-white relative overflow-hidden border-t-2 border-emerald-500/40 mt-16">
@@ -153,11 +157,11 @@ export const ValuePropsFooter = () => {
                 <Sparkles className="w-3.5 h-3.5" /> JOIN THE RUN ON CONSOLE GAMING COMMUNITY
               </span>
               <h3 className="font-display font-extrabold text-lg sm:text-xl text-white">
-                <BouncyText text="Connect on All Gaming Platforms & Feeds" />
+                <BouncyText text="Follow Run On Console" />
               </h3>
             </div>
             <span className="text-xs text-emerald-300/80 font-medium">
-              Join our independent hardware & benchmark community
+              Gear picks, setups and updates
             </span>
           </div>
 
@@ -166,11 +170,13 @@ export const ValuePropsFooter = () => {
               const PlatformLogo = soc.Logo;
               return (
                 <a
-                  key={soc.name}
-                  href={soc.url}
+                  key={soc.key}
+                  href={soc.url || undefined}
+                  hidden={!soc.url}
+                  data-roc-social={soc.key}
                   target="_blank"
-                  rel="noopener noreferrer"
-                  className={`bg-emerald-950/80 border border-emerald-700/60 ${soc.color} p-3.5 rounded-2xl flex items-center justify-between gap-3 shadow-md transition-all hover:scale-102 hover:-translate-y-0.5 group no-underline`}
+                  rel="noopener me"
+                  className={`bg-emerald-950/80 border border-emerald-700/60 ${soc.color} p-3.5 rounded-2xl ${soc.url ? "flex" : "hidden"} items-center justify-between gap-3 shadow-md transition-all hover:scale-102 hover:-translate-y-0.5 group no-underline`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-8 h-8 rounded-xl bg-slate-900 border border-emerald-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-inner p-1.5">

@@ -5,7 +5,8 @@ import { AVATAR_LIST, getAvatarById, RenderAvatar, DEFAULT_AVATAR_ID } from '../
 
 export function GamingAvatar({ profile, className = 'w-16 h-16', size = 48 }) {
   const avatarId = profile?.avatarIcon || profile?.gaming?.avatarIcon || DEFAULT_AVATAR_ID;
-  return <RenderAvatar avatarId={avatarId} className={className} size={size} />;
+  const name = profile?.name || profile?.username || profile?.email || '';
+  return <RenderAvatar avatarId={avatarId} name={name} className={className} size={size} />;
 }
 
 export function GamingProfileEditor({ profile, csrfToken, onSaved }) {
@@ -118,12 +119,12 @@ export function GamingProfileEditor({ profile, csrfToken, onSaved }) {
               className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs px-5 py-3 rounded-xl flex items-center gap-2 transition-all shadow-md hover:scale-105 cursor-pointer"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Change Gaming Avatar</span>
+              <span>Change badge colour</span>
             </button>
           </div>
 
           <p className="text-xs text-slate-300">
-            Current Avatar: <strong className="text-emerald-400">{selectedAvatar.name}</strong> ({selectedAvatar.category})
+            Badge colour: <strong className="text-emerald-400">{selectedAvatar.name}</strong>
           </p>
         </div>
       </div>
@@ -134,7 +135,7 @@ export function GamingProfileEditor({ profile, csrfToken, onSaved }) {
           className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4"
           role="dialog"
           aria-modal="true"
-          aria-label="Choose Esports Gaming Avatar"
+          aria-label="Choose badge colour"
           onKeyDown={(e) => { if (e.key === 'Escape') setShowGallery(false); }}
         >
           <div className="bg-white border-2 border-slate-200 rounded-3xl p-6 max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl relative text-slate-900">
@@ -142,9 +143,9 @@ export function GamingProfileEditor({ profile, csrfToken, onSaved }) {
               <div>
                 <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-emerald-600" />
-                  <span>Choose Your Esports Avatar</span>
+                  <span>Choose your badge colour</span>
                 </h3>
-                <p className="text-xs text-slate-600 mt-1">Click an avatar to preview, then press Confirm Avatar Selection below</p>
+                <p className="text-xs text-slate-600 mt-1">Your badge shows the first letters of your name. Pick a colour, then press Confirm below.</p>
               </div>
               <button
                 type="button"
@@ -177,12 +178,9 @@ export function GamingProfileEditor({ profile, csrfToken, onSaved }) {
                       </span>
                     )}
 
-                    <RenderAvatar avatarId={avatar.id} className="w-14 h-14 rounded-xl" size={48} />
+                    <RenderAvatar avatarId={avatar.id} name={draft.name || profile.username || profile.email} className="w-14 h-14 rounded-xl" size={48} />
                     <span className={`text-[11px] font-bold line-clamp-1 text-center ${isSelected ? 'text-emerald-800' : 'text-slate-900 group-hover:text-emerald-700'}`}>
                       {avatar.name}
-                    </span>
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500">
-                      {avatar.category}
                     </span>
                   </button>
                 );
@@ -206,7 +204,7 @@ export function GamingProfileEditor({ profile, csrfToken, onSaved }) {
                   onClick={confirmGallerySelection}
                   className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-6 py-2.5 rounded-xl transition-all shadow-md hover:scale-105 cursor-pointer"
                 >
-                  Confirm Avatar Selection
+                  Confirm colour
                 </button>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   GAMING_CATEGORIES, 
   ALL_GAMING_DEVICES, 
@@ -10,42 +10,12 @@ import { applyClientSideSeo, getSeoMetadata } from '../seo/seoConfig.js';
 import { 
   ENHANCED_PRODUCTS, 
   ENHANCED_BLOGS, 
-  getProductBySlug as getStaticProductBySlug,
+ getProductBySlug, 
+  getProductCategoryBySlug,
   getBlogBySlug, 
   getCategoryBySlug, 
   slugify 
 } from '../seo/routeRegistry.js';
-import {
-  INITIAL_SITE_IMAGES,
-  INITIAL_SITE_CONTENT,
-  INITIAL_SITE_METAS,
-  INITIAL_INTERNAL_LINKS
-} from '../data/adminInitialData.js';
-
-// â”€â”€â”€ Public API endpoint (no auth needed) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const PRODUCTS_API = '/api/v1/products-public.php';
-
-/**
- * Fetch all published products from the live database.
- * Falls back to static bundled data if the API is unavailable.
- */
-async function fetchLiveProducts() {
-  try {
-    const res = await fetch(PRODUCTS_API + '?_=' + Date.now(), {
-      cache: 'no-store',
-      headers: { 'Accept': 'application/json' }
-    });
-    if (!res.ok) throw new Error('API ' + res.status);
-    const data = await res.json();
-    if (data.success && Array.isArray(data.products) && data.products.length > 0) {
-      return { products: data.products, categories: data.categories || [], fromApi: true };
-    }
-    throw new Error('Empty or invalid API response');
-  } catch (e) {
-    console.warn('[ROC] Products API unavailable, using bundled data:', e.message);
-    return { products: ENHANCED_PRODUCTS, categories: [], fromApi: false };
-  }
-}
 
 const AppContext = createContext();
 
@@ -80,20 +50,20 @@ export const AppProvider = ({ children, initialUrl = null }) => {
     
     if (path.includes('/profile')) return { page: 'profile', param: null, is404: false };
 
+    if (path.includes('/products/category/')) {
+      const catSlug = path.split('/products/category/')[1].replace(/\/+$/, '');
+      const cat = getProductCategoryBySlug(catSlug);
+      if (cat) return { page: 'products', param: null, productCategory: cat.slug, is404: false };
+      return { page: '404', param: null, is404: true };
+    }
+
     if (path.includes('/products/')) {
-      // Category pages: /products/category/keyboards/
-      if (path.includes('/products/category/')) {
-        const catSlug = path.split('/products/category/')[1]?.replace(/\/+$/, '') || null;
-        return { page: 'products', param: null, productCategory: catSlug, is404: false };
-      }
       const parts = path.split('/products/').filter(Boolean);
       const slug = parts[0] ? parts[0].replace(/\/+$/, '') : null;
       if (slug) {
-        // Try static catalog first (fast); dynamic products checked after API load
-        const prod = getStaticProductBySlug(slug);
+        const prod = getProductBySlug(slug);
         if (prod) return { page: 'products', param: prod.slug, is404: false };
-        // Not in static catalog: treat as dynamic product (resolves after API load)
-        return { page: 'products', param: slug, is404: false };
+        return { page: '404', param: null, is404: true };
       }
       return { page: 'products', param: null, is404: false };
     }
@@ -120,11 +90,8 @@ export const AppProvider = ({ children, initialUrl = null }) => {
       return { page: 'categories', param: null, is404: false };
     }
 
-    if (path.includes('/author/')) {
-      if (typeof window !== 'undefined' && window.__INITIAL_CONTENT__ && window.__INITIAL_CONTENT__.pageType === 'author' && window.__INITIAL_CONTENT__.author) {
-        return { page: 'author', param: window.__INITIAL_CONTENT__.author.slug, is404: false };
-      }
-      return { page: '404', param: null, is404: true };
+    if (path.includes('/author/omar-abobakar')) {
+      return { page: 'author', param: 'omar-abobakar', is404: false };
     }
 
     return { page: '404', param: null, is404: true };
@@ -135,23 +102,17 @@ export const AppProvider = ({ children, initialUrl = null }) => {
   const [currentPage, setCurrentPage] = useState(initialResolution.page);
   const [is404, setIs404] = useState(initialResolution.is404);
   const [selectedProductId, setSelectedProductId] = useState(initialResolution.page === 'products' ? initialResolution.param : null);
+  const [productCategorySlug, setProductCategorySlug] = useState(initialResolution.productCategory || 'all');
   const [selectedBlogId, setSelectedBlogId] = useState(initialResolution.page === 'blogs' ? initialResolution.param : null);
   const [selectedCategorySlug, setSelectedCategorySlug] = useState(initialResolution.page === 'categories' ? initialResolution.param || 'all' : 'all');
   const [searchQuery, setSearchQuery] = useState('');
   const [compareIds, setCompareIds] = useState([]);
   const [isCompareOpen, setIsCompareOpen] = useState(false);
 
-  // Dynamic Data Lists — products start from static bundle, replaced by live API on mount
+  // Dynamic Data Lists
   const [products, setProducts] = useState(ENHANCED_PRODUCTS);
-  const [productsLoading, setProductsLoading] = useState(true);
-  const [productsFromApi, setProductsFromApi] = useState(false);
   const [blogs, setBlogs] = useState(ENHANCED_BLOGS);
   const [guestSubmissions, setGuestSubmissions] = useState([]);
-  const [siteImages, setSiteImages] = useState(INITIAL_SITE_IMAGES);
-  const [siteContent, setSiteContent] = useState(INITIAL_SITE_CONTENT);
-  const [siteMetas, setSiteMetas] = useState(INITIAL_SITE_METAS);
-  const [internalLinks, setInternalLinks] = useState(INITIAL_INTERNAL_LINKS);
-  const [savedProductIds, setSavedProductIds] = useState([]);
 
   // Working Shopping Cart State
   const [cart, setCart] = useState([]);
@@ -228,28 +189,7 @@ export const AppProvider = ({ children, initialUrl = null }) => {
     checkServerSession();
   }, []);
 
-  // ── Load live products from API on mount ─────────────────────────────────────
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    setProductsLoading(true);
-    fetchLiveProducts().then(({ products: liveProducts, fromApi }) => {
-      if (liveProducts && liveProducts.length > 0) {
-        setProducts(liveProducts);
-        setProductsFromApi(fromApi);
-      }
-    }).finally(() => setProductsLoading(false));
-  }, []);
-
-  // ── Refresh products from API (call this after CMS save) ─────────────────────
-  const refreshProducts = useCallback(async () => {
-    const { products: liveProducts, fromApi } = await fetchLiveProducts();
-    if (liveProducts && liveProducts.length > 0) {
-      setProducts(liveProducts);
-      setProductsFromApi(fromApi);
-    }
-  }, []);
-
-
+  // Listen to browser URL changes
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -257,7 +197,7 @@ export const AppProvider = ({ children, initialUrl = null }) => {
       const state = resolveInitialState(window.location.pathname);
       setCurrentPage(state.page);
       setIs404(state.is404);
-      if (state.page === 'products') setSelectedProductId(state.param);
+      if (state.page === 'products') { setSelectedProductId(state.param); setProductCategorySlug(state.productCategory || 'all'); }
       if (state.page === 'blogs') setSelectedBlogId(state.param);
       if (state.page === 'categories') setSelectedCategorySlug(state.param || 'all');
       if (state.page === 'auth') setAuthMode(state.param || 'login');
@@ -284,10 +224,16 @@ export const AppProvider = ({ children, initialUrl = null }) => {
     if (page === 'home') cleanPath = '/';
     else if (page === 'compatibility') cleanPath = '/compatibility/';
     else if (page === 'products') {
-      if (param) {
+      const productCat = param && !getProductBySlug(param) ? getProductCategoryBySlug(param) : null;
+      if (productCat) {
+        cleanPath = productCat.path;
+        param = null;
+        setProductCategorySlug(productCat.slug);
+      } else if (param) {
         const p = getProductBySlug(param);
         cleanPath = p ? p.url.replace(/^https?:\/\/[^\/]+/, '') : `/products/${slugify(param)}/`;
       } else {
+        setProductCategorySlug('all');
         cleanPath = '/products/';
       }
     } else if (page === 'blogs') {
@@ -497,13 +443,8 @@ export const AppProvider = ({ children, initialUrl = null }) => {
 
   const toggleSaveProduct = async (productId) => {
     if (!currentUser) {
-      setSavedProductIds(prev => {
-        const exists = prev.includes(productId);
-        const updated = exists ? prev.filter(id => id !== productId) : [...prev, productId];
-        showNotification(exists ? "Removed from saved gear" : "Saved to your favorites!");
-        return updated;
-      });
-      return { success: true };
+      navigateTo("auth", "login");
+      return;
     }
     try {
       const resp = await fetch('/api/v1/profile.php?action=toggle-save-product', {
@@ -524,8 +465,8 @@ export const AppProvider = ({ children, initialUrl = null }) => {
 
   const createPriceAlert = async (productId, targetPrice) => {
     if (!currentUser) {
-      showNotification(`Price alert tracking set at $${targetPrice}!`);
-      return { success: true };
+      navigateTo("auth", "login");
+      return;
     }
     try {
       const resp = await fetch('/api/v1/profile.php?action=create-price-alert', {
@@ -646,50 +587,6 @@ export const AppProvider = ({ children, initialUrl = null }) => {
     showNotification(`Article removed`, "warning");
   };
 
-  // Media Manager Helpers
-  const addSiteImage = (img) => {
-    setSiteImages(prev => [img, ...prev]);
-    showNotification(`Saved image asset: "${img.title}"`);
-  };
-
-  const updateSiteImage = (id, fields) => {
-    setSiteImages(prev => prev.map(img => img.id === id ? { ...img, ...fields } : img));
-    showNotification(`Updated image metadata.`);
-  };
-
-  const deleteSiteImage = (id) => {
-    setSiteImages(prev => prev.filter(img => img.id !== id));
-    showNotification(`Image asset removed`, "warning");
-  };
-
-  // Site Content Helpers
-  const updateSiteContent = (newContent) => {
-    setSiteContent(newContent);
-    showNotification(`Site content updated.`);
-  };
-
-  const resetSiteContentToDefaults = () => {
-    setSiteContent(INITIAL_SITE_CONTENT);
-  };
-
-  // SEO Metas Helpers
-  const updateSiteMetas = (routePath, metaObj) => {
-    setSiteMetas(prev => ({
-      ...prev,
-      [routePath]: metaObj
-    }));
-  };
-
-  // Internal Links Helpers
-  const addInternalLink = (link) => {
-    setInternalLinks(prev => [link, ...prev]);
-  };
-
-  const deleteInternalLink = (id) => {
-    setInternalLinks(prev => prev.filter(l => l.id !== id));
-    showNotification(`Internal link removed`, "warning");
-  };
-
   const toggleCompare = (id) => {
     setCompareIds(prev => {
       if (prev.includes(id)) return prev.filter(item => item !== id);
@@ -710,6 +607,7 @@ export const AppProvider = ({ children, initialUrl = null }) => {
       is404,
       setIs404,
       selectedProductId,
+      productCategorySlug,
       setSelectedProductId,
       selectedBlogId,
       setSelectedBlogId,
@@ -723,24 +621,8 @@ export const AppProvider = ({ children, initialUrl = null }) => {
       isCompareOpen,
       setIsCompareOpen,
       products,
-      productsLoading,
-      productsFromApi,
-      refreshProducts,
       blogs,
       guestSubmissions,
-      siteImages,
-      addSiteImage,
-      updateSiteImage,
-      deleteSiteImage,
-      siteContent,
-      updateSiteContent,
-      resetSiteContentToDefaults,
-      siteMetas,
-      updateSiteMetas,
-      internalLinks,
-      addInternalLink,
-      deleteInternalLink,
-      savedProductIds,
       categories: GAMING_CATEGORIES,
       allDevices: ALL_GAMING_DEVICES,
       gameCompatibility: GAME_COMPATIBILITY_DATA,

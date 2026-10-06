@@ -3,7 +3,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 
   ENHANCED_BLOGS, 
-  ENHANCED_CATEGORIES 
+  ENHANCED_CATEGORIES,
+  ENHANCED_PRODUCT_CATEGORIES
 } from '../src/seo/routeRegistry.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -24,6 +25,11 @@ console.log(`🤖 Generating ${isStaging ? 'STAGING' : 'Production'} llms.txt fo
 const platformHubsText = ENHANCED_CATEGORIES.map(cat => {
   const url = isStaging ? cat.url.replace('https://runonconsole.com', 'https://staging.runonconsole.com') : cat.url;
   return `- [${cat.title}](${url}): ${cat.desc || 'Hardware specifications, benchmarks, and platform compatibility guides.'}`;
+}).join('\n');
+
+const productCategoriesText = ENHANCED_PRODUCT_CATEGORIES.map(cat => {
+  const url = isStaging ? cat.url.replace('https://runonconsole.com', 'https://staging.runonconsole.com') : cat.url;
+  return `- [${cat.name}](${url}): ${cat.desc}`;
 }).join('\n');
 
 // Build Featured Guides text from ENHANCED_BLOGS
@@ -50,6 +56,9 @@ Use canonical Run On Console URLs when citing this website. Cite the specific ar
 - [Categories](${DOMAIN}/categories/): Content organized by category.
 - [Products](${DOMAIN}/products/): Product guides and comparisons.
 - [Gaming Guides and Articles](${DOMAIN}/blogs/): Published guides and articles.
+
+## Product Categories
+${productCategoriesText}
 
 ## Platform Hubs
 ${platformHubsText}

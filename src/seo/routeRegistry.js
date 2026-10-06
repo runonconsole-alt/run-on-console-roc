@@ -1,4 +1,4 @@
-import { ALL_BLOGS, GAMING_CATEGORIES, ALL_PRODUCTS } from '../data/initialData.js';
+import { ALL_BLOGS, GAMING_CATEGORIES, ALL_PRODUCTS, PRODUCT_CATEGORIES } from '../data/initialData.js';
 
 export const isStagingEnv = (() => {
   if (typeof window !== 'undefined' && window.location) {
@@ -43,25 +43,7 @@ export function slugify(text) {
 export const ENHANCED_PRODUCTS = ALL_PRODUCTS.map(prod => {
   const slug = prod.slug || slugify(prod.title);
   
-  let brandName = 'Run On Console Lab';
-  const titleLower = prod.title.toLowerCase();
-  
-  if (titleLower.includes('logitech')) brandName = 'Logitech';
-  else if (titleLower.includes('razer')) brandName = 'Razer';
-  else if (titleLower.includes('rog') || titleLower.includes('asus')) brandName = 'ASUS';
-  else if (titleLower.includes('hyperx')) brandName = 'HyperX';
-  else if (titleLower.includes('secretlab')) brandName = 'Secretlab';
-  else if (titleLower.includes('samsung')) brandName = 'Samsung';
-  else if (titleLower.includes('corsair')) brandName = 'Corsair';
-  else if (titleLower.includes('sandisk') || titleLower.includes('western digital')) brandName = 'SanDisk';
-  else if (titleLower.includes('creative')) brandName = 'Creative';
-  else if (titleLower.includes('anker')) brandName = 'Anker';
-  else if (titleLower.includes('amd') || titleLower.includes('ryzen')) brandName = 'AMD';
-  else if (titleLower.includes('intel')) brandName = 'Intel';
-  else if (titleLower.includes('msi')) brandName = 'MSI';
-  else if (titleLower.includes('steam deck') || titleLower.includes('valve')) brandName = 'Valve';
-  else if (titleLower.includes('moondrop')) brandName = 'Moondrop';
-  else if (titleLower.includes('steelseries')) brandName = 'SteelSeries';
+  const brandName = prod.brandName || prod.brand || 'Run On Console';
 
   return {
     ...prod,
@@ -71,6 +53,20 @@ export const ENHANCED_PRODUCTS = ALL_PRODUCTS.map(prod => {
     lastmod: prod.lastmod || '2024-05-18T10:00:00+00:00'
   };
 });
+
+// Product categories (keyboards, mice, …) — listing pages at /products/category/{slug}/
+export const ENHANCED_PRODUCT_CATEGORIES = PRODUCT_CATEGORIES.map(cat => ({
+  ...cat,
+  url: `${BASE_DOMAIN}/products/category/${cat.slug}/`,
+  path: `/products/category/${cat.slug}/`,
+  lastmod: '2026-09-29T10:00:00+05:00'
+}));
+
+export function getProductCategoryBySlug(slug) {
+  if (!slug) return null;
+  const clean = slugify(slug);
+  return ENHANCED_PRODUCT_CATEGORIES.find(c => c.slug === clean) || null;
+}
 
 // Helper function to resolve (internal-link:id) to canonical URL
 export function resolveInternalLinks(content) {
@@ -176,7 +172,7 @@ export const STATIC_PUBLIC_ROUTES = [
     path: '/products/',
     canonical: `${BASE_DOMAIN}/products/`,
     title: 'Gaming Hardware & Esports Accessories Catalog | Run On Console',
-    description: 'Browse benchmark-tested gaming keyboards, mice, monitors, headsets, memory, and PC building hardware with verified retailer prices.',
+    description: `Browse ${ALL_PRODUCTS.length} gaming keyboards, mice, headsets, speakers, monitors and graphics cards picked by Run On Console, with key specs and Amazon links.`,
     h1: 'Gaming Hardware & Esports Accessories Catalog',
     category: 'Products',
     lastmod: '2024-05-18T10:00:00+00:00'
@@ -199,7 +195,15 @@ export const STATIC_PUBLIC_ROUTES = [
     category: 'About',
     lastmod: '2024-05-10T10:00:00+00:00'
   },
-
+  {
+    path: '/author/omar-abobakar/',
+    canonical: `${BASE_DOMAIN}/author/omar-abobakar/`,
+    title: 'Omar Abobakar - Senior Hardware Columnist | Run On Console',
+    description: 'Biography, testing focus, and hardware reviews published by Omar Abobakar, Senior Hardware Columnist at Run On Console Testing Lab.',
+    h1: 'Omar Abobakar',
+    category: 'Author',
+    lastmod: '2024-05-20T10:00:00+00:00'
+  },
   {
     path: '/contact/',
     canonical: `${BASE_DOMAIN}/contact/`,

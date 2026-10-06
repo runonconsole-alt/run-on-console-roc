@@ -7,13 +7,21 @@ import { BouncyText } from './BouncyText';
 export const LatestReviewsSection = () => {
   const { products, navigateToProduct, navigateTo, toggleCompare, compareIds, searchQuery } = useApp();
 
-  const filtered = products.filter(r => {
+  const matches = products.filter(r => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return r.title.toLowerCase().includes(q) || 
            (r.category || "").toLowerCase().includes(q) || 
            (r.shortDesc || "").toLowerCase().includes(q);
   });
+  // Mix categories: the top pick of each category first, then the second, and so on.
+  const byCat = {};
+  matches.forEach(p => { (byCat[p.categorySlug] = byCat[p.categorySlug] || []).push(p); });
+  const filtered = [];
+  const lists = Object.values(byCat);
+  for (let i = 0; filtered.length < matches.length; i++) {
+    lists.forEach(l => { if (l[i]) filtered.push(l[i]); });
+  }
 
   return (
     <section id="latest-reviews-section" className="bg-white border-2 border-emerald-500/20 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
@@ -26,10 +34,10 @@ export const LatestReviewsSection = () => {
           </div>
           <div>
             <h2 className="font-display font-extrabold text-xl sm:text-2xl text-emerald-950 uppercase tracking-wide">
-              <BouncyText text="LATEST TESTED HARDWARE & DEALS" />
+              <BouncyText text="TOP GAMING GEAR PICKS" />
             </h2>
             <p className="text-xs text-emerald-700 font-semibold">
-              Complete lab testing verdicts, oscilloscope latency scores, and lowest verified prices.
+              Our picks by category, with key specs and direct Amazon links.
             </p>
           </div>
         </div>
@@ -53,8 +61,8 @@ export const LatestReviewsSection = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {filtered.slice(0, 8).map((review) => {
           const isComparing = compareIds.includes(review.id);
-          const ratingVal = review.rating || (review.rocScore / 2).toFixed(1);
-          const amazonLink = review.affiliateLinks?.amazon || "https://amazon.com?tag=fragreviews-20";
+          const ratingVal = review.rating || (review.rocScore ? (review.rocScore / 2).toFixed(1) : null);
+          const amazonLink = review.affiliateLinks?.amazon;
           const productUrl = `/products/${review.slug || review.id}/`;
 
           return (
@@ -115,10 +123,10 @@ export const LatestReviewsSection = () => {
                 </button>
 
                 {/* Score Pill */}
-                <div className="absolute bottom-2.5 right-2.5 bg-slate-900/90 text-white px-2 py-0.5 rounded-md text-[10px] font-extrabold flex items-center gap-1 backdrop-blur-xs">
+                {ratingVal && <div className="absolute bottom-2.5 right-2.5 bg-slate-900/90 text-white px-2 py-0.5 rounded-md text-[10px] font-extrabold flex items-center gap-1 backdrop-blur-xs">
                   <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
                   <span>{ratingVal}</span>
-                </div>
+                </div>}
               </a>
 
               {/* Card Body */}
@@ -149,8 +157,8 @@ export const LatestReviewsSection = () => {
                 {/* Price & Actions */}
                 <div className="pt-3 border-t border-slate-100 space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="font-display font-extrabold text-base text-slate-900">
-                      {review.price || "$149.99"}
+                    <span className="font-display font-extrabold text-sm text-slate-900">
+                      {review.price || review.brand}
                     </span>
                     {review.discount && (
                       <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
@@ -163,7 +171,7 @@ export const LatestReviewsSection = () => {
                     <a 
                       href={amazonLink}
                       target="_blank"
-                      rel="sponsored noopener noreferrer"
+                      rel="sponsored nofollow noopener noreferrer"
                       className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-[10px] py-2 px-2 rounded-xl flex items-center justify-center gap-1 shadow-xs transition-all hover:scale-105 text-center no-underline"
                     >
                       <ShoppingCart className="w-3 h-3" />
