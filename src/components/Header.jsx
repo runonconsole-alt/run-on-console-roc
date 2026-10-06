@@ -615,20 +615,6 @@ export const Header = () => {
                         <div className="text-[10px] text-emerald-700 font-mono font-bold">@{currentUser.username?.toLowerCase() || 'gamer'}</div>
                       </div>
                       
-                      {(currentUser.role === 'Head Administrator' || currentUser.username === 'ROC' || currentUser.email === 'admin@runonconsole.com') && (
-                        <a
-                          href="/admin/"
-                          onClick={(e) => {
-                            setUserDropdownOpen(false);
-                            handleNavClick(e, 'admin');
-                          }}
-                          className="w-full text-left px-3 py-2 text-xs font-extrabold bg-amber-50 text-amber-900 hover:bg-amber-100 rounded-xl flex items-center gap-2 transition-colors border border-amber-300 no-underline"
-                        >
-                          <ShieldCheck className="w-4 h-4 text-amber-700" />
-                          <span>ROC Admin Suite</span>
-                        </a>
-                      )}
-
                       <a
                         href="/profile/"
                         onClick={(e) => {

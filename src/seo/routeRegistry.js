@@ -263,14 +263,6 @@ export const STATIC_PUBLIC_ROUTES = [
 // Private / Non-Indexed Routes (Strictly Server & Client Noindex, Nofollow)
 export const PRIVATE_ROUTES = [
   {
-    path: '/admin/',
-    canonical: `${BASE_DOMAIN}/admin/`,
-    title: 'ROC Admin Suite | Run On Console',
-    description: 'Master Administrator management portal for Run On Console.',
-    h1: 'ROC Admin Console',
-    robots: 'noindex, nofollow'
-  },
-  {
     path: '/auth/',
     canonical: `${BASE_DOMAIN}/auth/`,
     title: 'Authentication & Account Portal | Run On Console',
