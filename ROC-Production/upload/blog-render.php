@@ -279,6 +279,8 @@ function rocTemplate(string $root, string $name): array {
 
     $headTop = substr($html, 0, $titlePos);
     $headTop = preg_replace('#<link[^>]+rel="modulepreload"[^>]*>\s*#i', '', $headTop);
+    // Every renderer adds its own roc-nav.js tag; newer builds put the template's copy before <title>.
+    $headTop = preg_replace('#<script\b[^>]*\bsrc="/roc-nav\.js"[^>]*>\s*</script>\s*#i', '', $headTop);
     $headTop = preg_replace('#<html\b([^>]*)>#i', '<html$1 data-roc-static="1">', $headTop, 1);
 
     $bodyToMain = substr($html, $headEnd, $mainPos - $headEnd);  // starts with </head>
