@@ -2512,7 +2512,9 @@ async function renderProductImages(m){
           (real?'<span style="color:var(--brand)">✓ real photo</span>':'name card')+' · '+
           (asinOf(p.affiliate_amazon)?'<span style="color:var(--brand)">✓ exact Amazon link</span>':'<span style="color:var(--amber)">Amazon search link</span>')+'</div>'+
           '<div style="display:flex;gap:8px;margin-top:8px;align-items:flex-start">'+
-            '<textarea rows="2" data-paste placeholder="Paste SiteStripe HTML or an image link" style="flex:1;min-width:0"></textarea>'+
+            '<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">'+
+              '<textarea rows="2" data-paste placeholder="Paste SiteStripe HTML or an image link"></textarea>'+
+              '<input type="text" data-alt maxlength="255" placeholder="Image description (alt text), e.g. '+esc(p.title)+' in black" value="'+esc(p.image_alt||'')+'"></div>'+
             '<div style="display:flex;flex-direction:column;gap:6px"><a class="btn sm" target="_blank" rel="noopener" href="https://www.amazon.com/s?k='+encodeURIComponent(p.title)+'">Find ↗</a>'+
             '<button class="btn sm primary" data-save>Save</button></div></div></td></tr>';
     }).join('')||'<tr><td class="empty">'+(only?'Every product in this view has a real photo.':'No products.')+'</td></tr>';
@@ -2523,15 +2525,17 @@ async function renderProductImages(m){
     var b=e.target.closest('[data-save]'); if(!b) return;
     var row=b.closest('[data-row]'), p=all.filter(function(x){ return String(x.id)===row.dataset.row; })[0];
     var got=readPaste($('[data-paste]',row).value);
-    if(!got.img && !got.link){ toast('Paste the SiteStripe HTML, an image link or an Amazon product link first.','bad'); return; }
+    var alt=$('[data-alt]',row).value.trim(), altChanged=alt!==(p.image_alt||'');
+    if(!got.img && !got.link && !altChanged){ toast('Paste the SiteStripe HTML, an image link or an Amazon product link, or change the alt text.','bad'); return; }
     var body={action:'set_media',id:p.id,version:p.version};
-    if(got.img){ body.image=got.img; if(!p.image_alt) body.image_alt=p.title; }
+    if(altChanged) body.image_alt=alt;
+    if(got.img){ body.image=got.img; if(!alt) body.image_alt=p.title; }
     if(got.link) body.affiliate_amazon=got.link;
     b.disabled=true;
     try{
       var r=await api('products.php',body);
       for(var k in r.product) p[k]=r.product[k];
-      toast('"'+p.title+'" updated'+(got.img&&got.link?': photo and Amazon link.':got.img?': photo.':': Amazon link.'),'good');
+      toast('"'+p.title+'" updated'+(got.img&&got.link?': photo and Amazon link.':got.img?': photo.':got.link?': Amazon link.':': alt text.'),'good');
       draw();
     }catch(err){ toast(err.message,'bad'); b.disabled=false; }
   });
