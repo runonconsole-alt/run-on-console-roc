@@ -1,0 +1,22 @@
+# ============================================================
+# ROC Dynamic Products — add these rules to your existing
+# public_html/.htaccess, BEFORE the final React SPA fallback.
+#
+# What this does:
+#   1. /products/{slug}/  → if no pre-built index.html exists,
+#      serve it dynamically from product-page.php (new CMS products).
+#   2. /products/category/{slug}/  → if no pre-built index.html,
+#      serve from product-page.php?category={slug}.
+#
+# Existing pre-built static pages are NEVER touched — PHP only
+# kicks in for new products added via CMS.
+# ============================================================
+
+# ── Dynamic single product page (new CMS products) ────────────────
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^products/category/([a-z0-9][a-z0-9\-]*)/?$ /api/v1/product-page.php?category=$1 [QSA,L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^products/([a-z0-9][a-z0-9\-]*)/?$ /api/v1/product-page.php?slug=$1 [QSA,L]

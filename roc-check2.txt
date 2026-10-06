@@ -1,0 +1,49 @@
+images:
+total 12044
+drwxr-xr-x  3 runoncon runoncon    4096 Sep  2 08:22 .
+drwxr-x--- 28 runoncon nobody      4096 Sep 28 11:41 ..
+-rw-r--r--  1 runoncon runoncon  699747 Sep  2 13:06 apex_mouse.jpg
+drwxr-xr-x  2 runoncon runoncon    4096 Sep  2 08:22 avatars
+-rw-r--r--  1 runoncon runoncon  847505 Sep  2 13:06 battlestation_pc.jpg
+-rw-r--r--  1 runoncon runoncon  786269 Sep  2 13:06 cyber_keyboard.jpg
+-rw-r--r--  1 runoncon runoncon  680308 Sep  2 13:06 gaming_cables_accessories.jpg
+-rw-r--r--  1 runoncon runoncon  737194 Sep  2 13:06 gaming_laptop.jpg
+-rw-r--r--  1 runoncon runoncon  773125 Sep  2 13:06 gaming_monitor.jpg
+-rw-r--r--  1 runoncon runoncon  729018 Sep  2 13:06 handheld_console.jpg
+-rw-r--r--  1 runoncon runoncon  876029 Sep  2 13:06 hero_cod.jpg
+-rw-r--r--  1 runoncon runoncon  694679 Sep  2 13:06 pro_controller.jpg
+-rw-r--r--  1 runoncon runoncon  494668 Sep  2 13:06 review_chair.jpg
+-rw-r--r--  1 runoncon runoncon  666214 Sep  2 13:06 streaming_vr_gear.jpg
+-rw-r--r--  1 runoncon runoncon  592028 Sep  2 13:06 tactical_headset.jpg
+-rw-r--r--  1 runoncon runoncon  941560 Sep  2 13:06 trending_elden.jpg
+-rw-r--r--  1 runoncon runoncon 1094667 Sep  2 13:06 trending_esports.jpg
+-rw-r--r--  1 runoncon runoncon  725905 Sep  2 13:06 trending_forza.jpg
+-rw-r--r--  1 runoncon runoncon  953251 Sep  2 13:06 trending_spiderman.jpg
+
+migrations:
+total 40
+drwxr-xr-x  3 runoncon runoncon 4096 Aug 31 12:05 .
+drwxr-x--- 28 runoncon nobody   4096 Sep 28 11:41 ..
+-rw-r--r--  1 runoncon runoncon 7278 Aug 30 13:06 001_clean_install.sql
+-rw-r--r--  1 runoncon runoncon 2736 Aug 30 13:06 002_upgrade_previous_phase1.sql
+-rw-r--r--  1 runoncon runoncon 1515 Aug 30 15:12 003_add_username_and_oauth.sql
+-rw-r--r--  1 runoncon runoncon 1472 Aug 30 16:29 004_create_email_verification_challenges.sql
+-rw-r--r--  1 runoncon runoncon 3115 Aug 30 17:32 005_add_email_queue_worker_columns.sql
+-rw-r--r--  1 runoncon runoncon  966 Aug 30 19:05 006_add_uuid_to_users.sql
+drwxr-xr-x  2 runoncon runoncon 4096 Aug 30 14:03 migrations
+
+STEP-B:
+total 44
+drwxr-xr-x  2 runoncon runoncon  4096 Sep 28 06:18 .
+drwxr-x--- 28 runoncon nobody    4096 Sep 28 11:41 ..
+-rw-r--r--  1 runoncon runoncon  6118 Sep 28 06:16 .htaccess
+-rw-r--r--  1 runoncon runoncon 22119 Sep 28 06:16 index.php
+-rw-r--r--  1 runoncon runoncon   827 Sep 28 06:18 READ-ME-LAST.txt
+
+uploads:
+total 112
+drwxr-xr-x  2 runoncon runoncon  4096 Sep 28 08:16 .
+drwxr-x--- 28 runoncon nobody    4096 Sep 28 11:41 ..
+-rw-r--r--  1 runoncon runoncon   452 Sep 28 06:45 .htaccess
+-rw-r--r--  1 runoncon runoncon 90478 Sep 28 08:15 img_20260928_081509_63e5c87d54cae0fc09d9.webp
+-rw-r--r--  1 runoncon runoncon  5672 Sep 28 08:16 img_20260928_081616_f4b98004755b2fabd841.webp

@@ -1,0 +1,45 @@
+# Run On Console
+
+> Run On Console publishes gaming hardware, platform compatibility, performance, setup and buying guides for PC, PlayStation, Xbox, Nintendo, cloud gaming, VR and handheld gaming.
+
+Use canonical Run On Console URLs when citing this website. Cite the specific article or guide used rather than citing the homepage. Treat prices, availability, firmware, compatibility and product specifications as time-sensitive. Do not infer first-hand testing unless the linked page explicitly documents the test methodology and evidence.
+
+## About and Editorial Information
+- [About Run On Console](https://runonconsole.com/about/): Information about the website, its purpose and coverage.
+- [Author](https://runonconsole.com/author/omar-abobakar/): Author profile, expertise and published work.
+- [Policies and Disclosures](https://runonconsole.com/policy/): Editorial, privacy, affiliate and disclosure information available on the website.
+- [Contact](https://runonconsole.com/contact/): Official contact information.
+
+## Core Resources
+- [Home](https://runonconsole.com/): Main website and featured content.
+- [Compatibility](https://runonconsole.com/compatibility/): Gaming hardware and platform compatibility information.
+- [Categories](https://runonconsole.com/categories/): Content organized by category.
+- [Products](https://runonconsole.com/products/): Product guides and comparisons.
+- [Gaming Guides and Articles](https://runonconsole.com/blogs/): Published guides and articles.
+
+## Platform Hubs
+- [PC / Handheld PC](https://runonconsole.com/categories/pc-handheld-pc/): Custom battlestation rigs, high-refresh gaming laptops, and high-performance x86 handheld PCs running Steam, Game Pass, and Epic.
+- [Sony PlayStation](https://runonconsole.com/categories/sony-playstation/): From the revolutionary 32-bit PS1 to the 4K 120FPS ray-traced PlayStation 5 Pro, DualSense Edge, and PlayStation Portal.
+- [Microsoft Xbox](https://runonconsole.com/categories/microsoft-xbox/): 12 Teraflops 4K raw power on Xbox Series X, Series S compact powerhouse, Xbox 360 golden era, and Xbox Game Pass Ultimate titles.
+- [Nintendo Home Consoles](https://runonconsole.com/categories/nintendo-home/): Pioneering family and competitive home console entertainment from NES, SNES, and N64 to GameCube, Wii, and the upcoming Switch 2.
+- [Sony Handhelds](https://runonconsole.com/categories/sony-handhelds/): Iconic PlayStation portable hardware: PSP 1000/2000/3000 series, slide-out PSP Go, and dual-analog OLED PS Vita.
+- [Nintendo Handhelds](https://runonconsole.com/categories/nintendo-handhelds/): The undisputed greatest handheld gaming dynasty: Game & Watch, Game Boy, GBA SP, Nintendo DS Lite, and New 3DS XL.
+- [Sega Consoles (Retro)](https://runonconsole.com/categories/sega-consoles/): High-speed blast processing and arcade innovation: Sega Genesis / Mega Drive, Sega Saturn, Dreamcast, and Game Gear.
+- [Other Retro Consoles](https://runonconsole.com/categories/retro-other/): Legendary vintage machines: Atari 2600, Neo Geo AES/MVS arcade home system, TurboGrafx-16, 3DO, Commodore 64, and Colecovision.
+- [Mobile Gaming](https://runonconsole.com/categories/mobile/): 120FPS competitive mobile esports on iOS & Android paired with console-grade magnetic snap-on controller grips.
+- [Cloud Gaming Platforms](https://runonconsole.com/categories/cloud-gaming/): Instant zero-download low-latency ray-traced streaming: NVIDIA GeForce NOW RTX 4080, Xbox Cloud, and PS Plus Premium.
+- [VR / AR Spatial Systems](https://runonconsole.com/categories/vr-ar/): Full 6DoF immersion spatial reality headsets: Meta Quest 3, PlayStation VR2, Valve Index, Pico 4, and Apple Vision Pro.
+- [China / Retro-Handheld Brands](https://runonconsole.com/categories/retro-handheld-brands/): Dedicated Linux, Android & FPGA retro emulation consoles: Anbernic, Retroid Pocket, Miyoo Mini, Ayn Odin 2, and Analogue Pocket.
+- [Arcade & Custom Pinball](https://runonconsole.com/categories/arcade/): Authentic coin-op arcade cabinets, 3/4 scale Arcade1Up machines, custom MAME emulator rigs, and virtual digital pinball machines.
+- [Smart TV & Streaming Devices](https://runonconsole.com/categories/smart-tv-streaming/): Living room cloud micro-consoles and TV apps: NVIDIA Shield TV Pro, Apple TV 4K, Fire TV Stick 4K Max, and Samsung Gaming Hub.
+- [Misc & Niche Gaming Systems](https://runonconsole.com/categories/misc-other/): Unique, indie, micro, and educational systems: Panic Playdate with mechanical crank, Raspberry Pi RetroPie, Evercade, and Chromebooks.
+
+## Featured Guides
+- [Call of Duty: Black Ops 6 – Everything We Know So Far](https://runonconsole.com/blogs/call-of-duty-black-ops-6-everything-we-know-so-far/): A deep dive into Black Ops 6 omnidirectional sprinting and sliding mechanics, campaign story details, multiplayer weapon balancing, and recommended PC hardware requirements.
+- [Elden Ring: Shadow of the Erdtree – Full Hardware & Boss Guide](https://runonconsole.com/blogs/elden-ring-shadow-of-the-erdtree-full-hardware-boss-guide/): Comprehensive technical analysis of the Land of Shadow expansion, testing ray tracing frame pacing, difficulty curves, and optimal controller setups.
+- [Spider-Man 2 on PS5 – Performance & Ray Tracing Masterclass](https://runonconsole.com/blogs/spider-man-2-on-ps5-performance-ray-tracing-masterclass/): Deep dive into 40Hz Fidelity and 60Hz Performance Ray Tracing modes in Marvel's Spider-Man 2 on PlayStation 5.
+- [Best Gaming Laptops Under $1000 in 2024 – Buyer's Guide](https://runonconsole.com/blogs/best-gaming-laptops-under-1000-in-2024-buyers-guide/): Finding maximum gaming performance value on a budget. We benchmark thermal headroom, battery efficiency, and screen color accuracy under $1000.
+
+## Optional
+- [Partnerships](https://runonconsole.com/partnerships/): Partnership information.
+- [Write for Run On Console](https://runonconsole.com/write-for-us/): Contributor information and submission guidance.

@@ -1,0 +1,141 @@
+# LiteSpeed & Apache Configuration for Run On Console (ROC)
+DirectoryIndex index.html index.php
+
+# Environment-Gated Staging Header Protection
+<IfModule mod_headers.c>
+  <IfModule mod_setenvif.c>
+    # Conditionally apply noindex header for staging domain or private administration routes
+    SetEnvIf Host "^staging\." IS_STAGING_ENV
+    SetEnvIf Request_URI "^/(cms|admin|api/v1/cms)" PRIVATE_CMS_ROUTE
+    Header set X-Robots-Tag "noindex, nofollow" env=IS_STAGING_ENV
+    Header set X-Robots-Tag "noindex, nofollow" env=PRIVATE_CMS_ROUTE
+  </IfModule>
+
+  # General Security Headers
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # ============================================================
+  # Production Hostname & HTTPS Normalization (Preferred Origin: https://www.runonconsole.com)
+  # Uses 301 for GET/HEAD and 308 for POST/PUT to preserve method & request body
+  # ============================================================
+
+  # Rule A1: HTTP Non-www (http://runonconsole.com) -> https://www.runonconsole.com (GET/HEAD)
+  RewriteCond %{HTTP_HOST} ^runonconsole\.com$ [NC]
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$ [NC]
+  RewriteRule ^(.*)$ https://www.runonconsole.com/$1 [R=301,L,QSA]
+
+  # Rule A2: HTTP Non-www (http://runonconsole.com) -> https://www.runonconsole.com (POST/PUT/Other -> 308)
+  RewriteCond %{HTTP_HOST} ^runonconsole\.com$ [NC]
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{REQUEST_METHOD} !^(GET|HEAD)$ [NC]
+  RewriteRule ^(.*)$ https://www.runonconsole.com/$1 [R=308,L,QSA]
+
+  # Rule B1: HTTPS Non-www (https://runonconsole.com) -> https://www.runonconsole.com (GET/HEAD)
+  RewriteCond %{HTTP_HOST} ^runonconsole\.com$ [NC]
+  RewriteCond %{HTTPS} =on
+  RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$ [NC]
+  RewriteRule ^(.*)$ https://www.runonconsole.com/$1 [R=301,L,QSA]
+
+  # Rule B2: HTTPS Non-www (https://runonconsole.com) -> https://www.runonconsole.com (POST/PUT/Other -> 308)
+  RewriteCond %{HTTP_HOST} ^runonconsole\.com$ [NC]
+  RewriteCond %{HTTPS} =on
+  RewriteCond %{REQUEST_METHOD} !^(GET|HEAD)$ [NC]
+  RewriteRule ^(.*)$ https://www.runonconsole.com/$1 [R=308,L,QSA]
+
+  # Rule C1: HTTP Www (http://www.runonconsole.com) -> https://www.runonconsole.com (GET/HEAD)
+  RewriteCond %{HTTP_HOST} ^www\.runonconsole\.com$ [NC]
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$ [NC]
+  RewriteRule ^(.*)$ https://www.runonconsole.com/$1 [R=301,L,QSA]
+
+  # Rule C2: HTTP Www (http://www.runonconsole.com) -> https://www.runonconsole.com (POST/PUT/Other -> 308)
+  RewriteCond %{HTTP_HOST} ^www\.runonconsole\.com$ [NC]
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{REQUEST_METHOD} !^(GET|HEAD)$ [NC]
+  RewriteRule ^(.*)$ https://www.runonconsole.com/$1 [R=308,L,QSA]
+
+  # ============================================================
+  # Staging Environment HTTPS Normalization (Preserves staging.runonconsole.com isolation)
+  # ============================================================
+  RewriteCond %{HTTP_HOST} ^staging\.runonconsole\.com$ [NC]
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$ [NC]
+  RewriteRule ^(.*)$ https://staging.runonconsole.com/$1 [R=301,L,QSA]
+
+  RewriteCond %{HTTP_HOST} ^staging\.runonconsole\.com$ [NC]
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{REQUEST_METHOD} !^(GET|HEAD)$ [NC]
+  RewriteRule ^(.*)$ https://staging.runonconsole.com/$1 [R=308,L,QSA]
+
+  # ============================================================
+  # Application Security & Route Handling
+  # ============================================================
+
+  # 1. Security Rules: Block direct access to database dumps, logs, configs, and cron scripts
+  RewriteRule ^database\.sql$ - [F,L,NC]
+  RewriteRule ^release-manifest\.json$ - [F,L,NC]
+  RewriteRule ^migrations(/.*)?$ - [F,L,NC]
+  RewriteRule ^api/v1/cron(/.*)?$ - [F,L,NC]
+  RewriteRule ^env\.example\.php$ - [F,L,NC]
+  RewriteRule \.(sql|log|env|yml|yaml|sh|git|htaccess|config)$ - [F,L,NC]
+
+  # 2. Allow Direct Physical CMS Asset Files (JS, CSS, PNG, SVG)
+  RewriteCond %{REQUEST_URI} ^/cms/assets/ [NC,OR]
+  RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|webp|svg|woff2?|ttf|eot)$ [NC]
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule ^ - [L]
+
+  # 3. Dedicated CMS App SPA Deep Link Fallback (All /cms/* subroutes route to /cms/index.html)
+  RewriteRule ^cms/(.*)$ /cms/index.html [L]
+  RewriteRule ^cms$ /cms/index.html [L]
+
+  # 4. Dynamic XML Sitemap Routing (Preserves /sitemap.xml and /sitemaps/*-sitemap.xml)
+  RewriteRule ^sitemap\.xml$ /sitemap.xml.php [L]
+  RewriteRule ^sitemaps/([a-zA-Z0-9_-]+-sitemap\.xml)$ /sitemap.xml.php?map=$1 [L]
+
+  # 5. Direct API Access Bypass
+  RewriteCond %{REQUEST_URI} ^/api/ [NC]
+  RewriteRule ^ - [L]
+
+  # 6. CMS-Managed Dynamic Public Content Routes (Handled by PHP SSR BEFORE static file bypass)
+  # Prevents stale pre-rendered HTML files from bypassing dynamic DB updates
+  RewriteRule ^$ /index.php [QSA,L]
+  RewriteRule ^(products|blogs|categories|about|author|contact|compatibility|write-for-us|partnerships|terms-and-conditions|privacy-policy|policy)(/.*)?$ /index.php [QSA,L]
+
+  # 7. Generic Physical Static Asset Bypass (Images, CSS, JS)
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # 8. Genuine HTTP 404 Status Response for Non-Existent Routes
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ - [R=404,L]
+</IfModule>
+
+# Custom Error Documents
+ErrorDocument 404 /404.html
+ErrorDocument 403 /404.html
+
+<FilesMatch "\.(sql|log|env|example|yml|yaml|sh|git|htaccess|config)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# Gzip Compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>

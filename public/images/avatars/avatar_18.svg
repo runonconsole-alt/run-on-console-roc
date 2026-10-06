@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bgGrad_avatar_18" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF5FF"/>
+      <stop offset="100%" stop-color="#E9D5FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bgGrad_avatar_18)" stroke="#D8B4FE" stroke-width="4"/>
+  <path d="M64,12 L94,44 L80,92 L64,112 L48,92 L34,44 Z" fill="#581C87" stroke="#D8B4FE" stroke-width="4"/>
+    <!-- Galaxy Orb -->
+    <circle cx="64" cy="62" r="16" fill="#C084FC" filter="drop-shadow(0 0 8px #C084FC)"/>
+    <circle cx="64" cy="62" r="8" fill="#FFFFFF"/>
+    <polygon points="64,24 68,36 80,40 68,44 64,56 60,44 48,40 60,36" fill="#D8B4FE"/>
+</svg>

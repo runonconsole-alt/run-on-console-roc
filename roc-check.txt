@@ -1,0 +1,129 @@
+== root ==
+total 372
+drwxr-x--- 28 runoncon nobody     4096 Sep 28 07:47 .
+drwx--x--x 29 runoncon runoncon   4096 Sep 28 11:30 ..
+-rw-r--r--  1 runoncon runoncon  66495 Sep  2 13:05 404.html
+drwxr-xr-x  2 runoncon runoncon   4096 Sep  2 08:22 about
+drwxr-xr-x  2 runoncon runoncon   4096 Sep  2 08:22 admin
+drwxr-xr-x  4 runoncon runoncon   4096 Sep 18 10:31 agent
+drwxr-xr-x  4 runoncon runoncon   4096 Sep 18 09:55 api
+drwxr-xr-x  2 runoncon runoncon   4096 Sep  2 08:22 assets
+drwxr-xr-x  7 runoncon runoncon   4096 Sep  2 08:22 auth
+drwxr-xr-x  3 runoncon runoncon   4096 Aug 29 11:46 author
+drwxr-xr-x  6 runoncon runoncon   4096 Sep  2 08:22 blogs
+drwxr-xr-x 17 runoncon runoncon   4096 Sep  2 08:22 categories
+drwxr-xr-x  2 runoncon runoncon   4096 Aug 19 11:15 cgi-bin
+drwxr-xr-x  2 runoncon runoncon   4096 Sep 28 08:12 cms
+drwxr-xr-x  2 runoncon runoncon   4096 Sep  2 08:22 compatibility
+drwxr-xr-x  2 runoncon runoncon   4096 Sep  2 08:22 contact
+-rw-r--r--  1 runoncon runoncon   1105 Aug 19 20:23 favicon.svg
+-rw-r--r--  1 runoncon runoncon     54 Aug 19 18:34 google0dcacebd57bb2c52.html
+-rw-r--r--  1 runoncon runoncon   1372 Sep 28 07:47 .htaccess
+-rw-r--r--  1 runoncon runoncon   3778 Sep 18 10:08 .htaccess.bac
+drwxr-xr-x  3 runoncon runoncon   4096 Sep  2 08:22 images
+-rw-r--r--  1 runoncon runoncon 141065 Sep  2 13:05 index.html
+-rw-r--r--  1 runoncon runoncon   6050 Sep  2 13:05 llms.txt
+drwxr-xr-x  3 runoncon runoncon   4096 Aug 31 12:05 migrations
+drwxr-xr-x  2 runoncon runoncon   4096 Sep  2 08:22 partnerships
+-rw-r--r--  1 runoncon runoncon    701 Sep 28 07:47 php.ini
+drwxr-xr-x  2 runoncon runoncon   4096 Sep  2 08:22 policy
+drwxr-xr-x  2 runoncon runoncon   4096 Sep  2 08:22 privacy-policy
+drwxr-xr-x 31 runoncon runoncon   4096 Sep  2 08:22 products
+drwxr-xr-x  2 runoncon runoncon   4096 Sep  2 08:22 profile
+-rw-r--r--  1 runoncon runoncon    312 Sep  2 13:05 release-manifest.json
+-rw-r--r--  1 runoncon runoncon    499 Aug 29 17:00 robots.txt
+drwxr-xr-x  2 runoncon runoncon   4096 Sep  2 08:22 sitemaps
+-rw-r--r--  1 runoncon runoncon    694 Sep  2 13:05 sitemap.xml
+-rw-r--r--  1 runoncon runoncon   6581 Sep 28 06:30 sitemap.xml.php
+drwxr-xr-x  2 runoncon runoncon   4096 Sep 28 06:18 STEP-B
+drwxr-xr-x  2 runoncon runoncon   4096 Sep  2 08:22 terms-and-conditions
+drwxr-xr-x  2 runoncon runoncon   4096 Sep 28 08:16 uploads
+-rw-r--r--  1 runoncon runoncon    652 Sep 28 07:47 .user.ini
+drwxr-xr-x  3 runoncon runoncon   4096 Aug 19 11:16 .well-known
+drwxr-xr-x  2 runoncon runoncon   4096 Sep  2 08:22 write-for-us
+== blogs folder ==
+total 116
+drwxr-xr-x  6 runoncon runoncon  4096 Sep  2 08:22 .
+drwxr-x--- 28 runoncon nobody    4096 Sep 28 07:47 ..
+drwxr-xr-x  2 runoncon runoncon  4096 Sep  2 08:22 best-gaming-laptops-under-1000-in-2024-buyers-guide
+drwxr-xr-x  2 runoncon runoncon  4096 Sep  2 08:22 call-of-duty-black-ops-6-everything-we-know-so-far
+drwxr-xr-x  2 runoncon runoncon  4096 Sep  2 08:22 elden-ring-shadow-of-the-erdtree-full-hardware-boss-guide
+-rw-r--r--  1 runoncon runoncon 92746 Sep  2 13:06 index.html
+drwxr-xr-x  2 runoncon runoncon  4096 Sep  2 08:22 spider-man-2-on-ps5-performance-ray-tracing-masterclass
+== test-blog ==
+ls: cannot access 'blogs/test-blog': No such file or directory
+== htaccess ==
+
+# BEGIN cPanel-generated php ini directives, do not edit
+# Manual editing of this file may result in unexpected behavior.
+# To make changes to this file, use the cPanel MultiPHP INI Editor (Home >> Software >> MultiPHP INI Editor)
+# For more information, read our documentation (https://go.cpanel.net/EA4ModifyINI)
+<IfModule php7_module>
+   php_value error_log "/home2/runoncon/logs/php.error.log"
+   php_flag log_errors On
+   php_flag display_errors Off
+   php_value max_execution_time 300
+   php_value max_input_time 600
+   php_value max_input_vars 5000
+   php_value memory_limit 256M
+   php_value post_max_size 24M
+   php_value session.gc_maxlifetime 1440
+   php_value session.save_path "/var/cpanel/php/sessions/ea-php74"
+   php_value upload_max_filesize 16M
+   php_flag zlib.output_compression Off
+</IfModule>
+<IfModule lsapi_module>
+   php_value error_log "/home2/runoncon/logs/php.error.log"
+   php_flag log_errors On
+   php_flag display_errors Off
+   php_value max_execution_time 300
+   php_value max_input_time 600
+   php_value max_input_vars 5000
+   php_value memory_limit 256M
+   php_value post_max_size 24M
+   php_value session.gc_maxlifetime 1440
+   php_value session.save_path "/var/cpanel/php/sessions/ea-php74"
+   php_value upload_max_filesize 16M
+   php_flag zlib.output_compression Off
+</IfModule>
+# END cPanel-generated php ini directives, do not edit
+== robots ==
+# Run On Console robots.txt
+# Public content is crawlable. Security is enforced by authentication and the server firewall.
+User-agent: *
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://runonconsole.com/sitemap.xml
+== blogs.php version check ==
+26:require_once __DIR__ . '/config.php';
+27:require_once __DIR__ . '/utils.php';
+28:require_once __DIR__ . '/cms-html.php';
+== clean-seo installed? ==
+ls: cannot access 'api/v1/cron/cli-blog-index-follow.php': No such file or directory

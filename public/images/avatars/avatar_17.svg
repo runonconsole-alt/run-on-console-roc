@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bgGrad_avatar_17" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ECFDF5"/>
+      <stop offset="100%" stop-color="#A7F3D0"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bgGrad_avatar_17)" stroke="#34D399" stroke-width="4"/>
+  <path d="M30,36 C30,16 98,16 98,36 L92,84 L64,112 L36,84 Z" fill="#064E3B" stroke="#34D399" stroke-width="4"/>
+    <!-- Cobra Hood Wings -->
+    <path d="M22,44 C36,30 46,60 64,60 C82,60 92,30 106,44 L92,80 L64,96 L36,80 Z" fill="#047857"/>
+    <circle cx="48" cy="46" r="5" fill="#34D399"/>
+    <circle cx="80" cy="46" r="5" fill="#34D399"/>
+    <polygon points="56,66 60,78 54,78" fill="#FFFFFF"/>
+    <polygon points="72,66 74,78 68,78" fill="#FFFFFF"/>
+</svg>

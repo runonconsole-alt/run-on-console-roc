@@ -1,0 +1,12 @@
+# ============================================================
+# Run On Console (ROC) - Parallel Django Backend (v2) Dependencies
+# Python Version: 3.10+ / 3.11+ / 3.12+ (HosterPK Compatible)
+# ============================================================
+
+Django>=4.2.11,<5.0
+mysqlclient>=2.2.4
+requests>=2.31.0
+python-dotenv>=1.0.1
+django-cors-headers>=4.3.1
+Pillow>=10.2.0
+gunicorn>=21.2.0

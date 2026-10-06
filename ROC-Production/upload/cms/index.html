@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Run On Console — CMS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23064e3b'/><text y='68' x='50' text-anchor='middle' font-size='42' font-family='system-ui' font-weight='700' fill='%236ee7b7'>R</text></svg>">
+<style>
+/* Self-contained. The previous build pulled Tailwind and Font Awesome from CDNs;
+   the Tailwind CDN compiles in the browser and is not meant for production, and
+   an admin panel should not depend on two third-party hosts staying up. */
+:root{
+  --bg:#080f0d; --panel:#0f1a17; --panel-2:#16241f; --line:#1f312b; --line-2:#284038;
+  --ink:#e8f0ed; --ink-2:#9fb3ac; --ink-3:#6b827a;
+  --brand:#10b981; --brand-2:#059669; --brand-ink:#04231a;
+  --amber:#f59e0b; --red:#f43f5e; --blue:#60a5fa;
+  --radius:12px; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+  font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;font-weight:640;letter-spacing:-.011em}
+a{color:var(--brand)}
+button,input,select,textarea{font:inherit;color:inherit}
+.hide{display:none!important}
+
+/* layout */
+.shell{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+.side{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.side-top{padding:18px 16px 14px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px}
+.mark{width:32px;height:32px;border-radius:9px;flex:none;background:linear-gradient(140deg,#34d399,#059669);display:grid;place-items:center;color:var(--brand-ink);font-weight:800;font-size:11px}
+.bname{font-weight:640;line-height:1.15}
+.bsub{font-size:10px;color:var(--brand);text-transform:uppercase;letter-spacing:.09em;font-weight:640}
+.snav{padding:12px 9px 0}
+.slabel{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:0 8px 6px;font-weight:640}
+.sitem{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;background:none;border-radius:9px;color:var(--ink-2);cursor:pointer;text-align:left;font-size:13.5px}
+.sitem:hover{background:var(--panel-2);color:var(--ink)}
+.sitem.on{background:var(--panel-2);color:var(--ink);font-weight:560}
+.sitem .ic{width:18px;text-align:center;font-size:13px;flex:none;opacity:.9}
+.sitem .ct{margin-left:auto;font-size:11px;color:var(--ink-3);background:rgba(255,255,255,.05);padding:1px 7px;border-radius:20px}
+.sfoot{margin-top:auto;padding:12px 9px 16px;border-top:1px solid var(--line)}
+.who{display:flex;align-items:center;gap:9px;padding:6px 8px}
+.av{width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;background:#17332a;color:#6ee7b7;font-weight:700;font-size:11px}
+.main{min-width:0;display:flex;flex-direction:column}
+.bar{position:sticky;top:0;z-index:30;background:rgba(8,15,13,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 24px;display:flex;align-items:center;gap:12px;min-height:58px}
+.bar h1{font-size:16.5px}
+.bar .sub{font-size:12px;color:var(--ink-3)}
+.bar .right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.body{padding:20px 24px 60px;flex:1}
+.narrow{max-width:1100px}
+
+/* controls */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid var(--line-2);background:var(--panel);border-radius:9px;cursor:pointer;font-size:13px;font-weight:520;color:var(--ink-2);white-space:nowrap}
+.btn:hover{background:var(--panel-2);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink);font-weight:640}
+.btn.primary:hover{background:#34d399}
+.btn.danger{color:var(--red);border-color:#40222c}
+.btn.ghost{border-color:transparent;background:none}
+.btn.ghost:hover{background:var(--panel-2)}
+.btn.sm{padding:4px 9px;font-size:12px}
+input[type=text],input[type=email],input[type=password],input[type=number],select,textarea{
+  width:100%;padding:8px 11px;border:1px solid var(--line-2);border-radius:9px;background:var(--bg);color:var(--ink);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(16,185,129,.14)}
+textarea{resize:vertical;min-height:70px;line-height:1.55}
+select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M3 4.5 6 8l3-3.5' fill='none' stroke='%236b827a' stroke-width='1.5' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
+.field{margin-bottom:13px}
+.field>label{display:block;font-size:12px;font-weight:580;margin-bottom:5px;color:var(--ink-2)}
+.hint{font-size:11.5px;color:var(--ink-3);margin-top:4px}
+.hint.warn{color:var(--amber)} .hint.bad{color:var(--red)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.check{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-bottom:7px}
+.check input{width:15px;height:15px;accent-color:var(--brand)}
+
+/* cards */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:15px;overflow:hidden}
+.chead{padding:12px 15px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.chead h3{font-size:13px}
+.chead .note{font-size:11.5px;color:var(--ink-3);margin-left:auto}
+.cbody{padding:15px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.stat .n{font-size:25px;font-weight:680;letter-spacing:-.02em}
+.stat .l{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em}
+
+table.list{width:100%;border-collapse:collapse}
+table.list th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);font-weight:620;padding:9px 15px;border-bottom:1px solid var(--line)}
+table.list td{padding:11px 15px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.list tr:last-child td{border-bottom:0}
+table.list tbody tr:hover{background:var(--panel-2)}
+.t-title{font-weight:560;cursor:pointer}
+.t-title:hover{color:var(--brand)}
+.t-slug{font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:580;padding:2px 9px;border-radius:20px}
+.tag::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+.tag.published{background:rgba(16,185,129,.12);color:#34d399}
+.tag.draft{background:rgba(255,255,255,.06);color:var(--ink-3)}
+.empty{text-align:center;padding:48px 20px;color:var(--ink-3)}
+.empty .big{font-size:30px;margin-bottom:10px;opacity:.4}
+
+/* editor */
+.egrid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+@media(max-width:1100px){.egrid{grid-template-columns:1fr}}
+.scol{position:sticky;top:74px}
+.rte{border:1px solid var(--line-2);border-radius:var(--radius);background:var(--panel);position:relative}
+.rte-bar{display:flex;flex-wrap:wrap;align-items:center;gap:1px;padding:6px;border-bottom:1px solid var(--line);background:var(--panel-2);border-radius:var(--radius) var(--radius) 0 0;position:sticky;top:58px;z-index:10}
+.rb{min-width:29px;height:29px;padding:0 7px;border:0;background:none;border-radius:6px;cursor:pointer;font-size:12.5px;color:var(--ink-2);display:inline-flex;align-items:center;justify-content:center}
+.rb:hover{background:var(--line-2);color:var(--ink)}
+.rb.on{background:var(--brand);color:var(--brand-ink)}
+.rsep{width:1px;height:18px;background:var(--line-2);margin:0 5px}
+.rte-area{padding:22px 26px;min-height:420px;outline:none;font-size:15.5px;line-height:1.72;max-width:740px;margin:0 auto}
+.rte-src{width:100%;min-height:450px;border:0;padding:18px 22px;outline:none;font-family:var(--mono);font-size:12.5px;line-height:1.6;background:var(--bg);color:var(--ink)}
+.rte-foot{padding:7px 14px;border-top:1px solid var(--line);display:flex;gap:14px;font-size:11.5px;color:var(--ink-3);background:var(--panel-2);border-radius:0 0 var(--radius) var(--radius)}
+.rte-hint{margin-left:auto;opacity:.85}
+.rte-area h2{font-size:23px;margin:1.5em 0 .5em}
+.rte-area h3{font-size:19px;margin:1.4em 0 .45em}
+.rte-area h4{font-size:16px;margin:1.3em 0 .4em}
+.rte-area p{margin:0 0 1.05em}
+.rte-area ul,.rte-area ol{margin:0 0 1.05em;padding-left:1.5em}
+.rte-area li{margin-bottom:.35em}
+.rte-area blockquote{margin:0 0 1.05em;padding:2px 0 2px 16px;border-left:3px solid var(--brand);color:var(--ink-2);font-style:italic}
+.rte-area pre{background:#060b09;color:#b8ccc5;padding:14px 16px;border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px}
+.rte-area img{max-width:100%;height:auto;border-radius:8px}
+.rte-area figure{margin:1.4em 0}
+.rte-area figcaption{font-size:12.5px;color:var(--ink-3);text-align:center;margin-top:7px}
+.rte-area hr{border:0;border-top:1px solid var(--line-2);margin:2em 0}
+.rte-area table{width:100%;border-collapse:collapse;margin:0 0 1.4em;font-size:14px}
+.rte-area th,.rte-area td{border:1px solid var(--line-2);padding:8px 11px;text-align:left}
+.rte-area th{background:var(--panel-2);font-weight:620}
+.rte-area td:focus,.rte-area th:focus{outline:2px solid var(--brand);outline-offset:-2px}
+.rte-area a{color:var(--brand);text-decoration:underline;text-underline-offset:2px}
+.tmenu{position:absolute;z-index:40;background:var(--panel);border:1px solid var(--line-2);border-radius:9px;box-shadow:0 12px 30px rgba(0,0,0,.5);padding:4px;display:flex;flex-wrap:wrap;gap:2px;max-width:320px}
+.tmenu button{border:0;background:none;padding:5px 9px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--ink-2)}
+.tmenu button:hover{background:var(--line-2);color:var(--ink)}
+.tmenu button.danger{color:var(--red)}
+
+/* previews */
+.serp{border:1px solid var(--line-2);border-radius:9px;padding:12px 14px;background:#fff}
+.serp .u{font-size:12px;color:#0b6b1f}
+.serp .t{font-size:17px;color:#1a0dab;line-height:1.3;margin:2px 0 3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.serp .d{font-size:12.6px;color:#4d5156;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.og{border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:var(--panel-2)}
+.og .pic{aspect-ratio:1.91;background:var(--bg) center/cover no-repeat;display:grid;place-items:center;color:var(--ink-3);font-size:12px}
+.og .meta{padding:9px 12px;border-top:1px solid var(--line)}
+.og .host{font-size:10.5px;color:var(--ink-3);text-transform:uppercase}
+.og .h{font-size:13.5px;font-weight:600;margin:2px 0;line-height:1.3}
+.og .p{font-size:12px;color:var(--ink-3);line-height:1.4}
+.meter{height:3px;border-radius:3px;background:var(--line-2);overflow:hidden;margin-top:5px}
+.meter i{display:block;height:100%;background:var(--brand)}
+.meter i.over{background:var(--amber)}
+.advice{display:flex;flex-direction:column;gap:6px}
+.advice .a{display:flex;gap:8px;font-size:12px;line-height:1.45;padding:8px 10px;border-radius:7px}
+.advice .a.error{background:rgba(244,63,94,.1);color:#fda4af}
+.advice .a.warn{background:rgba(245,158,11,.1);color:#fcd34d}
+.advice .a.info{background:rgba(96,165,250,.1);color:#93c5fd}
+.advice .a.ok{background:rgba(16,185,129,.1);color:#6ee7b7}
+.advice .a .m{flex:none}
+.codebox{background:#060b09;color:#9fb8b0;border-radius:8px;padding:12px 14px;font-family:var(--mono);font-size:11.5px;line-height:1.55;max-height:250px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+
+/* media */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.mitem{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--panel);cursor:pointer}
+.mitem:hover{border-color:var(--brand)}
+.mitem.picked{border-color:var(--brand);box-shadow:0 0 0 2px rgba(16,185,129,.25)}
+.mthumb{aspect-ratio:4/3;background:var(--bg) center/cover no-repeat;position:relative}
+.mmeta{padding:8px 10px;font-size:11.5px}
+.mname{font-weight:560;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msub{color:var(--ink-3);margin-top:2px}
+.flag{position:absolute;top:6px;right:6px;background:var(--amber);color:#3b2600;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.noalt{color:var(--red);font-weight:580}
+
+/* modal + misc */
+.veil{position:fixed;inset:0;background:rgba(4,8,7,.72);backdrop-filter:blur(3px);z-index:100;display:grid;place-items:center;padding:20px}
+.modal{background:var(--panel);border:1px solid var(--line-2);border-radius:14px;width:100%;max-width:560px;max-height:86vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.modal.wide{max-width:880px}
+.mhead{padding:15px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.mhead h3{font-size:15px}
+.mbody{padding:18px;overflow-y:auto}
+.mfoot{padding:13px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+.toasts{position:fixed;bottom:18px;right:18px;z-index:200;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--panel-2);border:1px solid var(--line-2);color:var(--ink);padding:10px 15px;border-radius:9px;font-size:13px;max-width:380px}
+.toast.bad{background:#3b1220;border-color:#5c1f33;color:#fda4af}
+.toast.good{background:#06281d;border-color:#0d4a36;color:#6ee7b7}
+.gate{min-height:100vh;display:grid;place-items:center;padding:20px}
+.gcard{background:var(--panel);border:1px solid var(--line-2);border-radius:16px;padding:30px;width:100%;max-width:392px}
+.alert{padding:10px 13px;border-radius:9px;font-size:12.5px;margin-bottom:13px}
+.alert.bad{background:rgba(244,63,94,.1);color:#fda4af}
+.alert.warn{background:rgba(245,158,11,.1);color:#fcd34d}
+.alert.info{background:rgba(96,165,250,.1);color:#93c5fd}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0;padding:0 8px}
+.tab{padding:9px 12px;border:0;background:none;cursor:pointer;font-size:12.5px;color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:520}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--brand);border-bottom-color:var(--brand);font-weight:620}
+.search{position:relative}
+.search input{padding-left:31px}
+.search::before{content:'\2315';position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-size:15px}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:turn .6s linear infinite}
+@keyframes turn{to{transform:rotate(360deg)}}
+.dirty{width:7px;height:7px;border-radius:50%;background:var(--amber);display:inline-block}
+@media(max-width:860px){.shell{grid-template-columns:1fr}.side{position:static;height:auto}.row{grid-template-columns:1fr}.body,.bar{padding-left:14px;padding-right:14px}}
+</style>
+</head>
+<body>
+<div id="app"><div class="gate"><div style="color:var(--ink-3)">Loading…</div></div></div>
+<script>
+/* ==========================================================================
+   Rich text editor — contenteditable, no dependencies, no build step.
+   The paste pipeline is the reason this exists: clipboard HTML from Word,
+   Google Docs or a web page is rewritten into a small clean tag set rather
+   than pasted raw or flattened to plain text.
+   ========================================================================== */
+(function (global) {
+'use strict';
+
+var KEEP = {P:'P',BR:'BR',HR:'HR',H1:'H2',H2:'H2',H3:'H3',H4:'H4',H5:'H5',H6:'H5',
+  STRONG:'STRONG',B:'STRONG',EM:'EM',I:'EM',U:'U',S:'S',STRIKE:'S',DEL:'S',
+  MARK:'MARK',SUB:'SUB',SUP:'SUP',BLOCKQUOTE:'BLOCKQUOTE',UL:'UL',OL:'OL',LI:'LI',
+  A:'A',IMG:'IMG',FIGURE:'FIGURE',FIGCAPTION:'FIGCAPTION',TABLE:'TABLE',THEAD:'THEAD',
+  TBODY:'TBODY',TR:'TR',TH:'TH',TD:'TD',PRE:'PRE',CODE:'CODE'};
+var ATTRS = {A:['href','title','target','rel'],IMG:['src','alt','title','width','height','loading'],
+  TH:['colspan','rowspan','scope'],TD:['colspan','rowspan']};
+var BLOCKS='P,H2,H3,H4,H5,BLOCKQUOTE,LI,PRE,TD,TH,FIGCAPTION';
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+function isBlock(n){return n&&n.nodeType===1&&(','+BLOCKS+',UL,OL,TABLE,THEAD,TBODY,TR,FIGURE,HR,')
+  .indexOf(','+n.nodeName+',')>-1;}
+
+/* Word and Docs express bold and italic as CSS on a span. Read that before the
+   span is discarded, so the formatting survives instead of being lost. */
+function inferred(el){
+  var out=[],style=el.getAttribute&&el.getAttribute('style');
+  if(!style)return out;
+  style=style.toLowerCase();
+  var w=/font-weight:\s*(\d+|bold)/.exec(style);
+  if(w&&(w[1]==='bold'||parseInt(w[1],10)>=600))out.push('STRONG');
+  if(/font-style:\s*italic/.test(style))out.push('EM');
+  if(/text-decoration[^;]*underline/.test(style))out.push('U');
+  if(/text-decoration[^;]*line-through/.test(style))out.push('S');
+  return out;
+}
+
+function cleanNode(node,doc){
+  if(node.nodeType===3)return [doc.createTextNode(node.nodeValue)];
+  if(node.nodeType!==1)return [];
+  var name=node.nodeName;
+  if(/^(SCRIPT|STYLE|NOSCRIPT|IFRAME|OBJECT|EMBED|LINK|META|FORM|INPUT|BUTTON|SELECT|SVG)$/.test(name))return [];
+  if(node.getAttribute&&/mso-list:\s*Ignore/i.test(node.getAttribute('style')||''))return [];
+
+  var kids=[];
+  for(var i=0;i<node.childNodes.length;i++)kids=kids.concat(cleanNode(node.childNodes[i],doc));
+
+  var mapped=KEEP[name];
+  if(!mapped){
+    var wraps=inferred(node);
+    if(wraps.length&&kids.length){
+      var w=kids;
+      for(var j=0;j<wraps.length;j++){
+        var el=doc.createElement(wraps[j]);
+        w.forEach(function(c){el.appendChild(c);});
+        w=[el];
+      }
+      kids=w;
+    }
+    if(/^(DIV|SECTION|ARTICLE)$/.test(name)&&kids.length&&!kids.some(isBlock)){
+      var p=doc.createElement('P');
+      kids.forEach(function(c){p.appendChild(c);});
+      return [p];
+    }
+    return kids;
+  }
+
+  var out=doc.createElement(mapped),allowed=ATTRS[mapped]||[];
+  for(var a=0;a<allowed.length;a++){
+    var v=node.getAttribute(allowed[a]);
+    if(!v)continue;
+    if(allowed[a]==='href'||allowed[a]==='src'){
+      var low=v.trim().toLowerCase().replace(/[\s\x00-\x1F]/g,'');
+      if(low.indexOf('javascript:')===0||low.indexOf('data:text')===0||low.indexOf('vbscript:')===0)continue;
+    }
+    out.setAttribute(allowed[a],v);
+  }
+  if(mapped==='A'&&out.getAttribute('target')==='_blank')out.setAttribute('rel','noopener noreferrer');
+
+  var extra=inferred(node),inner=kids;
+  for(var x=0;x<extra.length;x++){
+    if(extra[x]===mapped)continue;
+    var e2=doc.createElement(extra[x]);
+    inner.forEach(function(c){e2.appendChild(c);});
+    inner=[e2];
+  }
+  inner.forEach(function(c){out.appendChild(c);});
+  return [out];
+}
+
+function tidy(root,doc){
+  root.querySelectorAll('p,li,h2,h3,h4,h5,blockquote').forEach(function(el){
+    if(!el.textContent.trim()&&!el.querySelector('img'))el.remove();
+  });
+  root.querySelectorAll('table').forEach(function(t){
+    if(!t.querySelector('tr')){t.remove();return;}
+    var first=t.querySelector('tr');
+    if(first&&!t.querySelector('th')&&first.parentNode.nodeName!=='THEAD'){
+      var cells=first.children,short=cells.length>0;
+      for(var i=0;i<cells.length;i++)if(cells[i].textContent.trim().length>60){short=false;break;}
+      if(short)for(var j=cells.length-1;j>=0;j--){
+        var th=doc.createElement('TH');th.setAttribute('scope','col');
+        while(cells[j].firstChild)th.appendChild(cells[j].firstChild);
+        cells[j].replaceWith(th);
+      }
+    }
+  });
+  return root;
+}
+
+function sanitize(html){
+  var doc=document.implementation.createHTMLDocument('p');
+  var src=doc.createElement('div');src.innerHTML=String(html||'');
+  var dst=doc.createElement('div');
+  for(var i=0;i<src.childNodes.length;i++)
+    cleanNode(src.childNodes[i],doc).forEach(function(n){dst.appendChild(n);});
+  return tidy(dst,doc).innerHTML;
+}
+
+function fromText(t){
+  return String(t||'').split(/\n{2,}/).map(function(b){
+    var lines=b.split('\n');
+    if(lines.length>1&&lines.every(function(l){return /^\s*[-*•]\s+/.test(l);}))
+      return '<ul>'+lines.map(function(l){return '<li>'+esc(l.replace(/^\s*[-*•]\s+/,''))+'</li>';}).join('')+'</ul>';
+    return '<p>'+lines.map(esc).join('<br>')+'</p>';
+  }).join('');
+}
+
+var TOOLS=[{g:1},
+ {cmd:'bold',l:'B',t:'Bold  (Ctrl+B)',s:'font-weight:800'},
+ {cmd:'italic',l:'I',t:'Italic  (Ctrl+I)',s:'font-style:italic'},
+ {cmd:'underline',l:'U',t:'Underline',s:'text-decoration:underline'},
+ {cmd:'strikeThrough',l:'S',t:'Strikethrough',s:'text-decoration:line-through'},{g:1},
+ {b:'H2',l:'H2',t:'Heading 2'},{b:'H3',l:'H3',t:'Heading 3'},{b:'H4',l:'H4',t:'Heading 4'},
+ {b:'P',l:'¶',t:'Paragraph'},{g:1},
+ {cmd:'insertUnorderedList',l:'•',t:'Bulleted list'},
+ {cmd:'insertOrderedList',l:'1.',t:'Numbered list'},
+ {b:'BLOCKQUOTE',l:'❝',t:'Quote'},{g:1},
+ {a:'link',l:'⚭',t:'Link  (Ctrl+K)'},
+ {a:'internal',l:'⧉',t:'Link to another page on this site'},
+ {a:'image',l:'❑',t:'Insert image'},
+ {a:'table',l:'▦',t:'Insert table'},
+ {a:'code',l:'‹›',t:'Code block'},
+ {a:'hr',l:'—',t:'Divider'},{g:1},
+ {a:'clear',l:'⌧',t:'Clear formatting'},
+ {a:'source',l:'HTML',t:'Edit the HTML directly'}];
+
+function Editor(o){
+  var self=this;this.o=o||{};this.onChange=this.o.onChange||function(){};
+  this.root=o.mount;this.root.classList.add('rte');
+  this.root.innerHTML='<div class="rte-bar"></div>'+
+    '<div class="rte-area" contenteditable="true" spellcheck="true"></div>'+
+    '<textarea class="rte-src" spellcheck="false" hidden></textarea>'+
+    '<div class="rte-foot"><span class="rte-stats"></span>'+
+    '<span class="rte-hint">Paste from Word, Docs or any page — formatting is cleaned automatically</span></div>';
+  this.bar=this.root.querySelector('.rte-bar');
+  this.area=this.root.querySelector('.rte-area');
+  this.src=this.root.querySelector('.rte-src');
+  this.stats=this.root.querySelector('.rte-stats');
+  this.srcMode=false;
+  this.buildBar();this.buildTableMenu();
+  this.area.addEventListener('input',function(){self.changed();});
+  this.area.addEventListener('paste',function(e){self.paste(e);});
+  this.area.addEventListener('keydown',function(e){self.key(e);});
+  this.area.addEventListener('keyup',function(){self.sync();});
+  this.area.addEventListener('mouseup',function(){self.sync();});
+  this.area.addEventListener('click',function(e){self.click(e);});
+  this.src.addEventListener('input',function(){self.area.innerHTML=sanitize(self.src.value);self.changed();});
+  document.addEventListener('selectionchange',function(){if(document.activeElement===self.area)self.sync();});
+}
+
+Editor.prototype.buildBar=function(){
+  var self=this;
+  TOOLS.forEach(function(t){
+    if(t.g){var s=document.createElement('span');s.className='rsep';self.bar.appendChild(s);return;}
+    var b=document.createElement('button');
+    b.type='button';b.className='rb';b.title=t.t;b.setAttribute('aria-label',t.t);b.textContent=t.l;
+    if(t.s)b.style.cssText=t.s;
+    if(t.cmd)b.dataset.cmd=t.cmd; if(t.b)b.dataset.block=t.b; if(t.a)b.dataset.act=t.a;
+    b.addEventListener('mousedown',function(e){e.preventDefault();});
+    b.addEventListener('click',function(){self.run(t);});
+    self.bar.appendChild(b);
+  });
+};
+
+Editor.prototype.buildTableMenu=function(){
+  var self=this,m=document.createElement('div');
+  m.className='tmenu';m.hidden=true;
+  m.innerHTML='<button type="button" data-t="row-above">Row above</button>'+
+    '<button type="button" data-t="row-below">Row below</button>'+
+    '<button type="button" data-t="col-left">Column left</button>'+
+    '<button type="button" data-t="col-right">Column right</button>'+
+    '<button type="button" data-t="del-row" class="danger">Delete row</button>'+
+    '<button type="button" data-t="del-col" class="danger">Delete column</button>'+
+    '<button type="button" data-t="del-table" class="danger">Delete table</button>';
+  m.addEventListener('mousedown',function(e){e.preventDefault();});
+  m.addEventListener('click',function(e){
+    var a=e.target.dataset&&e.target.dataset.t;
+    if(a){self.table(a);m.hidden=true;}
+  });
+  this.root.appendChild(m);this.tmenu=m;
+  document.addEventListener('click',function(e){
+    if(!m.hidden&&!m.contains(e.target)&&!self.area.contains(e.target))m.hidden=true;
+  });
+};
+
+Editor.prototype.click=function(e){
+  var cell=e.target.closest&&e.target.closest('td,th');
+  if(cell&&this.area.contains(cell)){
+    var r=cell.getBoundingClientRect(),h=this.root.getBoundingClientRect();
+    this.tmenu.style.left=Math.max(4,r.left-h.left)+'px';
+    this.tmenu.style.top=(r.bottom-h.top+4)+'px';
+    this.tmenu.hidden=false;
+  }else this.tmenu.hidden=true;
+};
+
+Editor.prototype.cell=function(){
+  var s=global.getSelection();
+  if(!s.rangeCount)return null;
+  var n=s.getRangeAt(0).startContainer;
+  if(n.nodeType===3)n=n.parentNode;
+  return n.closest?n.closest('td,th'):null;
+};
+
+Editor.prototype.table=function(act){
+  var cell=this.cell(); if(!cell)return;
+  var row=cell.parentNode,tbl=cell.closest('table');
+  var idx=Array.prototype.indexOf.call(row.children,cell);
+  function newRow(like){
+    var tr=document.createElement('tr');
+    for(var i=0;i<like.children.length;i++){var td=document.createElement('td');td.innerHTML='<br>';tr.appendChild(td);}
+    return tr;
+  }
+  if(act==='row-above')row.parentNode.insertBefore(newRow(row),row);
+  if(act==='row-below')row.parentNode.insertBefore(newRow(row),row.nextSibling);
+  if(act==='col-left'||act==='col-right'){
+    tbl.querySelectorAll('tr').forEach(function(tr){
+      var ref=tr.children[idx];
+      var tag=(ref&&ref.nodeName==='TH')?'th':'td';
+      var f=document.createElement(tag);f.innerHTML='<br>';
+      if(tag==='th')f.setAttribute('scope','col');
+      if(act==='col-left')tr.insertBefore(f,ref); else tr.insertBefore(f,ref?ref.nextSibling:null);
+    });
+  }
+  if(act==='del-row'){ if(tbl.querySelectorAll('tr').length>1)row.remove(); else tbl.remove(); }
+  if(act==='del-col'){
+    if(row.children.length>1)tbl.querySelectorAll('tr').forEach(function(tr){if(tr.children[idx])tr.children[idx].remove();});
+    else tbl.remove();
+  }
+  if(act==='del-table')tbl.remove();
+  this.changed();
+};
+
+Editor.prototype.run=function(t){
+  if(this.srcMode&&t.a!=='source')return;
+  this.area.focus();
+  if(t.cmd)document.execCommand(t.cmd,false,null);
+  else if(t.b){var c=this.block();document.execCommand('formatBlock',false,(c===t.b&&t.b!=='P')?'P':t.b);}
+  else if(t.a==='link')this.link();
+  else if(t.a==='internal')this.internal();
+  else if(t.a==='image')this.image();
+  else if(t.a==='table')this.insertTable();
+  else if(t.a==='code')document.execCommand('formatBlock',false,'PRE');
+  else if(t.a==='hr')document.execCommand('insertHTML',false,'<hr><p><br></p>');
+  else if(t.a==='clear'){document.execCommand('removeFormat',false,null);document.execCommand('formatBlock',false,'P');}
+  else if(t.a==='source')this.toggleSource();
+  this.changed();this.sync();
+};
+
+Editor.prototype.block=function(){
+  var s=global.getSelection(); if(!s.rangeCount)return '';
+  var n=s.getRangeAt(0).startContainer;
+  if(n.nodeType===3)n=n.parentNode;
+  var b=n.closest?n.closest(BLOCKS):null;
+  return b?b.nodeName:'';
+};
+
+Editor.prototype.insert=function(h){this.area.focus();document.execCommand('insertHTML',false,h);this.changed();};
+
+Editor.prototype.anchor=function(){
+  var s=global.getSelection(); if(!s.rangeCount)return null;
+  var n=s.getRangeAt(0).startContainer;
+  if(n.nodeType===3)n=n.parentNode;
+  return n.closest?n.closest('a'):null;
+};
+
+Editor.prototype.link=function(){
+  var sel=(global.getSelection()||'').toString(),cur=this.anchor();
+  var url=global.prompt('Link URL',cur?cur.getAttribute('href'):'https://');
+  if(url===null)return;
+  if(!url.trim()){if(cur)document.execCommand('unlink',false,null);return;}
+  if(!/^(https?:|mailto:|tel:|\/|#)/i.test(url))url='https://'+url;
+  if(!sel&&!cur){
+    var txt=global.prompt('Link text',url); if(txt===null)return;
+    this.insert('<a href="'+esc(url)+'">'+esc(txt||url)+'</a>');return;
+  }
+  document.execCommand('createLink',false,url);this.changed();
+};
+
+Editor.prototype.internal=function(){
+  var self=this;
+  if(!this.o.onPickInternal)return;
+  var sel=(global.getSelection()||'').toString();
+  this.o.onPickInternal(function(entry){
+    if(!entry)return;
+    self.insert('<a href="'+esc(entry.path)+'">'+esc(sel||entry.title)+'</a>');
+  });
+};
+
+Editor.prototype.image=function(){
+  var self=this;
+  if(!this.o.onPickImage)return;
+  this.o.onPickImage(function(img){
+    if(!img)return;
+    var dim=img.width?' width="'+img.width+'" height="'+img.height+'"':'';
+    self.insert('<figure><img src="'+esc(img.url)+'" alt="'+esc(img.alt||'')+'"'+dim+' loading="lazy">'+
+      (img.caption?'<figcaption>'+esc(img.caption)+'</figcaption>':'')+'</figure><p><br></p>');
+  });
+};
+
+Editor.prototype.insertTable=function(){
+  var c=parseInt(global.prompt('Number of columns','3'),10);
+  var r=parseInt(global.prompt('Number of rows (not counting the header)','3'),10);
+  if(!c||!r||c<1||r<1||c>12||r>60)return;
+  var h='<table><thead><tr>';
+  for(var i=0;i<c;i++)h+='<th scope="col">Heading '+(i+1)+'</th>';
+  h+='</tr></thead><tbody>';
+  for(var j=0;j<r;j++){h+='<tr>';for(var k=0;k<c;k++)h+='<td><br></td>';h+='</tr>';}
+  this.insert(h+'</tbody></table><p><br></p>');
+};
+
+Editor.prototype.paste=function(e){
+  if(this.srcMode)return;
+  var clip=e.clipboardData; if(!clip)return;
+  e.preventDefault();
+  var html=clip.getData('text/html'),plain=clip.getData('text/plain');
+  var out=html?sanitize(html):fromText(plain);
+  if(!html&&/^https?:\/\/\S+$/.test((plain||'').trim()))
+    out='<a href="'+esc(plain.trim())+'">'+esc(plain.trim())+'</a>';
+  document.execCommand('insertHTML',false,out);
+  this.changed();
+};
+
+Editor.prototype.key=function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();this.link();return;}
+  if(e.key==='Tab'){
+    var cell=this.cell();
+    if(cell){
+      e.preventDefault();
+      var cells=Array.prototype.slice.call(cell.closest('table').querySelectorAll('td,th'));
+      var next=cells[cells.indexOf(cell)+(e.shiftKey?-1:1)];
+      if(next){
+        var r=document.createRange();r.selectNodeContents(next);r.collapse(true);
+        var s=global.getSelection();s.removeAllRanges();s.addRange(r);
+      }
+      return;
+    }
+  }
+  if(e.key==='Enter'&&!e.shiftKey){
+    var b=this.block();
+    if(b==='PRE')return;
+    if(/^H[2-5]$|^BLOCKQUOTE$/.test(b)){
+      var s2=global.getSelection(),n=s2.getRangeAt(0).endContainer;
+      var el=n.nodeType===3?n.parentNode:n,box=el.closest(b);
+      if(box&&s2.getRangeAt(0).endOffset>=(n.textContent||'').length){
+        e.preventDefault();
+        var p=document.createElement('p');p.innerHTML='<br>';
+        box.parentNode.insertBefore(p,box.nextSibling);
+        var r2=document.createRange();r2.setStart(p,0);r2.collapse(true);
+        s2.removeAllRanges();s2.addRange(r2);
+        this.changed();
+      }
+    }
+  }
+};
+
+Editor.prototype.sync=function(){
+  var self=this,b=this.block();
+  this.bar.querySelectorAll('.rb').forEach(function(btn){
+    var on=false;
+    if(btn.dataset.cmd){try{on=document.queryCommandState(btn.dataset.cmd);}catch(e){}}
+    else if(btn.dataset.block)on=b===btn.dataset.block;
+    else if(btn.dataset.act==='source')on=self.srcMode;
+    else if(btn.dataset.act==='link')on=!!self.anchor();
+    btn.classList.toggle('on',!!on);
+  });
+};
+
+Editor.prototype.toggleSource=function(){
+  this.srcMode=!this.srcMode;
+  if(this.srcMode){
+    this.src.value=this.area.innerHTML.replace(/></g,'>\n<')
+      .replace(/\n<(\/?(?:strong|em|u|s|a|code|br|img|sub|sup|mark)\b)/g,'<$1');
+    this.src.hidden=false;this.area.hidden=true;this.src.focus();
+  }else{
+    this.area.innerHTML=sanitize(this.src.value);
+    this.src.hidden=true;this.area.hidden=false;this.area.focus();
+  }
+  this.changed();
+};
+
+Editor.prototype.changed=function(){
+  var t=this.area.textContent||'';
+  var w=t.trim()?t.trim().split(/\s+/).length:0;
+  var m=Math.max(1,Math.round(w/225));
+  this.stats.textContent=w.toLocaleString()+' words · about '+m+' min read';
+  this.onChange(this.getHtml(),{words:w,minutes:m});
+};
+
+Editor.prototype.getHtml=function(){return this.srcMode?sanitize(this.src.value):this.area.innerHTML;};
+Editor.prototype.setHtml=function(h){
+  if(this.srcMode)this.toggleSource();
+  this.area.innerHTML=sanitize(h||'');
+  if(!this.area.innerHTML.trim())this.area.innerHTML='<p><br></p>';
+  this.changed();
+};
+
+global.ROCEditor={create:function(o){return new Editor(o);},sanitize:sanitize,esc:esc};
+})(window);
+
+/* ==========================================================================
+   CMS application.
+
+   The previous build sent action:'create' or action:'update' for every save.
+   `create` stored only the title and `update` only changed status, so writing
+   a post and pressing Save reported success and persisted nothing. This talks
+   to the API the way the API is actually built: create once, then save_draft
+   or publish, always carrying the row version so concurrent edits conflict
+   loudly instead of overwriting each other.
+   ========================================================================== */
+(function () {
+'use strict';
+
+var API = '/api/v1/cms/';
+var esc = window.ROCEditor.esc;
+var $ = function (s, r) { return (r || document).querySelector(s); };
+var app = $('#app');
+
+var S = { user:null, csrf:'', view:'dashboard', blogs:[], media:[], editing:null,
+          dirty:false, editor:null, tab:'image', search:'', filter:'all', warn:[] };
+
+/* ------------------------------------------------------------- helpers */
+
+function bytes(n){ n=+n||0; return n<1024?n+' B':n<1048576?Math.round(n/1024)+' KB':(n/1048576).toFixed(1)+' MB'; }
+function when(v){ if(!v)return '—'; var d=new Date(v.replace?v.replace(' ','T'):v);
+  return isNaN(d)?'—':d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
+function slugify(s){ return String(s).toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g,'')
+  .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,180); }
+
+function toast(msg, kind){
+  var box=$('.toasts')||(function(){var e=document.createElement('div');e.className='toasts';document.body.appendChild(e);return e;})();
+  var t=document.createElement('div'); t.className='toast '+(kind||''); t.textContent=msg;
+  box.appendChild(t); setTimeout(function(){t.remove();}, kind==='bad'?7000:3200);
+}
+
+async function api(endpoint, body, method){
+  var opts = { method: method || (body ? 'POST' : 'GET'), headers: {} };
+  if (body) { opts.headers['Content-Type']='application/json'; opts.body=JSON.stringify(body); }
+  if (S.csrf) opts.headers['X-CMS-CSRF-Token']=S.csrf;
+  var res = await fetch(API+endpoint, opts);
+  var data;
+  try { data = await res.json(); }
+  catch(e){ throw new Error('The server returned something unexpected. Your session may have expired — reload and sign in again.'); }
+  if (!res.ok || data.success === false) throw new Error(data.error || 'Request failed.');
+  return data;
+}
+
+/* ---------------------------------------------------------------- gate */
+
+function renderLogin(error){
+  app.innerHTML =
+  '<div class="gate"><div class="gcard">'+
+    '<div class="brand" style="margin-bottom:18px"><div class="mark">ROC</div>'+
+    '<div><div class="bname">Run On Console</div><div class="bsub">Content management</div></div></div>'+
+    '<h2 style="font-size:19px;margin-bottom:5px">Sign in</h2>'+
+    '<p style="color:var(--ink-3);font-size:13px;margin:0 0 18px">Use the account your administrator created.</p>'+
+    (error?'<div class="alert bad">'+esc(error)+'</div>':'')+
+    '<form id="lf">'+
+      '<div class="field"><label>Username or email</label><input type="text" name="username" required autocomplete="username"></div>'+
+      '<div class="field"><label>Password</label><input type="password" name="password" required autocomplete="current-password"></div>'+
+      '<button class="btn primary" style="width:100%;justify-content:center;margin-top:6px" type="submit">Sign in</button>'+
+    '</form>'+
+  '</div></div>';
+
+  $('#lf').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var b=$('button',e.target), f=new FormData(e.target);
+    b.disabled=true; b.innerHTML='<span class="spin"></span>';
+    try{
+      var d=await api('auth.php',{action:'login',username:f.get('username'),password:f.get('password')});
+      S.user=d.user; S.csrf=d.csrf_token; await load();
+    }catch(err){
+      renderLogin(err.message);
+    }
+  });
+}
+
+/* --------------------------------------------------------------- shell */
+
+function renderShell(){
+  var admin = S.user && S.user.role === 'administrator';
+  function item(v,label,ic,ct){
+    return '<button class="sitem'+(S.view===v?' on':'')+'" data-go="'+v+'">'+
+      '<span class="ic">'+ic+'</span><span>'+esc(label)+'</span>'+
+      (ct!==undefined?'<span class="ct">'+ct+'</span>':'')+'</button>';
+  }
+  app.innerHTML =
+  '<div class="shell"><aside class="side">'+
+    '<div class="side-top"><div class="brand"><div class="mark">ROC</div>'+
+    '<div><div class="bname">ROC CMS</div><div class="bsub">Content</div></div></div></div>'+
+    '<div class="snav"><div class="slabel">Workspace</div>'+item('dashboard','Dashboard','◱')+'</div>'+
+    '<div class="snav"><div class="slabel">Content</div>'+
+      item('blogs','Blog posts','✎',S.blogs.length)+
+      item('media','Media library','❖',S.media.length)+'</div>'+
+    (admin?'<div class="snav"><div class="slabel">Manage</div>'+
+      item('users','CMS users','◉')+item('audit','Audit log','◴')+'</div>':'')+
+    '<div class="sfoot"><div class="who"><div class="av">'+
+      esc((S.user.username||'?').slice(0,2).toUpperCase())+'</div>'+
+      '<div><div style="font-size:12.5px">'+esc(S.user.username)+'</div>'+
+      '<div style="font-size:11px;color:var(--ink-3);text-transform:capitalize">'+esc(S.user.role)+'</div></div></div>'+
+      '<button class="sitem" id="out"><span class="ic">⏻</span><span>Sign out</span></button>'+
+    '</div></aside><main class="main" id="main"></main></div>';
+
+  app.querySelectorAll('[data-go]').forEach(function(b){
+    b.addEventListener('click',function(){ go(b.dataset.go); });
+  });
+  $('#out').addEventListener('click', async function(){
+    if(S.dirty && !confirm('You have unsaved changes. Sign out anyway?'))return;
+    try{ await api('auth.php',{action:'logout'}); }catch(e){}
+    location.reload();
+  });
+  renderView();
+}
+
+function go(v){
+  if(S.dirty && !confirm('You have unsaved changes. Leave without saving?'))return;
+  if(S.editing) releaseLock(S.editing.id);
+  S.dirty=false; S.editing=null; S.view=v; S.search=''; S.filter='all';
+  renderShell();
+}
+
+function renderView(){
+  var m=$('#main');
+  if(S.editing) return renderEditor(m);
+  if(S.view==='dashboard') return renderDash(m);
+  if(S.view==='media') return renderMedia(m);
+  if(S.view==='users') return renderSimple(m,'users.php','users','CMS users & roles',['id','username','email','role']);
+  if(S.view==='audit') return renderSimple(m,'audit-logs.php','logs','Audit log',['created_at','action','entity_type','entity_id','username']);
+  return renderBlogs(m);
+}
+
+function head(title, sub, right){
+  return '<div class="bar"><div><h1>'+esc(title)+'</h1>'+
+    (sub?'<div class="sub">'+esc(sub)+'</div>':'')+'</div>'+
+    '<div class="right">'+(right||'')+'</div></div>';
+}
+
+/* ----------------------------------------------------------- dashboard */
+
+function renderDash(m){
+  var pub=S.blogs.filter(function(b){return b.status==='published';});
+  var dr=S.blogs.filter(function(b){return b.status!=='published';});
+  var heavy=S.media.filter(function(x){return +x.file_size>102400;});
+  var noAlt=S.media.filter(function(x){return !x.alt_text;});
+
+  var gaps=[];
+  pub.forEach(function(b){
+    var g=[];
+    if(!b.meta_title)g.push('meta title');
+    if(!b.meta_description)g.push('meta description');
+    if(!b.image)g.push('cover image');
+    if(g.length)gaps.push({b:b,g:g});
+  });
+
+  m.innerHTML = head('Dashboard','What is live and what needs attention')+
+  '<div class="body narrow">'+
+    '<div class="stats">'+
+      stat(pub.length,'Published')+stat(dr.length,'Drafts')+
+      stat(S.media.length,'Images')+stat(gaps.length,'Need SEO')+
+    '</div>'+
+    (gaps.length?'<div class="card"><div class="chead"><h3>Published posts missing SEO fields</h3>'+
+      '<span class="note">'+gaps.length+'</span></div><div class="cbody"><div class="advice">'+
+      gaps.slice(0,6).map(function(x){
+        return '<div class="a warn"><span class="m">▲</span><span><b data-open="'+esc(x.b.id)+
+          '" style="cursor:pointer;text-decoration:underline">'+esc(x.b.title)+'</b> — missing '+esc(x.g.join(', '))+'</span></div>';
+      }).join('')+'</div></div></div>':'')+
+    ((heavy.length||noAlt.length)?'<div class="card"><div class="chead"><h3>Media</h3></div><div class="cbody"><div class="advice">'+
+      (noAlt.length?'<div class="a error"><span class="m">●</span><span>'+noAlt.length+' image(s) have no alt text.</span></div>':'')+
+      (heavy.length?'<div class="a warn"><span class="m">▲</span><span>'+heavy.length+' image(s) are over 100 KB.</span></div>':'')+
+      '</div></div></div>':'')+
+    '<div class="card"><div class="chead"><h3>Recently edited</h3></div>'+
+    '<table class="list"><thead><tr><th>Title</th><th>Status</th><th>Updated</th></tr></thead><tbody>'+
+    (S.blogs.slice(0,8).map(function(b){
+      return '<tr><td><div class="t-title" data-open="'+esc(b.id)+'">'+esc(b.title)+'</div>'+
+        '<div class="t-slug">/blogs/'+esc(b.slug||'')+'/</div></td>'+
+        '<td><span class="tag '+(b.status==='published'?'published':'draft')+'">'+esc(b.status)+'</span></td>'+
+        '<td style="color:var(--ink-3)">'+when(b.updated_at)+'</td></tr>';
+    }).join('')||'<tr><td colspan="3" class="empty">No posts yet.</td></tr>')+
+    '</tbody></table></div></div>';
+  wireOpen(m);
+}
+
+function stat(n,l){ return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>'; }
+
+function wireOpen(root){
+  root.querySelectorAll('[data-open]').forEach(function(el){
+    el.addEventListener('click',function(){ openBlog(el.dataset.open); });
+  });
+}
+
+/* --------------------------------------------------------------- blogs */
+
+function renderBlogs(m){
+  var rows=S.blogs.filter(function(b){
+    if(S.filter!=='all' && (S.filter==='published') !== (b.status==='published'))return false;
+    if(S.search){ var h=(b.title+' '+(b.slug||'')).toLowerCase();
+      if(h.indexOf(S.search.toLowerCase())===-1)return false; }
+    return true;
+  });
+
+  m.innerHTML = head('Blog posts', rows.length+' of '+S.blogs.length+' shown',
+    '<button class="btn primary" id="newpost">＋ New post</button>')+
+  '<div class="body"><div class="card">'+
+    '<div class="chead" style="gap:8px">'+
+      '<div class="search" style="max-width:280px;flex:1"><input type="text" id="q" placeholder="Search title or slug" value="'+esc(S.search)+'"></div>'+
+      '<select id="f" style="max-width:150px">'+
+      ['all','published','draft'].map(function(s){
+        return '<option value="'+s+'"'+(S.filter===s?' selected':'')+'>'+
+          (s==='all'?'All':s.charAt(0).toUpperCase()+s.slice(1))+'</option>';
+      }).join('')+'</select></div>'+
+    (rows.length?'<table class="list"><thead><tr><th>Title</th><th>Status</th><th>SEO</th><th>Updated</th></tr></thead><tbody>'+
+      rows.map(function(b){
+        var g=[];
+        if(!b.meta_title)g.push('title');
+        if(!b.meta_description)g.push('description');
+        if(!b.image)g.push('image');
+        var locked = b.locked_by && b.locked_at &&
+          (Date.now() - new Date(String(b.locked_at).replace(' ','T')).getTime()) < 900000;
+        return '<tr><td><div class="t-title" data-open="'+esc(b.id)+'">'+esc(b.title)+
+          (locked?' <span style="color:var(--amber);font-size:11px">● being edited</span>':'')+'</div>'+
+          '<div class="t-slug">/blogs/'+esc(b.slug||'')+'/</div></td>'+
+          '<td><span class="tag '+(b.status==='published'?'published':'draft')+'">'+esc(b.status)+'</span></td>'+
+          '<td>'+(g.length?'<span style="color:var(--amber);font-size:12px">▲ '+esc(g.join(', '))+'</span>'
+                          :'<span style="color:var(--brand);font-size:12px">✓ complete</span>')+'</td>'+
+          '<td style="color:var(--ink-3)">'+when(b.updated_at)+'</td></tr>';
+      }).join('')+'</tbody></table>'
+      :'<div class="empty"><div class="big">✎</div><div>No posts match this view.</div></div>')+
+  '</div></div>';
+
+  var q=$('#q',m);
+  q.addEventListener('input',function(){
+    S.search=q.value; var at=q.selectionStart; renderView();
+    var f=$('#q',$('#main')); if(f){f.focus();f.setSelectionRange(at,at);}
+  });
+  $('#f',m).addEventListener('change',function(){ S.filter=this.value; renderView(); });
+  $('#newpost',m).addEventListener('click',newBlog);
+  wireOpen(m);
+}
+
+function blankBlog(){
+  return { id:null, version:0, title:'', slug:'', excerpt:'', content:'', category:'general',
+    author_name:(S.user&&S.user.username)||'', image:'', image_alt:'',
+    meta_title:'', meta_description:'', canonical_url:'', focus_keyword:'',
+    is_noindex:0, is_nofollow:0, og_title:'', og_description:'', og_image:'', og_type:'',
+    twitter_card:'summary_large_image', twitter_title:'', twitter_description:'', twitter_image:'',
+    schema_type:'', schema_json:'', status:'draft' };
+}
+
+function newBlog(){ S.editing=blankBlog(); S.dirty=false; S.tab='image'; renderShell(); }
+
+async function openBlog(id){
+  try{
+    var d=await api('blogs.php?id='+encodeURIComponent(id));
+    S.editing=d.blog; S.dirty=false; S.tab='image';
+    if(d.blog.lock_warning) toast(d.blog.lock_warning,'bad');
+    if(d.blog.has_draft) toast('Showing your unsaved draft, not the published version.');
+    renderShell();
+  }catch(e){ toast(e.message,'bad'); }
+}
+
+function releaseLock(id){
+  if(!id)return;
+  try{ api('blogs.php',{action:'release_lock',id:id}).catch(function(){}); }catch(e){}
+}
+
+/* -------------------------------------------------------------- editor */
+
+function fieldHtml(key,label,opts){
+  opts=opts||{};
+  var e=S.editing, v=e[key]==null?'':String(e[key]), id='f-'+key, input;
+  if(opts.type==='textarea')
+    input='<textarea id="'+id+'" data-k="'+key+'" rows="'+(opts.rows||2)+'">'+esc(v)+'</textarea>';
+  else if(opts.type==='select')
+    input='<select id="'+id+'" data-k="'+key+'">'+opts.options.map(function(o){
+      return '<option value="'+esc(o)+'"'+(v===o?' selected':'')+'>'+esc(o||'— default —')+'</option>';}).join('')+'</select>';
+  else
+    input='<input type="text" id="'+id+'" data-k="'+key+'" value="'+esc(v)+'"'+
+      (opts.placeholder?' placeholder="'+esc(opts.placeholder)+'"':'')+'>';
+  var extra='';
+  if(opts.max){
+    var pct=Math.min(100,Math.round(v.length/opts.max*100));
+    extra='<div class="meter"><i class="'+(v.length>opts.max?'over':'')+'" style="width:'+pct+'%"></i></div>'+
+      '<div class="hint'+(v.length>opts.max?' warn':'')+'" data-count="'+opts.max+'">'+v.length+' / '+opts.max+
+      ' characters'+(opts.note?' · '+esc(opts.note):'')+'</div>';
+  } else if(opts.note) extra='<div class="hint">'+esc(opts.note)+'</div>';
+  return '<div class="field"><label for="'+id+'">'+esc(label)+'</label>'+input+extra+'</div>';
+}
+
+function imageField(key,label,note){
+  var url=S.editing[key]||'';
+  var m=S.media.filter(function(x){return x.file_url===url;})[0];
+  return '<div class="field"><label>'+esc(label)+'</label>'+
+    '<div style="display:flex;gap:9px;align-items:flex-start">'+
+    '<div style="width:92px;height:69px;border-radius:7px;border:1px solid var(--line-2);flex:none;background:'+
+      (url?"var(--bg) url('"+esc(url)+"') center/cover no-repeat":'var(--bg)')+
+      ';display:grid;place-items:center;color:var(--ink-3);font-size:11px">'+(url?'':'none')+'</div>'+
+    '<div style="flex:1;min-width:0">'+
+      '<div style="display:flex;gap:6px;margin-bottom:5px;flex-wrap:wrap">'+
+      '<button class="btn sm" data-pick="'+key+'">Choose</button>'+
+      (url?'<button class="btn sm ghost" data-clear="'+key+'">Remove</button>':'')+'</div>'+
+      (m?'<div class="hint">'+m.width+'×'+m.height+' · '+bytes(m.file_size)+
+         (+m.file_size>102400?' <span style="color:var(--amber)">▲ over 100 KB</span>':'')+'</div>':'')+
+      (note?'<div class="hint">'+esc(note)+'</div>':'')+
+    '</div></div></div>';
+}
+
+function panelBody(){
+  var e=S.editing;
+  if(S.tab==='image'){
+    return imageField('image','Cover image')+
+      fieldHtml('image_alt','Alt text',{note:'Describe the image. Required before publishing.'})+
+      fieldHtml('category','Category')+
+      fieldHtml('author_name','Author');
+  }
+  if(S.tab==='seo'){
+    var url='https://runonconsole.com/blogs/'+(e.slug||'…')+'/';
+    return '<div class="field"><label>Google preview</label><div class="serp">'+
+      '<div class="u" id="pv-url">'+esc(url)+'</div>'+
+      '<div class="t" id="pv-title">'+esc(e.meta_title||e.title||'Untitled')+'</div>'+
+      '<div class="d" id="pv-desc">'+esc(e.meta_description||'No meta description yet.')+'</div></div></div>'+
+      fieldHtml('meta_title','Meta title',{max:60,note:'Falls back to the post title'})+
+      fieldHtml('meta_description','Meta description',{type:'textarea',max:160,rows:3})+
+      fieldHtml('focus_keyword','Focus keyword',{note:'Optional. Used only by the checks below.'})+
+      fieldHtml('canonical_url','Canonical URL',{note:'Leave empty to self-canonicalise.'})+
+      '<label class="check"><input type="checkbox" data-k="is_noindex"'+(+e.is_noindex?' checked':'')+'> noindex</label>'+
+      '<label class="check"><input type="checkbox" data-k="is_nofollow"'+(+e.is_nofollow?' checked':'')+'> nofollow</label>';
+  }
+  if(S.tab==='social'){
+    var img=e.og_image||e.image||'';
+    return '<div class="field"><label>Share preview</label><div class="og">'+
+      '<div class="pic" id="pv-og-img" style="'+(img?"background-image:url('"+esc(img)+"')":'')+'">'+(img?'':'No image')+'</div>'+
+      '<div class="meta"><div class="host">runonconsole.com</div>'+
+      '<div class="h" id="pv-og-title">'+esc(e.og_title||e.meta_title||e.title||'Untitled')+'</div>'+
+      '<div class="p" id="pv-og-desc">'+esc(e.og_description||e.meta_description||'')+'</div></div></div>'+
+      '<div class="hint">WhatsApp and Facebook do not run JavaScript, so these are rendered by index.php on the server.</div></div>'+
+      fieldHtml('og_title','OG title',{note:'Falls back to the meta title'})+
+      fieldHtml('og_description','OG description',{type:'textarea',rows:2})+
+      imageField('og_image','OG image','1200×630 works best. Falls back to the cover image.')+
+      fieldHtml('og_type','OG type',{type:'select',options:['','article','website','product']})+
+      '<hr style="border:0;border-top:1px solid var(--line);margin:14px 0">'+
+      fieldHtml('twitter_card','Twitter card',{type:'select',options:['summary_large_image','summary']})+
+      fieldHtml('twitter_title','Twitter title',{note:'Falls back to the OG title'})+
+      fieldHtml('twitter_description','Twitter description',{type:'textarea',rows:2});
+  }
+  return fieldHtml('schema_type','Schema type',{type:'select',
+      options:['','Article','BlogPosting','NewsArticle','Review','HowTo','FAQPage','WebPage'],
+      note:'Leave empty for BlogPosting.'})+
+    '<div class="field"><label>Generated JSON-LD</label><div class="codebox" id="schemaout">…</div>'+
+    '<div class="hint">This is what index.php will output. Paste your own below to override it.</div></div>'+
+    fieldHtml('schema_json','Manual override',{type:'textarea',rows:6,note:'Valid JSON only.'});
+}
+
+function renderEditor(m){
+  var e=S.editing, isNew=!e.id;
+  m.innerHTML = head(isNew?'New post':(e.title||'Untitled'),
+    isNew?'Draft · not saved yet':('/blogs/'+(e.slug||'')+'/ · v'+e.version),
+    (S.dirty?'<span class="dirty" title="Unsaved changes"></span>':'')+
+    '<button class="btn ghost" id="close">Close</button>'+
+    '<button class="btn" id="savedraft">Save draft</button>'+
+    '<button class="btn primary" id="publish">'+(e.status==='published'?'Update live post':'Publish')+'</button>'+
+    (e.status==='published'?'<button class="btn danger" id="unpub">Unpublish</button>':''))+
+  '<div class="body"><div class="egrid"><div>'+
+    '<div class="card"><div class="cbody">'+
+      fieldHtml('title','Title',{placeholder:'Give this post a title'})+
+      '<div class="field"><label for="f-slug">URL slug</label>'+
+      '<div style="display:flex;gap:6px"><input type="text" id="f-slug" data-k="slug" value="'+esc(e.slug||'')+'">'+
+      '<button class="btn sm" id="reslug" title="Generate from title">↻</button></div>'+
+      '<div class="hint">runonconsole.com<b>/blogs/'+esc(e.slug||'…')+'/</b></div></div>'+
+      fieldHtml('excerpt','Short description',{type:'textarea',rows:2,note:'Used in listings and as the meta description fallback.'})+
+    '</div></div>'+
+    '<div class="card"><div class="chead"><h3>Content</h3>'+
+      '<span class="note">Paste from anywhere — formatting is cleaned</span></div>'+
+      '<div id="mount"></div></div>'+
+  '</div><div class="scol">'+
+    '<div class="card"><div class="tabs">'+
+      ['image','seo','social','schema'].map(function(t){
+        var L={image:'Image',seo:'SEO',social:'Social',schema:'Schema'};
+        return '<button class="tab'+(S.tab===t?' on':'')+'" data-tab="'+t+'">'+L[t]+'</button>';
+      }).join('')+'</div><div class="cbody" id="panel">'+panelBody()+'</div></div>'+
+    '<div class="card"><div class="chead"><h3>Checks</h3></div>'+
+    '<div class="cbody"><div class="advice" id="advice"></div></div></div>'+
+  '</div></div></div>';
+
+  S.editor = window.ROCEditor.create({
+    mount: $('#mount', m),
+    onChange: function(html){
+      if(S.editing.content!==html){ S.editing.content=html; markDirty(); checks(); }
+    },
+    onPickImage: function(done){ pickMedia(done); },
+    onPickInternal: function(done){ pickInternal(done); }
+  });
+  S.editor.setHtml(e.content||'');
+
+  wireFields(m,false);
+  $('#close',m).addEventListener('click',function(){
+    if(S.dirty && !confirm('Close without saving? Your changes will be lost.'))return;
+    releaseLock(S.editing.id); S.dirty=false; S.editing=null; renderShell();
+  });
+  $('#reslug',m).addEventListener('click',function(){
+    S.editing.slug=slugify(S.editing.title||''); $('#f-slug',m).value=S.editing.slug; markDirty();
+  });
+  $('#savedraft',m).addEventListener('click',function(){ save(false); });
+  $('#publish',m).addEventListener('click',function(){ save(true); });
+  var un=$('#unpub',m);
+  if(un) un.addEventListener('click', unpublish);
+  document.addEventListener('keydown', hotkey);
+  checks();
+}
+
+function hotkey(ev){
+  if((ev.ctrlKey||ev.metaKey)&&ev.key==='s'){ ev.preventDefault(); if(S.editing) save(false); }
+}
+
+function wireFields(root, panelOnly){
+  root.querySelectorAll('[data-k]').forEach(function(el){
+    var evt = (el.type==='checkbox'||el.tagName==='SELECT') ? 'change' : 'input';
+    el.addEventListener(evt, function(){
+      var k=el.dataset.k;
+      S.editing[k] = el.type==='checkbox' ? (el.checked?1:0) : el.value;
+      if(k==='title' && !S.editing.id && !S.editing._slugTouched){
+        S.editing.slug=slugify(el.value);
+        var si=$('#f-slug'); if(si) si.value=S.editing.slug;
+      }
+      if(k==='slug') S.editing._slugTouched=true;
+      markDirty();
+      if(evt==='change') refreshPanel(); else { updateCount(el); livePreview(); }
+      checks();
+    });
+  });
+  root.querySelectorAll('[data-pick]').forEach(function(b){
+    b.addEventListener('click',function(){
+      pickMedia(function(img){
+        if(!img)return;
+        S.editing[b.dataset.pick]=img.url;
+        if(b.dataset.pick==='image' && img.alt && !S.editing.image_alt) S.editing.image_alt=img.alt;
+        markDirty(); refreshPanel(); checks();
+      });
+    });
+  });
+  root.querySelectorAll('[data-clear]').forEach(function(b){
+    b.addEventListener('click',function(){ S.editing[b.dataset.clear]=''; markDirty(); refreshPanel(); });
+  });
+
+  // Panel rebuilds must not re-bind the page buttons, or Save fires once per rebuild.
+  if(panelOnly) return;
+  root.querySelectorAll('[data-tab]').forEach(function(b){
+    b.addEventListener('click',function(){ S.tab=b.dataset.tab; refreshPanel(true); });
+  });
+}
+
+/* Patch the preview nodes directly. Re-rendering the whole panel on every
+   keystroke would steal focus from the field being typed into. */
+function livePreview(){
+  var e=S.editing; if(!e)return;
+  var set=function(id,text){ var n=document.getElementById(id); if(n) n.textContent=text; };
+  set('pv-url','https://runonconsole.com/blogs/'+(e.slug||'\u2026')+'/');
+  set('pv-title', e.meta_title||e.title||'Untitled');
+  set('pv-desc', e.meta_description||'No meta description yet.');
+  set('pv-og-title', e.og_title||e.meta_title||e.title||'Untitled');
+  set('pv-og-desc', e.og_description||e.meta_description||'');
+  var slugHint=document.querySelector('#f-slug');
+  if(slugHint){
+    var h=slugHint.closest('.field').querySelector('.hint b');
+    if(h) h.textContent='/blogs/'+(e.slug||'\u2026')+'/';
+  }
+  var pic=document.getElementById('pv-og-img');
+  if(pic){
+    var img=e.og_image||e.image||'';
+    pic.style.backgroundImage = img ? "url('"+img.replace(/'/g,"%27")+"')" : '';
+    pic.textContent = img ? '' : 'No image';
+  }
+}
+
+function updateCount(el){
+  var f=el.closest('.field'), meter=f&&f.querySelector('.meter i'), hint=f&&f.querySelector('[data-count]');
+  if(!meter||!hint)return;
+  var max=+hint.dataset.count, len=el.value.length;
+  meter.style.width=Math.min(100,len/max*100)+'%';
+  meter.className=len>max?'over':'';
+  hint.className='hint'+(len>max?' warn':'');
+  hint.textContent=hint.textContent.replace(/^\d+/,len);
+}
+
+function markDirty(){
+  if(S.dirty)return;
+  S.dirty=true;
+  var r=$('.bar .right');
+  if(r && !r.querySelector('.dirty')){
+    var d=document.createElement('span'); d.className='dirty'; d.title='Unsaved changes';
+    r.insertBefore(d,r.firstChild);
+  }
+}
+
+function refreshPanel(tabs){
+  var p=$('#panel'); if(!p)return;
+  if(tabs) document.querySelectorAll('[data-tab]').forEach(function(b){
+    b.classList.toggle('on', b.dataset.tab===S.tab);
+  });
+  p.innerHTML=panelBody();
+  wireFields(p,true);
+  if(S.tab==='schema') paintSchema();
+}
+
+/* ---------------------------------------------------------- SEO checks */
+
+function checks(){
+  var e=S.editing; if(!e)return;
+  var out=[], text=(S.editor?S.editor.area.textContent:'').trim();
+  var words=text?text.split(/\s+/).length:0;
+
+  var t=(e.meta_title||e.title||'').trim();
+  if(!t) out.push(['error','No meta title. Search engines will invent one.']);
+  else if(t.length>60) out.push(['warn','Meta title is '+t.length+' characters. Google truncates past about 60.']);
+
+  var d=(e.meta_description||'').trim();
+  if(!d) out.push(['error','No meta description.']);
+  else if(d.length>160) out.push(['warn','Meta description is '+d.length+' characters. Google truncates past about 160.']);
+
+  if(!e.image) out.push(['warn','No cover image, so shares will have no preview picture.']);
+  else if(!(e.image_alt||'').trim()) out.push(['error','Cover image has no alt text. This blocks publishing.']);
+
+  if(words<300) out.push(['warn','Body is about '+words+' words. Thin posts rarely rank.']);
+
+  var k=(e.focus_keyword||'').trim().toLowerCase();
+  if(k){
+    if(t.toLowerCase().indexOf(k)===-1) out.push(['warn','Focus keyword is not in the meta title.']);
+    if(text.toLowerCase().indexOf(k)===-1) out.push(['warn','Focus keyword does not appear in the body.']);
+  }
+  if(+e.is_noindex) out.push(['warn','This post is set to noindex, so it will stay out of search results.']);
+
+  if(e.schema_json && e.schema_json.trim()){
+    try{ JSON.parse(e.schema_json); }
+    catch(err){ out.push(['error','Schema JSON is not valid: '+err.message]); }
+  }
+
+  var box=$('#advice');
+  if(box){
+    var mark={error:'●',warn:'▲',info:'i',ok:'✓'};
+    box.innerHTML = out.length
+      ? out.map(function(w){ return '<div class="a '+w[0]+'"><span class="m">'+mark[w[0]]+'</span><span>'+esc(w[1])+'</span></div>'; }).join('')
+      : '<div class="a ok"><span class="m">✓</span><span>No issues found.</span></div>';
+  }
+  if(S.tab==='schema') paintSchema();
+}
+
+function paintSchema(){
+  var box=$('#schemaout'); if(!box)return;
+  var e=S.editing;
+  if(e.schema_json && e.schema_json.trim()){
+    try{ box.textContent=JSON.stringify(JSON.parse(e.schema_json),null,2); return; }
+    catch(err){ box.textContent='Override is not valid JSON:\n'+err.message; return; }
+  }
+  var url='https://runonconsole.com/blogs/'+(e.slug||'')+'/';
+  var img=e.og_image||e.image||'';
+  if(img && img.charAt(0)==='/') img='https://runonconsole.com'+img;
+  var node={ '@context':'https://schema.org', '@type':e.schema_type||'BlogPosting',
+    headline:(e.meta_title||e.title||'').slice(0,110), url:url,
+    mainEntityOfPage:{'@type':'WebPage','@id':url} };
+  if(e.meta_description) node.description=e.meta_description;
+  if(img) node.image=[img];
+  if(e.author_name) node.author={'@type':'Person',name:e.author_name};
+  node.publisher={'@type':'Organization',name:'Run On Console',
+    logo:{'@type':'ImageObject',url:'https://runonconsole.com/social-logo.svg'}};
+  box.textContent=JSON.stringify(node,null,2);
+}
+
+/* ----------------------------------------------------------- saving
+   This is the part that was broken. The old UI sent action 'create' for new
+   posts and 'update' for existing ones; 'create' stored only the title and
+   'update' only changed status, so content never reached the database.
+   ------------------------------------------------------------------- */
+
+function draftPayload(){
+  var e=S.editing, out={};
+  ['title','slug','excerpt','content','category','author_name','image','image_alt',
+   'meta_title','meta_description','canonical_url','focus_keyword',
+   'is_noindex','is_nofollow','og_title','og_description','og_image','og_type',
+   'twitter_card','twitter_title','twitter_description','twitter_image',
+   'schema_type','schema_json'].forEach(function(k){
+     out[k] = e[k]==null ? '' : e[k];
+   });
+  out.content = S.editor ? S.editor.getHtml() : (e.content||'');
+  return out;
+}
+
+async function save(publish){
+  var e=S.editing;
+  if(!e) return;
+  if(!(e.title||'').trim()){ toast('Give the post a title first.','bad'); return; }
+
+  var btn = publish ? $('#publish') : $('#savedraft');
+  var label = btn ? btn.textContent : '';
+  if(btn){ btn.disabled=true; btn.innerHTML='<span class="spin"></span>'; }
+
+  try{
+    // A post must exist before it can hold a draft, so create it first.
+    if(!e.id){
+      var created = await api('blogs.php',{ action:'create', draft: draftPayload() });
+      e.id = created.id;
+      e.slug = created.slug;
+      e.version = created.version;
+    }
+
+    var res = await api('blogs.php',{
+      action: publish ? 'publish' : 'save_draft',
+      id: e.id,
+      version: e.version,
+      draft: draftPayload()
+    });
+
+    e.version = res.version;
+    if(res.slug) e.slug = res.slug;
+    if(publish) e.status = 'published';
+    S.dirty = false;
+
+    toast(publish ? ('Published — live at '+(res.url||('/blogs/'+e.slug+'/'))) : 'Draft saved.', 'good');
+    await refreshBlogs();
+    renderShell();
+
+  }catch(err){
+    toast(err.message,'bad');
+    if(btn){ btn.disabled=false; btn.textContent=label; }
+  }
+}
+
+async function unpublish(){
+  if(!confirm('Take this post off the live site? It goes back to draft.'))return;
+  try{
+    var res = await api('blogs.php',{action:'update',id:S.editing.id,version:S.editing.version,status:'draft'});
+    S.editing.version = res.version;
+    S.editing.status = 'draft';
+    toast('Post moved back to draft.');
+    await refreshBlogs();
+    renderShell();
+  }catch(e){ toast(e.message,'bad'); }
+}
+
+async function refreshBlogs(){
+  try{ S.blogs = (await api('blogs.php')).blogs || []; }catch(e){}
+}
+
+/* ---------------------------------------------------------------- media */
+
+function mediaUrl(m){ return m.file_url || ''; }
+
+function renderMedia(m){
+  var heavy=S.media.filter(function(x){return +x.file_size>102400;});
+  var noAlt=S.media.filter(function(x){return !x.alt_text;});
+
+  m.innerHTML = head('Media library', S.media.length+' images',
+    '<button class="btn primary" id="up">＋ Upload</button>')+
+  '<div class="body">'+
+  ((heavy.length||noAlt.length)?'<div class="card"><div class="cbody"><div class="advice">'+
+    (heavy.length?'<div class="a warn"><span class="m">▲</span><span><b>'+heavy.length+
+      '</b> image(s) are over 100 KB. Large images cost Core Web Vitals score.</span></div>':'')+
+    (noAlt.length?'<div class="a error"><span class="m">●</span><span><b>'+noAlt.length+
+      '</b> image(s) have no alt text. A post cannot publish with an alt-less cover.</span></div>':'')+
+    '</div></div></div>':'')+
+  '<input type="file" id="file" accept="image/*" multiple hidden>'+
+  (S.media.length?'<div class="mgrid">'+S.media.map(function(x){
+    return '<div class="mitem" data-m="'+esc(x.id)+'">'+
+      '<div class="mthumb" style="background-image:url(\''+esc(mediaUrl(x))+'\')">'+
+      (+x.file_size>102400?'<span class="flag">'+bytes(x.file_size)+'</span>':'')+'</div>'+
+      '<div class="mmeta"><div class="mname" title="'+esc(x.filename)+'">'+esc(x.filename)+'</div>'+
+      '<div class="msub">'+(x.width?x.width+'×'+x.height:'—')+
+      (x.alt_text?'':' <span class="noalt">· no alt</span>')+'</div></div></div>';
+  }).join('')+'</div>'
+  :'<div class="card"><div class="empty"><div class="big">❖</div><div>No images yet.</div></div></div>')+
+  '</div>';
+
+  var input=$('#file',m);
+  $('#up',m).addEventListener('click',function(){ input.click(); });
+  input.addEventListener('change', async function(){
+    var files=Array.prototype.slice.call(input.files||[]);
+    for(var i=0;i<files.length;i++) await uploadOne(files[i]);
+    input.value='';
+    await refreshMedia();
+    renderShell();
+  });
+  m.querySelectorAll('[data-m]').forEach(function(el){
+    el.addEventListener('click',function(){ mediaDetail(el.dataset.m); });
+  });
+}
+
+async function uploadOne(file){
+  var fd=new FormData(); fd.append('file',file);
+  try{
+    var res=await fetch(API+'media.php',{method:'POST',headers:{'X-CMS-CSRF-Token':S.csrf},body:fd});
+    var d=await res.json();
+    if(!d.success) throw new Error(d.error||'Upload failed.');
+    toast(file.name+' uploaded.','good');
+  }catch(e){ toast(file.name+': '+e.message,'bad'); }
+}
+
+async function refreshMedia(){
+  try{ S.media=(await api('media.php')).media||[]; }catch(e){}
+}
+
+function mediaDetail(id){
+  var x=S.media.filter(function(v){return String(v.id)===String(id);})[0];
+  if(!x)return;
+  var big=+x.file_size>102400;
+  modal('Image details',
+    '<div style="display:grid;grid-template-columns:190px 1fr;gap:16px">'+
+    '<div><img src="'+esc(mediaUrl(x))+'" alt="" style="width:100%;border-radius:8px;border:1px solid var(--line-2)"></div>'+
+    '<div><div class="field"><label>File</label><div style="font-size:13px">'+esc(x.filename)+'</div>'+
+    '<div class="hint">'+(x.width?x.width+' × '+x.height+' px · ':'')+bytes(x.file_size)+'</div></div>'+
+    (big?'<div class="alert warn">Over 100 KB. Uploads are re-encoded to WebP by the server; if this is still '+
+         'large, re-export it smaller before uploading.</div>':'')+
+    '<div class="field"><label>Alt text</label><textarea id="m-alt" rows="2">'+esc(x.alt_text||'')+'</textarea>'+
+    '<div class="hint">Describe what the image shows. Required before a post using it can be published.</div></div>'+
+    '<div class="field"><label>Caption</label><input type="text" id="m-cap" value="'+esc(x.caption||'')+'"></div>'+
+    '<div class="field"><label>URL</label><input type="text" readonly value="'+esc(mediaUrl(x))+'" onclick="this.select()"></div>'+
+    '</div></div>',
+    '<button class="btn" data-a="close">Close</button><button class="btn primary" data-a="save">Save</button>',
+    function(a,close){
+      if(a==='close')return close();
+      api('media.php',{action:'update',id:x.id,alt_text:$('#m-alt').value,caption:$('#m-cap').value})
+        .then(async function(){ toast('Saved.','good'); await refreshMedia(); close(); renderShell(); })
+        .catch(function(e){ toast(e.message,'bad'); });
+    }, true);
+}
+
+function pickMedia(done){
+  var chosen=null;
+  modal('Choose an image',
+    '<input type="file" id="pf" accept="image/*" hidden>'+
+    '<button class="btn" style="margin-bottom:12px" id="pu">＋ Upload new</button>'+
+    (S.media.length?'<div class="mgrid">'+S.media.map(function(x){
+      return '<div class="mitem" data-p="'+esc(x.id)+'">'+
+        '<div class="mthumb" style="background-image:url(\''+esc(mediaUrl(x))+'\')">'+
+        (+x.file_size>102400?'<span class="flag">'+bytes(x.file_size)+'</span>':'')+'</div>'+
+        '<div class="mmeta"><div class="mname">'+esc(x.filename)+'</div>'+
+        '<div class="msub">'+(x.width?x.width+'×'+x.height:'—')+
+        (x.alt_text?'':' <span class="noalt">· no alt</span>')+'</div></div></div>';
+    }).join('')+'</div>'
+    :'<div class="empty"><div class="big">❖</div><div>No images yet. Upload one above.</div></div>'),
+    '<button class="btn" data-a="close">Cancel</button><button class="btn primary" data-a="use" disabled>Insert</button>',
+    function(a,close){
+      if(a==='close'){ done(null); return close(); }
+      if(a==='use' && chosen){
+        var x=S.media.filter(function(v){return String(v.id)===String(chosen);})[0];
+        done({url:mediaUrl(x),alt:x.alt_text||'',caption:x.caption||'',width:x.width,height:x.height});
+        close();
+      }
+    }, true);
+
+  document.querySelectorAll('[data-p]').forEach(function(el){
+    el.addEventListener('click',function(){
+      document.querySelectorAll('[data-p]').forEach(function(o){o.classList.remove('picked');});
+      el.classList.add('picked'); chosen=el.dataset.p;
+      var use=document.querySelector('[data-a=use]'); if(use) use.disabled=false;
+    });
+  });
+  var pf=$('#pf');
+  $('#pu').addEventListener('click',function(){ pf.click(); });
+  pf.addEventListener('change', async function(){
+    if(!pf.files[0])return;
+    await uploadOne(pf.files[0]);
+    await refreshMedia();
+    closeModal();
+    var latest=S.media[0];
+    if(latest) done({url:mediaUrl(latest),alt:latest.alt_text||'',caption:latest.caption||'',width:latest.width,height:latest.height});
+  });
+}
+
+function pickInternal(done){
+  var opts=S.blogs.filter(function(b){ return !S.editing || b.id!==S.editing.id; });
+  modal('Link to a post on this site',
+    '<div class="search" style="margin-bottom:11px"><input type="text" id="ilq" placeholder="Search posts"></div>'+
+    '<div id="ill" style="max-height:340px;overflow:auto"></div>',
+    '<button class="btn" data-a="close">Cancel</button>',
+    function(a,close){ if(a==='close'){ done(null); close(); } });
+
+  function paint(term){
+    var rows=opts.filter(function(b){
+      return !term || (b.title+' '+(b.slug||'')).toLowerCase().indexOf(term.toLowerCase())>-1;
+    });
+    $('#ill').innerHTML = rows.length
+      ? '<table class="list"><tbody>'+rows.map(function(b){
+          return '<tr><td><div class="t-title" data-il="'+esc(b.id)+'">'+esc(b.title)+'</div>'+
+            '<div class="t-slug">/blogs/'+esc(b.slug||'')+'/</div></td>'+
+            '<td style="text-align:right"><span class="tag '+(b.status==='published'?'published':'draft')+'">'+
+            esc(b.status)+'</span></td></tr>';
+        }).join('')+'</tbody></table>'
+      : '<div class="empty">No posts match.</div>';
+    document.querySelectorAll('[data-il]').forEach(function(el){
+      el.addEventListener('click',function(){
+        var b=opts.filter(function(v){return v.id===el.dataset.il;})[0];
+        done({title:b.title, path:'/blogs/'+(b.slug||'')+'/'});
+        closeModal();
+      });
+    });
+  }
+  paint('');
+  $('#ilq').addEventListener('input',function(){ paint(this.value); });
+  $('#ilq').focus();
+}
+
+/* -------------------------------------------------------- simple views */
+
+async function renderSimple(m, endpoint, key, title, cols){
+  m.innerHTML = head(title,'')+'<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var rows=[];
+  try{ rows=(await api(endpoint))[key]||[]; }
+  catch(e){ toast(e.message,'bad'); }
+  $('.body',m).innerHTML =
+    '<div class="card"><table class="list"><thead><tr>'+
+    cols.map(function(c){ return '<th>'+esc(c.replace(/_/g,' '))+'</th>'; }).join('')+
+    '</tr></thead><tbody>'+
+    (rows.length?rows.map(function(r){
+      return '<tr>'+cols.map(function(c){
+        return '<td>'+esc(r[c]==null?'':r[c])+'</td>';
+      }).join('')+'</tr>';
+    }).join(''):'<tr><td colspan="'+cols.length+'" class="empty">Nothing here yet.</td></tr>')+
+    '</tbody></table></div>';
+}
+
+/* ---------------------------------------------------------------- modal */
+
+function modal(title, body, actions, handler, wide){
+  closeModal();
+  var v=document.createElement('div');
+  v.className='veil';
+  v.innerHTML='<div class="modal'+(wide?' wide':'')+'">'+
+    '<div class="mhead"><h3>'+esc(title)+'</h3></div>'+
+    '<div class="mbody">'+body+'</div>'+
+    '<div class="mfoot">'+actions+'</div></div>';
+  document.body.appendChild(v);
+  v.addEventListener('click',function(e){ if(e.target===v){ closeModal(); if(handler) handler('close',closeModal); } });
+  v.querySelectorAll('[data-a]').forEach(function(b){
+    b.addEventListener('click',function(){ handler(b.dataset.a, closeModal); });
+  });
+  document.addEventListener('keydown', escClose);
+}
+function escClose(e){ if(e.key==='Escape') closeModal(); }
+function closeModal(){ var v=$('.veil'); if(v) v.remove(); document.removeEventListener('keydown',escClose); }
+
+/* ----------------------------------------------------------------- boot */
+
+async function load(){
+  try{
+    var [b,md] = await Promise.all([
+      api('blogs.php').catch(function(){ return {blogs:[]}; }),
+      api('media.php').catch(function(){ return {media:[]}; })
+    ]);
+    S.blogs=b.blogs||[]; S.media=md.media||[];
+    renderShell();
+  }catch(e){
+    app.innerHTML='<div class="gate"><div class="gcard"><h2 style="font-size:18px">Cannot reach the CMS</h2>'+
+      '<p style="color:var(--ink-3);font-size:13px">'+esc(e.message)+'</p>'+
+      '<button class="btn primary" onclick="location.reload()">Reload</button></div></div>';
+  }
+}
+
+async function boot(){
+  try{
+    var d=await api('auth.php');
+    if(d && d.authenticated){ S.user=d.user; S.csrf=d.csrf_token; await load(); }
+    else renderLogin();
+  }catch(e){ renderLogin('Could not reach the CMS backend.'); }
+}
+
+window.addEventListener('beforeunload',function(e){ if(S.dirty){ e.preventDefault(); e.returnValue=''; } });
+document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+</body>
+</html>

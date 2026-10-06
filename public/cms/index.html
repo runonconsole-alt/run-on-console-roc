@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Run On Console - Dedicated CMS</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
+    .modal-backdrop { background-color: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+  <div id="cms-app" class="flex-1 flex flex-col">
+    <!-- Loading State -->
+    <div id="cms-loading" class="flex-1 flex items-center justify-center p-8">
+      <div class="text-center">
+        <i class="fas fa-circle-notch fa-spin text-4xl text-emerald-500 mb-4"></i>
+        <p class="text-slate-400 font-medium">Loading Run On Console CMS...</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="cms-modal-container"></div>
+
+  <script>
+    // CMS Application Core Engine
+    const CMS = {
+      authenticated: false,
+      user: null,
+      csrfToken: '',
+      activeView: 'dashboard',
+
+      async init() {
+        try {
+          const res = await fetch('/api/v1/cms/auth.php');
+          const data = await res.json();
+          if (data && data.authenticated) {
+            this.authenticated = true;
+            this.user = data.user;
+            this.csrfToken = data.csrf_token;
+            this.renderLayout();
+            this.navigate('dashboard');
+          } else {
+            this.renderLogin();
+          }
+        } catch (e) {
+          this.renderLogin('Failed to connect to CMS backend.');
+        }
+      },
+
+      async login(username, password) {
+        try {
+          const res = await fetch('/api/v1/cms/auth.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'login', username, password })
+          });
+          const data = await res.json();
+          if (data && data.success) {
+            this.authenticated = true;
+            this.user = data.user;
+            this.csrfToken = data.csrf_token;
+            this.renderLayout();
+            this.navigate('dashboard');
+          } else {
+            this.renderLogin(data.error || 'Invalid credentials');
+          }
+        } catch (e) {
+          this.renderLogin('Login failed. Please check network connection.');
+        }
+      },
+
+      async logout() {
+        try {
+          await fetch('/api/v1/cms/auth.php', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'X-CMS-CSRF-Token': this.csrfToken 
+            },
+            body: JSON.stringify({ action: 'logout' })
+          });
+        } catch(e) {}
+        this.authenticated = false;
+        this.user = null;
+        this.csrfToken = '';
+        this.renderLogin();
+      },
+
+      renderLogin(error = '') {
+        const app = document.getElementById('cms-app');
+        app.innerHTML = `
+          <div class="min-h-screen flex items-center justify-center bg-slate-950 px-4">
+            <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl">
+              <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-400 mb-4 border border-emerald-500/20">
+                  <i class="fas fa-shield-halved text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-white">Run On Console CMS</h1>
+                <p class="text-slate-400 text-sm mt-1">Dedicated Administration & Content Management</p>
+              </div>
+
+              ${error ? '<div class="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm flex items-center gap-3"><i class="fas fa-exclamation-circle"></i> ' + error + '</div>' : ''}
+
+              <form onsubmit="event.preventDefault(); CMS.login(this.username.value, this.password.value);" class="space-y-5">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Username or Email</label>
+                  <input type="text" name="username" required class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-emerald-500 transition-colors" placeholder="admin@runonconsole.com" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Password</label>
+                  <input type="password" name="password" required class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-emerald-500 transition-colors" placeholder="••••••••" />
+                </div>
+                <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold tracking-wide transition-all shadow-lg shadow-emerald-500/20">
+                  Sign In to CMS <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        `;
+      },
+
+      renderLayout() {
+        const app = document.getElementById('cms-app');
+        const isAdmin = this.user && this.user.role === 'administrator';
+
+        let adminNav = '';
+        if (isAdmin) {
+          adminNav = `
+            <button onclick="CMS.navigate('audit-logs')" id="nav-audit-logs" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+              <i class="fas fa-clock-rotate-left w-5 text-rose-400"></i> Audit Logs
+            </button>
+            <button onclick="CMS.navigate('users')" id="nav-users" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+              <i class="fas fa-users-gear w-5 text-blue-400"></i> CMS Users
+            </button>
+            <button onclick="CMS.navigate('settings')" id="nav-settings" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+              <i class="fas fa-sliders w-5 text-slate-400"></i> Site Settings
+            </button>
+          `;
+        }
+
+        app.innerHTML = `
+          <div class="flex flex-1 min-h-screen bg-slate-950">
+            <!-- Sidebar -->
+            <aside class="w-64 bg-slate-900 border-r border-slate-800 p-6 flex flex-col justify-between shrink-0">
+              <div>
+                <div class="flex items-center gap-3 mb-8 px-2">
+                  <div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-slate-950 font-black">ROC</div>
+                  <div>
+                    <div class="font-bold text-white leading-none">ROC CMS</div>
+                    <div class="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider mt-0.5">Staging Environment</div>
+                  </div>
+                </div>
+
+                <nav class="space-y-1">
+                  <button onclick="CMS.navigate('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fas fa-chart-line w-5 text-emerald-400"></i> Dashboard
+                  </button>
+                  <button onclick="CMS.navigate('blogs')" id="nav-blogs" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fas fa-newspaper w-5 text-teal-400"></i> Blog Posts
+                  </button>
+                  <button onclick="CMS.navigate('products')" id="nav-products" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fas fa-box w-5 text-emerald-400"></i> Products Catalog
+                  </button>
+                  <button onclick="CMS.navigate('categories')" id="nav-categories" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fas fa-tags w-5 text-cyan-400"></i> Categories
+                  </button>
+                  <button onclick="CMS.navigate('pages')" id="nav-pages" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fas fa-cubes w-5 text-indigo-400"></i> Block Pages
+                  </button>
+                  <button onclick="CMS.navigate('media')" id="nav-media" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fas fa-photo-film w-5 text-purple-400"></i> Media Library
+                  </button>
+                  <button onclick="CMS.navigate('moderation')" id="nav-moderation" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fas fa-comments w-5 text-amber-400"></i> Moderation
+                  </button>
+                  <button onclick="CMS.navigate('revisions')" id="nav-revisions" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fas fa-history w-5 text-pink-400"></i> Revisions
+                  </button>
+                  ${adminNav}
+                </nav>
+              </div>
+
+              <div class="border-t border-slate-800 pt-4">
+                <div class="flex items-center justify-between px-2 mb-3">
+                  <div>
+                    <div class="text-sm font-semibold text-white">${this.user ? this.user.username : 'User'}</div>
+                    <div class="text-xs text-slate-500 capitalize">${this.user ? this.user.role : ''}</div>
+                  </div>
+                </div>
+                <button onclick="CMS.logout()" class="w-full py-2 px-3 rounded-lg bg-slate-800 hover:bg-rose-500/20 hover:text-rose-400 text-slate-400 text-xs font-semibold transition-colors flex items-center justify-center gap-2">
+                  <i class="fas fa-sign-out-alt"></i> Sign Out
+                </button>
+              </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+              <header class="h-16 border-b border-slate-800 px-8 flex items-center justify-between bg-slate-900/50 shrink-0">
+                <div class="flex items-center gap-3">
+                  <span id="cms-view-title" class="text-lg font-bold text-white capitalize">Dashboard</span>
+                </div>
+                <div class="flex items-center gap-4">
+                  <a href="/" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium flex items-center gap-2 transition-colors">
+                    <i class="fas fa-external-link-alt"></i> View Live Site
+                  </a>
+                </div>
+              </header>
+
+              <div id="cms-main-view" class="flex-1 p-8 overflow-y-auto">
+                <div class="text-slate-400"><i class="fas fa-circle-notch fa-spin mr-2"></i> Loading section...</div>
+              </div>
+            </main>
+          </div>
+        `;
+      },
+
+      async navigate(view) {
+        this.activeView = view;
+        const title = document.getElementById('cms-view-title');
+        if (title) title.innerText = view.replace('-', ' ');
+
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.classList.remove('bg-slate-800', 'text-white');
+          btn.classList.add('text-slate-400');
+        });
+        const activeBtn = document.getElementById('nav-' + view);
+        if (activeBtn) {
+          activeBtn.classList.add('bg-slate-800', 'text-white');
+          activeBtn.classList.remove('text-slate-400');
+        }
+
+        const mainView = document.getElementById('cms-main-view');
+        if (!mainView) return;
+
+        mainView.innerHTML = '<div class="text-slate-400"><i class="fas fa-circle-notch fa-spin mr-2"></i> Loading ' + view + '...</div>';
+
+        switch(view) {
+          case 'dashboard': await this.renderDashboardView(mainView); break;
+          case 'blogs': await this.renderBlogsView(mainView); break;
+          case 'products': await this.renderProductsView(mainView); break;
+          case 'categories': await this.renderCategoriesView(mainView); break;
+          case 'pages': await this.renderPagesView(mainView); break;
+          case 'media': await this.renderMediaView(mainView); break;
+          case 'moderation': await this.renderModerationView(mainView); break;
+          case 'revisions': await this.renderRevisionsView(mainView); break;
+          case 'settings': await this.renderSettingsView(mainView); break;
+          case 'users': await this.renderUsersView(mainView); break;
+          case 'audit-logs': await this.renderAuditLogsView(mainView); break;
+          default: mainView.innerHTML = '<div class="text-rose-400">View not found</div>';
+        }
+      },
+
+      async apiGet(endpoint) {
+        const res = await fetch(endpoint);
+        return await res.json();
+      },
+
+      async apiPost(endpoint, body) {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CMS-CSRF-Token': this.csrfToken
+          },
+          body: JSON.stringify(body)
+        });
+        return await res.json();
+      },
+
+      async renderDashboardView(container) {
+        let stats = { products: 0, blogs: 0, categories: 0, moderation: 0 };
+        try {
+          const [blogsData, prodsData, catsData, modData] = await Promise.all([
+            this.apiGet('/api/v1/cms/blogs.php'),
+            this.apiGet('/api/v1/cms/products.php'),
+            this.apiGet('/api/v1/cms/categories.php'),
+            this.apiGet('/api/v1/cms/moderation.php')
+          ]);
+          if (blogsData.blogs) stats.blogs = blogsData.blogs.length;
+          if (prodsData.products) stats.products = prodsData.products.length;
+          if (catsData.categories) stats.categories = catsData.categories.length;
+          if (modData.moderation) stats.moderation = modData.moderation.length;
+        } catch(e) {}
+
+        container.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+              <div class="text-slate-400 text-xs font-semibold uppercase">Products Catalog</div>
+              <div class="text-3xl font-black text-white mt-2">${stats.products}</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+              <div class="text-slate-400 text-xs font-semibold uppercase">Blog Posts</div>
+              <div class="text-3xl font-black text-white mt-2">${stats.blogs}</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+              <div class="text-slate-400 text-xs font-semibold uppercase">Categories</div>
+              <div class="text-3xl font-black text-white mt-2">${stats.categories}</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+              <div class="text-slate-400 text-xs font-semibold uppercase">Pending Moderation</div>
+              <div class="text-3xl font-black text-amber-400 mt-2">${stats.moderation}</div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+            <h2 class="text-base font-bold text-white mb-4">CMS Architecture & System Status</h2>
+            <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-center gap-3">
+              <i class="fas fa-circle-check text-lg"></i> Dedicated CMS connected to staging database (\`runoncon_rocstage\`) with SHA-256 session tokens and dual-state draft/publishing control.
+            </div>
+          </div>
+        `;
+      },
+
+      async renderBlogsView(container) {
+        const data = await this.apiGet('/api/v1/cms/blogs.php');
+        const blogs = data.blogs || [];
+
+        let rows = blogs.map(b => `
+          <tr class="border-b border-slate-800/50 hover:bg-slate-800/30">
+            <td class="py-3 px-4 text-white font-medium">${b.title}</td>
+            <td class="py-3 px-4 text-slate-400 font-mono text-xs">${b.slug}</td>
+            <td class="py-3 px-4">
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${b.status === 'published' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
+                ${b.status}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-slate-400 text-xs">${b.created_at || ''}</td>
+            <td class="py-3 px-4 text-right">
+              <button onclick="CMS.editBlog(${b.id})" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300">Edit</button>
+            </td>
+          </tr>
+        `).join('');
+
+        container.innerHTML = `
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-white">Blog Posts (${blogs.length})</h2>
+            <button onclick="CMS.editBlog(null)" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-2">
+              <i class="fas fa-plus"></i> Create Post
+            </button>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-950 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">Title</th>
+                  <th class="py-3 px-4">Slug</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4">Created</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows || '<tr><td colspan="5" class="p-4 text-center text-slate-500">No blog posts found.</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+        `;
+      },
+
+      async editBlog(id) {
+        let blog = { id: null, title: '', slug: '', summary: '', content: '', status: 'draft', seo_title: '', seo_description: '', author_name: 'ROC Team' };
+        if (id) {
+          const data = await this.apiGet('/api/v1/cms/blogs.php?id=' + id);
+          if (data.blog) blog = data.blog;
+        }
+
+        const modal = document.getElementById('cms-modal-container');
+        modal.innerHTML = `
+          <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+              <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
+                <h3 class="text-lg font-bold text-white">${blog.id ? 'Edit Blog Post' : 'Create New Blog Post'}</h3>
+                <button onclick="document.getElementById('cms-modal-container').innerHTML=''" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+              </div>
+              <form onsubmit="event.preventDefault(); CMS.saveBlog(this);" class="space-y-4">
+                <input type="hidden" name="id" value="${blog.id || ''}">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Title</label>
+                  <input type="text" name="title" value="${blog.title || ''}" required class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Slug</label>
+                  <input type="text" name="slug" value="${blog.slug || ''}" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-emerald-500" placeholder="auto-generated-if-empty">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Summary</label>
+                  <textarea name="summary" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-emerald-500" rows="2">${blog.summary || ''}</textarea>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Content (Markdown / HTML)</label>
+                  <textarea name="content" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-emerald-500 font-mono" rows="6">${blog.content || ''}</textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Publication Status</label>
+                    <select name="status" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-emerald-500">
+                      <option value="draft" ${blog.status === 'draft' ? 'selected' : ''}>Draft (Private)</option>
+                      <option value="published" ${blog.status === 'published' ? 'selected' : ''}>Published (Public)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Author Name</label>
+                    <input type="text" name="author_name" value="${blog.author_name || 'ROC Editorial Team'}" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-emerald-500">
+                  </div>
+                </div>
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                  <button type="button" onclick="document.getElementById('cms-modal-container').innerHTML=''" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Cancel</button>
+                  <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold">Save Post</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        `;
+      },
+
+      async saveBlog(form) {
+        const payload = {
+          action: form.id.value ? 'update' : 'create',
+          id: form.id.value || null,
+          title: form.title.value,
+          slug: form.slug.value,
+          summary: form.summary.value,
+          content: form.content.value,
+          status: form.status.value,
+          author_name: form.author_name.value
+        };
+        const res = await this.apiPost('/api/v1/cms/blogs.php', payload);
+        if (res.success) {
+          document.getElementById('cms-modal-container').innerHTML = '';
+          this.navigate('blogs');
+        } else {
+          alert('Error saving blog: ' + (res.error || 'Unknown error'));
+        }
+      },
+
+      async renderProductsView(container) {
+        const data = await this.apiGet('/api/v1/cms/products.php');
+        const prods = data.products || [];
+
+        let rows = prods.map(p => `
+          <tr class="border-b border-slate-800/50 hover:bg-slate-800/30">
+            <td class="py-3 px-4 font-mono text-xs text-slate-400">${p.id}</td>
+            <td class="py-3 px-4 text-white font-medium">${p.title || p.name || ''}</td>
+            <td class="py-3 px-4 text-emerald-400 font-semibold">$${p.price || '0.00'}</td>
+            <td class="py-3 px-4">
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${p.status === 'published' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
+                ${p.status || 'published'}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-right">
+              <button onclick="CMS.editProduct('${p.id}')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300">Edit</button>
+            </td>
+          </tr>
+        `).join('');
+
+        container.innerHTML = `
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-white">Products Catalog (${prods.length})</h2>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-950 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">ID</th>
+                  <th class="py-3 px-4">Title</th>
+                  <th class="py-3 px-4">Price</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>${rows || '<tr><td colspan="5" class="p-4 text-center text-slate-500">No products found.</td></tr>'}</tbody>
+            </table>
+          </div>
+        `;
+      },
+
+      async editProduct(id) {
+        const data = await this.apiGet('/api/v1/cms/products.php?id=' + id);
+        const prod = data.product || {};
+
+        const modal = document.getElementById('cms-modal-container');
+        modal.innerHTML = `
+          <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl">
+              <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
+                <h3 class="text-lg font-bold text-white">Edit Product: ${prod.id}</h3>
+                <button onclick="document.getElementById('cms-modal-container').innerHTML=''" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+              </div>
+              <form onsubmit="event.preventDefault(); CMS.saveProduct(this);" class="space-y-4">
+                <input type="hidden" name="id" value="${prod.id}">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Title</label>
+                  <input type="text" name="title" value="${prod.title || prod.name || ''}" required class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Price ($)</label>
+                  <input type="number" step="0.01" name="price" value="${prod.price || '0.00'}" required class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Description</label>
+                  <textarea name="description" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm" rows="4">${prod.description || ''}</textarea>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Status</label>
+                  <select name="status" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm">
+                    <option value="published" ${prod.status === 'published' ? 'selected' : ''}>Published</option>
+                    <option value="draft" ${prod.status === 'draft' ? 'selected' : ''}>Draft</option>
+                  </select>
+                </div>
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                  <button type="button" onclick="document.getElementById('cms-modal-container').innerHTML=''" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Cancel</button>
+                  <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold">Save Product</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        `;
+      },
+
+      async saveProduct(form) {
+        const payload = {
+          action: 'update',
+          id: form.id.value,
+          title: form.title.value,
+          price: parseFloat(form.price.value),
+          description: form.description.value,
+          status: form.status.value
+        };
+        const res = await this.apiPost('/api/v1/cms/products.php', payload);
+        if (res.success) {
+          document.getElementById('cms-modal-container').innerHTML = '';
+          this.navigate('products');
+        } else {
+          alert('Error saving product: ' + (res.error || 'Unknown error'));
+        }
+      },
+
+      async renderCategoriesView(container) {
+        const data = await this.apiGet('/api/v1/cms/categories.php');
+        const cats = data.categories || [];
+        let rows = cats.map(c => `
+          <tr class="border-b border-slate-800/50 hover:bg-slate-800/30">
+            <td class="py-3 px-4 font-mono text-xs text-slate-400">${c.id}</td>
+            <td class="py-3 px-4 text-white font-medium">${c.name}</td>
+            <td class="py-3 px-4 text-slate-400 font-mono text-xs">${c.slug}</td>
+            <td class="py-3 px-4 text-slate-400 text-xs">${c.description || ''}</td>
+          </tr>
+        `).join('');
+
+        container.innerHTML = `
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-white">Categories (${cats.length})</h2>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-950 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">ID</th>
+                  <th class="py-3 px-4">Name</th>
+                  <th class="py-3 px-4">Slug</th>
+                  <th class="py-3 px-4">Description</th>
+                </tr>
+              </thead>
+              <tbody>${rows || '<tr><td colspan="4" class="p-4 text-center text-slate-500">No categories found.</td></tr>'}</tbody>
+            </table>
+          </div>
+        `;
+      },
+
+      async renderPagesView(container) {
+        const data = await this.apiGet('/api/v1/cms/pages.php');
+        const pages = data.pages || [];
+        let rows = pages.map(p => `
+          <tr class="border-b border-slate-800/50 hover:bg-slate-800/30">
+            <td class="py-3 px-4 font-mono text-xs text-slate-400">${p.id}</td>
+            <td class="py-3 px-4 text-white font-medium">${p.title}</td>
+            <td class="py-3 px-4 text-slate-400 font-mono text-xs">${p.slug}</td>
+            <td class="py-3 px-4">
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${p.status === 'published' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
+                ${p.status}
+              </span>
+            </td>
+          </tr>
+        `).join('');
+
+        container.innerHTML = `
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-white">Block Pages (${pages.length})</h2>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-950 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">ID</th>
+                  <th class="py-3 px-4">Title</th>
+                  <th class="py-3 px-4">Slug</th>
+                  <th class="py-3 px-4">Status</th>
+                </tr>
+              </thead>
+              <tbody>${rows || '<tr><td colspan="4" class="p-4 text-center text-slate-500">No pages found.</td></tr>'}</tbody>
+            </table>
+          </div>
+        `;
+      },
+
+      async renderMediaView(container) {
+        const data = await this.apiGet('/api/v1/cms/media.php');
+        const media = data.media || [];
+        let cards = media.map(m => `
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden p-3">
+            <div class="h-32 bg-slate-950 rounded-lg overflow-hidden flex items-center justify-center mb-2">
+              <img src="${m.file_url}" alt="${m.filename}" class="max-h-full max-w-full object-contain">
+            </div>
+            <div class="text-xs font-medium text-white truncate">${m.filename}</div>
+            <div class="text-[10px] text-slate-500 flex justify-between mt-1">
+              <span>${m.width}x${m.height}</span>
+              <span>${Math.round(m.file_size / 1024)} KB</span>
+            </div>
+          </div>
+        `).join('');
+
+        container.innerHTML = `
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-xl font-bold text-white">Media Library</h2>
+              <p class="text-xs text-slate-400">All uploaded images auto-compressed to WebP (Max 100KB rendition size cap)</p>
+            </div>
+            <label class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs cursor-pointer flex items-center gap-2">
+              <i class="fas fa-upload"></i> Upload Image
+              <input type="file" onchange="CMS.uploadMedia(this)" accept="image/*" class="hidden">
+            </label>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+            ${cards || '<div class="col-span-6 p-8 text-center text-slate-500">No media uploaded yet.</div>'}
+          </div>
+        `;
+      },
+
+      async uploadMedia(input) {
+        if (!input.files || !input.files[0]) return;
+        const formData = new FormData();
+        formData.append('file', input.files[0]);
+
+        const res = await fetch('/api/v1/cms/media.php', {
+          method: 'POST',
+          headers: { 'X-CMS-CSRF-Token': this.csrfToken },
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          this.navigate('media');
+        } else {
+          alert('Upload failed: ' + (data.error || 'Unknown error'));
+        }
+      },
+
+      async renderModerationView(container) {
+        const data = await this.apiGet('/api/v1/cms/moderation.php');
+        const items = data.moderation || [];
+        container.innerHTML = `
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-white">Moderation Queue (${items.length})</h2>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-slate-400 text-sm">
+            <i class="fas fa-circle-check text-emerald-400 mr-2"></i> All user-submitted content items are clean. 0 items pending moderation.
+          </div>
+        `;
+      },
+
+      async renderRevisionsView(container) {
+        const data = await this.apiGet('/api/v1/cms/revisions.php');
+        const revs = data.revisions || [];
+        container.innerHTML = `
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-white">Content Revisions (${revs.length})</h2>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-slate-400 text-sm">
+            <i class="fas fa-history text-pink-400 mr-2"></i> CMS automatic revision tracking active with transactional rollback support.
+          </div>
+        `;
+      },
+
+      async renderSettingsView(container) {
+        const data = await this.apiGet('/api/v1/cms/settings.php');
+        const settings = data.settings || {};
+        container.innerHTML = `
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-white">Site & Environment Settings</h2>
+          </div>
+          <form onsubmit="event.preventDefault(); CMS.saveSettings(this);" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6 max-w-3xl">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Robots.txt Content</label>
+              <textarea name="robots" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs" rows="5">${settings.robots || 'User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /cms/\nSitemap: https://www.runonconsole.com/sitemap.xml'}</textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">LLMs.txt Content (AI Crawler Guidance)</label>
+              <textarea name="llms" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs" rows="5">${settings.llms || '# Run On Console LLM Context\nSite: https://www.runonconsole.com\nDescription: Enterprise developer tools and agentic orchestration platform.'}</textarea>
+            </div>
+            <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs">Save Settings</button>
+          </form>
+        `;
+      },
+
+      async saveSettings(form) {
+        const payload = { action: 'update', robots: form.robots.value, llms: form.llms.value };
+        const res = await this.apiPost('/api/v1/cms/settings.php', payload);
+        if (res.success) {
+          alert('Settings saved successfully.');
+        } else {
+          alert('Error saving settings: ' + (res.error || 'Unknown error'));
+        }
+      },
+
+      async renderUsersView(container) {
+        const data = await this.apiGet('/api/v1/cms/users.php');
+        const users = data.users || [];
+        let rows = users.map(u => `
+          <tr class="border-b border-slate-800/50 hover:bg-slate-800/30">
+            <td class="py-3 px-4 font-mono text-xs text-slate-400">${u.id}</td>
+            <td class="py-3 px-4 text-white font-medium">${u.username}</td>
+            <td class="py-3 px-4 text-slate-400 text-xs">${u.email}</td>
+            <td class="py-3 px-4 text-slate-400 text-xs capitalize">${u.role}</td>
+          </tr>
+        `).join('');
+
+        container.innerHTML = `
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-white">CMS Users & Roles</h2>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-950 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">ID</th>
+                  <th class="py-3 px-4">Username</th>
+                  <th class="py-3 px-4">Email</th>
+                  <th class="py-3 px-4">Role</th>
+                </tr>
+              </thead>
+              <tbody>${rows || '<tr><td colspan="4" class="p-4 text-center text-slate-500">No CMS users found.</td></tr>'}</tbody>
+            </table>
+          </div>
+        `;
+      },
+
+      async renderAuditLogsView(container) {
+        const data = await this.apiGet('/api/v1/cms/audit-logs.php');
+        const logs = data.logs || [];
+        let rows = logs.map(l => `
+          <tr class="border-b border-slate-800/50 hover:bg-slate-800/30">
+            <td class="py-3 px-4 text-slate-400 text-xs font-mono">${l.created_at || ''}</td>
+            <td class="py-3 px-4 text-emerald-400 font-mono text-xs">${l.action}</td>
+            <td class="py-3 px-4 text-white text-xs">${l.entity_type} (#${l.entity_id})</td>
+            <td class="py-3 px-4 text-slate-400 text-xs">${l.username || 'System'}</td>
+          </tr>
+        `).join('');
+
+        container.innerHTML = `
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-white">Security & Administrative Audit Logs</h2>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-950 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">Timestamp</th>
+                  <th class="py-3 px-4">Action</th>
+                  <th class="py-3 px-4">Entity</th>
+                  <th class="py-3 px-4">User</th>
+                </tr>
+              </thead>
+              <tbody>${rows || '<tr><td colspan="4" class="p-4 text-center text-slate-500">No audit logs recorded yet.</td></tr>'}</tbody>
+            </table>
+          </div>
+        `;
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => CMS.init());
+  </script>
+</body>
+</html>

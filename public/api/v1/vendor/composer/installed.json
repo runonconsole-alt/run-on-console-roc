@@ -1,0 +1,16 @@
+{
+    "packages": [
+        {
+            "name": "phpmailer/phpmailer",
+            "version": "v6.9.1",
+            "version_normalized": "6.9.1.0",
+            "install_path": "../phpmailer/phpmailer",
+            "aliases": [],
+            "reference": "039de17ab77c7f737d319a32c25387463f03b223",
+            "type": "library",
+            "install-path": "../phpmailer/phpmailer"
+        }
+    ],
+    "dev": false,
+    "dev-package-names": []
+}

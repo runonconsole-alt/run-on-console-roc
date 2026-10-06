@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bgGrad_avatar_12" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFBEB"/>
+      <stop offset="100%" stop-color="#FEF3C7"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bgGrad_avatar_12)" stroke="#FBBF24" stroke-width="4"/>
+  <path d="M32,44 L64,24 L96,44 L88,96 L64,114 L40,96 Z" fill="#78350F" stroke="#FBBF24" stroke-width="4"/>
+    <!-- King Crown -->
+    <polygon points="34,36 44,18 64,28 84,18 94,36" fill="#FBBF24" stroke="#D97706" stroke-width="2"/>
+    <circle cx="44" cy="18" r="3" fill="#EF4444"/>
+    <circle cx="64" cy="28" r="3" fill="#3B82F6"/>
+    <circle cx="84" cy="18" r="3" fill="#EF4444"/>
+    <!-- Lion Eyes & Mane -->
+    <polygon points="46,58 56,64 44,70" fill="#FBBF24"/>
+    <polygon points="82,58 72,64 84,70" fill="#FBBF24"/>
+    <polygon points="64,74 54,88 74,88" fill="#FBBF24"/>
+</svg>

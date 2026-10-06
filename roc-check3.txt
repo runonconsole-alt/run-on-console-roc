@@ -1,0 +1,51 @@
+== image files ==
+1105 ./favicon.svg
+699747 ./images/apex_mouse.jpg
+2029 ./images/avatars/avatar_01.svg
+2029 ./images/avatars/avatar_02.svg
+2029 ./images/avatars/avatar_03.svg
+2029 ./images/avatars/avatar_04.svg
+2029 ./images/avatars/avatar_05.svg
+2029 ./images/avatars/avatar_06.svg
+2029 ./images/avatars/avatar_07.svg
+2029 ./images/avatars/avatar_08.svg
+2029 ./images/avatars/avatar_09.svg
+2029 ./images/avatars/avatar_10.svg
+2029 ./images/avatars/avatar_11.svg
+2029 ./images/avatars/avatar_12.svg
+2029 ./images/avatars/avatar_13.svg
+2029 ./images/avatars/avatar_14.svg
+2029 ./images/avatars/avatar_15.svg
+2029 ./images/avatars/avatar_16.svg
+2029 ./images/avatars/avatar_17.svg
+2029 ./images/avatars/avatar_18.svg
+2029 ./images/avatars/avatar_19.svg
+2029 ./images/avatars/avatar_20.svg
+847505 ./images/battlestation_pc.jpg
+786269 ./images/cyber_keyboard.jpg
+680308 ./images/gaming_cables_accessories.jpg
+737194 ./images/gaming_laptop.jpg
+773125 ./images/gaming_monitor.jpg
+729018 ./images/handheld_console.jpg
+876029 ./images/hero_cod.jpg
+694679 ./images/pro_controller.jpg
+494668 ./images/review_chair.jpg
+666214 ./images/streaming_vr_gear.jpg
+592028 ./images/tactical_headset.jpg
+941560 ./images/trending_elden.jpg
+1094667 ./images/trending_esports.jpg
+725905 ./images/trending_forza.jpg
+953251 ./images/trending_spiderman.jpg
+90478 ./uploads/img_20260928_081509_63e5c87d54cae0fc09d9.webp
+5672 ./uploads/img_20260928_081616_f4b98004755b2fabd841.webp
+== tables ==
+cms_media (2 rows): id, filename, original_name, filepath, file_url, mime_type, file_size, width, height, alt_text, caption, folder, created_at
+cms_media_usage (0 rows): id, media_id, target_type, target_id, field_name, created_at
+cms_users (1 rows): id, username, email, password_hash, role, status, created_at, updated_at
+cms_sessions (2 rows): id, user_id, session_token_hash, csrf_token, ip_address, user_agent, expires_at, created_at
+cms_audit_logs (15 rows): id, user_id, action, target_type, target_id, details_json, ip_address, created_at
+products (29 rows): id, title, slug, category, short_desc, summary, specs_json, price, price_state, rating, image, pros, cons, affiliate_amazon, affiliate_bestbuy, affiliate_official, affiliate_links_json, product_images_json, clicks_count, last_verified_at, meta_title, meta_description, og_image, is_noindex, status, draft_status, draft_scheduled_at, version, draft_data_json, content_modified_at, created_at, updated_at, image_alt, canonical_url, is_nofollow, og_title, og_description, twitter_card, twitter_title, twitter_description, twitter_image, schema_type, schema_json
+pages (0 rows): id, title, slug, meta_title, meta_description, canonical_url, og_image, is_noindex, status, draft_status, version, content_blocks_json, draft_data_json, content_modified_at, created_at, updated_at
+categories (15 rows): id, name, slug, parent_id, description, icon_name, meta_title, meta_description, status, is_noindex, version, draft_data_json, content_modified_at, created_at, updated_at
+authors (0 rows): id, user_id, name, slug, title, bio, avatar_image, status, is_noindex, version, content_modified_at, created_at, updated_at
+cms_users: {"id":1,"role":"administrator","status":"active"} 

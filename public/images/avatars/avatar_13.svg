@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bgGrad_avatar_13" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FEF2F2"/>
+      <stop offset="100%" stop-color="#FEE2E2"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bgGrad_avatar_13)" stroke="#EF4444" stroke-width="4"/>
+  <path d="M40,24 C40,12 88,12 88,24 L94,68 L78,98 L50,98 L34,68 Z" fill="#7F1D1D" stroke="#EF4444" stroke-width="4"/>
+    <!-- Gas Mask Filters -->
+    <circle cx="34" cy="74" r="10" fill="#EF4444"/>
+    <circle cx="94" cy="74" r="10" fill="#EF4444"/>
+    <circle cx="50" cy="46" r="8" fill="#0F172A"/>
+    <circle cx="78" cy="46" r="8" fill="#0F172A"/>
+    <polygon points="64,58 58,68 70,68" fill="#EF4444"/>
+</svg>

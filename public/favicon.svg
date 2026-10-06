@@ -1,0 +1,20 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="4" y="4" width="92" height="92" rx="28" fill="url(#brandGrad)" />
+  <g transform="translate(20, 22) scale(0.6)">
+    <!-- Sleek Controller Outline -->
+    <path d="M12 28 C8 28 4 36 2 54 C0 72 8 88 22 88 C30 88 36 78 44 68 L56 68 C64 78 70 88 78 88 C92 88 100 72 98 54 C96 36 92 28 88 28 C76 28 68 36 50 36 C32 36 24 28 12 28 Z" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- D-Pad -->
+    <path d="M26 44 V64 M16 54 H36" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" />
+    <!-- Action Buttons -->
+    <circle cx="74" cy="48" r="4.5" fill="#FFFFFF" />
+    <circle cx="84" cy="58" r="4.5" fill="#FFFFFF" />
+    <circle cx="64" cy="58" r="4.5" fill="#FFFFFF" />
+    <circle cx="74" cy="68" r="4.5" fill="#FFFFFF" />
+  </g>
+  <defs>
+    <linearGradient id="brandGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#14B8A6"/>
+      <stop offset="1" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+</svg>

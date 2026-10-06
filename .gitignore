@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Archives / backups
+*.zip
+*.tar.gz
+
+# Environment secrets
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Generated caches
+scripts/.sitemap-cache.json
+
+# OS files
+.DS_Store
+Thumbs.db

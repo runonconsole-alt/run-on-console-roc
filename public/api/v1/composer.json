@@ -1,0 +1,13 @@
+{
+    "name": "runonconsole/production-api",
+    "description": "Run On Console Production API v1 with Official PHPMailer Engine",
+    "type": "project",
+    "require": {
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist"
+    },
+    "license": "MIT"
+}
