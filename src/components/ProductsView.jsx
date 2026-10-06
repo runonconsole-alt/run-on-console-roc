@@ -13,6 +13,7 @@ import { BouncyText } from './BouncyText';
 import { CyberMatrixHoloBackground } from './CyberMatrixHoloBackground';
 import { playClickSound, playHoverSound, playPowerUpSound } from '../utils/audioEffects';
 import confetti from 'canvas-confetti';
+import { amazonAffiliateLink } from '../utils/amazon';
 
 export const ProductsView = () => {
   const { 
@@ -135,7 +136,7 @@ export const ProductsView = () => {
     const isComparing = compareIds.includes(product.id);
     const related = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 3);
 
-    const amazonLink = product.affiliateLinks?.amazon || "https://amazon.com?tag=fragreviews-20";
+    const amazonLink = amazonAffiliateLink(product.affiliateLinks?.amazon, product.name || product.title);
     const bestbuyLink = product.affiliateLinks?.bestbuy || "https://bestbuy.com";
     const officialLink = product.affiliateLinks?.official || "https://store.com";
 
@@ -578,7 +579,7 @@ export const ProductsView = () => {
 
             {/* Buy Loadout Bundle Affiliate Link */}
             <a 
-              href="https://amazon.com?tag=fragreviews-20"
+              href={amazonAffiliateLink()}
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleBuyClick}
@@ -679,7 +680,7 @@ export const ProductsView = () => {
                 </div>
 
                 <a 
-                  href={unitA.affiliateLinks?.amazon || "https://amazon.com?tag=fragreviews-20"}
+                  href={amazonAffiliateLink(unitA.affiliateLinks?.amazon, unitA.name || unitA.title)}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={handleBuyClick}
@@ -723,7 +724,7 @@ export const ProductsView = () => {
                 </div>
 
                 <a 
-                  href={unitB.affiliateLinks?.amazon || "https://amazon.com?tag=fragreviews-20"}
+                  href={amazonAffiliateLink(unitB.affiliateLinks?.amazon, unitB.name || unitB.title)}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={handleBuyClick}
@@ -916,7 +917,7 @@ export const ProductsView = () => {
 
                   {/* Buy Button with Direct Amazon Link */}
                   <a
-                    href={prod.affiliateLinks?.amazon || "https://amazon.com?tag=fragreviews-20"}
+                    href={amazonAffiliateLink(prod.affiliateLinks?.amazon, prod.name || prod.title)}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => {

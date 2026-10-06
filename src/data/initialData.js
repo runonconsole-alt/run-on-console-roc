@@ -470,7 +470,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/cyber_keyboard.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0BCW7S66F?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0BCW7S66F?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/logitech-g-pro-x-tkl",
       "official": "https://www.logitechg.com"
     },
@@ -520,7 +520,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/apex_mouse.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0B6Y7N4P4?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0B6Y7N4P4?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/razer-deathadder-v3-pro",
       "official": "https://www.razer.com"
     },
@@ -566,7 +566,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/gaming_monitor.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0CS7Z8Z6P?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0CS7Z8Z6P?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/rog-swift-oled-360hz",
       "official": "https://rog.asus.com"
     },
@@ -605,7 +605,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/tactical_headset.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0C3BV19Q3?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0C3BV19Q3?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/hyperx-cloud-iii",
       "official": "https://hyperx.com"
     },
@@ -641,7 +641,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": false,
     "image": "/images/review_chair.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B09HN2D7Q9?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B09HN2D7Q9?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/secretlab-titan-evo",
       "official": "https://secretlab.co"
     },
@@ -676,7 +676,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/pro_controller.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0D185QZ6P?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0D185QZ6P?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/apex-pro-controller",
       "official": "https://www.scufgaming.com"
     },
@@ -711,7 +711,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/handheld_console.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0D999QZ6P?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0D999QZ6P?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/7-inch-oled-handheld",
       "official": "https://store.steampowered.com"
     },
@@ -746,7 +746,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": false,
     "image": "/images/battlestation_pc.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0CX87QZ6P?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0CX87QZ6P?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/custom-rtx4090-desktop",
       "official": "https://www.cyberpowerpc.com"
     },
@@ -781,7 +781,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/gaming_cables_accessories.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B08V89XYZ1?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B08V89XYZ1?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/coiled-cable-gaming",
       "official": "https://store.epomaker.com"
     },
@@ -819,7 +819,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/gaming_cables_accessories.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B07FL1XYZ2?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B07FL1XYZ2?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/mouse-bungee-pro",
       "official": "https://zowie.benq.com"
     },
@@ -855,7 +855,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/gaming_cables_accessories.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B09X7XYZ03?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B09X7XYZ03?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/ptfe-mouse-skates",
       "official": "https://corepad.de"
     },
@@ -891,7 +891,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/gaming_cables_accessories.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B08M9XYZ04?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B08M9XYZ04?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/hdmi-21-8k-cable",
       "official": "https://belkin.com"
     },
@@ -927,7 +927,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/streaming_vr_gear.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B09V7XYZ05?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B09V7XYZ05?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/gaming-dac-amp",
       "official": "https://soundblaster.com"
     },
@@ -963,7 +963,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/pro_controller.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B08H7XYZ06?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B08H7XYZ06?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/controller-dock",
       "official": "https://razer.com"
     },
@@ -999,7 +999,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/gaming_cables_accessories.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0998XYZ07?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0998XYZ07?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/switch-mod-kit",
       "official": "https://kineticlabs.com"
     },
@@ -1035,7 +1035,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/gaming_cables_accessories.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B07Z8XYZ08?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B07Z8XYZ08?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/extended-deskpad",
       "official": "https://artisan-jp.com"
     },
@@ -1072,7 +1072,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/battlestation_pc.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0BHD8Z3SD?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0BHD8Z3SD?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/asus-rtx-4090-strix",
       "official": "https://rog.asus.com"
     },
@@ -1109,7 +1109,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/battlestation_pc.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0CSK3G4PS?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0CSK3G4PS?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/msi-rtx-4070-ti-super",
       "official": "https://msi.com"
     },
@@ -1145,7 +1145,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/battlestation_pc.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0BTZB7F88?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0BTZB7F88?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/amd-ryzen-7-7800x3d",
       "official": "https://amd.com"
     },
@@ -1182,7 +1182,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/battlestation_pc.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0CGJDKLB8?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0CGJDKLB8?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/intel-core-i9-14900k",
       "official": "https://intel.com"
     },
@@ -1218,7 +1218,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/gaming_cables_accessories.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0BHJJ9Y77?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0BHJJ9Y77?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/samsung-990-pro-2tb",
       "official": "https://samsung.com"
     },
@@ -1255,7 +1255,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/gaming_cables_accessories.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0C3RYHZJQ?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0C3RYHZJQ?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/corsair-vengeance-rgb-32gb",
       "official": "https://corsair.com"
     },
@@ -1292,7 +1292,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/handheld_console.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B09X7C6159?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B09X7C6159?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/sandisk-extreme-1tb-microsd",
       "official": "https://westerndigital.com"
     },
@@ -1328,7 +1328,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/streaming_vr_gear.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0BQ59DXZ7?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0BQ59DXZ7?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/razer-leviathan-v2-pro",
       "official": "https://razer.com"
     },
@@ -1364,7 +1364,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/streaming_vr_gear.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0BKT8K28P?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0BKT8K28P?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/creative-pebble-pro",
       "official": "https://creative.com"
     },
@@ -1399,7 +1399,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/tactical_headset.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0BH4W7W6Z?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0BH4W7W6Z?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/razer-hammerhead-hyperspeed",
       "official": "https://razer.com"
     },
@@ -1435,7 +1435,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/tactical_headset.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0CB8HHS8V?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0CB8HHS8V?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/moondrop-chu-ii",
       "official": "https://moondroplab.com"
     },
@@ -1471,7 +1471,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/gaming_cables_accessories.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0C47FB9G7?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0C47FB9G7?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/anker-prime-100w",
       "official": "https://anker.com"
     },
@@ -1507,7 +1507,7 @@ export const ALL_PRODUCTS = [
     "primeEligible": true,
     "image": "/images/handheld_console.jpg",
     "affiliateLinks": {
-      "amazon": "https://www.amazon.com/dp/B0B79VMSZZ?tag=fragreviews-20",
+      "amazon": "https://www.amazon.com/dp/B0B79VMSZZ?tag=roc2602-20",
       "bestbuy": "https://www.bestbuy.com/site/steam-deck-dock-station",
       "official": "https://jsaux.com"
     },

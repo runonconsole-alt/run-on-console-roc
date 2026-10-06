@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Star, ArrowRight, ShoppingCart, SlidersHorizontal, PackageCheck } from 'lucide-react';
 import { Tilt3DCard } from './Tilt3DCard';
 import { BouncyText } from './BouncyText';
+import { amazonAffiliateLink } from '../utils/amazon';
 
 export const LatestReviewsSection = () => {
   const { products, navigateToProduct, navigateTo, toggleCompare, compareIds, searchQuery } = useApp();
@@ -54,7 +55,7 @@ export const LatestReviewsSection = () => {
         {filtered.slice(0, 8).map((review) => {
           const isComparing = compareIds.includes(review.id);
           const ratingVal = review.rating || (review.rocScore / 2).toFixed(1);
-          const amazonLink = review.affiliateLinks?.amazon || "https://amazon.com?tag=fragreviews-20";
+          const amazonLink = amazonAffiliateLink(review.affiliateLinks?.amazon, review.name || review.title);
           const productUrl = `/products/${review.slug || review.id}/`;
 
           return (

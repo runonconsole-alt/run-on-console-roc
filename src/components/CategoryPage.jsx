@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { CATEGORIES_LIST } from '../data/initialData';
 import { Star, ShoppingCart, ExternalLink, SlidersHorizontal, ArrowLeft, Check, ShieldCheck, Tag } from 'lucide-react';
+import { amazonAffiliateLink } from '../utils/amazon';
 
 export const CategoryPage = () => {
   const { 
@@ -134,7 +135,7 @@ export const CategoryPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((item) => {
             const isComparing = compareIds.includes(item.id);
-            const amazonLink = item.affiliateLinks?.amazon || "https://amazon.com?tag=fragreviews-20";
+            const amazonLink = amazonAffiliateLink(item.affiliateLinks?.amazon, item.name || item.title);
 
             return (
               <div 

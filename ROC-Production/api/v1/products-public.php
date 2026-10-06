@@ -45,9 +45,9 @@ function getAmazonTag(PDO $pdo): string {
         $st = $pdo->prepare("SELECT setting_value FROM cms_settings WHERE setting_key = 'amazon_tag' LIMIT 1");
         $st->execute();
         $v = $st->fetchColumn();
-        return ($v && preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]{1,62}-\d{2}$/', $v)) ? (string)$v : '';
+        return ($v && preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]{1,62}-\d{2}$/', $v)) ? (string)$v : 'roc2602-20';
     } catch (\Throwable $e) {
-        return '';
+        return 'roc2602-20';
     }
 }
 

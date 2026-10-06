@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Save, Plus, Trash2, Tag, ShoppingCart, DollarSign, FileText } from 'lucide-react';
+import { Save, Plus, Trash2, Tag, ShoppingCart, DollarSign, FileText, Search, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { amazonAffiliateLink, amazonSearchLink, extractAsin } from '../../utils/amazon';
 
 const CATEGORIES = [
   "Keyboards", 
@@ -32,7 +33,9 @@ export const AdminReviewForm = ({ initialData, onDone }) => {
   const [price, setPrice] = useState(initialData?.price || "$149.99");
   const [originalPrice, setOriginalPrice] = useState(initialData?.originalPrice || "$179.99");
   const [discount, setDiscount] = useState(initialData?.discount || "15% OFF");
-  const [amazonLink, setAmazonLink] = useState(initialData?.affiliateLinks?.amazon || "https://amazon.com?tag=fragreviews-20");
+  const [amazonLink, setAmazonLink] = useState(initialData?.affiliateLinks?.amazon || "");
+  // Article titles often end in "– Review"; search Amazon for the product name only.
+  const amazonQuery = title.replace(/\breviews?\b/gi, '').replace(/[\s\-–—|:]+$/, '').trim();
   const [bestbuyLink, setBestbuyLink] = useState(initialData?.affiliateLinks?.bestbuy || "https://bestbuy.com");
   const [officialLink, setOfficialLink] = useState(initialData?.affiliateLinks?.official || "https://store.com");
   const [primeEligible, setPrimeEligible] = useState(Boolean(initialData?.primeEligible !== false));
@@ -83,7 +86,7 @@ export const AdminReviewForm = ({ initialData, onDone }) => {
       discount,
       primeEligible,
       affiliateLinks: {
-        amazon: amazonLink,
+        amazon: amazonLink.trim() ? amazonAffiliateLink(amazonLink) : "",
         bestbuy: bestbuyLink,
         official: officialLink
       },
@@ -223,14 +226,50 @@ export const AdminReviewForm = ({ initialData, onDone }) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div>
-            <label className="block text-amber-900 mb-1 font-bold">AMAZON AFFILIATE LINK *</label>
-            <input 
-              type="text"
-              value={amazonLink}
-              onChange={(e) => setAmazonLink(e.target.value)}
-              placeholder="https://amazon.com/dp/...?tag=yourtag-20"
-              className="w-full bg-white border border-amber-300 rounded-lg p-2 text-slate-900 font-mono text-[11px]"
-            />
+            <label className="block text-amber-900 mb-1 font-bold">AMAZON PRODUCT LINK</label>
+            <div className="flex gap-2">
+              <input 
+                type="text"
+                value={amazonLink}
+                onChange={(e) => setAmazonLink(e.target.value)}
+                onBlur={() => amazonLink.trim() && setAmazonLink(amazonAffiliateLink(amazonLink))}
+                placeholder="Paste any Amazon product link"
+                className="flex-1 min-w-0 bg-white border border-amber-300 rounded-lg p-2 text-slate-900 font-mono text-[11px]"
+              />
+              <a
+                href={amazonQuery ? amazonSearchLink(amazonQuery) : undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-disabled={!amazonQuery}
+                title={amazonQuery ? `Search Amazon for "${amazonQuery}"` : 'Enter a product title first'}
+                className={`shrink-0 flex items-center gap-1 px-2.5 rounded-lg font-bold border no-underline ${
+                  amazonQuery
+                    ? 'bg-amber-500 hover:bg-amber-400 text-white border-amber-500'
+                    : 'bg-slate-100 text-slate-400 border-slate-200 pointer-events-none'
+                }`}
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span>Find on Amazon</span>
+              </a>
+            </div>
+            {amazonLink.trim() && (
+              extractAsin(amazonLink) ? (
+                <p className="mt-1 flex items-center gap-1 text-emerald-700 font-bold">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Product {extractAsin(amazonLink)} linked with store ID
+                </p>
+              ) : (
+                <p className="mt-1 flex items-center gap-1 text-amber-700 font-bold">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  No product code found. Paste the link from the product page (it contains /dp/).
+                </p>
+              )
+            )}
+            {!amazonLink.trim() && (
+              <p className="mt-1 text-slate-500">
+                Empty: the Buy button opens an Amazon search for the title.
+              </p>
+            )}
           </div>
 
           <div>

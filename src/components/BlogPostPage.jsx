@@ -5,6 +5,7 @@ import {
   AlertTriangle, Clock, User, MessageSquare, Send, Tag, Share2, Bookmark, SlidersHorizontal 
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { amazonAffiliateLink } from '../utils/amazon';
 
 export const BlogPostPage = () => {
   const { selectedArticle, setSelectedArticle, toggleCompare, compareIds, addComment } = useApp();
@@ -18,7 +19,7 @@ export const BlogPostPage = () => {
   if (!selectedArticle) return null;
 
   const isComparing = compareIds.includes(selectedArticle.id);
-  const amazonLink = selectedArticle.affiliateLinks?.amazon || "https://amazon.com?tag=fragreviews-20";
+  const amazonLink = amazonAffiliateLink(selectedArticle.affiliateLinks?.amazon, selectedArticle.name || selectedArticle.title);
   const bestbuyLink = selectedArticle.affiliateLinks?.bestbuy || "https://bestbuy.com";
   const officialLink = selectedArticle.affiliateLinks?.official || "https://store.com";
 

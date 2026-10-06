@@ -13,6 +13,7 @@ import { BouncyText } from './BouncyText';
 import { SubmissionSuccessCard } from './SubmissionSuccessCard';
 import { playClickSound, playHoverSound } from '../utils/audioEffects';
 import { slugify } from '../seo/routeRegistry';
+import { amazonAffiliateLink } from '../utils/amazon';
 
 export const BlogsView = () => {
   const { 
@@ -187,7 +188,7 @@ export const BlogsView = () => {
                   </div>
 
                   <a 
-                    href={prod.affiliateLinks?.amazon || "https://amazon.com?tag=fragreviews-20"}
+                    href={amazonAffiliateLink(prod.affiliateLinks?.amazon, prod.name || prod.title)}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => playClickSound()}
