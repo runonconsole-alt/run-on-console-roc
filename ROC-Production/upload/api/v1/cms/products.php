@@ -165,7 +165,7 @@ if ($method === 'GET') {
     }
 
     $cols = rocProdColumns($pdo);
-    $want = ['id', 'title', 'slug', 'category', 'price', 'price_state', 'rating', 'image', 'status', 'draft_status', 'version', 'is_noindex', 'updated_at', 'affiliate_amazon', 'short_desc'];
+    $want = ['id', 'title', 'slug', 'category', 'category_slug', 'price', 'price_state', 'rating', 'image', 'image_alt', 'status', 'draft_status', 'version', 'is_noindex', 'updated_at', 'affiliate_amazon', 'short_desc'];
     $sel = implode(', ', array_map(function ($c) { return "`{$c}`"; }, array_values(array_intersect($want, $cols))));
     $stmt = $pdo->query("SELECT {$sel} FROM products ORDER BY category, title");
     $products = $stmt->fetchAll();
@@ -196,6 +196,48 @@ if ($method === 'POST') {
         logCmsAudit('cms_product_create', 'product', $idStr, ['title' => $title]);
 
         echo json_encode(['success' => true, 'id' => $idStr, 'slug' => $slug, 'version' => 1]);
+        exit();
+    }
+
+    // Product images page: change only the photo (and Amazon link) of one product.
+    if ($action === 'set_media') {
+        $cols = rocProdColumns($pdo);
+        $set = [];
+        $errors = [];
+        if (array_key_exists('image', $data)) {
+            [$img, $e] = rocProdImage((string)$data['image']);
+            if ($e) $errors[] = $e; else $set['image'] = $img;
+        }
+        if (array_key_exists('affiliate_amazon', $data) && trim((string)$data['affiliate_amazon']) !== '') {
+            [$amz, $e] = rocProdAmazon((string)$data['affiliate_amazon']);
+            if ($e) $errors[] = $e; else $set['affiliate_amazon'] = $amz;
+        }
+        if (array_key_exists('image_alt', $data)) $set['image_alt'] = rocProdClip($data['image_alt'], 255);
+        if ($errors) {
+            http_response_code(422);
+            echo json_encode(['success' => false, 'error' => implode(' ', $errors)]);
+            exit();
+        }
+        if (!$set) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Nothing to save.']);
+            exit();
+        }
+        $now = date('Y-m-d H:i:s');
+        $set = array_intersect_key($set + ['updated_at' => $now, 'content_modified_at' => $now], array_flip($cols));
+        $expectedVersion = (int)($data['version'] ?? 1);
+        $st = $pdo->prepare('UPDATE products SET ' . implode(', ', array_map(function ($c) { return "{$c} = ?"; }, array_keys($set)))
+                          . ', version = version + 1 WHERE id = ? AND version = ?');
+        $st->execute([...array_values($set), $id, $expectedVersion]);
+        if ($st->rowCount() === 0) {
+            http_response_code(409);
+            echo json_encode(['success' => false, 'error' => 'This product was changed by someone else. Reload and try again.']);
+            exit();
+        }
+        logCmsAudit('cms_product_media', 'product', $id, ['version' => $expectedVersion + 1, 'fields' => array_keys($set)]);
+        $st = $pdo->prepare('SELECT * FROM products WHERE id = ? LIMIT 1');
+        $st->execute([$id]);
+        echo json_encode(['success' => true, 'product' => $st->fetch(PDO::FETCH_ASSOC)]);
         exit();
     }
 

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Razer BlackShark V3 Pro">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#022c22"/><stop offset="1" stop-color="#0f172a"/></linearGradient></defs>
+<rect width="400" height="300" fill="url(#g)"/>
+<g transform="translate(250 90) scale(6)" fill="none" stroke="#22d3ee" stroke-opacity=".16" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><rect x="2" y="14" width="5" height="7" rx="2"/><rect x="17" y="14" width="5" height="7" rx="2"/></g>
+<rect x="40" y="40" width="44" height="4" rx="2" fill="#22d3ee"/>
+<text x="40" y="74" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="15" font-weight="700" fill="#22d3ee" letter-spacing="1">RAZER</text>
+<text font-family="Outfit,Inter,Segoe UI,Arial,sans-serif" font-size="37" font-weight="800" fill="#f8fafc"><tspan x="40" y="129">BlackShark V3</tspan><tspan x="40" y="171">Pro</tspan></text>
+<text x="40" y="262" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">Gaming Headsets &amp; Audio</text>
+<text x="360" y="262" text-anchor="end" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="12" font-weight="800" fill="#10b981">RUN ON CONSOLE</text>
+</svg>
