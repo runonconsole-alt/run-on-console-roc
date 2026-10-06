@@ -155,7 +155,7 @@ export const Header = () => {
           <div className="flex items-center justify-between h-16 sm:h-18 gap-1.5 sm:gap-3">
             
             {/* Brand Logo Anchor Link */}
-            <div className="pr-3 sm:pr-4 mr-2 sm:mr-4 border-r border-slate-200 shrink-0">
+            <div className="shrink-0 sm:pr-4 sm:mr-4 sm:border-r sm:border-slate-200">
               <a href="/" onClick={(e) => handleNavClick(e, 'home')} className="no-underline block">
                 <BrandLogo theme="light" />
               </a>
@@ -647,13 +647,14 @@ export const Header = () => {
                   <a
                     href="/auth/login/"
                     onClick={(e) => handleNavClick(e, 'auth', 'login')}
-                    className="px-3 py-1.5 rounded-xl text-xs font-display font-extrabold text-slate-800 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200 transition-all no-underline shrink-0"
+                    className="hidden sm:block px-3 py-1.5 rounded-xl text-xs font-display font-extrabold text-slate-800 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200 transition-all no-underline shrink-0"
                   >
                     Sign In
                   </a>
                   <a
                     href="/auth/signup/"
                     onClick={(e) => handleNavClick(e, 'auth', 'signup')}
+                    aria-label="Join Free"
                     className="px-3 py-1.5 rounded-xl text-xs font-display font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-sm transition-all no-underline shrink-0 flex items-center gap-1"
                   >
                     <User className="w-3.5 h-3.5" />
@@ -666,6 +667,7 @@ export const Header = () => {
               <button
                 type="button"
                 aria-label="Toggle mobile navigation menu"
+                aria-expanded={mobileMenuOpen}
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="lg:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
               >
@@ -679,7 +681,47 @@ export const Header = () => {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-xl animate-page-in">
+          <div className="lg:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-xl animate-page-in max-h-[calc(100vh-4rem)] overflow-y-auto">
+            {/* Search (the header search bar is hidden below md) */}
+            <form
+              className="relative md:hidden"
+              onSubmit={(e) => {
+                e.preventDefault();
+                setMobileMenuOpen(false);
+                handleNavClick(null, 'products');
+              }}
+            >
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <input
+                type="search"
+                placeholder="Search gear & games..."
+                aria-label="Search gaming hardware and games"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-100 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white"
+              />
+            </form>
+
+            {/* Sign in / join (Sign In is hidden from the header bar below sm) */}
+            {!currentUser && (
+              <div className="grid grid-cols-2 gap-2 sm:hidden">
+                <a
+                  href="/auth/login/"
+                  onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'auth', 'login'); }}
+                  className="p-2.5 rounded-xl text-xs font-display font-extrabold text-center text-slate-800 border border-slate-200 no-underline"
+                >
+                  Sign In
+                </a>
+                <a
+                  href="/auth/signup/"
+                  onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'auth', 'signup'); }}
+                  className="p-2.5 rounded-xl text-xs font-display font-extrabold text-center bg-gradient-to-r from-emerald-600 to-teal-600 text-white no-underline"
+                >
+                  Join Free
+                </a>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-2 text-xs font-display font-extrabold">
               <a
                 href="/"
