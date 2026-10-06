@@ -106,17 +106,24 @@ export const Header = () => {
   };
 
   const productCount = (slug) => (products || []).filter(p => p.categorySlug === slug).length;
-  const componentsMenu = [
-    { title: "Graphics Cards (GPUs)", desc: `NVIDIA RTX 50, AMD RX 9000, Intel Arc · ${productCount('gpu')} picks`, icon: Cpu, slug: "gpu" },
-    { title: "All Gaming Gear", desc: `Every category · ${(products || []).length} products`, icon: Layers, slug: null },
-  ];
-
-  const peripheralsMenu = [
-    { title: "Gaming Monitors & Displays", desc: `OLED, QD-OLED & ultrawide · ${productCount('monitors')} picks`, icon: Monitor, slug: "monitors" },
-    { title: "Gaming Mice", desc: `Ultra-light, ergonomic & MMO · ${productCount('mice')} picks`, icon: Mouse, slug: "mice" },
-    { title: "Gaming Keyboards", desc: `Hall Effect, rapid trigger & mechanical · ${productCount('keyboards')} picks`, icon: Cable, slug: "keyboards" },
-    { title: "Headsets & Audio Gear", desc: `Headsets, earbuds & USB mics · ${productCount('audio')} picks`, icon: Headphones, slug: "audio" },
-    { title: "Speakers & Soundbars", desc: `2.0, 2.1, 5.1 & soundbars · ${productCount('speakers')} picks`, icon: Tv, slug: "speakers" },
+  // One "Components" menu: PC hardware and gaming hardware, then a link to every product.
+  const componentGroups = [
+    {
+      label: "PC HARDWARE",
+      items: [
+        { title: "Graphics Cards (GPUs)", desc: `NVIDIA RTX 50, AMD RX 9000, Intel Arc · ${productCount('gpu')} picks`, icon: Cpu, slug: "gpu" },
+      ],
+    },
+    {
+      label: "GAMING HARDWARE",
+      items: [
+        { title: "Gaming Monitors & Displays", desc: `OLED, QD-OLED & ultrawide · ${productCount('monitors')} picks`, icon: Monitor, slug: "monitors" },
+        { title: "Gaming Mice", desc: `Ultra-light, ergonomic & MMO · ${productCount('mice')} picks`, icon: Mouse, slug: "mice" },
+        { title: "Gaming Keyboards", desc: `Hall Effect, rapid trigger & mechanical · ${productCount('keyboards')} picks`, icon: Cable, slug: "keyboards" },
+        { title: "Headsets & Audio Gear", desc: `Headsets, earbuds & USB mics · ${productCount('audio')} picks`, icon: Headphones, slug: "audio" },
+        { title: "Speakers & Soundbars", desc: `2.0, 2.1, 5.1 & soundbars · ${productCount('speakers')} picks`, icon: Tv, slug: "speakers" },
+      ],
+    },
   ];
 
   const systemsMenu = [
@@ -177,8 +184,8 @@ export const Header = () => {
                 HOME
               </a>
 
-              {/* 1. COMPONENTS */}
-              <div 
+              {/* 1. COMPONENTS (PC hardware + gaming hardware) */}
+              <div
                 className="relative"
                 onMouseEnter={() => handleMouseEnter('components')}
                 onMouseLeave={handleMouseLeave}
@@ -187,8 +194,8 @@ export const Header = () => {
                   href="/products/"
                   onClick={(e) => handleNavClick(e, 'products')}
                   className={`px-1.5 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ${
-                    activeDropdown === 'components'
-                      ? 'bg-emerald-600 text-white shadow-sm' 
+                    activeDropdown === 'components' || currentPage === 'products'
+                      ? 'bg-emerald-600 text-white shadow-sm'
                       : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
                   }`}
                 >
@@ -197,104 +204,48 @@ export const Header = () => {
                 </a>
 
                 {activeDropdown === 'components' && (
-                  <div className="mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[360px] rounded-3xl p-4 shadow-2xl space-y-2 animate-page-in z-[99999]">
-                    <div className="flex items-center justify-between pb-2 border-b border-emerald-100">
-                      <span className="font-display font-extrabold text-xs text-slate-900 flex items-center gap-1.5">
-                        <Cpu className="w-4 h-4 text-emerald-600" />
-                        <span>CORE GAMING HARDWARE</span>
-                      </span>
-                      <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">The Build</span>
-                    </div>
-
-                    <div className="space-y-1">
-                      {componentsMenu.map((item, idx) => {
-                        const Icon = item.icon;
-                        return (
-                          <a
-                            key={idx}
-                            href={item.slug ? `/products/category/${item.slug}/` : '/products/'}
-                            onClick={(e) => handleNavClick(e, 'products', item.slug)}
-                            className="dropdown-tile p-2.5 rounded-xl cursor-pointer flex items-center justify-between gap-2.5 group no-underline"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                                <Icon className="w-4 h-4" />
+                  <div className="mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[380px] rounded-3xl p-4 shadow-2xl space-y-3 animate-page-in z-[99999]">
+                    {componentGroups.map((group) => (
+                      <div key={group.label} className="space-y-1">
+                        <div className="flex items-center gap-1.5 pb-1.5 border-b border-emerald-100 font-display font-extrabold text-[11px] text-slate-900">
+                          <Cpu className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>{group.label}</span>
+                        </div>
+                        {group.items.map((item) => {
+                          const Icon = item.icon;
+                          return (
+                            <a
+                              key={item.slug}
+                              href={`/products/category/${item.slug}/`}
+                              onClick={(e) => handleNavClick(e, 'products', item.slug)}
+                              className="dropdown-tile p-2 rounded-xl cursor-pointer flex items-center justify-between gap-2.5 group no-underline"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                  <Icon className="w-4 h-4" />
+                                </div>
+                                <div className="min-w-0">
+                                  <h5 className="font-display font-bold text-xs text-slate-900 group-hover:text-emerald-700 truncate">
+                                    {item.title}
+                                  </h5>
+                                  <span className="text-[10px] text-slate-500 block truncate">
+                                    {item.desc}
+                                  </span>
+                                </div>
                               </div>
-                              <div className="min-w-0">
-                                <h5 className="font-display font-bold text-xs text-slate-900 group-hover:text-emerald-700 truncate">
-                                  {item.title}
-                                </h5>
-                                <span className="text-[10px] text-slate-500 block truncate">
-                                  {item.desc}
-                                </span>
-                              </div>
-                            </div>
-                            <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 shrink-0" />
-                          </a>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 2. PERIPHERALS */}
-              <div 
-                className="relative"
-                onMouseEnter={() => handleMouseEnter('peripherals')}
-                onMouseLeave={handleMouseLeave}
-              >
-                <a
-                  href="/products/"
-                  onClick={(e) => handleNavClick(e, 'products')}
-                  className={`px-1.5 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ${
-                    activeDropdown === 'peripherals'
-                      ? 'bg-emerald-600 text-white shadow-sm' 
-                      : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
-                  }`}
-                >
-                  <span>PERIPHERALS</span>
-                  <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${activeDropdown === 'peripherals' ? 'rotate-180' : ''}`} />
-                </a>
-
-                {activeDropdown === 'peripherals' && (
-                  <div className="mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[360px] rounded-3xl p-4 shadow-2xl space-y-2 animate-page-in z-[99999]">
-                    <div className="flex items-center justify-between pb-2 border-b border-emerald-100">
-                      <span className="font-display font-extrabold text-xs text-slate-900 flex items-center gap-1.5">
-                        <Gamepad2 className="w-4 h-4 text-emerald-600" />
-                        <span>GEAR & CONTROLLERS</span>
-                      </span>
-                      <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Accessories</span>
-                    </div>
-
-                    <div className="space-y-1">
-                      {peripheralsMenu.map((item, idx) => {
-                        const Icon = item.icon;
-                        return (
-                          <a
-                            key={idx}
-                            href={item.slug ? `/products/category/${item.slug}/` : '/products/'}
-                            onClick={(e) => handleNavClick(e, 'products', item.slug)}
-                            className="dropdown-tile p-2.5 rounded-xl cursor-pointer flex items-center justify-between gap-2.5 group no-underline"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                                <Icon className="w-4 h-4" />
-                              </div>
-                              <div className="min-w-0">
-                                <h5 className="font-display font-bold text-xs text-slate-900 group-hover:text-emerald-700 truncate">
-                                  {item.title}
-                                </h5>
-                                <span className="text-[10px] text-slate-500 block truncate">
-                                  {item.desc}
-                                </span>
-                              </div>
-                            </div>
-                            <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 shrink-0" />
-                          </a>
-                        );
-                      })}
-                    </div>
+                              <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 shrink-0" />
+                            </a>
+                          );
+                        })}
+                      </div>
+                    ))}
+                    <a
+                      href="/products/"
+                      onClick={(e) => handleNavClick(e, 'products')}
+                      className="block text-center text-xs font-display font-extrabold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl py-2 no-underline"
+                    >
+                      View all {(products || []).length} products →
+                    </a>
                   </div>
                 )}
               </div>
@@ -743,13 +694,6 @@ export const Header = () => {
                 className="p-2.5 rounded-xl bg-slate-50 text-slate-900 text-left no-underline block"
               >
                 COMPONENTS
-              </a>
-              <a
-                href="/products/"
-                onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'products'); }}
-                className="p-2.5 rounded-xl bg-slate-50 text-slate-900 text-left no-underline block"
-              >
-                PERIPHERALS
               </a>
               <a
                 href="/categories/"
