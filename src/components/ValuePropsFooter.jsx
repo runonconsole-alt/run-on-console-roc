@@ -61,7 +61,7 @@ export const ValuePropsFooter = () => {
     { key: "youtube", name: "YouTube", desc: "Videos & guides", color: "hover:border-[#FF0000] hover:bg-[#FF0000]/20", url: "", Logo: YouTubeLogo },
     { key: "discord", name: "Discord", desc: "Community chat", color: "hover:border-[#5865F2] hover:bg-[#5865F2]/20", url: "", Logo: DiscordLogo },
     { key: "reddit", name: "Reddit", desc: "Community discussions", color: "hover:border-[#FF4500] hover:bg-[#FF4500]/20", url: "", Logo: RedditLogo },
-    { key: "linkedin", name: "LinkedIn", desc: "Company page", color: "hover:border-[#0A66C2] hover:bg-[#0A66C2]/20", url: "", Logo: LinkedInLogo },
+    { key: "linkedin", name: "LinkedIn", desc: "Company page", color: "hover:border-[#0A66C2] hover:bg-[#0A66C2]/20", url: "https://www.linkedin.com/company/run-on-console/", Logo: LinkedInLogo },
     { key: "quora", name: "Quora", desc: "Questions & answers", color: "hover:border-[#B92B27] hover:bg-[#B92B27]/20", url: "", Logo: QuoraLogo }
   ];
 
