@@ -140,18 +140,34 @@ function rocProductCategorySlug(array $p): string {
     return trim((string)preg_replace('/[^a-z0-9]+/', '-', $s), '-');
 }
 
+/** Slugs of categories hidden in the CMS: their products are hidden with them. */
+function rocHiddenCategories(PDO $pdo): array {
+    static $hidden = null;
+    if ($hidden !== null) return $hidden;
+    $hidden = [];
+    try {
+        foreach ($pdo->query("SELECT slug FROM product_categories WHERE status <> 'published'")->fetchAll(PDO::FETCH_COLUMN) as $s) {
+            $hidden[(string)$s] = true;
+        }
+    } catch (\Throwable $e) { /* table not created yet */ }
+    return $hidden;
+}
+
 function rocFetchProduct(PDO $pdo, string $slug): ?array {
     $stmt = $pdo->prepare("SELECT * FROM products WHERE slug = ? AND status = 'published' LIMIT 1");
     $stmt->execute([$slug]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $row ?: null;
+    if (!$row || isset(rocHiddenCategories($pdo)[rocProductCategorySlug($row)])) return null;
+    return $row;
 }
 
 /** Published products, optionally one category, in the CMS display order. */
 function rocFetchProducts(PDO $pdo, ?array $category, string $query = ''): array {
     $rows = $pdo->query("SELECT * FROM products WHERE status = 'published'")->fetchAll(PDO::FETCH_ASSOC);
     $q = mb_strtolower($query);
-    $rows = array_values(array_filter($rows, function ($p) use ($category, $q) {
+    $hidden = rocHiddenCategories($pdo);
+    $rows = array_values(array_filter($rows, function ($p) use ($category, $q, $hidden) {
+        if (isset($hidden[rocProductCategorySlug($p)])) return false;
         if ($category && rocProductCategorySlug($p) !== (string)$category['slug']
             && strcasecmp(trim((string)($p['category'] ?? '')), trim((string)$category['name'])) !== 0) return false;
         if ($q === '') return true;
