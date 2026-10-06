@@ -2010,6 +2010,15 @@ function seoEditor(path, draft){
 }
 /* -------------------------------------------------------- website pages */
 
+/* Products, product categories and gaming platforms are served from the CMS database now. */
+function cmsEditTarget(url){
+  var r;
+  if((r=/^\/products\/category\/([a-z0-9-]+)\/$/.exec(url))) return {type:'pcat', id:r[1], label:'Product category'};
+  if((r=/^\/products\/([a-z0-9-]+)\/$/.exec(url))) return {type:'product', id:r[1], label:'Product'};
+  if((r=/^\/categories\/([a-z0-9-]+)\/$/.exec(url))) return {type:'platform', id:r[1], label:'Gaming platform'};
+  return null;
+}
+
 async function renderPages(m){
   if(!S.sitePages){
     m.innerHTML=head('Website pages','Scanning…','')+'<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
@@ -2026,9 +2035,9 @@ async function renderPages(m){
   });
   m.innerHTML=head('Website pages', S.sitePages.length+' pages on runonconsole.com','<button class="btn" id="prescan">Rescan</button>')+
   '<div class="body">'+
-  '<div class="alert info"><b>Blog posts</b> are managed here: edit, publish and the live page updates. '+
-  'Built-in pages (home, products, categories, about…) are part of the website code: their <b>SEO</b> (meta title, description, share image) '+
-  'can be changed here with the SEO button; their text and images become editable in the next update.</div>'+
+  '<div class="alert info"><b>Editable</b> pages come from the CMS database: blog posts, CMS pages, products, product categories and gaming platforms. '+
+  'Edit them and the live page updates. <b>Read-only</b> pages (home, about, contact, compatibility…) are written in the website code: '+
+  'their <b>SEO</b> (meta title, description, share image) can still be changed here with the SEO button.</div>'+
   '<div class="card"><div class="chead" style="flex-wrap:wrap;gap:10px">'+
     '<div class="search" style="max-width:260px;flex:1"><input type="text" id="pq" placeholder="Search title or URL" value="'+esc(S.pq)+'"></div>'+
     '<div class="chips">'+groups.map(function(g){
@@ -2037,17 +2046,21 @@ async function renderPages(m){
     }).join('')+'</div></div>'+
   '<table class="list"><thead><tr><th>Page</th><th>Images</th><th>Content</th><th></th></tr></thead><tbody>'+
   (rows.length?rows.map(function(p){
+    var db=cmsEditTarget(p.url), editable=p.editable||!!db;
     return '<tr><td><div style="font-weight:560">'+esc(p.title)+'</div><div class="t-slug">'+esc(p.url)+'</div></td>'+
       '<td>'+(p.images.length?'<div class="thumbs">'+p.images.slice(0,8).map(function(i){
           return '<i title="'+esc(i.filename+' · '+bytes(i.file_size))+'" style="background-image:url(\''+esc(i.file_url)+'\')" data-img="'+esc(i.file_url)+'"></i>';
         }).join('')+(p.images.length>8?'<span class="hint">+'+(p.images.length-8)+'</span>':'')+'</div>':'<span class="hint">none</span>')+'</td>'+
-      '<td>'+(p.editable?'<span class="tag published">editable</span>':'<span class="tag ro">read-only</span>')+
+      '<td>'+(editable?'<span class="tag published">editable</span>':'<span class="tag ro">read-only</span>')+
         (p.indexed===false?' <span class="tag off" title="Not indexed and not in the sitemap">private · noindex</span>':' <span class="tag admin" title="Indexed and listed in the sitemap">in Google</span>')+
-        '<div class="hint">'+esc(p.source)+'</div></td>'+
+        '<div class="hint">'+esc(db?db.label+' · CMS database':p.source)+'</div></td>'+
       '<td style="text-align:right;white-space:nowrap">'+
         (p.edit&&p.edit.type==='blog'&&can('blogs','view')?'<button class="btn sm" data-pe="'+esc(p.edit.id)+'">Edit</button> ':'')+
         (p.edit&&p.edit.type==='page'?'<button class="btn sm" data-ppe="'+esc(p.edit.id)+'">Edit</button> ':'')+
-        (!p.editable&&p.group!=='Account pages'?'<button class="btn sm" data-seo="'+esc(p.url)+'">'+(S.seo&&S.seo[p.url]&&S.seo[p.url].override?'SEO ✓':'SEO')+'</button> ':'')+
+        (db&&db.type==='product'&&can('products','edit')?'<button class="btn sm" data-dbe="product" data-id="'+esc(db.id)+'">Edit</button> ':'')+
+        (db&&db.type==='pcat'&&can('products','edit')?'<button class="btn sm" data-dbe="pcat" data-id="'+esc(db.id)+'">Edit</button> ':'')+
+        (db&&db.type==='platform'&&can('pages','edit')?'<button class="btn sm" data-dbe="platform" data-id="'+esc(db.id)+'">Edit</button> ':'')+
+        (!editable&&p.group!=='Account pages'?'<button class="btn sm" data-seo="'+esc(p.url)+'">'+(S.seo&&S.seo[p.url]&&S.seo[p.url].override?'SEO ✓':'SEO')+'</button> ':'')+
         '<a class="btn sm" href="'+esc(p.url)+'" target="_blank" rel="noopener">View ↗</a></td></tr>';
   }).join(''):'<tr><td colspan="4" class="empty">No pages match.</td></tr>')+
   '</tbody></table></div></div>';
@@ -2060,6 +2073,15 @@ async function renderPages(m){
   m.querySelectorAll('[data-pe]').forEach(function(b){ b.addEventListener('click',function(){ S.view='blogs'; openBlog(b.dataset.pe); }); });
   m.querySelectorAll('[data-ppe]').forEach(function(b){ b.addEventListener('click',function(){ S.view='cmspages'; openPage(b.dataset.ppe); }); });
   m.querySelectorAll('[data-seo]').forEach(function(b){ b.addEventListener('click',function(){ seoEditor(b.dataset.seo); }); });
+  m.querySelectorAll('[data-dbe]').forEach(function(b){ b.addEventListener('click',async function(){
+    var id=b.dataset.id, t=b.dataset.dbe;
+    if(t==='product'){ S.view='products'; renderShell(); openProductEditor(id); return; }
+    if(t==='platform'){ S.view='platforms'; renderShell(); openPlatform($('#main'),id); return; }
+    S.view='product-categories'; renderShell();
+    try{ var d=await api('product-categories.php'); var c=(d.categories||[]).filter(function(x){ return x.slug===id; })[0];
+      if(c) renderCategoryEditor($('#main'),c); else toast('Category not found.','bad'); }
+    catch(e){ toast(e.message,'bad'); }
+  }); });
   m.querySelectorAll('[data-img]').forEach(function(i){ i.style.cursor='pointer'; i.addEventListener('click',async function(){
     if(!can('media','view')) return;
     if(!S.mediaLoaded){ try{ S.media=(await api('media.php')).media||[]; S.mediaLoaded=true; }catch(e){ return; } }

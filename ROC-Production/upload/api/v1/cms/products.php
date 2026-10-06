@@ -150,8 +150,9 @@ if ($method === 'GET') {
     }
     $id = $_GET['id'] ?? null;
     if ($id !== null && $id !== '') {
-        $stmt = $pdo->prepare("SELECT * FROM products WHERE id = ? LIMIT 1");
-        $stmt->execute([(string)$id]);
+        // By id, or by page address (slug) when opened from Website pages.
+        $stmt = $pdo->prepare("SELECT * FROM products WHERE id = ? OR slug = ? ORDER BY (id = ?) DESC LIMIT 1");
+        $stmt->execute([(string)$id, (string)$id, (string)$id]);
         $prod = $stmt->fetch();
 
         if (!$prod) {
