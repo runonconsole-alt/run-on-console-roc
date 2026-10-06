@@ -66,7 +66,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Championship-grade wireless mechanical keyboard engineered with LIGHTSPEED sub-1ms response time and dual-shot PBT keycaps.',
             'pros' => '["Low input latency via LIGHTSPEED wireless","Hard-shell zippered travel case included","Standard keycap bottom row for custom keycaps"]',
             'cons' => '["Switches are factory soldered","Premium price tier"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0BCW7S66F?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0BCW7S66F?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/logitech-g-pro-x-tkl',
             'affiliate_official' => 'https://www.logitechg.com'
         ],
@@ -80,7 +80,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Lightweight 63g ergonomic esports mouse featuring Razer Focus Pro 30K optical sensor and Gen-3 optical switches.',
             'pros' => '["Accurate optical tracking across surfaces","Optical switches designed to prevent double-click issues","Ergonomic contour supports palm and claw grips"]',
             'cons' => '["Designed specifically for right-handed players","HyperPolling dongle for higher polling rates sold separately"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0B6Y7N4P4?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0B6Y7N4P4?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/razer-deathadder-v3-pro',
             'affiliate_official' => 'https://www.razer.com'
         ],
@@ -94,7 +94,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Fast 0.03ms GtG pixel response and high contrast ratio with a 360Hz refresh rate on a QHD QD-OLED panel.',
             'pros' => '["High motion clarity with fast pixel response","Wide color gamut with 99% DCI-P3 coverage","Custom passive heatsink for fanless cooling"]',
             'cons' => '["OLED panel maintenance recommended to mitigate burn-in risk"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0CS7Z8Z6P?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0CS7Z8Z6P?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/rog-swift-oled-360hz',
             'affiliate_official' => 'https://rog.asus.com'
         ],
@@ -108,7 +108,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Memory foam ear cushions paired with up to 120 hours of wireless battery life and tuned 53mm angled acoustic drivers.',
             'pros' => '["Long 120-hour wireless battery life","Comfortable memory foam ear cushions"]',
             'cons' => '["2.4GHz wireless connection only (no Bluetooth support)"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0C3BV19Q3?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0C3BV19Q3?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/hyperx-cloud-iii',
             'affiliate_official' => 'https://hyperx.com'
         ],
@@ -122,7 +122,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Cold-cure foam ergonomic gaming chair with integrated 4-way dynamic lumbar support and magnetic memory foam head pillow.',
             'pros' => '["Adjustable internal lumbar support system","Magnetic armrest replacement ecosystem"]',
             'cons' => '["Firm cold-cure foam seating feel"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B09HN2D7Q9?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B09HN2D7Q9?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/secretlab-titan-evo',
             'affiliate_official' => 'https://secretlab.co'
         ],
@@ -136,7 +136,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Wireless gaming controller featuring contactless Hall-Effect magnetic thumbsticks, microswitch triggers, and 4 remappable back buttons.',
             'pros' => '["Hall-Effect magnetic sensors resist analog stick drift","Short-throw microswitch trigger stops for fast actuation"]',
             'cons' => '["Back paddle layout may require familiarization period"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0D185QZ6P?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0D185QZ6P?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/apex-pro-controller',
             'affiliate_official' => 'https://www.scufgaming.com'
         ],
@@ -150,7 +150,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Portable x86 gaming handheld featuring a 7-inch 120Hz OLED display, ergonomic grips, and broad PC game library compatibility.',
             'pros' => '["Vibrant 120Hz OLED display with deep contrast","High-speed LPDDR5X memory for handheld PC performance"]',
             'cons' => '["Battery life varies based on power profile TDP settings"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0D999QZ6P?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0D999QZ6P?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/oled-handheld-pc',
             'affiliate_official' => 'https://store.steampowered.com'
         ],
@@ -164,7 +164,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'High-end desktop gaming PC featuring custom hardline acrylic liquid cooling for low operating temperatures under heavy load.',
             'pros' => '["High-end 4K graphics and compute performance","Quiet custom hardline liquid cooling loop"]',
             'cons' => '["Large enclosure size and heavy chassis"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0CX87QZ6P?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0CX87QZ6P?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/custom-rtx4090-desktop',
             'affiliate_official' => 'https://www.cyberpowerpc.com'
         ],
@@ -178,7 +178,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Double-sleeved coiled aviator cable featuring reverse-coil heat-treated elasticity, gold-plated USB-C to USB-A connectors, and durable GX12 metal aviator lock.',
             'pros' => '["Heat-set tight coils designed to maintain shape","Metal GX12 aviator connector provides secure attachment","Multiple colorway options"]',
             'cons' => '["Not intended for high-wattage fast-charging mobile devices"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B08V89XYZ1?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B08V89XYZ1?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/coiled-cable-gaming',
             'affiliate_official' => 'https://store.epomaker.com'
         ],
@@ -192,7 +192,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Reduces cable drag and snagging. High-flexibility dual spring suspension arm keeps wired mouse cables elevated during play.',
             'pros' => '["Reduces cable friction on mouse pad surfaces","Weighted base prevents sliding during mouse movements"]',
             'cons' => '["Requires small dedicated desk area"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B07FL1XYZ2?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B07FL1XYZ2?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/mouse-bungee-pro',
             'affiliate_official' => 'https://zowie.benq.com'
         ],
@@ -206,7 +206,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Die-cut pure virgin PTFE replacement skates with 2.5D rounded edges for smooth mouse glide.',
             'pros' => '["Low dynamic friction on cloth and hybrid mouse pads","Beveled edges reduce pad snagging"]',
             'cons' => '["Requires thorough cleaning of old adhesive prior to installation"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B09X7XYZ03?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B09X7XYZ03?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/ptfe-mouse-skates',
             'affiliate_official' => 'https://corepad.de'
         ],
@@ -220,7 +220,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'HDMI Forum certified Ultra High Speed cable delivering full 48Gbps uncompressed bandwidth for 4K 120Hz/144Hz and 8K 60Hz displays.',
             'pros' => '["Full 48Gbps bandwidth supports high refresh rate 4K displays","Braided outer jacket for durability"]',
             'cons' => '["Thick cable diameter is less flexible in tight spaces"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B08M9XYZ04?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B08M9XYZ04?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/hdmi-21-8k-cable',
             'affiliate_official' => 'https://belkin.com'
         ],
@@ -234,7 +234,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'External USB-C discrete DAC and headphone amplifier featuring high-resolution audio decoding for studio headphones.',
             'pros' => '["Isolates audio signal from internal motherboard interference","Drives high-impedance headphones up to 600Ω"]',
             'cons' => '["Requires available USB port"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B09V7XYZ05?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B09V7XYZ05?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/gaming-dac-amp',
             'affiliate_official' => 'https://soundblaster.com'
         ],
@@ -248,7 +248,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Simultaneously fast-charges two gamepads with magnetic contact charging and integrated overvoltage protection.',
             'pros' => '["Stores and charges two controllers simultaneously","Magnetic contact pins simplify docking"]',
             'cons' => '["Requires dedicated USB power source"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B08H7XYZ06?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B08H7XYZ06?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/controller-dock',
             'affiliate_official' => 'https://razer.com'
         ],
@@ -262,7 +262,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Complete mechanical keyboard modding kit including authentic Krytox 205g0 lubricant, dual switch openers, stem holder, and detail brushes.',
             'pros' => '["Includes essential tools for mechanical switch maintenance","Dual MX and Kailh switch opener included"]',
             'cons' => '["Manual switch lubrication requires significant time"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0998XYZ07?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0998XYZ07?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/switch-mod-kit',
             'affiliate_official' => 'https://kineticlabs.com'
         ],
@@ -276,7 +276,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Large 900x400mm micro-woven gaming mouse pad featuring a water-resistant coating, 4mm natural rubber base, and anti-fray stitched edges.',
             'pros' => '["Water-resistant coating simplifies cleaning","Extended 900mm surface covers desk space","4mm thickness provides wrist cushioning"]',
             'cons' => '["Requires time to unroll and lay flat out of packaging"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B07Z8XYZ08?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B07Z8XYZ08?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/extended-deskpad',
             'affiliate_official' => 'https://artisan-jp.com'
         ],
@@ -290,7 +290,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'High-performance flagship graphics card powered by the NVIDIA Ada Lovelace architecture with 24GB of GDDR6X memory for demanding 4K gaming.',
             'pros' => '["Exceptional 4K rendering performance for ray-traced gaming","Axial-tech fans with 0dB idle mode"]',
             'cons' => '["Requires 3.5 slots of PCIe chassis clearance"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0BHD8Z3SD?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0BHD8Z3SD?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/asus-rtx-4090-strix',
             'affiliate_official' => 'https://rog.asus.com'
         ],
@@ -304,7 +304,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'High-performance 1440p and 4K graphics card featuring 16GB of GDDR6X VRAM on a 256-bit bus for modern graphics workloads.',
             'pros' => '["16GB VRAM buffer for high-resolution textures","Efficient 285W TGP power consumption"]',
             'cons' => '["Card length requires verifying case clearance"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0CSK3G4PS?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0CSK3G4PS?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/msi-rtx-4070-ti-super',
             'affiliate_official' => 'https://msi.com'
         ],
@@ -318,7 +318,7 @@ function rocAgentSeedContent(): void {
             'summary' => '8-core, 16-thread desktop processor built on Zen 4 architecture with 104MB of combined L2+L3 3D V-Cache technology for high-efficiency gaming performance.',
             'pros' => '["High gaming efficiency and framerate performance","Low power consumption under gaming workloads"]',
             'cons' => '["Requires Socket AM5 motherboard and DDR5 memory"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0BTZB7F88?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0BTZB7F88?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/amd-ryzen-7-7800x3d',
             'affiliate_official' => 'https://amd.com'
         ],
@@ -332,7 +332,7 @@ function rocAgentSeedContent(): void {
             'summary' => '24-core desktop processor with up to 6.0GHz max turbo frequency for gaming, streaming, and multithreaded content creation.',
             'pros' => '["High single-core turbo frequency up to 6.0GHz","Strong multithreaded performance for content creation"]',
             'cons' => '["Requires high-performance liquid cooling for peak workloads"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0CGJDKLB8?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0CGJDKLB8?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/intel-core-i9-14900k',
             'affiliate_official' => 'https://intel.com'
         ],
@@ -346,7 +346,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'PCIe 4.0 NVMe M.2 SSD delivering sequential read speeds up to 7450MB/s with an integrated low-profile heatsink compatible with PC and PS5 expansion slots.',
             'pros' => '["Sequential read speeds up to 7450 MB/s","Low-profile heatsink fits PS5 console expansion bay"]',
             'cons' => '["Priced higher than entry-level PCIe 4.0 SSDs"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0BHJJ9Y77?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0BHJJ9Y77?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/samsung-990-pro-2tb',
             'affiliate_official' => 'https://samsung.com'
         ],
@@ -360,7 +360,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'DDR5-6000 memory kit with CL30 latency timings, featuring dual AMD EXPO and Intel XMP 3.0 profile compatibility.',
             'pros' => '["CL30 low-latency timings at 6000MHz","Dual AMD EXPO + Intel XMP profile support"]',
             'cons' => '["Module height requires checking CPU cooler clearance"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0C3RYHZJQ?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0C3RYHZJQ?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/corsair-vengeance-rgb-32gb',
             'affiliate_official' => 'https://corsair.com'
         ],
@@ -374,7 +374,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Expandable 1TB microSDXC memory card with UHS-I U3 and A2 performance ratings for portable handheld consoles and mobile devices.',
             'pros' => '["1TB capacity for handheld game storage","A2 app performance classification"]',
             'cons' => '["Maximum read speeds require compatible QuickFlow card reader"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B09X7C6159?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B09X7C6159?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/sandisk-extreme-1tb-microsd',
             'affiliate_official' => 'https://westerndigital.com'
         ],
@@ -388,7 +388,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Desktop PC soundbar featuring infrared camera head-tracking beamforming audio and a dedicated down-firing subwoofer.',
             'pros' => '["Beamforming audio spatial separation","Dedicated down-firing subwoofer for low frequencies"]',
             'cons' => '["Head-tracking requires clear camera view of user"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0BQ59DXZ7?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0BQ59DXZ7?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/razer-leviathan-v2-pro',
             'affiliate_official' => 'https://razer.com'
         ],
@@ -402,7 +402,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Compact USB-C desktop speakers featuring 45-degree elevated drivers, passive bass radiators, and customizable RGB lighting.',
             'pros' => '["Compact desktop footprint","45-degree elevated driver alignment"]',
             'cons' => '["Maximum peak output requires optional 30W USB-PD adapter"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0BKT8K28P?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0BKT8K28P?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/creative-pebble-pro',
             'affiliate_official' => 'https://creative.com'
         ],
@@ -416,7 +416,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'In-ear gaming wireless earbuds featuring a low-latency 2.4GHz USB-C dongle, Bluetooth 5.2, and Active Noise Cancellation.',
             'pros' => '["Low-latency 2.4GHz USB-C wireless dongle connection","Active Noise Cancellation support"]',
             'cons' => '["Earbud battery runtime varies with ANC enabled"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0BH4W7W6Z?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0BH4W7W6Z?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/razer-hammerhead-hyperspeed',
             'affiliate_official' => 'https://razer.com'
         ],
@@ -430,7 +430,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Budget in-ear monitor featuring a zinc-alloy housing, aluminum-magnesium alloy dome dynamic driver, and detachable 0.78mm 2-pin cable.',
             'pros' => '["Detailed audio tuning for in-ear monitor entry level","Detachable 0.78mm 2-pin cable design"]',
             'cons' => '["Passive noise isolation only (no ANC)"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0CB8HHS8V?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0CB8HHS8V?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/moondrop-chu-ii',
             'affiliate_official' => 'https://moondroplab.com'
         ],
@@ -444,7 +444,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Compact GaN wall charger providing up to 100W multi-device power distribution across two USB-C ports and one USB-A port.',
             'pros' => '["Multi-port 100W GaN power delivery","Foldable wall prongs for travel"]',
             'cons' => '["Higher cost than single-port chargers"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0C47FB9G7?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0C47FB9G7?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/anker-prime-100w',
             'affiliate_official' => 'https://anker.com'
         ],
@@ -458,7 +458,7 @@ function rocAgentSeedContent(): void {
             'summary' => 'Multi-port docking station for handheld gaming PCs, featuring 4K HDMI video output, Gigabit Ethernet, 3 USB 3.0 ports, and 100W USB-C power delivery.',
             'pros' => '["Expands handheld PC to external display and Ethernet","Includes 100W USB-C PD power pass-through"]',
             'cons' => '["Cradle slot width may require removing thick protective covers"]',
-            'affiliate_amazon' => 'https://www.amazon.com/dp/B0B79VMSZZ?tag=fragreviews-20',
+            'affiliate_amazon' => 'https://www.amazon.com/dp/B0B79VMSZZ?tag=roc2602-20',
             'affiliate_bestbuy' => 'https://www.bestbuy.com/site/steam-deck-dock-station',
             'affiliate_official' => 'https://jsaux.com'
         ]
