@@ -39,7 +39,6 @@ export const AppProvider = ({ children, initialUrl = null }) => {
     if (path.includes('/privacy-policy')) return { page: 'privacy-policy', param: null, is404: false };
     if (path.includes('/policy')) return { page: 'policy', param: null, is404: false };
     if (path.includes('/contact')) return { page: 'contact', param: null, is404: false };
-    if (path.includes('/admin')) return { page: 'admin', param: null, is404: false };
     
     if (path.includes('/auth/login')) return { page: 'auth', param: 'login', is404: false };
     if (path.includes('/auth/signup')) return { page: 'auth', param: 'signup', is404: false };
@@ -143,8 +142,7 @@ export const AppProvider = ({ children, initialUrl = null }) => {
   const [authMode, setAuthMode] = useState(initialResolution.param || 'login');
   const [pendingActivationEmail, setPendingActivationEmail] = useState('');
 
-  // Admin tab & notification
-  const [adminTab, setAdminTab] = useState('overview');
+  // Toast state set by showNotification()
   const [adminNotification, setAdminNotification] = useState(null);
 
   const [authConfig, setAuthConfig] = useState({
@@ -257,7 +255,6 @@ export const AppProvider = ({ children, initialUrl = null }) => {
     else if (page === 'privacy-policy') cleanPath = '/privacy-policy/';
     else if (page === 'policy') cleanPath = '/policy/';
     else if (page === 'contact') cleanPath = '/contact/';
-    else if (page === 'admin') cleanPath = '/admin/';
     else if (page === 'auth') {
       if (param) cleanPath = `/auth/${param}/`;
       else cleanPath = '/auth/login/';
@@ -551,42 +548,6 @@ export const AppProvider = ({ children, initialUrl = null }) => {
     return newSub;
   };
 
-  const addProduct = (prodData) => {
-    const newProd = { ...prodData, id: 'prod-' + Date.now(), rating: 4.9, reviewCount: 1 };
-    setProducts(prev => [newProd, ...prev]);
-    showNotification(`Added hardware: "${newProd.name}"`);
-    return newProd;
-  };
-
-  const updateProduct = (id, fields) => {
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, ...fields } : p));
-    showNotification(`Updated hardware: "${fields.name || id}"`);
-  };
-
-  const deleteProduct = (id) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
-    if (selectedProductId === id) setSelectedProductId(null);
-    showNotification(`Hardware removed from catalog`, "warning");
-  };
-
-  const addBlog = (blogData) => {
-    const newBlog = { ...blogData, id: 'blog-' + Date.now(), readTime: '6 min read', comments: [] };
-    setBlogs(prev => [newBlog, ...prev]);
-    showNotification(`Published article: "${newBlog.title}"`);
-    return newBlog;
-  };
-
-  const updateBlog = (id, fields) => {
-    setBlogs(prev => prev.map(b => b.id === id ? { ...b, ...fields } : b));
-    showNotification(`Updated article: "${fields.title || id}"`);
-  };
-
-  const deleteBlog = (id) => {
-    setBlogs(prev => prev.filter(b => b.id !== id));
-    if (selectedBlogId === id) setSelectedBlogId(null);
-    showNotification(`Article removed`, "warning");
-  };
-
   const toggleCompare = (id) => {
     setCompareIds(prev => {
       if (prev.includes(id)) return prev.filter(item => item !== id);
@@ -628,9 +589,6 @@ export const AppProvider = ({ children, initialUrl = null }) => {
       gameCompatibility: GAME_COMPATIBILITY_DATA,
       testimonials: COMMUNITY_TESTIMONIALS,
       pageFaqs: PAGE_FAQS,
-      adminTab,
-      setAdminTab,
-      adminNotification,
       currentUser,
       isSessionLoading,
       csrfToken,
@@ -657,12 +615,6 @@ export const AppProvider = ({ children, initialUrl = null }) => {
       navigateToCategory,
       navigateToBlog,
       addGuestSubmission,
-      addProduct,
-      updateProduct,
-      deleteProduct,
-      addBlog,
-      updateBlog,
-      deleteBlog,
       cart,
       addToCart,
       removeFromCart,

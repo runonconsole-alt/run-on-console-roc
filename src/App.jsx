@@ -19,7 +19,6 @@ import { AuthView } from './components/AuthView';
 import { ProfileView } from './components/ProfileView';
 import { ValuePropsFooter } from './components/ValuePropsFooter';
 import { CompareDrawer } from './components/CompareDrawer';
-import { AdminLayout } from './components/admin/AdminLayout';
 import { FragAIAssistantModal } from './components/FragAIAssistantModal';
 // ROC Agent (server chat) is not enabled yet; the built-in assistant is used, as on the live site.
 
@@ -36,11 +35,6 @@ const MainRouter = () => {
     const timer = setTimeout(() => setNavigating(false), 200);
     return () => clearTimeout(timer);
   }, [currentPage, is404]);
-
-  // If in Admin URL route (e.g. /admin), render separate ROC Admin Suite
-  if (currentPage === 'admin') {
-    return <AdminLayout />;
-  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col font-body relative" suppressHydrationWarning>
