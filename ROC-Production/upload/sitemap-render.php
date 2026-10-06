@@ -81,10 +81,15 @@ if ($map === 'categories') rocSmUrlset(rocSmBuilt($root, 'categories'));
 
 /* index */
 $latest = function (array $urls): int { return $urls ? max($urls) : time(); };
+// Once product-render.php / category-render.php serve these sitemaps (see .htaccess),
+// their content changes in the CMS database, so the folder dates are no longer a guide.
+$fromDb = function (string $renderer, string $dir) use ($root, $latest): int {
+    return is_file($root . '/' . $renderer) ? time() : $latest(rocSmBuilt($root, $dir));
+};
 $children = [
     'pages'      => $latest(rocSmBuilt($root, null)),
-    'products'   => $latest(rocSmBuilt($root, 'products')),
-    'categories' => $latest(rocSmBuilt($root, 'categories')),
+    'products'   => $fromDb('product-render.php', 'products'),
+    'categories' => $fromDb('category-render.php', 'categories'),
     'blogs'      => time(),
     'cms-pages'  => time(),
 ];

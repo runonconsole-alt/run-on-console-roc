@@ -528,7 +528,7 @@ function rocProductSitemap(PDO $pdo, array $categories): void {
     $line = function (string $loc, ?int $mod): string {
         return '  <url><loc>' . rocH($loc) . '</loc>' . ($mod ? '<lastmod>' . gmdate('c', $mod) . '</lastmod>' : '') . "</url>\n";
     };
-    $out .= $line(ROC_PUBLIC_URL . '/products/', $latest);
+    // /products/ itself is listed in pages-sitemap.xml by sitemap-render.php.
     foreach ($categories as $s => $c) {
         if (!isset($latestByCat[$s]) || !empty($c['is_noindex'])) continue;
         // A category changes when it is edited or when any of its products changes.

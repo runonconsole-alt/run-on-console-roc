@@ -108,6 +108,17 @@ function rocCatModified(array $c, array $devices): ?int {
 
 function rocPlatformUrl(string $slug): string { return ROC_PUBLIC_URL . '/categories/' . $slug . '/'; }
 
+/** Published CMS category guides for a platform (served by page-render.php at /categories/{cat}/{slug}/). */
+function rocPlatformGuides(PDO $pdo, string $catSlug): array {
+    try {
+        $st = $pdo->prepare("SELECT title, slug, excerpt, image FROM pages
+                              WHERE status = 'published' AND page_type = 'category' AND category_slug = ?
+                              ORDER BY published_at DESC LIMIT 12");
+        $st->execute([$catSlug]);
+        return $st->fetchAll(PDO::FETCH_ASSOC);
+    } catch (\Throwable $e) { return []; }
+}
+
 /* ==================================================================== */
 /*                               markup                                 */
 /* ==================================================================== */
@@ -169,6 +180,7 @@ function rocRenderHub(string $root, PDO $pdo, array $c, array $cats): void {
     $era     = trim((string)($c['era'] ?? '')) ?: 'Modern & Retro';
     $focus   = rocJsonList($c['focus_json'] ?? null);
     $devices = rocGamingDevices($pdo, $slug);
+    $guides  = rocPlatformGuides($pdo, $slug);
     $mod     = rocCatModified($c, $devices);
     $metaT   = trim((string)($c['meta_title'] ?? '')) ?: ($title . ' Hardware, Devices & Games | Run On Console');
     $metaD   = trim((string)($c['meta_description'] ?? '')) ?: rocCatTruncate($desc, 155);
@@ -232,6 +244,22 @@ function rocRenderHub(string $root, PDO $pdo, array $c, array $cats): void {
                 . (trim((string)($d['type'] ?? '')) !== '' || trim((string)($d['status_label'] ?? '')) !== ''
                     ? '<div class="pt-3 mt-3 border-t border-slate-200/60 flex items-center justify-between text-xs font-bold text-emerald-600"><span>' . rocH($d['type'] ?? '') . '</span><span class="text-slate-500">' . rocH($d['status_label'] ?? '') . '</span></div>' : '')
                 . '</div>';
+        }
+        $m .= '</div></section>';
+    }
+    if ($guides) {
+        $m .= '<section class="bg-white border-2 border-emerald-500/20 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">'
+            . '<div class="border-b border-emerald-100 pb-4"><div class="flex items-center gap-2 text-emerald-700 mb-1"><span class="font-display font-extrabold text-xs uppercase tracking-wider">GUIDES</span></div>'
+            . '<h2 class="font-display font-extrabold text-2xl text-slate-900">' . rocH($title) . ' Guides</h2></div>'
+            . '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">';
+        foreach ($guides as $g) {
+            $href = '/categories/' . $slug . '/' . $g['slug'] . '/';
+            $img = trim((string)($g['image'] ?? ''));
+            $m .= '<a href="' . rocH($href) . '" class="block no-underline"><div class="game-card group flex flex-col h-full">'
+                . ($img !== '' ? '<div class="relative h-40 bg-slate-900 overflow-hidden"><img src="' . rocH($img) . '" alt="' . rocH($g['title']) . '" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/></div>' : '')
+                . '<div class="p-5 space-y-2"><h3 class="font-display font-extrabold text-base text-slate-900 group-hover:text-emerald-700 transition-colors">' . rocH($g['title']) . '</h3>'
+                . (trim((string)($g['excerpt'] ?? '')) !== '' ? '<p class="text-xs text-slate-500 leading-relaxed line-clamp-2">' . rocH($g['excerpt']) . '</p>' : '')
+                . '<span class="text-xs font-bold text-emerald-600">Read guide &rarr;</span></div></div></a>';
         }
         $m .= '</div></section>';
     }
