@@ -21,12 +21,23 @@
  *    post shows the draft rather than the last published version.
  *  - `release_lock` exists, so closing the editor frees the post immediately
  *    instead of leaving it locked for 15 minutes.
+ *
+ * Clean SEO (2026-09-28):
+ *  - Editors set only title, slug, excerpt, content, category, author, cover
+ *    image + alt, meta title, meta description and focus keyword.
+ *  - Open Graph / Twitter / canonical / robots / schema fields are no longer
+ *    accepted from the client. Old hidden values in a request are ignored.
+ *  - Every content save and publish sets is_noindex = 0, is_nofollow = 0 and
+ *    clears canonical_url / schema_json / schema_type overrides.
+ *  - Sharing metadata is derived on publish from the meta title, meta
+ *    description and cover image.
  */
 
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/utils.php';
 require_once __DIR__ . '/cms-html.php';
 
-$session = requireCmsSession(); // Administrator or Editor
+$session = requireCmsPermission('blogs', 'view');   // per-action checks below
 $pdo = getDBConnection();
 
 if (!$pdo) {
@@ -40,12 +51,36 @@ const ROC_LOCK_SECONDS = 900;   // 15 minutes
 /** Fields the editor may set. Anything else in the payload is ignored. */
 const ROC_BLOG_FIELDS = [
     'title', 'slug', 'excerpt', 'content', 'category', 'author_name', 'image', 'image_alt',
-    'meta_title', 'meta_description', 'canonical_url', 'focus_keyword',
-    'is_noindex', 'is_nofollow',
-    'og_title', 'og_description', 'og_image', 'og_type',
-    'twitter_card', 'twitter_title', 'twitter_description', 'twitter_image',
-    'schema_type', 'schema_json',
+    'meta_title', 'meta_description', 'focus_keyword',
 ];
+
+/**
+ * Columns the server owns. They are reset on every content save / publish so a
+ * published post can never carry noindex, nofollow, a foreign canonical or a
+ * stale schema override. Only columns that exist are touched.
+ */
+function rocSeoResetSql(PDO $pdo): string {
+    $reset = [
+        'is_noindex'    => '0',
+        'is_nofollow'   => '0',
+        'canonical_url' => "''",
+        'schema_type'   => "''",
+        'schema_json'   => 'NULL',
+    ];
+    $available = rocBlogColumns($pdo);
+    $parts = [];
+    foreach ($reset as $col => $val) {
+        if (in_array($col, $available, true)) $parts[] = "`{$col}` = {$val}";
+    }
+    return $parts ? ', ' . implode(', ', $parts) : '';
+}
+
+/** Read time from the body, e.g. "6 min read". */
+function rocReadTimeFromHtml(string $html): string {
+    $text = rocCmsTextFromHtml($html);
+    $words = $text === '' ? 0 : count(preg_split('/\s+/u', $text) ?: []);
+    return max(1, (int)ceil($words / 200)) . ' min read';
+}
 
 const ROC_BLOG_LIMITS = [
     'title' => 220, 'slug' => 180, 'excerpt' => 3000, 'category' => 100,
@@ -67,6 +102,37 @@ const ROC_ENUMS = [
 function rocFail(string $message, int $code = 400): void {
     http_response_code($code);
     echo json_encode(['success' => false, 'error' => $message]);
+    exit();
+}
+
+/** Publishing is strict; drafts may remain incomplete. */
+function rocPublishErrors(array $post): array {
+    $errors = [];
+    $required = ['title'=>'Title', 'excerpt'=>'Short description', 'category'=>'Category',
+                 'image'=>'Featured image', 'image_alt'=>'Image alt text',
+                 'meta_title'=>'Meta title', 'meta_description'=>'Meta description'];
+    foreach ($required as $field => $label) {
+        $text = html_entity_decode((string)($post[$field] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if (preg_replace('/[\s\x{00A0}\x{200B}\x{FEFF}]+/u', '', $text) === '') {
+            $errors[$field] = $label . ' is required before publishing.';
+        }
+    }
+    $text = rocCmsTextFromHtml(rocCmsSanitizeHtml((string)($post['content'] ?? '')));
+    if (preg_replace('/[\s\x{00A0}\x{200B}\x{FEFF}]+/u', '', $text) === '') {
+        $errors['content'] = 'Add body content before publishing.';
+    }
+    if (rocAgentSlugify((string)($post['slug'] ?? '') ?: (string)($post['title'] ?? '')) === '') {
+        $errors['slug'] = 'URL slug must contain letters or numbers.';
+    }
+    return $errors;
+}
+
+function rocRequirePublishFields(array $post): void {
+    $errors = rocPublishErrors($post);
+    if (!$errors) return;
+    http_response_code(422);
+    echo json_encode(['success'=>false, 'error'=>'Complete the required fields before publishing.',
+                      'errors'=>$errors]);
     exit();
 }
 
@@ -123,8 +189,7 @@ function rocCleanBlogPayload(array $raw): array {
             return [null, ucfirst(str_replace('_', ' ', $field))
                         . ' is too long (limit ' . ROC_BLOG_LIMITS[$field] . ' characters).'];
         }
-        if (in_array($field, ['canonical_url', 'og_image', 'twitter_image', 'image'], true)
-            && $value !== '') {
+        if ($field === 'image' && $value !== '') {
             $safe = rocCmsSafeUrl($value);
             if ($safe === null) return [null, "Invalid URL in {$field}."];
             $value = $safe;
@@ -184,12 +249,15 @@ if ($method === 'GET') {
             }
         }
 
-        // Take the lock for this editor.
-        $stmtLock = $pdo->prepare('UPDATE blogs SET locked_by = ?, locked_at = NOW() WHERE id = ?');
-        $stmtLock->execute([$session['user_id'], (string)$id]);
+        // Take the lock for this editor (read-only users never lock a post).
+        if (rocCmsCan($session, 'blogs', 'edit')) {
+            $stmtLock = $pdo->prepare('UPDATE blogs SET locked_by = ?, locked_at = NOW() WHERE id = ?');
+            $stmtLock->execute([$session['user_id'], (string)$id]);
+        }
 
         // Merge the unsaved draft over the live row so the editor resumes where
         // the writer left off rather than showing the published version.
+        $blog['live_slug'] = $blog['status'] === 'published' ? $blog['slug'] : null;
         $blog['has_draft'] = false;
         if (!empty($blog['draft_data_json'])) {
             $draft = json_decode($blog['draft_data_json'], true);
@@ -207,10 +275,10 @@ if ($method === 'GET') {
     }
 
     $stmt = $pdo->query(
-        'SELECT id, title, slug, category, author_name, status, draft_status, version,
+        "SELECT id, title, slug, category, author_name, status, draft_status, version,
                 is_noindex, image, meta_title, meta_description, locked_by, locked_at,
                 created_at, updated_at, published_at
-           FROM blogs ORDER BY updated_at DESC'
+           FROM blogs WHERE status <> 'archived' ORDER BY updated_at DESC"
     );
     echo json_encode(['success' => true, 'blogs' => $stmt->fetchAll()]);
     exit();
@@ -222,6 +290,14 @@ if ($method === 'POST') {
     $rawInput = file_get_contents('php://input');
     $data = json_decode($rawInput, true) ?? $_POST;
     $action = $data['action'] ?? 'save_draft';
+
+    // Permission per action (enforced here, not just hidden in the UI).
+    $need = [
+        'create' => 'edit', 'save_draft' => 'edit', 'release_lock' => 'edit',
+        'publish' => 'publish', 'unpublish' => 'publish', 'update' => 'publish', 'set_status' => 'publish',
+        'delete' => 'delete',
+    ][$action] ?? 'edit';
+    rocCmsAuthorize($session, 'blogs', $need);
 
     $id = (string)($data['id'] ?? '');
     if ($id === '' && $action !== 'create') {
@@ -262,7 +338,7 @@ if ($method === 'POST') {
         $pdo->prepare($sql)->execute($values);
 
         // Keep the full payload in the draft too, so fields the schema lacks survive.
-        $stmtDraft = $pdo->prepare('UPDATE blogs SET draft_data_json = ? WHERE id = ?');
+        $stmtDraft = $pdo->prepare('UPDATE blogs SET draft_data_json = ?' . rocSeoResetSql($pdo) . ' WHERE id = ?');
         $stmtDraft->execute([json_encode($clean, JSON_UNESCAPED_SLASHES), $idStr]);
 
         logCmsAudit('cms_blog_create', 'blog', $idStr, ['title' => $title]);
@@ -288,7 +364,7 @@ if ($method === 'POST') {
             "UPDATE blogs
                 SET draft_data_json = ?, draft_status = 'draft_saved',
                     version = version + 1, updated_at = NOW(),
-                    locked_by = ?, locked_at = NOW()
+                    locked_by = ?, locked_at = NOW()" . rocSeoResetSql($pdo) . "
               WHERE id = ? AND version = ?"
         );
         $stmtUpd->execute([$draftJson, $session['user_id'], $id, $expectedVersion]);
@@ -317,31 +393,18 @@ if ($method === 'POST') {
         [$clean, $error] = rocCleanBlogPayload($data['draft'] ?? $data);
         if ($error) rocFail($error);
 
-        $title = trim($clean['title'] ?? '');
-        if ($title === '') rocFail('Give the post a title before publishing.');
-
-        $content = $clean['content'] ?? '';
-        if (rocCmsTextFromHtml($content) === '') {
-            rocFail('Add some body content before publishing.');
-        }
-        if (!empty($clean['image']) && trim($clean['image_alt'] ?? '') === '') {
-            rocFail('The cover image needs alt text before this post can be published.');
-        }
-
-        // Fill the gaps rather than publishing an empty share card.
-        $excerpt = $clean['excerpt'] ?? '';
-        if ($excerpt === '') {
-            $excerpt = rocCmsTruncate(rocCmsTextFromHtml($content), 280);
-            $clean['excerpt'] = $excerpt;
-        }
-        $clean['meta_title']       = ($clean['meta_title'] ?? '') ?: $title;
-        $clean['meta_description'] = ($clean['meta_description'] ?? '')
-                                     ?: rocCmsTruncate($excerpt, 155);
-        $clean['og_title']         = ($clean['og_title'] ?? '') ?: $clean['meta_title'];
-        $clean['og_description']   = ($clean['og_description'] ?? '') ?: $clean['meta_description'];
-        $clean['og_image']         = ($clean['og_image'] ?? '') ?: ($clean['image'] ?? '');
-        $clean['og_type']          = ($clean['og_type'] ?? '') ?: 'article';
-        $clean['twitter_card']     = ($clean['twitter_card'] ?? '') ?: 'summary_large_image';
+        rocRequirePublishFields($clean);
+        $title = $clean['title'];
+        // Sharing metadata is derived, never typed in.
+        $clean['og_title']            = $clean['meta_title'];
+        $clean['og_description']      = $clean['meta_description'];
+        $clean['og_image']            = $clean['image'] ?? '';
+        $clean['og_type']             = 'article';
+        $clean['twitter_card']        = 'summary_large_image';
+        $clean['twitter_title']       = $clean['meta_title'];
+        $clean['twitter_description'] = $clean['meta_description'];
+        $clean['twitter_image']       = $clean['image'] ?? '';
+        $clean['read_time']           = rocReadTimeFromHtml((string)($clean['content'] ?? ''));
         $clean['slug']             = rocUniqueSlug(
             $pdo,
             ($clean['slug'] ?? '') ?: rocAgentSlugify($title),
@@ -367,6 +430,7 @@ if ($method === 'POST') {
                  . '  content_modified_at = NOW(), draft_data_json = NULL,'
                  . '  locked_by = NULL, locked_at = NULL,'
                  . '  version = version + 1, updated_at = NOW()'
+                 . rocSeoResetSql($pdo)
                  . ' WHERE id = ? AND version = ?';
             $values[] = $id;
             $values[] = $expectedVersion;
@@ -426,27 +490,21 @@ if ($method === 'POST') {
             rocFail('A version is required for a status change. Reload the post and try again.');
         }
         $expectedVersion = (int)$data['version'];
-        $wanted = $data['status'] ?? 'draft';
+        $wanted = $action === 'unpublish' ? 'draft' : ($data['status'] ?? 'draft');
         $status = $wanted === 'published' ? 'published' : 'draft';
         $draftStatus = $status === 'published' ? 'none' : 'draft_saved';
 
         // Do not let a post go live without the fields that publishing requires.
         if ($status === 'published') {
-            $check = $pdo->prepare('SELECT title, content, image, image_alt, meta_description
-                                      FROM blogs WHERE id = ? LIMIT 1');
+            $check = $pdo->prepare('SELECT * FROM blogs WHERE id = ? LIMIT 1');
             $check->execute([$id]);
             $row = $check->fetch();
             if (!$row) rocFail('Blog post not found.', 404);
-            if (trim((string)$row['title']) === '' || rocCmsTextFromHtml((string)$row['content']) === '') {
-                rocFail('This post has no title or body yet. Open it and publish from the editor.');
-            }
-            if (!empty($row['image']) && trim((string)($row['image_alt'] ?? '')) === '') {
-                rocFail('The cover image needs alt text before this post can go live.');
-            }
+            rocRequirePublishFields($row);
         }
 
         $sql = 'UPDATE blogs SET status = ?, draft_status = ?, version = version + 1, updated_at = NOW()'
-             . ($status === 'published' ? ', published_at = IFNULL(published_at, NOW())' : '')
+             . ($status === 'published' ? ', published_at = IFNULL(published_at, NOW())' . rocSeoResetSql($pdo) : '')
              . ' WHERE id = ? AND version = ?';
 
         $stmt = $pdo->prepare($sql);
@@ -472,6 +530,20 @@ if ($method === 'POST') {
             'message' => $status === 'published' ? 'Post is live.' : 'Post moved back to draft.',
             'version' => $expectedVersion + 1,
         ]);
+        exit();
+    }
+
+    /* ---------------------------------------------------------- delete */
+    // Soft delete: the post leaves the site and the CMS list, the row and its
+    // revisions stay in the database so it can be recovered by an administrator.
+    if ($action === 'delete') {
+        if (!isset($data['version']) || (int)$data['version'] < 1) rocFail('Reload the post and try again.');
+        $stmt = $pdo->prepare("UPDATE blogs SET status = 'archived', draft_status = 'none', locked_by = NULL, locked_at = NULL,
+                                      version = version + 1, updated_at = NOW() WHERE id = ? AND version = ?");
+        $stmt->execute([$id, (int)$data['version']]);
+        if ($stmt->rowCount() === 0) rocFail('This post was changed by someone else. Reload and try again.', 409);
+        logCmsAudit('cms_blog_delete', 'blog', $id, ['soft' => true]);
+        echo json_encode(['success' => true, 'message' => 'Post deleted. It is no longer on the website.']);
         exit();
     }
 

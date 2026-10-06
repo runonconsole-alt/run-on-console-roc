@@ -2199,12 +2199,13 @@ async function renderProducts(m){
   m.innerHTML=head('Products','Every product on the website, by category','')+
     '<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
   var d; try{ d=await api('products.php'); }catch(e){ toast(e.message,'bad'); return; }
-  var all=(d.products||[]).filter(function(p){return p.status!=='draft';});
+  var all=d.products||[];
+  var canPub=can('products','publish');
   var cats={}; all.forEach(function(p){ var c=p.category||'Other'; (cats[c]=cats[c]||[]).push(p); });
   var q='', cat='all';
   var body=$('.body',m);
   body.innerHTML='<div class="hint" style="margin-bottom:12px">'+all.length+' products in '+Object.keys(cats).length+
-    ' categories. Each one has its own page on the website and an Amazon button. To add or change products, update the product sheet and send it for the next website update.</div>'+
+    ' categories. Live products have their own page, an Amazon button and a place in the sitemap. Hidden products return &ldquo;not found&rdquo; and leave the sitemap.</div>'+
     '<div class="card"><div class="cbody" style="display:flex;gap:10px;flex-wrap:wrap">'+
       '<input type="search" id="pr-q" placeholder="Search products or brands…" style="flex:1;min-width:200px">'+
       '<select id="pr-c"><option value="all">All categories ('+all.length+')</option>'+Object.keys(cats).map(function(c){
@@ -2215,15 +2216,30 @@ async function renderProducts(m){
       if(cat!=='all' && (p.category||'Other')!==cat) return false;
       return !q || ((p.title||'')+' '+(p.category||'')).toLowerCase().indexOf(q)>=0;
     });
-    $('#pr-list',m).innerHTML='<div class="card"><table class="list"><thead><tr><th>Product</th><th>Category</th><th>Amazon</th></tr></thead><tbody>'+
+    $('#pr-list',m).innerHTML='<div class="card"><table class="list"><thead><tr><th>Product</th><th>Category</th><th>Amazon</th><th>On website</th></tr></thead><tbody>'+
       (list.map(function(p){
-        var slug=p.slug||p.id;
+        var slug=p.slug||p.id, live=p.status==='published';
         return '<tr><td><div class="t-title">'+esc(p.title)+'</div>'+
           '<div class="t-slug"><a href="/products/'+esc(slug)+'/" target="_blank" rel="noopener">/products/'+esc(slug)+'/ ↗</a></div></td>'+
           '<td>'+esc(p.category||'')+'</td>'+
-          '<td>'+(p.affiliate_amazon?'<a href="'+esc(p.affiliate_amazon)+'" target="_blank" rel="noopener">Open ↗</a>':'<span style="color:#e11d48">missing</span>')+'</td></tr>';
-      }).join('')||'<tr><td colspan="3" class="empty">No products match.</td></tr>')+'</tbody></table></div>';
+          '<td>'+(p.affiliate_amazon?'<a href="'+esc(p.affiliate_amazon)+'" target="_blank" rel="noopener">Open ↗</a>':'<span style="color:#e11d48">missing</span>')+'</td>'+
+          '<td style="white-space:nowrap"><span class="tag '+(live?'published':'draft')+'">'+(live?'Live':'Hidden')+'</span> '+
+            (canPub?'<button class="btn sm" data-pr-toggle="'+esc(p.id)+'">'+(live?'Hide':'Show')+'</button>':'')+'</td></tr>';
+      }).join('')||'<tr><td colspan="4" class="empty">No products match.</td></tr>')+'</tbody></table></div>';
   }
+  $('#pr-list',m).addEventListener('click',async function(e){
+    var b=e.target.closest('[data-pr-toggle]'); if(!b) return;
+    var p=all.filter(function(x){return String(x.id)===b.dataset.prToggle;})[0]; if(!p) return;
+    var show=p.status!=='published';
+    if(!show && !confirm('Hide "'+p.title+'" from the website? Its page will show "not found" and it leaves the sitemap until you show it again.')) return;
+    b.disabled=true;
+    try{
+      var r=await api('products.php',{action:'set_status',id:p.id,version:p.version,status:show?'published':'draft'});
+      p.status=r.status; p.version=r.version;
+      toast(show?'"'+p.title+'" is live again.':'"'+p.title+'" is hidden.','good');
+    }catch(err){ toast(err.message,'bad'); }
+    draw();
+  });
   $('#pr-q',m).addEventListener('input',function(e){ q=e.target.value.toLowerCase().trim(); draw(); });
   $('#pr-c',m).addEventListener('change',function(e){ cat=e.target.value; draw(); });
   draw();

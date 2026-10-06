@@ -1,7 +1,7 @@
 /*
- * Run On Console — blog navigation bridge (interim, until React reads blogs from the API).
+ * Run On Console — blog and product navigation bridge (interim, until React reads them from the API).
  *
- * 1. On React pages: any navigation to /blogs/... becomes a normal page load, so the
+ * 1. On React pages: any navigation to /blogs/... or /products/... becomes a normal page load, so the
  *    visitor always gets the server-rendered page with the current CMS content instead
  *    of the copy that was baked into the React bundle.
  * 2. On the server-rendered blog pages (<html data-roc-static>): small replacements for
@@ -13,7 +13,8 @@
   function blogPath(href) {
     try {
       var u = new URL(href, location.href);
-      return u.origin === location.origin && /^\/blogs(\/|$)/.test(u.pathname) ? u : null;
+      // Blogs and products are rendered by the server from the CMS database.
+      return u.origin === location.origin && /^\/(blogs|products)(\/|$)/.test(u.pathname) ? u : null;
     } catch (e) { return null; }
   }
 
