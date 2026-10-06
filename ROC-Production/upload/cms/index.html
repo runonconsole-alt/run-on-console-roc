@@ -787,7 +787,7 @@ function renderShell(){
       (can('media','view')?item('media','Media library','❖',S.media.length):'')+
       (can('pages','view')?item('cmspages','Pages','▦',S.pages.length):'')+
       (can('pages','view')?item('pages','Website pages & SEO','▤'):'')+
-      (can('products','view')?item('products','Products','▣'):'')+'</div>'+
+      (can('products','view')?item('products','Products','▣')+item('product-categories','Product categories','▤'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
       item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+'</div>':'')+
     '<div class="sfoot"><div class="who"><div class="av">'+
@@ -826,6 +826,7 @@ function renderView(){
   if(S.view==='activity') return renderActivity(m);
   if(S.view==='social') return renderSocial(m);
   if(S.view==='products' && can('products','view')) return renderProducts(m);
+  if(S.view==='product-categories' && can('products','view')) return renderProductCategories(m);
   if(S.view==='cmspages'){ if(!S.pageMeta){ loadPageMeta().then(function(){ if(S.view==='cmspages'&&!S.editing) renderCmsPages(m); }); } return renderCmsPages(m); }
   if(S.view==='users') return renderUsers(m);
   if(S.view==='audit') return renderSimple(m,'audit-logs.php','logs','Audit log',['created_at','username','action','target_type','target_id']);
@@ -2196,7 +2197,8 @@ async function renderSocial(m){
 /* -------------------------------------------------------- products (read-only list) */
 
 async function renderProducts(m){
-  m.innerHTML=head('Products','Every product on the website, by category','')+
+  m.innerHTML=head('Products','Every product on the website, by category',
+      can('products','edit')?'<button class="btn primary" id="pr-new">＋ New product</button>':'')+
     '<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
   var d; try{ d=await api('products.php'); }catch(e){ toast(e.message,'bad'); return; }
   var all=d.products||[];
@@ -2219,7 +2221,8 @@ async function renderProducts(m){
     $('#pr-list',m).innerHTML='<div class="card"><table class="list"><thead><tr><th>Product</th><th>Category</th><th>Amazon</th><th>On website</th></tr></thead><tbody>'+
       (list.map(function(p){
         var slug=p.slug||p.id, live=p.status==='published';
-        return '<tr><td><div class="t-title">'+esc(p.title)+'</div>'+
+        return '<tr><td><div class="t-title">'+esc(p.title)+
+          (can('products','edit')?' <button class="btn sm ghost" data-pr-edit="'+esc(p.id)+'">Edit</button>':'')+'</div>'+
           '<div class="t-slug"><a href="/products/'+esc(slug)+'/" target="_blank" rel="noopener">/products/'+esc(slug)+'/ ↗</a></div></td>'+
           '<td>'+esc(p.category||'')+'</td>'+
           '<td>'+(p.affiliate_amazon?'<a href="'+esc(p.affiliate_amazon)+'" target="_blank" rel="noopener">Open ↗</a>':'<span style="color:#e11d48">missing</span>')+'</td>'+
@@ -2227,7 +2230,9 @@ async function renderProducts(m){
             (canPub?'<button class="btn sm" data-pr-toggle="'+esc(p.id)+'">'+(live?'Hide':'Show')+'</button>':'')+'</td></tr>';
       }).join('')||'<tr><td colspan="4" class="empty">No products match.</td></tr>')+'</tbody></table></div>';
   }
+  var nb=$('#pr-new',m); if(nb) nb.addEventListener('click',function(){ openProductEditor(null); });
   $('#pr-list',m).addEventListener('click',async function(e){
+    var ed=e.target.closest('[data-pr-edit]'); if(ed){ openProductEditor(ed.dataset.prEdit); return; }
     var b=e.target.closest('[data-pr-toggle]'); if(!b) return;
     var p=all.filter(function(x){return String(x.id)===b.dataset.prToggle;})[0]; if(!p) return;
     var show=p.status!=='published';
@@ -2243,6 +2248,266 @@ async function renderProducts(m){
   $('#pr-q',m).addEventListener('input',function(e){ q=e.target.value.toLowerCase().trim(); draw(); });
   $('#pr-c',m).addEventListener('change',function(e){ cat=e.target.value; draw(); });
   draw();
+}
+
+/* ------------------------------------------------------- product categories */
+
+async function renderProductCategories(m){
+  m.innerHTML=head('Product categories','Category pages at /products/category/…/',
+      can('products','edit')?'<button class="btn primary" id="pc-new">＋ New category</button>':'')+
+    '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d; try{ d=await api('product-categories.php'); }catch(e){ $('.body',m).innerHTML='<div class="alert bad">'+esc(e.message)+'</div>'; return; }
+  var cats=d.categories||[];
+  $('.body',m).innerHTML='<div class="hint" style="margin-bottom:12px">Hiding a category hides its page and all its products on the website (their own Live/Hidden setting is kept).</div>'+
+    '<div class="card"><table class="list"><thead><tr><th>Category</th><th>Products</th><th>On website</th></tr></thead><tbody>'+
+    (cats.map(function(c){
+      var live=c.status==='published', n=c.products||{live:0,hidden:0};
+      return '<tr><td><div class="t-title">'+esc(c.name)+
+          (can('products','edit')?' <button class="btn sm ghost" data-pc-edit="'+esc(c.slug)+'">Edit</button>':'')+'</div>'+
+        '<div class="t-slug"><a href="/products/category/'+esc(c.slug)+'/" target="_blank" rel="noopener">/products/category/'+esc(c.slug)+'/ ↗</a></div></td>'+
+        '<td>'+n.live+' live'+(n.hidden?' · '+n.hidden+' hidden':'')+'</td>'+
+        '<td><span class="tag '+(live?'published':'draft')+'">'+(live?'Live':'Hidden')+'</span></td></tr>';
+    }).join('')||'<tr><td colspan="3" class="empty">No categories yet.</td></tr>')+'</tbody></table></div>';
+  $('.body',m).addEventListener('click',function(e){
+    var b=e.target.closest('[data-pc-edit]'); if(b) renderCategoryEditor(m,cats.filter(function(c){return c.slug===b.dataset.pcEdit;})[0]);
+  });
+  var nb=$('#pc-new',m); if(nb) nb.addEventListener('click',function(){ renderCategoryEditor(m,{status:'draft'}); });
+}
+
+function renderCategoryEditor(m,c){
+  var live=c.status==='published', canPub=can('products','publish');
+  function input(id,label,val,ph,note,max){
+    return '<div class="field"><label for="'+id+'">'+esc(label)+'</label><input type="text" id="'+id+'" value="'+esc(val==null?'':val)+'"'+
+      (ph?' placeholder="'+esc(ph)+'"':'')+(max?' maxlength="'+max+'"':'')+'>'+(note?'<div class="hint">'+note+'</div>':'')+'</div>';
+  }
+  m.innerHTML=head(c.slug?c.name:'New category',
+      c.slug?'/products/category/'+c.slug+'/ · '+(live?'Live on the website':'Hidden from the website'):'The address is created from the name and does not change later.',
+      '<button class="btn ghost" id="pc-back">← All categories</button>')+
+  '<div class="body narrow"><div class="card"><div class="cbody">'+
+    input('pc-name','Name *',c.name,'e.g. Gaming Mice','',160)+
+    '<div class="field"><label for="pc-desc">Description</label><textarea id="pc-desc" rows="3">'+esc(c.description||'')+'</textarea><div class="hint">Shown at the top of the category page.</div></div>'+
+    '<div style="display:flex;gap:12px;align-items:flex-start">'+
+      '<div id="pc-prev" style="width:140px;height:105px;border-radius:8px;border:1px solid var(--line-2);flex:none;background:var(--bg) center/cover no-repeat"></div>'+
+      '<div style="flex:1;min-width:0">'+input('pc-img','Image',c.image,'https://… or choose from the Media library','Also used for products in this category that have no image of their own.')+
+      '<button class="btn sm" id="pc-pick">Choose from Media library</button></div></div>'+
+    input('pc-rank','Order',c.sort_rank,'1 = first','')+
+    input('pc-mt','SEO title',c.meta_title,'Leave empty: "Best {name} (year) | Run On Console"','',255)+
+    '<div class="field"><label for="pc-md">SEO description</label><textarea id="pc-md" rows="2" maxlength="500">'+esc(c.meta_description||'')+'</textarea></div>'+
+    '<label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" id="pc-noidx"'+(+c.is_noindex?' checked':'')+'> Hide from Google (noindex)</label>'+
+  '</div></div>'+
+  '<div class="card"><div class="cbody" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">'+
+    '<button class="btn" id="pc-save">'+(c.slug?'Save':'Save as hidden')+'</button>'+
+    (canPub?'<button class="btn primary" id="pc-pub">'+(live?'Save &amp; keep live':'Save &amp; publish')+'</button>':'')+
+    (canPub&&live?'<button class="btn danger" id="pc-hide">Save &amp; hide</button>':'')+
+  '</div></div></div>';
+
+  function val(id){ return $('#'+id,m).value; }
+  function preview(){ var u=val('pc-img').trim(); $('#pc-prev',m).style.backgroundImage=u?'url("'+u.replace(/["\\]/g,'')+'")':'none'; }
+  preview();
+  $('#pc-img',m).addEventListener('input',preview);
+  $('#pc-pick',m).addEventListener('click',function(){ pickMedia(function(x){ if(x){ $('#pc-img',m).value=x.url; preview(); } }); });
+  $('#pc-back',m).addEventListener('click',function(){ go('product-categories'); });
+
+  async function save(status){
+    var body={action:'save',slug:c.slug||'',fields:{name:val('pc-name'),description:val('pc-desc'),image:val('pc-img'),
+      sort_rank:val('pc-rank'),meta_title:val('pc-mt'),meta_description:val('pc-md'),is_noindex:$('#pc-noidx',m).checked?1:0}};
+    if(status) body.status=status; else if(!c.slug) body.status='draft';
+    m.querySelectorAll('.cbody button').forEach(function(b){ b.disabled=true; });
+    try{
+      var r=await api('product-categories.php',body);
+      PRODUCT_CATS=null;
+      toast(r.category.status==='published'?'Saved. The category page is updated.':'Saved. This category and its products are hidden from the website.','good');
+      renderCategoryEditor(m,r.category);
+    }catch(e){ toast(e.message,'bad'); m.querySelectorAll('.cbody button').forEach(function(b){ b.disabled=false; }); }
+  }
+  $('#pc-save',m).addEventListener('click',function(){ save(null); });
+  var p=$('#pc-pub',m); if(p) p.addEventListener('click',function(){ save('published'); });
+  var h=$('#pc-hide',m); if(h) h.addEventListener('click',function(){
+    if(confirm('Hide "'+c.name+'" and all its products from the website?')) save('draft');
+  });
+}
+
+/* ---------------------------------------------------------- product editor */
+
+var PRODUCT_CATS=null;
+async function productCats(){
+  if(PRODUCT_CATS) return PRODUCT_CATS;
+  try{ PRODUCT_CATS=(await api('products.php?categories=1')).categories||[]; }catch(e){ PRODUCT_CATS=[]; }
+  return PRODUCT_CATS;
+}
+
+function jsonList(v){ if(!v) return []; if(typeof v!=='string') return v; try{ var d=JSON.parse(v); return d||[]; }catch(e){ return []; } }
+
+/* Amazon product code (ASIN) from any amazon.* product link, or ''. */
+function asinOf(url){
+  var m=String(url||'').match(/^https?:\/\/([^\/]+)(\/[^?#]*)/i);
+  if(!m || !/(^|\.)amazon\.[a-z.]+$/i.test(m[1])) return '';
+  var a=(m[2]+'/').match(/\/(?:dp|gp\/product|gp\/aw\/d|product|ASIN)\/([A-Z0-9]{10})[\/]/i);
+  return a?a[1].toUpperCase():'';
+}
+
+function amazonNote(url){
+  url=String(url||'').trim();
+  if(!url) return '<span style="color:var(--amber)">▲ No link: the button opens an Amazon search for the product name.</span>';
+  var asin=asinOf(url);
+  if(asin) return '<span style="color:var(--brand)">✓ Exact product '+esc(asin)+'</span> — saved as amazon.com/dp/'+esc(asin)+'; your store tag is added on the website.';
+  if(/^https?:\/\/(amzn\.to|a\.co)\//i.test(url)) return '<span style="color:var(--brand)">✓ Amazon short link</span> — make sure it was created with your store ID.';
+  if(/\/s\?|[?&]k=/.test(url)) return '<span style="color:var(--amber)">▲ This is a search page, not one product.</span> Open the product on Amazon and copy that link.';
+  return '<span style="color:var(--amber)">▲ No product code found in this link.</span>';
+}
+
+/* Pull the image and the product link out of Amazon SiteStripe "Image" / "Text+Image" HTML. */
+function parseSiteStripe(html){
+  // DOMParser builds an inert document: no scripts or onerror handlers run, nothing loads.
+  var box=new DOMParser().parseFromString(String(html||''),'text/html');
+  var out={img:'',link:''};
+  box.querySelectorAll('img').forEach(function(i){
+    var src=i.getAttribute('src')||'';
+    if(out.img || /\/e\/ir\?|[?&]o=1&a=/.test(src) || i.getAttribute('width')==='1') return;   // skip the 1x1 tracking pixel
+    if(src.indexOf('//')===0) src='https:'+src;
+    if(/^https:\/\//i.test(src)) out.img=src;
+  });
+  var a=box.querySelector('a[href]'); if(a) out.link=a.getAttribute('href');
+  return out;
+}
+
+async function openProductEditor(id){
+  var m=$('#main');
+  m.innerHTML=head(id?'Edit product':'New product','')+'<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var cats=await productCats(), p={status:'draft'};
+  if(id){
+    try{ p=(await api('products.php?id='+encodeURIComponent(id))).product; }
+    catch(e){ toast(e.message,'bad'); return go('products'); }
+  }
+  renderProductEditor(m,p,cats);
+}
+
+function renderProductEditor(m,p,cats){
+  var live=p.status==='published', canPub=can('products','publish');
+  var feats=jsonList(p.features_json), specs=jsonList(p.specs_json);
+  var specRows=Object.keys(specs).map(function(k){ return {key:k,value:specs[k]}; });
+  while(specRows.length<4) specRows.push({key:'',value:''});
+  var catSlug=p.category_slug||'';
+  if(!catSlug && p.category) cats.forEach(function(c){ if(c.name===p.category) catSlug=c.slug; });
+
+  function input(id,label,val,ph,note,max){
+    return '<div class="field"><label for="'+id+'">'+esc(label)+'</label><input type="text" id="'+id+'" value="'+esc(val||'')+'"'+
+      (ph?' placeholder="'+esc(ph)+'"':'')+(max?' maxlength="'+max+'"':'')+'>'+(note?'<div class="hint">'+note+'</div>':'')+'</div>';
+  }
+
+  m.innerHTML=head(p.id?p.title:'New product',
+      p.id?'/products/'+p.slug+'/ · '+(live?'Live on the website':'Hidden from the website'):'Fill in the details, then save.',
+      (p.id&&live?'<a class="btn sm" target="_blank" rel="noopener" href="/products/'+esc(p.slug)+'/">View live ↗</a> ':'')+
+      '<button class="btn ghost" id="pe-back">← All products</button>')+
+  '<div class="body narrow">'+
+   '<div class="card"><div class="chead"><h3>Product</h3></div><div class="cbody">'+
+     input('pe-title','Product name *',p.title,'e.g. Logitech G Pro X Superlight 2','',255)+
+     '<div class="field"><label for="pe-cat">Category *</label><select id="pe-cat"><option value="">— choose —</option>'+
+       cats.map(function(c){ return '<option value="'+esc(c.slug)+'"'+(c.slug===catSlug?' selected':'')+'>'+esc(c.name)+(c.status!=='published'?' (hidden)':'')+'</option>'; }).join('')+
+     '</select></div>'+
+     input('pe-brand','Brand',p.brand,'e.g. Logitech','',120)+
+     input('pe-sub','Short line under the name',p.subtitle,'e.g. 60g wireless // HERO 2 sensor','Shown on product cards.',255)+
+     input('pe-badge','Badge',p.badge,'e.g. BEST OVERALL','Shown on the product image.',120)+
+     input('pe-best','Best for',p.best_for,'e.g. Competitive FPS','',255)+
+     '<div class="field"><label for="pe-desc">Description</label><textarea id="pe-desc" rows="4">'+esc(p.short_desc||'')+'</textarea></div>'+
+     '<div class="field"><label for="pe-feat">Key features</label><textarea id="pe-feat" rows="4" placeholder="One per line">'+esc(feats.join('\n'))+'</textarea><div class="hint">One per line, up to 12. Shown as tags.</div></div>'+
+     '<div class="field"><label>Specifications</label><div id="pe-specs">'+specRows.map(function(r){
+        return '<div style="display:flex;gap:8px;margin-bottom:6px"><input type="text" class="pe-sk" placeholder="Name, e.g. Weight" value="'+esc(r.key)+'" style="flex:1">'+
+               '<input type="text" class="pe-sv" placeholder="Value, e.g. 60 g" value="'+esc(r.value)+'" style="flex:2"></div>';
+      }).join('')+'</div><button class="btn sm" id="pe-addspec">＋ Add row</button></div>'+
+   '</div></div>'+
+
+   '<div class="card"><div class="chead"><h3>Amazon</h3></div><div class="cbody">'+
+     '<div class="field"><label for="pe-ss">Paste from Amazon SiteStripe (optional)</label>'+
+       '<textarea id="pe-ss" rows="3" placeholder="On the product page on Amazon: SiteStripe → Image (or Text+Image) → copy the HTML and paste it here"></textarea>'+
+       '<div class="hint">Fills the Amazon link and the image below in one go.</div></div>'+
+     '<div class="field"><label for="pe-amz">Amazon product link</label>'+
+       '<div style="display:flex;gap:8px"><input type="text" id="pe-amz" value="'+esc(p.affiliate_amazon||'')+'" placeholder="https://www.amazon.com/…/dp/B0…" style="flex:1">'+
+       '<a class="btn" id="pe-find" target="_blank" rel="noopener">Find on Amazon ↗</a></div>'+
+       '<div class="hint" id="pe-amz-note">'+amazonNote(p.affiliate_amazon)+'</div></div>'+
+   '</div></div>'+
+
+   '<div class="card"><div class="chead"><h3>Image</h3></div><div class="cbody">'+
+     '<div style="display:flex;gap:12px;align-items:flex-start">'+
+       '<div id="pe-prev" style="width:140px;height:105px;border-radius:8px;border:1px solid var(--line-2);flex:none;background:var(--bg) center/contain no-repeat"></div>'+
+       '<div style="flex:1;min-width:0">'+
+         input('pe-img','Image link',p.image,'https://… or choose from the Media library','From SiteStripe, the brand’s press kit, or the Media library. Leave empty to use the category image.')+
+         '<button class="btn sm" id="pe-pick">Choose from Media library</button>'+
+       '</div></div>'+
+     input('pe-alt','Image description (alt text)',p.image_alt,'e.g. Logitech G Pro X Superlight 2 in white','',255)+
+   '</div></div>'+
+
+   '<div class="card"><div class="chead"><h3>Search engines</h3></div><div class="cbody">'+
+     input('pe-mt','SEO title',p.meta_title,'Leave empty: "Name: Specs & Where to Buy | Run On Console"','',255)+
+     '<div class="field"><label for="pe-md">SEO description</label><textarea id="pe-md" rows="2" maxlength="500">'+esc(p.meta_description||'')+'</textarea><div class="hint">Leave empty to use the description.</div></div>'+
+     input('pe-rank','Order in category',p.sort_rank||'','1 = first','Lower numbers show first.')+
+     '<label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" id="pe-noidx"'+(+p.is_noindex?' checked':'')+'> Hide from Google (noindex) — the page stays on the website</label>'+
+   '</div></div>'+
+
+   '<div class="card"><div class="cbody" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">'+
+     (p.id?'':'<span class="hint" style="margin-right:auto">The page address is created from the name and does not change later.</span>')+
+     '<button class="btn" id="pe-save">'+(p.id?'Save':'Save as hidden')+'</button>'+
+     (canPub?'<button class="btn primary" id="pe-pub">'+(live?'Save &amp; keep live':'Save &amp; publish')+'</button>':'')+
+     (canPub&&live?'<button class="btn danger" id="pe-hide">Save &amp; hide</button>':'')+
+   '</div></div>'+
+  '</div>';
+
+  function val(id){ var e=$('#'+id,m); return e?e.value:''; }
+  function preview(){
+    var u=val('pe-img').trim(), box=$('#pe-prev',m);
+    box.style.backgroundImage=u?'url("'+u.replace(/["\\]/g,'')+'")':'none';
+  }
+  function findLink(){
+    var q=(val('pe-title')+' ').trim();
+    $('#pe-find',m).href='https://www.amazon.com/s?k='+encodeURIComponent(q||'gaming');
+  }
+  preview(); findLink();
+  $('#pe-img',m).addEventListener('input',preview);
+  $('#pe-title',m).addEventListener('input',findLink);
+  $('#pe-amz',m).addEventListener('input',function(){ $('#pe-amz-note',m).innerHTML=amazonNote(val('pe-amz')); });
+  $('#pe-ss',m).addEventListener('input',function(){
+    var r=parseSiteStripe(val('pe-ss')), got=[];
+    if(r.link){ $('#pe-amz',m).value=r.link; $('#pe-amz-note',m).innerHTML=amazonNote(r.link); got.push('Amazon link'); }
+    if(r.img){ $('#pe-img',m).value=r.img; preview(); got.push('image'); }
+    if(got.length){ toast('Filled from SiteStripe: '+got.join(' and ')+'.','good'); $('#pe-ss',m).value=''; }
+  });
+  $('#pe-addspec',m).addEventListener('click',function(){
+    var d=document.createElement('div'); d.style.cssText='display:flex;gap:8px;margin-bottom:6px';
+    d.innerHTML='<input type="text" class="pe-sk" placeholder="Name" style="flex:1"><input type="text" class="pe-sv" placeholder="Value" style="flex:2">';
+    $('#pe-specs',m).appendChild(d);
+  });
+  $('#pe-pick',m).addEventListener('click',function(){
+    pickMedia(function(x){ if(!x) return; $('#pe-img',m).value=x.url; if(x.alt && !val('pe-alt')) $('#pe-alt',m).value=x.alt; preview(); });
+  });
+  $('#pe-back',m).addEventListener('click',function(){ go('products'); });
+
+  async function save(status){
+    var specsOut=[]; m.querySelectorAll('#pe-specs > div').forEach(function(r){
+      specsOut.push({key:$('.pe-sk',r).value,value:$('.pe-sv',r).value});
+    });
+    var body={action:'save_product',id:p.id||'',version:p.version,fields:{
+      title:val('pe-title'),category_slug:val('pe-cat'),brand:val('pe-brand'),subtitle:val('pe-sub'),badge:val('pe-badge'),
+      best_for:val('pe-best'),short_desc:val('pe-desc'),features:val('pe-feat'),specs:specsOut,
+      affiliate_amazon:val('pe-amz'),image:val('pe-img'),image_alt:val('pe-alt'),
+      meta_title:val('pe-mt'),meta_description:val('pe-md'),sort_rank:val('pe-rank'),is_noindex:$('#pe-noidx',m).checked?1:0}};
+    if(status) body.status=status;
+    else if(!p.id) body.status='draft';
+    m.querySelectorAll('.cbody button').forEach(function(b){ b.disabled=true; });
+    try{
+      var r=await api('products.php',body);
+      var nowLive=r.product.status==='published';
+      toast(nowLive?'Saved. The page on the website is updated.':'Saved. This product is hidden from the website.','good');
+      renderProductEditor(m,r.product,cats);
+    }catch(e){
+      toast(e.message,'bad');
+      m.querySelectorAll('.cbody button').forEach(function(b){ b.disabled=false; });
+    }
+  }
+  $('#pe-save',m).addEventListener('click',function(){ save(null); });
+  var pub=$('#pe-pub',m); if(pub) pub.addEventListener('click',function(){ save('published'); });
+  var hide=$('#pe-hide',m); if(hide) hide.addEventListener('click',function(){
+    if(confirm('Hide "'+p.title+'" from the website? Its page will show "not found" until you publish it again.')) save('draft');
+  });
 }
 
 /* Dashboard card: social profiles + Amazon tag as the website shows them (/roc-site.json). */
