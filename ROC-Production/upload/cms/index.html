@@ -897,11 +897,65 @@ function wireOpen(root){
   });
 }
 
+
+/* ---------------------------------------------------------- scheduling */
+
+var ICON_EDIT='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>', ICON_VIEW='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>', ICON_DEL='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+
+function fmtWhen(iso){
+  if(!iso) return '';
+  var d=new Date(iso); if(isNaN(d)) return '';
+  return d.toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+}
+/* Publishing slots: every 8 hours (01:00, 09:00, 17:00 your time) = 3 posts a day. */
+var SLOT_HOURS=[1,9,17];
+function nextFreeSlot(exceptId){
+  var taken=S.blogs.filter(function(b){ return b.status==='scheduled' && b.id!==exceptId && b.published_at_iso; })
+    .map(function(b){ return new Date(b.published_at_iso).getTime(); });
+  var t=new Date(); t.setMinutes(0,0,0);
+  for(var i=0;i<24*400;i++){
+    t=new Date(t.getTime()+3600000);
+    if(SLOT_HOURS.indexOf(t.getHours())===-1) continue;
+    if(t.getTime()<Date.now()+10*60000) continue;
+    var busy=taken.some(function(x){ return Math.abs(x-t.getTime())<3600000; });
+    if(!busy) return t;
+  }
+  return null;
+}
+function toLocalInput(d){
+  var p=function(n){ return (n<10?'0':'')+n; };
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes());
+}
+function scheduleDialog(){
+  var e=S.editing, start=e.status==='scheduled'&&e.published_at_iso?new Date(e.published_at_iso):(nextFreeSlot(e.id)||new Date(Date.now()+3600000));
+  var queue=S.blogs.filter(function(b){ return b.status==='scheduled' && b.id!==e.id; })
+    .sort(function(a,b){ return new Date(a.published_at_iso)-new Date(b.published_at_iso); });
+  modal('Schedule this post',
+    '<div class="field"><label for="sch-at">Publish on</label><input type="datetime-local" id="sch-at" value="'+toLocalInput(start)+'">'+
+    '<div class="hint">Your local time. The server publishes it at that moment, even when your computer is off.</div></div>'+
+    '<button class="btn sm" id="sch-next">Next free slot</button> <span class="hint">Slots every 8 hours: 01:00, 09:00, 17:00 (3 posts a day)</span>'+
+    (queue.length?'<div class="field" style="margin-top:14px"><label>Already scheduled</label><div class="hint">'+
+      queue.map(function(b){ return esc(fmtWhen(b.published_at_iso))+' — '+esc(b.title); }).join('<br>')+'</div></div>':''),
+    '<button class="btn" data-a="close">Cancel</button><button class="btn primary" data-a="ok">Schedule</button>',
+    function(a,close){
+      if(a!=='ok'){ close(); return; }
+      var v=$('#sch-at').value, d=v?new Date(v):null;
+      if(!d||isNaN(d)){ toast('Choose a date and time.','bad'); return; }
+      if(d.getTime()<Date.now()+60000){ toast('Choose a time at least one minute from now.','bad'); return; }
+      close(); save(true, d.toISOString());
+    });
+  $('#sch-next').addEventListener('click',function(){ var n=nextFreeSlot(e.id); if(n) $('#sch-at').value=toLocalInput(n); });
+}
+async function deleteFromList(b){
+  if(!confirm('Delete "'+(b.title||'this post')+'"?\n\nIt will be removed from the website and from this list. An administrator can still recover it from the database.'))return;
+  try{ await api('blogs.php',{action:'delete',id:b.id,version:b.version}); toast('Post deleted.','good'); await refreshBlogs(); renderShell(); }
+  catch(err){ toast(err.message,'bad'); }
+}
 /* --------------------------------------------------------------- blogs */
 
 function renderBlogs(m){
   var rows=S.blogs.filter(function(b){
-    if(S.filter!=='all' && (S.filter==='published') !== (b.status==='published'))return false;
+    if(S.filter!=='all' && S.filter!==(b.status==='published'||b.status==='scheduled'?b.status:'draft'))return false;
     if(S.search){ var h=(b.title+' '+(b.slug||'')).toLowerCase();
       if(h.indexOf(S.search.toLowerCase())===-1)return false; }
     return true;
@@ -913,11 +967,11 @@ function renderBlogs(m){
     '<div class="chead" style="gap:8px">'+
       '<div class="search" style="max-width:280px;flex:1"><input type="text" id="q" placeholder="Search title or slug" value="'+esc(S.search)+'"></div>'+
       '<select id="f" style="max-width:150px">'+
-      ['all','published','draft'].map(function(s){
+      ['all','published','scheduled','draft'].map(function(s){
         return '<option value="'+s+'"'+(S.filter===s?' selected':'')+'>'+
           (s==='all'?'All':s.charAt(0).toUpperCase()+s.slice(1))+'</option>';
       }).join('')+'</select></div>'+
-    (rows.length?'<table class="list"><thead><tr><th>Title</th><th>Status</th><th>SEO</th><th>Updated</th></tr></thead><tbody>'+
+    (rows.length?'<table class="list"><thead><tr><th>Title</th><th>Status</th><th>SEO</th><th>Updated</th><th style="text-align:right">Actions</th></tr></thead><tbody>'+
       rows.map(function(b){
         var g=[];
         if(!b.meta_title)g.push('title');
@@ -927,11 +981,17 @@ function renderBlogs(m){
           (Date.now() - new Date(String(b.locked_at).replace(' ','T')).getTime()) < 900000;
         return '<tr><td><div class="t-title" data-open="'+esc(b.id)+'">'+esc(b.title)+
           (locked?' <span style="color:var(--amber);font-size:11px">● being edited</span>':'')+'</div>'+
-          '<div class="t-slug">/blogs/'+esc(b.slug||'')+'/</div>'+viewLiveLink(b)+'</td>'+
-          '<td><span class="tag '+(b.status==='published'?'published':'draft')+'">'+esc(b.status)+'</span></td>'+
+          '<div class="t-slug">/blogs/'+esc(b.slug||'')+'/</div></td>'+
+          '<td><span class="tag '+(b.status==='published'?'published':'draft')+'">'+esc(b.status)+'</span>'+
+            (b.status==='scheduled'?'<div class="hint" style="margin-top:4px">'+esc(fmtWhen(b.published_at_iso))+'</div>':'')+'</td>'+
           '<td>'+(g.length?'<span style="color:var(--amber);font-size:12px">▲ '+esc(g.join(', '))+'</span>'
                           :'<span style="color:var(--brand);font-size:12px">✓ complete</span>')+'</td>'+
-          '<td style="color:var(--ink-3)">'+when(b.updated_at)+'</td></tr>';
+          '<td style="color:var(--ink-3)">'+when(b.updated_at)+'</td>'+
+          '<td style="text-align:right;white-space:nowrap">'+
+            '<button class="btn sm ghost" data-open="'+esc(b.id)+'" title="Edit" aria-label="Edit '+esc(b.title)+'">'+ICON_EDIT+'</button> '+
+            (b.status==='published'&&b.slug?'<a class="btn sm ghost" target="_blank" rel="noopener" href="'+esc(itemPath(b, encodeURIComponent(b.slug)))+'" title="View on the website" aria-label="View '+esc(b.title)+'">'+ICON_VIEW+'</a> ':'')+
+            (can('blogs','delete')?'<button class="btn sm ghost" data-del="'+esc(b.id)+'" title="Delete" aria-label="Delete '+esc(b.title)+'" style="color:var(--red)">'+ICON_DEL+'</button>':'')+
+          '</td></tr>';
       }).join('')+'</tbody></table>'
       :'<div class="empty"><div class="big">✎</div><div>No posts match this view.</div></div>')+
   '</div></div>';
@@ -944,6 +1004,9 @@ function renderBlogs(m){
   $('#f',m).addEventListener('change',function(){ S.filter=this.value; renderView(); });
   var np=$('#newpost',m); if(np) np.addEventListener('click',newBlog);
   wireOpen(m);
+  m.querySelectorAll('[data-del]').forEach(function(el){
+    el.addEventListener('click',function(){ deleteFromList(S.blogs.filter(function(x){ return x.id===el.dataset.del; })[0]); });
+  });
 }
 
 function blankBlog(){
@@ -1153,12 +1216,13 @@ function renderEditor(m){
   var e=S.editing, isNew=!e.id;
   var k=K();
   m.innerHTML = head(isNew?'New '+k.noun:(e.title||'Untitled'),
-    isNew?'Draft · not saved yet':(itemPath(e, e.slug||'')+' · v'+e.version),
+    isNew?'Draft · not saved yet':(itemPath(e, e.slug||'')+' · v'+e.version+(e.status==='scheduled'?' · scheduled for '+fmtWhen(e.published_at_iso):'')),
     (S.dirty?'<span class="dirty" title="Unsaved changes"></span>':'')+
     viewLiveLink(e)+'<button class="btn ghost" id="close">Close</button>'+
     (can(k.sec,'edit')?'<button class="btn" id="savedraft">Save draft</button>':'')+
-    (can(k.sec,'publish')?'<button class="btn primary" id="publish">'+(e.status==='published'?'Update live '+k.noun:'Publish')+'</button>':'')+
-    (e.status==='published'&&can(k.sec,'publish')?'<button class="btn danger" id="unpub">Unpublish</button>':'')+
+    (k===KINDS.blog&&e.status!=='published'&&can(k.sec,'publish')?'<button class="btn" id="schedpost">'+(e.status==='scheduled'?'Reschedule':'Schedule')+'</button>':'')+
+    (can(k.sec,'publish')?'<button class="btn primary" id="publish">'+(e.status==='published'?'Update live '+k.noun:e.status==='scheduled'?'Publish now':'Publish')+'</button>':'')+
+    ((e.status==='published'||e.status==='scheduled')&&can(k.sec,'publish')?'<button class="btn danger" id="unpub">'+(e.status==='scheduled'?'Cancel schedule':'Unpublish')+'</button>':'')+
     (e.id&&can(k.sec,'delete')?'<button class="btn danger ghost" id="delpost" title="Remove from the site and the CMS list">Delete</button>':''))+
   '<div class="body"><div class="egrid"><div>'+
     '<div class="card"><div class="cbody">'+
@@ -1206,6 +1270,8 @@ function renderEditor(m){
   var pb=$('#publish',m); if(pb) pb.addEventListener('click',function(){ save(true); });
   var un=$('#unpub',m);
   if(un) un.addEventListener('click', unpublish);
+  var sp=$('#schedpost',m);
+  if(sp) sp.addEventListener('click', scheduleDialog);
   var dp=$('#delpost',m);
   if(dp) dp.addEventListener('click', deletePost);
   document.addEventListener('keydown', hotkey);
@@ -1429,7 +1495,7 @@ function draftPayload(){
   return out;
 }
 
-async function save(publish){
+async function save(publish, scheduleAt){
   var e=S.editing;
   if(!e) return;
   if(S.saving)return;
@@ -1463,18 +1529,21 @@ async function save(publish){
     }
 
     var res = await api(K().ep,{
-      action: publish ? 'publish' : 'save_draft',
+      action: scheduleAt ? 'schedule' : publish ? 'publish' : 'save_draft',
       id: e.id,
       version: e.version,
+      publish_at: scheduleAt || undefined,
       draft: draftPayload()
     });
 
     e.version = res.version;
     if(res.slug) e.slug = res.slug;
-    if(publish){ e.status = 'published'; e.live_slug=res.slug||e.slug; S.validationAttempted=false; }
+    if(scheduleAt){ e.status='scheduled'; e.published_at_iso=res.publish_at; S.validationAttempted=false; }
+    else if(publish){ e.status = 'published'; e.live_slug=res.slug||e.slug; S.validationAttempted=false; }
     S.dirty = false;
 
-    toast(publish ? ('Published — live at '+(res.url||itemPath(e))) : 'Draft saved.', 'good');
+    toast(scheduleAt ? ('Scheduled for '+fmtWhen(res.publish_at)+'. It goes live automatically.')
+        : publish ? ('Published — live at '+(res.url||itemPath(e))) : 'Draft saved.', 'good');
     await refreshList();
     renderShell();
 
@@ -1486,7 +1555,8 @@ async function save(publish){
 }
 
 async function unpublish(){
-  if(!confirm('Take this post off the live site? It goes back to draft.'))return;
+  var sch=S.editing&&S.editing.status==='scheduled';
+  if(!confirm(sch?'Cancel the schedule? The post goes back to draft and will not be published.':'Take this post off the live site? It goes back to draft.'))return;
   try{
     var res = await api(K().ep,{action:K()===KINDS.page?'unpublish':'update',id:S.editing.id,version:S.editing.version,status:'draft'});
     S.editing.version = res.version;

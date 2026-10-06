@@ -269,6 +269,8 @@ if ($method === 'GET') {
             }
         }
         unset($blog['draft_data_json']);
+        $t = !empty($blog['published_at']) ? strtotime((string)$blog['published_at']) : false;
+        $blog['published_at_iso'] = $t ? date(DATE_ATOM, $t) : null;
 
         echo json_encode(['success' => true, 'blog' => $blog]);
         exit();
@@ -280,7 +282,14 @@ if ($method === 'GET') {
                 created_at, updated_at, published_at
            FROM blogs WHERE status <> 'archived' ORDER BY updated_at DESC"
     );
-    echo json_encode(['success' => true, 'blogs' => $stmt->fetchAll()]);
+    $blogs = $stmt->fetchAll();
+    // Scheduled times with their timezone, so the CMS shows them in the editor's local time.
+    foreach ($blogs as &$b) {
+        $t = !empty($b['published_at']) ? strtotime((string)$b['published_at']) : false;
+        $b['published_at_iso'] = $t ? date(DATE_ATOM, $t) : null;
+    }
+    unset($b);
+    echo json_encode(['success' => true, 'blogs' => $blogs, 'server_time' => date(DATE_ATOM)]);
     exit();
 }
 
@@ -294,7 +303,7 @@ if ($method === 'POST') {
     // Permission per action (enforced here, not just hidden in the UI).
     $need = [
         'create' => 'edit', 'save_draft' => 'edit', 'release_lock' => 'edit',
-        'publish' => 'publish', 'unpublish' => 'publish', 'update' => 'publish', 'set_status' => 'publish',
+        'publish' => 'publish', 'schedule' => 'publish', 'unpublish' => 'publish', 'update' => 'publish', 'set_status' => 'publish',
         'delete' => 'delete',
     ][$action] ?? 'edit';
     rocCmsAuthorize($session, 'blogs', $need);
@@ -388,8 +397,26 @@ if ($method === 'POST') {
 
     /* --------------------------------------------------------- publish */
 
-    if ($action === 'publish') {
+    // schedule = publish now in every respect (checks, slug, read time, revision) except
+    // that the post stays 'scheduled' until cron/cli-blog-scheduler.php makes it live
+    // at published_at. Only for posts that are not live yet.
+    if ($action === 'publish' || $action === 'schedule') {
         $expectedVersion = (int)($data['version'] ?? 1);
+        $scheduleAt = null;
+        if ($action === 'schedule') {
+            try {
+                $when = new DateTime((string)($data['publish_at'] ?? ''));
+                $when->setTimezone(new DateTimeZone(date_default_timezone_get()));
+            } catch (\Throwable $e) {
+                rocFail('Choose a valid date and time for publishing.');
+            }
+            if ($when->getTimestamp() < time() + 60) rocFail('Choose a time at least one minute from now.');
+            if ($when->getTimestamp() > time() + 400 * 86400) rocFail('Choose a time within the next year.');
+            $cur = $pdo->prepare('SELECT status FROM blogs WHERE id = ? LIMIT 1');
+            $cur->execute([$id]);
+            if ($cur->fetchColumn() === 'published') rocFail('This post is already live. Unpublish it first to schedule it.');
+            $scheduleAt = $when->format('Y-m-d H:i:s');
+        }
         [$clean, $error] = rocCleanBlogPayload($data['draft'] ?? $data);
         if ($error) rocFail($error);
 
@@ -425,13 +452,14 @@ if ($method === 'POST') {
         $pdo->beginTransaction();
         try {
             $sql = 'UPDATE blogs SET ' . implode(', ', $assignments)
-                 . ", status = 'published', draft_status = 'none',"
-                 . '  published_at = IFNULL(published_at, NOW()),'
+                 . ($scheduleAt ? ", status = 'scheduled', draft_status = 'none'," : ", status = 'published', draft_status = 'none',")
+                 . ($scheduleAt ? '  published_at = ?,' : '  published_at = IFNULL(published_at, NOW()),')
                  . '  content_modified_at = NOW(), draft_data_json = NULL,'
                  . '  locked_by = NULL, locked_at = NULL,'
                  . '  version = version + 1, updated_at = NOW()'
                  . rocSeoResetSql($pdo)
                  . ' WHERE id = ? AND version = ?';
+            if ($scheduleAt) $values[] = $scheduleAt;
             $values[] = $id;
             $values[] = $expectedVersion;
 
@@ -460,7 +488,21 @@ if ($method === 'POST') {
 
             $pdo->commit();
 
-            logCmsAudit('cms_blog_publish', 'blog', $id, ['version' => $newVersion, 'title' => $title]);
+            logCmsAudit($scheduleAt ? 'cms_blog_schedule' : 'cms_blog_publish', 'blog', $id,
+                        ['version' => $newVersion, 'title' => $title] + ($scheduleAt ? ['publish_at' => $scheduleAt] : []));
+
+            if ($scheduleAt) {
+                echo json_encode([
+                    'success'      => true,
+                    'message'      => 'Scheduled.',
+                    'version'      => $newVersion,
+                    'slug'         => $clean['slug'],
+                    'status'       => 'scheduled',
+                    'published_at' => $scheduleAt,
+                    'publish_at'   => $when->format(DATE_ATOM),
+                ]);
+                exit();
+            }
 
             echo json_encode([
                 'success' => true,
