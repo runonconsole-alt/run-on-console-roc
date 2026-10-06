@@ -267,15 +267,23 @@ if ($catCols === null) {
     $save();
 }
 $have = array_flip($pdo->query('SELECT slug FROM product_categories')->fetchAll(PDO::FETCH_COLUMN));
-$ins = $pdo->prepare('INSERT INTO product_categories (slug, name, description, image, status, sort_rank, created_at, updated_at, content_modified_at)
-                      VALUES (?, ?, ?, ?, \'published\', ?, ?, ?, NULL)');
+$ins = $pdo->prepare('INSERT INTO product_categories (slug, name, description, image, status, sort_rank, meta_title, meta_description, created_at, updated_at, content_modified_at)
+                      VALUES (?, ?, ?, ?, \'published\', ?, ?, ?, ?, ?, NULL)');
 $added = 0;
 foreach ($catBySlug as $s => $c) {
     if (isset($have[$s])) continue;
     $t = now();
     // content_modified_at stays empty until the category is edited in the CMS, so
     // its sitemap lastmod follows its products instead of the install date.
-    $ins->execute([$s, $c['name'], $c['desc'] ?? '', $c['image'] ?? '', $c['rank'], $t, $t]);
+    // Keep the title and description Google already has for this page.
+    $mt = $md = '';
+    $f = $ROOT . '/products/category/' . $s . '/index.html';
+    if (is_file($f)) {
+        $h = (string)file_get_contents($f);
+        if (preg_match('#<title>(.*?)</title>#is', $h, $m1)) $mt = html_entity_decode(trim($m1[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if (preg_match('#<meta\s+name="description"\s+content="([^"]*)"#i', $h, $m2)) $md = html_entity_decode($m2[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+    $ins->execute([$s, $c['name'], $c['desc'] ?? '', $c['image'] ?? '', $c['rank'], $mt, $md, $t, $t]);
     $added++;
 }
 echo "Categories added: {$added}\n";
