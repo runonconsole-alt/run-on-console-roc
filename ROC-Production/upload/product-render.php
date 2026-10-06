@@ -427,8 +427,10 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
     if ($cat) {
         $name  = (string)$cat['name'];
         $url   = rocCategoryUrl((string)$cat['slug']);
-        $title = trim((string)($cat['meta_title'] ?? '')) ?: ('Best ' . $name . ' (' . date('Y') . ') | Run On Console');
-        $desc  = trim((string)($cat['meta_description'] ?? '')) ?: (trim((string)($cat['description'] ?? '')) ?: ('Our picks for ' . $name . ', with what each is best for, key specs and a direct Amazon link.'));
+        $n     = count($inScope);
+        $title = trim((string)($cat['meta_title'] ?? '')) ?: ('Best ' . $name . ': ' . $n . ' Picks | Run On Console');
+        $desc  = trim((string)($cat['meta_description'] ?? ''))
+              ?: trim((trim((string)($cat['description'] ?? '')) ?: ('Our ' . $name . ' picks.')) . ' ' . $n . ' picks with what each is best for, key specs and a direct Amazon link.');
         $heroTitle = 'Best ' . $name;
         $heroText  = trim((string)($cat['description'] ?? '')) ?: $desc;
         $heroBadge = count($inScope) . ' PICKS';
@@ -437,10 +439,11 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
         $noindex = !empty($cat['is_noindex']);
     } else {
         $url   = ROC_PUBLIC_URL . '/products/';
-        $title = 'Gaming Gear Picks by Category | Run On Console';
-        $desc  = 'Keyboards, mice, headsets, speakers, monitors and graphics cards, each with what it is best for, key specs and a direct Amazon link.';
+        [$title, $desc] = rocTemplateMeta($root, ROC_PRODUCT_TEMPLATES['list'], count($all),
+            'Gaming Gear Picks by Category | Run On Console',
+            'Keyboards, mice, headsets, speakers, monitors and graphics cards, each with what it is best for, key specs and a direct Amazon link.');
         $heroTitle = 'Gaming Gear Picks by Category';
-        $heroText  = $desc;
+        $heroText  = 'Keyboards, mice, headsets, speakers, monitors and graphics cards, each with what it is best for, key specs and a direct Amazon link.';
         $heroBadge = 'GAMING GEAR PICKS BY CATEGORY';
         $first = reset($categories);
         $image = $first ? trim((string)($first['image'] ?? '')) : '';
@@ -525,7 +528,7 @@ function rocProductSitemap(PDO $pdo, array $categories): void {
     $line = function (string $loc, ?int $mod): string {
         return '  <url><loc>' . rocH($loc) . '</loc>' . ($mod ? '<lastmod>' . gmdate('c', $mod) . '</lastmod>' : '') . "</url>\n";
     };
-    $out .= $line(ROC_PUBLIC_URL . '/products/', $latest);
+    // /products/ itself is listed in pages-sitemap.xml by sitemap-render.php.
     foreach ($categories as $s => $c) {
         if (!isset($latestByCat[$s]) || !empty($c['is_noindex'])) continue;
         // A category changes when it is edited or when any of its products changes.
@@ -536,6 +539,20 @@ function rocProductSitemap(PDO $pdo, array $categories): void {
     $out .= "</urlset>\n";
     echo $out;
     exit;
+}
+
+/**
+ * Title and description of a saved layout template (the live page it was copied
+ * from), so list pages keep the wording Google already has. The first number in
+ * each (e.g. "Browse 122 …", "15 Gaming Platform Hubs") is set to the current count.
+ */
+function rocTemplateMeta(string $root, string $name, int $count, string $title, string $desc): array {
+    $f = $root . '/cms-templates/' . $name;
+    $h = is_file($f) ? (string)file_get_contents($f, false, null, 0, 20000) : '';
+    if (preg_match('#<title>(.*?)</title>#is', $h, $m)) $title = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    if (preg_match('#<meta\s+name="description"\s+content="([^"]*)"#i', $h, $m)) $desc = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $fix = function ($s) use ($count) { return (string)preg_replace('/\b\d+\b/', (string)$count, $s, 1); };
+    return [$fix($title), $fix($desc)];
 }
 
 /** Plain-text truncation that does not depend on cms-html.php. */

@@ -13,8 +13,8 @@
   function blogPath(href) {
     try {
       var u = new URL(href, location.href);
-      // Blogs and products are rendered by the server from the CMS database.
-      return u.origin === location.origin && /^\/(blogs|products)(\/|$)/.test(u.pathname) ? u : null;
+      // Blogs, products and gaming platforms are rendered by the server from the CMS database.
+      return u.origin === location.origin && /^\/(blogs|products|categories)(\/|$)/.test(u.pathname) ? u : null;
     } catch (e) { return null; }
   }
 

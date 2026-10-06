@@ -787,6 +787,7 @@ function renderShell(){
       (can('media','view')?item('media','Media library','❖',S.media.length):'')+
       (can('pages','view')?item('cmspages','Pages','▦',S.pages.length):'')+
       (can('pages','view')?item('pages','Website pages & SEO','▤'):'')+
+      (can('pages','view')?item('platforms','Gaming platforms','◈'):'')+
       (can('products','view')?item('products','Products','▣')+item('product-categories','Product categories','▤'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
       item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+'</div>':'')+
@@ -823,6 +824,7 @@ function renderView(){
   if(S.view==='dashboard') return renderDash(m);
   if(S.view==='media') return renderMedia(m);
   if(S.view==='pages') return renderPages(m);
+  if(S.view==='platforms' && can('pages','view')) return renderPlatforms(m);
   if(S.view==='activity') return renderActivity(m);
   if(S.view==='social') return renderSocial(m);
   if(S.view==='products' && can('products','view')) return renderProducts(m);
@@ -2248,6 +2250,145 @@ async function renderProducts(m){
   $('#pr-q',m).addEventListener('input',function(e){ q=e.target.value.toLowerCase().trim(); draw(); });
   $('#pr-c',m).addEventListener('change',function(e){ cat=e.target.value; draw(); });
   draw();
+}
+
+/* ------------------------------------------------------- gaming platforms */
+
+async function renderPlatforms(m){
+  var canEdit=can('pages','edit');
+  m.innerHTML=head('Gaming platforms','Platform hubs at /categories/…/',
+      canEdit?'<button class="btn primary" id="gp-new">＋ New platform</button>':'')+
+    '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d; try{ d=await api('gaming-categories.php'); }catch(e){ $('.body',m).innerHTML='<div class="alert bad">'+esc(e.message)+'</div>'; return; }
+  var cats=d.categories||[];
+  $('.body',m).innerHTML='<div class="card"><table class="list"><thead><tr><th>Platform</th><th>Devices</th><th>On website</th></tr></thead><tbody>'+
+    (cats.map(function(c){
+      var live=c.status==='published';
+      return '<tr><td><div class="t-title">'+esc(c.title)+(canEdit?' <button class="btn sm ghost" data-gp-edit="'+esc(c.slug)+'">Edit</button>':'')+'</div>'+
+        '<div class="t-slug"><a href="/categories/'+esc(c.slug)+'/" target="_blank" rel="noopener">/categories/'+esc(c.slug)+'/ ↗</a></div></td>'+
+        '<td>'+c.devices.live+' live'+(c.devices.hidden?' · '+c.devices.hidden+' hidden':'')+'</td>'+
+        '<td><span class="tag '+(live?'published':'draft')+'">'+(live?'Live':'Hidden')+'</span></td></tr>';
+    }).join('')||'<tr><td colspan="3" class="empty">No platforms yet.</td></tr>')+'</tbody></table></div>';
+  $('.body',m).addEventListener('click',function(e){ var b=e.target.closest('[data-gp-edit]'); if(b) openPlatform(m,b.dataset.gpEdit); });
+  var nb=$('#gp-new',m); if(nb) nb.addEventListener('click',function(){ renderPlatformEditor(m,{status:'draft'},[]); });
+}
+
+async function openPlatform(m,slug){
+  try{ var d=await api('gaming-categories.php?slug='+encodeURIComponent(slug)); renderPlatformEditor(m,d.category,d.devices||[]); }
+  catch(e){ toast(e.message,'bad'); }
+}
+
+function renderPlatformEditor(m,c,devices){
+  var live=c.status==='published', canPub=can('pages','publish');
+  var focus=jsonList(c.focus_json), faqs=jsonList(c.faq_json);
+  if(!faqs.length) faqs=[{q:'',a:''}];
+  function input(id,label,val,ph,note,max){
+    return '<div class="field"><label for="'+id+'">'+esc(label)+'</label><input type="text" id="'+id+'" value="'+esc(val==null?'':val)+'"'+
+      (ph?' placeholder="'+esc(ph)+'"':'')+(max?' maxlength="'+max+'"':'')+'>'+(note?'<div class="hint">'+note+'</div>':'')+'</div>';
+  }
+  function faqRow(f){
+    return '<div class="gp-faq" style="border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:8px">'+
+      '<input type="text" class="gp-q" placeholder="Question" value="'+esc(f.q||'')+'" style="margin-bottom:6px">'+
+      '<textarea class="gp-a" rows="2" placeholder="Answer">'+esc(f.a||'')+'</textarea></div>';
+  }
+  m.innerHTML=head(c.slug?c.title:'New platform',
+      c.slug?'/categories/'+c.slug+'/ · '+(live?'Live on the website':'Hidden from the website'):'The address is created from the name and does not change later.',
+      (c.slug&&live?'<a class="btn sm" target="_blank" rel="noopener" href="/categories/'+esc(c.slug)+'/">View live ↗</a> ':'')+
+      '<button class="btn ghost" id="gp-back">← All platforms</button>')+
+  '<div class="body narrow">'+
+   '<div class="card"><div class="chead"><h3>Platform</h3></div><div class="cbody">'+
+     input('gp-title','Name *',c.title,'e.g. Sony PlayStation','',160)+
+     '<div class="field"><label for="gp-desc">Description</label><textarea id="gp-desc" rows="3">'+esc(c.description||'')+'</textarea></div>'+
+     input('gp-badge','Badge',c.badge,'e.g. 4K 120FPS RAY TRACING','',120)+
+     input('gp-era','Era',c.era,'e.g. Modern & Retro','',120)+
+     '<div class="field"><label for="gp-focus">Focus areas</label><textarea id="gp-focus" rows="3" placeholder="One per line">'+esc(focus.join('\n'))+'</textarea></div>'+
+     '<div style="display:flex;gap:12px;align-items:flex-start">'+
+       '<div id="gp-prev" style="width:140px;height:105px;border-radius:8px;border:1px solid var(--line-2);flex:none;background:var(--bg) center/cover no-repeat"></div>'+
+       '<div style="flex:1;min-width:0">'+input('gp-img','Image',c.image,'https://… or choose from the Media library','')+
+       '<button class="btn sm" id="gp-pick">Choose from Media library</button></div></div>'+
+   '</div></div>'+
+   '<div class="card"><div class="chead"><h3>FAQs</h3></div><div class="cbody"><div id="gp-faqs">'+faqs.map(faqRow).join('')+'</div>'+
+     '<button class="btn sm" id="gp-addfaq">＋ Add question</button><div class="hint">Shown at the bottom of the page and to Google as FAQ results.</div></div></div>'+
+   '<div class="card"><div class="chead"><h3>Search engines</h3></div><div class="cbody">'+
+     input('gp-mt','SEO title',c.meta_title,'Leave empty for an automatic title','',255)+
+     '<div class="field"><label for="gp-md">SEO description</label><textarea id="gp-md" rows="2" maxlength="500">'+esc(c.meta_description||'')+'</textarea></div>'+
+     input('gp-rank','Order',c.sort_rank,'1 = first','')+
+     '<label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" id="gp-noidx"'+(+c.is_noindex?' checked':'')+'> Hide from Google (noindex)</label>'+
+   '</div></div>'+
+   '<div class="card"><div class="cbody" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">'+
+     '<button class="btn" id="gp-save">'+(c.slug?'Save':'Save as hidden')+'</button>'+
+     (canPub?'<button class="btn primary" id="gp-pub">'+(live?'Save &amp; keep live':'Save &amp; publish')+'</button>':'')+
+     (canPub&&live?'<button class="btn danger" id="gp-hide">Save &amp; hide</button>':'')+
+   '</div></div>'+
+   (c.slug?'<div class="card"><div class="chead"><h3>Devices ('+devices.length+')</h3><button class="btn sm" id="gp-newdev">＋ Add device</button></div>'+
+     '<div id="gp-devform"></div><table class="list"><tbody>'+
+     (devices.map(function(d){
+       var on=d.status==='published';
+       return '<tr><td><div class="t-title">'+esc(d.name)+' <button class="btn sm ghost" data-dev-edit="'+esc(d.id)+'">Edit</button></div>'+
+         '<div class="t-slug">'+esc([d.year,d.type].filter(Boolean).join(' · '))+'</div></td>'+
+         '<td style="white-space:nowrap"><span class="tag '+(on?'published':'draft')+'">'+(on?'Live':'Hidden')+'</span> '+
+         (canPub?'<button class="btn sm" data-dev-toggle="'+esc(d.id)+'">'+(on?'Hide':'Show')+'</button>':'')+'</td></tr>';
+     }).join('')||'<tr><td class="empty">No devices yet.</td></tr>')+'</tbody></table></div>':'')+
+  '</div>';
+
+  function val(id){ return $('#'+id,m).value; }
+  function preview(){ var u=val('gp-img').trim(); $('#gp-prev',m).style.backgroundImage=u?'url("'+u.replace(/["\\]/g,'')+'")':'none'; }
+  preview();
+  $('#gp-img',m).addEventListener('input',preview);
+  $('#gp-pick',m).addEventListener('click',function(){ pickMedia(function(x){ if(x){ $('#gp-img',m).value=x.url; preview(); } }); });
+  $('#gp-addfaq',m).addEventListener('click',function(){ $('#gp-faqs',m).insertAdjacentHTML('beforeend',faqRow({})); });
+  $('#gp-back',m).addEventListener('click',function(){ go('platforms'); });
+
+  async function save(status){
+    var faqOut=[]; m.querySelectorAll('.gp-faq').forEach(function(r){ faqOut.push({q:$('.gp-q',r).value,a:$('.gp-a',r).value}); });
+    var body={action:'save',slug:c.slug||'',fields:{title:val('gp-title'),description:val('gp-desc'),badge:val('gp-badge'),era:val('gp-era'),
+      focus:val('gp-focus'),image:val('gp-img'),faqs:faqOut,meta_title:val('gp-mt'),meta_description:val('gp-md'),
+      sort_rank:val('gp-rank'),is_noindex:$('#gp-noidx',m).checked?1:0}};
+    if(status) body.status=status; else if(!c.slug) body.status='draft';
+    m.querySelectorAll('.cbody button').forEach(function(b){ b.disabled=true; });
+    try{
+      var r=await api('gaming-categories.php',body);
+      toast(r.category.status==='published'?'Saved. The platform page is updated.':'Saved. This platform is hidden from the website.','good');
+      openPlatform(m,r.category.slug);
+    }catch(e){ toast(e.message,'bad'); m.querySelectorAll('.cbody button').forEach(function(b){ b.disabled=false; }); }
+  }
+  $('#gp-save',m).addEventListener('click',function(){ save(null); });
+  var p=$('#gp-pub',m); if(p) p.addEventListener('click',function(){ save('published'); });
+  var h=$('#gp-hide',m); if(h) h.addEventListener('click',function(){ if(confirm('Hide "'+c.title+'" from the website?')) save('draft'); });
+
+  if(!c.slug) return;
+  function devForm(d){
+    var games=jsonList(d.iconic_games_json);
+    $('#gp-devform',m).innerHTML='<div class="cbody" style="border-bottom:1px solid var(--line)">'+
+      '<h4 style="margin-bottom:10px">'+(d.id?'Edit device':'New device')+'</h4>'+
+      input('dv-name','Name *',d.name,'e.g. PlayStation 5 Pro','',200)+
+      input('dv-year','Year',d.year,'e.g. 2024','',40)+
+      input('dv-type','Type',d.type,'e.g. Home Console','',120)+
+      input('dv-specs','Specs',d.specs,'e.g. 16.7 TFLOPS // 2TB SSD // 8K Output','',500)+
+      input('dv-status','Label',d.status_label,'e.g. Active Flagship','',80)+
+      '<div class="field"><label for="dv-games">Iconic games</label><textarea id="dv-games" rows="3" placeholder="One per line">'+esc(games.join('\n'))+'</textarea></div>'+
+      '<div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost" id="dv-cancel">Cancel</button><button class="btn primary" id="dv-save">Save device</button></div></div>';
+    $('#dv-cancel',m).addEventListener('click',function(){ $('#gp-devform',m).innerHTML=''; });
+    $('#dv-save',m).addEventListener('click',async function(){
+      try{
+        await api('gaming-categories.php',{action:'save_device',id:d.id||'',category_slug:c.slug,fields:{
+          name:val('dv-name'),year:val('dv-year'),type:val('dv-type'),specs:val('dv-specs'),status_label:val('dv-status'),games:val('dv-games')}});
+        toast('Device saved.','good'); openPlatform(m,c.slug);
+      }catch(e){ toast(e.message,'bad'); }
+    });
+    $('#dv-name',m).focus();
+  }
+  $('#gp-newdev',m).addEventListener('click',function(){ devForm({}); });
+  m.querySelector('.body').addEventListener('click',async function(e){
+    var ed=e.target.closest('[data-dev-edit]');
+    if(ed){ devForm(devices.filter(function(x){return x.id===ed.dataset.devEdit;})[0]); return; }
+    var tg=e.target.closest('[data-dev-toggle]'); if(!tg) return;
+    var d=devices.filter(function(x){return x.id===tg.dataset.devToggle;})[0];
+    try{
+      await api('gaming-categories.php',{action:'save_device',id:d.id,category_slug:c.slug,status:d.status==='published'?'draft':'published',fields:{name:d.name}});
+      toast(d.status==='published'?'"'+d.name+'" is hidden.':'"'+d.name+'" is live again.','good'); openPlatform(m,c.slug);
+    }catch(err){ toast(err.message,'bad'); }
+  });
 }
 
 /* ------------------------------------------------------- product categories */
