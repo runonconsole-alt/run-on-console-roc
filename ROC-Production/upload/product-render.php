@@ -22,6 +22,10 @@ $ROOT = __DIR__;
 define('ROC_RENDER_LIB_ONLY', true);
 require_once $ROOT . '/blog-render.php';
 
+/** Photos the product sheet gave every product of a category (not real product photos). */
+const ROC_SHARED_PRODUCT_PHOTOS = ['/images/cyber_keyboard.jpg', '/images/tactical_headset.jpg', '/images/apex_mouse.jpg',
+                                   '/images/streaming_vr_gear.jpg', '/images/gaming_monitor.jpg', '/images/battlestation_pc.jpg'];
+
 const ROC_PRODUCT_TEMPLATES = [
     'page'     => 'product-page.html',
     'list'     => 'product-list.html',
@@ -220,9 +224,23 @@ function rocProductList(array $p, string $key): array {
 function rocProductUrl(string $slug): string { return ROC_PUBLIC_URL . '/products/' . $slug . '/'; }
 function rocCategoryUrl(string $slug): string { return ROC_PUBLIC_URL . '/products/category/' . $slug . '/'; }
 
+/**
+ * Image shown for a product: its own photo when one is set in the CMS; otherwise
+ * its own card (/images/products/{slug}.svg); otherwise the category image.
+ */
 function rocProductImage(array $p, array $categories): string {
     $img = trim((string)($p['image'] ?? ''));
-    if ($img !== '') return $img;
+    $c = $categories[rocProductCategorySlug($p)] ?? null;
+    $catImg = $c ? trim((string)($c['image'] ?? '')) : '';
+    if ($img !== '' && !in_array($img, ROC_SHARED_PRODUCT_PHOTOS, true) && $img !== $catImg) return $img;
+    $card = '/images/products/' . $p['slug'] . '.svg';
+    if (is_file(__DIR__ . $card)) return $card;
+    return $img !== '' ? $img : $catImg;
+}
+
+/** Social networks do not show SVG: use the category photo for link previews. */
+function rocShareImage(string $image, array $p, array $categories): string {
+    if (substr($image, -4) !== '.svg') return $image;
     $c = $categories[rocProductCategorySlug($p)] ?? null;
     return $c ? trim((string)($c['image'] ?? '')) : '';
 }
@@ -338,7 +356,7 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
     $metaD = trim((string)($p['meta_description'] ?? '')) ?: rocCmsTruncatePlain($desc, 155);
 
     /* ---------------- head */
-    $h  = rocHeadMeta($metaT, $metaD, $url, $image, $noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large', 'product');
+    $h  = rocHeadMeta($metaT, $metaD, $url, rocShareImage($image, $p, $categories), $noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large', 'product');
     $h .= rocBreadcrumbLd([
         ['Home', ROC_PUBLIC_URL . '/'],
         ['Products', ROC_PUBLIC_URL . '/products/'],

@@ -454,7 +454,15 @@ export const ALL_GAMING_DEVICES = [
 
 // ALL PRODUCTS & PERIPHERALS (Keyboards, Mice, Monitors, Audio, Cables, Desks, Controllers, Rigs)
 // Products come from productCatalog.js (generated from the product master sheet).
-export { ALL_PRODUCTS, PRODUCT_CATEGORIES } from './productCatalog.js';
+import { ALL_PRODUCTS as CATALOG_PRODUCTS, PRODUCT_CATEGORIES } from './productCatalog.js';
+export { PRODUCT_CATEGORIES };
+
+// The sheet gives every product its category's shared photo. Until a real photo is
+// set in the CMS, show the product's own card (scripts/generate-product-cards.mjs).
+const SHARED_CATEGORY_PHOTOS = new Set(PRODUCT_CATEGORIES.map((c) => c.image));
+export const ALL_PRODUCTS = CATALOG_PRODUCTS.map((p) =>
+  SHARED_CATEGORY_PHOTOS.has(p.image) ? { ...p, image: `/images/products/${p.slug}.svg` } : p
+);
 
 export const ALL_BLOGS = [
   {

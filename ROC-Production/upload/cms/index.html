@@ -788,7 +788,7 @@ function renderShell(){
       (can('pages','view')?item('cmspages','Pages','▦',S.pages.length):'')+
       (can('pages','view')?item('pages','Website pages & SEO','▤'):'')+
       (can('pages','view')?item('platforms','Gaming platforms','◈'):'')+
-      (can('products','view')?item('products','Products','▣')+item('product-categories','Product categories','▤'):'')+'</div>'+
+      (can('products','view')?item('products','Products','▣')+item('product-images','Product images','▨')+item('product-categories','Product categories','▤'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
       item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+'</div>':'')+
     '<div class="sfoot"><div class="who"><div class="av">'+
@@ -829,6 +829,7 @@ function renderView(){
   if(S.view==='social') return renderSocial(m);
   if(S.view==='products' && can('products','view')) return renderProducts(m);
   if(S.view==='product-categories' && can('products','view')) return renderProductCategories(m);
+  if(S.view==='product-images' && can('products','edit')) return renderProductImages(m);
   if(S.view==='cmspages'){ if(!S.pageMeta){ loadPageMeta().then(function(){ if(S.view==='cmspages'&&!S.editing) renderCmsPages(m); }); } return renderCmsPages(m); }
   if(S.view==='users') return renderUsers(m);
   if(S.view==='audit') return renderSimple(m,'audit-logs.php','logs','Audit log',['created_at','username','action','target_type','target_id']);
@@ -2466,6 +2467,75 @@ function renderCategoryEditor(m,c){
   var h=$('#pc-hide',m); if(h) h.addEventListener('click',function(){
     if(confirm('Hide "'+c.name+'" and all its products from the website?')) save('draft');
   });
+}
+
+/* ---------------------------------------------------------- product images */
+
+var SHARED_PHOTOS=['/images/cyber_keyboard.jpg','/images/tactical_headset.jpg','/images/apex_mouse.jpg',
+                   '/images/streaming_vr_gear.jpg','/images/gaming_monitor.jpg','/images/battlestation_pc.jpg'];
+function hasRealPhoto(p){ return !!p.image && SHARED_PHOTOS.indexOf(p.image)===-1; }
+function shownImage(p){ return hasRealPhoto(p)?p.image:'/images/products/'+p.slug+'.svg'; }
+
+/* What a pasted value contains: SiteStripe HTML, an image link or an Amazon product link. */
+function readPaste(v){
+  v=String(v||'').trim(); var out={img:'',link:''};
+  if(!v) return out;
+  if(v.indexOf('<')!==-1){ var r=parseSiteStripe(v); out.img=r.img; out.link=r.link; return out; }
+  if(/^https:\/\/[^\s"<>]+\.(jpe?g|png|webp|gif|avif)(\?|$)/i.test(v) || /^https:\/\/(m\.media-amazon\.com|images-na\.ssl-images-amazon\.com|ws-na\.amazon-adsystem\.com)\//i.test(v)) out.img=v;
+  else if(/^https?:\/\/([^\/]+\.)?(amazon\.[a-z.]+|amzn\.to|a\.co)\//i.test(v)) out.link=v;
+  return out;
+}
+
+async function renderProductImages(m){
+  m.innerHTML=head('Product images','One real photo per product','')+
+    '<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d; try{ d=await api('products.php'); }catch(e){ toast(e.message,'bad'); return; }
+  var all=d.products||[], cat='all', only=true;
+  var cats={}; all.forEach(function(p){ cats[p.category||'Other']=1; });
+  var body=$('.body',m);
+  body.innerHTML='<div class="hint" style="margin-bottom:12px">For each product: open it on Amazon (<b>Find</b>), use SiteStripe → <b>Image</b>, copy the HTML and paste it in the box. '+
+    'The photo and the exact Amazon link are saved together. You can also paste a plain image link. Products without a photo show their name card.</div>'+
+    '<div class="card"><div class="cbody" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">'+
+      '<select id="pi-c"><option value="all">All categories</option>'+Object.keys(cats).sort().map(function(c){ return '<option value="'+esc(c)+'">'+esc(c)+'</option>'; }).join('')+'</select>'+
+      '<label style="display:flex;gap:6px;align-items:center;font-size:13px"><input type="checkbox" id="pi-only" checked> Only products without a photo</label>'+
+      '<span class="hint" id="pi-count" style="margin-left:auto"></span></div></div>'+
+    '<div class="card"><table class="list"><tbody id="pi-list"></tbody></table></div>';
+
+  function draw(){
+    var done=all.filter(hasRealPhoto).length;
+    $('#pi-count',m).textContent=done+' of '+all.length+' products have a real photo';
+    var list=all.filter(function(p){ return (cat==='all'||(p.category||'Other')===cat) && (!only||!hasRealPhoto(p)); });
+    $('#pi-list',m).innerHTML=list.map(function(p){
+      var real=hasRealPhoto(p);
+      return '<tr data-row="'+esc(p.id)+'"><td style="width:150px"><img src="'+esc(shownImage(p))+'" alt="" style="width:140px;height:105px;object-fit:contain;border-radius:8px;background:#0f172a"></td>'+
+        '<td><div class="t-title">'+esc(p.title)+'</div><div class="t-slug">'+esc(p.category||'')+' · '+
+          (real?'<span style="color:var(--brand)">✓ real photo</span>':'name card')+' · '+
+          (asinOf(p.affiliate_amazon)?'<span style="color:var(--brand)">✓ exact Amazon link</span>':'<span style="color:var(--amber)">Amazon search link</span>')+'</div>'+
+          '<div style="display:flex;gap:8px;margin-top:8px;align-items:flex-start">'+
+            '<textarea rows="2" data-paste placeholder="Paste SiteStripe HTML or an image link" style="flex:1;min-width:0"></textarea>'+
+            '<div style="display:flex;flex-direction:column;gap:6px"><a class="btn sm" target="_blank" rel="noopener" href="https://www.amazon.com/s?k='+encodeURIComponent(p.title)+'">Find ↗</a>'+
+            '<button class="btn sm primary" data-save>Save</button></div></div></td></tr>';
+    }).join('')||'<tr><td class="empty">'+(only?'Every product in this view has a real photo.':'No products.')+'</td></tr>';
+  }
+  $('#pi-c',m).addEventListener('change',function(e){ cat=e.target.value; draw(); });
+  $('#pi-only',m).addEventListener('change',function(e){ only=e.target.checked; draw(); });
+  $('#pi-list',m).addEventListener('click',async function(e){
+    var b=e.target.closest('[data-save]'); if(!b) return;
+    var row=b.closest('[data-row]'), p=all.filter(function(x){ return String(x.id)===row.dataset.row; })[0];
+    var got=readPaste($('[data-paste]',row).value);
+    if(!got.img && !got.link){ toast('Paste the SiteStripe HTML, an image link or an Amazon product link first.','bad'); return; }
+    var body={action:'set_media',id:p.id,version:p.version};
+    if(got.img){ body.image=got.img; if(!p.image_alt) body.image_alt=p.title; }
+    if(got.link) body.affiliate_amazon=got.link;
+    b.disabled=true;
+    try{
+      var r=await api('products.php',body);
+      for(var k in r.product) p[k]=r.product[k];
+      toast('"'+p.title+'" updated'+(got.img&&got.link?': photo and Amazon link.':got.img?': photo.':': Amazon link.'),'good');
+      draw();
+    }catch(err){ toast(err.message,'bad'); b.disabled=false; }
+  });
+  draw();
 }
 
 /* ---------------------------------------------------------- product editor */

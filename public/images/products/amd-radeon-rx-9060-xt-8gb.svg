@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="AMD Radeon RX 9060 XT 8GB">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#022c22"/><stop offset="1" stop-color="#0f172a"/></linearGradient></defs>
+<rect width="400" height="300" fill="url(#g)"/>
+<g transform="translate(250 90) scale(6)" fill="none" stroke="#f472b6" stroke-opacity=".16" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="9" cy="12" r="3"/><circle cx="16" cy="12" r="2"/><path d="M6 18v3M10 18v3M14 18v3"/></g>
+<rect x="40" y="40" width="44" height="4" rx="2" fill="#f472b6"/>
+<text x="40" y="74" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="15" font-weight="700" fill="#f472b6" letter-spacing="1">AMD</text>
+<text font-family="Outfit,Inter,Segoe UI,Arial,sans-serif" font-size="34" font-weight="800" fill="#f8fafc"><tspan x="40" y="130">Radeon RX 9060</tspan><tspan x="40" y="170">XT 8GB</tspan></text>
+<text x="40" y="262" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">Graphics Cards (GPU)</text>
+<text x="360" y="262" text-anchor="end" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="12" font-weight="800" fill="#10b981">RUN ON CONSOLE</text>
+</svg>
