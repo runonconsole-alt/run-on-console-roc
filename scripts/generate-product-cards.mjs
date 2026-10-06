@@ -2,7 +2,7 @@
  * Run On Console — one card image per product.
  *
  * Writes public/images/products/{slug}.svg for every product in the catalog:
- * product name, brand and category on the site's own colours. These replace the
+ * product name and brand on the site's own colours. These replace the
  * six shared category photos until a real product photo is set in the CMS.
  * Deterministic, so re-running only changes files whose product changed.
  *
@@ -10,7 +10,7 @@
  */
 import fs from 'fs';
 import path from 'path';
-import { ALL_PRODUCTS, PRODUCT_CATEGORIES } from '../src/data/productCatalog.js';
+import { ALL_PRODUCTS } from '../src/data/productCatalog.js';
 
 const OUT = path.resolve('public/images/products');
 
@@ -50,34 +50,36 @@ function wrap(text, maxChars, maxLines) {
   return lines;
 }
 
-function card(p, catName) {
+// Cards are shown with object-fit: cover in boxes of different shapes (wide grid tiles,
+// taller product photo box), so everything that matters sits in the centre band
+// (about x 60-340, y 60-180 of 400x240) that every box keeps.
+function card(p) {
   const accent = ACCENT[p.categorySlug] || '#34d399';
   const glyph = GLYPH[p.categorySlug] || GLYPH.keyboards;
-  const lines = wrap(p.title.replace(new RegExp('^' + (p.brand || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s+', 'i'), '') || p.title, 14, 3);
-  // 320px of room for the name; bold sans glyphs average about 0.66em wide.
+  const lines = wrap(p.title.replace(new RegExp('^' + (p.brand || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s+', 'i'), '') || p.title, 16, 3);
+  // 270px of room for the name; bold sans glyphs average about 0.66em wide.
   const longest = Math.max(...lines.map((l) => l.length));
-  const size = Math.max(20, Math.min(lines.length > 2 ? 34 : 40, Math.floor(320 / (longest * 0.66))));
-  const startY = 150 - ((lines.length - 1) * size * 1.15) / 2;
-  const nameTspans = lines.map((l, i) => `<tspan x="40" y="${Math.round(startY + i * size * 1.15)}">${esc(l)}</tspan>`).join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="${esc(p.title)}">
+  const size = Math.max(18, Math.min(lines.length > 2 ? 28 : 34, Math.floor(270 / (longest * 0.66))));
+  const lineH = size * 1.15;
+  const blockH = 22 + lines.length * lineH;            // brand line + name lines
+  const top = 120 - blockH / 2;                        // centre the block vertically
+  const brandY = Math.round(top + 14);
+  const nameTspans = lines.map((l, i) => `<tspan x="200" y="${Math.round(top + 22 + (i + 0.8) * lineH)}">${esc(l)}</tspan>`).join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240" role="img" aria-label="${esc(p.title)}">
 <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#022c22"/><stop offset="1" stop-color="#0f172a"/></linearGradient></defs>
-<rect width="400" height="300" fill="url(#g)"/>
-<g transform="translate(250 90) scale(6)" fill="none" stroke="${accent}" stroke-opacity=".16" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">${glyph}</g>
-<rect x="40" y="40" width="44" height="4" rx="2" fill="${accent}"/>
-<text x="40" y="74" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="15" font-weight="700" fill="${accent}" letter-spacing="1">${esc((p.brand || '').toUpperCase())}</text>
-<text font-family="Outfit,Inter,Segoe UI,Arial,sans-serif" font-size="${size}" font-weight="800" fill="#f8fafc">${nameTspans}</text>
-<text x="40" y="262" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">${esc(catName)}</text>
-<text x="360" y="262" text-anchor="end" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="12" font-weight="800" fill="#10b981">RUN ON CONSOLE</text>
+<rect width="400" height="240" fill="url(#g)"/>
+<g transform="translate(128 48) scale(6)" fill="none" stroke="${accent}" stroke-opacity=".12" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">${glyph}</g>
+<text x="200" y="${brandY}" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="13" font-weight="700" fill="${accent}" letter-spacing="1.5">${esc((p.brand || '').toUpperCase())}</text>
+<text text-anchor="middle" font-family="Outfit,Inter,Segoe UI,Arial,sans-serif" font-size="${size}" font-weight="800" fill="#f8fafc">${nameTspans}</text>
 </svg>
 `;
 }
 
 fs.mkdirSync(OUT, { recursive: true });
-const names = Object.fromEntries(PRODUCT_CATEGORIES.map((c) => [c.slug, c.name]));
 let written = 0;
 for (const p of ALL_PRODUCTS) {
   const file = path.join(OUT, `${p.slug}.svg`);
-  const svg = card(p, names[p.categorySlug] || p.category);
+  const svg = card(p);
   if (!fs.existsSync(file) || fs.readFileSync(file, 'utf8') !== svg) { fs.writeFileSync(file, svg); written++; }
 }
 console.log(`Product cards: ${ALL_PRODUCTS.length} products, ${written} file(s) written to public/images/products/`);
