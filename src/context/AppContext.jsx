@@ -37,7 +37,7 @@ export const AppProvider = ({ children, initialUrl = null }) => {
     if (path.includes('/partnerships')) return { page: 'partnerships', param: null, is404: false };
     if (path.includes('/terms-and-conditions')) return { page: 'terms-and-conditions', param: null, is404: false };
     if (path.includes('/privacy-policy')) return { page: 'privacy-policy', param: null, is404: false };
-    if (path.includes('/policy')) return { page: 'policy', param: null, is404: false };
+    if (path.includes('/policy')) return { page: 'privacy-policy', param: null, is404: false };
     if (path.includes('/contact')) return { page: 'contact', param: null, is404: false };
     
     if (path.includes('/auth/login')) return { page: 'auth', param: 'login', is404: false };
@@ -214,8 +214,11 @@ export const AppProvider = ({ children, initialUrl = null }) => {
   };
 
   const navigateTo = (page, param = null) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Ctrl/Cmd/Shift-click or middle-click: open the page in a new tab like a normal link would.
+    const ev = typeof window !== 'undefined' ? window.event : null;
+    const newTab = !!ev && (ev.type === 'click' || ev.type === 'auxclick')
+      && (ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.button === 1);
+    let nextCategorySlug = null;
 
     let cleanPath = '/';
 
@@ -226,12 +229,12 @@ export const AppProvider = ({ children, initialUrl = null }) => {
       if (productCat) {
         cleanPath = productCat.path;
         param = null;
-        setProductCategorySlug(productCat.slug);
+        nextCategorySlug = productCat.slug;
       } else if (param) {
         const p = getProductBySlug(param);
         cleanPath = p ? p.url.replace(/^https?:\/\/[^\/]+/, '') : `/products/${slugify(param)}/`;
       } else {
-        setProductCategorySlug('all');
+        nextCategorySlug = 'all';
         cleanPath = '/products/';
       }
     } else if (page === 'blogs') {
@@ -253,12 +256,20 @@ export const AppProvider = ({ children, initialUrl = null }) => {
     else if (page === 'partnerships') cleanPath = '/partnerships/';
     else if (page === 'terms-and-conditions') cleanPath = '/terms-and-conditions/';
     else if (page === 'privacy-policy') cleanPath = '/privacy-policy/';
-    else if (page === 'policy') cleanPath = '/policy/';
+    else if (page === 'policy') cleanPath = '/privacy-policy/';
     else if (page === 'contact') cleanPath = '/contact/';
     else if (page === 'auth') {
       if (param) cleanPath = `/auth/${param}/`;
       else cleanPath = '/auth/login/';
     } else if (page === 'profile') cleanPath = '/profile/';
+
+    if (newTab) {
+      window.open(cleanPath, '_blank', 'noopener');
+      return;
+    }
+    setCurrentPage(page);
+    if (nextCategorySlug) setProductCategorySlug(nextCategorySlug);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     const seo = getSeoMetadata(cleanPath);
     applyClientSideSeo(seo);

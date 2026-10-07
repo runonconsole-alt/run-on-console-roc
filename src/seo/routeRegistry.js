@@ -232,15 +232,6 @@ export const STATIC_PUBLIC_ROUTES = [
     lastmod: '2024-05-10T10:00:00+00:00'
   },
   {
-    path: '/policy/',
-    canonical: `${BASE_DOMAIN}/policy/`,
-    title: 'Privacy Policy & Affiliate Disclosure | Run On Console',
-    description: 'Read Run On Console\'s privacy policy, data protection standards, terms of service, and Amazon affiliate program disclosures.',
-    h1: 'Privacy Policy & Affiliate Disclosure',
-    category: 'Policy',
-    lastmod: '2024-05-10T10:00:00+00:00'
-  },
-  {
     path: '/terms-and-conditions/',
     canonical: `${BASE_DOMAIN}/terms-and-conditions/`,
     title: 'Terms of Service & Conditions | Run On Console',
@@ -252,11 +243,11 @@ export const STATIC_PUBLIC_ROUTES = [
   {
     path: '/privacy-policy/',
     canonical: `${BASE_DOMAIN}/privacy-policy/`,
-    title: 'Privacy Policy & Data Protection | Run On Console',
-    description: 'Read Run On Console\'s privacy policy, data collection standards, session cookie security, and Turnstile CAPTCHA protection details.',
+    title: 'Privacy Policy & Affiliate Disclosure | Run On Console',
+    description: 'How Run On Console handles your data, cookies and analytics, and our Amazon Associates affiliate disclosure: we earn from qualifying purchases at no extra cost to you.',
     h1: 'Privacy Policy',
     category: 'Privacy',
-    lastmod: '2024-05-10T10:00:00+00:00'
+    lastmod: '2026-10-07T00:00:00+00:00'
   }
 ];
 

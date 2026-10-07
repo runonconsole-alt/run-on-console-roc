@@ -226,15 +226,17 @@ function rocCategoryUrl(string $slug): string { return ROC_PUBLIC_URL . '/produc
 
 /**
  * Image shown for a product: its own photo when one is set in the CMS; otherwise
- * its own card (/images/products/{slug}.svg); otherwise the category image.
+ * its own name card (/images/products/{slug}.webp; older sites had .svg); otherwise the category image.
  */
 function rocProductImage(array $p, array $categories): string {
     $img = trim((string)($p['image'] ?? ''));
     $c = $categories[rocProductCategorySlug($p)] ?? null;
     $catImg = $c ? trim((string)($c['image'] ?? '')) : '';
     if ($img !== '' && !in_array($img, ROC_SHARED_PRODUCT_PHOTOS, true) && $img !== $catImg) return $img;
-    $card = '/images/products/' . $p['slug'] . '.svg';
-    if (is_file(__DIR__ . $card)) return $card;
+    foreach (['.webp', '.svg'] as $ext) {
+        $card = '/images/products/' . $p['slug'] . $ext;
+        if (is_file(__DIR__ . $card)) return $card;
+    }
     return $img !== '' ? $img : $catImg;
 }
 

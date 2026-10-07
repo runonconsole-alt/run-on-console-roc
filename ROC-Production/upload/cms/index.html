@@ -116,6 +116,10 @@ table.list tbody tr:hover{background:var(--panel-2)}
 .rte-src{width:100%;min-height:450px;border:0;padding:18px 22px;outline:none;font-family:var(--mono);font-size:12.5px;line-height:1.6;background:var(--bg);color:var(--ink)}
 .rte-foot{padding:7px 14px;border-top:1px solid var(--line);display:flex;gap:14px;font-size:11.5px;color:var(--ink-3);background:var(--panel-2);border-radius:0 0 var(--radius) var(--radius)}
 .rte-hint{margin-left:auto;opacity:.85}
+.rte-note{display:flex;align-items:center;gap:10px;padding:8px 14px;background:#fffbeb;border-bottom:1px solid #fde68a;color:#78350f;font-size:12.5px}
+.rte-note span{flex:1}
+.rte-note button{border:1px solid #f59e0b;background:#fff;color:#78350f;border-radius:8px;padding:4px 10px;font-weight:600;cursor:pointer;font-size:12px}
+.rte-note button.x{border:0;background:none;font-size:16px;padding:0 4px}
 .rte-area h2{font-size:23px;margin:1.5em 0 .5em}
 .rte-area h3{font-size:19px;margin:1.4em 0 .45em}
 .rte-area h4{font-size:16px;margin:1.3em 0 .4em}
@@ -287,6 +291,7 @@ function cleanNode(node,doc){
   for(var i=0;i<node.childNodes.length;i++)kids=kids.concat(cleanNode(node.childNodes[i],doc));
 
   var mapped=KEEP[name];
+  if(name==='B'&&/font-weight:\s*(normal|[1-5]00)\b/i.test(node.getAttribute('style')||''))mapped=null;
   if(!mapped){
     var wraps=inferred(node);
     if(wraps.length&&kids.length){
@@ -367,6 +372,92 @@ function fromText(t){
   }).join('');
 }
 
+/* Markdown (what ChatGPT, Gemini and many editors copy as plain text) -> clean HTML.
+   Headings, bullet and numbered lists (one level of nesting), tables, quotes,
+   code blocks, dividers, links, images, bold, italic, strikethrough, inline code. */
+var MD_LINE=/^\s{0,3}(#{1,6}\s|[-*+•]\s|\d+[.)]\s|>\s?|\|.*\||```|(-{3,}|\*{3,}|_{3,})\s*$)/;
+function looksLikeMarkdown(t){
+  t=String(t||'');
+  var lines=t.split('\n'),hits=0;
+  for(var i=0;i<lines.length;i++)if(MD_LINE.test(lines[i]))hits++;
+  var inline=/\*\*[^*\n]+\*\*|\[[^\]\n]+\]\([^)\s]+\)/.test(t);
+  return hits>=2||(hits>=1&&inline);
+}
+function mdInline(s){
+  var codes=[];
+  s=esc(s).replace(/`([^`]+)`/g,function(m,c){codes.push(c);return '\u0000'+(codes.length-1)+'\u0000';});
+  s=s.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+&quot;[^&]*&quot;)?\)/g,'<img src="$2" alt="$1">')
+     .replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+&quot;[^&]*&quot;)?\)/g,'<a href="$2">$1</a>')
+     .replace(/(^|[\s(])(https?:\/\/[^\s<]+[^\s<.,;:!?)])/g,'$1<a href="$2">$2</a>')
+     .replace(/\*\*\*([^*]+)\*\*\*/g,'<strong><em>$1</em></strong>')
+     .replace(/\*\*([^*]+?)\*\*/g,'<strong>$1</strong>')
+     .replace(/__([^_]+?)__/g,'<strong>$1</strong>')
+     .replace(/(^|[^\w*])\*(?!\s)([^*\n]+?)(?<!\s)\*(?![\w*])/g,'$1<em>$2</em>')
+     .replace(/(^|[^\w])_(?!\s)([^_\n]+?)(?<!\s)_(?![\w])/g,'$1<em>$2</em>')
+     .replace(/~~([^~]+)~~/g,'<s>$1</s>');
+  return s.replace(/\u0000(\d+)\u0000/g,function(m,i){return '<code>'+codes[+i]+'</code>';});
+}
+function mdCells(line){
+  return line.trim().replace(/^\|/,'').replace(/\|$/,'').split('|').map(function(c){return c.trim();});
+}
+function markdownToHtml(text){
+  var lines=String(text||'').replace(/\r\n?/g,'\n').split('\n');
+  var out=[],para=[],i=0;
+  function flush(){ if(para.length){out.push('<p>'+para.map(mdInline).join('<br>')+'</p>');para=[];} }
+  while(i<lines.length){
+    var line=lines[i],t=line.trim(),m;
+    if(!t){flush();i++;continue;}
+    if(/^```/.test(t)){
+      flush();var code=[];i++;
+      while(i<lines.length&&!/^\s*```/.test(lines[i]))code.push(lines[i++]);
+      i++;out.push('<pre><code>'+esc(code.join('\n'))+'</code></pre>');continue;
+    }
+    if((m=/^(#{1,6})\s+(.*?)\s*#*$/.exec(t))){
+      flush();var lv=m[1].length,tag=lv<=2?'h2':lv===3?'h3':lv===4?'h4':'h5';
+      out.push('<'+tag+'>'+mdInline(m[2])+'</'+tag+'>');i++;continue;
+    }
+    if(/^(-{3,}|\*{3,}|_{3,})$/.test(t)){flush();out.push('<hr>');i++;continue;}
+    if(/^\|.*\|$/.test(t)&&i+1<lines.length&&/^\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?$/.test(lines[i+1].trim())){
+      flush();
+      var head=mdCells(t),h='<table><thead><tr>'+head.map(function(c){return '<th scope="col">'+mdInline(c)+'</th>';}).join('')+'</tr></thead><tbody>';
+      i+=2;
+      while(i<lines.length&&/^\|.*\|$/.test(lines[i].trim())){
+        var cells=mdCells(lines[i]);
+        h+='<tr>'+head.map(function(_,k){return '<td>'+mdInline(cells[k]||'')+'</td>';}).join('')+'</tr>';i++;
+      }
+      out.push(h+'</tbody></table>');continue;
+    }
+    if(/^>/.test(t)){
+      flush();var q=[];
+      while(i<lines.length&&/^\s*>/.test(lines[i])){q.push(lines[i].replace(/^\s*>\s?/,''));i++;}
+      out.push('<blockquote>'+markdownToHtml(q.join('\n'))+'</blockquote>');continue;
+    }
+    if(/^([-*+•]|\d+[.)])\s+/.test(t)){
+      flush();
+      // Lists: indented items become a list inside the previous item.
+      var stack=[],html='';
+      while(i<lines.length){
+        var l=lines[i],lm=/^(\s*)([-*+•]|\d+[.)])\s+(.*)$/.exec(l);
+        if(!lm){
+          if(lines[i].trim()&&stack.length&&/^\s{2,}\S/.test(l)){html+=' '+mdInline(l.trim());i++;continue;}
+          break;
+        }
+        var ind=lm[1].replace(/\t/g,'    ').length,type=/\d/.test(lm[2])?'ol':'ul';
+        while(stack.length&&ind<stack[stack.length-1].ind){html+='</li></'+stack.pop().type+'>';}
+        var top=stack[stack.length-1];
+        if(!top||ind>top.ind){html+='<'+type+'>';stack.push({ind:ind,type:type});}
+        else{html+='</li>';if(top.type!==type){html+='</'+top.type+'><'+type+'>';top.type=type;}}
+        html+='<li>'+mdInline(lm[3]);i++;
+      }
+      while(stack.length)html+='</li></'+stack.pop().type+'>';
+      out.push(html);continue;
+    }
+    para.push(t);i++;
+  }
+  flush();
+  return out.join('');
+}
+
 var TOOLS=[{g:1},
  {cmd:'bold',l:'B',t:'Bold  (Ctrl+B)',s:'font-weight:800'},
  {cmd:'italic',l:'I',t:'Italic  (Ctrl+I)',s:'font-style:italic'},
@@ -384,6 +475,7 @@ var TOOLS=[{g:1},
  {a:'code',l:'‹›',t:'Code block'},
  {a:'hr',l:'—',t:'Divider'},{g:1},
  {a:'clear',l:'⌧',t:'Clear formatting'},
+ {a:'markdown',l:'MD',t:'Turn Markdown text (## headings, - bullets, **bold**, | tables |) into formatting'},
  {a:'source',l:'HTML',t:'Edit the HTML directly'}];
 
 function Editor(o){
@@ -393,7 +485,7 @@ function Editor(o){
     '<div class="rte-area" contenteditable="true" spellcheck="true"></div>'+
     '<textarea class="rte-src" spellcheck="false" hidden></textarea>'+
     '<div class="rte-foot"><span class="rte-stats"></span>'+
-    '<span class="rte-hint">Paste from Word, Docs or any page — formatting is cleaned automatically</span></div>';
+    '<span class="rte-hint">Paste from Google Docs, Word, ChatGPT (Markdown) or any page — headings, lists and tables are kept</span></div>';
   this.bar=this.root.querySelector('.rte-bar');
   this.area=this.root.querySelector('.rte-area');
   this.src=this.root.querySelector('.rte-src');
@@ -505,6 +597,7 @@ Editor.prototype.run=function(t){
   else if(t.a==='hr')document.execCommand('insertHTML',false,'<hr><p><br></p>');
   else if(t.a==='clear'){document.execCommand('removeFormat',false,null);document.execCommand('formatBlock',false,'P');}
   else if(t.a==='source')this.toggleSource();
+  else if(t.a==='markdown'){this.convertMarkdown(true);return;}
   this.changed();this.sync();
 };
 
@@ -575,11 +668,51 @@ Editor.prototype.paste=function(e){
   var clip=e.clipboardData; if(!clip)return;
   e.preventDefault();
   var html=clip.getData('text/html'),plain=clip.getData('text/plain');
-  var out=html?sanitize(html):fromText(plain);
+  // Real structure from Docs, Word or a web page wins. Otherwise Markdown text
+  // (ChatGPT, Gemini, .md files) is turned into headings, lists and tables.
+  var structured=html&&/<(h[1-6]|li|table|blockquote)\b/i.test(html);
+  var out=!structured&&looksLikeMarkdown(plain)?this.fixLinks(sanitize(markdownToHtml(plain)))
+    :html?sanitize(html):fromText(plain);
   if(!html&&/^https?:\/\/\S+$/.test((plain||'').trim()))
     out='<a href="'+esc(plain.trim())+'">'+esc(plain.trim())+'</a>';
   document.execCommand('insertHTML',false,out);
   this.changed();
+};
+
+/* Text of the editor with its line breaks, as it was typed or pasted. */
+Editor.prototype.plainText=function(){
+  var c=this.area.cloneNode(true);
+  c.querySelectorAll('br').forEach(function(b){b.replaceWith('\n');});
+  return Array.prototype.map.call(c.childNodes,function(n){return n.textContent;}).join('\n\n')
+    .replace(/\n{3,}/g,'\n\n').trim();
+};
+Editor.prototype.convertMarkdown=function(ask){
+  var t=this.plainText();
+  if(!looksLikeMarkdown(t)){ if(ask)global.alert('No Markdown found in this text (lines starting with #, - or |).'); return; }
+  if(ask&&!global.confirm('Turn the Markdown in this text into headings, lists, bold text and tables?'))return;
+  this.area.innerHTML=this.fixLinks(sanitize(markdownToHtml(t)))||'<p><br></p>';
+  this.changed();this.sync();
+};
+/* Links to old demo products (/products/prod-101/, internal-link:prod-101) lead nowhere:
+   keep their text, drop the link, and say so. */
+Editor.prototype.fixLinks=function(html){
+  var box=document.createElement('div'),n=0;box.innerHTML=html;
+  box.querySelectorAll('a[href]').forEach(function(a){
+    var h=a.getAttribute('href');
+    if(/^internal-link:|^\/?products\/prod-\d+\/?$/i.test(h)){a.replaceWith(document.createTextNode(a.textContent));n++;}
+  });
+  if(n)this.notice(n+' link(s) pointed to old demo products that do not exist. Their text is kept; select it and use ⧉ to link the real product.');
+  return box.innerHTML;
+};
+Editor.prototype.notice=function(msg,action,label){
+  var self=this,bar=this.root.querySelector('.rte-note');
+  if(!bar){bar=document.createElement('div');bar.className='rte-note';this.root.insertBefore(bar,this.area);}
+  if(!msg){bar.hidden=true;return;}
+  bar.hidden=false;bar.innerHTML='<span></span>';bar.firstChild.textContent=msg;
+  if(action){var b=document.createElement('button');b.type='button';b.textContent=label;
+    b.addEventListener('click',function(){bar.hidden=true;action.call(self);});bar.appendChild(b);}
+  var x=document.createElement('button');x.type='button';x.className='x';x.textContent='×';x.title='Dismiss';
+  x.addEventListener('click',function(){bar.hidden=true;});bar.appendChild(x);
 };
 
 Editor.prototype.key=function(e){
@@ -653,6 +786,10 @@ Editor.prototype.setHtml=function(h){
   if(this.srcMode)this.toggleSource();
   this.area.innerHTML=sanitize(h||'');
   if(!this.area.innerHTML.trim())this.area.innerHTML='<p><br></p>';
+  this.notice('');
+  if(!this.area.querySelector('h2,h3,h4,ul,ol,table')&&looksLikeMarkdown(this.plainText()))
+    this.notice('This text contains Markdown (#, -, **, |) that shows as plain symbols on the website.',
+      function(){this.convertMarkdown(false);},'Convert to formatting');
   this.changed();
 };
 
@@ -849,7 +986,7 @@ function renderDash(m){
   var pub=S.blogs.filter(function(b){return b.status==='published';});
   var dr=S.blogs.filter(function(b){return b.status!=='published';});
   var heavy=S.media.filter(function(x){return +x.file_size>102400;});
-  var noAlt=S.media.filter(function(x){return !x.alt_text;});
+  var noAlt=S.media.filter(function(x){return !hasAlt(x);});
 
   var gaps=[];
   pub.forEach(function(b){
@@ -1634,21 +1771,48 @@ async function refreshBlogs(){
 /* ---------------------------------------------------------------- media */
 
 function mediaUrl(m){ return m.file_url || m.url || ''; }
+/* Thumbnail URL; after a Replace the version stops the browser showing the old picture. */
+function mediaThumb(m){ return mediaUrl(m)+(m._v?'?v='+m._v:''); }
+
+/* Alt text for images that are not CMS uploads. Product name cards show the product's
+   name on the website; other site images get their alt text from each page's code.
+   Neither is stored in the Media library, so neither counts as missing. */
+function prepMedia(list){
+  (list||[]).forEach(function(x){
+    if(x.alt_text || x.folder==='uploads') return;
+    var m=/^\/images\/products\/([a-z0-9-]+)\.(webp|svg)$/.exec(x.file_url||'');
+    if(m){
+      var p=S.prodNames&&S.prodNames[m[1]];
+      x.card=m[1]; x.alt_auto=(p&&(p.image_alt||p.title))||m[1].replace(/-/g,' ');
+    } else if(x.folder==='site') x.alt_auto='Written in the page code where the image is used';
+  });
+  return list||[];
+}
+function hasAlt(x){ return !!(x.alt_text||x.alt_auto); }
+async function loadProdNames(){
+  if(S.prodNames || !can('products','view')) return;
+  try{
+    var d=await api('products.php'); S.prodNames={};
+    (d.products||[]).forEach(function(p){ S.prodNames[p.slug]={title:p.title,image_alt:p.image_alt,id:p.id}; });
+    prepMedia(S.media.map(function(x){ delete x.alt_auto; return x; }));
+  }catch(e){}
+}
+var REPLACE_TYPES='image/jpeg,image/png,image/webp';
 
 function mediaBadge(x){
   var big=+x.file_size>102400;
   return (big?'<span class="flag">'+bytes(x.file_size)+'</span>':'')+
     (x.usage? (x.usage.length?'<span class="flag used">used · '+x.usage.length+'</span>':'<span class="flag unused">not used</span>'):'')+
-    (x.locked?'<span class="flag lock">site build</span>':'');
+    (x.card?'<span class="flag lock">name card</span>':x.locked?'<span class="flag lock">site build</span>':'');
 }
 function mediaMatches(x){
   var f=S.mfilter;
   if(f==='uploads' && x.folder!=='uploads') return false;
   if(f==='site' && x.folder!=='site') return false;
   if(f==='heavy' && !(+x.file_size>102400)) return false;
-  if(f==='noalt' && x.alt_text) return false;
+  if(f==='noalt' && hasAlt(x)) return false;
   if(f==='unused' && !(x.usage && !x.usage.length)) return false;
-  if(S.mq && (x.filename+' '+x.file_url+' '+(x.alt_text||'')).toLowerCase().indexOf(S.mq.toLowerCase())===-1) return false;
+  if(S.mq && (x.filename+' '+x.file_url+' '+(x.alt_text||x.alt_auto||'')).toLowerCase().indexOf(S.mq.toLowerCase())===-1) return false;
   return true;
 }
 
@@ -1657,13 +1821,13 @@ async function renderMedia(m){
     m.innerHTML = head('Media library','Scanning the website…')+
       '<div class="body"><div class="card"><div class="empty"><span class="spin"></span>'+
       '<div style="margin-top:10px">Finding every image and where it is used…</div></div></div></div>';
-    try{ var d=await api('media.php'); S.media=d.media||[]; S.mcan=d.can||{}; S.mediaLoaded=true; }
+    try{ var d=await api('media.php'); await loadProdNames(); S.media=prepMedia(d.media); S.mcan=d.can||{}; S.mediaLoaded=true; }
     catch(e){ toast(e.message,'bad'); return; }
     if(S.view!=='media' || S.editing) return;
   }
   var all=S.media, rows=all.filter(mediaMatches);
   var heavy=all.filter(function(x){return +x.file_size>102400;});
-  var noAlt=all.filter(function(x){return !x.alt_text;});
+  var noAlt=all.filter(function(x){return !hasAlt(x);});
   var counts={all:all.length,
     uploads:all.filter(function(x){return x.folder==='uploads';}).length,
     site:all.filter(function(x){return x.folder==='site';}).length,
@@ -1683,13 +1847,13 @@ async function renderMedia(m){
     '<div class="chips">'+Object.keys(labels).map(function(k){
       return '<button class="chip'+(S.mfilter===k?' on':'')+'" data-mf="'+k+'">'+labels[k]+'<span class="n">'+counts[k]+'</span></button>';
     }).join('')+'</div></div><div class="cbody">'+
-  '<input type="file" id="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden>'+
+  '<input type="file" id="file" accept="image/jpeg,image/png,image/webp" multiple hidden>'+
   (rows.length?'<div class="mgrid">'+rows.map(function(x){
     return '<div class="mitem" data-m="'+esc(x.id)+'">'+
-      '<div class="mthumb" style="background-image:url(\''+esc(x.file_url)+'\')">'+mediaBadge(x)+'</div>'+
+      '<div class="mthumb" style="background-image:url(\''+esc(mediaThumb(x))+'\')">'+mediaBadge(x)+'</div>'+
       '<div class="mmeta"><div class="mname" title="'+esc(x.file_url)+'">'+esc(x.filename)+'</div>'+
       '<div class="msub">'+(x.width?x.width+'×'+x.height+' · ':'')+bytes(x.file_size)+
-      (x.alt_text?'':' <span class="noalt">· no alt</span>')+'</div></div></div>';
+      (hasAlt(x)?'':' <span class="noalt">· no alt</span>')+'</div></div></div>';
   }).join('')+'</div>'
   :'<div class="empty"><div class="big">❖</div><div>No images match.</div></div>')+
   '</div></div></div>';
@@ -1713,6 +1877,7 @@ async function renderMedia(m){
 }
 
 async function uploadOne(file){
+  if(REPLACE_TYPES.split(',').indexOf(file.type)===-1){ toast(file.name+': only JPG, PNG or WebP images can be uploaded.','bad'); return null; }
   if(file.size>16*1024*1024){ toast(file.name+': larger than the 16 MB upload limit.','bad'); return null; }
   var fd=new FormData(); fd.append('file',file);
   try{
@@ -1725,7 +1890,7 @@ async function uploadOne(file){
 }
 
 async function refreshMedia(){
-  try{ S.media=(await api('media.php?usage=0')).media||[]; S.mediaLoaded=false; }catch(e){}
+  try{ S.media=prepMedia((await api('media.php?usage=0')).media); S.mediaLoaded=false; }catch(e){}
 }
 
 function usageHtml(list){
@@ -1745,10 +1910,16 @@ function mediaDetail(id){
   if(!x)return;
   var big=+x.file_size>102400, canEdit=can('media','edit'), canDel=can('media','delete');
   var used=x.usage?x.usage.length:0;
+  var canReplace=can('media','upload') && /^\/(images|uploads)\//.test(x.file_url||'') && (x.card || /\.(jpe?g|png|webp)$/i.test(x.file_url||''));
+  var prod=x.card&&S.prodNames?S.prodNames[x.card]:null;
   modal('Image details',
     '<div style="display:grid;grid-template-columns:220px 1fr;gap:18px">'+
-    '<div><img src="'+esc(x.file_url)+'" alt="" style="width:100%;border-radius:8px;border:1px solid var(--line-2);background:var(--bg)">'+
-      '<div class="hint" style="margin-top:8px">'+(x.folder==='uploads'?'Uploaded through the CMS':'Site image (shipped with the website)')+'</div></div>'+
+    '<div><img src="'+esc(mediaThumb(x))+'" alt="" style="width:100%;border-radius:8px;border:1px solid var(--line-2);background:var(--bg)">'+
+      '<div class="hint" style="margin-top:8px">'+(x.card?'Product name card: shown until the product has a real photo':x.folder==='uploads'?'Uploaded through the CMS':'Site image (shipped with the website)')+'</div>'+
+      (canReplace?'<button class="btn" id="m-rep" style="margin-top:10px;width:100%">⟳ Replace image</button>'+
+        '<input type="file" id="m-repf" accept="'+REPLACE_TYPES+'" hidden>'+
+        '<div class="hint" style="margin-top:6px">'+(x.card?'JPG, PNG or WebP. Saved as this product\'s photo.':'JPG, PNG or WebP. Keeps the same URL, so every page using it updates.')+'</div>':'')+
+    '</div>'+
     '<div>'+
     '<div class="field"><label>File</label><div style="font-size:13px;word-break:break-all">'+esc(x.filename)+'</div>'+
       '<div class="hint">'+(x.width?x.width+' × '+x.height+' px · ':'')+bytes(x.file_size)+(x.mime_type?' · '+esc(x.mime_type):'')+'</div></div>'+
@@ -1756,7 +1927,9 @@ function mediaDetail(id){
     '<div class="field"><label>URL</label><div style="display:flex;gap:6px"><input type="text" id="m-url" readonly value="'+esc(x.file_url)+'">'+
       '<button class="btn sm" id="m-copy">Copy</button></div></div>'+
     '<div class="field"><label>Alt text</label><textarea id="m-alt" rows="2"'+(canEdit?'':' readonly')+'>'+esc(x.alt_text||'')+'</textarea>'+
-      '<div class="hint">Filled in automatically when you insert this image in a post. '+(x.folder==='site'?'Pages built into the site keep their own alt text.':'')+'</div></div>'+
+      '<div class="hint">'+(x.card?'The website shows this card with the alt text <b>'+esc(x.alt_auto)+'</b> (the product name). '+(prod?'<a href="#" id="m-prod">Change it on the product</a>.':'Change it under Products → the product → Image description.')
+        :x.folder==='site'?'The website already gives this image alt text in each page where it is used. Text saved here is used when you insert it in a post.'
+        :'Filled in automatically when you insert this image in a post.')+'</div></div>'+
     '<div class="field"><label>Caption</label><input type="text" id="m-cap" value="'+esc(x.caption||'')+'"'+(canEdit?'':' readonly')+'></div>'+
     '<div class="field"><label>Where it is used'+(x.usage?' ('+used+')':'')+'</label>'+usageHtml(x.usage)+'</div>'+
     '</div></div>',
@@ -1772,6 +1945,26 @@ function mediaDetail(id){
       }
       if(a==='delete') deleteMedia(x, close);
     }, true);
+  var rb=$('#m-rep'), rf=$('#m-repf');
+  if(rb) rb.addEventListener('click',function(){ rf.click(); });
+  if(rf) rf.addEventListener('change',async function(){
+    var file=rf.files&&rf.files[0]; rf.value='';
+    if(!file) return;
+    if(REPLACE_TYPES.split(',').indexOf(file.type)===-1){ toast('Only JPG, PNG or WebP images can be used.','bad'); return; }
+    if(file.size>16*1024*1024){ toast('The image is larger than 16 MB.','bad'); return; }
+    rb.disabled=true; rb.textContent='Replacing…';
+    var fd=new FormData(); fd.append('file_url',x.file_url); fd.append('file',file);
+    try{
+      var res=await fetch(API+'media-replace.php',{method:'POST',headers:{'X-CMS-CSRF-Token':S.csrf},body:fd,credentials:'same-origin'});
+      var d=await res.json().catch(function(){ return {success:false,error:'The server did not answer (HTTP '+res.status+').'}; });
+      if(!d.success) throw new Error(d.error||'Replace failed.');
+      toast(d.message+(d.notes&&d.notes.length?' '+d.notes.join(' '):''),'good');
+      if(d.product_photo){ S.mediaLoaded=false; }
+      else { x.file_size=d.file_size; x.width=d.width; x.height=d.height; x._v=Date.now(); }
+      closeModal(); renderShell();
+    }catch(e){ toast(e.message,'bad'); rb.disabled=false; rb.textContent='⟳ Replace image'; }
+  });
+  var mp=$('#m-prod'); if(mp) mp.addEventListener('click',function(ev){ ev.preventDefault(); closeModal(); S.view='products'; renderShell(); openProductEditor(prod.id); });
   var cp=$('#m-copy'); if(cp) cp.addEventListener('click',function(){
     var i=$('#m-url'); i.select(); (navigator.clipboard?navigator.clipboard.writeText(location.origin+x.file_url):Promise.resolve()).then(function(){ toast('URL copied.'); });
   });
@@ -1803,7 +1996,7 @@ async function deleteMedia(x, close){
 function pickMedia(done){
   var chosen=null;
   modal('Choose an image',
-    '<input type="file" id="pf" accept="image/*" hidden>'+
+    '<input type="file" id="pf" accept="image/jpeg,image/png,image/webp" hidden>'+
     (can('media','upload')?'<button class="btn" style="margin-bottom:12px" id="pu">＋ Upload new</button>':'')+
     (S.media.length?'<div class="mgrid">'+S.media.slice().sort(function(a,b){
         return (a.folder==='uploads'?0:1)-(b.folder==='uploads'?0:1);
@@ -1813,7 +2006,7 @@ function pickMedia(done){
         (+x.file_size>102400?'<span class="flag">'+bytes(x.file_size)+'</span>':'')+'</div>'+
         '<div class="mmeta"><div class="mname">'+esc(x.filename)+'</div>'+
         '<div class="msub">'+(x.width?x.width+'×'+x.height:'—')+
-        (x.alt_text?'':' <span class="noalt">· no alt</span>')+'</div></div></div>';
+        (hasAlt(x)?'':' <span class="noalt">· no alt</span>')+'</div></div></div>';
     }).join('')+'</div>'
     :'<div class="empty"><div class="big">❖</div><div>No images yet. Upload one above.</div></div>'),
     '<button class="btn" data-a="close">Cancel</button><button class="btn primary" data-a="use" disabled>Insert</button>',
@@ -2155,7 +2348,7 @@ async function renderPages(m){
   }); });
   m.querySelectorAll('[data-img]').forEach(function(i){ i.style.cursor='pointer'; i.addEventListener('click',async function(){
     if(!can('media','view')) return;
-    if(!S.mediaLoaded){ try{ S.media=(await api('media.php')).media||[]; S.mediaLoaded=true; }catch(e){ return; } }
+    if(!S.mediaLoaded){ try{ S.media=prepMedia((await api('media.php')).media); S.mediaLoaded=true; }catch(e){ return; } }
     var x=S.media.filter(function(v){return v.file_url===i.dataset.img;})[0]; if(x) mediaDetail(x.id);
   }); });
 }
@@ -2566,7 +2759,7 @@ function renderCategoryEditor(m,c){
 var SHARED_PHOTOS=['/images/cyber_keyboard.jpg','/images/tactical_headset.jpg','/images/apex_mouse.jpg',
                    '/images/streaming_vr_gear.jpg','/images/gaming_monitor.jpg','/images/battlestation_pc.jpg'];
 function hasRealPhoto(p){ return !!p.image && SHARED_PHOTOS.indexOf(p.image)===-1; }
-function shownImage(p){ return hasRealPhoto(p)?p.image:'/images/products/'+p.slug+'.svg'; }
+function shownImage(p){ return hasRealPhoto(p)?p.image:'/images/products/'+p.slug+'.webp'; }
 
 /* What a pasted value contains: SiteStripe HTML, an image link or an Amazon product link. */
 function readPaste(v){
@@ -2881,7 +3074,8 @@ async function load(){
       can('media','view') ? api('media.php?usage=0').catch(function(){ return {media:[]}; }) : {media:[]},
       can('pages','view') ? api('pages.php').catch(function(){ return {pages:[]}; }) : {pages:[]}
     ]).then(function(r){ S.pages=(r[2]&&r[2].pages)||[]; return r; });
-    S.blogs=b.blogs||[]; S.media=md.media||[];
+    S.blogs=b.blogs||[]; S.media=prepMedia(md.media);
+    loadProdNames().then(function(){ if(S.view==='dashboard'&&!S.editing) renderShell(); });
     renderShell();
     startActivityPolling();
   }catch(e){

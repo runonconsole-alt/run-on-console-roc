@@ -234,37 +234,31 @@ export const ValuePropsFooter = () => {
               <li>
                 <a href="/" onClick={(e) => { e.preventDefault(); navigateTo('home'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
                   <Home className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Home Overview</span>
+                  <span>Home</span>
+                </a>
+              </li>
+              <li>
+                <a href="/products/" onClick={(e) => { e.preventDefault(); navigateTo('products'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
+                  <Cpu className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Components</span>
                 </a>
               </li>
               <li>
                 <a href="/categories/" onClick={(e) => { e.preventDefault(); navigateToCategory('all'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
                   <LayoutGrid className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>15 Gaming Platforms (100+ Devices)</span>
-                </a>
-              </li>
-              <li>
-                <a href="/compatibility/" onClick={(e) => { e.preventDefault(); navigateTo('compatibility'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <Cpu className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Can I Run It? Compatibility Matrix</span>
-                </a>
-              </li>
-              <li>
-                <a href="/products/" onClick={(e) => { e.preventDefault(); navigateTo('products'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <ShoppingBag className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Peripherals, Gear & Loadouts</span>
-                </a>
-              </li>
-              <li>
-                <a href="/products/" onClick={(e) => { e.preventDefault(); navigateTo('products'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <Tag className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Hardware Reviews & Deals</span>
+                  <span>Systems</span>
                 </a>
               </li>
               <li>
                 <a href="/blogs/" onClick={(e) => { e.preventDefault(); navigateTo('blogs'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
                   <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Editorial Guides & Benchmarks</span>
+                  <span>PC Guides</span>
+                </a>
+              </li>
+              <li>
+                <a href="/compatibility/" onClick={(e) => { e.preventDefault(); navigateTo('compatibility'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
+                  <Gamepad2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Compatibility</span>
                 </a>
               </li>
               <li>
@@ -318,13 +312,7 @@ export const ValuePropsFooter = () => {
               <li>
                 <a href="/privacy-policy/" onClick={(e) => { e.preventDefault(); navigateTo('privacy-policy'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
                   <FileCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Privacy Policy</span>
-                </a>
-              </li>
-              <li>
-                <a href="/policy/" onClick={(e) => { e.preventDefault(); navigateTo('policy'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <FileCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Affiliate Disclosure</span>
+                  <span>Privacy Policy &amp; Affiliate Disclosure</span>
                 </a>
               </li>
               <li>
