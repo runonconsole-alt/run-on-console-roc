@@ -904,6 +904,109 @@ function renderLogin(error){
   });
 }
 
+/* ------------------------------------------------------------- messages */
+/* Contact and write-for-us forms (api/v1/cms/messages.php). Administrators only. */
+
+var MSG_KIND={contact:'Contact',write_for_us:'Write for us'};
+var MSG_STATUS={new:'New',replied:'Replied',closed:'Closed',spam:'Spam'};
+
+async function loadMessages(){
+  try{
+    var d=await api('messages.php');
+    S.msgs=d.messages||[]; S.msgCounts=d.counts||{}; S.msgInstalled=d.installed!==false;
+  }catch(e){ S.msgs=[]; S.msgCounts={}; toast(e.message,'bad'); }
+}
+
+function msgTag(st){
+  var cls=st==='new'?'admin':st==='replied'?'published':st==='spam'?'off':'draft';
+  return '<span class="tag '+cls+'">'+esc(MSG_STATUS[st]||st)+'</span>';
+}
+
+async function renderMessages(m){
+  if(!S.msgs){
+    m.innerHTML=head('Messages','Loading…')+'<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+    await loadMessages();
+    if(S.view!=='messages'||S.editing) return;
+  }
+  var f=S.msgFilter||'new', k=S.msgKind||'all';
+  var rows=S.msgs.filter(function(x){ return (f==='all'||x.status===f)&&(k==='all'||x.kind===k); });
+  var c=S.msgCounts||{}, total=S.msgs.length;
+  m.innerHTML=head('Messages','From the contact and write-for-us forms. Replies are emailed to the sender.',
+      '<button class="btn" id="msg-refresh">⟳ Refresh</button>')+
+    '<div class="body">'+
+    (S.msgInstalled===false?'<div class="alert warn">The message tables are not installed yet. In the cPanel Terminal run:<br><code>/usr/local/bin/php ~/public_html/api/v1/cron/cli-messages.php --apply</code></div>':'')+
+    '<div class="card"><div class="chead" style="flex-wrap:wrap;gap:10px"><div class="chips">'+
+      ['new','replied','closed','spam','all'].map(function(s){
+        var n=s==='all'?total:(c[s]||0);
+        return '<button class="chip'+(f===s?' on':'')+'" data-mf="'+s+'">'+(s==='all'?'All':MSG_STATUS[s])+'<span class="n">'+n+'</span></button>';
+      }).join('')+'</div><div class="chips">'+
+      ['all','contact','write_for_us'].map(function(s){
+        return '<button class="chip'+(k===s?' on':'')+'" data-mk="'+s+'">'+(s==='all'?'Both forms':MSG_KIND[s])+'</button>';
+      }).join('')+'</div></div>'+
+    (rows.length?'<table class="list"><thead><tr><th>From</th><th>Message</th><th>Form</th><th>Status</th><th>Received</th></tr></thead><tbody>'+
+      rows.map(function(x){
+        return '<tr data-msg="'+x.id+'" style="cursor:pointer'+(x.status==='new'?';font-weight:600':'')+'">'+
+          '<td><div>'+esc(x.name)+'</div><div class="t-slug">'+esc(x.email)+'</div></td>'+
+          '<td><div>'+esc(x.subject||'(no subject)')+'</div><div class="hint" style="max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(x.preview||'')+'</div></td>'+
+          '<td>'+esc(MSG_KIND[x.kind]||x.kind)+'</td><td>'+msgTag(x.status)+'</td>'+
+          '<td style="color:var(--ink-3);white-space:nowrap">'+when(x.created_at)+'</td></tr>';
+      }).join('')+'</tbody></table>'
+      :'<div class="empty"><div class="big">✉</div><div>No messages here.</div></div>')+
+    '</div></div>';
+  m.querySelectorAll('[data-mf]').forEach(function(b){ b.addEventListener('click',function(){ S.msgFilter=b.dataset.mf; renderMessages(m); }); });
+  m.querySelectorAll('[data-mk]').forEach(function(b){ b.addEventListener('click',function(){ S.msgKind=b.dataset.mk; renderMessages(m); }); });
+  m.querySelectorAll('[data-msg]').forEach(function(r){ r.addEventListener('click',function(){ openMessage(r.dataset.msg); }); });
+  $('#msg-refresh',m).addEventListener('click',async function(){ S.msgs=null; renderMessages(m); });
+}
+
+async function openMessage(id){
+  var d;
+  try{ d=await api('messages.php?id='+encodeURIComponent(id)); }catch(e){ toast(e.message,'bad'); return; }
+  var x=d.message, meta=x.meta||{};
+  var metaHtml=Object.keys(meta).map(function(k){
+    return '<div><span class="hint">'+esc(k.charAt(0).toUpperCase()+k.slice(1).replace(/_/g,' '))+':</span> '+esc(meta[k])+'</div>';
+  }).join('');
+  var replies=(x.replies||[]).map(function(r){
+    var st=r.email_status==='sent'?'emailed':r.email_status==='failed'?'email failed':r.email_status?'sending…':'';
+    return '<div style="border-left:3px solid #10b981;padding:8px 12px;margin:8px 0;background:var(--panel-2);border-radius:0 8px 8px 0">'+
+      '<div class="hint">'+esc(r.sent_by)+' · '+when(r.created_at)+(st?' · '+st:'')+'</div>'+
+      '<div style="white-space:pre-wrap;margin-top:4px">'+esc(r.body)+'</div></div>';
+  }).join('');
+  modal((MSG_KIND[x.kind]||'Message')+' from '+x.name,
+    '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">'+
+      '<div><div style="font-weight:600">'+esc(x.name)+' &lt;<a href="mailto:'+esc(x.email)+'">'+esc(x.email)+'</a>&gt;</div>'+
+      '<div class="hint">'+when(x.created_at)+'</div></div><div>'+msgTag(x.status)+'</div></div>'+
+    (x.subject?'<div style="margin-top:10px;font-weight:600">'+esc(x.subject)+'</div>':'')+
+    (metaHtml?'<div style="margin-top:8px;font-size:13px">'+metaHtml+'</div>':'')+
+    '<div style="white-space:pre-wrap;background:var(--panel-2);border-radius:8px;padding:12px;margin-top:10px">'+esc(x.message)+'</div>'+
+    (replies?'<div style="margin-top:14px"><div class="hint" style="font-weight:600">Replies</div>'+replies+'</div>':'')+
+    '<div class="field" style="margin-top:14px"><label for="msg-body">Reply to '+esc(x.email)+'</label>'+
+      '<textarea id="msg-body" rows="6" placeholder="Write your reply. It is emailed to the sender with their message quoted below."></textarea></div>',
+    '<button class="btn danger" data-a="spam" style="margin-right:auto">Spam</button>'+
+    (x.status==='closed'||x.status==='spam'?'<button class="btn" data-a="reopen">Reopen</button>':'<button class="btn" data-a="closeMsg">Mark done</button>')+
+    '<button class="btn" data-a="close">Close</button><button class="btn primary" data-a="send">Send reply</button>',
+    async function(a,close){
+      if(a==='close') return close();
+      if(a==='send'){
+        var body=$('#msg-body').value.trim();
+        if(!body){ toast('Write a reply first.','bad'); return; }
+        var b=document.querySelector('[data-a="send"]'); b.disabled=true; b.textContent='Sending…';
+        try{
+          await api('messages.php',{action:'reply',id:x.id,body:body});
+          // Send the queued email now instead of waiting for the next queue run.
+          await fetch('/api/v1/messages.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dispatch:1}),credentials:'same-origin'}).catch(function(){});
+          toast('Reply sent to '+x.email+'.','good');
+          close(); S.msgs=null; renderShell();
+        }catch(e){ toast(e.message,'bad'); b.disabled=false; b.textContent='Send reply'; }
+        return;
+      }
+      var status=a==='spam'?'spam':a==='reopen'?'new':a==='closeMsg'?'closed':null;
+      if(!status) return;
+      try{ await api('messages.php',{action:'set_status',id:x.id,status:status}); close(); S.msgs=null; renderShell(); }
+      catch(e){ toast(e.message,'bad'); }
+    }, true);
+}
+
 /* --------------------------------------------------------------- shell */
 
 function renderShell(){
@@ -911,14 +1014,15 @@ function renderShell(){
   function item(v,label,ic,ct){
     return '<button class="sitem'+(S.view===v?' on':'')+'" data-go="'+v+'">'+
       '<span class="ic">'+ic+'</span><span>'+esc(label)+'</span>'+
-      (ct!==undefined?'<span class="ct'+(v==='activity'?' new':'')+'">'+ct+'</span>':'')+'</button>';
+      (ct!==undefined?'<span class="ct'+(v==='activity'||v==='messages'?' new':'')+'">'+ct+'</span>':'')+'</button>';
   }
   app.innerHTML =
   '<div class="shell"><aside class="side">'+
     '<div class="side-top"><div class="brand"><div class="mark"><svg viewBox="0 0 100 100" width="24" height="24" fill="none" aria-hidden="true"><path d="M12 28 C8 28 4 36 2 54 C0 72 8 88 22 88 C30 88 36 78 44 68 L56 68 C64 78 70 88 78 88 C92 88 100 72 98 54 C96 36 92 28 88 28 C76 28 68 36 50 36 C32 36 24 28 12 28 Z" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 44 V64 M16 54 H36" stroke="#fff" stroke-width="7" stroke-linecap="round"/><circle cx="74" cy="48" r="4.5" fill="#fff"/><circle cx="84" cy="58" r="4.5" fill="#fff"/><circle cx="64" cy="58" r="4.5" fill="#fff"/><circle cx="74" cy="68" r="4.5" fill="#fff"/></svg></div>'+
     '<div><div class="bname">RUN ON <span style="color:#6ee7b7">CONSOLE</span></div><div class="bsub">Content management</div></div></div></div>'+
     '<div class="snav"><div class="slabel">Workspace</div>'+item('dashboard','Dashboard','◱')+
-      (can('activity','view')?item('activity','Live activity','⚡',S.actUnseen?S.actUnseen:undefined):'')+'</div>'+
+      (can('activity','view')?item('activity','Live activity','⚡',S.actUnseen?S.actUnseen:undefined):'')+
+      (admin?item('messages','Messages','✉',S.msgCounts&&S.msgCounts['new']?S.msgCounts['new']:undefined):'')+'</div>'+
     '<div class="snav"><div class="slabel">Content</div>'+
       (can('blogs','view')?item('blogs','Blog posts','✎',S.blogs.length):'')+
       (can('media','view')?item('media','Media library','❖',S.media.length):'')+
@@ -963,6 +1067,7 @@ function renderView(){
   if(S.view==='pages') return renderPages(m);
   if(S.view==='platforms' && can('pages','view')) return renderPlatforms(m);
   if(S.view==='activity') return renderActivity(m);
+  if(S.view==='messages' && S.user.role==='administrator') return renderMessages(m);
   if(S.view==='social') return renderSocial(m);
   if(S.view==='products' && can('products','view')) return renderProducts(m);
   if(S.view==='product-categories' && can('products','view')) return renderProductCategories(m);
@@ -3075,6 +3180,8 @@ async function load(){
       can('pages','view') ? api('pages.php').catch(function(){ return {pages:[]}; }) : {pages:[]}
     ]).then(function(r){ S.pages=(r[2]&&r[2].pages)||[]; return r; });
     S.blogs=b.blogs||[]; S.media=prepMedia(md.media);
+    if(location.hash==='#messages') S.view='messages';
+    if(S.user.role==='administrator') loadMessages().then(function(){ if(!S.editing && !document.querySelector('.veil') && S.view!=='messages') renderShell(); });
     loadProdNames().then(function(){ if(S.view==='dashboard'&&!S.editing) renderShell(); });
     renderShell();
     startActivityPolling();

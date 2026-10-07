@@ -9,6 +9,7 @@ import { Tilt3DCard } from './Tilt3DCard';
 import { BouncyText } from './BouncyText';
 import { CyberMatrixHoloBackground } from './CyberMatrixHoloBackground';
 import { SubmissionSuccessCard } from './SubmissionSuccessCard';
+import { sendMessage } from '../utils/sendMessage';
 
 export const WriteForUsView = () => {
   const { addGuestSubmission, sendNotificationEmail } = useApp();
@@ -22,6 +23,9 @@ export const WriteForUsView = () => {
   const [selectedPlan, setSelectedPlan] = useState('Standard Guest Article ($50)');
   const [submitted, setSubmitted] = useState(false);
   const [submittedData, setSubmittedData] = useState(null);
+  const [website, setWebsite] = useState('');
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
 
   const publishingPackages = [
     {
@@ -32,7 +36,7 @@ export const WriteForUsView = () => {
       desc: "Perfect for gaming journalists, tech writers, and indie developers looking for quality editorial exposure.",
       features: [
         "1000+ Words in-depth editorial article",
-        "1 Permanent Do-Follow backlink",
+        '1 permanent backlink (rel="sponsored")',
         "Fast 24-hour editorial review",
         "Permanent Google Indexing guarantee"
       ]
@@ -45,7 +49,7 @@ export const WriteForUsView = () => {
       desc: "Ideal for peripheral manufacturers, gaming brands, and premium tech products.",
       features: [
         "1500+ Words lab benchmark testing",
-        "2 Permanent Do-Follow backlinks",
+        '2 permanent backlinks (rel="sponsored")',
         "Featured on Run On Console Homepage",
         "Dedicated Product Gallery & Buy Box"
       ]
@@ -58,39 +62,45 @@ export const WriteForUsView = () => {
       desc: "Ultimate authority piece targeting high-intent gaming hardware keywords.",
       features: [
         "2500+ Words cornerstone buyer guide",
-        "3 Permanent Do-Follow backlinks",
+        '3 permanent backlinks (rel="sponsored")',
         "Pinned Category Hub placement",
         "Included in 50K+ Subscriber Newsletter"
       ]
     }
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !email || !contact || !title || !pitch) {
-      alert("Please fill in all required fields!");
+      setError('Please fill in all required fields.');
       return;
     }
-
-    const newSub = addGuestSubmission({
-      name,
-      email,
-      contact,
-      niche,
-      title,
-      pitch,
-      plan: selectedPlan,
-      price: selectedPlan.includes('$120') ? '$120' : selectedPlan.includes('$200') ? '$200' : '$50'
-    });
-
-    setSubmittedData(newSub);
-    setSubmitted(true);
+    if (sending) return;
+    setSending(true);
+    setError('');
+    try {
+      const r = await sendMessage({
+        kind: 'write_for_us',
+        name: name.trim(),
+        email: email.trim(),
+        subject: title.trim(),
+        message: pitch.trim(),
+        meta: { plan: selectedPlan, niche, contact: contact.trim() },
+        website,
+      });
+      setSubmittedData({ name, id: r.reference });
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSending(false);
+    }
   };
 
   const guestFaqs = [
     {
       q: "Why is guest posting on Run On Console a paid service?",
-      a: "To maintain the highest editorial standards, every submission is thoroughly fact-checked, proofread, and formatted by our senior tech editors. Paid slots ensure priority 24-hour review and permanent Do-Follow links."
+      a: "To maintain the highest editorial standards, every submission is thoroughly fact-checked, proofread, and formatted by our senior tech editors. Paid slots get priority review. As Google requires for paid placements, links in sponsored articles are marked rel=\"sponsored\"."
     },
     {
       q: "What payment methods do you accept?",
@@ -121,7 +131,7 @@ export const WriteForUsView = () => {
             <BouncyText text="Write For Run On Console" />
           </h1>
           <p className="text-emerald-100 text-xs sm:text-base leading-relaxed max-w-2xl mx-auto">
-            Share your gaming expertise, promote your hardware, and earn permanent high-authority Do-Follow backlinks. Paid editorial publishing starting from <strong className="text-white underline">$50</strong>.
+            Share your gaming expertise, promote your hardware, and get a permanent backlink to your site (marked rel="sponsored", as Google requires for paid posts). Paid editorial publishing starting from <strong className="text-white underline">$50</strong>.
           </p>
         </div>
       </div>
@@ -232,8 +242,11 @@ export const WriteForUsView = () => {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5 text-xs sm:text-sm">
+          <form onSubmit={handleSubmit} className="space-y-5 text-xs sm:text-sm relative">
             
+            {/* Left empty by people; bots fill it in. */}
+            <input type="text" name="website" value={website} onChange={(e) => setWebsite(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }} />
+
             {/* Selected Package Banner */}
             <div className="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4 flex items-center justify-between">
               <div>
@@ -326,12 +339,14 @@ export const WriteForUsView = () => {
               ></textarea>
             </div>
 
+            {error && <p role="alert" className="text-rose-700 bg-rose-50 border border-rose-200 rounded-xl p-3 font-semibold">{error}</p>}
             <button 
               type="submit"
-              className="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-display font-extrabold text-sm py-4 px-6 rounded-xl shadow-lg border border-emerald-500/40 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+              disabled={sending}
+              className="w-full bg-emerald-800 hover:bg-emerald-900 disabled:opacity-60 text-white font-display font-extrabold text-sm py-4 px-6 rounded-xl shadow-lg border border-emerald-500/40 flex items-center justify-center gap-2 transition-all"
             >
               <Send className="w-4 h-4 text-emerald-300" />
-              <span>Submit Article Pitch to Editorial Desk</span>
+              <span>{sending ? 'Sending…' : 'Submit Article Pitch'}</span>
             </button>
 
           </form>

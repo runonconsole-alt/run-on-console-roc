@@ -674,10 +674,6 @@ export const PAGE_FAQS = {
     {
       q: "How quickly does the editorial team respond to inquiries?",
       a: "We aim to respond to all general inquiries, partnership proposals, and reader questions within 24 to 48 business hours."
-    },
-    {
-      q: "Where is the Run On Console testing lab located?",
-      a: "Our primary hardware benchmarking lab and editorial headquarters are located in San Francisco, CA."
     }
   ],
   compatibility: [
