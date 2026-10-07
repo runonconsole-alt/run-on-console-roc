@@ -62,6 +62,16 @@
   z-index: 99999 !important;
 }
 
+/* Header menus are in the page HTML and open with CSS, so they also work on the
+   server-rendered blog, product and category pages where React does not run. */
+.roc-dd-panel { display: none; }
+.roc-dd:hover > .roc-dd-panel,
+.roc-dd:focus-within > .roc-dd-panel,
+.roc-dd-panel.is-open { display: block; }
+.roc-dd > .roc-dd-panel.is-closed { display: none; }
+/* Invisible bridge over the gap under the menu button, so the menu stays open on the way down. */
+.roc-dd-panel::before { content: ''; position: absolute; left: 0; right: 0; top: -14px; height: 14px; }
+
 @keyframes mirrorDropIn {
   0% {
     opacity: 0;

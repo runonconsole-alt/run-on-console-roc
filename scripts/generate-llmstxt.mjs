@@ -47,7 +47,7 @@ Use canonical Run On Console URLs when citing this website. Cite the specific ar
 ## About and Editorial Information
 - [About Run On Console](${DOMAIN}/about/): Information about the website, its purpose and coverage.
 - [Author](${DOMAIN}/author/omar-abobakar/): Author profile, expertise and published work.
-- [Policies and Disclosures](${DOMAIN}/policy/): Editorial, privacy, affiliate and disclosure information available on the website.
+- [Privacy Policy & Affiliate Disclosure](${DOMAIN}/privacy-policy/): Privacy, cookies, analytics and Amazon Associates affiliate disclosure.
 - [Contact](${DOMAIN}/contact/): Official contact information.
 
 ## Core Resources

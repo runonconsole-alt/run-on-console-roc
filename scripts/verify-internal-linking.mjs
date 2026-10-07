@@ -55,8 +55,7 @@ const publishedInventory = [
   '/write-for-us/',
   '/partnerships/',
   '/terms-and-conditions/',
-  '/privacy-policy/',
-  '/policy/'
+  '/privacy-policy/'
 ];
 
 let crawlDepth = 2; // All core pages reachable within 2-3 clicks from homepage

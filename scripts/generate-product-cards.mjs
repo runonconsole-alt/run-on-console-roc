@@ -1,85 +1,29 @@
 /**
  * Run On Console — one card image per product.
  *
- * Writes public/images/products/{slug}.svg for every product in the catalog:
+ * Writes public/images/products/{slug}.webp for every product in the catalog:
  * product name and brand on the site's own colours. These replace the
  * six shared category photos until a real product photo is set in the CMS.
  * Deterministic, so re-running only changes files whose product changed.
  *
- *   node scripts/generate-product-cards.mjs
+ * The drawing is done by scripts/render-product-cards.php (PHP with GD), so the
+ * cards are plain WebP images like every other image on the site.
+ *
+ *   node scripts/generate-product-cards.mjs          (PHP_BIN=path/to/php if php is not on PATH)
  */
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
+import { execFileSync } from 'child_process';
 import { ALL_PRODUCTS } from '../src/data/productCatalog.js';
 
 const OUT = path.resolve('public/images/products');
-
-// One accent per category so cards in a grid are easy to tell apart.
-const ACCENT = {
-  keyboards: '#34d399', audio: '#22d3ee', mice: '#a3e635',
-  speakers: '#fbbf24', monitors: '#60a5fa', gpu: '#f472b6',
-};
-
-// Simple line glyph per category (24x24 grid, drawn large and faint).
-const GLYPH = {
-  keyboards: '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>',
-  audio: '<path d="M3 14v-2a9 9 0 0 1 18 0v2"/><rect x="2" y="14" width="5" height="7" rx="2"/><rect x="17" y="14" width="5" height="7" rx="2"/>',
-  mice: '<rect x="6" y="2" width="12" height="20" rx="6"/><path d="M12 6v4"/>',
-  speakers: '<rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="14" r="4"/><path d="M12 6h.01"/>',
-  monitors: '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
-  gpu: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="9" cy="12" r="3"/><circle cx="16" cy="12" r="2"/><path d="M6 18v3M10 18v3M14 18v3"/>',
-};
-
-const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]));
-
-/** Greedy word wrap by an approximate character budget per line. */
-function wrap(text, maxChars, maxLines) {
-  const words = String(text).split(/\s+/).filter(Boolean);
-  const lines = [];
-  let cur = '';
-  for (const w of words) {
-    const next = cur ? cur + ' ' + w : w;
-    if (next.length > maxChars && cur) { lines.push(cur); cur = w; } else cur = next;
-  }
-  if (cur) lines.push(cur);
-  if (lines.length > maxLines) {
-    const kept = lines.slice(0, maxLines);
-    kept[maxLines - 1] = kept[maxLines - 1].replace(/\s*\S*$/, '') + '…';
-    return kept;
-  }
-  return lines;
+const list = ALL_PRODUCTS.map((p) => ({ slug: p.slug, title: p.title, brand: p.brand || '', categorySlug: p.categorySlug }));
+const tmp = path.join(os.tmpdir(), 'roc-product-cards.json');
+fs.writeFileSync(tmp, JSON.stringify(list));
+try {
+  process.stdout.write(execFileSync(process.env.PHP_BIN || 'php',
+    [path.resolve('scripts/render-product-cards.php'), tmp, OUT], { encoding: 'utf8' }));
+} finally {
+  fs.rmSync(tmp, { force: true });
 }
-
-// Cards are shown with object-fit: cover in boxes of different shapes (wide grid tiles,
-// taller product photo box), so everything that matters sits in the centre band
-// (about x 60-340, y 60-180 of 400x240) that every box keeps.
-function card(p) {
-  const accent = ACCENT[p.categorySlug] || '#34d399';
-  const glyph = GLYPH[p.categorySlug] || GLYPH.keyboards;
-  const lines = wrap(p.title.replace(new RegExp('^' + (p.brand || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s+', 'i'), '') || p.title, 16, 3);
-  // 270px of room for the name; bold sans glyphs average about 0.66em wide.
-  const longest = Math.max(...lines.map((l) => l.length));
-  const size = Math.max(18, Math.min(lines.length > 2 ? 28 : 34, Math.floor(270 / (longest * 0.66))));
-  const lineH = size * 1.15;
-  const blockH = 22 + lines.length * lineH;            // brand line + name lines
-  const top = 120 - blockH / 2;                        // centre the block vertically
-  const brandY = Math.round(top + 14);
-  const nameTspans = lines.map((l, i) => `<tspan x="200" y="${Math.round(top + 22 + (i + 0.8) * lineH)}">${esc(l)}</tspan>`).join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240" role="img" aria-label="${esc(p.title)}">
-<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#022c22"/><stop offset="1" stop-color="#0f172a"/></linearGradient></defs>
-<rect width="400" height="240" fill="url(#g)"/>
-<g transform="translate(128 48) scale(6)" fill="none" stroke="${accent}" stroke-opacity=".12" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">${glyph}</g>
-<text x="200" y="${brandY}" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="13" font-weight="700" fill="${accent}" letter-spacing="1.5">${esc((p.brand || '').toUpperCase())}</text>
-<text text-anchor="middle" font-family="Outfit,Inter,Segoe UI,Arial,sans-serif" font-size="${size}" font-weight="800" fill="#f8fafc">${nameTspans}</text>
-</svg>
-`;
-}
-
-fs.mkdirSync(OUT, { recursive: true });
-let written = 0;
-for (const p of ALL_PRODUCTS) {
-  const file = path.join(OUT, `${p.slug}.svg`);
-  const svg = card(p);
-  if (!fs.existsSync(file) || fs.readFileSync(file, 'utf8') !== svg) { fs.writeFileSync(file, svg); written++; }
-}
-console.log(`Product cards: ${ALL_PRODUCTS.length} products, ${written} file(s) written to public/images/products/`);

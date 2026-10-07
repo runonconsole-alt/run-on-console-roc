@@ -28,6 +28,9 @@ export const Header = () => {
   } = useApp();
 
   const [activeDropdown, setActiveDropdown] = useState(null);
+  // Menus open on hover with CSS too (server-rendered pages have no React). After a click
+  // the menu stays hidden until the pointer leaves it, so it does not linger over the new page.
+  const [closedDropdown, setClosedDropdown] = useState(null);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -85,6 +88,7 @@ export const Header = () => {
   };
 
   const handleMouseLeave = () => {
+    setClosedDropdown(null);
     dropdownTimeoutRef.current = setTimeout(() => {
       setActiveDropdown(null);
     }, 180);
@@ -92,7 +96,9 @@ export const Header = () => {
 
   const closeDropdown = () => {
     if (dropdownTimeoutRef.current) clearTimeout(dropdownTimeoutRef.current);
+    setClosedDropdown(activeDropdown);
     setActiveDropdown(null);
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   };
 
   const handleNavClick = (e, page, param = null) => {
@@ -186,7 +192,7 @@ export const Header = () => {
 
               {/* 1. COMPONENTS (PC hardware + gaming hardware) */}
               <div
-                className="relative"
+                className="relative roc-dd"
                 onMouseEnter={() => handleMouseEnter('components')}
                 onMouseLeave={handleMouseLeave}
               >
@@ -203,8 +209,8 @@ export const Header = () => {
                   <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${activeDropdown === 'components' ? 'rotate-180' : ''}`} />
                 </a>
 
-                {activeDropdown === 'components' && (
-                  <div className="mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[380px] rounded-3xl p-4 shadow-2xl space-y-3 animate-page-in z-[99999]">
+                {(
+                  <div className={`roc-dd-panel${activeDropdown === 'components' ? ' is-open' : ''}${closedDropdown === 'components' ? ' is-closed' : ''} mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[380px] rounded-3xl p-4 shadow-2xl space-y-3 animate-page-in z-[99999]`}>
                     {componentGroups.map((group) => (
                       <div key={group.label} className="space-y-1">
                         <div className="flex items-center gap-1.5 pb-1.5 border-b border-emerald-100 font-display font-extrabold text-[11px] text-slate-900">
@@ -252,7 +258,7 @@ export const Header = () => {
 
               {/* 3. SYSTEMS */}
               <div 
-                className="relative"
+                className="relative roc-dd"
                 onMouseEnter={() => handleMouseEnter('systems')}
                 onMouseLeave={handleMouseLeave}
               >
@@ -269,8 +275,8 @@ export const Header = () => {
                   <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${activeDropdown === 'systems' ? 'rotate-180' : ''}`} />
                 </a>
 
-                {activeDropdown === 'systems' && (
-                  <div className="mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[360px] rounded-3xl p-4 shadow-2xl space-y-2 animate-page-in z-[99999]">
+                {(
+                  <div className={`roc-dd-panel${activeDropdown === 'systems' ? ' is-open' : ''}${closedDropdown === 'systems' ? ' is-closed' : ''} mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[360px] rounded-3xl p-4 shadow-2xl space-y-2 animate-page-in z-[99999]`}>
                     <div className="flex items-center justify-between pb-2 border-b border-emerald-100">
                       <span className="font-display font-extrabold text-xs text-slate-900 flex items-center gap-1.5">
                         <Monitor className="w-4 h-4 text-emerald-600" />
@@ -314,7 +320,7 @@ export const Header = () => {
 
               {/* 4. PC GUIDES */}
               <div 
-                className="relative"
+                className="relative roc-dd"
                 onMouseEnter={() => handleMouseEnter('guides')}
                 onMouseLeave={handleMouseLeave}
               >
@@ -331,8 +337,8 @@ export const Header = () => {
                   <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${activeDropdown === 'guides' ? 'rotate-180' : ''}`} />
                 </a>
 
-                {activeDropdown === 'guides' && (
-                  <div className="mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[360px] rounded-3xl p-4 shadow-2xl space-y-2 animate-page-in z-[99999]">
+                {(
+                  <div className={`roc-dd-panel${activeDropdown === 'guides' ? ' is-open' : ''}${closedDropdown === 'guides' ? ' is-closed' : ''} mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[360px] rounded-3xl p-4 shadow-2xl space-y-2 animate-page-in z-[99999]`}>
                     <div className="flex items-center justify-between pb-2 border-b border-emerald-100">
                       <span className="font-display font-extrabold text-xs text-slate-900 flex items-center gap-1.5">
                         <Wrench className="w-4 h-4 text-emerald-600" />
