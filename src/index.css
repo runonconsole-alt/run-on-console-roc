@@ -292,3 +292,17 @@
 .animate-page-in {
   animation: pageFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Performance: no looping animations (QA: pages lagged). Hover and one-time entrance
+   effects stay; anything that ran forever in the background is switched off. */
+.badge-holo-glow::before,
+.hero-btn-bouncy-glow::before,
+.btn-glow-border::before,
+.btn-shimmer::after,
+.animate-float-3d,
+.badge-glow,
+.animate-pulse,
+.animate-bounce,
+.animate-ping {
+  animation: none !important;
+}

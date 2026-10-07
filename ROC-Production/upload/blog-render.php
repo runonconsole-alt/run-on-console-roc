@@ -339,6 +339,8 @@ function rocSendHtml(string $html, ?int $modified = null): void {
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: public, max-age=0, must-revalidate');
     header('X-Content-Type-Options: nosniff');
+    // Same rule as the page's robots meta tag, also as an HTTP header (some SEO tools look for it).
+    if (preg_match('#<meta\s+name="robots"\s+content="([^"]+)"#i', $html, $rm)) header('X-Robots-Tag: ' . $rm[1]);
     if ($modified) header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $modified) . ' GMT');
     echo $html;
     exit;

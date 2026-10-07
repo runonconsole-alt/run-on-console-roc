@@ -13,6 +13,15 @@ import { CyberMatrixHoloBackground } from './CyberMatrixHoloBackground';
 import { BouncyText } from './BouncyText';
 import { playClickSound, playPowerUpSound, playHoverSound } from '../utils/audioEffects';
 
+/* Requirement tier scores (same scale as the CPU / GPU options below; RAM in GB).
+   Games list their own in gameCompatibilityData.js (req); older entries use their era. */
+const ERA_REQUIREMENTS = {
+  classic: { min: { cpu: 2, gpu: 1.8, ram: 4 }, rec: { cpu: 4.5, gpu: 1.8, ram: 8 } },
+  modern: { min: { cpu: 4.5, gpu: 4.5, ram: 8 }, rec: { cpu: 7, gpu: 7, ram: 16 } },
+  upcoming: { min: { cpu: 7, gpu: 7, ram: 16 }, rec: { cpu: 8.5, gpu: 8.5, ram: 32 } },
+};
+const gameRequirements = (game) => game.req || ERA_REQUIREMENTS[game.era] || ERA_REQUIREMENTS.modern;
+
 export const GameCompatibilityView = () => {
   const { gameCompatibility = [], navigateToCategory, navigateToProduct, pageFaqs } = useApp();
 
@@ -85,103 +94,67 @@ export const GameCompatibilityView = () => {
   const customAnalysisResult = useMemo(() => {
     if (!selectedCheckerGame) return null;
 
-    const gameId = selectedCheckerGame.id;
     const gameEra = selectedCheckerGame.era; // 'upcoming', 'modern', 'classic'
-    const titleLower = selectedCheckerGame.gameTitle.toLowerCase();
-
     const selectedCpu = cpuOptions.find(c => c.id === customCpuTier) || cpuOptions[2];
     const selectedGpu = gpuOptions.find(g => g.id === customGpuTier) || gpuOptions[2];
+    const req = gameRequirements(selectedCheckerGame);
 
-    // Hardware score calculation out of 100
-    let cpuWeight = selectedCpu.score * 3.5;  // max 35
-    let gpuWeight = selectedGpu.score * 4.5;  // max 45
-    let ramWeight = customRamGb >= 32 ? 15 : customRamGb >= 16 ? 13 : customRamGb >= 8 ? 8 : 3; // max 15
-    let storageWeight = customStorage === 'nvme' ? 5 : customStorage === 'sata_ssd' ? 4 : 1; // max 5
+    // Each part against this game's recommended specs (graphics card counts most).
+    const part = (have, rec) => Math.min(1, have / rec);
+    const storageFactor = customStorage === 'nvme' ? 1 : customStorage === 'sata_ssd' ? 0.95 : 0.8;
+    let percentage = Math.round(100 * storageFactor * (
+      0.5 * part(selectedGpu.score, req.rec.gpu) + 0.3 * part(selectedCpu.score, req.rec.cpu) + 0.2 * part(customRamGb, req.rec.ram)
+    ));
+    const belowMin = selectedGpu.score < req.min.gpu || selectedCpu.score < req.min.cpu || customRamGb < req.min.ram;
+    if (belowMin) percentage = Math.min(percentage, 40);
+    percentage = Math.max(5, percentage);
 
-    let rawScore = Math.round(cpuWeight + gpuWeight + ramWeight + storageWeight);
-    rawScore = Math.min(100, Math.max(5, rawScore));
-
-    // Determine requirements threshold depending on game demand
-    let requiredScore = 70;
-    if (gameEra === 'upcoming' || titleLower.includes('gta 6') || titleLower.includes('cyberpunk') || titleLower.includes('witcher')) {
-      requiredScore = 80;
-    } else if (gameEra === 'classic' || titleLower.includes('san andreas') || titleLower.includes('cs 1.6') || titleLower.includes('skyrim') || titleLower.includes('minecraft')) {
-      requiredScore = 25;
-    }
-
-    let percentage = Math.round((rawScore / requiredScore) * 100);
-    percentage = Math.min(100, Math.max(8, percentage));
-
-    // Identify specific bottlenecks
     const bottlenecks = [];
-    if (selectedGpu.id === 'integrated_uhd' && gameEra !== 'classic') {
-      bottlenecks.push("GPU Bottleneck: Integrated Intel graphics lacks dedicated VRAM for modern 3D rendering.");
-    }
-    if (customRamGb < 16 && (gameEra === 'modern' || gameEra === 'upcoming')) {
-      bottlenecks.push(`RAM Warning: ${customRamGb}GB RAM detected. Modern titles require minimum 16GB for zero stutter.`);
-    }
-    if (customStorage === 'hdd' && (gameEra === 'modern' || gameEra === 'upcoming')) {
-      bottlenecks.push("Storage Notice: Mechanical HDD will cause texture pop-in. NVMe SSD recommended.");
-    }
-    if (selectedCpu.id === 'ancient' || selectedCpu.id === 'low_i3') {
-      if (gameEra !== 'classic') {
-        bottlenecks.push("CPU Bottleneck: Dual-core / low clock speed CPU will bottleneck physics and draw calls.");
-      }
-    }
+    if (selectedGpu.score < req.min.gpu) bottlenecks.push(`Graphics card is below this game's minimum (${selectedGpu.label.split(' (')[0]}).`);
+    if (selectedCpu.score < req.min.cpu) bottlenecks.push(`Processor is below this game's minimum (${selectedCpu.label.split(' (')[0]}).`);
+    if (customRamGb < req.min.ram) bottlenecks.push(`${customRamGb}GB RAM is below this game's minimum of ${req.min.ram}GB.`);
+    if (customStorage === 'hdd' && gameEra !== 'classic') bottlenecks.push('A hard disk (HDD) causes long loading and stutter. This game is meant for an SSD.');
 
-    // Verdict Categorization
-    let statusBadge = "100% FULLY COMPATIBLE";
-    let statusColor = "text-emerald-700 bg-emerald-50 border-emerald-300";
-    let fpsEstimate = "85 - 144+ FPS at 1080p / 1440p High";
-    let upgradeRecommendation = "Hardware is perfectly matched! No upgrade needed.";
-
-    if (percentage >= 90) {
-      statusBadge = `${percentage}% - PERFECT MATCH (ULTRA 60-144 FPS)`;
-      statusColor = "text-emerald-700 bg-emerald-50 border-emerald-300";
-      fpsEstimate = selectedGpu.id === 'ultra_rtx4080' ? "120 - 240 FPS at 4K / 1440p Max RT" : "80 - 120 FPS at 1440p High";
-      upgradeRecommendation = "Your rig is in the top tier! You can push Ray Tracing and Max graphics settings.";
-    } else if (percentage >= 70) {
-      statusBadge = `${percentage}% - HIGHLY PLAYABLE (SMOOTH 60 FPS)`;
-      statusColor = "text-teal-700 bg-teal-50 border-teal-300";
-      fpsEstimate = "60 - 85 FPS at 1080p Medium/High";
-      upgradeRecommendation = "Playable at solid 60 FPS. If you experience minor frame drops, enable DLSS / FSR Quality mode.";
-    } else if (percentage >= 45) {
-      statusBadge = `${percentage}% - PLAYABLE WITH LOW SETTINGS / TWEAKS`;
-      statusColor = "text-amber-800 bg-amber-50 border-amber-300";
-      fpsEstimate = "35 - 50 FPS at 720p/1080p Low Settings";
-      upgradeRecommendation = `Playable on low settings. For a smooth 60 FPS, upgrade the graphics card to at least an NVIDIA RTX 3060 (12GB) and use 16GB of RAM.`;
-    } else {
-      statusBadge = `${percentage}% - INSUFFICIENT HARDWARE (UNPLAYABLE)`;
-      statusColor = "text-rose-800 bg-rose-50 border-rose-300";
-      fpsEstimate = "Under 15 - 25 FPS (Severe Stutter / Lag)";
-      upgradeRecommendation = `This PC cannot run the game well. Minimum to aim for: Intel Core i5 12th Gen (or Ryzen 5 5600), RTX 3060 and 16GB RAM. Without upgrading, you can still play it through a cloud gaming service such as NVIDIA GeForce NOW or Xbox Cloud Gaming, if the game is available there.`;
-    }
-
-    // What to change, part by part, when the PC falls short.
+    // What to change, part by part, to reach this game's recommended specs.
+    const tierName = (opts, score) => (opts.find(o => o.score >= score) || opts[0]).label.split(' (')[0];
+    const ascending = (opts) => [...opts].sort((a, b) => a.score - b.score);
     const missing = [];
-    if (percentage < 70) {
-      if (selectedGpu.score < 6) missing.push({ part: 'Graphics card', have: selectedGpu.label || selectedGpu.name || selectedGpu.id, need: 'NVIDIA RTX 3060 / AMD RX 6600 or better' });
-      if (selectedCpu.score < 6) missing.push({ part: 'Processor', have: selectedCpu.label || selectedCpu.name || selectedCpu.id, need: 'Intel Core i5 12th Gen / AMD Ryzen 5 5600 or better' });
-      if (customRamGb < 16) missing.push({ part: 'Memory (RAM)', have: `${customRamGb}GB`, need: '16GB' });
-      if (customStorage === 'hdd') missing.push({ part: 'Storage', have: 'Hard disk (HDD)', need: 'SSD (NVMe preferred)' });
+    if (selectedGpu.score < req.rec.gpu) missing.push({ part: 'Graphics card', have: selectedGpu.label.split(' (')[0], need: tierName(ascending(gpuOptions), req.rec.gpu) + ' or better' });
+    if (selectedCpu.score < req.rec.cpu) missing.push({ part: 'Processor', have: selectedCpu.label.split(' (')[0], need: tierName(ascending(cpuOptions), req.rec.cpu) + ' or better' });
+    if (customRamGb < req.rec.ram) missing.push({ part: 'Memory (RAM)', have: `${customRamGb}GB`, need: `${req.rec.ram}GB` });
+    if (customStorage === 'hdd' && gameEra !== 'classic') missing.push({ part: 'Storage', have: 'Hard disk (HDD)', need: 'SSD (NVMe preferred)' });
+
+    let statusBadge, statusColor, fpsEstimate, upgradeRecommendation;
+    if (percentage >= 90) {
+      statusBadge = `${percentage}% - MEETS RECOMMENDED SPECS`;
+      statusColor = "text-emerald-700 bg-emerald-50 border-emerald-300";
+      fpsEstimate = "60+ FPS at 1080p / 1440p High";
+      upgradeRecommendation = "Your PC meets or beats this game's recommended specs. Play on high settings.";
+    } else if (percentage >= 70) {
+      statusBadge = `${percentage}% - PLAYABLE (MEDIUM / HIGH)`;
+      statusColor = "text-teal-700 bg-teal-50 border-teal-300";
+      fpsEstimate = "45 - 60 FPS at 1080p Medium";
+      upgradeRecommendation = "Above the minimum but under the recommended specs. Use medium settings and DLSS / FSR upscaling for a steady frame rate.";
+    } else if (percentage > 40) {
+      statusBadge = `${percentage}% - PLAYABLE ON LOW SETTINGS`;
+      statusColor = "text-amber-800 bg-amber-50 border-amber-300";
+      fpsEstimate = "30 - 45 FPS at 1080p / 720p Low";
+      upgradeRecommendation = "It meets the minimum specs only. Expect low settings; see the table above for the upgrades that make the biggest difference.";
+    } else {
+      statusBadge = `${percentage}% - BELOW MINIMUM SPECS`;
+      statusColor = "text-rose-800 bg-rose-50 border-rose-300";
+      fpsEstimate = "Not playable (under 20 FPS or will not start)";
+      upgradeRecommendation = "This PC is below the game's minimum specs. Upgrade the parts listed above, or play it through a cloud gaming service such as NVIDIA GeForce NOW or Xbox Cloud Gaming if the game is available there.";
     }
 
-    return {
-      percentage,
-      missing,
-      statusBadge,
-      statusColor,
-      fpsEstimate,
-      bottlenecks,
-      upgradeRecommendation
-    };
+    return { percentage, missing, statusBadge, statusColor, fpsEstimate, bottlenecks, upgradeRecommendation, req };
   }, [selectedCheckerGame, customCpuTier, customGpuTier, customRamGb, customStorage]);
 
   const eras = [
     { id: 'all', label: 'All Eras & Generations' },
-    { id: 'upcoming', label: '🔥 Upcoming (2025/2026)' },
-    { id: 'modern', label: '⚡ Modern Hits (2020-2024)' },
-    { id: 'classic', label: '🕹️ Classic & Retro Legends' },
+    { id: 'upcoming', label: 'Upcoming (GTA 6)' },
+    { id: 'modern', label: 'Modern hits (2021 to today)' },
+    { id: 'classic', label: 'Classics & retro' },
   ];
 
   const platforms = [
@@ -266,28 +239,29 @@ export const GameCompatibilityView = () => {
             </p>
 
             <div className="flex flex-wrap gap-2.5 pt-2">
-              <span 
-                onClick={() => { playPowerUpSound(); setSelectedEra('upcoming'); }}
-                className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 cursor-pointer"
+              <a
+                href="#game-list"
+                onClick={(e) => { e.preventDefault(); playPowerUpSound(); setSelectedEra('upcoming'); document.getElementById('game-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+                className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 cursor-pointer no-underline"
               >
-                <BouncyText text="🔥 GTA 6 & Next-Gen Targets" />
-              </span>
+                <Flame className="w-3.5 h-3.5" /> <span>GTA 6 & upcoming games</span>
+              </a>
 
-              <span 
-                onClick={() => { playPowerUpSound(); setSelectedEra('modern'); }}
-                className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 cursor-pointer" 
-                style={{ animationDelay: '0.6s' }}
+              <a
+                href="#game-list"
+                onClick={(e) => { e.preventDefault(); playPowerUpSound(); setSelectedEra('modern'); document.getElementById('game-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+                className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 cursor-pointer no-underline"
               >
-                <BouncyText text="⚡ GTA 5, BO6 & 240Hz Esports" />
-              </span>
+                <Zap className="w-3.5 h-3.5" /> <span>Games from 2021 to today</span>
+              </a>
 
-              <span 
-                onClick={() => { playPowerUpSound(); setSelectedEra('classic'); }}
-                className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 cursor-pointer" 
-                style={{ animationDelay: '1.2s' }}
+              <a
+                href="#game-list"
+                onClick={(e) => { e.preventDefault(); playPowerUpSound(); setSelectedEra('classic'); document.getElementById('game-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+                className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 cursor-pointer no-underline"
               >
-                <BouncyText text="🕹️ San Andreas, CS 1.6 & Skyrim" />
-              </span>
+                <Gamepad2 className="w-3.5 h-3.5" /> <span>Classics: San Andreas, CS 1.6, Skyrim</span>
+              </a>
             </div>
           </div>
 
@@ -397,6 +371,20 @@ export const GameCompatibilityView = () => {
               </option>
             ))}
           </select>
+
+          {/* The selected game's own PC requirements (change with the game) */}
+          {selectedCheckerGame && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3">
+                <div className="font-display font-extrabold text-amber-800 uppercase tracking-wider text-[10px] mb-1">Minimum PC specs</div>
+                <div className="text-slate-800 font-medium">{selectedCheckerGame.minSpecs}</div>
+              </div>
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3">
+                <div className="font-display font-extrabold text-emerald-800 uppercase tracking-wider text-[10px] mb-1">Recommended PC specs</div>
+                <div className="text-slate-800 font-medium">{selectedCheckerGame.recommendedSpecs}</div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* MODE A: CUSTOM PC SPECS INPUT FORM */}
@@ -715,7 +703,7 @@ export const GameCompatibilityView = () => {
                 External Hard Drive / USB / Disc Copy
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                If your internet download speed is slow for 100GB+ games, you can copy pre-installed game backup files from a friend's USB 3.2 drive or physical disc into your Steam/Epic directory, then verify and play.
+                If your internet download speed is slow for 100GB+ games, you can copy the game folder from a friend's USB drive into your Steam/Epic library and run 'Verify files' so only the missing parts download. The game must be bought on your own account.
               </p>
             </div>
             <span className="text-[10px] font-extrabold text-amber-400 bg-amber-950/80 px-2 py-1 rounded border border-amber-500/30 block text-center">
@@ -745,7 +733,7 @@ export const GameCompatibilityView = () => {
       </section>
 
       {/* 4. Filter Toolbar: Era Pills + Platform Pills + Search Box */}
-      <section className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-5">
+      <section id="game-list" className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-5 scroll-mt-24">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
           
           <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">

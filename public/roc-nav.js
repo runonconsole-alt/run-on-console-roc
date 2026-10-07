@@ -187,6 +187,10 @@
       return loading;
     }
 
+    // Words people type that the catalog spells differently.
+    var SYNONYMS = { mouse: ['mice'], mice: ['mouse'], headset: ['headsets', 'audio'], headphone: ['headset', 'audio'], headphones: ['headset', 'audio'],
+      earbuds: ['buds'], gpu: ['graphics', 'rtx', 'radeon'], graphics: ['gpu'], videocard: ['graphics'], monitor: ['monitors', 'display'],
+      display: ['monitor'], screen: ['monitor'], speaker: ['speakers', 'soundbar'], mic: ['microphone', 'wave', 'quadcast', 'seiren'] };
     function norm(t) { return String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
     function lev(a, b, max) {
       if (Math.abs(a.length - b.length) > max) return max + 1;
@@ -204,9 +208,9 @@
       var title = norm(item.t), hay = title + ' ' + norm((item.b || '') + ' ' + (item.c || '') + ' ' + (item.g || '') + ' ' + (item.e || ''));
       var hayWords = hay.split(' '), total = 0;
       for (var i = 0; i < words.length; i++) {
-        var w = words[i];
-        if (title.indexOf(w) !== -1) { total += 3; continue; }
-        if (hay.indexOf(w) !== -1) { total += 2; continue; }
+        var w = words[i], alts = [w].concat(SYNONYMS[w] || []);
+        if (alts.some(function (a) { return title.indexOf(a) !== -1; })) { total += 3; continue; }
+        if (alts.some(function (a) { return hay.indexOf(a) !== -1; })) { total += 2; continue; }
         if (w.length < 4) return 0;
         var max = w.length >= 7 ? 2 : 1, hit = false;
         for (var k = 0; k < hayWords.length && !hit; k++) {

@@ -37,7 +37,8 @@ export function generateJsonLd(routeData) {
       'https://www.facebook.com/profile.php?id=61594369295787',
       'https://www.instagram.com/runonconsole/',
       'https://www.pinterest.com/runonconsole/',
-      'https://x.com/RunOnConsole'
+      'https://x.com/RunOnConsole',
+      'https://www.linkedin.com/company/run-on-console/'
     ]
   };
 
@@ -54,9 +55,38 @@ export function generateJsonLd(routeData) {
       'publisher': { '@id': `${SITE_DOMAIN}/#organization` },
       'potentialAction': {
         '@type': 'SearchAction',
-        'target': `${SITE_DOMAIN}/products/?search={search_term_string}`,
+        'target': `${SITE_DOMAIN}/products/?q={search_term_string}`,
         'query-input': 'required name=search_term_string'
       }
+    });
+  }
+
+  // 2b. The page itself, typed by what it is, linked to the site and publisher.
+  const PAGE_TYPES = { '/about/': 'AboutPage', '/contact/': 'ContactPage', '/compatibility/': 'WebPage',
+    '/privacy-policy/': 'WebPage', '/terms-and-conditions/': 'WebPage', '/write-for-us/': 'WebPage', '/partnerships/': 'WebPage' };
+  if (PAGE_TYPES[routeData.path]) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': PAGE_TYPES[routeData.path],
+      '@id': `${routeData.canonical}#webpage`,
+      'url': routeData.canonical,
+      'name': routeData.title,
+      'description': routeData.description,
+      'isPartOf': { '@type': 'WebSite', '@id': `${SITE_DOMAIN}/#website`, 'name': SITE_NAME, 'url': SITE_DOMAIN },
+      'publisher': organizationSchema,
+    });
+  }
+  if (routeData.path === '/compatibility/') {
+    // The checker is a free tool that runs in the browser.
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      'name': 'Can I Run It? PC Game Compatibility Checker',
+      'url': routeData.canonical,
+      'applicationCategory': 'UtilitiesApplication',
+      'operatingSystem': 'Any (web browser)',
+      'offers': { '@type': 'Offer', 'price': '0', 'priceCurrency': 'USD' },
+      'publisher': { '@id': `${SITE_DOMAIN}/#organization` },
     });
   }
 

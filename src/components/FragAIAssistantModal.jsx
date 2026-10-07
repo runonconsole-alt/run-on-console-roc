@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { richText } from '../utils/richText';
 import { useApp } from '../context/AppContext';
 import { 
   Bot, MessageSquare, X, Send, Sparkles, Cpu, Monitor, Laptop, 
@@ -128,7 +129,7 @@ export const FragAIAssistantModal = () => {
   const [messages, setMessages] = useState([
     {
       sender: 'bot',
-      text: "Assalam-o-Alaikum & Welcome Gamer! 🎮 Main **ROC AI** hoon — Run On Console ka official Hardware & Game Compatibility Assistant.\n\nMain aapko kisi bhi laptop ya PC ke specs check kar ke bata sakta hoon ke aapki manpasand game (GTA 5, GTA 6, BO6, Cyberpunk) us par chalegi ya nahi.",
+      text: "Welcome! 🎮 I'm **ROC AI**, the Run On Console hardware and game compatibility assistant.\n\nTell me your laptop or PC model and the game you want to play, and I'll tell you whether it will run, and what to upgrade if it won't.",
       quickActions: [
         { label: "🔍 Check My PC Specs & Game", action: "start_pc_check" },
         { label: "⚡ 1-Click Browser Auto-Scan", action: "scan_browser" },
@@ -139,6 +140,9 @@ export const FragAIAssistantModal = () => {
   ]);
 
   const chatEndRef = useRef(null);
+  // The 'open-ai-bot' listener is registered once; these refs always point at the current handlers.
+  const handleQuickActionRef = useRef(null);
+  const handleUserSendRef = useRef(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -150,7 +154,8 @@ export const FragAIAssistantModal = () => {
       playPowerUpSound();
       if (e.detail?.query) {
         setTimeout(() => {
-          handleUserSend(e.detail.query);
+          if (e.detail.query === 'start_pc_check') handleQuickActionRef.current('start_pc_check');
+          else handleUserSendRef.current(e.detail.query);
         }, 300);
       }
     };
@@ -205,7 +210,7 @@ export const FragAIAssistantModal = () => {
                 `🔹 **GPU:** ${scannedDev.gpu}\n` +
                 `🔹 **CPU Cores:** ${scannedDev.cpu}\n` +
                 `🔹 **RAM:** ${scannedDev.ram}\n\n` +
-                `Ab batayein aap is hardware par **kaun si game** check karna chahte hain?`,
+                `Which **game** would you like to check on this hardware?`,
           quickActions: [
             { label: "Grand Theft Auto V (GTA 5)", action: "game_gta5" },
             { label: "Grand Theft Auto VI (GTA 6)", action: "game_gta6" },
@@ -246,7 +251,7 @@ export const FragAIAssistantModal = () => {
         ...currentMessages,
         {
           sender: 'bot',
-          text: "Humari website par 15 verified Gaming Platforms aur 100+ hardware devices listed hain: PC/Handhelds, PS5, Xbox, Nintendo Switch, PSP/Vita, Sega Retro, Atari, Anbernic, VR, aur Cloud!\n\nAap Categories page par ja kar kisi bhi system ke full teardown specs dekh sakte hain.",
+          text: "We cover 15 gaming platforms and 100+ devices: PC and handhelds, PlayStation, Xbox, Nintendo, PSP/Vita, Sega, Atari, Anbernic, VR and cloud gaming.\n\nOpen the platforms page to see each system's devices, specs and guides.",
           quickActions: [
             { label: "Open 15 Platforms Hub", action: "nav_categories" },
             { label: "Check My PC Compatibility", action: "start_pc_check" }
@@ -256,13 +261,13 @@ export const FragAIAssistantModal = () => {
       return;
     }
 
-    if (qLower === 'cloud_guide' || qLower.includes('cloud') || qLower.includes('jugaar')) {
+    if (qLower === 'cloud_guide' || qLower.includes('cloud')) {
       setIsTyping(false);
       setMessages([
         ...currentMessages,
         {
           sender: 'bot',
-          text: "💡 **Cloud Gaming Shortcut (Zero Download & High FPS):**\n\nAgar aapka laptop/PC purana hai to aap **NVIDIA GeForce NOW** ya **Xbox Cloud Gaming** use kar sakte hain. Isme game aapke browser/app me 60-120 FPS par stream hoti hai bina heavy graphics card ke!",
+          text: "💡 **Cloud gaming (no download, no graphics card needed):**\n\nIf your laptop or PC is older, services such as **NVIDIA GeForce NOW** or **Xbox Cloud Gaming** stream supported games to your browser or app at up to 60-120 FPS. You need a stable internet connection (about 15-25 Mbps or more).",
           quickActions: [
             { label: "Test My Laptop Model", action: "start_pc_check" },
             { label: "Open Compatibility Page", action: "nav_compatibility" }
@@ -280,7 +285,7 @@ export const FragAIAssistantModal = () => {
         ...currentMessages,
         {
           sender: 'bot',
-          text: "Zabardast! Sabse pehle mujhe apne **Laptop ya PC ka model naam** batayein.\n\n*(Misal ke tor par: 'HP 650 G4', 'Dell Inspiron 15', 'Lenovo ThinkPad', 'Core i5 10th gen with GTX 1650', 'MacBook Air M2', ya 'ASUS TUF Gaming')*",
+          text: "Great! First, tell me your **laptop or PC model**.\n\n*(For example: 'HP 650 G4', 'Dell Inspiron 15', 'Lenovo ThinkPad', 'Core i5 10th gen with GTX 1650', 'MacBook Air M2' or 'ASUS TUF Gaming')*",
           quickActions: [
             { label: "HP ProBook 650 G4", action: "dev_hp650" },
             { label: "Dell Inspiron 15", action: "dev_dell" },
@@ -303,7 +308,7 @@ export const FragAIAssistantModal = () => {
     }
 
     // Fallback: Dynamic NLP parser for custom specs typed by user
-    if (!matchedDevice && (qLower.includes('core i') || qLower.includes('ryzen') || qLower.includes('rtx') || qLower.includes('gtx') || qLower.includes('hp') || qLower.includes('dell') || qLower.includes('laptop') || qLower.includes('pc') || qLower.includes('intel') || qLower.includes('amd'))) {
+    if (!matchedDevice && (chatStep === 'awaiting_device' || qLower.includes('core i') || qLower.includes('ryzen') || qLower.includes('rtx') || qLower.includes('gtx') || qLower.includes('hp') || qLower.includes('dell') || qLower.includes('laptop') || qLower.includes('pc') || qLower.includes('intel') || qLower.includes('amd'))) {
       let detectedCpu = "Intel Core i5 (General Quad-Core)";
       let detectedGpu = "Integrated Intel UHD / Iris Graphics";
       let power = 40;
@@ -343,7 +348,11 @@ export const FragAIAssistantModal = () => {
       (g.gameTitle.toLowerCase().includes('elden ring') && qLower.includes('elden')) ||
       (g.gameTitle.toLowerCase().includes('valorant') && (qLower.includes('valorant') || qLower.includes('cs2') || qLower.includes('cs 1.6'))) ||
       (g.gameTitle.toLowerCase().includes('minecraft') && qLower.includes('minecraft'))
-    );
+    ) || gameCompatibility.find(g => {
+      // Any other game: its main name ("Hogwarts Legacy" in "Hogwarts Legacy (2023)") typed in the message.
+      const main = g.gameTitle.split(/[(:]/)[0].trim().toLowerCase();
+      return main.length >= 4 && (qLower.includes(main) || (qLower.length >= 5 && main.includes(qLower)));
+    });
 
     // Case A: Device found, but no game mentioned yet -> Ask for Game
     if (currentDev && !matchedGame && chatStep !== 'completed') {
@@ -355,12 +364,12 @@ export const FragAIAssistantModal = () => {
         {
           sender: 'bot',
           deviceData: currentDev,
-          text: `Ji haan! Maine aapke **${currentDev.name}** ke specifications fetch kar liye hain:\n\n` +
+          text: `Got it! Here are the specs for your **${currentDev.name}**:\n\n` +
                 `🔹 **CPU:** ${currentDev.cpu}\n` +
                 `🔹 **GPU:** ${currentDev.gpu}\n` +
                 `🔹 **RAM:** ${currentDev.ram}\n` +
                 `🔹 **Storage:** ${currentDev.storage}\n\n` +
-                `Ab batayein aap is device par **kaun si game** chalana chahte hain?`,
+                `Which **game** do you want to run on this device?`,
           quickActions: [
             { label: "Grand Theft Auto V (GTA 5)", action: "game_gta5" },
             { label: "Grand Theft Auto VI (GTA 6)", action: "game_gta6" },
@@ -386,21 +395,21 @@ export const FragAIAssistantModal = () => {
       if (currentDev.tier === 'high_dedicated') {
         compScore = 98;
         compVerdict = "High Performance Profile";
-        adviceText = "Aapka system high performance Tier me hai. Game high settings aur Ray Tracing par smooth chalegi.";
+        adviceText = "Your system is in the high-performance tier. The game should run smoothly on high settings, including ray tracing.";
       } else if (currentDev.tier === 'mid_dedicated') {
         compScore = 80;
         compVerdict = "Recommended Hardware Profile";
-        adviceText = "Aapka PC ready hai. Recommended performance profile milegi.";
+        adviceText = "Your PC meets the recommended requirements. Expect smooth performance on medium to high settings.";
       } else {
         // Budget / Integrated like HP 650 G4
         if (matchedGame.gameTitle.includes('GTA 5') || matchedGame.gameTitle.includes('San Andreas') || matchedGame.gameTitle.includes('CS 1.6') || matchedGame.gameTitle.includes('Minecraft')) {
           compScore = 55;
           compVerdict = "Playable on Basic Low Settings";
-          adviceText = `Aapke ${currentDev.name} me integrated graphics hai. ${matchedGame.gameTitle} low settings par playable rahegi agar aap RAM ko 16GB rakhein.`;
+          adviceText = `Your ${currentDev.name} uses integrated graphics. ${matchedGame.gameTitle} is playable on low settings, especially with 16GB of RAM.`;
         } else {
           compScore = 18;
           compVerdict = "Below Minimum Hardware Requirements";
-          adviceText = `Aapke ${currentDev.name} par heavy AAA 3D games (like ${matchedGame.gameTitle}) native nahi chal sakengi kyunke isme dedicated GPU nahi hai.`;
+          adviceText = `Your ${currentDev.name} has no dedicated graphics card, so demanding 3D games like ${matchedGame.gameTitle} will not run properly on it.`;
         }
       }
 
@@ -420,13 +429,13 @@ export const FragAIAssistantModal = () => {
                 `💡 **Expert Verdict:**\n${adviceText}\n\n` +
                 (compScore < 70 ? 
                   `🔧 **Hardware Upgrade Recommendation:**\n` +
-                  `1. RAM ko **16GB Dual-Channel** karein taake integrated graphics ko double bandwidth mile.\n` +
-                  `2. Mechanical hard drive ki jagah fast **M.2 NVMe SSD** use karein.\n\n` +
-                  `⚠️ **Jugaaru / Alternative Shortcut (Fun Only):**\n` +
-                  `Agar aapne upgrade nahi karwana to aap **NVIDIA GeForce NOW Cloud** par free stream kar lein, ya dost se **USB 3.2 External Drive** me pre-installed game backup copy karwa lein.\n` +
-                  `*(Note: Hamari lab official safe platforms ko refer karti hai taake security aur ban ka risk na ho, lekin casual fun ke liye ye working alternatives hain!)*`
+                  `1. Upgrade to **16GB dual-channel RAM** (two matching sticks); integrated graphics get twice the memory bandwidth.\n` +
+                  `2. Replace a mechanical hard drive with a fast **M.2 NVMe SSD**.\n\n` +
+                  `☁️ **Without upgrading:**\n` +
+                  `Play it through a cloud gaming service such as **NVIDIA GeForce NOW** or **Xbox Cloud Gaming**, if the game is available there.\n` +
+                  `*(Always get games from official stores such as Steam, Epic Games, Xbox or PlayStation: they are safe and updated.)*`
                   :
-                  `Aapka PC hardware verified hai. Aap official Steam ya Epic Games se install kar ke enjoy kar sakte hain!`
+                  `Your PC can run it. Get the game from an official store such as Steam or the Epic Games Store and enjoy!`
                 ),
           quickActions: [
             { label: "🎮 Test Another Game", action: "test_another_game" },
@@ -445,7 +454,7 @@ export const FragAIAssistantModal = () => {
       ...currentMessages,
       {
         sender: 'bot',
-        text: `Ji main aapki puri madad karne ke liye hazir hoon! 😊\n\nAap mujhe apne laptop/PC ka naam batayein (jaise: 'HP 650 G4', 'Dell Inspiron', 'RTX 3060 PC') aur game ka naam likhein. Main aapko exact specs aur compatibility percentage bata dunga!`,
+        text: `Happy to help! 😊\n\nTell me your laptop or PC model (e.g. 'HP 650 G4', 'Dell Inspiron', 'RTX 3060 PC') and the game you want to play, and I'll give you the specs and a compatibility score.`,
         quickActions: [
           { label: "🔍 Check My PC Specs", action: "start_pc_check" },
           { label: "⚡ 1-Click Screen Scan", action: "scan_browser" },
@@ -456,8 +465,21 @@ export const FragAIAssistantModal = () => {
     ]);
   };
 
+  const ACTION_LABELS = {
+    start_pc_check: 'Check my PC specs',
+    browse_platforms: 'Show me the gaming platforms',
+    cloud_guide: 'How does cloud gaming work?',
+  };
+
   const handleQuickAction = (action) => {
     playClickSound();
+    if (ACTION_LABELS[action]) {
+      const next = [...messages, { sender: 'user', text: ACTION_LABELS[action] }];
+      setMessages(next);
+      setIsTyping(true);
+      setTimeout(() => processBotResponse(action, next), 400);
+      return;
+    }
     if (action === 'auth_login') {
       navigateTo('auth', 'login');
       setIsOpen(false);
@@ -477,8 +499,6 @@ export const FragAIAssistantModal = () => {
       setIsOpen(false);
     } else if (action === 'scan_browser') {
       handleBrowserAutoScan();
-    } else if (action === 'start_pc_check') {
-      processBotResponse('start_pc_check', messages);
     } else if (action === 'dev_hp650') {
       handleUserSend("HP ProBook 650 G4 Core i5 8th gen");
     } else if (action === 'dev_dell') {
@@ -499,6 +519,8 @@ export const FragAIAssistantModal = () => {
       handleUserSend("Valorant and CS2");
     } else if (action === 'game_minecraft') {
       handleUserSend("Minecraft");
+    } else if (action === 'game_elden') {
+      handleUserSend("Elden Ring");
     } else if (action === 'test_another_game') {
       setChatStep('awaiting_game');
       setIsTyping(false);
@@ -506,18 +528,21 @@ export const FragAIAssistantModal = () => {
         ...prev,
         {
           sender: 'bot',
-          text: "Kaun si doosri game test karni hai? Niche se game select karein ya naam type karein:",
+          text: "Which game would you like to test next? Pick one below or type its name:",
           quickActions: [
             { label: "Grand Theft Auto V", action: "game_gta5" },
             { label: "Cyberpunk 2077", action: "game_cyberpunk" },
             { label: "Call of Duty: BO6", action: "game_bo6" },
-            { label: "Elden Ring", action: "game_gta6" },
+            { label: "Elden Ring", action: "game_elden" },
             { label: "Valorant", action: "game_valorant" }
           ]
         }
       ]);
     }
   };
+
+  handleQuickActionRef.current = handleQuickAction;
+  handleUserSendRef.current = handleUserSend;
 
   return (
     <>
@@ -627,7 +652,7 @@ export const FragAIAssistantModal = () => {
                     </div>
                   )}
 
-                  <div>{msg.text}</div>
+                  <div>{richText(msg.text)}</div>
                 </div>
 
                 {/* Interactive Quick Action Buttons */}

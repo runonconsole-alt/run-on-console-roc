@@ -211,8 +211,13 @@ function rocFuzzyMatch(string $hay, string $q): bool {
     $norm = function (string $t): string { return trim((string)preg_replace('/[^\p{L}\p{N}]+/u', ' ', mb_strtolower($t))); };
     $hay = $norm($hay);
     $words = array_filter(explode(' ', $hay));
+    // Words people type that the catalog spells differently.
+    $syn = ['mouse' => ['mice'], 'mice' => ['mouse'], 'headset' => ['headsets', 'audio'], 'headphone' => ['headset', 'audio'],
+            'headphones' => ['headset', 'audio'], 'gpu' => ['graphics', 'rtx', 'radeon'], 'graphics' => ['gpu'], 'monitor' => ['monitors', 'display'],
+            'display' => ['monitor'], 'screen' => ['monitor'], 'speaker' => ['speakers', 'soundbar'], 'mic' => ['microphone', 'wave', 'quadcast', 'seiren']];
     foreach (array_filter(explode(' ', $norm($q))) as $t) {
-        if (mb_strpos($hay, $t) !== false) continue;
+        $alts = array_merge([$t], $syn[$t] ?? []);
+        foreach ($alts as $a) if (mb_strpos($hay, $a) !== false) continue 2;
         $len = mb_strlen($t);
         if ($len < 4) return false;
         $max = $len >= 7 ? 2 : 1;
@@ -555,8 +560,8 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
         . '<span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5 badge-glow">' . rocH($heroBadge) . '</span>'
         . '<h1 class="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight">' . rocH($heroTitle) . '</h1>'
         . '<p class="text-emerald-100 text-xs sm:text-sm leading-relaxed max-w-lg">' . rocH($heroText) . '</p>'
-        . '<div class="flex flex-wrap gap-2.5 pt-2"><span class="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5"><span>' . count($inScope) . ' products</span></span>'
-        . '<span class="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5"><span>Direct Amazon links</span></span></div>'
+        . '<div class="flex flex-wrap gap-2.5 pt-2"><a href="#all-products" class="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline"><span>' . count($inScope) . ' products</span></a>'
+        . '<a href="/privacy-policy/" class="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline"><span>Direct Amazon links</span></a></div>'
         . '</div><div class="lg:col-span-5 grid grid-cols-2 gap-3">';
     $tiles = !empty($cat['group']) ? array_slice(array_intersect_key($categories, array_flip($cat['members'])), 0, 4, true)
         : ($cat ? [(string)$cat['slug'] => $cat] : array_slice($categories, 0, 4, true));
@@ -579,7 +584,7 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
         . ($query !== '' ? '<a href="' . rocH($action) . '" class="text-[11px] font-bold text-slate-400 hover:text-emerald-600 flex items-center gap-1 px-2 no-underline">Reset</a>' : '')
         . '</form>';
 
-    $m .= '<div class="space-y-4"><div class="text-xs font-bold text-slate-600">Showing <span class="text-emerald-600 font-extrabold">' . count($shown) . '</span> of ' . count($inScope) . ' products</div>'
+    $m .= '<div id="all-products" class="space-y-4 scroll-mt-24"><div class="text-xs font-bold text-slate-600">Showing <span class="text-emerald-600 font-extrabold">' . count($shown) . '</span> of ' . count($inScope) . ' products</div>'
         . '<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">';
     foreach ($shown as $p) $m .= rocProductCard($pdo, $p, $categories);
     $m .= '</div>';

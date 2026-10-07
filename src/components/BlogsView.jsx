@@ -313,25 +313,29 @@ export const BlogsView = () => {
           </div>
 
           <div className="lg:col-span-5 grid grid-cols-2 gap-3">
+            <a href="/compatibility/?q=Elden%20Ring%3A%20Shadow%20of%20the%20Erdtree" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
               <img 
                 src="/images/trending_elden.jpg" 
-                alt="Elden Ring Guide" 
+                alt="Elden Ring: Shadow of the Erdtree" 
                 className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform" 
               />
-              <div className="text-xs font-display font-bold text-white">Shadow of Erdtree</div>
-              <div className="text-[10px] text-emerald-300 font-medium">Full Boss & Build Guide</div>
+              <div className="text-xs font-display font-bold text-white">Shadow of the Erdtree</div>
+              <div className="text-[10px] text-emerald-300 font-medium">Can your PC run it?</div>
             </Tilt3DCard>
+            </a>
 
+ <a href="/products/category/mice/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
               <img 
                 src="/images/hero_cod.jpg" 
                 alt="COD Black Ops 6" 
                 className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform" 
               />
-              <div className="text-xs font-display font-bold text-white">Black Ops 6 Latency</div>
-              <div className="text-[10px] text-emerald-300 font-medium">8000Hz Input Delay Test</div>
+              <div className="text-xs font-display font-bold text-white">Black Ops 6 Gear</div>
+              <div className="text-[10px] text-emerald-300 font-medium">Low-latency gaming mice</div>
             </Tilt3DCard>
+            </a>
           </div>
 
         </div>
