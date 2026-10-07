@@ -120,7 +120,7 @@ export const ENHANCED_BLOGS = ALL_BLOGS.map(blog => {
 export const ENHANCED_CATEGORIES = GAMING_CATEGORIES.map(cat => ({
   ...cat,
   slug: cat.slug || slugify(cat.title),
-  url: `${BASE_DOMAIN}/categories/${cat.slug || slugify(cat.title)}/`,
+  url: `${BASE_DOMAIN}/gaming-platforms/${cat.slug || slugify(cat.title)}/`,
   lastmod: cat.lastmod || '2024-05-15T10:00:00+00:00'
 }));
 
@@ -162,7 +162,7 @@ export const STATIC_PUBLIC_ROUTES = [
   },
   {
     path: '/categories/',
-    canonical: `${BASE_DOMAIN}/categories/`,
+    canonical: `${BASE_DOMAIN}/gaming-platforms/`,
     title: '15 Gaming Platform Hubs & Specs Directory | Run On Console',
     description: 'Explore 15 comprehensive gaming categories and over 100+ hardware devices from x86 handhelds to PS5 Pro, Xbox, retro consoles, and emulation engines.',
     h1: '15 Gaming Platform Hubs & Specs Directory',
@@ -217,19 +217,10 @@ export const STATIC_PUBLIC_ROUTES = [
   {
     path: '/write-for-us/',
     canonical: `${BASE_DOMAIN}/write-for-us/`,
-    title: 'Write For Us & Submit Review Sample | Run On Console',
-    description: 'Submit commercial guest posts, hardware review proposals, and tech articles to the Run On Console editorial team.',
+    title: 'Write For Us & Advertise | Run On Console',
+    description: 'Pitch a guest article, a sponsored post or an advertising campaign to Run On Console. Email comments@runonconsole.com or use the form.',
     h1: 'Write For Run On Console',
     category: 'Write For Us',
-    lastmod: '2024-05-10T10:00:00+00:00'
-  },
-  {
-    path: '/partnerships/',
-    canonical: `${BASE_DOMAIN}/partnerships/`,
-    title: 'Brand Advertising & Partnerships | Run On Console',
-    description: 'Partner with Run On Console for hardware review sample testing, brand sponsorships, and commercial advertising opportunities.',
-    h1: 'Brand Advertising & Partnerships',
-    category: 'Partnerships',
     lastmod: '2024-05-10T10:00:00+00:00'
   },
   {
