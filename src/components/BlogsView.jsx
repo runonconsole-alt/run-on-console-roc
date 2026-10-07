@@ -325,7 +325,7 @@ export const BlogsView = () => {
             </Tilt3DCard>
             </a>
 
- <a href="/products/category/mice/" className="block no-underline">
+ <a href="/products/mice/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
               <img 
                 src="/images/hero_cod.jpg" 

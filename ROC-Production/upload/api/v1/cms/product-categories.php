@@ -120,12 +120,18 @@ try {
         if (isset($f['name'])) $pdo->prepare('UPDATE products SET category = ? WHERE category_slug = ?')->execute([$f['name'], $slug]);
         $log = 'cms_product_category_update';
     } else {
-        // New category: the address /products/category/{slug}/ is set once from the name.
+        // New category: the address /products/{slug}/ is set once from the name.
         $base = $slug !== '' ? $slug : rocCatSlug($f['name']);
         if ($base === '') $base = 'category';
         $slug = $base;
-        $chk = $pdo->prepare('SELECT COUNT(*) FROM product_categories WHERE slug = ?');
-        for ($n = 2; ; $n++) { $chk->execute([$slug]); if (!(int)$chk->fetchColumn()) break; $slug = $base . '-' . $n; }
+        // Category pages share /products/{slug}/ with product pages and the two group pages.
+        $chk = $pdo->prepare('SELECT (SELECT COUNT(*) FROM product_categories WHERE slug = ?) + (SELECT COUNT(*) FROM products WHERE slug = ?)');
+        $reserved = ['category', 'pc-hardware', 'gaming-hardware'];
+        for ($n = 2; ; $n++) {
+            $chk->execute([$slug, $slug]);
+            if (!(int)$chk->fetchColumn() && !in_array($slug, $reserved, true)) break;
+            $slug = $base . '-' . $n;
+        }
         if (!isset($f['sort_rank'])) $f['sort_rank'] = (int)$pdo->query('SELECT COALESCE(MAX(sort_rank), 0) + 1 FROM product_categories')->fetchColumn();
         $row = $f + ['slug' => $slug, 'status' => $status ?? 'draft', 'created_at' => $now, 'updated_at' => $now, 'content_modified_at' => $now];
         $names = array_keys($row);

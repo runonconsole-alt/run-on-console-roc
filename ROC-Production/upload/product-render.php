@@ -3,7 +3,8 @@
  * Run On Console — public product pages rendered from the CMS database.
  *
  *   /products/                       -> all products        (product-render.php)
- *   /products/category/{slug}/       -> one category        (product-render.php?cat=...)
+ *   /products/{category}/            -> one category        (product-render.php?slug=...)
+ *   /products/category/{slug}/       -> 301 to /products/{slug}/ (old address)
  *   /products/{slug}/                -> one product         (product-render.php?slug=...)
  *   /sitemaps/products-sitemap.xml   -> products sitemap    (product-render.php?sitemap=1)
  *
@@ -105,8 +106,19 @@ if ($isMap) rocProductSitemap($pdo, $categories);
 
 if (isset($_GET['json']) && $slug === '' && $cat === '') rocProductsJson($pdo, $categories);
 
+if ($cat !== '') {
+    // Old address of a category page.
+    if (!isset($categories[$cat])) rocNotFound($ROOT);
+    header('Location: ' . rocCategoryUrl($cat) . ($query !== '' ? '?q=' . rawurlencode($query) : ''), true, 301);
+    exit;
+}
+
 if ($slug !== '' && isset(ROC_PRODUCT_GROUPS[$slug])) {
     rocRenderProductList($ROOT, $pdo, $categories, rocProductGroup($slug, $categories), $query);
+}
+
+if ($slug !== '' && isset($categories[$slug])) {
+    rocRenderProductList($ROOT, $pdo, $categories, $categories[$slug], $query);
 }
 
 if ($slug !== '') {
@@ -115,10 +127,6 @@ if ($slug !== '') {
     rocRenderProduct($ROOT, $pdo, $product, $categories);
 }
 
-if ($cat !== '') {
-    if (!isset($categories[$cat])) rocNotFound($ROOT);
-    rocRenderProductList($ROOT, $pdo, $categories, $categories[$cat], $query);
-}
 
 rocRenderProductList($ROOT, $pdo, $categories, null, $query);
 
@@ -291,7 +299,7 @@ function rocProductList(array $p, string $key): array {
 }
 
 function rocProductUrl(string $slug): string { return ROC_PUBLIC_URL . '/products/' . $slug . '/'; }
-function rocCategoryUrl(string $slug): string { return ROC_PUBLIC_URL . '/products/category/' . $slug . '/'; }
+function rocCategoryUrl(string $slug): string { return ROC_PUBLIC_URL . '/products/' . $slug . '/'; }
 
 /**
  * Image shown for a product: its own photo when one is set in the CMS; otherwise
@@ -352,17 +360,37 @@ function rocProductCard(PDO $pdo, array $p, array $categories): string {
         . '</div></div>';
 }
 
-function rocCategoryNav(array $categories, ?string $current, int $total, array $counts): string {
-    $pill = function (string $href, string $label, int $n, bool $on): string {
+/** The Products-menu group a category belongs to. */
+function rocGroupOf(string $catSlug): string {
+    return in_array($catSlug, ROC_PRODUCT_GROUPS['pc-hardware']['members'], true) ? 'pc-hardware' : 'gaming-hardware';
+}
+
+/**
+ * Filter bar: All products | PC Hardware | Gaming Hardware. On a group or category
+ * page a second row lists that group's categories.
+ */
+function rocCategoryNav(array $categories, ?array $cat, int $total, array $counts): string {
+    $pill = function (string $href, string $label, int $n, bool $on, bool $small = false): string {
         return '<a href="' . rocH($href) . '"' . ($on ? ' aria-current="page"' : '')
-            . ' class="text-xs font-bold px-4 py-2 rounded-full border transition-colors no-underline '
+            . ' class="text-xs font-bold ' . ($small ? 'px-3 py-1.5' : 'px-4 py-2') . ' rounded-full border transition-colors no-underline '
             . ($on ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-600') . '">'
             . rocH($label) . ' <span class="' . ($on ? 'text-emerald-100' : 'text-slate-400') . '">(' . $n . ')</span></a>';
     };
-    $h = '<nav aria-label="Product categories" class="flex flex-wrap gap-2">' . $pill('/products/', 'All products', $total, $current === null);
-    foreach ($categories as $s => $c) {
-        if (empty($counts[$s])) continue;
-        $h .= $pill('/products/category/' . $s . '/', (string)$c['name'], $counts[$s], $current === $s);
+    $group = $cat === null ? null : (!empty($cat['group']) ? (string)$cat['slug'] : rocGroupOf((string)$cat['slug']));
+    $h = '<nav aria-label="Product groups" class="space-y-2"><div class="flex flex-wrap gap-2">' . $pill('/products/', 'All products', $total, $cat === null);
+    foreach (ROC_PRODUCT_GROUPS as $g => $def) {
+        $members = rocProductGroup($g, $categories)['members'];
+        $n = array_sum(array_intersect_key($counts, array_flip($members)));
+        if ($n) $h .= $pill('/products/' . $g . '/', $def['name'], $n, $group === $g && !empty($cat['group']));
+    }
+    $h .= '</div>';
+    if ($group !== null) {
+        $row = '';
+        foreach (rocProductGroup($group, $categories)['members'] as $s) {
+            if (empty($counts[$s]) || !isset($categories[$s])) continue;
+            $row .= $pill('/products/' . $s . '/', (string)$categories[$s]['name'], $counts[$s], empty($cat['group']) && $cat['slug'] === $s, true);
+        }
+        if ($row !== '') $h .= '<div class="flex flex-wrap gap-2 pl-1">' . $row . '</div>';
     }
     return $h . '</nav>';
 }
@@ -444,10 +472,10 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
     $m  = $mainOpen . '<div class="max-w-6xl mx-auto py-6 space-y-8 animate-page-in">';
     $m .= '<nav aria-label="Breadcrumb" class="text-xs font-semibold text-slate-500 flex flex-wrap items-center gap-1.5">'
         . '<a href="/products/" class="hover:text-emerald-600 no-underline text-slate-500">Products</a><span>/</span>'
-        . '<a href="/products/category/' . rocH($catSlug) . '/" class="hover:text-emerald-600 no-underline text-slate-500">' . rocH($catName) . '</a><span>/</span>'
+        . '<a href="/products/' . rocH($catSlug) . '/" class="hover:text-emerald-600 no-underline text-slate-500">' . rocH($catName) . '</a><span>/</span>'
         . '<span class="text-slate-800">' . rocH($title) . '</span></nav>';
     $m .= '<div class="flex items-center justify-between gap-3">'
-        . '<a href="/products/category/' . rocH($catSlug) . '/" class="bg-white border border-slate-300 hover:border-emerald-600 text-slate-700 font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2 transition-colors shadow-sm no-underline">'
+        . '<a href="/products/' . rocH($catSlug) . '/" class="bg-white border border-slate-300 hover:border-emerald-600 text-slate-700 font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2 transition-colors shadow-sm no-underline">'
         . ROC_ICON_BACK . '<span>All ' . rocH($catName) . '</span></a></div>';
 
     $m .= '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-8">'
@@ -490,7 +518,7 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
     if ($related) {
         $m .= '<div class="space-y-4"><div class="flex items-center justify-between gap-3">'
             . '<h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">More ' . rocH($catName) . '</h2>'
-            . '<a href="/products/category/' . rocH($catSlug) . '/" class="text-xs font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1 no-underline">See all ' . (count($related) + 1) . ' ' . ROC_ICON_NEXT . '</a></div>'
+            . '<a href="/products/' . rocH($catSlug) . '/" class="text-xs font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1 no-underline">See all ' . (count($related) + 1) . ' ' . ROC_ICON_NEXT . '</a></div>'
             . '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">';
         foreach (array_slice($related, 0, 3) as $r) $m .= rocProductCard($pdo, $r, $categories);
         $m .= '</div></div>';
@@ -524,7 +552,9 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
         $heroText  = trim((string)($cat['description'] ?? '')) ?: $desc;
         $heroBadge = count($inScope) . ' PICKS';
         $image = trim((string)($cat['image'] ?? ''));
-        $crumbs = [['Home', ROC_PUBLIC_URL . '/'], ['Products', ROC_PUBLIC_URL . '/products/'], [$name, $url]];
+        $crumbs = [['Home', ROC_PUBLIC_URL . '/'], ['Products', ROC_PUBLIC_URL . '/products/']];
+        if (empty($cat['group'])) { $g = rocGroupOf((string)$cat['slug']); $crumbs[] = [ROC_PRODUCT_GROUPS[$g]['name'], ROC_PUBLIC_URL . '/products/' . $g . '/']; }
+        $crumbs[] = [$name, $url];
         $noindex = !empty($cat['is_noindex']);
     } else {
         $url   = ROC_PUBLIC_URL . '/products/';
@@ -568,17 +598,17 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
     foreach ($tiles as $s => $c) {
         if (empty($counts[$s])) continue;
         $img = trim((string)($c['image'] ?? ''));
-        $m .= '<a href="/products/category/' . rocH($s) . '/" class="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group no-underline' . (count($tiles) === 1 ? ' col-span-2' : '') . '">'
+        $m .= '<a href="/products/' . rocH($s) . '/" class="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group no-underline' . (count($tiles) === 1 ? ' col-span-2' : '') . '">'
             . ($img !== '' ? '<img src="' . rocH($img) . '" alt="' . rocH($c['name']) . '" class="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform"/>' : '')
             . '<div class="text-xs font-display font-bold text-white">' . rocH($c['name']) . '</div>'
             . '<div class="text-[10px] text-emerald-300 font-medium">' . $counts[$s] . ' picks</div></a>';
     }
     $m .= '</div></div></div>';
 
-    $m .= rocCategoryNav($categories, $cat && empty($cat['group']) ? (string)$cat['slug'] : null, count($all), $counts);
+    $m .= rocCategoryNav($categories, $cat, count($all), $counts);
 
     $action = !empty($cat['group']) ? '/products/' . rawurlencode((string)$cat['slug']) . '/'
-        : ($cat ? '/products/category/' . rawurlencode((string)$cat['slug']) . '/' : '/products/');
+        : ($cat ? '/products/' . rawurlencode((string)$cat['slug']) . '/' : '/products/');
     $m .= '<form method="get" action="' . rocH($action) . '" class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-xs" role="search">'
         . '<div class="relative flex-1 max-w-md"><input type="search" name="q" value="' . rocH($query) . '" placeholder="Search ' . rocH($cat ? strtolower((string)$cat['name']) : 'products') . '…" aria-label="Search products" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500"/></div>'
         . ($query !== '' ? '<a href="' . rocH($action) . '" class="text-[11px] font-bold text-slate-400 hover:text-emerald-600 flex items-center gap-1 px-2 no-underline">Reset</a>' : '')
@@ -614,23 +644,20 @@ function rocProductSitemap(PDO $pdo, array $categories): void {
 
     header('Content-Type: application/xml; charset=utf-8');
     header('Cache-Control: public, max-age=300');
-    $out  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-    $out .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
-    $line = function (string $loc, ?int $mod): string {
-        return '  <url><loc>' . rocH($loc) . '</loc>' . ($mod ? '<lastmod>' . gmdate('c', $mod) . '</lastmod>' : '') . "</url>\n";
-    };
+    $out  = rocSmOpen();
+    $line = 'rocSmLine';
     // /products/ itself is listed in pages-sitemap.xml by sitemap-render.php.
     foreach ($categories as $s => $c) {
         if (!isset($latestByCat[$s]) || !empty($c['is_noindex'])) continue;
         // A category changes when it is edited or when any of its products changes.
         $own = rocDate($c['content_modified_at'] ?? null);
-        $out .= $line(rocCategoryUrl($s), max($own ?? 0, $latestByCat[$s]) ?: null);
+        $out .= $line(rocCategoryUrl($s), max($own ?? 0, $latestByCat[$s]) ?: null, (string)$c['name']);
     }
     foreach (array_keys(ROC_PRODUCT_GROUPS) as $g) {
         $mods = array_intersect_key($latestByCat, array_flip(rocProductGroup($g, $categories)['members']));
-        if ($mods) $out .= $line(ROC_PUBLIC_URL . '/products/' . $g . '/', max($mods));
+        if ($mods) $out .= $line(ROC_PUBLIC_URL . '/products/' . $g . '/', max($mods), ROC_PRODUCT_GROUPS[$g]['name']);
     }
-    foreach ($all as $p) $out .= $line(rocProductUrl((string)$p['slug']), rocProductModified($p));
+    foreach ($all as $p) $out .= $line(rocProductUrl((string)$p['slug']), rocProductModified($p), (string)$p['title']);
     $out .= "</urlset>\n";
     echo $out;
     exit;

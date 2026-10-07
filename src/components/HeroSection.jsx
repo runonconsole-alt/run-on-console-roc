@@ -69,10 +69,10 @@ export const HeroSection = () => {
 
           {/* Floating Hardware Badges */}
           <div className="flex flex-wrap gap-2.5 pt-1">
-            <a href="/products/category/mice/" className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline">
+            <a href="/products/mice/" className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline">
               ⚡ 8000Hz gaming mice
             </a>
-            <a href="/products/category/monitors/" className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline">
+            <a href="/products/monitors/" className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline">
               🔥 QD-OLED monitors
             </a>
             <a href="/compatibility/" className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline">

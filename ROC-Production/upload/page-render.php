@@ -57,16 +57,12 @@ if (!$pdo) {
 if ($isMap) {
     header('Content-Type: application/xml; charset=utf-8');
     header('Cache-Control: public, max-age=300');
-    $out = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    $out = rocSmOpen();
     try {
         // Pages set to "hide from Google" stay out of the sitemap.
         $rows = $pdo->query("SELECT * FROM pages WHERE status = 'published' AND (is_noindex = 0 OR is_noindex IS NULL) ORDER BY published_at DESC")->fetchAll(PDO::FETCH_ASSOC);
     } catch (\Throwable $e) { $rows = []; }
-    foreach ($rows as $r) {
-        $mod = rocModified($r);
-        $out .= '  <url><loc>' . rocH(ROC_PUBLIC_URL . rocPagePathOf($r)) . '</loc>'
-              . ($mod ? '<lastmod>' . gmdate('c', $mod) . '</lastmod>' : '') . "</url>\n";
-    }
+    foreach ($rows as $r) $out .= rocSmLine(ROC_PUBLIC_URL . rocPagePathOf($r), rocModified($r), (string)($r['title'] ?? ''));
     echo $out . "</urlset>\n";
     exit;
 }

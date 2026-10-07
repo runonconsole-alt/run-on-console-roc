@@ -123,7 +123,7 @@ export const ProductsView = () => {
 
   const activeCategory = productCategorySlug !== 'all' ? getProductCategoryBySlug(productCategorySlug) : null;
 
-  const categoryHref = (slug) => (slug === 'all' ? '/products/' : `/products/category/${slug}/`);
+  const categoryHref = (slug) => (slug === 'all' ? '/products/' : `/products/${slug}/`);
   const openCategory = (slug) => {
     setSelectedBrand('all');
     navigateTo('products', slug === 'all' ? null : slug);

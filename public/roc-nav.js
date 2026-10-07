@@ -279,7 +279,8 @@
     }
 
     function formOf(el) { return el && el.closest ? el.closest('form[data-roc-search]') : null; }
-    document.addEventListener('focusin', function (e) { var f = formOf(e.target); if (f) load().then(function () { render(f); }); });
+    // Only the text box: focusing a result link must not rebuild the list, or the click on it is lost.
+    document.addEventListener('focusin', function (e) { var f = formOf(e.target); if (f && e.target.name === 'q') load().then(function () { render(f); }); });
     document.addEventListener('input', function (e) { var f = formOf(e.target); if (f) { render(f); load().then(function () { render(f); }); } });
     document.addEventListener('change', function (e) { var f = formOf(e.target); if (f && e.target.name === 'in') { render(f); if (f.q.value.trim()) f.q.focus(); } });
     document.addEventListener('submit', function (e) {
