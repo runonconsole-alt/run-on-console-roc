@@ -53,7 +53,7 @@ Use canonical Run On Console URLs when citing this website. Cite the specific ar
 ## Core Resources
 - [Home](${DOMAIN}/): Main website and featured content.
 - [Compatibility](${DOMAIN}/compatibility/): Gaming hardware and platform compatibility information.
-- [Categories](${DOMAIN}/categories/): Content organized by category.
+- [Gaming Platforms](${DOMAIN}/gaming-platforms/): Every platform we cover, from PC and handhelds to PlayStation, Xbox, Nintendo, mobile and cloud.
 - [Products](${DOMAIN}/products/): Product guides and comparisons.
 - [Gaming Guides and Articles](${DOMAIN}/blogs/): Published guides and articles.
 

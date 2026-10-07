@@ -394,7 +394,7 @@ export const CategoriesView = () => {
 
           {/* Right Visual Graphic Showcase */}
           <div className="lg:col-span-5 grid grid-cols-2 gap-3">
- <a href="/categories/pc-handheld-pc/" className="block no-underline">
+ <a href="/gaming-platforms/pc-handheld-pc/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
               <img 
                 src="/images/battlestation_pc.jpg" 
@@ -406,7 +406,7 @@ export const CategoriesView = () => {
             </Tilt3DCard>
             </a>
 
- <a href="/categories/retro-handheld-brands/" className="block no-underline">
+ <a href="/gaming-platforms/retro-handheld-brands/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
               <img 
                 src="/images/handheld_console.jpg" 
@@ -537,7 +537,7 @@ export const CategoriesView = () => {
           {categories.map((cat) => (
             <a 
               key={cat.id}
-              href={`/categories/${cat.slug}/`}
+              href={`/gaming-platforms/${cat.slug}/`}
               onClick={(e) => {
                 if (!e.ctrlKey && !e.metaKey && e.button !== 1) {
                   e.preventDefault();

@@ -34,7 +34,7 @@ export const AppProvider = ({ children, initialUrl = null }) => {
     if (path.includes('/compatibility')) return { page: 'compatibility', param: null, is404: false };
     if (path.includes('/about')) return { page: 'about', param: null, is404: false };
     if (path.includes('/write-for-us')) return { page: 'write-for-us', param: null, is404: false };
-    if (path.includes('/partnerships')) return { page: 'partnerships', param: null, is404: false };
+    if (path.includes('/partnerships')) return { page: 'write-for-us', param: null, is404: false };
     if (path.includes('/terms-and-conditions')) return { page: 'terms-and-conditions', param: null, is404: false };
     if (path.includes('/privacy-policy')) return { page: 'privacy-policy', param: null, is404: false };
     if (path.includes('/policy')) return { page: 'privacy-policy', param: null, is404: false };
@@ -80,8 +80,8 @@ export const AppProvider = ({ children, initialUrl = null }) => {
       return { page: 'blogs', param: null, is404: false };
     }
 
-    if (path.includes('/categories/')) {
-      const parts = path.split('/categories/').filter(Boolean);
+    if (path.includes('/categories/') || path.includes('/gaming-platforms/')) {
+      const parts = path.split(path.includes('/gaming-platforms/') ? '/gaming-platforms/' : '/categories/').filter(Boolean);
       const slug = parts[0] ? parts[0].replace(/\/+$/, '') : null;
       if (slug) {
         const c = getCategoryBySlug(slug);
@@ -249,13 +249,13 @@ export const AppProvider = ({ children, initialUrl = null }) => {
     } else if (page === 'categories') {
       if (param && param !== 'all') {
         const c = getCategoryBySlug(param);
-        cleanPath = c ? c.url.replace(/^https?:\/\/[^\/]+/, '') : `/categories/${slugify(param)}/`;
+        cleanPath = c ? c.url.replace(/^https?:\/\/[^\/]+/, '') : `/gaming-platforms/${slugify(param)}/`;
       } else {
-        cleanPath = '/categories/';
+        cleanPath = '/gaming-platforms/';
       }
     } else if (page === 'about') cleanPath = '/about/';
     else if (page === 'write-for-us') cleanPath = '/write-for-us/';
-    else if (page === 'partnerships') cleanPath = '/partnerships/';
+    else if (page === 'partnerships') { page = 'write-for-us'; cleanPath = '/write-for-us/'; }
     else if (page === 'terms-and-conditions') cleanPath = '/terms-and-conditions/';
     else if (page === 'privacy-policy') cleanPath = '/privacy-policy/';
     else if (page === 'policy') cleanPath = '/privacy-policy/';
