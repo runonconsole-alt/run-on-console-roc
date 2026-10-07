@@ -26,6 +26,9 @@ const OUT = path.resolve('public/roc-steam-games.json');
 const TARGET = 500;
 const FROM_YEAR = 2021;
 const SPY_PAGES = 5;
+// Steam numbers apps in the order they were created: below this number they are
+// almost all released before 2021 (Helldivers 2, 553850, is one of the lowest recent ones).
+const MIN_APPID = 500000;
 const ADULT_DESCRIPTORS = [3, 4];   // Steam: adult-only sexual content, frequent nudity or sexual content
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -84,7 +87,7 @@ for (let page = 0; page < SPY_PAGES; page++) {
 }
 const seen = new Set();
 const candidates = Object.values(cache.spy).flat()
-  .filter((a) => a && !seen.has(a.appid) && seen.add(a.appid))
+  .filter((a) => a && a.appid >= MIN_APPID && !seen.has(a.appid) && seen.add(a.appid))
   .sort((a, b) => b.positive - a.positive);
 console.log(`${candidates.length} candidates`);
 

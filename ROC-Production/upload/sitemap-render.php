@@ -115,6 +115,11 @@ try {
     while (ob_get_level() > 0) ob_end_clean();
     $children['cms-pages'] = [time(), 'CMS pages'];
 }
+// config.php is shared with the API (session, no-cache headers): undo that for the sitemap.
+if (!headers_sent()) {
+    foreach (['Set-Cookie', 'Expires', 'Pragma', 'Cache-Control', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'] as $h) header_remove($h);
+    header('Cache-Control: public, max-age=600');
+}
 header('Content-Type: application/xml; charset=utf-8');
 header('X-Robots-Tag: noindex');
 echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . ROC_SM_STYLE . "\n"

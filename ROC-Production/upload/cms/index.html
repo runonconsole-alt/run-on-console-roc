@@ -268,6 +268,7 @@ a{color:var(--brand)}
 .sitem .ct{background:var(--panel-2)}
 .sitem .ct.new{background:var(--brand);color:#fff}
 .av{background:var(--brand)}
+.list .tag{white-space:nowrap}
 .accents{display:flex;gap:6px;padding:4px 10px 10px}
 .accents button{width:18px;height:18px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line-2);cursor:pointer;padding:0}
 .accents button.on{box-shadow:0 0 0 2px var(--ink)}
@@ -1104,6 +1105,68 @@ async function openMessage(id){
     }, true);
 }
 
+/* ---------------------------------------------------------------- games */
+/* Games on the compatibility page: our own picks (part of the website build, in
+   /roc-games.json) and the popular PC games with official Steam requirements
+   (/roc-steam-games.json, made by scripts/fetch-steam-games.mjs). Read-only. */
+
+async function renderGames(m){
+  if(!S.gamesData){
+    m.innerHTML=head('Games','Loading…')+'<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+    var get=function(u){ return fetch(u+'?ts='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }); };
+    var res=await Promise.all([get('/roc-steam-games.json'),get('/roc-games.json')]);
+    var steam=(res[0]&&res[0].games)||[];
+    var steamUrls={}; steam.forEach(function(g){ steamUrls['/compatibility/?steam='+g.appid]=1; });
+    var ours=(res[1]||[]).filter(function(g){ return !steamUrls[g.u]; });
+    S.gamesData={
+      updated:res[0]&&res[0].updated,
+      rows:ours.map(function(g){ return {t:g.t,y:'',g:g.g,src:'ours',auto:true,page:g.u,store:''}; })
+        .concat(steam.map(function(g){
+          var r=g.req&&g.req.min;
+          return {t:g.t,y:g.y,g:g.g,src:'steam',auto:!!(r&&r.cpu&&r.gpu),page:'/compatibility/?steam='+g.appid,store:g.u,min:g.min};
+        }))
+    };
+    if(S.view!=='games'||S.editing) return;
+  }
+  var d=S.gamesData, f=S.gameFilter||'all', q=(S.gameQ||'').toLowerCase();
+  var rows=d.rows.filter(function(r){
+    if(f==='ours'&&r.src!=='ours') return false;
+    if(f==='steam'&&r.src!=='steam') return false;
+    if(f==='manual'&&r.auto) return false;
+    return !q || (r.t+' '+(r.g||'')+' '+r.y).toLowerCase().indexOf(q)!==-1;
+  });
+  var count=function(fn){ return d.rows.filter(fn).length; };
+  var chips={all:['All',d.rows.length],ours:['Our picks',count(function(r){return r.src==='ours';})],
+    steam:['Steam (official requirements)',count(function(r){return r.src==='steam';})],
+    manual:['No automatic check',count(function(r){return !r.auto;})]};
+  m.innerHTML=head('Games','Every game on the compatibility page ('+d.rows.length+')',
+      '<a class="btn" href="/compatibility/" target="_blank" rel="noopener">Open the page ↗</a>')+
+    '<div class="body">'+
+    '<div class="card"><div class="chead" style="flex-wrap:wrap;gap:10px">'+
+      '<div class="search" style="max-width:280px;flex:1"><input type="text" id="gq" placeholder="Search a game, genre or year" value="'+esc(S.gameQ||'')+'"></div>'+
+      '<div class="chips">'+Object.keys(chips).map(function(k){
+        return '<button class="chip'+(f===k?' on':'')+'" data-gf="'+k+'">'+esc(chips[k][0])+'<span class="n">'+chips[k][1]+'</span></button>';
+      }).join('')+'</div></div>'+
+    (rows.length?'<table class="list"><thead><tr><th>Game</th><th>Year</th><th>Genre</th><th>Source</th><th>Check</th><th></th></tr></thead><tbody>'+
+      rows.slice(0,600).map(function(r){
+        return '<tr><td><div style="font-weight:600">'+esc(r.t)+'</div>'+
+          (r.min&&(r.min.gpu||r.min.cpu)?'<div class="t-slug" style="max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+esc([r.min.cpu,r.min.gpu,r.min.ram].filter(Boolean).join(' / '))+'">Min: '+esc([r.min.gpu,r.min.ram].filter(Boolean).join(' · '))+'</div>':'')+'</td>'+
+          '<td>'+esc(r.y||'—')+'</td><td style="color:var(--ink-3)">'+esc(r.g||'')+'</td>'+
+          '<td><span class="tag '+(r.src==='steam'?'admin':'published')+'">'+(r.src==='steam'?'Steam':'Our pick')+'</span></td>'+
+          '<td>'+(r.auto?'<span class="tag published">Automatic</span>':'<span class="tag draft" title="The official text could not be read for an automatic score: visitors see the requirements and compare themselves">Requirements only</span>')+'</td>'+
+          '<td style="text-align:right;white-space:nowrap"><a class="btn sm" href="'+esc(r.page)+'" target="_blank" rel="noopener">Check page ↗</a>'+
+          (r.store?' <a class="btn sm" href="'+esc(r.store)+'" target="_blank" rel="noopener">Steam ↗</a>':'')+'</td></tr>';
+      }).join('')+'</tbody></table>'
+      :'<div class="empty"><div class="big">🎮</div><div>No games match.</div></div>')+
+    '</div>'+
+    '<div class="hint">Steam games and their requirements come from each game\'s Steam store page'+(d.updated?' (list made '+esc(d.updated)+')':'')+
+      '. To refresh the list, run <code>node scripts/fetch-steam-games.mjs</code> and deploy <code>roc-steam-games.json</code>. Our picks are edited in the website code.</div>'+
+    '</div>';
+  var gq=$('#gq',m);
+  gq.addEventListener('input',function(){ S.gameQ=gq.value; var at=gq.selectionStart; renderGames(m); var x=$('#gq',m); if(x){ x.focus(); x.setSelectionRange(at,at); } });
+  m.querySelectorAll('[data-gf]').forEach(function(b){ b.addEventListener('click',function(){ S.gameFilter=b.dataset.gf; renderGames(m); }); });
+}
+
 /* --------------------------------------------------------------- shell */
 
 function renderShell(){
@@ -1126,6 +1189,7 @@ function renderShell(){
       (can('pages','view')?item('cmspages','Pages','▦',S.pages.length):'')+
       (can('pages','view')?item('pages','Website pages & SEO','▤'):'')+
       (can('pages','view')?item('platforms','Gaming platforms','◈'):'')+
+      item('games','Games','🎮')+
       (can('products','view')?item('products','Products','▣')+item('product-images','Product images','▨')+item('product-categories','Product categories','▤'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
       item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+'</div>':'')+
@@ -1170,6 +1234,7 @@ function renderView(){
   if(S.view==='media') return renderMedia(m);
   if(S.view==='pages') return renderPages(m);
   if(S.view==='platforms' && can('pages','view')) return renderPlatforms(m);
+  if(S.view==='games') return renderGames(m);
   if(S.view==='activity') return renderActivity(m);
   if(S.view==='messages' && S.user.role==='administrator') return renderMessages(m);
   if(S.view==='social') return renderSocial(m);

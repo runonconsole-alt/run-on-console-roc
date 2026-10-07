@@ -75,6 +75,18 @@ export function gpuScore(s) {
     if (ARC[k] !== undefined) add(ARC[k]);
   }
   if (!found.length && /\b(uhd|iris|hd graphics|integrated|vega\s*(3|6|7|8|10|11)\b)/.test(s)) add(1.8);
+  // Older cards and plain wording, mostly from small games with light requirements.
+  if (!found.length) {
+    if (/\bgts\s*\d{3}|\bgtx\s*[45]\d{2}\b|\bgt\s*[4-7]\d{2}m?\b|\bhd\s*\d{3,4}\b|\bhd\d{4}\b/.test(s)) add(1.8);
+    else if (/gtx\s*[67]00\s*series/.test(s)) add(2.5);
+    else {
+      const v1 = /(\d+(?:\.\d+)?)\s*(gb|mb)\b[^.;]*?(vram|dedicated|video memory)/.exec(s);
+      const v2 = /(vram|dedicated)[^\d]{0,20}(\d+(?:\.\d+)?)\s*(gb|mb)/.exec(s);
+      const gb = v1 ? (v1[2] === 'mb' ? +v1[1] / 1024 : +v1[1]) : v2 ? (v2[3] === 'mb' ? +v2[2] / 1024 : +v2[2]) : null;
+      if (gb !== null) add(gb >= 8 ? 6 : gb >= 6 ? 5 : gb >= 4 ? 4.5 : gb >= 2 ? 3 : 1.8);
+      else if (/directx|opengl|vulkan|dx1[0-2]|any (modern )?(graphics|video|card)|capable|compatible|\d+\s*mb/.test(s)) add(1.8);
+    }
+  }
   return max(found);
 }
 
@@ -110,6 +122,13 @@ export function cpuScore(s) {
   if (/core\s*2|pentium|celeron|atom/.test(s)) found.push(2);
   if (!found.length && /quad[\s-]*core|4[\s-]*core/.test(s)) found.push(3);
   if (!found.length && /dual[\s-]*core|2[\s-]*core/.test(s)) found.push(2);
+  // A family without a model number ("Intel Core i5", "Ryzen 3 series"): the oldest of it.
+  if (!found.length) {
+    const fam = [[/\bi9\b/, 6], [/\bi7\b/, 4.5], [/\bi5\b/, 4.5], [/\bi3\b/, 3], [/ryzen\s*9/, 6], [/ryzen\s*7/, 5], [/ryzen\s*5/, 4.5], [/ryzen\s*3/, 3.5]];
+    for (const [re, v] of fam) if (re.test(s)) found.push(v);
+  }
+  // Only a clock speed or an instruction set: any recent dual-core processor.
+  if (!found.length && /\d(?:[.,]\d+)?\s*ghz|sse2|x64|64-bit|64 bit/.test(s)) found.push(2);
   return max(found);
 }
 
