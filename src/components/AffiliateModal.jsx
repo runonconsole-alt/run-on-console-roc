@@ -64,7 +64,7 @@ export const AffiliateModal = ({ isOpen, onClose, targetUrl, productName }) => {
             className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl border border-slate-700 transition-colors flex items-center justify-center gap-2"
           >
             <UserCheck className="w-4 h-4 text-emerald-400" />
-            <span>Sign In to Save to Wishlist & Earn Rewards</span>
+            <span>Sign In</span>
           </button>
 
           <button

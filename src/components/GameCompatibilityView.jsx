@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   Gamepad2, Search, Filter, Sparkles, CheckCircle, Flame, Zap, 
@@ -25,6 +25,16 @@ export const GameCompatibilityView = () => {
 
   // Selected Target Game
   const [checkerGameId, setCheckerGameId] = useState(gameCompatibility[0]?.id || 'game-gta-5');
+
+  // Arriving from the header search (/compatibility/?q=Game title): filter the list and
+  // pick that game in the checker. Done after hydration so the server HTML still matches.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('q');
+    if (!q) return;
+    setSearchQuery(q);
+    const game = gameCompatibility.find((g) => g.gameTitle.toLowerCase() === q.toLowerCase());
+    if (game) setCheckerGameId(game.id);
+  }, []);
 
   // Mode A: Preset Device Profile State
   const [checkerDeviceId, setCheckerDeviceId] = useState('pc-mid');
@@ -139,16 +149,26 @@ export const GameCompatibilityView = () => {
       statusBadge = `${percentage}% - PLAYABLE WITH LOW SETTINGS / TWEAKS`;
       statusColor = "text-amber-800 bg-amber-50 border-amber-300";
       fpsEstimate = "35 - 50 FPS at 720p/1080p Low Settings";
-      upgradeRecommendation = `Is se upar wala version: Upgrade your GPU to at least an NVIDIA RTX 3060 (12GB) and upgrade RAM to 16GB.`;
+      upgradeRecommendation = `Playable on low settings. For a smooth 60 FPS, upgrade the graphics card to at least an NVIDIA RTX 3060 (12GB) and use 16GB of RAM.`;
     } else {
       statusBadge = `${percentage}% - INSUFFICIENT HARDWARE (UNPLAYABLE)`;
       statusColor = "text-rose-800 bg-rose-50 border-rose-300";
       fpsEstimate = "Under 15 - 25 FPS (Severe Stutter / Lag)";
-      upgradeRecommendation = `Is device par game nahi chalegi! Upgrade to Intel Core i5 12th Gen + RTX 3060 + 16GB RAM minimum, ya alternative use karein (GeForce NOW Cloud / External HDD copy / Mobile APK).`;
+      upgradeRecommendation = `This PC cannot run the game well. Minimum to aim for: Intel Core i5 12th Gen (or Ryzen 5 5600), RTX 3060 and 16GB RAM. Without upgrading, you can still play it through a cloud gaming service such as NVIDIA GeForce NOW or Xbox Cloud Gaming, if the game is available there.`;
+    }
+
+    // What to change, part by part, when the PC falls short.
+    const missing = [];
+    if (percentage < 70) {
+      if (selectedGpu.score < 6) missing.push({ part: 'Graphics card', have: selectedGpu.label || selectedGpu.name || selectedGpu.id, need: 'NVIDIA RTX 3060 / AMD RX 6600 or better' });
+      if (selectedCpu.score < 6) missing.push({ part: 'Processor', have: selectedCpu.label || selectedCpu.name || selectedCpu.id, need: 'Intel Core i5 12th Gen / AMD Ryzen 5 5600 or better' });
+      if (customRamGb < 16) missing.push({ part: 'Memory (RAM)', have: `${customRamGb}GB`, need: '16GB' });
+      if (customStorage === 'hdd') missing.push({ part: 'Storage', have: 'Hard disk (HDD)', need: 'SSD (NVMe preferred)' });
     }
 
     return {
       percentage,
+      missing,
       statusBadge,
       statusColor,
       fpsEstimate,
@@ -534,6 +554,45 @@ export const GameCompatibilityView = () => {
                         <li key={i}>{b}</li>
                       ))}
                     </ul>
+                  </div>
+                )}
+
+                {/* What is missing, part by part */}
+                {customAnalysisResult.missing.length > 0 && (
+                  <div className="p-3.5 bg-white/90 rounded-xl border border-current/30 text-xs">
+                    <div className="font-bold uppercase tracking-wider text-slate-900 mb-2">What your PC is missing</div>
+                    <table className="w-full text-left text-slate-800">
+                      <thead><tr className="text-slate-500"><th className="py-1 pr-2">Part</th><th className="py-1 pr-2">You have</th><th className="py-1">Needed</th></tr></thead>
+                      <tbody>
+                        {customAnalysisResult.missing.map((m) => (
+                          <tr key={m.part} className="border-t border-slate-100"><td className="py-1 pr-2 font-semibold">{m.part}</td><td className="py-1 pr-2">{m.have}</td><td className="py-1 font-semibold text-emerald-700">{m.need}</td></tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Official stores to get the game (search pages on the store itself) */}
+                {customAnalysisResult.percentage >= 45 && (
+                  <div className="p-3.5 bg-white/90 rounded-xl border border-current/30 text-xs space-y-2">
+                    <div className="font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1">
+                      <DownloadCloud className="w-4 h-4 text-emerald-600" />
+                      <span>Get {selectedCheckerGame.gameTitle} from an official store</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        ['Steam', 'https://store.steampowered.com/search/?term='],
+                        ['Epic Games Store', 'https://store.epicgames.com/en-US/browse?q='],
+                        ['Xbox / PC Game Pass', 'https://www.xbox.com/en-US/search/results/games?q='],
+                        ['PlayStation Store', 'https://store.playstation.com/en-us/search/'],
+                      ].map(([name, base]) => (
+                        <a key={name} href={base + encodeURIComponent(selectedCheckerGame.gameTitle.replace(/\s*\([^)]*\)/g, '').trim())} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold no-underline hover:bg-emerald-700">
+                          {name} <ExternalLink className="w-3 h-3" />
+                        </a>
+                      ))}
+                    </div>
+                    <p className="text-slate-500">Buy or download only from official stores: they are safe, updated and support the developers.</p>
                   </div>
                 )}
 

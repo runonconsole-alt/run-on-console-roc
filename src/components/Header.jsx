@@ -112,38 +112,13 @@ export const Header = () => {
   };
 
   const productCount = (slug) => (products || []).filter(p => p.categorySlug === slug).length;
-  // One "Components" menu: PC hardware and gaming hardware, then a link to every product.
-  const componentGroups = [
-    {
-      label: "PC HARDWARE",
-      items: [
-        { title: "Graphics Cards (GPUs)", desc: `NVIDIA RTX 50, AMD RX 9000, Intel Arc · ${productCount('gpu')} picks`, icon: Cpu, slug: "gpu" },
-      ],
-    },
-    {
-      label: "GAMING HARDWARE",
-      items: [
-        { title: "Gaming Monitors & Displays", desc: `OLED, QD-OLED & ultrawide · ${productCount('monitors')} picks`, icon: Monitor, slug: "monitors" },
-        { title: "Gaming Mice", desc: `Ultra-light, ergonomic & MMO · ${productCount('mice')} picks`, icon: Mouse, slug: "mice" },
-        { title: "Gaming Keyboards", desc: `Hall Effect, rapid trigger & mechanical · ${productCount('keyboards')} picks`, icon: Cable, slug: "keyboards" },
-        { title: "Headsets & Audio Gear", desc: `Headsets, earbuds & USB mics · ${productCount('audio')} picks`, icon: Headphones, slug: "audio" },
-        { title: "Speakers & Soundbars", desc: `2.0, 2.1, 5.1 & soundbars · ${productCount('speakers')} picks`, icon: Tv, slug: "speakers" },
-      ],
-    },
-  ];
-
-  const systemsMenu = [
-    { title: "Gaming Laptops", desc: "RTX 4080/4090 175W TGP Laptops", icon: Laptop, slug: "pc-handheld-pc" },
-    { title: "Steam Deck & Handheld PCs", desc: "Steam Deck OLED, ROG Ally X, Legion Go", icon: Gamepad2, slug: "retro-handheld-brands" },
-    { title: "Pre-Built Desktop PCs", desc: "Liquid Battlestations, i9-14900KS Rigs", icon: Cpu, slug: "pc-handheld-pc" },
-    { title: "15 Gaming Platforms Directory", desc: "PlayStation 5 Pro, Xbox Series X, Switch 2 Hubs", icon: Layers, slug: "all" },
-  ];
-
-  const guidesMenu = [
-    { title: "Step-by-Step PC Building", desc: "$800, $1,500, $3,000+ Budget Bracket Builds", icon: Wrench, route: "blogs" },
-    { title: "Troubleshooting & Fixes", desc: "Thermal Throttling, Driver Fixes, BIOS Updates", icon: Activity, route: "blogs" },
-    { title: "Windows & Game Optimization", desc: "Windows 11 Gaming Tweaks, Undervolting", icon: Zap, route: "blogs" },
-    { title: "Can I Run It? Hardware Matrix", desc: "Test Custom PC Specs for GTA 5, BO6 & Cyberpunk", icon: Cpu, route: "compatibility" },
+  // Products menu: two groups. Each opens /products/{group}/ (server-rendered from the CMS),
+  // which lists every product of the group's categories.
+  const PC_HARDWARE = ['gpu'];
+  const countIn = (slugs) => (products || []).filter(p => slugs.includes(p.categorySlug)).length;
+  const productGroups = [
+    { slug: 'pc-hardware', title: 'PC Hardware', desc: `Graphics cards and PC components · ${countIn(PC_HARDWARE)} picks`, icon: Cpu },
+    { slug: 'gaming-hardware', title: 'Gaming Hardware', desc: `Monitors, mice, keyboards, headsets, speakers · ${(products || []).length - countIn(PC_HARDWARE)} picks`, icon: Gamepad2 },
   ];
 
   const query = (searchQuery || '').toLowerCase().trim();
@@ -190,207 +165,94 @@ export const Header = () => {
                 HOME
               </a>
 
-              {/* 1. COMPONENTS (PC hardware + gaming hardware) */}
+              {/* 1. PRODUCTS: PC hardware and gaming hardware */}
               <div
                 className="relative roc-dd"
-                onMouseEnter={() => handleMouseEnter('components')}
+                onMouseEnter={() => handleMouseEnter('products')}
                 onMouseLeave={handleMouseLeave}
               >
                 <a
                   href="/products/"
                   onClick={(e) => handleNavClick(e, 'products')}
                   className={`px-1.5 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ${
-                    activeDropdown === 'components' || currentPage === 'products'
+                    activeDropdown === 'products' || currentPage === 'products'
                       ? 'bg-emerald-600 text-white shadow-sm'
                       : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
                   }`}
                 >
-                  <span>COMPONENTS</span>
-                  <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${activeDropdown === 'components' ? 'rotate-180' : ''}`} />
+                  <span>PRODUCTS</span>
+                  <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${activeDropdown === 'products' ? 'rotate-180' : ''}`} />
                 </a>
 
-                {(
-                  <div className={`roc-dd-panel${activeDropdown === 'components' ? ' is-open' : ''}${closedDropdown === 'components' ? ' is-closed' : ''} mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[380px] rounded-3xl p-4 shadow-2xl space-y-3 animate-page-in z-[99999]`}>
-                    {componentGroups.map((group) => (
-                      <div key={group.label} className="space-y-1">
-                        <div className="flex items-center gap-1.5 pb-1.5 border-b border-emerald-100 font-display font-extrabold text-[11px] text-slate-900">
-                          <Cpu className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>{group.label}</span>
+                <div className={`roc-dd-panel${activeDropdown === 'products' ? ' is-open' : ''}${closedDropdown === 'products' ? ' is-closed' : ''} mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[320px] rounded-3xl p-3 shadow-2xl space-y-1.5 animate-page-in z-[99999]`}>
+                  {productGroups.map((group) => {
+                    const Icon = group.icon;
+                    return (
+                      <a
+                        key={group.slug}
+                        href={`/products/${group.slug}/`}
+                        className="dropdown-tile p-2.5 rounded-xl cursor-pointer flex items-center justify-between gap-2.5 group no-underline"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <h5 className="font-display font-bold text-xs text-slate-900 group-hover:text-emerald-700 truncate">{group.title}</h5>
+                            <span className="text-[10px] text-slate-500 block truncate">{group.desc}</span>
+                          </div>
                         </div>
-                        {group.items.map((item) => {
-                          const Icon = item.icon;
-                          return (
-                            <a
-                              key={item.slug}
-                              href={`/products/category/${item.slug}/`}
-                              onClick={(e) => handleNavClick(e, 'products', item.slug)}
-                              className="dropdown-tile p-2 rounded-xl cursor-pointer flex items-center justify-between gap-2.5 group no-underline"
-                            >
-                              <div className="flex items-center gap-2.5 min-w-0">
-                                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                                  <Icon className="w-4 h-4" />
-                                </div>
-                                <div className="min-w-0">
-                                  <h5 className="font-display font-bold text-xs text-slate-900 group-hover:text-emerald-700 truncate">
-                                    {item.title}
-                                  </h5>
-                                  <span className="text-[10px] text-slate-500 block truncate">
-                                    {item.desc}
-                                  </span>
-                                </div>
-                              </div>
-                              <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 shrink-0" />
-                            </a>
-                          );
-                        })}
-                      </div>
-                    ))}
-                    <a
-                      href="/products/"
-                      onClick={(e) => handleNavClick(e, 'products')}
-                      className="block text-center text-xs font-display font-extrabold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl py-2 no-underline"
-                    >
-                      View all {(products || []).length} products →
-                    </a>
-                  </div>
-                )}
+                        <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 shrink-0" />
+                      </a>
+                    );
+                  })}
+                  <a
+                    href="/products/"
+                    onClick={(e) => handleNavClick(e, 'products')}
+                    className="block text-center text-xs font-display font-extrabold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl py-2 no-underline"
+                  >
+                    View all {(products || []).length} products →
+                  </a>
+                </div>
               </div>
 
-              {/* 3. SYSTEMS */}
-              <div 
-                className="relative roc-dd"
-                onMouseEnter={() => handleMouseEnter('systems')}
-                onMouseLeave={handleMouseLeave}
-              >
-                <a
-                  href="/categories/"
-                  onClick={(e) => handleNavClick(e, 'categories', 'all')}
-                  className={`px-1.5 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ${
-                    currentPage === 'categories' || activeDropdown === 'systems'
-                      ? 'bg-emerald-600 text-white shadow-sm' 
-                      : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
-                  }`}
-                >
-                  <span>SYSTEMS</span>
-                  <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${activeDropdown === 'systems' ? 'rotate-180' : ''}`} />
-                </a>
-
-                {(
-                  <div className={`roc-dd-panel${activeDropdown === 'systems' ? ' is-open' : ''}${closedDropdown === 'systems' ? ' is-closed' : ''} mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[360px] rounded-3xl p-4 shadow-2xl space-y-2 animate-page-in z-[99999]`}>
-                    <div className="flex items-center justify-between pb-2 border-b border-emerald-100">
-                      <span className="font-display font-extrabold text-xs text-slate-900 flex items-center gap-1.5">
-                        <Monitor className="w-4 h-4 text-emerald-600" />
-                        <span>GAMING ECOSYSTEMS</span>
-                      </span>
-                      <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">15 Platforms</span>
-                    </div>
-
-                    <div className="space-y-1">
-                      {systemsMenu.map((item, idx) => {
-                        const Icon = item.icon;
-                        const catUrl = item.slug && item.slug !== 'all' ? `/categories/${item.slug}/` : '/categories/';
-                        return (
-                          <a
-                            key={idx}
-                            href={catUrl}
-                            onClick={(e) => handleNavClick(e, 'categories', item.slug || 'all')}
-                            className="dropdown-tile p-2.5 rounded-xl cursor-pointer flex items-center justify-between gap-2.5 group no-underline"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                                <Icon className="w-4 h-4" />
-                              </div>
-                              <div className="min-w-0">
-                                <h5 className="font-display font-bold text-xs text-slate-900 group-hover:text-emerald-700 truncate">
-                                  {item.title}
-                                </h5>
-                                <span className="text-[10px] text-slate-500 block truncate">
-                                  {item.desc}
-                                </span>
-                              </div>
-                            </div>
-                            <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 shrink-0" />
-                          </a>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 4. PC GUIDES */}
-              <div 
-                className="relative roc-dd"
-                onMouseEnter={() => handleMouseEnter('guides')}
-                onMouseLeave={handleMouseLeave}
-              >
-                <a
-                  href="/blogs/"
-                  onClick={(e) => handleNavClick(e, 'blogs')}
-                  className={`px-1.5 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ${
-                    activeDropdown === 'guides'
-                      ? 'bg-emerald-600 text-white shadow-sm' 
-                      : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
-                  }`}
-                >
-                  <span>PC GUIDES</span>
-                  <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${activeDropdown === 'guides' ? 'rotate-180' : ''}`} />
-                </a>
-
-                {(
-                  <div className={`roc-dd-panel${activeDropdown === 'guides' ? ' is-open' : ''}${closedDropdown === 'guides' ? ' is-closed' : ''} mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[360px] rounded-3xl p-4 shadow-2xl space-y-2 animate-page-in z-[99999]`}>
-                    <div className="flex items-center justify-between pb-2 border-b border-emerald-100">
-                      <span className="font-display font-extrabold text-xs text-slate-900 flex items-center gap-1.5">
-                        <Wrench className="w-4 h-4 text-emerald-600" />
-                        <span>PC BUILDING & HOW-TOS</span>
-                      </span>
-                      <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Tutorials</span>
-                    </div>
-
-                    <div className="space-y-1">
-                      {guidesMenu.map((item, idx) => {
-                        const Icon = item.icon;
-                        const guideUrl = item.route === 'compatibility' ? '/compatibility/' : '/blogs/';
-                        return (
-                          <a
-                            key={idx}
-                            href={guideUrl}
-                            onClick={(e) => handleNavClick(e, item.route)}
-                            className="dropdown-tile p-2.5 rounded-xl cursor-pointer flex items-center justify-between gap-2.5 group no-underline"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                                <Icon className="w-4 h-4" />
-                              </div>
-                              <div className="min-w-0">
-                                <h5 className="font-display font-bold text-xs text-slate-900 group-hover:text-emerald-700 truncate">
-                                  {item.title}
-                                </h5>
-                                <span className="text-[10px] text-slate-500 block truncate">
-                                  {item.desc}
-                                </span>
-                              </div>
-                            </div>
-                            <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 shrink-0" />
-                          </a>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 5. GAME COMPATIBILITY */}
+              {/* 2. SYSTEMS: which games run on which system + the PC compatibility checker */}
               <a
                 href="/compatibility/"
                 onClick={(e) => handleNavClick(e, 'compatibility')}
-                className={`px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap mr-1 lg:mr-2 ${
-                  currentPage === 'compatibility' 
-                    ? 'bg-emerald-600 text-white shadow-sm' 
+                className={`px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap ${
+                  currentPage === 'compatibility'
+                    ? 'bg-emerald-600 text-white shadow-sm'
                     : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
                 }`}
               >
-                COMPATIBILITY
+                SYSTEMS
+              </a>
+
+              {/* 3. BLOGS */}
+              <a
+                href="/blogs/"
+                onClick={(e) => handleNavClick(e, 'blogs')}
+                className={`px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap ${
+                  currentPage === 'blogs'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
+                }`}
+              >
+                BLOGS
+              </a>
+
+              {/* 4. ABOUT US */}
+              <a
+                href="/about/"
+                onClick={(e) => handleNavClick(e, 'about')}
+                className={`px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap mr-1 lg:mr-2 ${
+                  currentPage === 'about'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
+                }`}
+              >
+                ABOUT US
               </a>
 
             </nav>
@@ -398,134 +260,36 @@ export const Header = () => {
             {/* Right Actions */}
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               
-              {/* Search Bar */}
-              <div ref={searchRef} className="relative hidden md:block w-32 lg:w-36 xl:w-48 shrink-0">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-                <input 
-                  type="text"
-                  placeholder="Search gear & games..."
-                  aria-label="Search gaming hardware and games"
-                  value={searchQuery}
-                  onFocus={() => setSearchFocused(true)}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setSearchFocused(true);
-                  }}
-                  className="w-full bg-slate-100/90 hover:bg-slate-100 border border-slate-200 rounded-xl pl-8 pr-2.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all shadow-inner font-medium"
+              {/* Search: products, blogs or games. roc-nav.js shows live results and opens the right page. */}
+              <form
+                data-roc-search=""
+                role="search"
+                action="/products/"
+                className="relative hidden md:flex items-center w-48 lg:w-56 xl:w-72 shrink-0 bg-slate-100/90 border border-slate-200 rounded-xl focus-within:border-emerald-500 focus-within:bg-white transition-all shadow-inner"
+              >
+                <select
+                  name="in"
+                  aria-label="Search in"
+                  defaultValue="all"
+                  className="bg-transparent border-0 border-r border-slate-200 text-[11px] font-bold text-slate-700 pl-2 pr-1 py-1.5 rounded-l-xl focus:outline-none cursor-pointer"
+                >
+                  <option value="all">All</option>
+                  <option value="products">Products</option>
+                  <option value="blogs">Blogs</option>
+                  <option value="games">Games</option>
+                </select>
+                <input
+                  type="search"
+                  name="q"
+                  autoComplete="off"
+                  placeholder="Search..."
+                  aria-label="Search products, blogs and games"
+                  className="flex-1 min-w-0 bg-transparent border-0 pl-2 pr-7 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none font-medium"
                 />
-
-                {searchFocused && (
-                  <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white border-2 border-emerald-400 rounded-3xl p-3 shadow-2xl z-[99999] space-y-2.5 animate-page-in">
-                    <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200 text-[10px] font-extrabold">
-                      <button
-                        type="button"
-                        onClick={() => setSearchTab('all')}
-                        className={`py-1 rounded-lg transition-colors ${searchTab === 'all' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:text-slate-900'}`}
-                      >
-                        ALL
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSearchTab('games')}
-                        className={`py-1 rounded-lg transition-colors ${searchTab === 'games' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:text-slate-900'}`}
-                      >
-                        🎮 GAMES ({filteredGames.length})
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSearchTab('devices')}
-                        className={`py-1 rounded-lg transition-colors ${searchTab === 'devices' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:text-slate-900'}`}
-                      >
-                        💻 DEVICES ({filteredProducts.length})
-                      </button>
-                    </div>
-
-                    <div className="max-h-72 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
-                      {(searchTab === 'all' || searchTab === 'games') && filteredGames.length > 0 && (
-                        <div className="space-y-1">
-                          <div className="text-[10px] font-extrabold text-emerald-800 uppercase px-2 flex items-center gap-1">
-                            <Gamepad2 className="w-3 h-3 text-emerald-600" />
-                            <span>GAMES & PERFORMANCE TARGETS</span>
-                          </div>
-                          {filteredGames.slice(0, 4).map((game) => (
-                            <div
-                              key={game.id}
-                              onClick={() => {
-                                playClickSound();
-                                setSelectedGameForModal(game);
-                                setSearchFocused(false);
-                              }}
-                              className="p-2.5 rounded-xl hover:bg-emerald-50 cursor-pointer flex items-center justify-between gap-2 border border-transparent hover:border-emerald-200 transition-all group"
-                            >
-                              <div className="min-w-0">
-                                <div className="font-display font-extrabold text-xs text-slate-900 group-hover:text-emerald-700 truncate">
-                                  {game.gameTitle}
-                                </div>
-                                <div className="text-[10px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                                  <span>{game.genre}</span>
-                                  <span>•</span>
-                                  <span className="text-emerald-600 font-bold">{game.fpsTarget.split('|')[0]}</span>
-                                </div>
-                              </div>
-                              <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md shrink-0">
-                                View Hub →
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {(searchTab === 'all' || searchTab === 'devices') && filteredProducts.length > 0 && (
-                        <div className="space-y-1 pt-1 border-t border-slate-100">
-                          <div className="text-[10px] font-extrabold text-cyan-800 uppercase px-2 flex items-center gap-1">
-                            <Cpu className="w-3 h-3 text-cyan-600" />
-                            <span>DEVICES & ACCESSORIES</span>
-                          </div>
-                          {filteredProducts.slice(0, 4).map((prod) => (
-                            <a
-                              key={prod.id}
-                              href={`/products/${prod.slug || prod.id}/`}
-                              onClick={(e) => {
-                                setSearchFocused(false);
-                                handleNavClick(e, 'products', prod.id);
-                              }}
-                              className="p-2 rounded-xl hover:bg-cyan-50 cursor-pointer flex items-center justify-between gap-2 border border-transparent hover:border-cyan-200 transition-all group no-underline"
-                            >
-                              <div className="min-w-0">
-                                <div className="font-display font-bold text-xs text-slate-900 group-hover:text-cyan-700 truncate">
-                                  {prod.title || prod.name}
-                                </div>
-                                <div className="text-[10px] text-slate-500">
-                                  {prod.brand} • <span className="text-emerald-700 font-bold">{prod.price || prod.category}</span>
-                                </div>
-                              </div>
-                              <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-600 shrink-0" />
-                            </a>
-                          ))}
-                        </div>
-                      )}
-
-                      {filteredGames.length === 0 && filteredProducts.length === 0 && (
-                        <div className="p-4 text-center text-xs text-slate-500">
-                          No matching games or devices found for "{searchQuery}".
-                        </div>
-                      )}
-                    </div>
-
-                    <a
-                      href="/compatibility/"
-                      onClick={(e) => {
-                        setSearchFocused(false);
-                        handleNavClick(e, 'compatibility');
-                      }}
-                      className="w-full bg-slate-900 hover:bg-slate-800 text-emerald-300 font-display font-extrabold text-[11px] py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors no-underline"
-                    >
-                      <Zap className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>Test Custom PC Specs on Compatibility Matrix</span>
-                    </a>
-                  </div>
-                )}
-              </div>
+                <button type="submit" aria-label="Search" className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600">
+                  <Search className="w-3.5 h-3.5" />
+                </button>
+              </form>
 
               {/* Compare Trigger Badge */}
               {compareIds.length > 0 && (
@@ -640,22 +404,20 @@ export const Header = () => {
         {mobileMenuOpen && (
           <div className="lg:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-xl animate-page-in max-h-[calc(100vh-4rem)] overflow-y-auto">
             {/* Search (the header search bar is hidden below md) */}
-            <form
-              className="relative md:hidden"
-              onSubmit={(e) => {
-                e.preventDefault();
-                setMobileMenuOpen(false);
-                handleNavClick(null, 'products');
-              }}
-            >
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <form data-roc-search="" role="search" action="/products/" className="relative md:hidden flex gap-1.5">
+              <select name="in" aria-label="Search in" defaultValue="all" className="bg-slate-100 border border-slate-200 rounded-xl px-2 text-xs font-bold text-slate-700">
+                <option value="all">All</option>
+                <option value="products">Products</option>
+                <option value="blogs">Blogs</option>
+                <option value="games">Games</option>
+              </select>
               <input
                 type="search"
-                placeholder="Search gear & games..."
-                aria-label="Search gaming hardware and games"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-100 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white"
+                name="q"
+                autoComplete="off"
+                placeholder="Search products, blogs, games..."
+                aria-label="Search products, blogs and games"
+                className="flex-1 min-w-0 bg-slate-100 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white"
               />
             </form>
 
@@ -688,22 +450,29 @@ export const Header = () => {
                 HOME
               </a>
               <a
-                href="/compatibility/"
-                onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'compatibility'); }}
-                className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 text-left no-underline block"
-              >
-                COMPATIBILITY
-              </a>
-              <a
                 href="/products/"
                 onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'products'); }}
                 className="p-2.5 rounded-xl bg-slate-50 text-slate-900 text-left no-underline block"
               >
-                COMPONENTS
+                PRODUCTS
               </a>
               <a
-                href="/categories/"
-                onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'categories', 'all'); }}
+                href="/products/pc-hardware/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 text-left no-underline block"
+              >
+                PC HARDWARE
+              </a>
+              <a
+                href="/products/gaming-hardware/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 text-left no-underline block"
+              >
+                GAMING HARDWARE
+              </a>
+              <a
+                href="/compatibility/"
+                onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'compatibility'); }}
                 className="p-2.5 rounded-xl bg-slate-50 text-slate-900 text-left no-underline block"
               >
                 SYSTEMS
@@ -713,7 +482,14 @@ export const Header = () => {
                 onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'blogs'); }}
                 className="p-2.5 rounded-xl bg-slate-50 text-slate-900 text-left no-underline block"
               >
-                PC GUIDES
+                BLOGS
+              </a>
+              <a
+                href="/about/"
+                onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'about'); }}
+                className="p-2.5 rounded-xl bg-slate-50 text-slate-900 text-left no-underline block"
+              >
+                ABOUT US
               </a>
             </div>
           </div>

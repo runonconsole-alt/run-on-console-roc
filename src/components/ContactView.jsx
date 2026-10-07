@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Mail, MapPin, Send, MessageSquare, ShieldCheck, Check, Sparkles, SendHorizontal } from 'lucide-react';
-import { FAQSection } from './FAQSection';
 import { Tilt3DCard } from './Tilt3DCard';
 import { BouncyText } from './BouncyText';
 import { CyberMatrixHoloBackground } from './CyberMatrixHoloBackground';
 import { SubmissionSuccessCard } from './SubmissionSuccessCard';
 
 export const ContactView = () => {
-  const { pageFaqs, sendNotificationEmail } = useApp();
+  const { sendNotificationEmail } = useApp();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('General Inquiry');
@@ -162,8 +161,8 @@ export const ContactView = () => {
                 </div>
                 <div className="min-w-0">
                   <div className="font-bold text-xs text-emerald-950 uppercase tracking-wider">Direct Email</div>
-                  <a href="mailto:contact@runonconsole.com" className="text-xs sm:text-sm text-emerald-700 font-extrabold hover:underline block mt-0.5 truncate">
-                    contact@runonconsole.com
+                  <a href="mailto:support@runonconsole.com" className="text-xs sm:text-sm text-emerald-700 font-extrabold hover:underline block mt-0.5 truncate">
+                    support@runonconsole.com
                   </a>
                   <span className="text-[10px] text-slate-500 block mt-0.5">24/7 Editorial & Reader Support</span>
                 </div>
@@ -184,33 +183,32 @@ export const ContactView = () => {
             </div>
           </Tilt3DCard>
 
+          {/* Shown by roc-nav.js once a Discord link is saved in CMS -> Social & Amazon tag. */}
+          <div data-roc-social-box="discord" style={{ display: 'none' }}>
           <Tilt3DCard className="bg-gradient-to-tr from-[#064E3B] to-[#047857] text-white rounded-3xl p-7 sm:p-8 shadow-md space-y-3 border border-emerald-500/40">
             <h4 className="font-display font-bold text-lg text-white">
               <BouncyText text="Join Our Discord Community" />
             </h4>
             <p className="text-xs text-emerald-100 leading-relaxed">
-              Connect with 50,000+ PC builders, share your battlestation, and get real-time advice from our hardware testers.
+              Connect with other PC builders and gamers, share your battlestation, and get advice on gear.
             </p>
             <div className="pt-2">
-              <button 
-                onClick={() => alert("Discord invite link copied!")}
-                className="bg-white text-emerald-950 font-bold text-xs px-5 py-2.5 rounded-xl transition-transform hover:scale-105 shadow-md"
+              <a
+                data-roc-social="discord"
+                href="/contact/"
+                target="_blank"
+                rel="noopener"
+                className="inline-block bg-white text-emerald-950 font-bold text-xs px-5 py-2.5 rounded-xl shadow-md no-underline hover:bg-emerald-50"
               >
-                Join Frag Discord Server →
-              </button>
+                Join Our Discord Server →
+              </a>
             </div>
           </Tilt3DCard>
+          </div>
 
         </div>
 
       </div>
-
-      {/* Contact FAQs with Mouse-tracking Spotlight and Green Header */}
-      <FAQSection 
-        faqs={pageFaqs.contact}
-        title="Contact & Review Submission FAQs"
-        subtitle="Frequently asked questions on editorial response times and PR review samples."
-      />
 
     </div>
   );

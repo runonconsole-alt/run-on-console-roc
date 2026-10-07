@@ -86,6 +86,16 @@ if ($slug !== '') {
     if (!$post) rocNotFound($ROOT);
     rocRenderPost($ROOT, $post);
 }
+if (isset($_GET['json'])) {
+    // Published posts for the header search box (/blogs/?json=1).
+    $rows = $pdo->query("SELECT title, slug, category, excerpt FROM blogs WHERE status = 'published' ORDER BY published_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: public, max-age=300');
+    echo json_encode(array_map(function ($r) {
+        return ['t' => (string)$r['title'], 'c' => (string)($r['category'] ?? ''), 'e' => mb_substr((string)($r['excerpt'] ?? ''), 0, 160), 'u' => '/blogs/' . $r['slug'] . '/'];
+    }, $rows), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
 rocRenderList($ROOT, $pdo, $query, $page);
 }
 

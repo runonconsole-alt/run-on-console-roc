@@ -39,6 +39,15 @@ const ROC_ICON_EXT  = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height
 const ROC_ICON_BACK = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left w-4 h-4"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>';
 const ROC_ICON_NEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3.5 h-3.5"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>';
 
+/* Product groups shown in the header's Products menu, at /products/{group}/.
+   Categories not listed under a group belong to gaming-hardware. */
+const ROC_PRODUCT_GROUPS = [
+    'pc-hardware' => ['name' => 'PC Hardware', 'members' => ['gpu'],
+        'description' => 'Graphics cards and PC components we recommend, each with what it is best for, key specs and a direct Amazon link.'],
+    'gaming-hardware' => ['name' => 'Gaming Hardware', 'members' => null,
+        'description' => 'Gaming monitors, mice, keyboards, headsets and speakers we recommend, each with what it is best for, key specs and a direct Amazon link.'],
+];
+
 /* ------------------------------------------------------------ request */
 
 $slug  = isset($_GET['slug']) ? strtolower(trim((string)$_GET['slug'], "/ \t\n\r")) : '';
@@ -93,6 +102,12 @@ if (!$pdo) {
 $categories = rocProductCategories($pdo);
 
 if ($isMap) rocProductSitemap($pdo, $categories);
+
+if (isset($_GET['json']) && $slug === '' && $cat === '') rocProductsJson($pdo, $categories);
+
+if ($slug !== '' && isset(ROC_PRODUCT_GROUPS[$slug])) {
+    rocRenderProductList($ROOT, $pdo, $categories, rocProductGroup($slug, $categories), $query);
+}
 
 if ($slug !== '') {
     $product = rocFetchProduct($pdo, $slug);
@@ -172,11 +187,13 @@ function rocFetchProducts(PDO $pdo, ?array $category, string $query = ''): array
     $hidden = rocHiddenCategories($pdo);
     $rows = array_values(array_filter($rows, function ($p) use ($category, $q, $hidden) {
         if (isset($hidden[rocProductCategorySlug($p)])) return false;
-        if ($category && rocProductCategorySlug($p) !== (string)$category['slug']
+        if ($category && isset($category['members'])) {
+            if (!in_array(rocProductCategorySlug($p), $category['members'], true)) return false;
+        } elseif ($category && rocProductCategorySlug($p) !== (string)$category['slug']
             && strcasecmp(trim((string)($p['category'] ?? '')), trim((string)$category['name'])) !== 0) return false;
         if ($q === '') return true;
         $hay = mb_strtolower(($p['title'] ?? '') . ' ' . ($p['brand'] ?? '') . ' ' . ($p['category'] ?? '') . ' ' . ($p['subtitle'] ?? ''));
-        return mb_strpos($hay, $q) !== false;
+        return rocFuzzyMatch($hay, $q);
     }));
     usort($rows, function ($a, $b) {
         $ra = (int)($a['sort_rank'] ?? 0) ?: PHP_INT_MAX;
@@ -184,6 +201,53 @@ function rocFetchProducts(PDO $pdo, ?array $category, string $query = ''): array
         return [rocProductCategorySlug($a), $ra, (string)$a['title']] <=> [rocProductCategorySlug($b), $rb, (string)$b['title']];
     });
     return $rows;
+}
+
+/**
+ * Search that forgives small typos: every word of the query must appear in the text,
+ * either as part of it or as a word one letter off (two for long words).
+ */
+function rocFuzzyMatch(string $hay, string $q): bool {
+    $norm = function (string $t): string { return trim((string)preg_replace('/[^\p{L}\p{N}]+/u', ' ', mb_strtolower($t))); };
+    $hay = $norm($hay);
+    $words = array_filter(explode(' ', $hay));
+    foreach (array_filter(explode(' ', $norm($q))) as $t) {
+        if (mb_strpos($hay, $t) !== false) continue;
+        $len = mb_strlen($t);
+        if ($len < 4) return false;
+        $max = $len >= 7 ? 2 : 1;
+        $hit = false;
+        foreach ($words as $w) {
+            // Whole word, or its start ("superlite" ~ "superligh|t").
+            if (levenshtein($t, $w) <= $max || levenshtein($t, mb_substr($w, 0, $len)) <= $max) { $hit = true; break; }
+        }
+        if (!$hit) return false;
+    }
+    return true;
+}
+
+/** A Products-menu group as a category-like array; 'members' lists its category slugs. */
+function rocProductGroup(string $slug, array $categories): array {
+    $g = ROC_PRODUCT_GROUPS[$slug];
+    $pcMembers = ROC_PRODUCT_GROUPS['pc-hardware']['members'];
+    $members = $g['members'] ?? array_values(array_filter(array_keys($categories), function ($c) use ($pcMembers) { return !in_array($c, $pcMembers, true); }));
+    $first = $categories[$members[0] ?? ''] ?? null;
+    return ['slug' => $slug, 'name' => $g['name'], 'description' => $g['description'], 'members' => $members,
+            'image' => $first ? ($first['image'] ?? '') : '', 'group' => true];
+}
+
+/** Published products as JSON for the header search box (/products/?json=1). */
+function rocProductsJson(PDO $pdo, array $categories): void {
+    $out = [];
+    foreach (rocFetchProducts($pdo, null) as $p) {
+        $c = $categories[rocProductCategorySlug($p)] ?? null;
+        $out[] = ['t' => (string)$p['title'], 'b' => (string)($p['brand'] ?? ''), 'c' => $c ? (string)$c['name'] : (string)($p['category'] ?? ''),
+                  'u' => '/products/' . $p['slug'] . '/'];
+    }
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: public, max-age=300');
+    echo json_encode($out, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
 }
 
 /** Amazon Associates tag saved in CMS -> Social & Amazon tag ('' when unset). */
@@ -446,7 +510,7 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
 
     if ($cat) {
         $name  = (string)$cat['name'];
-        $url   = rocCategoryUrl((string)$cat['slug']);
+        $url   = !empty($cat['group']) ? ROC_PUBLIC_URL . '/products/' . $cat['slug'] . '/' : rocCategoryUrl((string)$cat['slug']);
         $n     = count($inScope);
         $title = trim((string)($cat['meta_title'] ?? '')) ?: ('Best ' . $name . ': ' . $n . ' Picks | Run On Console');
         $desc  = trim((string)($cat['meta_description'] ?? ''))
@@ -494,20 +558,22 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
         . '<div class="flex flex-wrap gap-2.5 pt-2"><span class="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5"><span>' . count($inScope) . ' products</span></span>'
         . '<span class="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5"><span>Direct Amazon links</span></span></div>'
         . '</div><div class="lg:col-span-5 grid grid-cols-2 gap-3">';
-    $tiles = $cat ? [(string)$cat['slug'] => $cat] : array_slice($categories, 0, 4, true);
+    $tiles = !empty($cat['group']) ? array_slice(array_intersect_key($categories, array_flip($cat['members'])), 0, 4, true)
+        : ($cat ? [(string)$cat['slug'] => $cat] : array_slice($categories, 0, 4, true));
     foreach ($tiles as $s => $c) {
         if (empty($counts[$s])) continue;
         $img = trim((string)($c['image'] ?? ''));
-        $m .= '<a href="/products/category/' . rocH($s) . '/" class="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group no-underline' . ($cat ? ' col-span-2' : '') . '">'
+        $m .= '<a href="/products/category/' . rocH($s) . '/" class="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group no-underline' . (count($tiles) === 1 ? ' col-span-2' : '') . '">'
             . ($img !== '' ? '<img src="' . rocH($img) . '" alt="' . rocH($c['name']) . '" class="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform"/>' : '')
             . '<div class="text-xs font-display font-bold text-white">' . rocH($c['name']) . '</div>'
             . '<div class="text-[10px] text-emerald-300 font-medium">' . $counts[$s] . ' picks</div></a>';
     }
     $m .= '</div></div></div>';
 
-    $m .= rocCategoryNav($categories, $cat ? (string)$cat['slug'] : null, count($all), $counts);
+    $m .= rocCategoryNav($categories, $cat && empty($cat['group']) ? (string)$cat['slug'] : null, count($all), $counts);
 
-    $action = $cat ? '/products/category/' . rawurlencode((string)$cat['slug']) . '/' : '/products/';
+    $action = !empty($cat['group']) ? '/products/' . rawurlencode((string)$cat['slug']) . '/'
+        : ($cat ? '/products/category/' . rawurlencode((string)$cat['slug']) . '/' : '/products/');
     $m .= '<form method="get" action="' . rocH($action) . '" class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-xs" role="search">'
         . '<div class="relative flex-1 max-w-md"><input type="search" name="q" value="' . rocH($query) . '" placeholder="Search ' . rocH($cat ? strtolower((string)$cat['name']) : 'products') . '…" aria-label="Search products" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500"/></div>'
         . ($query !== '' ? '<a href="' . rocH($action) . '" class="text-[11px] font-bold text-slate-400 hover:text-emerald-600 flex items-center gap-1 px-2 no-underline">Reset</a>' : '')
@@ -554,6 +620,10 @@ function rocProductSitemap(PDO $pdo, array $categories): void {
         // A category changes when it is edited or when any of its products changes.
         $own = rocDate($c['content_modified_at'] ?? null);
         $out .= $line(rocCategoryUrl($s), max($own ?? 0, $latestByCat[$s]) ?: null);
+    }
+    foreach (array_keys(ROC_PRODUCT_GROUPS) as $g) {
+        $mods = array_intersect_key($latestByCat, array_flip(rocProductGroup($g, $categories)['members']));
+        if ($mods) $out .= $line(ROC_PUBLIC_URL . '/products/' . $g . '/', max($mods));
     }
     foreach ($all as $p) $out .= $line(rocProductUrl((string)$p['slug']), rocProductModified($p));
     $out .= "</urlset>\n";

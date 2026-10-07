@@ -62,6 +62,15 @@
   z-index: 99999 !important;
 }
 
+/* Card hover: a soft green light follows the pointer behind the content (Tilt3DCard). */
+.roc-spot { position: relative; isolation: isolate; }
+.roc-spot::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
+  background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgba(16, 185, 129, 0.22), transparent 65%);
+  opacity: 0; transition: opacity 0.2s ease;
+}
+.roc-spot:hover::before { opacity: 1; }
+
 /* Header menus are in the page HTML and open with CSS, so they also work on the
    server-rendered blog, product and category pages where React does not run. */
 .roc-dd-panel { display: none; }
