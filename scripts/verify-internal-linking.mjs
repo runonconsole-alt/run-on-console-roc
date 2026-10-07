@@ -41,7 +41,6 @@ assertOk(headerSource.includes('href="/compatibility/"') || headerSource.include
 assertOk(footerSource.includes('href="/about/"') || footerSource.includes("navigateTo('about')"), 'Footer links to About Us (/about/)');
 assertOk(footerSource.includes('href="/contact/"') || footerSource.includes("navigateTo('contact')"), 'Footer links to Contact Us (/contact/)');
 assertOk(footerSource.includes('href="/write-for-us/"') || footerSource.includes("navigateTo('write-for-us')"), 'Footer links to Write For Us (/write-for-us/)');
-assertOk(footerSource.includes('href="/partnerships/"') || footerSource.includes("navigateTo('partnerships')"), 'Footer links to Partnerships (/partnerships/)');
 
 // 3. Crawl graph analysis simulation
 const publishedInventory = [
@@ -53,7 +52,6 @@ const publishedInventory = [
   '/about/',
   '/contact/',
   '/write-for-us/',
-  '/partnerships/',
   '/terms-and-conditions/',
   '/privacy-policy/'
 ];

@@ -2,14 +2,14 @@
 /**
  * Run On Console — gaming platform pages rendered from the CMS database.
  *
- *   /categories/                       -> all platforms        (category-render.php)
- *   /categories/{slug}/                -> one platform hub     (category-render.php?slug=...)
+ *   /gaming-platforms/                 -> all platforms        (category-render.php)
+ *   /gaming-platforms/{slug}/          -> one platform hub     (category-render.php?slug=...)
  *   /sitemaps/categories-sitemap.xml   -> platforms sitemap    (category-render.php?sitemap=1)
  *
  * Same approach as blog-render.php and product-render.php: layout from the
  * prerendered pages saved in /cms-templates/ by cli-gaming-categories.php,
  * content from gaming_categories / gaming_devices. Only published platforms and
- * devices are shown. CMS guide pages under /categories/{cat}/{slug}/ are still
+ * devices are shown. CMS guide pages under /gaming-platforms/{cat}/{slug}/ are still
  * served by page-render.php.
  */
 
@@ -106,9 +106,9 @@ function rocCatModified(array $c, array $devices): ?int {
     return $t;
 }
 
-function rocPlatformUrl(string $slug): string { return ROC_PUBLIC_URL . '/categories/' . $slug . '/'; }
+function rocPlatformUrl(string $slug): string { return ROC_PUBLIC_URL . '/gaming-platforms/' . $slug . '/'; }
 
-/** Published CMS category guides for a platform (served by page-render.php at /categories/{cat}/{slug}/). */
+/** Published CMS category guides for a platform (served by page-render.php at /gaming-platforms/{cat}/{slug}/). */
 function rocPlatformGuides(PDO $pdo, string $catSlug): array {
     try {
         $st = $pdo->prepare("SELECT title, slug, excerpt, image FROM pages
@@ -190,7 +190,7 @@ function rocRenderHub(string $root, PDO $pdo, array $c, array $cats): void {
     $h  = rocCatHead($metaT, $metaD, $url, $image, !empty($c['is_noindex']) ? 'noindex, follow' : 'index, follow, max-image-preview:large');
     $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => [
         ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => ROC_PUBLIC_URL . '/'],
-        ['@type' => 'ListItem', 'position' => 2, 'name' => 'Gaming Platforms', 'item' => ROC_PUBLIC_URL . '/categories/'],
+        ['@type' => 'ListItem', 'position' => 2, 'name' => 'Gaming Platforms', 'item' => ROC_PUBLIC_URL . '/gaming-platforms/'],
         ['@type' => 'ListItem', 'position' => 3, 'name' => $title, 'item' => $url],
     ]]);
     if ($devices) {
@@ -203,8 +203,8 @@ function rocRenderHub(string $root, PDO $pdo, array $c, array $cats): void {
 
     $m  = $mainOpen . '<div class="space-y-10 py-6 animate-page-in">';
     $m .= '<div class="flex items-center justify-between">'
-        . '<a href="/categories/" class="bg-white border border-slate-300 hover:border-emerald-600 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition-colors shadow-sm no-underline"><span aria-hidden="true">&larr;</span><span>Back to All ' . count($cats) . ' Platforms</span></a>'
-        . '<nav aria-label="Breadcrumb" class="text-xs text-slate-500 font-semibold hidden sm:flex items-center gap-1.5"><a href="/categories/" class="text-slate-500 no-underline">Platform Directory</a><span>/</span><span class="text-emerald-700 font-extrabold">' . rocH($title) . '</span></nav></div>';
+        . '<a href="/gaming-platforms/" class="bg-white border border-slate-300 hover:border-emerald-600 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition-colors shadow-sm no-underline"><span aria-hidden="true">&larr;</span><span>Back to All ' . count($cats) . ' Platforms</span></a>'
+        . '<nav aria-label="Breadcrumb" class="text-xs text-slate-500 font-semibold hidden sm:flex items-center gap-1.5"><a href="/gaming-platforms/" class="text-slate-500 no-underline">Platform Directory</a><span>/</span><span class="text-emerald-700 font-extrabold">' . rocH($title) . '</span></nav></div>';
 
     $m .= '<div class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
         . '<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10"><div class="lg:col-span-7 space-y-4">'
@@ -253,7 +253,7 @@ function rocRenderHub(string $root, PDO $pdo, array $c, array $cats): void {
             . '<h2 class="font-display font-extrabold text-2xl text-slate-900">' . rocH($title) . ' Guides</h2></div>'
             . '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">';
         foreach ($guides as $g) {
-            $href = '/categories/' . $slug . '/' . $g['slug'] . '/';
+            $href = '/gaming-platforms/' . $slug . '/' . $g['slug'] . '/';
             $img = trim((string)($g['image'] ?? ''));
             $m .= '<a href="' . rocH($href) . '" class="block no-underline"><div class="game-card group flex flex-col h-full">'
                 . ($img !== '' ? '<div class="relative h-40 bg-slate-900 overflow-hidden"><img src="' . rocH($img) . '" alt="' . rocH($g['title']) . '" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/></div>' : '')
@@ -278,7 +278,7 @@ function rocRenderPlatformList(string $root, PDO $pdo, array $cats): void {
     $byCat = [];
     foreach ($all as $d) $byCat[(string)$d['category_slug']][] = $d;
     $n = count($cats);
-    $url = ROC_PUBLIC_URL . '/categories/';
+    $url = ROC_PUBLIC_URL . '/gaming-platforms/';
     [$title, $desc] = rocTemplateMeta($root, ROC_CAT_TEMPLATES['list'], $n,
         'Gaming Platforms & Hardware Ecosystems | Run On Console',
         'Explore all ' . $n . ' gaming platform categories across every generation: PC and handhelds, PlayStation, Xbox, Nintendo, retro consoles, VR/AR, cloud and more.');
@@ -310,7 +310,7 @@ function rocRenderPlatformList(string $root, PDO $pdo, array $cats): void {
     foreach ($cats as $s => $c) {
         $devs = $byCat[$s] ?? [];
         $img = trim((string)($c['image'] ?? ''));
-        $m .= '<a href="/categories/' . rocH($s) . '/" class="block no-underline"><div class="game-card group cursor-pointer flex flex-col justify-between h-full">'
+        $m .= '<a href="/gaming-platforms/' . rocH($s) . '/" class="block no-underline"><div class="game-card group cursor-pointer flex flex-col justify-between h-full">'
             . '<div class="relative h-48 bg-slate-900 overflow-hidden">'
             . ($img !== '' ? '<img src="' . rocH($img) . '" alt="' . rocH($c['title']) . '" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>' : '')
             . (trim((string)($c['badge'] ?? '')) !== '' ? '<span class="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-extrabold px-2.5 py-1 rounded shadow-sm badge-glow">' . rocH($c['badge']) . '</span>' : '')
