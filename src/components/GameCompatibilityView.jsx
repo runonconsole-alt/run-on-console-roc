@@ -55,9 +55,43 @@ export const GameCompatibilityView = () => {
   const [customRamGb, setCustomRamGb] = useState(16); // 4, 8, 16, 32, 64
   const [customStorage, setCustomStorage] = useState('nvme'); // 'nvme', 'sata_ssd', 'hdd'
 
+  // 500 popular PC games (2021 on) with their official Steam requirements: /roc-steam-games.json,
+  // written by scripts/fetch-steam-games.mjs. Loaded after the page opens.
+  const [steamGames, setSteamGames] = useState([]);
+  const [steamPick, setSteamPick] = useState(null);
+  const [steamQuery, setSteamQuery] = useState('');
+  useEffect(() => {
+    fetch('/roc-steam-games.json').then((r) => (r.ok ? r.json() : null)).then((d) => {
+      const list = (d && d.games) || [];
+      setSteamGames(list);
+      const id = new URLSearchParams(window.location.search).get('steam');
+      if (id) { const g = list.find((x) => String(x.appid) === id); if (g) setSteamPick(g); }
+    }).catch(() => {});
+  }, []);
+  const steamMatches = useMemo(() => {
+    const q = steamQuery.trim().toLowerCase();
+    if (q.length < 2) return [];
+    return steamGames.filter((g) => g.t.toLowerCase().includes(q)).slice(0, 8);
+  }, [steamQuery, steamGames]);
+
+  const specLine = (b) => (b ? [b.cpu, b.gpu, b.ram, b.storage].filter(Boolean).join(' / ') : '');
   const selectedCheckerGame = useMemo(() => {
+    if (steamPick) {
+      return {
+        id: `steam-${steamPick.appid}`,
+        gameTitle: steamPick.t,
+        era: 'modern',
+        eraLabel: `Released ${steamPick.y}`,
+        genre: steamPick.g || 'PC game',
+        fpsTarget: 'Official Steam system requirements',
+        minSpecs: specLine(steamPick.min) || 'Not listed on Steam',
+        recommendedSpecs: specLine(steamPick.rec) || 'Not listed on Steam (the minimum is used)',
+        req: steamPick.req,
+        steamUrl: steamPick.u,
+      };
+    }
     return gameCompatibility.find(g => g.id === checkerGameId) || gameCompatibility[0];
-  }, [checkerGameId, gameCompatibility]);
+  }, [checkerGameId, gameCompatibility, steamPick]);
 
   const deviceProfiles = [
     { id: 'pc-high', name: 'High-End Gaming PC (RTX 4080 / 4090 + 32GB RAM)', type: 'pc', power: 10 },
@@ -99,29 +133,33 @@ export const GameCompatibilityView = () => {
     const selectedGpu = gpuOptions.find(g => g.id === customGpuTier) || gpuOptions[2];
     const req = gameRequirements(selectedCheckerGame);
 
-    // Each part against this game's recommended specs (graphics card counts most).
-    const part = (have, rec) => Math.min(1, have / rec);
+    // Each part against this game's recommended specs (graphics card counts most). A part the
+    // official text did not let us read (null) is left out rather than guessed.
+    const known = (v) => typeof v === 'number' && v > 0;
+    const parts = [[0.5, selectedGpu.score, req.rec.gpu], [0.3, selectedCpu.score, req.rec.cpu], [0.2, customRamGb, req.rec.ram]]
+      .filter(([, , rec]) => known(rec));
+    const weight = parts.reduce((a, [w]) => a + w, 0) || 1;
     const storageFactor = customStorage === 'nvme' ? 1 : customStorage === 'sata_ssd' ? 0.95 : 0.8;
-    let percentage = Math.round(100 * storageFactor * (
-      0.5 * part(selectedGpu.score, req.rec.gpu) + 0.3 * part(selectedCpu.score, req.rec.cpu) + 0.2 * part(customRamGb, req.rec.ram)
-    ));
-    const belowMin = selectedGpu.score < req.min.gpu || selectedCpu.score < req.min.cpu || customRamGb < req.min.ram;
+    let percentage = Math.round(100 * storageFactor * parts.reduce((a, [w, have, rec]) => a + w * Math.min(1, have / rec), 0) / weight);
+    const unread = [!known(req.min.gpu) && 'graphics card', !known(req.min.cpu) && 'processor', !known(req.min.ram) && 'memory'].filter(Boolean);
+    const below = (have, min) => known(min) && have < min;
+    const belowMin = below(selectedGpu.score, req.min.gpu) || below(selectedCpu.score, req.min.cpu) || below(customRamGb, req.min.ram);
     if (belowMin) percentage = Math.min(percentage, 40);
     percentage = Math.max(5, percentage);
 
     const bottlenecks = [];
-    if (selectedGpu.score < req.min.gpu) bottlenecks.push(`Graphics card is below this game's minimum (${selectedGpu.label.split(' (')[0]}).`);
-    if (selectedCpu.score < req.min.cpu) bottlenecks.push(`Processor is below this game's minimum (${selectedCpu.label.split(' (')[0]}).`);
-    if (customRamGb < req.min.ram) bottlenecks.push(`${customRamGb}GB RAM is below this game's minimum of ${req.min.ram}GB.`);
+    if (below(selectedGpu.score, req.min.gpu)) bottlenecks.push(`Graphics card is below this game's minimum (${selectedGpu.label.split(' (')[0]}).`);
+    if (below(selectedCpu.score, req.min.cpu)) bottlenecks.push(`Processor is below this game's minimum (${selectedCpu.label.split(' (')[0]}).`);
+    if (below(customRamGb, req.min.ram)) bottlenecks.push(`${customRamGb}GB RAM is below this game's minimum of ${req.min.ram}GB.`);
     if (customStorage === 'hdd' && gameEra !== 'classic') bottlenecks.push('A hard disk (HDD) causes long loading and stutter. This game is meant for an SSD.');
 
     // What to change, part by part, to reach this game's recommended specs.
     const tierName = (opts, score) => (opts.find(o => o.score >= score) || opts[0]).label.split(' (')[0];
     const ascending = (opts) => [...opts].sort((a, b) => a.score - b.score);
     const missing = [];
-    if (selectedGpu.score < req.rec.gpu) missing.push({ part: 'Graphics card', have: selectedGpu.label.split(' (')[0], need: tierName(ascending(gpuOptions), req.rec.gpu) + ' or better' });
-    if (selectedCpu.score < req.rec.cpu) missing.push({ part: 'Processor', have: selectedCpu.label.split(' (')[0], need: tierName(ascending(cpuOptions), req.rec.cpu) + ' or better' });
-    if (customRamGb < req.rec.ram) missing.push({ part: 'Memory (RAM)', have: `${customRamGb}GB`, need: `${req.rec.ram}GB` });
+    if (below(selectedGpu.score, req.rec.gpu)) missing.push({ part: 'Graphics card', have: selectedGpu.label.split(' (')[0], need: tierName(ascending(gpuOptions), req.rec.gpu) + ' or better' });
+    if (below(selectedCpu.score, req.rec.cpu)) missing.push({ part: 'Processor', have: selectedCpu.label.split(' (')[0], need: tierName(ascending(cpuOptions), req.rec.cpu) + ' or better' });
+    if (below(customRamGb, req.rec.ram)) missing.push({ part: 'Memory (RAM)', have: `${customRamGb}GB`, need: `${req.rec.ram}GB` });
     if (customStorage === 'hdd' && gameEra !== 'classic') missing.push({ part: 'Storage', have: 'Hard disk (HDD)', need: 'SSD (NVMe preferred)' });
 
     let statusBadge, statusColor, fpsEstimate, upgradeRecommendation;
@@ -147,7 +185,17 @@ export const GameCompatibilityView = () => {
       upgradeRecommendation = "This PC is below the game's minimum specs. Upgrade the parts listed above, or play it through a cloud gaming service such as NVIDIA GeForce NOW or Xbox Cloud Gaming if the game is available there.";
     }
 
-    return { percentage, missing, statusBadge, statusColor, fpsEstimate, bottlenecks, upgradeRecommendation, req };
+    // Without the graphics card or the processor there is no honest score: say so instead.
+    const unrated = !known(req.rec.gpu) || !known(req.rec.cpu);
+    if (unrated) {
+      statusBadge = 'CHECK THE OFFICIAL REQUIREMENTS';
+      statusColor = 'text-slate-800 bg-slate-50 border-slate-300';
+      fpsEstimate = 'Not estimated: compare your PC with the requirements above';
+    }
+    if (unread.length) {
+      upgradeRecommendation = `The ${unread.join(' and ')} in the official requirements could not be matched to our list, so this score leaves ${unread.length > 1 ? 'them' : 'it'} out. Compare your ${unread.join(' and ')} with the requirements above. ` + upgradeRecommendation;
+    }
+    return { percentage, missing, statusBadge, statusColor, fpsEstimate, bottlenecks, upgradeRecommendation, req, unread, unrated };
   }, [selectedCheckerGame, customCpuTier, customGpuTier, customRamGb, customStorage]);
 
   const eras = [
@@ -361,6 +409,7 @@ export const GameCompatibilityView = () => {
             value={checkerGameId}
             onChange={(e) => {
               playClickSound();
+              setSteamPick(null);
               setCheckerGameId(e.target.value);
             }}
             className="w-full bg-slate-50 border-2 border-slate-200 focus:border-emerald-500 rounded-2xl px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 focus:bg-white focus:outline-none transition-all shadow-xs"
@@ -371,6 +420,39 @@ export const GameCompatibilityView = () => {
               </option>
             ))}
           </select>
+
+          {/* Search the Steam list (official requirements) */}
+          {steamGames.length > 0 && (
+            <div className="relative">
+              <input
+                type="search"
+                value={steamQuery}
+                onChange={(e) => setSteamQuery(e.target.value)}
+                placeholder={`Or search ${steamGames.length} popular PC games (2021 to today)…`}
+                aria-label="Search PC games"
+                className="w-full bg-white border-2 border-slate-200 focus:border-emerald-500 rounded-2xl px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none"
+              />
+              {steamMatches.length > 0 && (
+                <div className="absolute z-20 left-0 right-0 mt-1 bg-white border-2 border-emerald-400 rounded-2xl p-1.5 shadow-2xl">
+                  {steamMatches.map((g) => (
+                    <button key={g.appid} type="button"
+                      onClick={() => { playClickSound(); setSteamPick(g); setSteamQuery(''); }}
+                      className="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50 text-xs sm:text-sm">
+                      <span className="font-bold text-slate-900">{g.t}</span>
+                      <span className="text-slate-500"> · {g.y}{g.g ? ` · ${g.g}` : ''}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {steamPick && (
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                  <span className="text-slate-600">Checking <b>{steamPick.t}</b> with its official Steam requirements.</span>
+                  <a href={steamPick.u} target="_blank" rel="noopener noreferrer" className="font-bold text-emerald-700 underline">See them on Steam ↗</a>
+                  <button type="button" onClick={() => setSteamPick(null)} className="font-bold text-slate-500 underline">Back to the list above</button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* The selected game's own PC requirements (change with the game) */}
           {selectedCheckerGame && (
@@ -505,7 +587,7 @@ export const GameCompatibilityView = () => {
 
                   <div className="text-right shrink-0">
                     <div className="text-2xl sm:text-3xl font-display font-extrabold tracking-tight">
-                      {customAnalysisResult.percentage}%
+                      {customAnalysisResult.unrated ? '—' : `${customAnalysisResult.percentage}%`}
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-wider block opacity-80">
                       Hardware Compatibility Score
@@ -561,15 +643,21 @@ export const GameCompatibilityView = () => {
                 )}
 
                 {/* Official stores to get the game (search pages on the store itself) */}
-                {customAnalysisResult.percentage >= 45 && (
+                {(customAnalysisResult.percentage >= 45 || customAnalysisResult.unrated) && (
                   <div className="p-3.5 bg-white/90 rounded-xl border border-current/30 text-xs space-y-2">
                     <div className="font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1">
                       <DownloadCloud className="w-4 h-4 text-emerald-600" />
                       <span>Get {selectedCheckerGame.gameTitle} from an official store</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
+                      {selectedCheckerGame.steamUrl && (
+                        <a href={selectedCheckerGame.steamUrl} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-700 text-white font-bold no-underline hover:bg-emerald-800">
+                          Steam store page <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
                       {[
-                        ['Steam', 'https://store.steampowered.com/search/?term='],
+                        ...(selectedCheckerGame.steamUrl ? [] : [['Steam', 'https://store.steampowered.com/search/?term=']]),
                         ['Epic Games Store', 'https://store.epicgames.com/en-US/browse?q='],
                         ['Xbox / PC Game Pass', 'https://www.xbox.com/en-US/search/results/games?q='],
                         ['PlayStation Store', 'https://store.playstation.com/en-us/search/'],
