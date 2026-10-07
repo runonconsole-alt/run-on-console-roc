@@ -74,6 +74,8 @@ if ($action === 'get-profile') {
             "avatarIcon" => (in_array($currentUser['avatar_icon'] ?? '', ROC_VALID_AVATARS, true)) ? $currentUser['avatar_icon'] : 'avatar_01',
             "avatarBg" => $currentUser['avatar_bg'] ?: 'from-emerald-600 to-teal-500',
             "bio" => $currentUser['bio'] ?: '',
+            "avatarUrl" => rocProfilePhotoUrl($pdo, $userId),
+            "profileMissing" => rocProfileMissing($pdo, $currentUser, $userId),
             "isVerified" => (bool) $currentUser['is_verified'],
             "status" => $currentUser['status'],
             "createdAt" => $currentUser['created_at'],

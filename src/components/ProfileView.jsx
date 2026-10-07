@@ -60,6 +60,12 @@ export const ProfileView = () => {
     }
   }, [currentUser]);
 
+  // Bio, city and country are required: until they are filled in, the editor opens first.
+  const missing = (profileData && profileData.profileMissing) || [];
+  useEffect(() => {
+    if (missing.length && activeTab === 'overview') setActiveTab('gaming');
+  }, [missing.length]);
+
   const fetchProfile = async () => {
     setLoading(true);
     try {
@@ -351,6 +357,12 @@ export const ProfileView = () => {
           })}
         </div>
 
+        {missing.length > 0 && (
+          <div role="status" className="rounded-2xl border border-amber-400/40 bg-amber-500/10 text-amber-100 px-5 py-4 text-sm">
+            <strong className="text-amber-300">Complete your profile.</strong>{' '}
+            Please add your {missing.map((m) => ({ bio: 'bio', city: 'city', country: 'country', username: 'username' }[m] || m)).join(', ')} below and press Save. A photo is optional.
+          </div>
+        )}
         {activeTab === 'gaming' && profileData && <GamingProfileEditor profile={profileData} csrfToken={csrfToken} onSaved={fetchProfile} />}
         {/* Tab 1: Overview */}
         {activeTab === 'overview' && (

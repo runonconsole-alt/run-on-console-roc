@@ -37,6 +37,10 @@ function rocSaveGaming(PDO $db, int $id, array $in): void {
     if (!$name || strlen($name) > 120 || strlen($bio) > 2000 || strlen($city) > 100 || strlen($country) > 50) {
         throw new InvalidArgumentException('Please check display name, bio, city, and country length limits.');
     }
+    // Every gamer profile has a bio, a city and a country (shown on the profile and in the CMS).
+    if (mb_strlen($bio) < 20) throw new InvalidArgumentException('Please write a short bio (at least 20 characters).');
+    if ($city === '') throw new InvalidArgumentException('Please enter your city.');
+    if ($country === '') throw new InvalidArgumentException('Please enter your country.');
 
     if ($dob !== '') {
         $date = DateTimeImmutable::createFromFormat('!Y-m-d', $dob);
@@ -88,4 +92,25 @@ function rocSaveGaming(PDO $db, int $id, array $in): void {
         if ($db->inTransaction()) $db->rollBack();
         throw $e;
     }
+}
+
+/** Uploaded profile photo (user_profiles.avatar_url, see cron/cli-profile-photos.php), or ''. */
+function rocProfilePhotoUrl(PDO $db, int $userId): string {
+    try {
+        $q = $db->prepare('SELECT avatar_url FROM user_profiles WHERE user_id = ? LIMIT 1');
+        $q->execute([$userId]);
+        $v = (string)($q->fetchColumn() ?: '');
+        return preg_match('#^/uploads/avatars/[a-f0-9]{32}\.webp$#', $v) ? $v : '';
+    } catch (Throwable $e) { return ''; }
+}
+
+/** Required profile fields that are still empty: username, bio, city, country. */
+function rocProfileMissing(PDO $db, array $user, int $userId): array {
+    $missing = [];
+    if (trim((string)($user['username'] ?? '')) === '') $missing[] = 'username';
+    if (mb_strlen(trim((string)($user['bio'] ?? ''))) < 20) $missing[] = 'bio';
+    if (trim((string)($user['country'] ?? '')) === '') $missing[] = 'country';
+    $city = rocGamingProfile($db, $userId)['city'] ?? '';
+    if (trim((string)$city) === '') $missing[] = 'city';
+    return $missing;
 }
