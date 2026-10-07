@@ -31,6 +31,10 @@ header('X-Robots-Tag: noindex');   // the sitemap file itself should not appear 
 
 function rocSmEsc(string $s): string { return htmlspecialchars($s, ENT_XML1 | ENT_QUOTES, 'UTF-8'); }
 
+/** Page names from each built page's <title> (shown by /sitemap.xsl; search engines ignore them). */
+$ROC_SM_TITLES = [];
+const ROC_SM_STYLE = '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>';
+
 /** Built pages under $dir (or the site root), indexable ones only: [path => mtime]. */
 function rocSmBuilt(string $root, ?string $dir): array {
     $base = $dir === null ? $root : $root . '/' . $dir;
@@ -55,6 +59,10 @@ function rocSmBuilt(string $root, ?string $dir): array {
         $head = (string)file_get_contents($f->getPathname(), false, null, 0, 20000);
         if (preg_match('#<meta\s+name=["\']robots["\']\s+content=["\'][^"\']*noindex#i', $head)) continue;
         $out[$path] = $f->getMTime();
+        if ($path === '/') $GLOBALS['ROC_SM_TITLES'][$path] = 'Home';
+        elseif (preg_match('#<title>([^<]+)</title>#i', $head, $tm)) {
+            $GLOBALS['ROC_SM_TITLES'][$path] = trim(preg_replace('/\s*\|\s*Run On Console\s*$/', '', html_entity_decode($tm[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+        }
     }
     // Root page scan also found products/ and categories/ - they have their own sitemaps.
     if ($dir === null) {
@@ -67,9 +75,12 @@ function rocSmBuilt(string $root, ?string $dir): array {
 }
 
 function rocSmUrlset(array $urls): void {
-    echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . ROC_SM_STYLE . "\n"
+       . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:roc="https://runonconsole.com/ns/sitemap">' . "\n";
     foreach ($urls as $path => $mtime) {
-        echo '  <url><loc>' . rocSmEsc(ROC_SM_BASE . $path) . '</loc><lastmod>' . gmdate('c', $mtime) . "</lastmod></url>\n";
+        $t = $GLOBALS['ROC_SM_TITLES'][$path] ?? '';
+        echo '  <url><loc>' . rocSmEsc(ROC_SM_BASE . $path) . '</loc><lastmod>' . gmdate('c', $mtime) . '</lastmod>'
+           . ($t !== '' ? '<roc:title>' . rocSmEsc($t) . '</roc:title>' : '') . "</url>\n";
     }
     echo "</urlset>\n";
     exit;
@@ -87,14 +98,34 @@ $fromDb = function (string $renderer, string $dir) use ($root, $latest): int {
     return is_file($root . '/' . $renderer) ? time() : $latest(rocSmBuilt($root, $dir));
 };
 $children = [
-    'pages'      => $latest(rocSmBuilt($root, null)),
-    'products'   => $fromDb('product-render.php', 'products'),
-    'categories' => $fromDb('category-render.php', 'categories'),
-    'blogs'      => time(),
-    'cms-pages'  => time(),
+    'pages'      => [$latest(rocSmBuilt($root, null)), 'Main pages'],
+    'products'   => [$fromDb('product-render.php', 'products'), 'Products and product categories'],
+    'categories' => [$fromDb('category-render.php', 'categories'), 'Gaming platforms'],
+    'blogs'      => [time(), 'Blog posts'],
 ];
-echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
-foreach ($children as $name => $t) {
-    echo '  <sitemap><loc>' . ROC_SM_BASE . '/sitemaps/' . $name . '-sitemap.xml</loc><lastmod>' . gmdate('c', $t) . "</lastmod></sitemap>\n";
+// CMS pages (About-style pages made in the CMS) are listed only once there is at least one.
+try {
+    ob_start();
+    require_once $root . '/api/v1/config.php';
+    ob_end_clean();
+    $pdo = function_exists('getDBConnection') ? getDBConnection() : null;
+    $n = $pdo ? (int)$pdo->query("SELECT COUNT(*) FROM pages WHERE status = 'published' AND (is_noindex = 0 OR is_noindex IS NULL)")->fetchColumn() : 1;
+    if ($n > 0) $children['cms-pages'] = [time(), 'CMS pages'];
+} catch (\Throwable $e) {
+    while (ob_get_level() > 0) ob_end_clean();
+    $children['cms-pages'] = [time(), 'CMS pages'];
+}
+// config.php is shared with the API (session, no-cache headers): undo that for the sitemap.
+if (!headers_sent()) {
+    foreach (['Set-Cookie', 'Expires', 'Pragma', 'Cache-Control', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'] as $h) header_remove($h);
+    header('Cache-Control: public, max-age=600');
+}
+header('Content-Type: application/xml; charset=utf-8');
+header('X-Robots-Tag: noindex');
+echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . ROC_SM_STYLE . "\n"
+   . '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:roc="https://runonconsole.com/ns/sitemap">' . "\n";
+foreach ($children as $name => [$t, $label]) {
+    echo '  <sitemap><loc>' . ROC_SM_BASE . '/sitemaps/' . $name . '-sitemap.xml</loc><lastmod>' . gmdate('c', $t) . '</lastmod>'
+       . '<roc:title>' . rocSmEsc($label) . "</roc:title></sitemap>\n";
 }
 echo "</sitemapindex>\n";

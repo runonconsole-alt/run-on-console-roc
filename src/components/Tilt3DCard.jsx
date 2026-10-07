@@ -1,50 +1,33 @@
 import React, { useRef } from 'react';
 
 /**
- * Tilt3DCard - Performance-Optimized GPU 3D Micro-Tilt
- * Optimizations:
- * - Uses direct ref DOM style mutations on mousemove to avoid React re-renders.
- * - Skips 3D tilt calculations on mobile touch devices (<768px).
- * - Instant static fallback when prefers-reduced-motion is active.
+ * Tilt3DCard - hover highlight for cards.
+ *
+ * The card used to tilt in 3D on hover, which made its text look blurry. Now it stays
+ * still and a soft green light follows the pointer behind the content (.roc-spot in
+ * index.css). The name is kept so existing pages do not change.
  */
-export const Tilt3DCard = ({ 
-  children, 
-  className = "", 
-  onClick, 
-  maxTilt = 3.5
+export const Tilt3DCard = ({
+  children,
+  className = "",
+  onClick,
 }) => {
   const cardRef = useRef(null);
 
   const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
-    if (window.innerWidth < 768) return; // Skip tilt on mobile
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -maxTilt;
-    const rotateY = ((x - centerX) / centerX) * maxTilt;
-
-    cardRef.current.style.transform = `perspective(1200px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.012, 1.012, 1.012)`;
-    cardRef.current.style.transition = 'transform 0.08s ease-out';
-  };
-
-  const handleMouseLeave = () => {
-    if (!cardRef.current) return;
-    cardRef.current.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-    cardRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+    const el = cardRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    el.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+    el.style.setProperty('--my', `${e.clientY - rect.top}px`);
   };
 
   return (
     <div
       ref={cardRef}
       onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
       onClick={onClick}
-      className={`transition-shadow duration-300 will-change-transform ${className}`}
+      className={`roc-spot ${className}`}
     >
       {children}
     </div>

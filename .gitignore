@@ -22,3 +22,6 @@ scripts/.sitemap-cache.json
 # OS files
 .DS_Store
 Thumbs.db
+
+# Steam fetch cache (scripts/fetch-steam-games.mjs)
+scripts/data/

@@ -674,16 +674,12 @@ export const PAGE_FAQS = {
     {
       q: "How quickly does the editorial team respond to inquiries?",
       a: "We aim to respond to all general inquiries, partnership proposals, and reader questions within 24 to 48 business hours."
-    },
-    {
-      q: "Where is the Run On Console testing lab located?",
-      a: "Our primary hardware benchmarking lab and editorial headquarters are located in San Francisco, CA."
     }
   ],
   compatibility: [
     {
       q: "What if my PC or device does not meet the minimum specs for games like GTA 5 or Black Ops 6?",
-      a: "If your current PC or laptop cannot run the game natively, you have 4 proven options:\n\n1. 🏆 **Hardware Upgrade or Switch (Best Option):** Upgrade your GPU, RAM (to 16GB), and switch to a fast NVMe SSD, or pick up a value-packed modern console like an Xbox Series S ($299), PS5 Digital, or Steam Deck OLED.\n\n2. ☁️ **Cloud Gaming (Zero Download / Any Device):** Use NVIDIA GeForce NOW or Xbox Cloud Gaming to stream the full game in high resolution directly to any low-end office laptop, tablet, Smart TV, or smartphone with zero high-end specs required.\n\n3. 💾 **Copying Game Files via External Hard Drive, USB 3.2, or Disc:** If your internet connection is slow for massive 100GB+ downloads, you can copy the pre-installed game backup files directly from a friend's USB flash drive, external hard drive, or physical disc into your Steam/Epic/Rockstar directory, then click 'Verify Game Files' to start playing immediately.\n\n4. 🕹️ **Casual Fun Options: Community Servers, Mobile APK Ports & Low-End Mods:** For casual gaming with friends on older PCs or phones, you can play optimized mobile APK ports (like GTA San Andreas Definitive on Android, Xash3D for CS 1.6), join lightweight community servers (SAMP for GTA), or install custom low-spec configuration tweaks (LowSpecGamer mods, FSR 3 / DLSS scaling)."
+      a: "If your current PC or laptop cannot run the game natively, you have 4 proven options:\n\n1. 🏆 **Hardware Upgrade or Switch (Best Option):** Upgrade your GPU, RAM (to 16GB), and switch to a fast NVMe SSD, or pick up a value-packed modern console like an Xbox Series S ($299), PS5 Digital, or Steam Deck OLED.\n\n2. ☁️ **Cloud Gaming (Zero Download / Any Device):** Use NVIDIA GeForce NOW or Xbox Cloud Gaming to stream the full game in high resolution directly to any low-end office laptop, tablet, Smart TV, or smartphone with zero high-end specs required.\n\n3. 💾 **Copying Game Files via External Hard Drive, USB 3.2, or Disc:** If your internet connection is slow for massive 100GB+ downloads, you can copy the game folder from a friend's USB or external drive into your Steam/Epic/Rockstar library and click 'Verify Game Files', so only the missing parts download. You still need to own the game on your own account: the store checks this before it starts.\n\n4. 🕹️ **Casual Fun Options: Community Servers, Mobile APK Ports & Low-End Mods:** For casual gaming with friends on older PCs or phones, you can play optimized mobile APK ports (like GTA San Andreas Definitive on Android, Xash3D for CS 1.6), join lightweight community servers (SAMP for GTA), or install custom low-spec configuration tweaks (LowSpecGamer mods, FSR 3 / DLSS scaling)."
     },
     {
       q: "How do I know if a game will run smoothly on handheld consoles like Steam Deck or ROG Ally?",

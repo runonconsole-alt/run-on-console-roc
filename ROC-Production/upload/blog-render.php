@@ -86,6 +86,20 @@ if ($slug !== '') {
     if (!$post) rocNotFound($ROOT);
     rocRenderPost($ROOT, $post);
 }
+if (isset($_GET['json'])) {
+    // Published posts for the header search box (/blogs/?json=1).
+    // Also used by the home page's latest-articles section (image, date).
+    $rows = $pdo->query("SELECT title, slug, category, excerpt, image, image_alt, published_at FROM blogs WHERE status = 'published' ORDER BY published_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: public, max-age=300');
+    echo json_encode(array_map(function ($r) {
+        $pub = rocDate($r['published_at'] ?? null);
+        return ['t' => (string)$r['title'], 'c' => rocCategoryLabel((string)($r['category'] ?? '')), 'e' => mb_substr((string)($r['excerpt'] ?? ''), 0, 160),
+                'u' => '/blogs/' . $r['slug'] . '/', 'i' => (string)($r['image'] ?? ''), 'a' => (string)($r['image_alt'] ?? ''),
+                'd' => $pub ? gmdate('Y-m-d', $pub) : ''];
+    }, $rows), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
 rocRenderList($ROOT, $pdo, $query, $page);
 }
 
@@ -329,6 +343,8 @@ function rocSendHtml(string $html, ?int $modified = null): void {
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: public, max-age=0, must-revalidate');
     header('X-Content-Type-Options: nosniff');
+    // Same rule as the page's robots meta tag, also as an HTTP header (some SEO tools look for it).
+    if (preg_match('#<meta\s+name="robots"\s+content="([^"]+)"#i', $html, $rm)) header('X-Robots-Tag: ' . $rm[1]);
     if ($modified) header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $modified) . ' GMT');
     echo $html;
     exit;
@@ -604,22 +620,38 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page): void {
 /*                               sitemap                                */
 /* ==================================================================== */
 
+/* ==================================================================== */
+/*                       sitemap helpers (all sitemaps)                 */
+/* ==================================================================== */
+
+/**
+ * Start of a sitemap. The stylesheet shows it as a readable table (page name, address,
+ * last change) when opened in a browser; search engines ignore it. Page names are in
+ * roc:title, a namespaced extension that sitemap readers skip.
+ */
+function rocSmOpen(): string {
+    return '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
+         . '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>' . "\n"
+         . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:roc="https://runonconsole.com/ns/sitemap">' . "\n";
+}
+
+function rocSmLine(string $loc, ?int $mod, string $title = ''): string {
+    $x = function ($v) { return htmlspecialchars((string)$v, ENT_XML1 | ENT_QUOTES, 'UTF-8'); };
+    return '  <url><loc>' . $x($loc) . '</loc>' . ($mod ? '<lastmod>' . gmdate('c', $mod) . '</lastmod>' : '')
+         . ($title !== '' ? '<roc:title>' . $x($title) . '</roc:title>' : '') . "</url>\n";
+}
+
+
 function rocSitemap(PDO $pdo): void {
-    $rows = $pdo->query("SELECT slug, image, published_at, created_at, updated_at, content_modified_at
+    $rows = $pdo->query("SELECT slug, title, image, published_at, created_at, updated_at, content_modified_at
                            FROM blogs WHERE status = 'published' " . rocOrderSql())->fetchAll(PDO::FETCH_ASSOC);
     header('Content-Type: application/xml; charset=utf-8');
     header('Cache-Control: public, max-age=300');
-    $out  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-    $out .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    $out  = rocSmOpen();
     $latest = null;
     foreach ($rows as $r) { $t = rocModified($r); if ($t && (!$latest || $t > $latest)) $latest = $t; }
-    $out .= '  <url><loc>' . rocH(ROC_PUBLIC_URL . '/blogs/') . '</loc>'
-          . ($latest ? '<lastmod>' . gmdate('c', $latest) . '</lastmod>' : '') . "</url>\n";
-    foreach ($rows as $r) {
-        $mod = rocModified($r);
-        $out .= '  <url><loc>' . rocH(rocPostUrl((string)$r['slug'])) . '</loc>'
-              . ($mod ? '<lastmod>' . gmdate('c', $mod) . '</lastmod>' : '') . "</url>\n";
-    }
+    $out .= rocSmLine(ROC_PUBLIC_URL . '/blogs/', $latest, 'Blogs');
+    foreach ($rows as $r) $out .= rocSmLine(rocPostUrl((string)$r['slug']), rocModified($r), (string)$r['title']);
     $out .= "</urlset>\n";
     echo $out;
     exit;

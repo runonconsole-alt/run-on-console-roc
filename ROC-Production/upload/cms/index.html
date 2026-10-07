@@ -237,6 +237,103 @@ table.list tbody tr:hover{background:var(--panel-2)}
 .act .w{margin-left:auto;font-size:11.5px;color:var(--ink-3);white-space:nowrap}
 .act.new{background:#f0fdf4}
 .dayh{padding:8px 15px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);background:var(--panel-2);border-bottom:1px solid var(--line)}
+
+/* ==========================================================================
+   Look & feel (October 2026): light, card-based dashboard style.
+   One accent colour (--brand) re-tints the whole CMS; it can be changed under
+   the user's name in the sidebar and is remembered in this browser.
+   ========================================================================== */
+:root{
+  --bg:#eef3f0; --panel:#ffffff; --panel-2:#f3f7f4; --line:#e3eae5; --line-2:#cfd9d2;
+  --ink:#0f1f17; --ink-2:#3b4a42; --ink-3:#7a8a81;
+  --brand:#1f7a4f; --brand-2:#17603e; --brand-soft:#e3f2e9; --brand-ink:#ffffff;
+  --radius:16px; --shadow:0 1px 2px rgba(15,31,23,.04),0 10px 30px -14px rgba(15,31,23,.14);
+}
+:root[data-accent="blue"]{--brand:#2457c5;--brand-2:#1b44a0;--brand-soft:#e4ecfb}
+:root[data-accent="violet"]{--brand:#6d3fd1;--brand-2:#5530a8;--brand-soft:#eee7fb}
+:root[data-accent="amber"]{--brand:#b85c12;--brand-2:#94490c;--brand-soft:#fbeee2}
+:root[data-accent="slate"]{--brand:#334155;--brand-2:#1e293b;--brand-soft:#e8ecf1}
+html,body{font-family:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--brand)}
+
+/* sidebar: white, the active item is a solid accent pill */
+.side{background:#fff;border-right:1px solid var(--line);
+  --ink:#0f1f17;--ink-2:#4b5a52;--ink-3:#93a29a;--panel-2:var(--brand-soft);--line:#edf1ee;color:var(--ink)}
+.mark{background:var(--brand);box-shadow:0 6px 16px -6px var(--brand)}
+.bsub{color:var(--brand)}
+.sitem{border-radius:12px;padding:9px 11px;transition:background .18s,color .18s,transform .18s}
+.sitem:hover{background:var(--brand-soft);color:var(--brand-2)}
+.sitem.on{background:var(--brand);color:#fff;font-weight:600;box-shadow:0 8px 18px -10px var(--brand)}
+.sitem.on .ct{background:rgba(255,255,255,.22);color:#fff}
+.sitem .ct{background:var(--panel-2)}
+.sitem .ct.new{background:var(--brand);color:#fff}
+.av{background:var(--brand)}
+.list .tag{white-space:nowrap}
+.accents{display:flex;gap:6px;padding:4px 10px 10px}
+.accents button{width:18px;height:18px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line-2);cursor:pointer;padding:0}
+.accents button.on{box-shadow:0 0 0 2px var(--ink)}
+
+/* top bar and content */
+.bar{background:rgba(238,243,240,.85);border-bottom:0;padding:16px 28px}
+.bar h1{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.body{padding:8px 28px 60px}
+.card{border-radius:var(--radius);box-shadow:var(--shadow);border-color:var(--line)}
+.chead{border-bottom-color:var(--line);padding:14px 18px}
+.chead h3{font-size:14px;font-weight:650}
+.cbody{padding:16px 18px}
+.btn{border-radius:999px;padding:7px 15px;transition:background .15s,transform .15s,box-shadow .15s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--brand);border-color:var(--brand);box-shadow:0 8px 18px -10px var(--brand)}
+.btn.primary:hover{background:var(--brand-2);border-color:var(--brand-2)}
+.chip.on{background:var(--brand);border-color:var(--brand)}
+.tag.published{background:var(--brand-soft);color:var(--brand-2)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand)!important;box-shadow:0 0 0 3px var(--brand-soft)}
+
+/* smooth page changes: content rises in, cards one after another */
+@keyframes rocRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.main > .body{animation:rocRise .35s cubic-bezier(.2,.8,.2,1) both}
+.main > .body .card,.main > .body .dstat,.main > .body .stat{animation:rocRise .45s cubic-bezier(.2,.8,.2,1) both}
+.main > .body > :nth-child(2){animation-delay:.04s}
+.main > .body > :nth-child(3){animation-delay:.08s}
+.main > .body > :nth-child(4){animation-delay:.12s}
+.main > .body > :nth-child(5){animation-delay:.16s}
+.dstats > :nth-child(2){animation-delay:.05s}.dstats > :nth-child(3){animation-delay:.1s}.dstats > :nth-child(4){animation-delay:.15s}
+@media (prefers-reduced-motion:reduce){.main > .body,.main > .body *{animation:none!important}}
+
+/* dashboard */
+.dstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:18px}
+.dstat{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px 18px 16px;box-shadow:var(--shadow);position:relative;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.dstat:hover{transform:translateY(-2px);box-shadow:0 14px 34px -16px rgba(15,31,23,.28)}
+.dstat .l{font-size:13px;font-weight:600;color:var(--ink-2)}
+.dstat .n{font-size:38px;font-weight:750;letter-spacing:-.03em;line-height:1.1;margin:10px 0 6px}
+.dstat .s{font-size:11.5px;color:var(--ink-3)}
+.dstat .go{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;font-size:14px;color:var(--ink-2);background:#fff;transform:rotate(-45deg)}
+.dstat.hero{background:linear-gradient(140deg,var(--brand) 0%,var(--brand-2) 100%);border-color:transparent;color:#fff}
+.dstat.hero .l,.dstat.hero .s{color:rgba(255,255,255,.82)}
+.dstat.hero .go{background:#fff;color:var(--brand-2);border-color:#fff}
+.dgrid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;margin-bottom:16px}
+.dgrid > .card{margin:0}
+.span-7{grid-column:span 7}.span-5{grid-column:span 5}.span-4{grid-column:span 4}.span-8{grid-column:span 8}.span-6{grid-column:span 6}.span-12{grid-column:span 12}
+.bars{display:flex;align-items:flex-end;gap:10px;height:170px;padding:6px 4px 0}
+.bars .b{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.bars .col{width:100%;max-width:34px;border-radius:999px;background:repeating-linear-gradient(135deg,var(--line) 0 4px,#fff 4px 8px);border:1px solid var(--line-2);transition:height .7s cubic-bezier(.2,.8,.2,1);min-height:10px}
+.bars .col.on{background:var(--brand);border-color:var(--brand)}
+.bars .col.today{background:var(--brand-2);border-color:var(--brand-2)}
+.bars .x{font-size:10.5px;color:var(--ink-3)}
+.bars .v{font-size:10.5px;font-weight:650;color:var(--ink-2);min-height:14px}
+.donut{display:flex;align-items:center;gap:20px}
+.donut svg{flex:none}
+.donut .legend div{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2);margin:5px 0}
+.donut .legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.timer{background:linear-gradient(140deg,#0f2a1d,#123524);color:#fff;border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+.timer .t{font-size:34px;font-weight:700;letter-spacing:.02em;font-variant-numeric:tabular-nums;margin:6px 0}
+.timer .l{font-size:12px;color:rgba(255,255,255,.7)}
+.mini{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.mini:first-child{border-top:0}
+.mini .dot{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand-2);font-size:13px;flex:none}
+.mini .tt{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .ss{font-size:11.5px;color:var(--ink-3)}
+@media (max-width:1100px){.dstats{grid-template-columns:repeat(2,minmax(0,1fr))}.span-7,.span-5,.span-4,.span-8,.span-6{grid-column:span 12}}
 </style>
 </head>
 <body>
@@ -810,6 +907,7 @@ global.ROCEditor={create:function(o){return new Editor(o);},sanitize:sanitize,es
 'use strict';
 
 var API = '/api/v1/cms/';
+try{ var savedAccent=localStorage.getItem('roc_cms_accent'); if(savedAccent && savedAccent!=='green') document.documentElement.setAttribute('data-accent',savedAccent); }catch(e){}
 var esc = window.ROCEditor.esc;
 var $ = function (s, r) { return (r || document).querySelector(s); };
 var app = $('#app');
@@ -904,6 +1002,171 @@ function renderLogin(error){
   });
 }
 
+/* ------------------------------------------------------------- messages */
+/* Contact and write-for-us forms (api/v1/cms/messages.php). Administrators only. */
+
+var MSG_KIND={contact:'Contact',write_for_us:'Write for us'};
+var MSG_STATUS={new:'New',replied:'Replied',closed:'Closed',spam:'Spam'};
+
+async function loadMessages(){
+  try{
+    var d=await api('messages.php');
+    S.msgs=d.messages||[]; S.msgCounts=d.counts||{}; S.msgInstalled=d.installed!==false;
+  }catch(e){ S.msgs=[]; S.msgCounts={}; toast(e.message,'bad'); }
+}
+
+function msgTag(st){
+  var cls=st==='new'?'admin':st==='replied'?'published':st==='spam'?'off':'draft';
+  return '<span class="tag '+cls+'">'+esc(MSG_STATUS[st]||st)+'</span>';
+}
+
+async function renderMessages(m){
+  if(!S.msgs){
+    m.innerHTML=head('Messages','Loading…')+'<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+    await loadMessages();
+    if(S.view!=='messages'||S.editing) return;
+  }
+  var f=S.msgFilter||'new', k=S.msgKind||'all';
+  var rows=S.msgs.filter(function(x){ return (f==='all'||x.status===f)&&(k==='all'||x.kind===k); });
+  var c=S.msgCounts||{}, total=S.msgs.length;
+  m.innerHTML=head('Messages','From the contact and write-for-us forms. Replies are emailed to the sender.',
+      '<button class="btn" id="msg-refresh">⟳ Refresh</button>')+
+    '<div class="body">'+
+    (S.msgInstalled===false?'<div class="alert warn">The message tables are not installed yet. In the cPanel Terminal run:<br><code>/usr/local/bin/php ~/public_html/api/v1/cron/cli-messages.php --apply</code></div>':'')+
+    '<div class="card"><div class="chead" style="flex-wrap:wrap;gap:10px"><div class="chips">'+
+      ['new','replied','closed','spam','all'].map(function(s){
+        var n=s==='all'?total:(c[s]||0);
+        return '<button class="chip'+(f===s?' on':'')+'" data-mf="'+s+'">'+(s==='all'?'All':MSG_STATUS[s])+'<span class="n">'+n+'</span></button>';
+      }).join('')+'</div><div class="chips">'+
+      ['all','contact','write_for_us'].map(function(s){
+        return '<button class="chip'+(k===s?' on':'')+'" data-mk="'+s+'">'+(s==='all'?'Both forms':MSG_KIND[s])+'</button>';
+      }).join('')+'</div></div>'+
+    (rows.length?'<table class="list"><thead><tr><th>From</th><th>Message</th><th>Form</th><th>Status</th><th>Received</th></tr></thead><tbody>'+
+      rows.map(function(x){
+        return '<tr data-msg="'+x.id+'" style="cursor:pointer'+(x.status==='new'?';font-weight:600':'')+'">'+
+          '<td><div>'+esc(x.name)+'</div><div class="t-slug">'+esc(x.email)+'</div></td>'+
+          '<td><div>'+esc(x.subject||'(no subject)')+'</div><div class="hint" style="max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(x.preview||'')+'</div></td>'+
+          '<td>'+esc(MSG_KIND[x.kind]||x.kind)+'</td><td>'+msgTag(x.status)+'</td>'+
+          '<td style="color:var(--ink-3);white-space:nowrap">'+when(x.created_at)+'</td></tr>';
+      }).join('')+'</tbody></table>'
+      :'<div class="empty"><div class="big">✉</div><div>No messages here.</div></div>')+
+    '</div></div>';
+  m.querySelectorAll('[data-mf]').forEach(function(b){ b.addEventListener('click',function(){ S.msgFilter=b.dataset.mf; renderMessages(m); }); });
+  m.querySelectorAll('[data-mk]').forEach(function(b){ b.addEventListener('click',function(){ S.msgKind=b.dataset.mk; renderMessages(m); }); });
+  m.querySelectorAll('[data-msg]').forEach(function(r){ r.addEventListener('click',function(){ openMessage(r.dataset.msg); }); });
+  $('#msg-refresh',m).addEventListener('click',async function(){ S.msgs=null; renderMessages(m); });
+}
+
+async function openMessage(id){
+  var d;
+  try{ d=await api('messages.php?id='+encodeURIComponent(id)); }catch(e){ toast(e.message,'bad'); return; }
+  var x=d.message, meta=x.meta||{};
+  var metaHtml=Object.keys(meta).map(function(k){
+    return '<div><span class="hint">'+esc(k.charAt(0).toUpperCase()+k.slice(1).replace(/_/g,' '))+':</span> '+esc(meta[k])+'</div>';
+  }).join('');
+  var replies=(x.replies||[]).map(function(r){
+    var st=r.email_status==='sent'?'emailed':r.email_status==='failed'?'email failed':r.email_status?'sending…':'';
+    return '<div style="border-left:3px solid #10b981;padding:8px 12px;margin:8px 0;background:var(--panel-2);border-radius:0 8px 8px 0">'+
+      '<div class="hint">'+esc(r.sent_by)+' · '+when(r.created_at)+(st?' · '+st:'')+'</div>'+
+      '<div style="white-space:pre-wrap;margin-top:4px">'+esc(r.body)+'</div></div>';
+  }).join('');
+  modal((MSG_KIND[x.kind]||'Message')+' from '+x.name,
+    '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">'+
+      '<div><div style="font-weight:600">'+esc(x.name)+' &lt;<a href="mailto:'+esc(x.email)+'">'+esc(x.email)+'</a>&gt;</div>'+
+      '<div class="hint">'+when(x.created_at)+'</div></div><div>'+msgTag(x.status)+'</div></div>'+
+    (x.subject?'<div style="margin-top:10px;font-weight:600">'+esc(x.subject)+'</div>':'')+
+    (metaHtml?'<div style="margin-top:8px;font-size:13px">'+metaHtml+'</div>':'')+
+    '<div style="white-space:pre-wrap;background:var(--panel-2);border-radius:8px;padding:12px;margin-top:10px">'+esc(x.message)+'</div>'+
+    (replies?'<div style="margin-top:14px"><div class="hint" style="font-weight:600">Replies</div>'+replies+'</div>':'')+
+    '<div class="field" style="margin-top:14px"><label for="msg-body">Reply to '+esc(x.email)+'</label>'+
+      '<textarea id="msg-body" rows="6" placeholder="Write your reply. It is emailed to the sender with their message quoted below."></textarea></div>',
+    '<button class="btn danger" data-a="spam" style="margin-right:auto">Spam</button>'+
+    (x.status==='closed'||x.status==='spam'?'<button class="btn" data-a="reopen">Reopen</button>':'<button class="btn" data-a="closeMsg">Mark done</button>')+
+    '<button class="btn" data-a="close">Close</button><button class="btn primary" data-a="send">Send reply</button>',
+    async function(a,close){
+      if(a==='close') return close();
+      if(a==='send'){
+        var body=$('#msg-body').value.trim();
+        if(!body){ toast('Write a reply first.','bad'); return; }
+        var b=document.querySelector('[data-a="send"]'); b.disabled=true; b.textContent='Sending…';
+        try{
+          await api('messages.php',{action:'reply',id:x.id,body:body});
+          // Send the queued email now instead of waiting for the next queue run.
+          await fetch('/api/v1/messages.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dispatch:1}),credentials:'same-origin'}).catch(function(){});
+          toast('Reply sent to '+x.email+'.','good');
+          close(); S.msgs=null; renderShell();
+        }catch(e){ toast(e.message,'bad'); b.disabled=false; b.textContent='Send reply'; }
+        return;
+      }
+      var status=a==='spam'?'spam':a==='reopen'?'new':a==='closeMsg'?'closed':null;
+      if(!status) return;
+      try{ await api('messages.php',{action:'set_status',id:x.id,status:status}); close(); S.msgs=null; renderShell(); }
+      catch(e){ toast(e.message,'bad'); }
+    }, true);
+}
+
+/* ---------------------------------------------------------------- games */
+/* Games on the compatibility page: our own picks (part of the website build, in
+   /roc-games.json) and the popular PC games with official Steam requirements
+   (/roc-steam-games.json, made by scripts/fetch-steam-games.mjs). Read-only. */
+
+async function renderGames(m){
+  if(!S.gamesData){
+    m.innerHTML=head('Games','Loading…')+'<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+    var get=function(u){ return fetch(u+'?ts='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }); };
+    var res=await Promise.all([get('/roc-steam-games.json'),get('/roc-games.json')]);
+    var steam=(res[0]&&res[0].games)||[];
+    var steamUrls={}; steam.forEach(function(g){ steamUrls['/compatibility/?steam='+g.appid]=1; });
+    var ours=(res[1]||[]).filter(function(g){ return !steamUrls[g.u]; });
+    S.gamesData={
+      updated:res[0]&&res[0].updated,
+      rows:ours.map(function(g){ return {t:g.t,y:'',g:g.g,src:'ours',auto:true,page:g.u,store:''}; })
+        .concat(steam.map(function(g){
+          var r=g.req&&g.req.min;
+          return {t:g.t,y:g.y,g:g.g,src:'steam',auto:!!(r&&r.cpu&&r.gpu),page:'/compatibility/?steam='+g.appid,store:g.u,min:g.min};
+        }))
+    };
+    if(S.view!=='games'||S.editing) return;
+  }
+  var d=S.gamesData, f=S.gameFilter||'all', q=(S.gameQ||'').toLowerCase();
+  var rows=d.rows.filter(function(r){
+    if(f==='ours'&&r.src!=='ours') return false;
+    if(f==='steam'&&r.src!=='steam') return false;
+    if(f==='manual'&&r.auto) return false;
+    return !q || (r.t+' '+(r.g||'')+' '+r.y).toLowerCase().indexOf(q)!==-1;
+  });
+  var count=function(fn){ return d.rows.filter(fn).length; };
+  var chips={all:['All',d.rows.length],ours:['Our picks',count(function(r){return r.src==='ours';})],
+    steam:['Steam (official requirements)',count(function(r){return r.src==='steam';})],
+    manual:['No automatic check',count(function(r){return !r.auto;})]};
+  m.innerHTML=head('Games','Every game on the compatibility page ('+d.rows.length+')',
+      '<a class="btn" href="/compatibility/" target="_blank" rel="noopener">Open the page ↗</a>')+
+    '<div class="body">'+
+    '<div class="card"><div class="chead" style="flex-wrap:wrap;gap:10px">'+
+      '<div class="search" style="max-width:280px;flex:1"><input type="text" id="gq" placeholder="Search a game, genre or year" value="'+esc(S.gameQ||'')+'"></div>'+
+      '<div class="chips">'+Object.keys(chips).map(function(k){
+        return '<button class="chip'+(f===k?' on':'')+'" data-gf="'+k+'">'+esc(chips[k][0])+'<span class="n">'+chips[k][1]+'</span></button>';
+      }).join('')+'</div></div>'+
+    (rows.length?'<table class="list"><thead><tr><th>Game</th><th>Year</th><th>Genre</th><th>Source</th><th>Check</th><th></th></tr></thead><tbody>'+
+      rows.slice(0,600).map(function(r){
+        return '<tr><td><div style="font-weight:600">'+esc(r.t)+'</div>'+
+          (r.min&&(r.min.gpu||r.min.cpu)?'<div class="t-slug" style="max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+esc([r.min.cpu,r.min.gpu,r.min.ram].filter(Boolean).join(' / '))+'">Min: '+esc([r.min.gpu,r.min.ram].filter(Boolean).join(' · '))+'</div>':'')+'</td>'+
+          '<td>'+esc(r.y||'—')+'</td><td style="color:var(--ink-3)">'+esc(r.g||'')+'</td>'+
+          '<td><span class="tag '+(r.src==='steam'?'admin':'published')+'">'+(r.src==='steam'?'Steam':'Our pick')+'</span></td>'+
+          '<td>'+(r.auto?'<span class="tag published">Automatic</span>':'<span class="tag draft" title="The official text could not be read for an automatic score: visitors see the requirements and compare themselves">Requirements only</span>')+'</td>'+
+          '<td style="text-align:right;white-space:nowrap"><a class="btn sm" href="'+esc(r.page)+'" target="_blank" rel="noopener">Check page ↗</a>'+
+          (r.store?' <a class="btn sm" href="'+esc(r.store)+'" target="_blank" rel="noopener">Steam ↗</a>':'')+'</td></tr>';
+      }).join('')+'</tbody></table>'
+      :'<div class="empty"><div class="big">🎮</div><div>No games match.</div></div>')+
+    '</div>'+
+    '<div class="hint">Steam games and their requirements come from each game\'s Steam store page'+(d.updated?' (list made '+esc(d.updated)+')':'')+
+      '. To refresh the list, run <code>node scripts/fetch-steam-games.mjs</code> and deploy <code>roc-steam-games.json</code>. Our picks are edited in the website code.</div>'+
+    '</div>';
+  var gq=$('#gq',m);
+  gq.addEventListener('input',function(){ S.gameQ=gq.value; var at=gq.selectionStart; renderGames(m); var x=$('#gq',m); if(x){ x.focus(); x.setSelectionRange(at,at); } });
+  m.querySelectorAll('[data-gf]').forEach(function(b){ b.addEventListener('click',function(){ S.gameFilter=b.dataset.gf; renderGames(m); }); });
+}
+
 /* --------------------------------------------------------------- shell */
 
 function renderShell(){
@@ -911,20 +1174,22 @@ function renderShell(){
   function item(v,label,ic,ct){
     return '<button class="sitem'+(S.view===v?' on':'')+'" data-go="'+v+'">'+
       '<span class="ic">'+ic+'</span><span>'+esc(label)+'</span>'+
-      (ct!==undefined?'<span class="ct'+(v==='activity'?' new':'')+'">'+ct+'</span>':'')+'</button>';
+      (ct!==undefined?'<span class="ct'+(v==='activity'||v==='messages'?' new':'')+'">'+ct+'</span>':'')+'</button>';
   }
   app.innerHTML =
   '<div class="shell"><aside class="side">'+
     '<div class="side-top"><div class="brand"><div class="mark"><svg viewBox="0 0 100 100" width="24" height="24" fill="none" aria-hidden="true"><path d="M12 28 C8 28 4 36 2 54 C0 72 8 88 22 88 C30 88 36 78 44 68 L56 68 C64 78 70 88 78 88 C92 88 100 72 98 54 C96 36 92 28 88 28 C76 28 68 36 50 36 C32 36 24 28 12 28 Z" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 44 V64 M16 54 H36" stroke="#fff" stroke-width="7" stroke-linecap="round"/><circle cx="74" cy="48" r="4.5" fill="#fff"/><circle cx="84" cy="58" r="4.5" fill="#fff"/><circle cx="64" cy="58" r="4.5" fill="#fff"/><circle cx="74" cy="68" r="4.5" fill="#fff"/></svg></div>'+
     '<div><div class="bname">RUN ON <span style="color:#6ee7b7">CONSOLE</span></div><div class="bsub">Content management</div></div></div></div>'+
     '<div class="snav"><div class="slabel">Workspace</div>'+item('dashboard','Dashboard','◱')+
-      (can('activity','view')?item('activity','Live activity','⚡',S.actUnseen?S.actUnseen:undefined):'')+'</div>'+
+      (can('activity','view')?item('activity','Live activity','⚡',S.actUnseen?S.actUnseen:undefined):'')+
+      (admin?item('messages','Messages','✉',S.msgCounts&&S.msgCounts['new']?S.msgCounts['new']:undefined):'')+'</div>'+
     '<div class="snav"><div class="slabel">Content</div>'+
       (can('blogs','view')?item('blogs','Blog posts','✎',S.blogs.length):'')+
       (can('media','view')?item('media','Media library','❖',S.media.length):'')+
       (can('pages','view')?item('cmspages','Pages','▦',S.pages.length):'')+
       (can('pages','view')?item('pages','Website pages & SEO','▤'):'')+
       (can('pages','view')?item('platforms','Gaming platforms','◈'):'')+
+      item('games','Games','🎮')+
       (can('products','view')?item('products','Products','▣')+item('product-images','Product images','▨')+item('product-categories','Product categories','▤'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
       item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+'</div>':'')+
@@ -932,12 +1197,19 @@ function renderShell(){
       esc((S.user.username||'?').slice(0,2).toUpperCase())+'</div>'+
       '<div><div style="font-size:12.5px">'+esc(S.user.username)+'</div>'+
       '<div style="font-size:11px;color:var(--ink-3)">'+(admin?'Full access':'Limited access')+'</div></div></div>'+
+      accentPicker()+
       '<button class="sitem" id="chpw"><span class="ic">⚿</span><span>Change password</span></button>'+
       '<button class="sitem" id="out"><span class="ic">⏻</span><span>Sign out</span></button>'+
     '</div></aside><main class="main" id="main"></main></div>';
 
   app.querySelectorAll('[data-go]').forEach(function(b){
     b.addEventListener('click',function(){ go(b.dataset.go); });
+  });
+  app.querySelectorAll('.accents [data-accent]').forEach(function(b){
+    b.addEventListener('click',function(){
+      applyAccent(b.dataset.accent);
+      app.querySelectorAll('.accents [data-accent]').forEach(function(x){ x.classList.toggle('on', x===b); });
+    });
   });
   $('#chpw').addEventListener('click', function(){ renderChangePassword(false); });
   $('#out').addEventListener('click', async function(){
@@ -962,7 +1234,9 @@ function renderView(){
   if(S.view==='media') return renderMedia(m);
   if(S.view==='pages') return renderPages(m);
   if(S.view==='platforms' && can('pages','view')) return renderPlatforms(m);
+  if(S.view==='games') return renderGames(m);
   if(S.view==='activity') return renderActivity(m);
+  if(S.view==='messages' && S.user.role==='administrator') return renderMessages(m);
   if(S.view==='social') return renderSocial(m);
   if(S.view==='products' && can('products','view')) return renderProducts(m);
   if(S.view==='product-categories' && can('products','view')) return renderProductCategories(m);
@@ -984,10 +1258,11 @@ function head(title, sub, right){
 
 function renderDash(m){
   var pub=S.blogs.filter(function(b){return b.status==='published';});
-  var dr=S.blogs.filter(function(b){return b.status!=='published';});
+  var sched=S.blogs.filter(function(b){return b.status==='scheduled';}).sort(function(a,b){
+    return new Date(a.published_at_iso||0)-new Date(b.published_at_iso||0); });
+  var drafts=S.blogs.filter(function(b){return b.status!=='published'&&b.status!=='scheduled';});
   var heavy=S.media.filter(function(x){return +x.file_size>102400;});
   var noAlt=S.media.filter(function(x){return !hasAlt(x);});
-
   var gaps=[];
   pub.forEach(function(b){
     var g=[];
@@ -996,35 +1271,134 @@ function renderDash(m){
     if(!b.image)g.push('cover image');
     if(g.length)gaps.push({b:b,g:g});
   });
+  var products=S.prodNames?Object.keys(S.prodNames).length:null;
+  var newMsgs=S.msgCounts?(S.msgCounts['new']||0):null;
+  var admin=S.user&&(S.user.is_admin||S.user.role==='administrator');
 
-  m.innerHTML = head('Dashboard','What is live and what needs attention')+
-  '<div class="body narrow">'+
-    '<div class="stats">'+
-      stat(pub.length,'Published')+stat(dr.length,'Drafts')+
-      stat(S.media.length,'Images')+stat(gaps.length,'Need SEO')+
+  // Buy clicks per day, last 14 days (Live activity keeps 30 days)
+  var days=[], counts={}, today=new Date(); today.setHours(0,0,0,0);
+  for(var i=13;i>=0;i--){ var d=new Date(today.getTime()-i*86400000); days.push(d); counts[d.toDateString()]=0; }
+  (S.activity||[]).forEach(function(a){
+    if(a.type!=='click') return;
+    var t=new Date(String(a.at).replace(' ','T')+'Z'); t.setHours(0,0,0,0);
+    if(counts[t.toDateString()]!==undefined) counts[t.toDateString()]++;
+  });
+  var maxC=Math.max(1,Math.max.apply(null,days.map(function(d){return counts[d.toDateString()];})));
+  var clicks14=days.reduce(function(s,d){return s+counts[d.toDateString()];},0);
+
+  function dstat(n,label,sub,go,hero){
+    return '<div class="dstat'+(hero?' hero':'')+'" data-go-view="'+go+'"><span class="go">→</span>'+
+      '<div class="l">'+esc(label)+'</div><div class="n" data-count="'+(n==null?'':n)+'">'+(n==null?'—':'0')+'</div>'+
+      '<div class="s">'+sub+'</div></div>';
+  }
+  var total=pub.length+sched.length+drafts.length;
+  function arc(val,offset,color){
+    var C=2*Math.PI*42, len=total?C*val/total:0;
+    return '<circle cx="55" cy="55" r="42" fill="none" stroke="'+color+'" stroke-width="14" stroke-linecap="butt" '+
+      'stroke-dasharray="'+len.toFixed(2)+' '+(C-len).toFixed(2)+'" stroke-dashoffset="'+(-offset*C/(total||1)).toFixed(2)+'" transform="rotate(-90 55 55)"/>';
+  }
+  var pct=total?Math.round(pub.length*100/total):0;
+
+  m.innerHTML = head('Dashboard','Plan, publish and track everything on runonconsole.com',
+      (can('blogs','create')||can('blogs','edit')?'<button class="btn primary" id="dash-new">＋ New post</button>':''))+
+  '<div class="body">'+
+    '<div class="dstats">'+
+      dstat(pub.length,'Published posts',sched.length?sched.length+' scheduled · '+drafts.length+' drafts':drafts.length+' drafts','blogs',true)+
+      dstat(products,'Products on the site',products==null?(can('products','view')?'Loading…':'No access'):'In the PC and gaming hardware pages','products')+
+      dstat(clicks14,'Amazon clicks · 14 days','Visitors who went to a store','activity')+
+      dstat(newMsgs,'New messages',admin?'Contact and write-for-us forms':'Administrators only','messages')+
     '</div>'+
-    (gaps.length?'<div class="card"><div class="chead"><h3>Published posts missing SEO fields</h3>'+
-      '<span class="note">'+gaps.length+'</span></div><div class="cbody"><div class="advice">'+
-      gaps.slice(0,6).map(function(x){
-        return '<div class="a warn"><span class="m">▲</span><span><b data-open="'+esc(x.b.id)+
-          '" style="cursor:pointer;text-decoration:underline">'+esc(x.b.title)+'</b> — missing '+esc(x.g.join(', '))+'</span></div>';
-      }).join('')+'</div></div></div>':'')+
-    ((heavy.length||noAlt.length)?'<div class="card"><div class="chead"><h3>Media</h3></div><div class="cbody"><div class="advice">'+
-      (noAlt.length?'<div class="a error"><span class="m">●</span><span>'+noAlt.length+' image(s) have no alt text.</span></div>':'')+
-      (heavy.length?'<div class="a warn"><span class="m">▲</span><span>'+heavy.length+' image(s) are over 100 KB.</span></div>':'')+
-      '</div></div></div>':'')+
+
+    '<div class="dgrid">'+
+      '<div class="card span-8"><div class="chead"><h3>Amazon clicks</h3><span class="note">Last 14 days · from Live activity</span></div><div class="cbody">'+
+        '<div class="bars">'+days.map(function(d,ix){
+          var c=counts[d.toDateString()], h=Math.max(8,Math.round(c/maxC*100));
+          return '<div class="b"><div class="v">'+(c||'')+'</div><div class="col'+(c?' on':'')+(ix===13?' today':'')+'" data-h="'+h+'" style="height:8%"></div>'+
+            '<div class="x">'+d.toLocaleDateString('en-GB',{day:'numeric'})+'</div></div>';
+        }).join('')+'</div>'+
+        (clicks14?'':'<div class="hint" style="margin-top:8px">No store clicks in the last 14 days yet. They appear here as visitors use the Buy buttons.</div>')+
+      '</div></div>'+
+      '<div class="span-4" style="display:flex;flex-direction:column;gap:16px">'+
+        '<div class="timer"><div class="l">Next scheduled post</div><div class="t" id="dash-timer">'+(sched.length?'--:--:--':'—')+'</div>'+
+          '<div class="l" style="color:#fff;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(sched.length?esc(sched[0].title):'Nothing scheduled')+'</div>'+
+          '<div class="l">'+(sched.length?esc(fmtWhen(sched[0].published_at_iso)):'Write a draft and press Schedule')+'</div></div>'+
+        '<div class="card" style="flex:1"><div class="chead"><h3>Posts</h3><span class="note">'+total+' in total</span></div><div class="cbody"><div class="donut">'+
+          '<svg width="110" height="110" viewBox="0 0 110 110" aria-hidden="true"><circle cx="55" cy="55" r="42" fill="none" stroke="var(--line)" stroke-width="14"/>'+
+            arc(pub.length,0,'var(--brand)')+arc(sched.length,pub.length,'#f59e0b')+arc(drafts.length,pub.length+sched.length,'#cbd5e1')+
+            '<text x="55" y="60" text-anchor="middle" font-size="20" font-weight="700" fill="var(--ink)">'+pct+'%</text></svg>'+
+          '<div class="legend"><div><i style="background:var(--brand)"></i>Published · '+pub.length+'</div>'+
+            '<div><i style="background:#f59e0b"></i>Scheduled · '+sched.length+'</div>'+
+            '<div><i style="background:#cbd5e1"></i>Drafts · '+drafts.length+'</div></div>'+
+        '</div></div></div>'+
+      '</div>'+
+    '</div>'+
+
+    '<div class="dgrid">'+
+      '<div class="card span-6"><div class="chead"><h3>Recently edited</h3><button class="btn" data-go-view="blogs" style="margin-left:auto">All posts</button></div><div class="cbody">'+
+        (S.blogs.slice(0,5).map(function(b){
+          var st=b.status==='published'?'Live':b.status==='scheduled'?'Scheduled':'Draft';
+          return '<div class="mini" data-open="'+esc(b.id)+'" style="cursor:pointer"><div class="dot">✎</div><div style="min-width:0;flex:1">'+
+            '<div class="tt">'+esc(b.title)+'</div><div class="ss">'+st+' · '+when(b.updated_at)+'</div></div></div>';
+        }).join('')||'<div class="hint">No posts yet. Press “New post” to write the first one.</div>')+
+      '</div></div>'+
+      '<div class="card span-6"><div class="chead"><h3>Needs attention</h3></div><div class="cbody">'+
+        (function(){
+          var rows=[];
+          if(newMsgs) rows.push(['✉',newMsgs+' new message'+(newMsgs>1?'s':''),'Reply from Messages','messages']);
+          gaps.slice(0,3).forEach(function(x){ rows.push(['▲',x.b.title,'Missing '+x.g.join(', '),null,x.b.id]); });
+          if(noAlt.length) rows.push(['●',noAlt.length+' image(s) without alt text','Media library','media']);
+          if(heavy.length) rows.push(['▲',heavy.length+' image(s) over 100 KB','Media library → Replace image','media']);
+          if(!rows.length) return '<div class="hint">All good: nothing needs attention.</div>';
+          return rows.map(function(r){
+            return '<div class="mini" '+(r[3]?'data-go-view="'+r[3]+'"':'data-open="'+esc(r[4])+'"')+' style="cursor:pointer"><div class="dot">'+r[0]+'</div>'+
+              '<div style="min-width:0;flex:1"><div class="tt">'+esc(r[1])+'</div><div class="ss">'+esc(r[2])+'</div></div></div>';
+          }).join('');
+        })()+
+      '</div></div>'+
+    '</div>'+
     '<div id="dash-site"></div>'+
-    '<div class="card"><div class="chead"><h3>Recently edited</h3></div>'+
-    '<table class="list"><thead><tr><th>Title</th><th>Status</th><th>Updated</th></tr></thead><tbody>'+
-    (S.blogs.slice(0,8).map(function(b){
-      return '<tr><td><div class="t-title" data-open="'+esc(b.id)+'">'+esc(b.title)+'</div>'+
-        '<div class="t-slug">/blogs/'+esc(b.slug||'')+'/</div>'+viewLiveLink(b)+'</td>'+
-        '<td><span class="tag '+(b.status==='published'?'published':'draft')+'">'+esc(b.status)+'</span></td>'+
-        '<td style="color:var(--ink-3)">'+when(b.updated_at)+'</td></tr>';
-    }).join('')||'<tr><td colspan="3" class="empty">No posts yet.</td></tr>')+
-    '</tbody></table></div></div>';
+  '</div>';
+
   wireOpen(m);
+  m.querySelectorAll('[data-go-view]').forEach(function(el){
+    el.addEventListener('click',function(e){ e.stopPropagation(); go(el.dataset.goView); });
+  });
+  var nb=$('#dash-new',m); if(nb) nb.addEventListener('click',function(){ go('blogs'); setTimeout(function(){ var b=document.querySelector('#newpost'); if(b) b.click(); },60); });
+
+  // Numbers count up; bars grow in.
+  m.querySelectorAll('[data-count]').forEach(function(el){
+    var to=+el.dataset.count; if(el.dataset.count==='') return;
+    var t0=performance.now(), dur=700;
+    (function step(t){ var p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,3); el.textContent=Math.round(to*e); if(p<1) requestAnimationFrame(step); })(t0);
+  });
+  requestAnimationFrame(function(){ m.querySelectorAll('.bars .col').forEach(function(c){ c.style.height=c.dataset.h+'%'; }); });
+
+  // Countdown to the next scheduled post
+  if(S.dashTimer){ clearInterval(S.dashTimer); S.dashTimer=null; }
+  if(sched.length && sched[0].published_at_iso){
+    var at=new Date(sched[0].published_at_iso).getTime(), tEl=$('#dash-timer',m);
+    var tick=function(){
+      if(!document.body.contains(tEl)){ clearInterval(S.dashTimer); S.dashTimer=null; return; }
+      var s=Math.max(0,Math.floor((at-Date.now())/1000)), h=Math.floor(s/3600), mi=Math.floor(s%3600/60), se=s%60;
+      tEl.textContent=(h>99?Math.floor(h/24)+'d '+(h%24):String(h).padStart(2,'0'))+':'+String(mi).padStart(2,'0')+':'+String(se).padStart(2,'0');
+    };
+    tick(); S.dashTimer=setInterval(tick,1000);
+  }
   fillDashSite(m);
+}
+
+/* Accent colour for the whole CMS (remembered in this browser). */
+var ACCENTS={green:'#1f7a4f',blue:'#2457c5',violet:'#6d3fd1',amber:'#b85c12',slate:'#334155'};
+function applyAccent(a){
+  if(!ACCENTS[a]) a='green';
+  if(a==='green') document.documentElement.removeAttribute('data-accent'); else document.documentElement.setAttribute('data-accent',a);
+  try{ localStorage.setItem('roc_cms_accent',a); }catch(e){}
+}
+function accentPicker(){
+  var cur=(function(){ try{ return localStorage.getItem('roc_cms_accent')||'green'; }catch(e){ return 'green'; } })();
+  return '<div class="accents" title="Colour of the CMS">'+Object.keys(ACCENTS).map(function(k){
+    return '<button type="button" class="'+(k===cur?'on':'')+'" data-accent="'+k+'" style="background:'+ACCENTS[k]+'" aria-label="'+k+' colour"></button>';
+  }).join('')+'</div>';
 }
 
 function stat(n,l){ return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>'; }
@@ -2387,6 +2761,7 @@ async function pollActivity(){
       if(S.actUnseen){ if(!ct){ ct=document.createElement('span'); ct.className='ct new'; b.appendChild(ct);} ct.textContent=S.actUnseen; }
       else if(ct) ct.remove(); }
     if(S.view==='activity' && !S.editing) paintActivity($('#main'));
+    if(S.view==='dashboard' && !S.editing && !S.dashActDone && !document.querySelector('.veil')){ S.dashActDone=true; renderView(); }
   }catch(e){}
 }
 function startActivityPolling(){
@@ -2680,7 +3055,7 @@ function renderPlatformEditor(m,c,devices){
 /* ------------------------------------------------------- product categories */
 
 async function renderProductCategories(m){
-  m.innerHTML=head('Product categories','Category pages at /products/category/…/',
+  m.innerHTML=head('Product categories','Category pages at /products/…/',
       can('products','edit')?'<button class="btn primary" id="pc-new">＋ New category</button>':'')+
     '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
   var d; try{ d=await api('product-categories.php'); }catch(e){ $('.body',m).innerHTML='<div class="alert bad">'+esc(e.message)+'</div>'; return; }
@@ -2691,7 +3066,7 @@ async function renderProductCategories(m){
       var live=c.status==='published', n=c.products||{live:0,hidden:0};
       return '<tr><td><div class="t-title">'+esc(c.name)+
           (can('products','edit')?' <button class="btn sm ghost" data-pc-edit="'+esc(c.slug)+'">Edit</button>':'')+'</div>'+
-        '<div class="t-slug"><a href="/products/category/'+esc(c.slug)+'/" target="_blank" rel="noopener">/products/category/'+esc(c.slug)+'/ ↗</a></div></td>'+
+        '<div class="t-slug"><a href="/products/'+esc(c.slug)+'/" target="_blank" rel="noopener">/products/'+esc(c.slug)+'/ ↗</a></div></td>'+
         '<td>'+n.live+' live'+(n.hidden?' · '+n.hidden+' hidden':'')+'</td>'+
         '<td><span class="tag '+(live?'published':'draft')+'">'+(live?'Live':'Hidden')+'</span></td></tr>';
     }).join('')||'<tr><td colspan="3" class="empty">No categories yet.</td></tr>')+'</tbody></table></div>';
@@ -2708,7 +3083,7 @@ function renderCategoryEditor(m,c){
       (ph?' placeholder="'+esc(ph)+'"':'')+(max?' maxlength="'+max+'"':'')+'>'+(note?'<div class="hint">'+note+'</div>':'')+'</div>';
   }
   m.innerHTML=head(c.slug?c.name:'New category',
-      c.slug?'/products/category/'+c.slug+'/ · '+(live?'Live on the website':'Hidden from the website'):'The address is created from the name and does not change later.',
+      c.slug?'/products/'+c.slug+'/ · '+(live?'Live on the website':'Hidden from the website'):'The address is created from the name and does not change later.',
       '<button class="btn ghost" id="pc-back">← All categories</button>')+
   '<div class="body narrow"><div class="card"><div class="cbody">'+
     input('pc-name','Name *',c.name,'e.g. Gaming Mice','',160)+
@@ -3075,6 +3450,8 @@ async function load(){
       can('pages','view') ? api('pages.php').catch(function(){ return {pages:[]}; }) : {pages:[]}
     ]).then(function(r){ S.pages=(r[2]&&r[2].pages)||[]; return r; });
     S.blogs=b.blogs||[]; S.media=prepMedia(md.media);
+    if(location.hash==='#messages') S.view='messages';
+    if(S.user.role==='administrator') loadMessages().then(function(){ if(!S.editing && !document.querySelector('.veil') && S.view!=='messages') renderShell(); });
     loadProdNames().then(function(){ if(S.view==='dashboard'&&!S.editing) renderShell(); });
     renderShell();
     startActivityPolling();

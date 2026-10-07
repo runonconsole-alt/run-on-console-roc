@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { HelpCircle, ChevronDown, Sparkles } from 'lucide-react';
 import { BouncyText } from './BouncyText';
+import { richText } from '../utils/richText';
 
 // Individual Interactive FAQ Item with Real-Time Mouse-Tracking Green Radial Spotlight
 const InteractiveFAQItem = ({ faq, idx, isOpen, onToggle }) => {
@@ -73,7 +74,7 @@ const InteractiveFAQItem = ({ faq, idx, isOpen, onToggle }) => {
         <div className="relative z-10 px-5 pb-5 pt-2 text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-emerald-200/60 bg-white/80 backdrop-blur-xs animate-page-in">
           <div className="flex items-start gap-2.5">
             <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5 animate-pulse" />
-            <p>{faq.a}</p>
+            <p className="whitespace-pre-line">{richText(faq.a)}</p>
           </div>
         </div>
       )}

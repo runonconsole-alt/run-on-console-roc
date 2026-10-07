@@ -343,12 +343,10 @@ function rocGamingSitemap(PDO $pdo, array $cats): void {
     foreach (rocGamingDevices($pdo) as $d) $byCat[(string)$d['category_slug']][] = $d;
     header('Content-Type: application/xml; charset=utf-8');
     header('Cache-Control: public, max-age=300');
-    $out  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-    $out .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    $out  = rocSmOpen();
     foreach ($cats as $s => $c) {
         if (!empty($c['is_noindex'])) continue;
-        $mod = rocCatModified($c, $byCat[$s] ?? []);
-        $out .= '  <url><loc>' . rocH(rocPlatformUrl($s)) . '</loc>' . ($mod ? '<lastmod>' . gmdate('c', $mod) . '</lastmod>' : '') . "</url>\n";
+        $out .= rocSmLine(rocPlatformUrl($s), rocCatModified($c, $byCat[$s] ?? []), (string)$c['title']);
     }
     $out .= "</urlset>\n";
     echo $out;

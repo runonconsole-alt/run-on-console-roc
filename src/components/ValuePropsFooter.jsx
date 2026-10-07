@@ -240,25 +240,25 @@ export const ValuePropsFooter = () => {
               <li>
                 <a href="/products/" onClick={(e) => { e.preventDefault(); navigateTo('products'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
                   <Cpu className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Components</span>
+                  <span>Products</span>
                 </a>
               </li>
               <li>
-                <a href="/categories/" onClick={(e) => { e.preventDefault(); navigateToCategory('all'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <LayoutGrid className="w-3.5 h-3.5 text-emerald-400" />
+                <a href="/compatibility/" onClick={(e) => { e.preventDefault(); navigateTo('compatibility'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
+                  <Gamepad2 className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Systems</span>
                 </a>
               </li>
               <li>
                 <a href="/blogs/" onClick={(e) => { e.preventDefault(); navigateTo('blogs'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
                   <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>PC Guides</span>
+                  <span>Blogs</span>
                 </a>
               </li>
               <li>
-                <a href="/compatibility/" onClick={(e) => { e.preventDefault(); navigateTo('compatibility'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <Gamepad2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Compatibility</span>
+                <a href="/categories/" onClick={(e) => { e.preventDefault(); navigateToCategory('all'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
+                  <LayoutGrid className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Gaming Platforms</span>
                 </a>
               </li>
               <li>

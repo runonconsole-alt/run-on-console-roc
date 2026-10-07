@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/generate-llmstxt.mjs && node scripts/prerender.mjs && node scripts/generate-sitemap.mjs && node scripts/generate-release-manifest.mjs",
+    "build": "vite build && node scripts/generate-llmstxt.mjs && node scripts/prerender.mjs && node scripts/generate-sitemap.mjs && node scripts/generate-search-index.mjs && node scripts/generate-release-manifest.mjs",
     "verify-seo": "node scripts/verify-seo.mjs",
     "preview": "vite preview"
   },

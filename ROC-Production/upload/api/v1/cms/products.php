@@ -265,8 +265,15 @@ if ($method === 'POST') {
                 $base = rocProdSlug((string)($data['slug'] ?? '')) ?: rocProdSlug($fields['title']);
                 if ($base === '') $base = 'product';
                 $slug = $base;
-                $chk = $pdo->prepare('SELECT COUNT(*) FROM products WHERE slug = ?');
-                for ($n = 2; ; $n++) { $chk->execute([$slug]); if (!(int)$chk->fetchColumn()) break; $slug = $base . '-' . $n; }
+                // Product pages share /products/{slug}/ with category pages and the two group pages.
+                $taken = function (string $s) use ($pdo): bool {
+                    if (in_array($s, ['category', 'pc-hardware', 'gaming-hardware'], true)) return true;
+                    $q = $pdo->prepare('SELECT COUNT(*) FROM products WHERE slug = ?'); $q->execute([$s]);
+                    if ((int)$q->fetchColumn()) return true;
+                    try { $q = $pdo->prepare('SELECT COUNT(*) FROM product_categories WHERE slug = ?'); $q->execute([$s]); return (bool)(int)$q->fetchColumn(); }
+                    catch (\Throwable $e) { return false; }
+                };
+                for ($n = 2; $taken($slug); $n++) $slug = $base . '-' . $n;
                 $id = $slug;
                 $chkId = $pdo->prepare('SELECT COUNT(*) FROM products WHERE id = ?');
                 $chkId->execute([$id]);

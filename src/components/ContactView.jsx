@@ -1,35 +1,37 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Mail, MapPin, Send, MessageSquare, ShieldCheck, Check, Sparkles, SendHorizontal } from 'lucide-react';
-import { FAQSection } from './FAQSection';
 import { Tilt3DCard } from './Tilt3DCard';
 import { BouncyText } from './BouncyText';
 import { CyberMatrixHoloBackground } from './CyberMatrixHoloBackground';
 import { SubmissionSuccessCard } from './SubmissionSuccessCard';
+import { sendMessage } from '../utils/sendMessage';
 
 export const ContactView = () => {
-  const { pageFaqs, sendNotificationEmail } = useApp();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('General Inquiry');
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [refId, setRefId] = useState('');
+  const [website, setWebsite] = useState('');
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !email || !message) return;
-
-    sendNotificationEmail({
-      type: 'suggestion',
-      name: name.trim(),
-      email: email.trim(),
-      subject: subject,
-      message: message.trim()
-    });
-
-    setRefId('MSG-' + Date.now().toString().slice(-6));
-    setSubmitted(true);
+    if (!name || !email || !message || sending) return;
+    setSending(true);
+    setError('');
+    try {
+      const r = await sendMessage({ kind: 'contact', name: name.trim(), email: email.trim(), subject, message: message.trim(), website });
+      setRefId(r.reference);
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -84,7 +86,9 @@ export const ContactView = () => {
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4 text-xs sm:text-sm">
+              <form onSubmit={handleSubmit} className="space-y-4 text-xs sm:text-sm relative">
+                {/* Left empty by people; bots fill it in. */}
+                <input type="text" name="website" value={website} onChange={(e) => setWebsite(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }} />
                 <div>
                   <label className="block text-emerald-950 font-bold mb-1">YOUR NAME *</label>
                   <input 
@@ -135,12 +139,14 @@ export const ContactView = () => {
                   ></textarea>
                 </div>
 
+                {error && <p role="alert" className="text-rose-700 bg-rose-50 border border-rose-200 rounded-xl p-3 font-semibold">{error}</p>}
                 <button 
                   type="submit"
-                  className="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-display font-extrabold text-sm py-4 px-6 rounded-xl shadow-lg border border-emerald-500/40 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+                  disabled={sending}
+                  className="w-full bg-emerald-800 hover:bg-emerald-900 disabled:opacity-60 text-white font-display font-extrabold text-sm py-4 px-6 rounded-xl shadow-lg border border-emerald-500/40 flex items-center justify-center gap-2 transition-all"
                 >
                   <Send className="w-4 h-4 text-emerald-300" />
-                  <span>Send Message to Editorial Team</span>
+                  <span>{sending ? 'Sending…' : 'Send Message'}</span>
                 </button>
               </form>
             </Tilt3DCard>
@@ -152,7 +158,7 @@ export const ContactView = () => {
           
           <Tilt3DCard className="bg-white border-2 border-emerald-500/20 rounded-3xl p-7 sm:p-8 shadow-sm space-y-5">
             <h3 className="font-display font-extrabold text-lg sm:text-xl text-emerald-950 border-b border-emerald-100 pb-3">
-              <BouncyText text="Editorial Contact Details" />
+              <BouncyText text="Contact Details" />
             </h3>
 
             <div className="space-y-4 pt-1">
@@ -162,55 +168,42 @@ export const ContactView = () => {
                 </div>
                 <div className="min-w-0">
                   <div className="font-bold text-xs text-emerald-950 uppercase tracking-wider">Direct Email</div>
-                  <a href="mailto:contact@runonconsole.com" className="text-xs sm:text-sm text-emerald-700 font-extrabold hover:underline block mt-0.5 truncate">
-                    contact@runonconsole.com
+                  <a href="mailto:support@runonconsole.com" className="text-xs sm:text-sm text-emerald-700 font-extrabold hover:underline block mt-0.5 truncate">
+                    support@runonconsole.com
                   </a>
-                  <span className="text-[10px] text-slate-500 block mt-0.5">24/7 Editorial & Reader Support</span>
+                  <span className="text-[10px] text-slate-500 block mt-0.5">We usually reply within 2 working days</span>
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/60 flex items-start gap-4 transition-all hover:bg-emerald-100/60 shadow-xs">
-                <div className="p-3 rounded-xl bg-emerald-800 text-emerald-300 shrink-0 shadow-sm">
-                  <MapPin className="w-5 h-5 animate-pulse" />
-                </div>
-                <div className="min-w-0">
-                  <div className="font-bold text-xs text-emerald-950 uppercase tracking-wider">Hardware Testing Lab</div>
-                  <p className="text-xs text-slate-600 font-medium leading-relaxed mt-0.5">
-                    Run On Console Lab, 550 Mission Street, Suite 1800, San Francisco, CA 94105
-                  </p>
-                  <span className="text-[10px] text-emerald-700 font-bold block mt-0.5">Oscilloscope & Soundproofing Lab</span>
-                </div>
-              </div>
             </div>
           </Tilt3DCard>
 
+          {/* Shown by roc-nav.js once a Discord link is saved in CMS -> Social & Amazon tag. */}
+          <div data-roc-social-box="discord" style={{ display: 'none' }}>
           <Tilt3DCard className="bg-gradient-to-tr from-[#064E3B] to-[#047857] text-white rounded-3xl p-7 sm:p-8 shadow-md space-y-3 border border-emerald-500/40">
             <h4 className="font-display font-bold text-lg text-white">
               <BouncyText text="Join Our Discord Community" />
             </h4>
             <p className="text-xs text-emerald-100 leading-relaxed">
-              Connect with 50,000+ PC builders, share your battlestation, and get real-time advice from our hardware testers.
+              Connect with other PC builders and gamers, share your battlestation, and get advice on gear.
             </p>
             <div className="pt-2">
-              <button 
-                onClick={() => alert("Discord invite link copied!")}
-                className="bg-white text-emerald-950 font-bold text-xs px-5 py-2.5 rounded-xl transition-transform hover:scale-105 shadow-md"
+              <a
+                data-roc-social="discord"
+                href="/contact/"
+                target="_blank"
+                rel="noopener"
+                className="inline-block bg-white text-emerald-950 font-bold text-xs px-5 py-2.5 rounded-xl shadow-md no-underline hover:bg-emerald-50"
               >
-                Join Frag Discord Server →
-              </button>
+                Join Our Discord Server →
+              </a>
             </div>
           </Tilt3DCard>
+          </div>
 
         </div>
 
       </div>
-
-      {/* Contact FAQs with Mouse-tracking Spotlight and Green Header */}
-      <FAQSection 
-        faqs={pageFaqs.contact}
-        title="Contact & Review Submission FAQs"
-        subtitle="Frequently asked questions on editorial response times and PR review samples."
-      />
 
     </div>
   );

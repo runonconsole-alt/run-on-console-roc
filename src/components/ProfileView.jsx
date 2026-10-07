@@ -292,11 +292,6 @@ export const ProfileView = () => {
                   <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                     {profileData?.name || currentUser?.name || 'Gamer Profile Dashboard'}
                   </h1>
-                  {currentUser && (currentUser.emailVerified || currentUser.isVerified) && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                      <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Verified Gamer
-                    </span>
-                  )}
                 </div>
                 <p className="text-slate-400 text-sm mt-1 flex items-center">
                   <Mail className="w-4 h-4 mr-1.5 text-slate-500" />
@@ -335,8 +330,6 @@ export const ProfileView = () => {
           {[
             { id: 'overview', label: 'Overview', icon: User },
             { id: 'gaming', label: 'Edit Gaming Profile', icon: Gamepad2 },
-            { id: 'saved', label: 'Saved Wishlist', icon: Heart },
-            { id: 'alerts', label: 'Price Alerts', icon: Bell },
             { id: 'comments', label: 'Comments History', icon: MessageSquare },
             { id: 'settings', label: 'Account Settings', icon: Settings },
           ].map(tab => {
@@ -383,14 +376,6 @@ export const ProfileView = () => {
                 <Heart className="w-5 h-5 mr-2 text-rose-400" /> Activity Summary
               </h2>
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between py-2 border-b border-slate-800">
-                  <span className="text-slate-400">Saved Wishlist</span>
-                  <span className="font-bold text-white">{profileData?.savedProducts?.length || 0}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-slate-800">
-                  <span className="text-slate-400">Active Price Alerts</span>
-                  <span className="font-bold text-white">{profileData?.priceAlerts?.length || 0}</span>
-                </div>
                 <div className="flex justify-between py-2">
                   <span className="text-slate-400">Comments Posted</span>
                   <span className="font-bold text-white">{profileData?.comments?.length || 0}</span>
@@ -400,93 +385,6 @@ export const ProfileView = () => {
           </div>
         )}
 
-        {/* Tab 2: Saved Wishlist */}
-        {activeTab === 'saved' && (
-          <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 backdrop-blur-xl">
-            <h2 className="text-xl font-bold text-white mb-4 flex items-center">
-              <Heart className="w-5 h-5 mr-2 text-rose-400" /> Saved Products Wishlist
-            </h2>
-            {profileData?.savedProducts?.length === 0 ? (
-              <p className="text-slate-400 text-sm">No saved products in your wishlist yet.</p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {profileData?.savedProducts?.map(prodId => (
-                  <div key={prodId} className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
-                    <span className="text-sm font-semibold text-slate-200">{prodId}</span>
-                    <button
-                      onClick={() => navigateTo('products', prodId)}
-                      className="text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg border border-emerald-500/30"
-                    >
-                      View Product →
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Tab 3: Price Alerts */}
-        {activeTab === 'alerts' && (
-          <div className="space-y-6">
-            <form onSubmit={handleCreatePriceAlert} className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 backdrop-blur-xl space-y-4">
-              <h2 className="text-xl font-bold text-white flex items-center">
-                <Bell className="w-5 h-5 mr-2 text-amber-400" /> Create New Price Alert
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  placeholder="Product ID (e.g. logitech-g-pro-x-tkl-lightspeed)"
-                  value={alertProductId}
-                  onChange={(e) => setAlertProductId(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500"
-                  required
-                />
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="Target Price ($ USD)"
-                  value={alertTargetPrice}
-                  onChange={(e) => setAlertTargetPrice(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                className="inline-flex items-center px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm rounded-xl transition"
-              >
-                <Plus className="w-4 h-4 mr-1.5" /> Create Alert
-              </button>
-            </form>
-
-            <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 backdrop-blur-xl">
-              <h3 className="text-lg font-bold text-white mb-4">Active Price Alerts</h3>
-              {profileData?.priceAlerts?.length === 0 ? (
-                <p className="text-slate-400 text-sm">No price alerts set.</p>
-              ) : (
-                <div className="space-y-3">
-                  {profileData?.priceAlerts?.map(alert => (
-                    <div key={alert.id} className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-white">{alert.product_id}</p>
-                        <p className="text-xs text-slate-400">Target: ${alert.target_price} | Status: {alert.status}</p>
-                      </div>
-                      <button
-                        onClick={() => handleDeletePriceAlert(alert.id)}
-                        className="text-xs text-rose-400 hover:text-rose-300 p-2"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Tab 4: Comments History */}
         {activeTab === 'comments' && (
           <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 backdrop-blur-xl">
             <h2 className="text-xl font-bold text-white mb-4 flex items-center">

@@ -62,6 +62,8 @@ export const AppProvider = ({ children, initialUrl = null }) => {
       if (slug) {
         const prod = getProductBySlug(slug);
         if (prod) return { page: 'products', param: prod.slug, is404: false };
+        const cat = getProductCategoryBySlug(slug);
+        if (cat) return { page: 'products', param: null, productCategory: cat.slug, is404: false };
         return { page: '404', param: null, is404: true };
       }
       return { page: 'products', param: null, is404: false };
@@ -227,7 +229,7 @@ export const AppProvider = ({ children, initialUrl = null }) => {
     else if (page === 'products') {
       const productCat = param && !getProductBySlug(param) ? getProductCategoryBySlug(param) : null;
       if (productCat) {
-        cleanPath = productCat.path;
+        cleanPath = `/products/${productCat.slug}/`;
         param = null;
         nextCategorySlug = productCat.slug;
       } else if (param) {

@@ -4,8 +4,9 @@
  * 1. On React pages: any navigation to /blogs/... or /products/... becomes a normal page load, so the
  *    visitor always gets the server-rendered page with the current CMS content instead
  *    of the copy that was baked into the React bundle.
- * 2. On the server-rendered blog pages (<html data-roc-static>): small replacements for
- *    the React-only header controls — mobile menu, search box, share button, AI button.
+ * 2. Header search box on every page (products, blogs and games, with typo-tolerant matching).
+ * 3. On the server-rendered blog pages (<html data-roc-static>): small replacements for
+ *    the React-only header controls — mobile menu, share button, AI button.
  */
 (function () {
   'use strict';
@@ -113,7 +114,9 @@
       var foot = document.querySelector('footer');
       if (!foot) return;
       cfg.social.forEach(function (x) {
-        var nodes = Array.prototype.slice.call(foot.querySelectorAll('a[data-roc-social="' + x.platform + '"]'));
+        var nodes = Array.prototype.slice.call(document.querySelectorAll('a[data-roc-social="' + x.platform + '"]'));
+        // Boxes that only make sense with a link (e.g. the Discord card on the contact page).
+        document.querySelectorAll('[data-roc-social-box="' + x.platform + '"]').forEach(function (b) { b.style.display = x.url ? '' : 'none'; });
         if (!nodes.length && x.match) {
           var re = new RegExp('^https?://(www\\.)?' + x.match.replace(/\./g, '\\.') + '/?$', 'i');
           foot.querySelectorAll('a[href]').forEach(function (a) {
@@ -165,6 +168,156 @@
     if (document.readyState !== 'loading') start(); else document.addEventListener('DOMContentLoaded', start);
   })();
 
+  /* ---------- Header search (every page): <form data-roc-search> with a scope select.
+     Products and blogs come live from the server, games from the website build.
+     Matching forgives small typos ("logitec", "deathader"). */
+  (function () {
+    var data = null, loading = null;
+    var PAGES = { products: '/products/', blogs: '/blogs/', games: '/compatibility/' };
+    var LABELS = { products: 'Products', blogs: 'Blogs', games: 'Games & compatibility' };
+
+    function load() {
+      if (data) return Promise.resolve(data);
+      if (loading) return loading;
+      function get(u) { return fetch(u, { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; }); }
+      loading = Promise.all([get('/products/?json=1'), get('/blogs/?json=1'), get('/roc-games.json')]).then(function (r) {
+        data = { products: r[0] || [], blogs: r[1] || [], games: r[2] || [] };
+        return data;
+      });
+      return loading;
+    }
+
+    // Words people type that the catalog spells differently.
+    var SYNONYMS = { mouse: ['mice'], mice: ['mouse'], headset: ['headsets', 'audio'], headphone: ['headset', 'audio'], headphones: ['headset', 'audio'],
+      earbuds: ['buds'], gpu: ['graphics', 'rtx', 'radeon'], graphics: ['gpu'], videocard: ['graphics'], monitor: ['monitors', 'display'],
+      display: ['monitor'], screen: ['monitor'], speaker: ['speakers', 'soundbar'], mic: ['microphone', 'wave', 'quadcast', 'seiren'] };
+    function norm(t) { return String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+    function lev(a, b, max) {
+      if (Math.abs(a.length - b.length) > max) return max + 1;
+      var prev = [], cur, i, j;
+      for (j = 0; j <= b.length; j++) prev[j] = j;
+      for (i = 1; i <= a.length; i++) {
+        cur = [i];
+        for (j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        prev = cur;
+      }
+      return prev[b.length];
+    }
+    /** 0 = no match; higher = better. Every query word must match (exactly, as a prefix, or one or two letters off). */
+    function score(item, words) {
+      var title = norm(item.t), hay = title + ' ' + norm((item.b || '') + ' ' + (item.c || '') + ' ' + (item.g || '') + ' ' + (item.e || ''));
+      var hayWords = hay.split(' '), total = 0;
+      for (var i = 0; i < words.length; i++) {
+        var w = words[i], alts = [w].concat(SYNONYMS[w] || []);
+        if (alts.some(function (a) { return title.indexOf(a) !== -1; })) { total += 3; continue; }
+        if (alts.some(function (a) { return hay.indexOf(a) !== -1; })) { total += 2; continue; }
+        if (w.length < 4) return 0;
+        var max = w.length >= 7 ? 2 : 1, hit = false;
+        for (var k = 0; k < hayWords.length && !hit; k++) {
+          // Whole word, or its start ("superlite" ~ "superligh|t").
+          if (lev(w, hayWords[k], max) <= max || lev(w, hayWords[k].slice(0, w.length), max) <= max) hit = true;
+        }
+        if (!hit) return 0;
+        total += 1;
+      }
+      if (title.indexOf(words.join(' ')) === 0) total += 2;
+      return total;
+    }
+    function find(scope, q, limit) {
+      var words = norm(q).split(' ').filter(Boolean);
+      if (!words.length || !data) return [];
+      return (data[scope] || []).map(function (it) { return { it: it, s: score(it, words) }; })
+        .filter(function (x) { return x.s > 0; })
+        .sort(function (a, b) { return b.s - a.s; })
+        .slice(0, limit).map(function (x) { return x.it; });
+    }
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+    function css() {
+      if (document.getElementById('roc-search-css')) return;
+      var st = document.createElement('style');
+      st.id = 'roc-search-css';
+      st.textContent = '.roc-sr{position:absolute;right:0;top:calc(100% + 8px);width:min(380px,calc(100vw - 24px));max-height:420px;overflow-y:auto;background:#fff;border:2px solid #34d399;border-radius:18px;padding:8px;box-shadow:0 20px 50px -12px rgba(15,23,42,.35);z-index:100000;font-family:Inter,system-ui,sans-serif}' +
+        '.roc-sr h6{margin:6px 8px 4px;font:800 10px Outfit,Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#047857}' +
+        '.roc-sr a{display:block;padding:7px 10px;border-radius:10px;text-decoration:none;color:#0f172a}' +
+        '.roc-sr a:hover,.roc-sr a.on{background:#ecfdf5}' +
+        '.roc-sr a b{display:block;font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+        '.roc-sr a small{display:block;font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+        '.roc-sr .all{margin-top:4px;text-align:center;font-size:12px;font-weight:800;color:#fff;background:#059669}' +
+        '.roc-sr .all:hover{background:#047857}' +
+        '.roc-sr p{margin:12px;font-size:12px;color:#64748b;text-align:center}';
+      document.head.appendChild(st);
+    }
+
+    function targetUrl(scope, q) {
+      if (scope === 'all') {
+        // "All": open the page of the best kind of result.
+        scope = find('products', q, 1).length ? 'products' : find('blogs', q, 1).length ? 'blogs' : find('games', q, 1).length ? 'games' : 'products';
+      }
+      return PAGES[scope] + (q ? '?q=' + encodeURIComponent(q) : '');
+    }
+
+    function render(form) {
+      var q = form.q.value.trim(), scope = form['in'] ? form['in'].value : 'all';
+      var box = form.querySelector('.roc-sr');
+      if (!q) { if (box) box.remove(); return; }
+      css();
+      if (!box) { box = document.createElement('div'); box.className = 'roc-sr'; box.setAttribute('role', 'listbox'); form.appendChild(box); }
+      if (!data) { box.innerHTML = '<p>Searching…</p>'; return; }
+      var scopes = scope === 'all' ? ['products', 'blogs', 'games'] : [scope], html = '', any = false;
+      scopes.forEach(function (s) {
+        var list = find(s, q, scope === 'all' ? 4 : 10);
+        if (!list.length) return;
+        any = true;
+        html += '<h6>' + LABELS[s] + '</h6>' + list.map(function (it) {
+          var sub = s === 'products' ? [it.b, it.c].filter(Boolean).join(' · ') : s === 'blogs' ? (it.c || it.e || '') : (it.g ? it.g + ' · check if it runs' : 'Check if it runs');
+          return '<a href="' + esc(it.u) + '"><b>' + esc(it.t) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</a>';
+        }).join('');
+      });
+      box.innerHTML = any ? html + '<a class="all" href="' + esc(targetUrl(scope, q)) + '">See all results for “' + esc(q) + '”</a>'
+        : '<p>Nothing found for “' + esc(q) + '”.</p>';
+    }
+
+    function formOf(el) { return el && el.closest ? el.closest('form[data-roc-search]') : null; }
+    // Only the text box: focusing a result link must not rebuild the list, or the click on it is lost.
+    document.addEventListener('focusin', function (e) { var f = formOf(e.target); if (f && e.target.name === 'q') load().then(function () { render(f); }); });
+    document.addEventListener('input', function (e) { var f = formOf(e.target); if (f) { render(f); load().then(function () { render(f); }); } });
+    document.addEventListener('change', function (e) { var f = formOf(e.target); if (f && e.target.name === 'in') { render(f); if (f.q.value.trim()) f.q.focus(); } });
+    document.addEventListener('submit', function (e) {
+      var f = formOf(e.target);
+      if (!f) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var q = f.q.value.trim(), scope = f['in'] ? f['in'].value : 'all';
+      load().then(function () { location.assign(targetUrl(scope, q)); });
+    }, true);
+    document.addEventListener('keydown', function (e) {
+      var f = formOf(e.target);
+      if (!f) return;
+      var box = f.querySelector('.roc-sr');
+      if (e.key === 'Escape' && box) { box.remove(); return; }
+      if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && box) {
+        var links = Array.prototype.slice.call(box.querySelectorAll('a')), i = links.indexOf(document.activeElement);
+        e.preventDefault();
+        var next = links[e.key === 'ArrowDown' ? Math.min(links.length - 1, i + 1) : i - 1];
+        if (next) next.focus(); else f.q.focus();
+      }
+    });
+    document.addEventListener('click', function (e) {
+      document.querySelectorAll('form[data-roc-search] .roc-sr').forEach(function (box) {
+        if (!box.parentNode.contains(e.target)) box.remove();
+      });
+    });
+    // Keep the words in the box on the results page.
+    function fill() {
+      var p = new URLSearchParams(location.search), q = p.get('q');
+      if (!q) return;
+      var scope = /^\/products\//.test(location.pathname) ? 'products' : /^\/blogs\//.test(location.pathname) ? 'blogs' : /^\/compatibility\//.test(location.pathname) ? 'games' : 'all';
+      document.querySelectorAll('form[data-roc-search]').forEach(function (f) { if (!f.q.value) f.q.value = q; if (f['in']) f['in'].value = scope; });
+    }
+    if (document.readyState !== 'loading') setTimeout(fill, 0); else document.addEventListener('DOMContentLoaded', fill);
+  })();
+
   /* ---------- 2. server-rendered pages only */
   if (!document.documentElement.hasAttribute('data-roc-static')) return;
 
@@ -197,10 +350,14 @@
             panel.appendChild(l);
           });
           var s = document.createElement('form');
-          s.action = '/blogs/';
-          s.style.cssText = 'margin-top:8px';
-          s.innerHTML = '<input name="q" type="search" placeholder="Search articles..." aria-label="Search articles" ' +
-            'style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #cbd5e1;border-radius:12px;font-size:14px">';
+          s.action = '/products/';
+          s.setAttribute('data-roc-search', '');
+          s.setAttribute('role', 'search');
+          s.style.cssText = 'margin-top:8px;position:relative;display:flex;gap:6px';
+          s.innerHTML = '<select name="in" aria-label="Search in" style="padding:10px 6px;border:1px solid #cbd5e1;border-radius:12px;font-size:13px;background:#f8fafc">' +
+            '<option value="all">All</option><option value="products">Products</option><option value="blogs">Blogs</option><option value="games">Games</option></select>' +
+            '<input name="q" type="search" placeholder="Search products, blogs, games..." aria-label="Search" ' +
+            'style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid #cbd5e1;border-radius:12px;font-size:14px">';
           panel.appendChild(s);
           header.appendChild(panel);
         }
@@ -209,18 +366,6 @@
         toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
       });
     }
-
-    // Header search: search the blog.
-    document.querySelectorAll('input[aria-label="Search gaming hardware and games"]').forEach(function (input) {
-      input.placeholder = 'Search articles...';
-      input.addEventListener('keydown', function (ev) {
-        if (ev.key !== 'Enter') return;
-        var q = input.value.trim();
-        location.assign('/blogs/' + (q ? '?q=' + encodeURIComponent(q) : ''));
-      });
-      var here = new URLSearchParams(location.search).get('q');
-      if (here) input.value = here;
-    });
 
     // Share button.
     document.querySelectorAll('[data-roc-share]').forEach(function (btn) {

@@ -5,7 +5,6 @@ import {
   ArrowRight, ChevronLeft, ChevronRight, Gamepad2, FileText, 
   Users, Clock, User, Sparkles, Activity, ShoppingBag 
 } from 'lucide-react';
-import { LiveGamingCanvas } from './LiveGamingCanvas';
 import { Tilt3DCard } from './Tilt3DCard';
 
 export const HeroSection = () => {
@@ -32,8 +31,6 @@ export const HeroSection = () => {
   return (
     <section className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">
       
-      {/* Live Warzone Battlefield Combat Canvas */}
-      <LiveGamingCanvas />
 
       {/* Ambient Soft Glow Orbs */}
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-400/15 rounded-full blur-3xl pointer-events-none motion-reduce:hidden"></div>
@@ -72,15 +69,15 @@ export const HeroSection = () => {
 
           {/* Floating Hardware Badges */}
           <div className="flex flex-wrap gap-2.5 pt-1">
-            <span className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
-              ⚡ 8000Hz Polling
-            </span>
-            <span className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
-              🔥 0.03ms QD-OLED
-            </span>
-            <span className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
-              🛡️ Zero Stick Drift
-            </span>
+            <a href="/products/mice/" className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline">
+              ⚡ 8000Hz gaming mice
+            </a>
+            <a href="/products/monitors/" className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline">
+              🔥 QD-OLED monitors
+            </a>
+            <a href="/compatibility/" className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline">
+              🎮 Can my PC run it?
+            </a>
           </div>
 
           {/* DUAL RESPONSIVE CRAWLABLE BUTTONS */}

@@ -394,6 +394,7 @@ export const CategoriesView = () => {
 
           {/* Right Visual Graphic Showcase */}
           <div className="lg:col-span-5 grid grid-cols-2 gap-3">
+ <a href="/categories/pc-handheld-pc/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
               <img 
                 src="/images/battlestation_pc.jpg" 
@@ -403,7 +404,9 @@ export const CategoriesView = () => {
               <div className="text-xs font-display font-bold text-white">PC & Handhelds</div>
               <div className="text-[10px] text-emerald-300 font-medium">Steam Deck • ROG • RTX 4090</div>
             </Tilt3DCard>
+            </a>
 
+ <a href="/categories/retro-handheld-brands/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
               <img 
                 src="/images/handheld_console.jpg" 
@@ -413,6 +416,7 @@ export const CategoriesView = () => {
               <div className="text-xs font-display font-bold text-white">Retro & Emulation</div>
               <div className="text-[10px] text-emerald-300 font-medium">Miyoo • Anbernic • Dreamcast</div>
             </Tilt3DCard>
+            </a>
           </div>
 
         </div>
