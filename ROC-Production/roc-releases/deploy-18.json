@@ -15,16 +15,9 @@
    "type": "contains",
    "path": "index.html",
    "text": "googletagmanager.com/gtm.js"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-D9xiOzS2.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/27",
- "build": "index-D9xiOzS2.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]

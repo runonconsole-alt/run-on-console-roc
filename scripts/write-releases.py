@@ -104,6 +104,10 @@ RELEASES = [
                   'Blog posts are signed "ROC"'],
          checks=[dict(label='Tracking codes on the home page (cli-refresh-templates.php)', type='contains', path='index.html', text='googletagmanager.com/gtm.js')],
          pr=REPO + '27'),
+    dict(deploy=19, date='2026-10-08', title='Fix: the ROC author page showed the sign-in page',
+         changes=['/author/roc-team/ shows the ROC page again (its address contains "/auth", which the router took for sign-in)'],
+         checks=[dict(label='ROC page has the right heading', type='contains', path='author/roc-team/index.html', text='ROC (Run On Console)</h1>')],
+         pr=REPO + '27'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
