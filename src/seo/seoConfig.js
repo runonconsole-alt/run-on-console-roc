@@ -124,7 +124,7 @@ export function generateJsonLd(routeData) {
       'dateModified': b.isoDateModified || '2024-05-20T08:00:00+00:00',
       'author': {
         '@type': 'Organization',
-        'name': 'ROC Team',
+        'name': 'ROC (Run On Console)',
         'url': `${SITE_DOMAIN}/author/roc-team/`
       },
       'publisher': {

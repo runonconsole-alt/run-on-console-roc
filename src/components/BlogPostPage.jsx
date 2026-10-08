@@ -123,7 +123,7 @@ export const BlogPostPage = () => {
                 href="/author/roc-team/"
                 className="font-bold text-slate-900 hover:text-blue-600 transition-colors block"
               >
-                By ROC Team
+                By ROC
               </a>
               <div className="text-[11px] text-slate-400">Senior Hardware Columnist</div>
             </div>

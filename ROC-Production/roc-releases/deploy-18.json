@@ -1,0 +1,31 @@
+{
+ "deploy": 18,
+ "date": "2026-10-08",
+ "title": "CMS Settings and Sitemap; blog posts by \"ROC\"",
+ "changes": [
+  "CMS > Settings: Google Tag Manager, GA4, Clarity, Search Console, Bing, Pinterest, Facebook, Yandex and Google Business Profile codes",
+  "CMS > Settings: redirects (301 / 302 / 410), noindex rules, robots.txt and llms.txt editors, all with 30-day history",
+  "CMS > Sitemap: every address in the sitemaps, leave pages out or add pages",
+  "Tracking codes moved out of the page code into CMS (same IDs as before)",
+  "Blog posts are signed \"ROC\""
+ ],
+ "checks": [
+  {
+   "label": "Tracking codes on the home page (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "index.html",
+   "text": "googletagmanager.com/gtm.js"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-D9xiOzS2.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/27",
+ "build": "index-D9xiOzS2.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

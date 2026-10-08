@@ -390,11 +390,11 @@ function rocRenderPost(string $root, array $p): void {
     $image    = trim((string)($p['image'] ?? ''));
     $imageAbs = rocAbs($image);
     $alt      = trim((string)($p['image_alt'] ?? '')) ?: $title;
-    // Posts are signed by the ROC Team (a name typed in the CMS is shown only when it is
+    // Posts are signed "ROC" (a name typed in the CMS is shown only when it is
     // someone else, e.g. a guest writer).
     $author   = trim((string)($p['author_name'] ?? ''));
-    if ($author === '' || in_array(strtolower($author), ['omar abobakar', 'omar', 'roc team', 'run on console', 'run on console team', 'run on console editorial team'], true)) $author = 'ROC Team';
-    $byPerson = $author !== 'ROC Team';
+    if ($author === '' || in_array(strtolower($author), ['omar abobakar', 'omar', 'roc', 'roc team', 'run on console', 'run on console team', 'run on console editorial team'], true)) $author = 'ROC';
+    $byPerson = $author !== 'ROC';
     $authorUrl = $byPerson ? '' : '/author/roc-team/';
     $category = rocCategoryLabel($p['category'] ?? '');
     $pub      = rocPublished($p);
@@ -444,7 +444,7 @@ function rocRenderPost(string $root, array $p): void {
     if ($imageAbs) $article['image'] = [$imageAbs];
     if ($pub) $article['datePublished'] = gmdate('c', $pub);
     if ($mod) $article['dateModified'] = gmdate('c', $mod);
-    $article['author'] = $byPerson ? ['@type' => 'Person', 'name' => $author] : ['@type' => 'Organization', 'name' => 'ROC Team', 'url' => ROC_PUBLIC_URL . '/author/roc-team/'];
+    $article['author'] = $byPerson ? ['@type' => 'Person', 'name' => $author] : ['@type' => 'Organization', 'name' => 'ROC (Run On Console)', 'url' => ROC_PUBLIC_URL . '/author/roc-team/'];
     if ($authorUrl !== '') $article['author']['url'] = ROC_PUBLIC_URL . $authorUrl;
     $article['publisher'] = [
         '@type' => 'Organization',
@@ -657,6 +657,9 @@ function rocSmOpen(): string {
 }
 
 function rocSmLine(string $loc, ?int $mod, string $title = ''): string {
+    // CMS > Sitemap can leave addresses out (and noindex pages never belong in a sitemap).
+    $lib = __DIR__ . '/api/v1/cms/site-layer-lib.php';
+    if (is_file($lib)) { require_once $lib; if (rocLayerSitemapSkip(__DIR__, $loc)) return ''; }
     $x = function ($v) { return htmlspecialchars((string)$v, ENT_XML1 | ENT_QUOTES, 'UTF-8'); };
     return '  <url><loc>' . $x($loc) . '</loc>' . ($mod ? '<lastmod>' . gmdate('c', $mod) . '</lastmod>' : '')
          . ($title !== '' ? '<roc:title>' . $x($title) . '</roc:title>' : '') . "</url>\n";

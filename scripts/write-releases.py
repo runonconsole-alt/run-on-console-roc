@@ -96,6 +96,14 @@ RELEASES = [
          checks=[dict(label='ROC Team installer (cli-roc-team.php)', type='htaccess', marker='# ROC team BEGIN'),
                  dict(label='Blog agent token made in CMS', type='setting', key='blog_agent_token_hash')],
          pr=REPO + '26'),
+    dict(deploy=18, date='2026-10-08', title='CMS Settings and Sitemap; blog posts by "ROC"',
+         changes=['CMS > Settings: Google Tag Manager, GA4, Clarity, Search Console, Bing, Pinterest, Facebook, Yandex and Google Business Profile codes',
+                  'CMS > Settings: redirects (301 / 302 / 410), noindex rules, robots.txt and llms.txt editors, all with 30-day history',
+                  'CMS > Sitemap: every address in the sitemaps, leave pages out or add pages',
+                  'Tracking codes moved out of the page code into CMS (same IDs as before)',
+                  'Blog posts are signed "ROC"'],
+         checks=[dict(label='Tracking codes on the home page (cli-refresh-templates.php)', type='contains', path='index.html', text='googletagmanager.com/gtm.js')],
+         pr=REPO + '27'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
