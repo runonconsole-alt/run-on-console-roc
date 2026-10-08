@@ -16,7 +16,7 @@ export const AuthorView = () => {
             <a href="/about/" className="text-emerald-600 hover:underline">About</a>
             <span className="ml-2 text-slate-300">/</span>
           </li>
-          <li className="text-slate-900 font-bold">ROC Team</li>
+          <li className="text-slate-900 font-bold">ROC</li>
         </ol>
       </nav>
 
@@ -26,9 +26,9 @@ export const AuthorView = () => {
           <span className="inline-block bg-emerald-500 text-slate-950 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
             Run On Console
           </span>
-          <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-white">ROC Team</h1>
+          <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-white">ROC (Run On Console)</h1>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
-            The ROC (Run On Console) team is a small, independent group of gamers. We write the guides on this site,
+            ROC (Run On Console) is run by a small, independent group of gamers. We write the guides on this site,
             keep the gaming gear picks and the game requirements checker up to date, and answer every message we get.
           </p>
         </div>

@@ -28,7 +28,10 @@ define('ROC_SITE_LAYER_LIB', 1);
 
 const ROC_LAYER_FILE = '/cms-templates/site-layer.json';
 /** Where each part is stored (cms_settings.setting_key). */
-const ROC_LAYER_KEYS = ['announcement' => 'site_announcement', 'code' => 'site_code', 'meta' => 'meta_overrides', 'code_pages' => 'site_code_pages'];
+const ROC_LAYER_KEYS = ['announcement' => 'site_announcement', 'code' => 'site_code', 'meta' => 'meta_overrides', 'code_pages' => 'site_code_pages',
+                        'tracking' => 'site_tracking', 'noindex' => 'noindex_rules', 'sitemap' => 'sitemap_rules'];
+/** Parts that are plain lists/maps (saved as they are, not merged with defaults). */
+const ROC_LAYER_LISTS = ['meta', 'code_pages', 'noindex'];
 /** Built pages live in these folders; the others are served by PHP or are not pages. */
 const ROC_LAYER_SKIP_DIRS = ['api', 'cms', 'cms-templates', 'uploads', 'images', 'assets', 'fonts', 'products',
                              'categories', 'blogs', 'gaming-platforms', 'partnerships', 'policy', 'node_modules', 'cgi-bin', '.well-known'];
@@ -48,6 +51,13 @@ function rocLayerDefaults(): array {
         'code' => ['css' => '', 'head_html' => '', 'body_top_html' => '', 'body_end_html' => ''],
         'meta' => [],
         'code_pages' => [],
+        // Tracking and verification codes (CMS > Settings). Until the CMS saves them, the
+        // codes that used to be written in index.html stay in use.
+        'tracking' => ['gtm' => 'GTM-TT93MFWB', 'ga4' => 'G-X5LQFPMR0C', 'clarity' => 'ybw9tw3qju',
+                       'gsc' => 'google0dcacebd57bb2c52', 'bing' => '9C2164D8729DA6CB7999A97B8756BC22',
+                       'pinterest' => '', 'facebook' => '', 'yandex' => '', 'gmb_url' => '', 'gmb_place_id' => ''],
+        'noindex' => [],                                   // ["/path/", "/old-section/*"]
+        'sitemap' => ['exclude' => [], 'extra' => []],     // exclude: paths; extra: [{path, title}]
         'updated' => '',
     ];
 }
@@ -64,6 +74,9 @@ function rocLayerLoad(string $root): array {
         $d['code'] = array_merge($d['code'], (array)($j['code'] ?? []));
         $d['meta'] = (array)($j['meta'] ?? []);
         $d['code_pages'] = (array)($j['code_pages'] ?? []);
+        if (is_array($j['tracking'] ?? null)) $d['tracking'] = array_merge($d['tracking'], $j['tracking']);
+        $d['noindex'] = array_values(array_filter((array)($j['noindex'] ?? []), 'is_string'));
+        if (is_array($j['sitemap'] ?? null)) $d['sitemap'] = array_merge($d['sitemap'], $j['sitemap']);
         $d['updated'] = (string)($j['updated'] ?? '');
     }
     return $cache[$root] = $d;
@@ -125,6 +138,59 @@ function rocLayerAnnouncementHtml(array $a): string {
     return $h;
 }
 
+/* ------------------------------------------------------------- tracking */
+
+/** <head> code for the saved tracking and verification IDs (IDs are validated on save). */
+function rocLayerTrackingHead(array $t, string $path): string {
+    $h = '';
+    $id = function ($k, $re) use ($t) { $v = trim((string)($t[$k] ?? '')); return preg_match($re, $v) ? $v : ''; };
+    if ($v = $id('gsc', '/^[A-Za-z0-9_-]{10,120}$/')) $h .= '<meta name="google-site-verification" content="' . $v . '" />';
+    if ($v = $id('bing', '/^[A-Za-z0-9]{10,64}$/')) $h .= '<meta name="msvalidate.01" content="' . $v . '" />';
+    if ($v = $id('pinterest', '/^[A-Za-z0-9]{10,64}$/')) $h .= '<meta name="p:domain_verify" content="' . $v . '" />';
+    if ($v = $id('facebook', '/^[A-Za-z0-9]{10,64}$/')) $h .= '<meta name="facebook-domain-verification" content="' . $v . '" />';
+    if ($v = $id('yandex', '/^[A-Za-z0-9]{10,64}$/')) $h .= '<meta name="yandex-verification" content="' . $v . '" />';
+    if ($v = $id('gtm', '/^GTM-[A-Z0-9]{4,12}$/')) {
+        $h .= "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','" . $v . "');</script>";
+    }
+    if ($v = $id('ga4', '/^G-[A-Z0-9]{4,15}$/')) {
+        $h .= '<script async src="https://www.googletagmanager.com/gtag/js?id=' . $v . '"></script>'
+            . "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','" . $v . "');</script>";
+    }
+    if ($v = $id('clarity', '/^[a-z0-9]{6,20}$/')) {
+        $h .= '<script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","' . $v . '");</script>';
+    }
+    // Google Business Profile: linked from the Organization on the home page.
+    $gmb = trim((string)($t['gmb_url'] ?? ''));
+    if ($path === '/' && preg_match('#^https://[^\s"<>]+$#', $gmb)) {
+        $h .= '<script type="application/ld+json">' . json_encode(['@context' => 'https://schema.org', '@type' => 'Organization',
+            '@id' => 'https://runonconsole.com/#organization', 'sameAs' => [$gmb]], JSON_UNESCAPED_SLASHES) . '</script>';
+    }
+    return $h;
+}
+
+function rocLayerTrackingBodyTop(array $t): string {
+    $v = trim((string)($t['gtm'] ?? ''));
+    return preg_match('/^GTM-[A-Z0-9]{4,12}$/', $v)
+        ? '<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=' . $v . '" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>' : '';
+}
+
+/** Is $path covered by a list of rules ("/exact/" or "/prefix/*")? */
+function rocLayerPathIn(string $path, array $rules): bool {
+    foreach ($rules as $r) {
+        $r = (string)$r;
+        if ($r === '') continue;
+        if (substr($r, -1) === '*' ? strpos($path, substr($r, 0, -1)) === 0 : $r === $path) return true;
+    }
+    return false;
+}
+
+/** CMS > Sitemap: true when this address must not be listed in any sitemap. */
+function rocLayerSitemapSkip(string $root, string $loc): bool {
+    $L = rocLayerLoad($root);
+    $path = (string)(parse_url($loc, PHP_URL_PATH) ?: '/');
+    return rocLayerPathIn($path, (array)($L['sitemap']['exclude'] ?? [])) || rocLayerPathIn($path, (array)($L['noindex'] ?? []));
+}
+
 /* ---------------------------------------------------------------- apply */
 
 /** Removes earlier additions; returns [html, originals|null]. */
@@ -135,7 +201,10 @@ function rocLayerStrip(string $html): array {
         if (is_array($o)) $orig = $o;
     }
     $html = (string)preg_replace('#<!--roc-layer-(head|top|end)-->.*?<!--/roc-layer-\1-->#s', '', $html);
-    if ($orig) $html = rocLayerSetMeta($html, (string)($orig['t'] ?? ''), (string)($orig['d'] ?? ''));
+    if ($orig) {
+        $html = rocLayerSetMeta($html, (string)($orig['t'] ?? ''), (string)($orig['d'] ?? ''));
+        if (isset($orig['r'])) $html = rocLayerSetRobots($html, (string)$orig['r']);
+    }
     return [$html, $orig];
 }
 
@@ -143,6 +212,17 @@ function rocLayerGetMeta(string $html): array {
     $t = preg_match('#<title>(.*?)</title>#is', $html, $m) ? html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8') : '';
     $d = preg_match('#<meta\s+name="description"\s+content="([^"]*)"#i', $html, $m) ? html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '';
     return [$t, $d];
+}
+
+function rocLayerGetRobots(string $html): string {
+    return preg_match('#<meta\s+name="robots"\s+content="([^"]*)"#i', $html, $m) ? html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '';
+}
+function rocLayerSetRobots(string $html, string $value): string {
+    if ($value === '') return $html;
+    if (preg_match('#<meta\s+name="robots"\s+content="[^"]*"#i', $html)) {
+        return (string)preg_replace('#(<meta\s+name="robots"\s+content=")[^"]*(")#i', '${1}' . rocLayerH($value) . '${2}', $html, 1);
+    }
+    return (string)preg_replace('#</head>#i', '<meta name="robots" content="' . rocLayerH($value) . '" /></head>', $html, 1);
 }
 
 /** Puts a title and/or description into <title> and the description, Open Graph and X tags. */
@@ -171,12 +251,18 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
 
     $head = '';
     $ov = $metaOn ? ($L['meta'][$path] ?? null) : null;
-    if (is_array($ov) && (trim((string)($ov['title'] ?? '')) !== '' || trim((string)($ov['description'] ?? '')) !== '')) {
+    $hasOv = is_array($ov) && (trim((string)($ov['title'] ?? '')) !== '' || trim((string)($ov['description'] ?? '')) !== '');
+    $noindex = rocLayerPathIn($path, (array)($L['noindex'] ?? []));
+    if ($hasOv || $noindex) {
         [$t0, $d0] = rocLayerGetMeta($html);
-        $head .= '<!--roc-orig:' . base64_encode((string)json_encode(['t' => $t0, 'd' => $d0])) . '-->'
-            . '<meta name="roc-meta-override" content="1" />';
+        $head .= '<!--roc-orig:' . base64_encode((string)json_encode(['t' => $t0, 'd' => $d0, 'r' => rocLayerGetRobots($html)])) . '-->';
+    }
+    if ($hasOv) {
+        $head .= '<meta name="roc-meta-override" content="1" />';
         $html = rocLayerSetMeta($html, trim((string)($ov['title'] ?? '')), trim((string)($ov['description'] ?? '')));
     }
+    if ($noindex) $html = rocLayerSetRobots($html, 'noindex, follow');      // CMS > Settings > Noindex rules
+    $head .= rocLayerTrackingHead((array)($L['tracking'] ?? []), $path);
     $ann = rocLayerAnnouncementOn($L['announcement']);
     // Whole-site code first, then code for page groups (/products/*) and for this page.
     $codes = [$L['code']];
@@ -186,7 +272,7 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
     foreach ($codes as $c) if (trim((string)($c['css'] ?? '')) !== '') $css .= ($css !== '' ? "\n" : '') . trim((string)$c['css']);
     if ($css !== '') $head .= '<style id="roc-site-css">' . str_ireplace('</style', '<\/style', $css) . '</style>';
     if (trim($pick('head_html')) !== '') $head .= "\n" . $pick('head_html') . "\n";
-    $top = ($ann ? rocLayerAnnouncementHtml($L['announcement']) : '') . $pick('body_top_html');
+    $top = rocLayerTrackingBodyTop((array)($L['tracking'] ?? [])) . ($ann ? rocLayerAnnouncementHtml($L['announcement']) : '') . $pick('body_top_html');
     $end = $pick('body_end_html');
 
     if ($head !== '') {
@@ -281,7 +367,7 @@ function rocLayerFromDb(PDO $pdo, string $root): array {
     foreach (ROC_LAYER_KEYS as $k => $key) {
         $v = rocLayerSettingGet($pdo, $key);
         $d = $v !== null ? json_decode($v, true) : null;
-        if (is_array($d)) $L[$k] = in_array($k, ['meta', 'code_pages'], true) ? $d : array_merge(rocLayerDefaults()[$k], $d);
+        if (is_array($d)) $L[$k] = in_array($k, ROC_LAYER_LISTS, true) || $k === 'code_pages' ? $d : array_merge(rocLayerDefaults()[$k], $d);
     }
     return $L;
 }
@@ -336,7 +422,7 @@ function rocHistGet(string $root, string $id): ?array {
 function rocLayerSave(PDO $pdo, string $root, string $part, array $value, ?int $userId, ?array $onlyPaths = null): int {
     rocLayerSettingSet($pdo, ROC_LAYER_KEYS[$part], (string)json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), $userId);
     $L = rocLayerFromDb($pdo, $root);
-    $L[$part] = in_array($part, ['meta', 'code_pages'], true) ? $value : array_merge(rocLayerDefaults()[$part], $value);
+    $L[$part] = in_array($part, ROC_LAYER_LISTS, true) || $part === 'code_pages' ? $value : array_merge(rocLayerDefaults()[$part], $value);
     $L['updated'] = gmdate('c');
     $file = $root . ROC_LAYER_FILE;
     if (!is_dir(dirname($file))) @mkdir(dirname($file), 0755, true);

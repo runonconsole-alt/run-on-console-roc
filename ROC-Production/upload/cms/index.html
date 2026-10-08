@@ -1263,7 +1263,7 @@ function renderShell(){
       item('games','Games','🎮')+
       (can('products','view')?item('products','Products','▣')+item('product-images','Product images','▨')+item('product-categories','Product categories','▤'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
-      item('blogagent','Blog agent','✍')+item('announce','Announcement bar','📣')+item('sitecode','Template & code','⌨')+
+      item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Blog agent','✍')+item('announce','Announcement bar','📣')+item('sitecode','Template & code','⌨')+
       item('siteusers','Site users','👤')+item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+'</div>':'')+
     '<div class="sfoot"><div class="who"><div class="av">'+
       esc((S.user.username||'?').slice(0,2).toUpperCase())+'</div>'+
@@ -1309,6 +1309,8 @@ function renderView(){
   if(S.view==='metas' && can('pages','view')) return renderMetas(m);
   if(S.view==='announce' && S.user.role==='administrator') return renderAnnouncement(m);
   if(S.view==='blogagent' && S.user.role==='administrator') return renderBlogAgent(m);
+  if(S.view==='settings' && S.user.role==='administrator') return renderSettings(m);
+  if(S.view==='sitemap' && S.user.role==='administrator') return renderSitemapView(m);
   if(S.view==='sitecode' && S.user.role==='administrator') return renderSiteCode(m);
   if(S.view==='media') return renderMedia(m);
   if(S.view==='pages') return renderPages(m);
@@ -3418,6 +3420,177 @@ async function renderBlogAgent(m, fresh){
   if(cp) cp.addEventListener('click',function(){
     var t=$('#ba-cmd',m).textContent;
     (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){ toast('Copied.','good'); },function(){ toast('Select the line and copy it.','bad'); });
+  });
+}
+
+/* ------------------------------------------------------------- settings */
+/* Tracking & verification codes, redirects, noindex rules, robots.txt, llms.txt
+   (api/v1/cms/site-settings.php). Every save keeps the previous version 30 days. */
+
+var SET_TABS=[['tracking','Tracking & verification'],['redirects','Redirects'],['noindex','Noindex'],['robots','robots.txt'],['llms','llms.txt']];
+
+function settingsHistory(box, part, reload){
+  box.innerHTML='<span class="spin" style="width:10px;height:10px"></span>';
+  api('site-settings.php?history='+part).then(function(d){
+    if(!d.history.length){ box.innerHTML='<div class="hint">No earlier versions in the last 30 days.</div>'; return; }
+    var show=function(v){ var t=typeof v==='string'?v:JSON.stringify(v,null,1); return '<pre style="white-space:pre-wrap;max-height:140px;overflow:auto;font-size:11.5px;background:var(--panel-2);padding:8px;border-radius:8px;margin:4px 0">'+esc(String(t).slice(0,3000))+'</pre>'; };
+    box.innerHTML=d.history.map(function(h){
+      return '<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0;font-size:12.5px"><div class="hint">'+histWhen(h.at)+(h.user&&isNaN(h.user)?' · '+esc(h.user):'')+'</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><div class="hint">Before</div>'+show(h.before)+'<button class="btn sm" data-srest="'+esc(h.id)+'" data-which="before">Restore this</button></div>'+
+        '<div><div class="hint">Changed to</div>'+show(h.after)+'<button class="btn sm" data-srest="'+esc(h.id)+'" data-which="after">Restore this</button></div></div></div>';
+    }).join('');
+    box.querySelectorAll('[data-srest]').forEach(function(b){ b.addEventListener('click',async function(){
+      if(!confirm('Put this version back on the website?')) return;
+      try{ var r=await api('site-settings.php',{action:'restore',id:b.dataset.srest,which:b.dataset.which}); toast(r.message,'good'); reload(); }catch(e){ toast(e.message,'bad'); }
+    }); });
+  },function(e){ box.innerHTML='<div class="hint">'+esc(e.message)+'</div>'; });
+}
+
+async function renderSettings(m){
+  var tab=S.setTab||'tracking';
+  m.innerHTML=head('Settings','Tracking codes, verification, redirects, noindex, robots.txt and llms.txt')+
+    '<div class="body narrow"><div class="chips" style="margin-bottom:14px">'+SET_TABS.map(function(t){
+      return '<button class="chip'+(tab===t[0]?' on':'')+'" data-stab="'+t[0]+'">'+esc(t[1])+'</button>'; }).join('')+'</div>'+
+    '<div id="set-body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div></div>';
+  m.querySelectorAll('[data-stab]').forEach(function(b){ b.addEventListener('click',function(){
+    if(S.dirty && !confirm('You have unsaved changes. Leave this tab?')) return; S.dirty=false; S.setTab=b.dataset.stab; renderSettings(m); }); });
+  var d; try{ d=await api('site-settings.php'); }catch(e){ toast(e.message,'bad'); return; }
+  if(S.view!=='settings') return;
+  var box=$('#set-body',m), reload=function(){ renderSettings(m); };
+  var histCard='<div class="card"><div class="chead"><h3>Earlier versions</h3><span class="note">Kept 30 days</span></div><div class="cbody" id="set-hist"></div></div>';
+  var sys=d.system||{redirects:[],noindex:[],disallow:[]};
+  var srcName=function(x){ return String(x||'').replace(/^ROC\s+/,'').replace(/\s*\(cli-[a-z-]+\.php\)/,'').replace(/^./,function(c){return c.toUpperCase();}); };
+  // What the website already does (installers, page code, database): read-only.
+  var sysRedirects='<div class="card"><div class="chead"><h3>Already on the site ('+sys.redirects.length+')</h3><span class="note">Set up by the website itself · read-only</span></div>'+
+    (sys.redirects.length?'<table class="list"><thead><tr><th>From</th><th>To</th><th>Type</th><th>Set by</th></tr></thead><tbody>'+sys.redirects.map(function(r){
+      return '<tr><td class="t-slug">'+esc(r.from)+'</td><td class="t-slug">'+(r.type==410?'<span class="hint">removed</span>':esc(r.to))+'</td><td><span class="tag ro">'+r.type+'</span></td><td class="hint">'+esc(srcName(r.source))+'</td></tr>'; }).join('')+'</tbody></table>'
+      :'<div class="cbody hint">None found.</div>')+'</div>';
+  var sysNoindex='<div class="card"><div class="chead"><h3>Already noindex ('+sys.noindex.length+')</h3><span class="note">Set by the website itself · read-only</span></div>'+
+    (sys.noindex.length?'<table class="list"><thead><tr><th>Page</th><th>Why</th></tr></thead><tbody>'+sys.noindex.map(function(r){
+      return '<tr><td class="t-slug">'+esc(r.path)+'</td><td class="hint">'+esc(r.why)+'</td></tr>'; }).join('')+'</tbody></table>':'<div class="cbody hint">None found.</div>')+'</div>'+
+    (sys.disallow.length?'<div class="card"><div class="chead"><h3>Blocked in robots.txt ('+sys.disallow.length+')</h3><span class="note">Crawlers are asked not to visit</span></div><table class="list"><thead><tr><th>Address</th><th>For</th></tr></thead><tbody>'+
+      sys.disallow.map(function(r){ return '<tr><td class="t-slug">'+esc(r.path)+'</td><td class="hint">'+(r.agent==='*'?'all crawlers':esc(r.agent))+'</td></tr>'; }).join('')+'</tbody></table></div>':'');
+  function saveBtn(){ return '<button class="btn primary" type="submit">Save to website</button>'; }
+  function showErrors(err, map){
+    toast(err.message,'bad');
+    var errs=(err.data&&err.data.errors)||{};
+    Object.keys(errs).forEach(function(k){ var i=$('#'+(map[k]||('st-'+k)),m); if(!i) return;
+      var n=document.createElement('div'); n.className='hint publish-error'; n.style.color='#e11d48'; n.textContent=errs[k]; i.parentNode.appendChild(n); });
+  }
+  async function save(part, value){
+    m.querySelectorAll('.publish-error').forEach(function(n){ n.remove(); });
+    try{ var r=await api('site-settings.php',{part:part,value:value}); S.dirty=false; toast(r.message,'good'); reload(); return true; }
+    catch(e){ showErrors(e,{}); return false; }
+  }
+
+  if(tab==='tracking'){
+    var t=d.tracking, f=function(k,label,help,ph){ return '<div class="field"><label for="st-'+k+'">'+label+'</label><input type="text" id="st-'+k+'" value="'+esc(t[k]||'')+'" placeholder="'+esc(ph)+'"><div class="hint">'+help+'</div></div>'; };
+    box.innerHTML='<div class="alert info">These codes are added to <b>every page</b> on the server as soon as you save. Leave a box empty to remove that code. '+
+      'You can paste the whole verification &lt;meta&gt; tag: only the code is kept. Tip: if GA4 is also set up inside Google Tag Manager, leave the GA4 box empty so visits are not counted twice.</div>'+
+      '<div class="card"><div class="cbody"><form id="stf">'+
+      '<h3 style="margin:0 0 10px">Analytics</h3>'+
+      f('gtm','Google Tag Manager','Container ID from tagmanager.google.com.','GTM-XXXXXXX')+
+      f('ga4','Google Analytics 4','Measurement ID from GA4 → Admin → Data streams.','G-XXXXXXXXXX')+
+      f('clarity','Microsoft Clarity','Project ID from clarity.microsoft.com → Settings.','abc123xyz')+
+      '<h3 style="margin:16px 0 10px">Site verification</h3>'+
+      f('gsc','Google Search Console','Search Console → Settings → Ownership verification → HTML tag.','google-site-verification code')+
+      f('bing','Bing Webmaster Tools','Bing → Settings → Verify ownership → meta tag (msvalidate.01).','msvalidate.01 code')+
+      f('pinterest','Pinterest','Pinterest → Settings → Claimed accounts → HTML tag.','p:domain_verify code')+
+      f('facebook','Facebook / Meta','Business settings → Domains → Meta-tag verification.','facebook-domain-verification code')+
+      f('yandex','Yandex Webmaster','Optional.','yandex-verification code')+
+      '<h3 style="margin:16px 0 10px">Google Business Profile</h3>'+
+      f('gmb_url','Profile link','Your Google Business Profile / Maps link: added to the home page Organization schema.','https://maps.app.goo.gl/… or https://g.page/…')+
+      f('gmb_place_id','Place ID','Optional, for showing Google reviews later. Find it with Google’s Place ID finder.','ChIJ…')+
+      saveBtn()+'</form></div></div>'+histCard;
+    $('#stf',m).addEventListener('input',function(){ S.dirty=true; });
+    $('#stf',m).addEventListener('submit',function(e){ e.preventDefault(); var v={};
+      ['gtm','ga4','clarity','gsc','bing','pinterest','facebook','yandex','gmb_url','gmb_place_id'].forEach(function(k){ v[k]=$('#st-'+k,m).value.trim(); }); save('tracking',v); });
+  }
+
+  if(tab==='redirects'){
+    var rows=(d.redirects||[]).concat([{from:'',to:'',type:301,note:''}]);
+    var row=function(r,i){ return '<tr data-rr><td><input type="text" data-k="from" value="'+esc(r.from)+'" placeholder="/old-page/" id="st-from'+i+'"></td>'+
+      '<td><select data-k="type"><option value="301"'+(r.type==301?' selected':'')+'>301 permanent</option><option value="302"'+(r.type==302?' selected':'')+'>302 temporary</option><option value="410"'+(r.type==410?' selected':'')+'>410 gone</option></select></td>'+
+      '<td><input type="text" data-k="to" value="'+esc(r.to)+'" placeholder="/new-page/ or https://…" id="st-to'+i+'"></td>'+
+      '<td><input type="text" data-k="note" value="'+esc(r.note||'')+'" placeholder="note (optional)"></td>'+
+      '<td><button class="btn sm" type="button" data-rdel title="Remove">✕</button></td></tr>'; };
+    box.innerHTML='<div class="alert info">Your own redirects go in the table below; the ones the website already has are listed under it. Send an old address to a new one. <b>From</b> is an address on this site; end it with <b>*</b> for a whole section (/old-blog/*). '+
+      '<b>410 gone</b> tells Google a page was removed for good. After saving, the server checks the site still opens and undoes the change if it does not.</div>'+
+      '<div class="card"><div class="cbody"><form id="stf"><table class="list"><thead><tr><th>From</th><th>Type</th><th>To</th><th>Note</th><th></th></tr></thead><tbody id="rr-body">'+
+      rows.map(row).join('')+'</tbody></table><div style="display:flex;gap:8px;margin-top:10px"><button class="btn" type="button" id="rr-add">＋ Add row</button>'+saveBtn()+'</div></form></div></div>'+sysRedirects+histCard;
+    $('#rr-add',m).addEventListener('click',function(){ var tb=$('#rr-body',m); tb.insertAdjacentHTML('beforeend',row({from:'',to:'',type:301,note:''},tb.children.length)); bindDel(); });
+    function bindDel(){ m.querySelectorAll('[data-rdel]').forEach(function(b){ b.onclick=function(){ b.closest('tr').remove(); S.dirty=true; }; }); }
+    bindDel();
+    $('#stf',m).addEventListener('input',function(){ S.dirty=true; });
+    $('#stf',m).addEventListener('submit',function(e){ e.preventDefault();
+      var v=[].map.call(m.querySelectorAll('[data-rr]'),function(tr){ var o={}; tr.querySelectorAll('[data-k]').forEach(function(i){ o[i.dataset.k]=i.value.trim(); }); o.type=+o.type; return o; })
+        .filter(function(o){ return o.from||o.to; });
+      save('redirects',v); });
+  }
+
+  if(tab==='noindex'){
+    box.innerHTML='<div class="alert info">Add your own noindex pages here; the pages that are already noindex are listed below. Pages listed here get <b>noindex</b> (Google does not show them) and are left out of the sitemaps. One address per line; end with <b>*</b> for a whole section, e.g. <code>/products/old-mouse/</code> or <code>/blogs/test-*</code>.</div>'+
+      '<div class="card"><div class="cbody"><form id="stf"><div class="field"><label for="st-noindex">Noindex addresses</label>'+
+      '<textarea id="st-noindex" rows="10" spellcheck="false" style="font-family:ui-monospace,Consolas,monospace">'+esc((d.noindex||[]).join('\n'))+'</textarea></div>'+saveBtn()+'</form></div></div>'+sysNoindex+histCard;
+    $('#stf',m).addEventListener('input',function(){ S.dirty=true; });
+    $('#stf',m).addEventListener('submit',function(e){ e.preventDefault(); save('noindex',$('#st-noindex',m).value); });
+  }
+
+  if(tab==='robots'||tab==='llms'){
+    var file=tab==='robots'?'robots.txt':'llms.txt';
+    box.innerHTML='<div class="alert info">'+(tab==='robots'
+      ?'robots.txt tells search engines and AI crawlers what they may visit. Keep the <code>Sitemap:</code> line. A rule that blocks the whole site is refused.'
+      :'llms.txt describes the site for AI assistants (ChatGPT, Claude, Perplexity…): what it is and its main pages.')+
+      ' <a href="/'+file+'" target="_blank" rel="noopener">Open the live '+file+' ↗</a></div>'+
+      '<div class="card"><div class="cbody"><form id="stf"><div class="field"><label for="st-file">'+file+'</label>'+
+      '<textarea id="st-file" rows="18" spellcheck="false" style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px;white-space:pre">'+esc(d[tab]||'')+'</textarea></div>'+saveBtn()+'</form></div></div>'+histCard;
+    $('#stf',m).addEventListener('input',function(){ S.dirty=true; });
+    $('#stf',m).addEventListener('submit',function(e){ e.preventDefault(); save(tab,$('#st-file',m).value); });
+  }
+  settingsHistory($('#set-hist',m), tab, reload);
+}
+
+/* -------------------------------------------------------------- sitemap */
+/* Live sitemaps (read from the site), plus addresses to leave out or add. */
+
+async function renderSitemapView(m){
+  m.innerHTML=head('Sitemap','What Google gets in /sitemap.xml','<a class="btn" href="/sitemap.xml" target="_blank" rel="noopener">Open sitemap.xml ↗</a>')+
+    '<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d, maps=[];
+  try{ d=await api('site-settings.php'); }catch(e){ toast(e.message,'bad'); return; }
+  try{
+    var idx=new DOMParser().parseFromString(await (await fetch('/sitemap.xml',{cache:'no-store'})).text(),'application/xml');
+    var locs=[].map.call(idx.getElementsByTagName('loc'),function(n){ return n.textContent.trim(); });
+    for(var i=0;i<locs.length;i++){
+      var x=new DOMParser().parseFromString(await (await fetch(locs[i].replace(/^https?:\/\/[^/]+/,''),{cache:'no-store'})).text(),'application/xml');
+      maps.push({url:locs[i], urls:[].map.call(x.getElementsByTagName('url'),function(u){
+        var l=u.getElementsByTagName('loc')[0], mo=u.getElementsByTagName('lastmod')[0], t=u.getElementsByTagNameNS('*','title')[0];
+        return {loc:l?l.textContent.trim():'', mod:mo?mo.textContent.trim():'', title:t?t.textContent.trim():''}; })});
+    }
+  }catch(e){ toast('Could not read the live sitemaps: '+e.message,'bad'); }
+  if(S.view!=='sitemap') return;
+  var total=maps.reduce(function(a,x){ return a+x.urls.length; },0), sm=d.sitemap||{exclude:[],extra:[]};
+  $('.body',m).innerHTML=
+    '<div class="dstats">'+maps.map(function(x){ var n=x.url.replace(/^.*\/sitemaps\//,'').replace('.xml','');
+      return '<div class="dstat"><div class="l">'+esc(n)+'</div><div class="n">'+x.urls.length+'</div><div class="s"><a href="'+esc(x.url)+'" target="_blank" rel="noopener">open ↗</a></div></div>'; }).join('')+
+      '<div class="dstat hero"><div class="l">All addresses</div><div class="n">'+total+'</div><div class="s">updated automatically</div></div></div>'+
+    '<div class="alert info">Sitemaps are built automatically: new blog posts, products and pages appear by themselves, and pages set to noindex never appear. '+
+    'Below you can leave addresses out or add pages the scan cannot see. Then submit <code>https://runonconsole.com/sitemap.xml</code> once in Google Search Console and Bing Webmaster Tools.</div>'+
+    '<div class="card"><div class="chead"><h3>Rules</h3><span class="note">Kept 30 days in the history</span></div><div class="cbody"><form id="smf">'+
+      '<div class="field"><label for="st-exclude">Leave out of the sitemaps</label><textarea id="st-exclude" rows="5" spellcheck="false" placeholder="/products/old-mouse/&#10;/blogs/test-*" style="font-family:ui-monospace,Consolas,monospace">'+esc((sm.exclude||[]).join('\n'))+'</textarea></div>'+
+      '<div class="field"><label for="st-extra">Add pages (one per line: /address/ | Page name)</label><textarea id="st-extra" rows="4" spellcheck="false" placeholder="/my-landing-page/ | My landing page" style="font-family:ui-monospace,Consolas,monospace">'+esc((sm.extra||[]).map(function(e){ return e.path+(e.title?' | '+e.title:''); }).join('\n'))+'</textarea></div>'+
+      '<button class="btn primary" type="submit">Save rules</button></form></div></div>'+
+    '<div class="card"><div class="chead"><h3>Every address in the sitemaps</h3><div class="search" style="max-width:300px"><input type="text" id="smq" placeholder="Search addresses"></div></div>'+
+      '<table class="list"><thead><tr><th>Address</th><th>Name</th><th>Sitemap</th><th>Last change</th></tr></thead><tbody id="sm-rows"></tbody></table></div>';
+  var all=[]; maps.forEach(function(x){ var n=x.url.replace(/^.*\/sitemaps\//,'').replace('.xml',''); x.urls.forEach(function(u){ all.push([u,n]); }); });
+  function draw(){ var q=($('#smq',m).value||'').toLowerCase();
+    $('#sm-rows',m).innerHTML=all.filter(function(a){ return !q||(a[0].loc+' '+a[0].title).toLowerCase().indexOf(q)!==-1; }).slice(0,400).map(function(a){
+      var p=a[0].loc.replace(/^https?:\/\/[^/]+/,'');
+      return '<tr><td class="t-slug"><a href="'+esc(p)+'" target="_blank" rel="noopener">'+esc(p)+'</a></td><td>'+esc(a[0].title)+'</td><td><span class="tag ro">'+esc(a[1])+'</span></td><td class="hint">'+esc((a[0].mod||'').slice(0,10))+'</td></tr>'; }).join(''); }
+  draw(); $('#smq',m).addEventListener('input',draw);
+  $('#smf',m).addEventListener('submit',async function(e){ e.preventDefault();
+    var extra=$('#st-extra',m).value.split('\n').map(function(l){ var p=l.split('|'); return {path:(p[0]||'').trim(), title:(p.slice(1).join('|')||'').trim()}; }).filter(function(x){ return x.path; });
+    try{ var r=await api('site-settings.php',{part:'sitemap',value:{exclude:$('#st-exclude',m).value, extra:extra}}); toast(r.message,'good'); renderSitemapView(m); }catch(err){ toast(err.message,'bad'); }
   });
 }
 

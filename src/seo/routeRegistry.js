@@ -198,9 +198,9 @@ export const STATIC_PUBLIC_ROUTES = [
   {
     path: '/author/roc-team/',
     canonical: `${BASE_DOMAIN}/author/roc-team/`,
-    title: 'ROC Team: the people behind Run On Console',
-    description: 'The ROC (Run On Console) team writes the guides, keeps the gaming gear picks and the game requirements checker up to date.',
-    h1: 'ROC Team',
+    title: 'ROC: who writes Run On Console',
+    description: 'ROC (Run On Console) writes the guides, keeps the gaming gear picks and the game requirements checker up to date.',
+    h1: 'ROC (Run On Console)',
     category: 'Author',
     lastmod: '2024-05-20T10:00:00+00:00'
   },
