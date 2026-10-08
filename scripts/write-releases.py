@@ -114,6 +114,13 @@ RELEASES = [
                   'Includes the fix for the ROC author page (deploy 19)'],
          checks=[dict(label='ROC page has the right heading', type='contains', path='author/roc-team/index.html', text='ROC (Run On Console)</h1>')],
          pr=REPO + '27'),
+    dict(deploy=21, date='2026-10-08', title='CMS > Menus & footer: edit the header menu, footer and logo',
+         changes=['Header menu: add, remove, rename and reorder items; dropdowns with icon, title, description and a bottom button',
+                  'Footer: about text, points, up to 4 link columns, copyright and small print',
+                  'Logo: both words, the line under them and an optional logo picture',
+                  'Changes show on every page, including product, blog and platform pages; 30-day history and a reset'],
+         checks=[dict(label='Page templates refreshed (cli-refresh-templates.php)', type='contains', path='cms-templates/product-page.html', text='data-roc-region="header-nav"')],
+         pr=REPO + '28'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
