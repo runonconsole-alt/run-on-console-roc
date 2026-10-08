@@ -390,11 +390,12 @@ function rocRenderPost(string $root, array $p): void {
     $image    = trim((string)($p['image'] ?? ''));
     $imageAbs = rocAbs($image);
     $alt      = trim((string)($p['image_alt'] ?? '')) ?: $title;
-    // No author typed in the CMS: the post is by the site itself (no person's name is added).
+    // Posts are signed by the ROC Team (a name typed in the CMS is shown only when it is
+    // someone else, e.g. a guest writer).
     $author   = trim((string)($p['author_name'] ?? ''));
-    $byPerson = $author !== '';
-    if (!$byPerson) $author = 'Run On Console';
-    $authorUrl = in_array(strtolower($author), ['omar abobakar', 'omar'], true) ? '/author/omar-abobakar/' : '';
+    if ($author === '' || in_array(strtolower($author), ['omar abobakar', 'omar', 'roc team', 'run on console', 'run on console team', 'run on console editorial team'], true)) $author = 'ROC Team';
+    $byPerson = $author !== 'ROC Team';
+    $authorUrl = $byPerson ? '' : '/author/roc-team/';
     $category = rocCategoryLabel($p['category'] ?? '');
     $pub      = rocPublished($p);
     $mod      = rocModified($p) ?? $pub;
@@ -443,7 +444,7 @@ function rocRenderPost(string $root, array $p): void {
     if ($imageAbs) $article['image'] = [$imageAbs];
     if ($pub) $article['datePublished'] = gmdate('c', $pub);
     if ($mod) $article['dateModified'] = gmdate('c', $mod);
-    $article['author'] = $byPerson ? ['@type' => 'Person', 'name' => $author] : ['@type' => 'Organization', 'name' => 'Run On Console', 'url' => ROC_PUBLIC_URL . '/'];
+    $article['author'] = $byPerson ? ['@type' => 'Person', 'name' => $author] : ['@type' => 'Organization', 'name' => 'ROC Team', 'url' => ROC_PUBLIC_URL . '/author/roc-team/'];
     if ($authorUrl !== '') $article['author']['url'] = ROC_PUBLIC_URL . $authorUrl;
     $article['publisher'] = [
         '@type' => 'Organization',

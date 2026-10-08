@@ -89,6 +89,13 @@ RELEASES = [
                   'Contact page: plain reply-time note instead of "senior testing columnists"',
                   'Heading order on every page: one H1, H2 sections, H3 inside them; footer, value boxes, launchers and social cards are plain text'],
          checks=[], pr=REPO + '25'),
+    dict(deploy=17, date='2026-10-08', title='ROC Team author page and the blog agent',
+         changes=['Author page is now /author/roc-team/ (the old address redirects); posts are signed "ROC Team"',
+                  'CMS > Blog agent: a token for the writer on your PC, and the list of its posts',
+                  'Posts from the agent are scheduled for 12:00 and 18:00 Pakistan time with an automatic cover image'],
+         checks=[dict(label='ROC Team installer (cli-roc-team.php)', type='htaccess', marker='# ROC team BEGIN'),
+                 dict(label='Blog agent token made in CMS', type='setting', key='blog_agent_token_hash')],
+         pr=REPO + '26'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
