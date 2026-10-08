@@ -11,6 +11,10 @@ import { playClickSound } from '../utils/audioEffects';
 import { BrandLogo } from './BrandLogo';
 import { GameDetailModal } from './GameDetailModal';
 import { GamingAvatar } from './GamingProfileEditor';
+import { getSiteNav, navIsActive, iconSvg } from '../data/siteNav';
+
+const NAV_ON = 'bg-emerald-600 text-white shadow-sm';
+const NAV_OFF = 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50';
 
 export const Header = () => {
   const { 
@@ -24,8 +28,10 @@ export const Header = () => {
     compareIds = [], 
     setIsCompareOpen,
     currentUser,
-    logoutUser 
+    logoutUser,
+    currentPath
   } = useApp();
+  const siteNav = getSiteNav();
 
   const [activeDropdown, setActiveDropdown] = useState(null);
   // Menus open on hover with CSS too (server-rendered pages have no React). After a click
@@ -111,15 +117,6 @@ export const Header = () => {
     closeDropdown();
   };
 
-  const productCount = (slug) => (products || []).filter(p => p.categorySlug === slug).length;
-  // Products menu: two groups. Each opens /products/{group}/ (server-rendered from the CMS),
-  // which lists every product of the group's categories.
-  const PC_HARDWARE = ['gpu'];
-  const countIn = (slugs) => (products || []).filter(p => slugs.includes(p.categorySlug)).length;
-  const productGroups = [
-    { slug: 'pc-hardware', title: 'PC Hardware', desc: `Graphics cards and PC components · ${countIn(PC_HARDWARE)} picks`, icon: Cpu },
-    { slug: 'gaming-hardware', title: 'Gaming Hardware', desc: `Monitors, mice, keyboards, headsets, speakers · ${(products || []).length - countIn(PC_HARDWARE)} picks`, icon: Gamepad2 },
-  ];
 
   const query = (searchQuery || '').toLowerCase().trim();
 
@@ -150,111 +147,53 @@ export const Header = () => {
             </div>
 
             {/* 5 Pillar Crawlable Navigation Anchors */}
-            <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 flex-1 justify-center min-w-0 px-1">
-              
-              {/* 0. HOME */}
-              <a
-                href="/"
-                onClick={(e) => handleNavClick(e, 'home')}
-                className={`px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap ${
-                  currentPage === 'home' 
-                    ? 'bg-emerald-600 text-white shadow-sm' 
-                    : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
-                }`}
-              >
-                HOME
-              </a>
-
-              {/* 1. PRODUCTS: PC hardware and gaming hardware */}
-              <div
-                className="relative roc-dd"
-                onMouseEnter={() => handleMouseEnter('products')}
-                onMouseLeave={handleMouseLeave}
-              >
-                <a
-                  href="/products/"
-                  onClick={(e) => handleNavClick(e, 'products')}
-                  className={`px-1.5 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ${
-                    activeDropdown === 'products' || currentPage === 'products'
-                      ? 'bg-emerald-600 text-white shadow-sm'
-                      : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
-                  }`}
-                >
-                  <span>PRODUCTS</span>
-                  <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${activeDropdown === 'products' ? 'rotate-180' : ''}`} />
-                </a>
-
-                <div className={`roc-dd-panel${activeDropdown === 'products' ? ' is-open' : ''}${closedDropdown === 'products' ? ' is-closed' : ''} mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[320px] rounded-3xl p-3 shadow-2xl space-y-1.5 animate-page-in z-[99999]`}>
-                  {productGroups.map((group) => {
-                    const Icon = group.icon;
-                    return (
-                      <a
-                        key={group.slug}
-                        href={`/products/${group.slug}/`}
-                        className="dropdown-tile p-2.5 rounded-xl cursor-pointer flex items-center justify-between gap-2.5 group no-underline"
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                            <Icon className="w-4 h-4" />
+            {/* Main menu (CMS > Menus & footer). The server draws the same markup from the
+                CMS menu (rocNavHeader in api/v1/cms/site-layer-lib.php): keep them in step. */}
+            <nav data-roc-region="header-nav" className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 flex-1 justify-center min-w-0 px-1">
+              {siteNav.header.map((item, i) => {
+                const active = navIsActive(item.url, currentPath);
+                const last = i === siteNav.header.length - 1;
+                if (!item.children || !item.children.length) {
+                  return (
+                    <a key={'n' + i} href={item.url} onClick={closeDropdown}
+                      className={'px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap' + (last ? ' mr-1 lg:mr-2' : '') + ' ' + (active ? NAV_ON : NAV_OFF)}>
+                      {item.label}
+                    </a>
+                  );
+                }
+                const key = 'dd' + i;
+                const open = activeDropdown === key;
+                return (
+                  <div key={key} className="relative roc-dd" onMouseEnter={() => handleMouseEnter(key)} onMouseLeave={handleMouseLeave}>
+                    <a href={item.url} onClick={closeDropdown}
+                      className={'px-1.5 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ' + (open || active ? NAV_ON : NAV_OFF)}>
+                      <span>{item.label}</span>
+                      <span className="inline-flex" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg('chevron-down', 'w-3 h-3 transition-transform duration-300' + (open ? ' rotate-180' : '')) }} />
+                    </a>
+                    <div className={'roc-dd-panel' + (open ? ' is-open' : '') + (closedDropdown === key ? ' is-closed' : '') + ' mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[320px] rounded-3xl p-3 shadow-2xl space-y-1.5 animate-page-in z-[99999]'}>
+                      {item.children.map((c, j) => (
+                        <a key={'c' + j} href={c.url} onClick={closeDropdown} className="dropdown-tile p-2.5 rounded-xl cursor-pointer flex items-center justify-between gap-2.5 group no-underline">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                              <span className="inline-flex" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg(c.icon || 'link', 'w-4 h-4') }} />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="block font-display font-bold text-xs text-slate-900 group-hover:text-emerald-700 truncate">{c.title}</span>
+                              <span className="text-[10px] text-slate-500 block truncate">{c.desc}</span>
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <span className="block font-display font-bold text-xs text-slate-900 group-hover:text-emerald-700 truncate">{group.title}</span>
-                            <span className="text-[10px] text-slate-500 block truncate">{group.desc}</span>
-                          </div>
-                        </div>
-                        <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 shrink-0" />
-                      </a>
-                    );
-                  })}
-                  <a
-                    href="/products/"
-                    onClick={(e) => handleNavClick(e, 'products')}
-                    className="block text-center text-xs font-display font-extrabold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl py-2 no-underline"
-                  >
-                    View all {(products || []).length} products →
-                  </a>
-                </div>
-              </div>
-
-              {/* 2. SYSTEMS: which games run on which system + the PC compatibility checker */}
-              <a
-                href="/compatibility/"
-                onClick={(e) => handleNavClick(e, 'compatibility')}
-                className={`px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap ${
-                  currentPage === 'compatibility'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
-                }`}
-              >
-                SYSTEMS
-              </a>
-
-              {/* 3. BLOGS */}
-              <a
-                href="/blogs/"
-                onClick={(e) => handleNavClick(e, 'blogs')}
-                className={`px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap ${
-                  currentPage === 'blogs'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
-                }`}
-              >
-                BLOGS
-              </a>
-
-              {/* 4. ABOUT US */}
-              <a
-                href="/about/"
-                onClick={(e) => handleNavClick(e, 'about')}
-                className={`px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap mr-1 lg:mr-2 ${
-                  currentPage === 'about'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
-                }`}
-              >
-                ABOUT US
-              </a>
-
+                          <span className="inline-flex" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg('arrow-right', 'w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 shrink-0') }} />
+                        </a>
+                      ))}
+                      {item.button && item.button.label ? (
+                        <a href={item.button.url} onClick={closeDropdown} className="block text-center text-xs font-display font-extrabold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl py-2 no-underline">
+                          {item.button.label}
+                        </a>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
             </nav>
 
             {/* Right Actions */}
@@ -442,55 +381,16 @@ export const Header = () => {
             )}
 
             <div className="grid grid-cols-2 gap-2 text-xs font-display font-extrabold">
-              <a
-                href="/"
-                onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'home'); }}
-                className="p-2.5 rounded-xl bg-slate-50 text-slate-900 text-left no-underline block"
-              >
-                HOME
-              </a>
-              <a
-                href="/products/"
-                onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'products'); }}
-                className="p-2.5 rounded-xl bg-slate-50 text-slate-900 text-left no-underline block"
-              >
-                PRODUCTS
-              </a>
-              <a
-                href="/products/pc-hardware/"
-                onClick={() => setMobileMenuOpen(false)}
-                className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 text-left no-underline block"
-              >
-                PC HARDWARE
-              </a>
-              <a
-                href="/products/gaming-hardware/"
-                onClick={() => setMobileMenuOpen(false)}
-                className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 text-left no-underline block"
-              >
-                GAMING HARDWARE
-              </a>
-              <a
-                href="/compatibility/"
-                onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'compatibility'); }}
-                className="p-2.5 rounded-xl bg-slate-50 text-slate-900 text-left no-underline block"
-              >
-                SYSTEMS
-              </a>
-              <a
-                href="/blogs/"
-                onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'blogs'); }}
-                className="p-2.5 rounded-xl bg-slate-50 text-slate-900 text-left no-underline block"
-              >
-                BLOGS
-              </a>
-              <a
-                href="/about/"
-                onClick={(e) => { setMobileMenuOpen(false); handleNavClick(e, 'about'); }}
-                className="p-2.5 rounded-xl bg-slate-50 text-slate-900 text-left no-underline block"
-              >
-                ABOUT US
-              </a>
+              {siteNav.header.flatMap((item, i) => [
+                <a key={'m' + i} href={item.url} onClick={() => setMobileMenuOpen(false)} className="p-2.5 rounded-xl bg-slate-50 text-slate-900 text-left no-underline block">
+                  {item.label}
+                </a>,
+                ...(item.children || []).map((c, j) => (
+                  <a key={'m' + i + '-' + j} href={c.url} onClick={() => setMobileMenuOpen(false)} className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 text-left no-underline block uppercase">
+                    {c.title}
+                  </a>
+                )),
+              ])}
             </div>
           </div>
         )}

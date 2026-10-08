@@ -580,6 +580,8 @@ export const AppProvider = ({ children, initialUrl = null }) => {
 
   return (
     <AppContext.Provider value={{
+      // Address of the page (prerender: the route being rendered). Used for the active menu item.
+      currentPath: typeof window !== 'undefined' ? window.location.pathname : (initialUrl || '/'),
       currentPage,
       setCurrentPage,
       is404,
