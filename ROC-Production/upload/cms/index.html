@@ -340,6 +340,39 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand)!i
 .mini .tt{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mini .ss{font-size:11.5px;color:var(--ink-3)}
 @media (max-width:1100px){.dstats{grid-template-columns:repeat(2,minmax(0,1fr))}.span-7,.span-5,.span-4,.span-8,.span-6{grid-column:span 12}}
+
+/* site builder */
+.bld{display:flex;flex-direction:column;height:100vh;min-height:520px}
+.bld-top{display:flex;gap:8px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+.bld-main{flex:1;display:flex;min-height:0}
+.bld-stage{flex:1;position:relative;overflow:hidden;background:#dfe5ec}
+.bld-wrap{position:absolute;top:12px;transform-origin:0 0;background:#fff;box-shadow:0 10px 40px rgba(15,23,42,.18);border-radius:8px;overflow:hidden}
+.bld-wrap iframe{width:100%;height:100%;border:0;display:block}
+.bld-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(223,229,236,.6)}
+.bld-panel{width:380px;flex:none;overflow:auto;border-left:1px solid var(--line);background:var(--panel);padding:14px 16px 40px}
+.bld-panel label{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin:8px 0 4px}
+.bld-panel input[type=text],.bld-panel select,.bld-panel textarea{width:100%;min-width:0}
+.bld-panel input[type=color]{width:44px;height:30px;padding:2px;border-radius:6px}
+.bp-head{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.bfield{margin-bottom:6px}
+.bsec{border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:10px 0}
+.bsec summary{cursor:pointer;font-weight:600;font-size:13px;padding:4px 0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:6px 10px;font:inherit;font-size:12.5px;cursor:pointer;color:var(--ink-2)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--brand);color:#fff}
+.bchg{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px}
+.bchg>a{flex:1;min-width:0;text-decoration:none;color:inherit}
+.bchg b{font-size:12.5px;word-break:break-word}
+.bnav-sec{margin-bottom:14px}
+.bnav-sec h4{margin:6px 0}
+.bnav-item{border:1px solid var(--line);border-radius:10px;padding:8px;margin-bottom:8px}
+.bnav-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.bnav-row input[type=text]{flex:1}
+.bnav-kids{margin:6px 0 0 10px}
+.bnav-kid{border-left:2px solid var(--line);padding-left:8px;margin-bottom:8px}
+.bnav-tools{display:inline-flex;gap:3px;margin-left:auto}
+.bnav-chk{display:flex!important;gap:6px;align-items:center;font-weight:500!important}
 </style>
 </head>
 <body>
@@ -1257,13 +1290,12 @@ function renderShell(){
     '<div class="snav"><div class="slabel">Content</div>'+
       (can('blogs','view')?item('blogs','Blog posts','✎',S.blogs.length):'')+
       (can('media','view')?item('media','Media library','❖',S.media.length):'')+
-      (can('pages','view')?item('cmspages','Pages','▦',S.pages.length):'')+
-      (can('pages','view')?item('pages','Website pages & SEO','▤')+item('metas','Metas','🏷'):'')+
+      (can('pages','view')?item('cmspages','Pages','▦',S.pages.length+(S.sitePagesN||0))+item('metas','Metas','🏷'):'')+
       (can('pages','view')?item('platforms','Gaming platforms','◈'):'')+
       item('games','Games','🎮')+
       (can('products','view')?item('products','Products','▣')+item('product-images','Product images','▨')+item('product-categories','Product categories','▤'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
-      item('nav','Menus & footer','☰')+item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Blog agent','✍')+item('announce','Announcement bar','📣')+item('sitecode','Template & code','⌨')+
+      item('builder','Site builder','✦')+item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Blog writer','✍')+item('announce','Announcement bar','📣')+
       item('siteusers','Site users','👤')+item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+'</div>':'')+
     '<div class="sfoot"><div class="who"><div class="av">'+
       esc((S.user.username||'?').slice(0,2).toUpperCase())+'</div>'+
@@ -1310,7 +1342,8 @@ function renderView(){
   if(S.view==='announce' && S.user.role==='administrator') return renderAnnouncement(m);
   if(S.view==='blogagent' && S.user.role==='administrator') return renderBlogAgent(m);
   if(S.view==='settings' && S.user.role==='administrator') return renderSettings(m);
-  if(S.view==='nav' && S.user.role==='administrator') return renderNavEditor(m);
+  if(S.view==='nav' && S.user.role==='administrator'){ S.view='builder'; return renderBuilder(m); }
+  if(S.view==='builder' && S.user.role==='administrator') return renderBuilder(m);
   if(S.view==='sitemap' && S.user.role==='administrator') return renderSitemapView(m);
   if(S.view==='sitecode' && S.user.role==='administrator') return renderSiteCode(m);
   if(S.view==='media') return renderMedia(m);
@@ -2198,7 +2231,7 @@ function renderCmsPages(m){
     '<div class="chead"><div class="search" style="max-width:280px;flex:1"><input type="text" id="q" placeholder="Search title or URL" value="'+esc(S.search)+'"></div>'+
     '<div class="chips">'+['all'].concat(Object.keys(PAGE_TYPES)).map(function(t){
       return '<button class="chip'+(S.ptype===t?' on':'')+'" data-pt="'+t+'">'+(t==='all'?'All':esc(PAGE_TYPES[t].label))+'<span class="n">'+tcount(t)+'</span></button>'; }).join('')+'</div>'+
-    '<span class="note">Existing site pages: <a href="#" id="gowp">Website pages & SEO</a></span></div>'+
+    '<span class="note"><a href="#" id="gowp">Pages already on the website ↓</a></span></div>'+
     (rows.length?'<table class="list"><thead><tr><th>Title</th><th>Type</th><th>Category</th><th>Status</th><th>Updated</th></tr></thead><tbody>'+
       rows.map(function(p){
         return '<tr><td><div class="t-title" data-openpage="'+p.id+'">'+esc(p.title)+'</div>'+
@@ -2210,14 +2243,15 @@ function renderCmsPages(m){
             (+p.is_noindex?'<div class="hint">hidden from Google</div>':'')+'</td>'+
           '<td style="color:var(--ink-3)">'+when(p.updated_at)+'</td></tr>';
       }).join('')+'</tbody></table>'
-      :'<div class="empty"><div class="big">▦</div><div>No pages yet.'+(can('pages','edit')?' Click “New page” to create a landing page, guide or any other page.':'')+'</div></div>')+
-  '</div></div>';
+      :'<div class="empty"><div class="big">▦</div><div>No new pages yet.'+(can('pages','edit')?' Click “New page” to create a landing page, guide or any other page.':'')+'</div></div>')+
+  '</div><div id="sitepages-box"></div></div>';
   var q=$('#q',m);
   q.addEventListener('input',function(){ S.search=q.value; var at=q.selectionStart; renderCmsPages(m);
     var f=$('#q',m); if(f){f.focus();f.setSelectionRange(at,at);} });
   var np=$('#newpage',m); if(np) np.addEventListener('click',newPage);
   m.querySelectorAll('[data-pt]').forEach(function(b){ b.addEventListener('click',function(){ S.ptype=b.dataset.pt; renderCmsPages(m); }); });
-  $('#gowp',m).addEventListener('click',function(e){ e.preventDefault(); go('pages'); });
+  $('#gowp',m).addEventListener('click',function(e){ e.preventDefault(); var b=$('#sitepages-box',m); if(b) b.scrollIntoView({behavior:'smooth'}); });
+  renderPages($('#sitepages-box',m), true);
   m.querySelectorAll('[data-openpage]').forEach(function(el){ el.addEventListener('click',function(){ openPage(el.dataset.openpage); }); });
 }
 
@@ -2740,13 +2774,15 @@ function cmsEditTarget(url){
   return null;
 }
 
-async function renderPages(m){
+async function renderPages(m, embedded){
+  var VIEW=embedded?'cmspages':'pages';
   if(!S.sitePages){
-    m.innerHTML=head('Website pages','Scanning…','')+'<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+    m.innerHTML=embedded?'<div class="card"><div class="empty"><span class="spin"></span> Reading the website pages…</div></div>':head('Website pages','Scanning…','')+'<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
     try{ S.sitePages=(await api('site-pages.php')).pages||[]; }catch(e){ toast(e.message,'bad'); return; }
     try{ var sd=await api('page-seo.php'); S.seo={}; S.seoCan=sd.can_edit; (sd.pages||[]).forEach(function(x){ S.seo[x.path]=x; }); }
     catch(e){ S.seo=null; }
-    if(S.view!=='pages') return;
+    S.sitePagesN=S.sitePages.length; var badge=document.querySelector('[data-go="cmspages"] .ct'); if(badge) badge.textContent=S.pages.length+S.sitePagesN;
+    if(S.view!==VIEW || !m.isConnected) return;
   }
   var groups=['all'].concat(S.sitePages.map(function(p){return p.group;}).filter(function(g,i,a){return a.indexOf(g)===i;}));
   var rows=S.sitePages.filter(function(p){
@@ -2754,8 +2790,8 @@ async function renderPages(m){
     if(S.pq && (p.title+' '+p.url).toLowerCase().indexOf(S.pq.toLowerCase())===-1) return false;
     return true;
   });
-  m.innerHTML=head('Website pages', S.sitePages.length+' pages on runonconsole.com','<button class="btn" id="prescan">Rescan</button>')+
-  '<div class="body">'+
+  m.innerHTML=(embedded?'<h2 style="margin:22px 0 4px;font-size:17px">Pages already on the website <span class="hint">('+S.sitePages.length+')</span> <button class="btn sm" id="prescan" style="margin-left:6px">Rescan</button></h2>':
+    head('Website pages', S.sitePages.length+' pages on runonconsole.com','<button class="btn" id="prescan">Rescan</button>')+'<div class="body">')+
   '<div class="alert info"><b>Editable</b> pages come from the CMS database: blog posts, CMS pages, products, product categories and gaming platforms. '+
   'Edit them and the live page updates. <b>Read-only</b> pages (home, about, contact, compatibility…) are written in the website code: '+
   'their title and description can still be changed with the <b>Metas</b> button.</div>'+
@@ -2784,13 +2820,13 @@ async function renderPages(m){
         '<button class="btn sm" data-metas="'+esc(p.url)+'">Metas</button> '+
         '<a class="btn sm" href="'+esc(p.url)+'" target="_blank" rel="noopener">View ↗</a></td></tr>';
   }).join(''):'<tr><td colspan="4" class="empty">No pages match.</td></tr>')+
-  '</tbody></table></div></div>';
+  '</tbody></table></div>'+(embedded?'':'</div>');
 
   var pq=$('#pq',m);
-  pq.addEventListener('input',function(){ S.pq=pq.value; var at=pq.selectionStart; renderPages(m);
+  pq.addEventListener('input',function(){ S.pq=pq.value; var at=pq.selectionStart; renderPages(m,embedded);
     var f=$('#pq',m); if(f){f.focus();f.setSelectionRange(at,at);} });
-  m.querySelectorAll('[data-pf]').forEach(function(b){ b.addEventListener('click',function(){ S.pfilter=b.dataset.pf; renderPages(m); }); });
-  $('#prescan',m).addEventListener('click',function(){ S.sitePages=null; renderPages(m); });
+  m.querySelectorAll('[data-pf]').forEach(function(b){ b.addEventListener('click',function(){ S.pfilter=b.dataset.pf; renderPages(m,embedded); }); });
+  $('#prescan',m).addEventListener('click',function(){ S.sitePages=null; renderPages(m,embedded); });
   m.querySelectorAll('[data-pe]').forEach(function(b){ b.addEventListener('click',function(){ S.view='blogs'; openBlog(b.dataset.pe); }); });
   m.querySelectorAll('[data-ppe]').forEach(function(b){ b.addEventListener('click',function(){ S.view='cmspages'; openPage(b.dataset.ppe); }); });
   m.querySelectorAll('[data-seo]').forEach(function(b){ b.addEventListener('click',function(){ seoEditor(b.dataset.seo); }); });
@@ -3343,7 +3379,7 @@ async function renderSiteCode(m){
       document.body.appendChild(ov);
       var tick=setInterval(function(){
         n--; var el=$('#idle-n'); if(el) el.textContent=n;
-        if(n<=0){ clearInterval(tick); ov.remove(); if(S.view==='sitecode' && !changed) go(S.prevView && S.prevView!=='sitecode' ? S.prevView : 'dashboard'); }
+        if(n<=0){ clearInterval(tick); ov.remove(); if(S.view==='sitecode' && !changed) go(S.prevView && S.prevView!=='sitecode' ? S.prevView : 'builder'); }
       },1000);
       S.layerTimers.push(tick);
       $('#idle-stay',ov).addEventListener('click',function(){ clearInterval(tick); ov.remove(); armIdle(); });
@@ -3382,39 +3418,149 @@ function pkTime(utc){
   return isNaN(d)?esc(utc):d.toLocaleString('en-GB',{timeZone:'Asia/Karachi',weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 }
 
+var STAGE_NAMES={tofu:['TOFU','Learn','#0ea5e9'],mofu:['MOFU','Compare','#a855f7'],bofu:['BOFU','Buy','#059669']};
+function stageTag(s){ var x=STAGE_NAMES[s]||[s,'','#64748b']; return '<span class="tag" style="background:'+x[2]+'1a;color:'+x[2]+';border-color:'+x[2]+'55" title="'+esc(x[1])+'">'+x[0]+' · '+x[1]+'</span>'; }
+
 async function renderBlogAgent(m, fresh){
-  m.innerHTML=head('Blog agent','Two new blog posts a day, written on your PC and published at 12:00 and 18:00')+
+  m.innerHTML=head('Blog writer','New posts every day from your content plan, published automatically')+
     '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
   var d; try{ d=await api('blog-agent-admin.php'); }catch(e){ toast(e.message,'bad'); return; }
   if(S.view!=='blogagent') return;
-  var body=$('.body',m);
-  body.innerHTML=
-    '<div class="alert info"><b>How it works:</b> while your PC and the Claude app are on, the "ROC blog writer" task runs at 11:30 and 17:30. '+
-    'It picks a new topic, writes an SEO article with links to your products and the game checker, and sends it here. '+
-    'The post is <b>scheduled</b> for 12:00 or 18:00 (Pakistan time) and the server publishes it then, even if the PC is off. '+
-    'You can read, edit or delete it in <b>Blog posts</b> before it goes live. The cover image is made automatically.</div>'+
-    '<div class="card"><div class="chead"><h3>Connection</h3><span class="note">'+
-      (d.active?'<b style="color:#059669">● On</b>'+(d.created?' · token made '+esc(pkTime(d.created)):''):'<b style="color:#b45309">● Off: make a token</b>')+'</span></div>'+
-      '<div class="cbody">'+
+  var body=$('.body',m), P=d.plan||{pillars:[],topics:[]}, st=d.state||{};
+  var engine=d.engine, times=(d.slots||['16:00','23:00']).slice();
+  var pillarName={}; P.pillars.forEach(function(p){ pillarName[p.id]=p.name; });
+  var next=P.topics.filter(function(t){ return t.id===d.next; })[0];
+  S.baCluster=S.baCluster||'all'; S.baStage=S.baStage||'all'; S.baStatus=S.baStatus||'planned';
+
+  function writerCard(){
+    var opt=function(v,title,txt){ return '<label style="display:flex;gap:10px;align-items:flex-start;border:1px solid '+(engine===v?'var(--brand)':'var(--line)')+';border-radius:12px;padding:10px 12px;cursor:pointer;margin-bottom:8px">'+
+      '<input type="radio" name="ba-eng" value="'+v+'"'+(engine===v?' checked':'')+' style="margin-top:3px"><span><b>'+title+'</b><br><span class="hint">'+txt+'</span></span></label>'; };
+    return '<div class="card"><div class="chead"><h3>Who writes the posts</h3><span class="note">'+
+        (engine==='server'?'<b style="color:#059669">● Server</b>':engine==='pc'?'<b style="color:#2563eb">● PC</b>':'<b style="color:#b45309">● Off</b>')+'</span></div><div class="cbody">'+
+      opt('server','Server, with Google Gemini (free) <span class="tag published">recommended</span>','Works by itself every day: your PC can be off and no Claude subscription is needed. Needs a free key from Google (steps below).')+
+      opt('pc','Your PC, with the Claude app','The "ROC blog writer" task in the Claude app writes the posts while the PC and the app are on.')+
+      opt('off','Off','No new posts are written. Scheduled posts still go live.')+
+      '<div class="field" style="margin-top:12px"><label>Publishing times (Pakistan time)</label><div id="ba-times" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>'+
+        '<div class="hint">One post per time, every day. The writer starts about 2 hours before.</div></div>'+
+      '<div class="field"><label>Google Gemini key '+(d.gemini.set?'<span class="tag published">saved ••••'+esc(d.gemini.end)+'</span>':'<span class="tag off">not saved</span>')+'</label>'+
+        '<input type="password" id="ba-key" autocomplete="off" placeholder="'+(d.gemini.set?'Leave empty to keep the saved key':'Paste the key here (starts with AIza)')+'">'+
+        '<details style="margin-top:6px"><summary class="hint" style="cursor:pointer">How to get the free key (2 minutes)</summary><ol class="hint" style="margin:6px 0 0 18px;line-height:1.7">'+
+          '<li>Open <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> and sign in with your Google account.</li>'+
+          '<li>Click <b>Create API key</b> (accept Google\'s terms if asked).</li><li>Copy the key, paste it in the box above and press <b>Save</b>, then <b>Test the key</b>.</li>'+
+          '<li>The free plan is enough for a few posts a day. Do not paste the key anywhere else or in a chat.</li></ol>'+
+          '<div class="hint" style="margin-top:6px">Google may use what is sent on the free plan to improve its services; here that is only the article brief.</div></details></div>'+
+      '<div class="field"><label>Model <span class="hint">(optional)</span></label><input type="text" id="ba-model" value="'+esc(d.gemini.model||'')+'" placeholder="gemini-2.5-flash"><div class="hint">Leave as it is. If Google retires it, the newest free "flash" model is picked automatically.</div></div>'+
+      (st.last_ok||st.last_error?'<div class="hint" style="margin:6px 0">'+(st.last_ok?'Last post written: '+esc(pkTime(st.last_ok))+'. ':'')+(st.last_error?'<span style="color:#b91c1c">Last problem: '+esc(st.last_error)+'</span>':'')+'</div>':'')+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn primary" id="ba-save">Save</button>'+
+        (d.gemini.set?'<button class="btn" id="ba-test">Test the key</button><button class="btn" id="ba-write">Write the next post now</button>':'')+'</div>'+
+      (d.free_slots&&d.free_slots.length?'<div class="hint" style="margin-top:8px">Next free times: '+d.free_slots.slice(0,4).map(esc).join(' · ')+'</div>':'')+
+    '</div></div>';
+  }
+
+  function planCard(){
+    var count=function(pid,stage,status){ return P.topics.filter(function(t){ return (!pid||t.pillar===pid)&&(!stage||t.stage===stage)&&(!status||t.status===status); }).length; };
+    var rows=P.topics.filter(function(t){
+      return (S.baCluster==='all'||t.pillar===S.baCluster)&&(S.baStage==='all'||t.stage===S.baStage)&&(S.baStatus==='all'||t.status===S.baStatus);
+    });
+    var shown=S.baAll?rows:rows.slice(0,40);
+    return '<div class="card"><div class="chead"><h3>Content plan</h3><span class="note">'+count(null,null,'written')+' written · '+count(null,null,'planned')+' planned</span></div><div class="cbody">'+
+      '<div class="hint" style="margin-bottom:10px">Every topic belongs to a <b>cluster</b> (a hub page plus its posts). Each post links up to its hub, to its products and to its sister posts, and the sister posts link back to it ("Keep reading"). '+
+        'The writer finishes about 6 posts in one cluster before moving on, mixing '+stageTag('tofu')+' '+stageTag('mofu')+' '+stageTag('bofu')+'.</div>'+
+      (next?'<div class="alert info" style="margin-bottom:12px"><b>Next post:</b> '+esc(next.title)+'<br>'+stageTag(next.stage)+' <span class="hint">cluster: '+esc(pillarName[next.pillar]||next.pillar)+' · keyword: '+esc(next.keyword)+'</span></div>':'')+
+      '<table class="list" style="margin-bottom:14px"><thead><tr><th>Cluster (hub page)</th><th>Learn</th><th>Compare</th><th>Buy</th></tr></thead><tbody>'+P.pillars.map(function(p){
+        var c=function(s){ return '<b>'+count(p.id,s,'written')+'</b><span class="hint"> / '+count(p.id,s)+'</span>'; };
+        return '<tr><td><a href="#" data-bacl="'+esc(p.id)+'" style="font-weight:600">'+esc(p.name)+'</a><div class="t-slug"><a href="'+esc(p.url)+'" target="_blank" rel="noopener">'+esc(p.url)+' ↗</a></div></td><td>'+c('tofu')+'</td><td>'+c('mofu')+'</td><td>'+c('bofu')+'</td></tr>';
+      }).join('')+'</tbody></table>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'+
+        '<select id="ba-fcl"><option value="all">All clusters</option>'+P.pillars.map(function(p){ return '<option value="'+esc(p.id)+'"'+(S.baCluster===p.id?' selected':'')+'>'+esc(p.name)+'</option>'; }).join('')+'</select>'+
+        '<select id="ba-fst"><option value="all">All stages</option>'+['tofu','mofu','bofu'].map(function(s){ return '<option value="'+s+'"'+(S.baStage===s?' selected':'')+'>'+STAGE_NAMES[s][0]+' · '+STAGE_NAMES[s][1]+'</option>'; }).join('')+'</select>'+
+        '<select id="ba-fss">'+[['planned','Planned'],['written','Written'],['skipped','Skipped'],['all','All']].map(function(x){ return '<option value="'+x[0]+'"'+(S.baStatus===x[0]?' selected':'')+'>'+x[1]+'</option>'; }).join('')+'</select>'+
+        '<button class="btn" id="ba-refresh" title="Adds topics for new products and categories; keeps what is written">↻ Refresh plan from products</button></div>'+
+      '<table class="list"><thead><tr><th>Topic</th><th>Stage</th><th>Status</th><th></th></tr></thead><tbody>'+
+      (shown.length?shown.map(function(t){
+        return '<tr data-tid="'+esc(t.id)+'"><td><div style="font-weight:600" class="ba-t">'+esc(t.title)+'</div><div class="hint">'+esc(pillarName[t.pillar]||t.pillar)+' · keyword: <span class="ba-k">'+esc(t.keyword)+'</span>'+(t.id===d.next?' · <b style="color:var(--brand)">next</b>':'')+'</div></td>'+
+          '<td>'+stageTag(t.stage)+'</td>'+
+          '<td>'+(t.status==='written'&&t.slug?'<a class="tag published" href="/blogs/'+esc(t.slug)+'/" target="_blank" rel="noopener">written ↗</a>':'<span class="tag '+(t.status==='planned'?'draft':'off')+'">'+esc(t.status)+'</span>')+'</td>'+
+          '<td style="white-space:nowrap;text-align:right">'+(t.status==='planned'?'<button class="btn sm" data-bae="'+esc(t.id)+'" title="Edit">✎</button> <button class="btn sm" data-bas="skip" data-id="'+esc(t.id)+'">Skip</button> ':'')+
+            (t.status==='skipped'?'<button class="btn sm" data-bas="plan" data-id="'+esc(t.id)+'">Back to plan</button> ':'')+
+            (t.status!=='written'?'<button class="btn sm" data-bas="delete" data-id="'+esc(t.id)+'" title="Delete">✕</button>':'')+'</td></tr>';
+      }).join(''):'<tr><td colspan="4" class="empty">No topics here.</td></tr>')+'</tbody></table>'+
+      (rows.length>shown.length?'<button class="btn sm" id="ba-all" style="margin-top:8px">Show all '+rows.length+'</button>':'')+
+      '<h4 style="margin:18px 0 8px">Add your own topic</h4><div style="display:flex;gap:8px;flex-wrap:wrap">'+
+        '<select id="ba-ncl">'+P.pillars.map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>'; }).join('')+'</select>'+
+        '<select id="ba-nst">'+['tofu','mofu','bofu'].map(function(s){ return '<option value="'+s+'">'+STAGE_NAMES[s][0]+' · '+STAGE_NAMES[s][1]+'</option>'; }).join('')+'</select>'+
+        '<input type="text" id="ba-nti" placeholder="Title idea" style="flex:2;min-width:220px"><input type="text" id="ba-nkw" placeholder="Focus keyword" style="flex:1;min-width:160px">'+
+        '<button class="btn primary" id="ba-add">Add</button></div><div class="hint" style="margin-top:6px">Topics you add are written first.</div>'+
+    '</div></div>';
+  }
+
+  function pcCard(){
+    return '<details class="card" style="padding:0"'+(engine==='pc'||fresh?' open':'')+'><summary class="chead" style="cursor:pointer;list-style:none"><h3>PC writer connection (Claude app)</h3><span class="note">'+
+        (d.active?'<b style="color:#059669">● token on</b>'+(d.created?' · made '+esc(pkTime(d.created)):''):'<b style="color:#b45309">● no token</b>')+'</span></summary>'+
+      '<div class="cbody"><div class="hint" style="margin-bottom:8px">Only needed when "Your PC" writes the posts. The "ROC blog writer" task runs at 15:30 and 22:30.</div>'+
       (fresh?'<div class="alert" style="background:#ecfdf5;border-color:#a7f3d0"><b>Your new token</b> (shown only now). Save it on your PC: open <b>PowerShell</b>, paste this line and press Enter:'+
         '<pre id="ba-cmd" style="white-space:pre-wrap;word-break:break-all;background:#0f172a;color:#e2e8f0;padding:10px;border-radius:8px;margin:8px 0">Set-Content -Path "$env:USERPROFILE\\.roc-blog-agent-token" -Value "'+esc(fresh)+'" -NoNewline</pre>'+
         '<button class="btn sm" id="ba-copy">Copy</button> <span class="hint">Do not share this token with anyone or paste it in a chat.</span></div>':'')+
-      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="ba-new">'+(d.active?'Make a new token':'Make a token')+'</button>'+
-      (d.active?'<button class="btn danger" id="ba-off">Switch off</button>':'')+'</div>'+
-      '<div class="hint" style="margin-top:8px">A new token replaces the old one (the PC then needs the new one).</div></div></div>'+
-    '<div class="card"><div class="chead"><h3>Posts from the agent</h3><span class="note">last 100</span></div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="ba-new">'+(d.active?'Make a new token':'Make a token')+'</button>'+
+      (d.active?'<button class="btn danger" id="ba-off">Switch off</button>':'')+'</div></div></details>';
+  }
+
+  function postsCard(){
+    return '<div class="card"><div class="chead"><h3>Posts written</h3><span class="note">last 100</span></div>'+
       (d.posts.length?'<table class="list"><thead><tr><th>Post</th><th>Goes live</th><th>Status</th></tr></thead><tbody>'+d.posts.map(function(p){
-        return '<tr><td><div style="font-weight:600">'+esc(p.title)+'</div><div class="t-slug"><a href="/blogs/'+esc(p.slug)+'/" target="_blank" rel="noopener">/blogs/'+esc(p.slug)+'/ ↗</a> · '+esc(p.words)+' words</div></td>'+
+        return '<tr><td><div style="font-weight:600">'+esc(p.title)+'</div><div class="t-slug"><a href="/blogs/'+esc(p.slug)+'/" target="_blank" rel="noopener">/blogs/'+esc(p.slug)+'/ ↗</a> · '+esc(p.words)+' words'+
+            (p.stage?' · '+stageTag(p.stage):'')+(p.by?' · by '+esc(String(p.by).replace(/^server/,'server')):'')+'</div></td>'+
           '<td style="white-space:nowrap">'+esc(pkTime(p.publish_at))+'</td>'+
           '<td><span class="tag '+(p.status==='published'?'published':p.status==='scheduled'?'draft':'off')+'">'+esc(p.status)+'</span></td></tr>';
-      }).join('')+'</tbody></table>':'<div class="empty"><div class="big">✍</div><div>No posts from the agent yet.</div></div>')+'</div>';
+      }).join('')+'</tbody></table>':'<div class="empty"><div class="big">✍</div><div>No posts written yet.</div></div>')+'</div>';
+  }
+
+  function drawTimes(){
+    var box=$('#ba-times',m);
+    box.innerHTML=times.map(function(t,i){ return '<span style="display:inline-flex;gap:4px;align-items:center"><input type="time" value="'+esc(t)+'" data-ti="'+i+'" style="width:120px">'+
+      (times.length>1?'<button class="btn sm" type="button" data-trm="'+i+'" title="Remove">✕</button>':'')+'</span>'; }).join('')+
+      (times.length<6?'<button class="btn sm" type="button" id="ba-tadd">＋ Time</button>':'');
+    box.querySelectorAll('[data-ti]').forEach(function(x){ x.addEventListener('change',function(){ times[+x.dataset.ti]=x.value; }); });
+    box.querySelectorAll('[data-trm]').forEach(function(x){ x.addEventListener('click',function(){ times.splice(+x.dataset.trm,1); drawTimes(); }); });
+    var ta=$('#ba-tadd',m); if(ta) ta.addEventListener('click',function(){ times.push('12:00'); drawTimes(); });
+  }
+
+  body.innerHTML=writerCard()+planCard()+postsCard()+pcCard();
+  drawTimes();
+  m.querySelectorAll('input[name=ba-eng]').forEach(function(r){ r.addEventListener('change',function(){ engine=r.value; }); });
+  var call=async function(payload, btn, reload){
+    if(btn){ btn.disabled=true; var old=btn.textContent; btn.innerHTML='<span class="spin" style="width:10px;height:10px"></span> '+esc(old); }
+    try{ var r=await api('blog-agent-admin.php',payload); toast(r.message||'Done.','good'); if(reload!==false) renderBlogAgent(m); return r; }
+    catch(e){ toast(e.message,'bad'); if(btn){ btn.disabled=false; btn.textContent=old; } }
+  };
+  $('#ba-save',m).addEventListener('click',function(){ call({action:'settings',engine:engine,slots:times,gemini_key:$('#ba-key',m).value.trim(),model:$('#ba-model',m).value.trim()},this); });
+  var bt=$('#ba-test',m); if(bt) bt.addEventListener('click',function(){ call({action:'test_key'},this,false).then(function(){ bt.disabled=false; bt.textContent='Test the key'; }); });
+  var bw=$('#ba-write',m); if(bw) bw.addEventListener('click',function(){
+    if(!confirm('Write the next post now? It takes 1-2 minutes and is scheduled for the next free time.')) return;
+    call({action:'write_now'},this);
+  });
+  [['#ba-fcl','baCluster'],['#ba-fst','baStage'],['#ba-fss','baStatus']].forEach(function(x){ $(x[0],m).addEventListener('change',function(){ S[x[1]]=this.value; S.baAll=false; renderBlogAgent(m); }); });
+  m.querySelectorAll('[data-bacl]').forEach(function(a){ a.addEventListener('click',function(e){ e.preventDefault(); S.baCluster=a.dataset.bacl; S.baStatus='all'; renderBlogAgent(m); }); });
+  var all=$('#ba-all',m); if(all) all.addEventListener('click',function(){ S.baAll=true; renderBlogAgent(m); });
+  $('#ba-refresh',m).addEventListener('click',function(){ call({action:'plan_refresh'},this); });
+  m.querySelectorAll('[data-bas]').forEach(function(b){ b.addEventListener('click',function(){
+    if(b.dataset.bas==='delete' && !confirm('Delete this topic from the plan?')) return;
+    call({action:'topic',id:b.dataset.id,op:b.dataset.bas},b); }); });
+  m.querySelectorAll('[data-bae]').forEach(function(b){ b.addEventListener('click',function(){
+    var tr=b.closest('tr'), t=P.topics.filter(function(x){ return x.id===b.dataset.bae; })[0];
+    tr.cells[0].innerHTML='<input type="text" class="ba-et" value="'+esc(t.title)+'" style="width:100%;margin-bottom:4px"><input type="text" class="ba-ek" value="'+esc(t.keyword)+'" style="width:100%" placeholder="Focus keyword">';
+    tr.cells[1].innerHTML='<select class="ba-es">'+['tofu','mofu','bofu'].map(function(s){ return '<option value="'+s+'"'+(t.stage===s?' selected':'')+'>'+STAGE_NAMES[s][0]+'</option>'; }).join('')+'</select>';
+    tr.cells[3].innerHTML='<button class="btn sm primary">✓ Save</button>';
+    tr.cells[3].firstChild.addEventListener('click',function(){ call({action:'topic',id:t.id,op:'save',title:$('.ba-et',tr).value,keyword:$('.ba-ek',tr).value,stage:$('.ba-es',tr).value},this); });
+  }); });
+  $('#ba-add',m).addEventListener('click',function(){ call({action:'topic_add',pillar:$('#ba-ncl',m).value,stage:$('#ba-nst',m).value,title:$('#ba-nti',m).value,keyword:$('#ba-nkw',m).value},this); });
   $('#ba-new',m).addEventListener('click',async function(){
     if(d.active && !confirm('Make a new token? The PC will need the new one; the old one stops working.')) return;
     try{ var r=await api('blog-agent-admin.php',{action:'new_token'}); toast(r.message,'good'); renderBlogAgent(m, r.token); }catch(e){ toast(e.message,'bad'); }
   });
   var off=$('#ba-off',m);
   if(off) off.addEventListener('click',async function(){
-    if(!confirm('Switch the blog agent off? Scheduled posts stay scheduled.')) return;
+    if(!confirm('Switch the PC token off? Scheduled posts stay scheduled.')) return;
     try{ var r=await api('blog-agent-admin.php',{action:'revoke'}); toast(r.message,'good'); renderBlogAgent(m); }catch(e){ toast(e.message,'bad'); }
   });
   var cp=$('#ba-copy',m);
@@ -3422,6 +3568,334 @@ async function renderBlogAgent(m, fresh){
     var t=$('#ba-cmd',m).textContent;
     (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){ toast('Copied.','good'); },function(){ toast('Select the line and copy it.','bad'); });
   });
+}
+
+/* ---------------------------------------------------------- site builder */
+/* CMS > Site builder: the real page in a frame. Click anything to change its text, link,
+   picture, colours or size, hide it or add a block next to it; click the menu, footer or
+   logo to edit them. Changes are previewed at once and go live with "Save to website"
+   (api/v1/cms/site-settings.php, parts "edits" and "nav"; 30-day history). */
+
+var B={};
+function bDeep(x){ return JSON.parse(JSON.stringify(x==null?null:x)); }
+function bScopeIn(scope,path){ if(scope==='*') return true; if(scope.slice(-1)==='*'){ var p=scope.slice(0,-1); return path.indexOf(p)===0&&path!==p; } return scope===path; }
+function bGroupScope(path){ var m=String(path).match(/^\/([^/]+)\/[^/]/); return m?'/'+m[1]+'/*':null; }
+function bScopeName(sc){ if(sc==='*') return 'Whole website'; if(sc.slice(-1)==='*') return 'All '+sc.slice(1,-2)+' pages'; return 'Only '+sc; }
+
+/* The header menu / footer / logo form (also used by the old "Menus & footer" view). */
+function navFormInto(box, N, icons, only, onChange){
+  var icoSel=function(path,val){ return '<select data-p="'+path+'" style="width:104px">'+icons.map(function(i){ return '<option'+(i===val?' selected':'')+'>'+esc(i)+'</option>'; }).join('')+'</select>'; };
+  var inp=function(path,val,ph){ return '<input type="text" data-p="'+path+'" value="'+esc(val||'')+'" placeholder="'+esc(ph||'')+'">'; };
+  var tools=function(path,i,n){ return '<span class="bnav-tools"><button class="btn sm" type="button" data-mv="'+path+'|'+i+'|-1"'+(i===0?' disabled':'')+' title="Move up">▲</button>'+
+    '<button class="btn sm" type="button" data-mv="'+path+'|'+i+'|1"'+(i===n-1?' disabled':'')+' title="Move down">▼</button>'+
+    '<button class="btn sm" type="button" data-rm="'+path+'|'+i+'" title="Remove">✕</button></span>'; };
+  function get(path){ return path.split('.').reduce(function(o,k){ return o==null?o:o[k]; },N); }
+  function set(path,val){ var ks=path.split('.'), o=N; for(var i=0;i<ks.length-1;i++){ if(o[ks[i]]==null) o[ks[i]]={}; o=o[ks[i]]; } o[ks[ks.length-1]]=val; }
+  function draw(){
+    var H=N.header||[], F=N.footer||{}, L=N.logo||{}, h='';
+    if(!only||only==='logo') h+='<div class="bnav-sec"><h4>Logo</h4>'+
+      '<label>First word(s)</label>'+inp('logo.line1',L.line1,'RUN ON')+'<label>Coloured word(s)</label>'+inp('logo.line2',L.line2,'CONSOLE')+
+      '<label>Small line under the name</label>'+inp('logo.tagline',L.tagline,'THE GAMING & HARDWARE HUB')+
+      '<label>Logo picture (optional)</label><div style="display:flex;gap:6px">'+inp('logo.image',L.image,'empty = green controller icon')+'<button class="btn sm" type="button" data-pickimg="logo.image">Media</button></div></div>';
+    if(!only||only==='header') h+='<div class="bnav-sec"><h4>Header menu</h4>'+H.map(function(it,i){
+        var P='header.'+i, kids=it.children||[];
+        return '<div class="bnav-item"><div class="bnav-row"><b>'+(i+1)+'</b>'+inp(P+'.label',it.label,'LABEL')+inp(P+'.url',it.url,'/page/')+'</div>'+
+          '<div class="bnav-row"><label class="bnav-chk"><input type="checkbox" data-dd="'+i+'"'+(kids.length?' checked':'')+'> Dropdown</label>'+tools('header',i,H.length)+'</div>'+
+          (kids.length?'<div class="bnav-kids">'+kids.map(function(c,j){ var C=P+'.children.'+j;
+              return '<div class="bnav-kid"><div class="bnav-row">'+icoSel(C+'.icon',c.icon)+inp(C+'.title',c.title,'Title')+'</div><div class="bnav-row">'+inp(C+'.desc',c.desc,'Short description')+'</div><div class="bnav-row">'+inp(C+'.url',c.url,'/page/')+tools(P+'.children',j,kids.length)+'</div></div>'; }).join('')+
+            '<button class="btn sm" type="button" data-add="'+P+'.children">＋ Dropdown link</button>'+
+            '<label style="margin-top:8px">Button at the bottom</label><div class="bnav-row">'+inp(P+'.button.label',(it.button||{}).label,'View all →')+inp(P+'.button.url',(it.button||{}).url,'/page/')+'</div></div>':'')+
+        '</div>'; }).join('')+(H.length<10?'<button class="btn sm" type="button" data-add="header">＋ Menu item</button>':'')+'</div>';
+    if(!only||only==='footer') h+='<div class="bnav-sec"><h4>Footer</h4>'+
+      '<label>About text</label><textarea data-p="footer.about" rows="3">'+esc(F.about||'')+'</textarea>'+
+      '<label>Points under the text</label>'+(F.points||[]).map(function(pt,i){ var P='footer.points.'+i;
+          return '<div class="bnav-row">'+icoSel(P+'.icon',pt.icon)+inp(P+'.text',pt.text,'Text')+tools('footer.points',i,(F.points||[]).length)+'</div>'; }).join('')+
+        ((F.points||[]).length<4?'<button class="btn sm" type="button" data-add="footer.points">＋ Point</button>':'')+
+      '<label style="margin-top:10px">Link columns</label>'+(F.columns||[]).map(function(col,i){ var P='footer.columns.'+i, links=col.links||[];
+          return '<div class="bnav-item"><div class="bnav-row">'+icoSel(P+'.icon',col.icon)+inp(P+'.title',col.title,'TITLE')+tools('footer.columns',i,(F.columns||[]).length)+'</div><div class="bnav-kids">'+
+            links.map(function(l,j){ var C=P+'.links.'+j;
+              return '<div class="bnav-kid"><div class="bnav-row">'+icoSel(C+'.icon',l.icon)+inp(C+'.label',l.label,'Link text')+'</div><div class="bnav-row">'+inp(C+'.url',l.url,'/page/')+tools(P+'.links',j,links.length)+'</div></div>'; }).join('')+
+            '<button class="btn sm" type="button" data-add="'+P+'.links">＋ Link</button></div></div>'; }).join('')+
+        ((F.columns||[]).length<4?'<button class="btn sm" type="button" data-add="footer.columns">＋ Column</button>':'')+
+      '<label style="margin-top:10px">Copyright line ({year} = this year)</label>'+inp('footer.copyright',F.copyright,'© {year} …')+
+      '<label>Small print</label>'+inp('footer.disclaimer',F.disclaimer,'As an Amazon Associate …')+'</div>';
+    box.innerHTML=h;
+    box.querySelectorAll('[data-p]').forEach(function(el){ var f=function(){ set(el.dataset.p, el.value); onChange(); }; el.addEventListener('input',f); el.addEventListener('change',f); });
+    box.querySelectorAll('[data-add]').forEach(function(b){ b.addEventListener('click',function(){
+      var path=b.dataset.add, arr=get(path)||[];
+      var blank={'header':{label:'NEW',url:'/'}, 'footer.points':{icon:'check',text:'New point'}, 'footer.columns':{title:'NEW COLUMN',icon:'link',links:[]}}[path] ||
+        (/\.children$/.test(path)?{title:'New link',desc:'',url:'/',icon:'link'}:{label:'New link',url:'/',icon:'link'});
+      arr.push(blank); set(path,arr); onChange(); draw(); }); });
+    box.querySelectorAll('[data-rm]').forEach(function(b){ b.addEventListener('click',function(){ var x=b.dataset.rm.split('|'); get(x[0]).splice(+x[1],1); onChange(); draw(); }); });
+    box.querySelectorAll('[data-mv]').forEach(function(b){ b.addEventListener('click',function(){
+      var x=b.dataset.mv.split('|'), arr=get(x[0]), i=+x[1], j=i+(+x[2]), t=arr[i]; arr[i]=arr[j]; arr[j]=t; onChange(); draw(); }); });
+    box.querySelectorAll('[data-dd]').forEach(function(c){ c.addEventListener('change',function(){
+      var it=N.header[+c.dataset.dd];
+      if(c.checked){ it.children=it.children&&it.children.length?it.children:[{title:'New link',desc:'',url:'/',icon:'link'}]; it.button=it.button||{label:'',url:it.url}; }
+      else { delete it.children; delete it.button; }
+      onChange(); draw(); }); });
+    box.querySelectorAll('[data-pickimg]').forEach(function(b){ b.addEventListener('click',function(){
+      pickMedia(function(x){ if(!x) return; set(b.dataset.pickimg, x.url); onChange(); draw(); }); }); });
+  }
+  draw();
+}
+
+async function renderBuilder(m){
+  m.innerHTML='<div class="bld"><div class="bld-top">'+
+      '<b style="font-size:15px;margin-right:4px">Site builder</b>'+
+      '<select id="bp-page" title="Page to edit" style="max-width:260px"><option>Loading pages…</option></select>'+
+      '<div class="seg" id="bp-mode"><button type="button" data-mode="edit" class="on" title="Click things on the page to change them">✎ Edit</button><button type="button" data-mode="browse" title="Click links to go to other pages">👆 Browse</button></div>'+
+      '<div class="seg" id="bp-dev"><button type="button" data-dev="desktop" class="on" title="Computer">🖥</button><button type="button" data-dev="mobile" title="Phone">📱</button></div>'+
+      '<span style="flex:1"></span><span id="bp-dirty" class="hint"></span>'+
+      '<button class="btn sm" type="button" id="bp-code" title="Your own CSS and HTML for the whole site or one page">‹/› Code</button>'+
+      '<button class="btn sm" type="button" id="bp-hist">History</button>'+
+      '<button class="btn sm" type="button" id="bp-discard" disabled>Discard</button>'+
+      '<button class="btn primary sm" type="button" id="bp-save" disabled>Save to website</button></div>'+
+    '<div class="bld-main"><div class="bld-stage" id="bp-stage"><div class="bld-wrap" id="bp-wrap"><iframe id="bp-frame" title="Page preview"></iframe></div>'+
+      '<div class="bld-loading" id="bp-loading"><span class="spin"></span></div></div>'+
+    '<aside class="bld-panel" id="bp-panel"></aside></div></div>';
+  var d; try{ d=await api('site-settings.php'); }catch(e){ toast(e.message,'bad'); return; }
+  if(S.view!=='builder') return;
+  B={ edits:bDeep(d.edits||[]), saved:JSON.stringify(d.edits||[]), nav:bDeep(d.nav), navSaved:JSON.stringify(d.nav), navCustom:d.nav_custom, navReset:false,
+      icons:d.nav_icons||[], path:S.bPath||'/', mode:'edit', dev:'desktop', sel:null, el:null, scope:null, part:null };
+  var frame=$('#bp-frame',m), wrap=$('#bp-wrap',m), stage=$('#bp-stage',m), panel=$('#bp-panel',m);
+
+  // Pages list.
+  api('page-metas.php').then(function(x){
+    var rows=(x.rows||[]).filter(function(r){ return r.path && r.path.charAt(0)==='/'; }), groups={};
+    rows.forEach(function(r){ (groups[r.group||'Pages']=groups[r.group||'Pages']||[]).push(r); });
+    var sel=$('#bp-page',m); if(!sel) return;
+    sel.innerHTML=Object.keys(groups).map(function(g){ return '<optgroup label="'+esc(g)+'">'+groups[g].map(function(r){
+      return '<option value="'+esc(r.path)+'">'+esc(r.label||r.path)+'</option>'; }).join('')+'</optgroup>'; }).join('');
+    setPageSelect(B.path);
+  }).catch(function(){});
+  function setPageSelect(p){ var sel=$('#bp-page',m); if(!sel) return;
+    if(![].some.call(sel.options,function(o){ return o.value===p; })){ var o=document.createElement('option'); o.value=p; o.textContent=p; sel.insertBefore(o,sel.firstChild); }
+    sel.value=p; }
+  $('#bp-page',m).addEventListener('change',function(){ open(this.value); });
+
+  function dirtyNow(){ return JSON.stringify(B.edits)!==B.saved || B.navReset || JSON.stringify(B.nav)!==B.navSaved; }
+  function markDirty(){ var dd=dirtyNow(); S.dirty=dd; $('#bp-save',m).disabled=!dd; $('#bp-discard',m).disabled=!dd;
+    $('#bp-dirty',m).textContent=dd?'Not saved yet':''; }
+
+  function fit(){
+    if(S.view!=='builder'||!wrap.isConnected){ window.removeEventListener('resize',fit); return; }
+    var dw=B.dev==='mobile'?390:1280, w=stage.clientWidth-24, h=stage.clientHeight-24, sc=Math.min(1,w/dw);
+    wrap.style.width=dw+'px'; wrap.style.height=Math.round(h/sc)+'px'; wrap.style.transform='scale('+sc+')';
+    wrap.style.left=Math.max(12,Math.round((stage.clientWidth-dw*sc)/2))+'px';
+  }
+  window.addEventListener('resize',fit);
+
+  function open(path){ B.path=path; S.bPath=path; B.sel=null; B.el=null; B.part=null; $('#bp-loading',m).style.display='flex';
+    frame.src=path+(path.indexOf('?')===-1?'?':'&')+'roc_builder=1'; drawPanel(); }
+
+  function win(){ try{ return frame.contentWindow; }catch(e){ return null; } }
+  function preview(){
+    var w=win(); if(!w) return;
+    try{
+      if(w.__rocEditsSet) w.__rocEditsSet(bDeep(B.edits));
+      w.__ROC_NAV=B.navReset?null:bDeep(B.nav); w.dispatchEvent(new w.Event('roc:nav'));
+      setTimeout(placeBoxes,60);
+    }catch(e){}
+  }
+
+  // Outlines drawn over the page (no change to the page's own elements).
+  var hov=null, cur=null, hoverEl=null;
+  function box(doc,color,dash){ var b=doc.createElement('div'); b.style.cssText='position:absolute;pointer-events:none;z-index:2147483646;border:2px '+(dash?'dashed':'solid')+' '+color+';border-radius:4px;display:none;box-sizing:border-box';
+    var t=doc.createElement('span'); t.style.cssText='position:absolute;left:-2px;top:-20px;background:'+color+';color:#fff;font:600 11px/18px system-ui;padding:0 6px;border-radius:4px 4px 0 0;white-space:nowrap';
+    b.appendChild(t); doc.body.appendChild(b); return b; }
+  function placeOn(b,el,label){ var w=win(); if(!b||!el||!el.isConnected){ if(b) b.style.display='none'; return; }
+    var r=el.getBoundingClientRect(); b.style.display='block'; b.style.left=(r.left+w.scrollX-2)+'px'; b.style.top=(r.top+w.scrollY-2)+'px';
+    b.style.width=(r.width+4)+'px'; b.style.height=(r.height+4)+'px'; b.firstChild.textContent=label||''; }
+  function placeBoxes(){ placeOn(cur,B.el,B.el?kindOf(B.el)[0]:''); placeOn(hov,hoverEl!==B.el?hoverEl:null,hoverEl?kindOf(hoverEl)[0]:''); }
+
+  function regionOf(el){ var r=el.closest('[data-roc-region],[data-roc-text],[data-roc-logo]'); if(!r) return null;
+    var v=r.getAttribute('data-roc-region')||r.getAttribute('data-roc-text')||r.getAttribute('data-roc-logo')||'';
+    if(r.hasAttribute('data-roc-logo')) return 'logo'; return v.indexOf('header')===0?'header':'footer'; }
+  function kindOf(el){ var t=el.tagName.toLowerCase();
+    if(/^h[1-6]$/.test(t)) return ['Heading ('+t+')',t]; if(t==='a') return ['Link','a']; if(t==='img') return ['Picture','img']; if(t==='button') return ['Button','button'];
+    if(t==='p') return ['Paragraph','p']; if(t==='li') return ['List item','li']; if(t==='span'||t==='strong'||t==='em') return ['Text',t];
+    if(t==='svg'||el.closest('svg')) return ['Icon','svg']; if(t==='section') return ['Section',t]; if(t==='header') return ['Header',t]; if(t==='footer') return ['Footer',t];
+    return ['Box ('+t+')',t]; }
+  function selector(el){ var doc=el.ownerDocument, parts=[];
+    while(el && el.nodeType===1 && el!==doc.body && el!==doc.documentElement){
+      if(el.id && /^[A-Za-z][\w-]*$/.test(el.id) && doc.querySelectorAll('#'+el.id).length===1){ parts.unshift('#'+el.id); return parts.join(' > '); }
+      var t=el.tagName.toLowerCase(), i=1, s=el; while((s=s.previousElementSibling)) if(s.tagName===el.tagName) i++;
+      parts.unshift(t+':nth-of-type('+i+')'); el=el.parentElement; }
+    parts.unshift('body'); return parts.join(' > '); }
+
+  frame.addEventListener('load',function(){
+    $('#bp-loading',m).style.display='none';
+    var w=win(), doc; try{ doc=w.document; B.path=w.location.pathname; }catch(e){ toast('That page is on another website: go back to a page of runonconsole.com.','bad'); return; }
+    S.bPath=B.path; setPageSelect(B.path); B.sel=null; B.el=null; B.part=null;
+    hov=box(doc,'#10b981',true); cur=box(doc,'#2563eb',false);
+    var st=doc.createElement('style'); st.textContent='html{scroll-behavior:auto!important} roc-block{min-height:8px}'; doc.head.appendChild(st);
+    if(!w.__rocEditsSet){ var sc=doc.createElement('script'); sc.src='/roc-edits.js?b='+Date.now(); sc.onload=preview; doc.head.appendChild(sc); } else preview();
+    doc.addEventListener('mousemove',function(e){ if(B.mode!=='edit') return; var t=e.target; if(t.closest&&t.closest('svg')&&t.tagName.toLowerCase()!=='svg') t=t.closest('svg'); if(t===hoverEl) return; hoverEl=t; placeBoxes(); },true);
+    doc.addEventListener('mouseleave',function(){ hoverEl=null; placeBoxes(); });
+    w.addEventListener('scroll',placeBoxes,{passive:true});
+    var stop=function(e){ if(B.mode!=='edit') return; e.preventDefault(); e.stopPropagation(); };
+    ['mousedown','mouseup','pointerdown','pointerup','submit','dblclick'].forEach(function(ev){ w.addEventListener(ev,stop,true); });
+    w.addEventListener('click',function(e){ if(B.mode!=='edit') return; e.preventDefault(); e.stopPropagation();
+      var t=e.target; if(t.closest&&t.closest('svg')) t=t.closest('svg'); if(t.closest&&t.closest('roc-block')) t=t.closest('roc-block');
+      pick(t); },true);
+    doc.addEventListener('keydown',function(e){ if(e.key==='Escape'){ B.sel=null; B.el=null; B.part=null; placeBoxes(); drawPanel(); } });
+    drawPanel();
+  });
+
+  function pick(el){
+    var doc=el.ownerDocument;
+    if(el===doc.body||el===doc.documentElement) return;
+    B.el=el;
+    if(el.tagName==='ROC-BLOCK'){ var ed=B.edits.filter(function(x){ return x.id===el.getAttribute('data-id'); })[0];
+      if(ed){ var tgt=null; try{ tgt=doc.querySelector(ed.sel); }catch(e){} B.el=tgt||el; B.sel=ed.sel; B.scope=ed.scope; B.part='block:'+ed.id; placeBoxes(); drawPanel(); return; } }
+    B.sel=selector(el);
+    var reg=regionOf(el); B.part=reg?'nav:'+reg:null;
+    // Scope: the change already saved for this element, else this page (whole site for menu/footer parts).
+    var ex=B.edits.filter(function(x){ return x.sel===B.sel && bScopeIn(x.scope,B.path); })[0];
+    B.scope=ex?ex.scope:(el.closest('header,footer')?'*':B.path);
+    placeBoxes(); drawPanel();
+  }
+
+  function editFor(create){
+    var e=B.edits.filter(function(x){ return x.sel===B.sel && x.scope===B.scope; })[0];
+    if(!e && create){ e={id:Math.random().toString(36).slice(2,12), scope:B.scope, sel:B.sel, label:kindOf(B.el)[0]+': '+String(B.el.textContent||'').trim().slice(0,40)}; B.edits.push(e); }
+    return e;
+  }
+  function tidy(){ B.edits=B.edits.filter(function(e){ if(e.text==null) delete e.mixed; return e.text!=null||e.href!=null||e.src!=null||e.alt!=null||e.hide||e.html||(e.style&&Object.keys(e.style).length); }); }
+  function change(fn){ var e=editFor(true); fn(e); if(e.style){ Object.keys(e.style).forEach(function(k){ if(!e.style[k]) delete e.style[k]; }); if(!Object.keys(e.style).length) delete e.style; }
+    tidy(); markDirty(); preview(); }
+
+  function drawPanel(){
+    if(B.part&&B.part.indexOf('nav:')===0) return drawNavPanel(B.part.slice(4));
+    if(!B.el||!B.sel) return drawHome();
+    var el=B.el, k=kindOf(el), e=editFor(false)||{}, st=e.style||{}, cs=el.ownerDocument.defaultView.getComputedStyle(el);
+    var leaf=!el.children.length && String(el.textContent||'').trim()!=='' && el.tagName!=='ROC-BLOCK';
+    // Text with coloured or bold parts inside (spans, strong…): it can be rewritten as one text.
+    var mixed=!leaf && String(el.textContent||'').trim()!=='' && el.tagName!=='ROC-BLOCK' && [].every.call(el.querySelectorAll('*'),function(c){ return /^(SPAN|STRONG|EM|B|I|BR|SMALL|MARK|SUP|SUB)$/.test(c.tagName); });
+    var grp=bGroupScope(B.path), scopes=[[B.path,'Only this page'],grp?[grp,'All pages like this ('+grp+')']:null,['*','Whole website (every page)']].filter(Boolean);
+    if(scopes.every(function(s){ return s[0]!==B.scope; })) scopes.unshift([B.scope,bScopeName(B.scope)]);
+    var color=function(id,label,prop,cur){ return '<div class="bfield"><label>'+label+'</label><div style="display:flex;gap:6px;align-items:center"><input type="color" id="'+id+'" value="'+esc(toHex(st[prop]||cur))+'">'+
+      '<span class="hint">'+(st[prop]?esc(st[prop]):'as now')+'</span>'+(st[prop]?'<button class="btn sm" type="button" data-clr="'+prop+'">reset</button>':'')+'</div></div>'; };
+    var choice=function(id,label,prop,opts){ return '<div class="bfield"><label>'+label+'</label><select id="'+id+'"><option value="">as now</option>'+opts.map(function(o){
+      return '<option value="'+esc(o[0])+'"'+(st[prop]===o[0]?' selected':'')+'>'+esc(o[1])+'</option>'; }).join('')+'</select></div>'; };
+    var anc=[], a=el.parentElement; while(a && a!==el.ownerDocument.body && anc.length<4){ anc.push(a); a=a.parentElement; }
+    panel.innerHTML='<div class="bp-head"><button class="btn sm" type="button" id="bp-back">← Back</button><b>'+esc(k[0])+'</b></div>'+
+      (anc.length?'<div class="hint" style="margin:6px 0 10px">Select the bigger part: '+anc.map(function(x,i){ return '<a href="#" data-up="'+i+'">'+esc(kindOf(x)[0])+'</a>'; }).join(' › ')+'</div>':'')+
+      '<div class="bfield"><label>Change it on</label><select id="bp-scope">'+scopes.map(function(s){ return '<option value="'+esc(s[0])+'"'+(s[0]===B.scope?' selected':'')+'>'+esc(s[1])+'</option>'; }).join('')+'</select></div>'+
+      (regionOf(el)?'<div class="alert info" style="font-size:12px">This is part of the '+esc(regionOf(el))+'. <a href="#" id="bp-tonav">Edit the '+esc(regionOf(el))+' texts and links</a>; here you can change how it looks.</div>':'')+
+      ((leaf||mixed||e.mixed)&&!regionOf(el)?'<div class="bfield"><label>Text</label><textarea id="bp-text" rows="3">'+esc(e.text!=null?e.text:el.textContent)+'</textarea>'+
+        (mixed?'<div class="hint">This text has parts in another colour or weight; after a change it becomes one text. To keep them, click each part instead.</div>':'')+'</div>':'')+
+      (el.tagName==='A'&&!regionOf(el)?'<div class="bfield"><label>Link goes to</label><input type="text" id="bp-href" value="'+esc(e.href!=null?e.href:(el.getAttribute('href')||''))+'" placeholder="/page/ or https://…"></div>':'')+
+      (el.tagName!=='A'&&el.closest('a')&&!regionOf(el)?'<div class="hint" style="margin-bottom:8px">It is inside a link: <a href="#" id="bp-tolink">change the link</a></div>':'')+
+      (el.tagName==='IMG'?'<div class="bfield"><label>Picture</label><div style="display:flex;gap:6px"><input type="text" id="bp-src" value="'+esc(e.src!=null?e.src:(el.getAttribute('src')||''))+'"><button class="btn sm" type="button" id="bp-media">Media</button></div></div>'+
+        '<div class="bfield"><label>Picture description (alt)</label><input type="text" id="bp-alt" value="'+esc(e.alt!=null?e.alt:(el.getAttribute('alt')||''))+'"></div>':'')+
+      '<details class="bsec" open><summary>Look</summary>'+
+        color('bp-color','Text colour','color',cs.color)+color('bp-bg','Background','background-color',cs.backgroundColor)+
+        choice('bp-fs','Text size','font-size',[['12px','Small (12)'],['14px','Normal (14)'],['16px','Medium (16)'],['18px','Large (18)'],['22px','Larger (22)'],['28px','Big (28)'],['36px','Bigger (36)'],['48px','Huge (48)']])+
+        choice('bp-fw','Weight','font-weight',[['400','Normal'],['600','Semi-bold'],['800','Bold']])+
+        choice('bp-ta','Align','text-align',[['left','Left'],['center','Centre'],['right','Right']])+
+        choice('bp-tt','Capitals','text-transform',[['none','As typed'],['uppercase','ALL CAPITALS']])+
+        choice('bp-pd','Space inside','padding',[['0','None'],['4px 8px','Small'],['8px 16px','Medium'],['16px 24px','Large'],['24px 32px','Extra large']])+
+        choice('bp-mg','Space around','margin',[['0','None'],['8px 0','Small'],['16px 0','Medium'],['32px 0','Large']])+
+        choice('bp-br','Round corners','border-radius',[['0','Square'],['6px','Slightly round'],['12px','Round'],['999px','Pill']])+
+      '</details>'+
+      '<label class="bnav-chk" style="margin:10px 0"><input type="checkbox" id="bp-hide"'+(e.hide?' checked':'')+'> Hide it</label>'+
+      '<details class="bsec"'+(e.html?' open':'')+'><summary>Add a block '+(e.html?'(added)':'')+'</summary>'+
+        '<div class="hint" style="margin-bottom:6px">Text or HTML shown next to this element: a note, an offer, a picture, a list… (scripts are not allowed here; use ‹/› Code for those).</div>'+
+        '<textarea id="bp-html" rows="5" spellcheck="false" style="font-family:ui-monospace,Consolas,monospace;font-size:12px" placeholder="<p><strong>Sale:</strong> new picks every week!</p>">'+esc(e.html||'')+'</textarea>'+
+        '<div style="display:flex;gap:6px;margin-top:6px"><select id="bp-pos"><option value="after"'+(e.pos!=='before'?' selected':'')+'>below it</option><option value="before"'+(e.pos==='before'?' selected':'')+'>above it</option></select>'+
+        '<button class="btn sm" type="button" id="bp-addblk">'+(e.html?'Update block':'Add block')+'</button>'+(e.html?'<button class="btn sm" type="button" id="bp-rmblk">Remove block</button>':'')+'</div></details>'+
+      (editFor(false)?'<button class="btn danger sm" type="button" id="bp-undo" style="margin-top:12px">Undo all changes to this element</button>':'')+
+      '<div class="hint" style="margin-top:12px">Changes show here at once. Press <b>Save to website</b> to put them live.</div>';
+    $('#bp-back',panel).addEventListener('click',function(){ B.el=null; B.sel=null; placeBoxes(); drawPanel(); });
+    panel.querySelectorAll('[data-up]').forEach(function(x){ x.addEventListener('click',function(ev){ ev.preventDefault(); pick(anc[+x.dataset.up]); }); });
+    $('#bp-scope',panel).addEventListener('change',function(){ var e0=editFor(false), ns=this.value;
+      if(e0 && !B.edits.some(function(x){ return x.sel===B.sel&&x.scope===ns; })) e0.scope=ns; B.scope=ns; markDirty(); preview(); drawPanel(); });
+    var tn=$('#bp-tonav',panel); if(tn) tn.addEventListener('click',function(ev){ ev.preventDefault(); B.part='nav:'+regionOf(el); drawPanel(); });
+    var tl=$('#bp-tolink',panel); if(tl) tl.addEventListener('click',function(ev){ ev.preventDefault(); pick(el.closest('a')); });
+    var on=function(id,fn,evn){ var x=$('#'+id,panel); if(x) x.addEventListener(evn||'input',function(){ fn(x.value,x); }); };
+    on('bp-text',function(v){ change(function(e){ e.text=v; if(mixed||e.mixed) e.mixed=true; }); });
+    on('bp-href',function(v){ change(function(e){ e.href=v.trim(); }); });
+    on('bp-src',function(v){ change(function(e){ e.src=v.trim(); }); });
+    on('bp-alt',function(v){ change(function(e){ e.alt=v; }); });
+    var mb=$('#bp-media',panel); if(mb) mb.addEventListener('click',function(){ pickMedia(function(x){ if(!x) return; change(function(e){ e.src=x.url; if(x.alt) e.alt=x.alt; }); drawPanel(); }); });
+    [['bp-color','color'],['bp-bg','background-color']].forEach(function(p){ on(p[0],function(v){ change(function(e){ e.style=e.style||{}; e.style[p[1]]=v; }); },'change'); });
+    [['bp-fs','font-size'],['bp-fw','font-weight'],['bp-ta','text-align'],['bp-tt','text-transform'],['bp-pd','padding'],['bp-mg','margin'],['bp-br','border-radius']].forEach(function(p){
+      on(p[0],function(v){ change(function(e){ e.style=e.style||{}; e.style[p[1]]=v; }); setTimeout(placeBoxes,50); },'change'); });
+    panel.querySelectorAll('[data-clr]').forEach(function(b){ b.addEventListener('click',function(){ change(function(e){ if(e.style) delete e.style[b.dataset.clr]; }); drawPanel(); }); });
+    $('#bp-hide',panel).addEventListener('change',function(){ var h=this.checked; change(function(e){ if(h) e.hide=true; else delete e.hide; }); });
+    $('#bp-addblk',panel).addEventListener('click',function(){ var h=$('#bp-html',panel).value.trim(), pos=$('#bp-pos',panel).value;
+      if(!h){ toast('Write the text or HTML of the block first.','bad'); return; } if(/<script/i.test(h)){ toast('Scripts are not allowed in a block. Use ‹/› Code.','bad'); return; }
+      change(function(e){ e.html=h; e.pos=pos; }); drawPanel(); });
+    var rb=$('#bp-rmblk',panel); if(rb) rb.addEventListener('click',function(){ change(function(e){ delete e.html; delete e.pos; }); drawPanel(); });
+    var ub=$('#bp-undo',panel); if(ub) ub.addEventListener('click',function(){ B.edits=B.edits.filter(function(x){ return !(x.sel===B.sel&&x.scope===B.scope); }); markDirty(); preview(); drawPanel(); });
+  }
+
+  function drawNavPanel(part){
+    var names={header:'Header menu',footer:'Footer',logo:'Logo'};
+    panel.innerHTML='<div class="bp-head"><button class="btn sm" type="button" id="bp-back">← Back</button><b>'+esc(names[part]||'Menu')+'</b></div>'+
+      '<div class="hint" style="margin:6px 0 10px">Same on every page. Changes show at once; <b>Save to website</b> puts them live.</div>'+
+      '<div class="seg" style="margin-bottom:10px">'+['logo','header','footer'].map(function(p){ return '<button type="button" data-np="'+p+'"'+(p===part?' class="on"':'')+'>'+names[p]+'</button>'; }).join('')+'</div>'+
+      '<div id="bp-navform"></div>'+
+      (B.navCustom&&!B.navReset?'<button class="btn sm" type="button" id="bp-navreset" style="margin-top:12px">Use the website\'s own menu, footer and logo again</button>':'')+
+      (B.el?'<div style="margin-top:10px"><a href="#" id="bp-look">Change how the selected part looks (colours, size)</a></div>':'');
+    $('#bp-back',panel).addEventListener('click',function(){ B.part=null; if(!B.el) B.sel=null; drawPanel(); });
+    panel.querySelectorAll('[data-np]').forEach(function(b){ b.addEventListener('click',function(){ B.part='nav:'+b.dataset.np; drawPanel(); }); });
+    navFormInto($('#bp-navform',panel), B.nav, B.icons, part, function(){ B.navReset=false; markDirty(); preview(); });
+    var r=$('#bp-navreset',panel); if(r) r.addEventListener('click',function(){
+      if(!confirm('Go back to the website\'s own menu, footer and logo? Press Save to put it live; your version stays in the History.')) return;
+      B.navReset=true; markDirty(); preview(); toast('Showing the website\'s own menu. Press Save to put it live.','good'); drawPanel(); });
+    var lk=$('#bp-look',panel); if(lk) lk.addEventListener('click',function(ev){ ev.preventDefault(); B.part=null; drawPanel(); });
+  }
+
+  function drawHome(){
+    var here=B.edits.filter(function(e){ return bScopeIn(e.scope,B.path); });
+    panel.innerHTML='<div class="alert info" style="font-size:12.5px"><b>How to use:</b> choose a page at the top (or switch to 👆 Browse and click links), then in ✎ Edit mode <b>click anything</b> on the page: '+
+        'change its text, link, picture, colours or size, hide it, or add a block next to it. Click the <b>menu, footer or logo</b> to edit them. Nothing goes live until you press <b>Save to website</b>.</div>'+
+      '<div class="seg" style="margin:8px 0 14px"><button type="button" data-np="header">☰ Header menu</button><button type="button" data-np="footer">Footer</button><button type="button" data-np="logo">Logo</button></div>'+
+      '<h4 style="margin:0 0 8px">Changes on this page ('+here.length+')</h4>'+
+      (here.length?here.map(function(e){
+        var what=[e.text!=null?'text':'',e.href!=null?'link':'',e.src!=null?'picture':'',e.hide?'hidden':'',e.html?'block':'',e.style?'look':''].filter(Boolean).join(', ');
+        return '<div class="bchg"><a href="#" data-goto="'+esc(e.id)+'"><b>'+esc(e.label||e.sel)+'</b></a><div class="hint">'+esc(what)+' · '+esc(bScopeName(e.scope))+'</div>'+
+          '<button class="btn sm" type="button" data-rmchg="'+esc(e.id)+'" title="Undo this change">✕</button></div>'; }).join(''):'<div class="hint">None yet.</div>')+
+      (B.edits.length>here.length?'<div class="hint" style="margin-top:10px">'+(B.edits.length-here.length)+' more change(s) on other pages.</div>':'');
+    panel.querySelectorAll('[data-np]').forEach(function(b){ b.addEventListener('click',function(){ B.part='nav:'+b.dataset.np; drawPanel(); }); });
+    panel.querySelectorAll('[data-rmchg]').forEach(function(b){ b.addEventListener('click',function(){ B.edits=B.edits.filter(function(x){ return x.id!==b.dataset.rmchg; }); markDirty(); preview(); drawPanel(); }); });
+    panel.querySelectorAll('[data-goto]').forEach(function(a){ a.addEventListener('click',function(ev){ ev.preventDefault();
+      var e=B.edits.filter(function(x){ return x.id===a.dataset.goto; })[0], w=win(), el=null; try{ el=w.document.querySelector(e.sel); }catch(x){}
+      if(!el){ toast('That element is not on this page now (the page may have changed).','bad'); return; }
+      el.scrollIntoView({block:'center'}); B.el=el; B.sel=e.sel; B.scope=e.scope; B.part=null; placeBoxes(); drawPanel(); }); });
+  }
+
+  function toHex(c){ if(!c) return '#000000'; if(/^#[0-9a-f]{6}$/i.test(c)) return c; var m=String(c).match(/\d+(\.\d+)?/g); if(!m||m.length<3) return '#000000';
+    return '#'+m.slice(0,3).map(function(x){ return ('0'+Math.round(+x).toString(16)).slice(-2); }).join(''); }
+
+  // Top bar.
+  $('#bp-mode',m).querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){ B.mode=b.dataset.mode;
+    $('#bp-mode',m).querySelectorAll('button').forEach(function(x){ x.classList.toggle('on',x===b); }); hoverEl=null; placeBoxes(); }); });
+  $('#bp-dev',m).querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){ B.dev=b.dataset.dev;
+    $('#bp-dev',m).querySelectorAll('button').forEach(function(x){ x.classList.toggle('on',x===b); }); fit(); setTimeout(placeBoxes,80); }); });
+  $('#bp-code',m).addEventListener('click',function(){ go('sitecode'); });
+  $('#bp-hist',m).addEventListener('click',function(){ B.el=null; B.sel=null; B.part=null; placeBoxes();
+    panel.innerHTML='<div class="bp-head"><button class="btn sm" type="button" id="bp-back">← Back</button><b>Earlier versions</b></div><div class="hint" style="margin:6px 0">Kept 30 days. Restoring puts that version live straight away.</div><div id="bp-h"></div>';
+    $('#bp-back',panel).addEventListener('click',drawPanel);
+    settingsHistory($('#bp-h',panel),'edits,nav',function(){ S.dirty=false; renderBuilder(m); }); });
+  $('#bp-discard',m).addEventListener('click',function(){ if(!confirm('Throw away the changes you have not saved?')) return;
+    B.edits=JSON.parse(B.saved); B.nav=JSON.parse(B.navSaved); B.navReset=false; markDirty(); preview(); drawPanel(); });
+  $('#bp-save',m).addEventListener('click',async function(){
+    var btn=this; btn.disabled=true; btn.textContent='Saving…';
+    try{
+      if(JSON.stringify(B.edits)!==B.saved){ tidy(); var r1=await api('site-settings.php',{part:'edits',value:B.edits}); B.edits=r1.value; B.saved=JSON.stringify(r1.value); }
+      if(B.navReset||JSON.stringify(B.nav)!==B.navSaved){ var r2=await api('site-settings.php',{part:'nav',value:B.navReset?[]:B.nav});
+        if(B.navReset){ var dd=await api('site-settings.php'); B.nav=bDeep(dd.nav); B.navCustom=false; } else B.navCustom=true;
+        B.navSaved=JSON.stringify(B.nav); B.navReset=false; }
+      markDirty(); toast('Saved. The changes are live on the website.','good');
+    }catch(e){ toast(e.message,'bad'); }
+    btn.textContent='Save to website'; markDirty();
+  });
+
+  fit(); open(B.path); markDirty();
 }
 
 /* ------------------------------------------------------------- settings */
@@ -3462,14 +3936,20 @@ async function renderSettings(m){
   var sys=d.system||{redirects:[],noindex:[],disallow:[]};
   var srcName=function(x){ return String(x||'').replace(/^ROC\s+/,'').replace(/\s*\(cli-[a-z-]+\.php\)/,'').replace(/^./,function(c){return c.toUpperCase();}); };
   // What the website already does (installers, page code, database): read-only.
-  var sysRedirects='<div class="card"><div class="chead"><h3>Already on the site ('+sys.redirects.length+')</h3><span class="note">Set up by the website itself · read-only</span></div>'+
-    (sys.redirects.length?'<table class="list"><thead><tr><th>From</th><th>To</th><th>Type</th><th>Set by</th></tr></thead><tbody>'+sys.redirects.map(function(r){
-      return '<tr><td class="t-slug">'+esc(r.from)+'</td><td class="t-slug">'+(r.type==410?'<span class="hint">removed</span>':esc(r.to))+'</td><td><span class="tag ro">'+r.type+'</span></td><td class="hint">'+esc(srcName(r.source))+'</td></tr>'; }).join('')+'</tbody></table>'
+  var ownFrom={}; (d.redirects||[]).forEach(function(r){ ownFrom[String(r.from).replace(/\/?$/,'/')]=1; });
+  var sysRedirects='<div class="card"><div class="chead"><h3>Already on the site ('+sys.redirects.length+')</h3><span class="note">Set up by the website itself</span></div>'+
+    (sys.redirects.length?'<table class="list"><thead><tr><th>From</th><th>To</th><th>Type</th><th>Set by</th><th></th></tr></thead><tbody>'+sys.redirects.map(function(r,i){
+      var mine=ownFrom[String(r.from).replace(/\/?$/,'/')];
+      return '<tr><td class="t-slug">'+esc(r.from)+'</td><td class="t-slug">'+(r.type==410?'<span class="hint">removed</span>':esc(r.to))+'</td><td><span class="tag ro">'+r.type+'</span></td><td class="hint">'+esc(srcName(r.source))+'</td>'+
+        '<td style="text-align:right;white-space:nowrap">'+(mine?'<span class="tag published" title="Your rule above is used instead">replaced by yours</span>':
+          r.lock?'<span class="hint" title="'+esc(r.lock)+'" style="cursor:help">🔒 fixed</span>':'<button class="btn sm" type="button" data-sysrd="'+i+'" title="Send it somewhere else">✎ Change</button>')+'</td></tr>'; }).join('')+'</tbody></table>'
       :'<div class="cbody hint">None found.</div>')+'</div>';
-  var sysNoindex='<div class="card"><div class="chead"><h3>Already noindex ('+sys.noindex.length+')</h3><span class="note">Set by the website itself · read-only</span></div>'+
-    (sys.noindex.length?'<table class="list"><thead><tr><th>Page</th><th>Why</th></tr></thead><tbody>'+sys.noindex.map(function(r){
-      return '<tr><td class="t-slug">'+esc(r.path)+'</td><td class="hint">'+esc(r.why)+'</td></tr>'; }).join('')+'</tbody></table>':'<div class="cbody hint">None found.</div>')+'</div>'+
-    (sys.disallow.length?'<div class="card"><div class="chead"><h3>Blocked in robots.txt ('+sys.disallow.length+')</h3><span class="note">Crawlers are asked not to visit</span></div><table class="list"><thead><tr><th>Address</th><th>For</th></tr></thead><tbody>'+
+  var sysNoindex='<div class="card"><div class="chead"><h3>Already noindex ('+sys.noindex.length+')</h3><span class="note">Set by the website itself</span></div>'+
+    (sys.noindex.length?'<table class="list"><thead><tr><th>Page</th><th>Why</th><th></th></tr></thead><tbody>'+sys.noindex.map(function(r){
+      return '<tr><td class="t-slug">'+esc(r.path)+'</td><td class="hint">'+esc(r.why)+'</td><td style="text-align:right;white-space:nowrap">'+
+        (r.table?'<button class="btn sm" type="button" data-idx="'+esc(r.table)+'" data-slug="'+esc(r.slug)+'" title="Remove noindex: Google may show it again and it goes back in the sitemap">Show in Google</button>':
+          '<span class="hint" title="'+esc(r.lock||'')+'" style="cursor:help">🔒 fixed</span>')+'</td></tr>'; }).join('')+'</tbody></table>':'<div class="cbody hint">None found.</div>')+'</div>'+
+    (sys.disallow.length?'<div class="card"><div class="chead"><h3>Blocked in robots.txt ('+sys.disallow.length+')</h3><span class="note">Change these in the robots.txt tab</span></div><table class="list"><thead><tr><th>Address</th><th>For</th></tr></thead><tbody>'+
       sys.disallow.map(function(r){ return '<tr><td class="t-slug">'+esc(r.path)+'</td><td class="hint">'+(r.agent==='*'?'all crawlers':esc(r.agent))+'</td></tr>'; }).join('')+'</tbody></table></div>':'');
   function saveBtn(){ return '<button class="btn primary" type="submit">Save to website</button>'; }
   function showErrors(err, map){
@@ -3509,32 +3989,69 @@ async function renderSettings(m){
   }
 
   if(tab==='redirects'){
-    var rows=(d.redirects||[]).concat([{from:'',to:'',type:301,note:''}]);
-    var row=function(r,i){ return '<tr data-rr><td><input type="text" data-k="from" value="'+esc(r.from)+'" placeholder="/old-page/" id="st-from'+i+'"></td>'+
-      '<td><select data-k="type"><option value="301"'+(r.type==301?' selected':'')+'>301 permanent</option><option value="302"'+(r.type==302?' selected':'')+'>302 temporary</option><option value="410"'+(r.type==410?' selected':'')+'>410 gone</option></select></td>'+
-      '<td><input type="text" data-k="to" value="'+esc(r.to)+'" placeholder="/new-page/ or https://…" id="st-to'+i+'"></td>'+
-      '<td><input type="text" data-k="note" value="'+esc(r.note||'')+'" placeholder="note (optional)"></td>'+
-      '<td><button class="btn sm" type="button" data-rdel title="Remove">✕</button></td></tr>'; };
-    box.innerHTML='<div class="alert info">Your own redirects go in the table below; the ones the website already has are listed under it. Send an old address to a new one. <b>From</b> is an address on this site; end it with <b>*</b> for a whole section (/old-blog/*). '+
-      '<b>410 gone</b> tells Google a page was removed for good. After saving, the server checks the site still opens and undoes the change if it does not.</div>'+
-      '<div class="card"><div class="cbody"><form id="stf"><table class="list"><thead><tr><th>From</th><th>Type</th><th>To</th><th>Note</th><th></th></tr></thead><tbody id="rr-body">'+
-      rows.map(row).join('')+'</tbody></table><div style="display:flex;gap:8px;margin-top:10px"><button class="btn" type="button" id="rr-add">＋ Add row</button>'+saveBtn()+'</div></form></div></div>'+sysRedirects+histCard;
-    $('#rr-add',m).addEventListener('click',function(){ var tb=$('#rr-body',m); tb.insertAdjacentHTML('beforeend',row({from:'',to:'',type:301,note:''},tb.children.length)); bindDel(); });
-    function bindDel(){ m.querySelectorAll('[data-rdel]').forEach(function(b){ b.onclick=function(){ b.closest('tr').remove(); S.dirty=true; }; }); }
-    bindDel();
+    var own=(d.redirects||[]).slice();
+    var typeSel=function(t){ return '<select data-k="type"><option value="301"'+(t==301?' selected':'')+'>301 permanent</option><option value="302"'+(t==302?' selected':'')+'>302 temporary</option><option value="410"'+(t==410?' selected':'')+'>410 gone</option></select>'; };
+    var editRow=function(r){ return '<tr data-rr><td><input type="text" data-k="from" value="'+esc(r.from)+'" placeholder="/old-page/"></td><td>'+typeSel(r.type||301)+'</td>'+
+      '<td><input type="text" data-k="to" value="'+esc(r.to)+'" placeholder="/new-page/ or https://…"></td><td><input type="text" data-k="note" value="'+esc(r.note||'')+'" placeholder="note (optional)"></td>'+
+      '<td><button class="btn sm" type="button" data-rdel title="Remove this row">✕</button></td></tr>'; };
+    var viewRow=function(r,i){ return '<tr data-rr data-i="'+i+'"><td class="t-slug">'+esc(r.from)+'</td><td><span class="tag ro">'+r.type+'</span></td><td class="t-slug">'+(r.type==410?'<span class="hint">removed for good</span>':esc(r.to))+'</td>'+
+      '<td class="hint">'+esc(r.note||'')+'</td><td style="white-space:nowrap"><button class="btn sm" type="button" data-redit="'+i+'" title="Edit">✎</button> <button class="btn sm" type="button" data-rstop="'+i+'" title="Stop this redirect: the old address opens again and goes back in the sitemap">✕</button></td></tr>'; };
+    box.innerHTML='<div class="alert info"><b>Redirect</b> = send visitors and Google from an old address to a new one. <b>From</b> is an address on this site (end with <b>*</b> for a whole section, like /old-blog/*). '+
+      '<b>✎</b> changes a redirect, <b>✕</b> stops it: the old address opens again and goes back in the sitemap. A redirect the website already has can be sent somewhere else with <b>✎ Change</b> (your rule is used instead). '+
+      'After saving, the server checks the site still opens and undoes the change if it does not.</div>'+
+      '<div class="card"><div class="chead"><h3>Your redirects ('+own.length+')</h3></div><div class="cbody"><form id="stf"><table class="list"><thead><tr><th>From</th><th>Type</th><th>To</th><th>Note</th><th></th></tr></thead><tbody id="rr-body">'+
+      own.map(viewRow).join('')+(own.length?'':editRow({from:'',to:'',type:301}))+'</tbody></table><div style="display:flex;gap:8px;margin-top:10px"><button class="btn" type="button" id="rr-add">＋ Add redirect</button>'+saveBtn()+'</div></form></div></div>'+sysRedirects+histCard;
+    var collect=function(){ return [].map.call(m.querySelectorAll('[data-rr]'),function(tr){
+        if(tr.dataset.i!==undefined && !tr.querySelector('input')) return own[+tr.dataset.i];
+        var o={}; tr.querySelectorAll('[data-k]').forEach(function(i){ o[i.dataset.k]=i.value.trim(); }); o.type=+o.type; return o; })
+      .filter(function(o){ return o && (o.from||o.to); }); };
+    var bind=function(){
+      m.querySelectorAll('[data-rdel]').forEach(function(b){ b.onclick=function(){ b.closest('tr').remove(); S.dirty=true; }; });
+      m.querySelectorAll('[data-redit]').forEach(function(b){ b.onclick=function(){ var tr=b.closest('tr'), i=tr.dataset.i; tr.outerHTML=editRow(own[+i]).replace('<tr data-rr>','<tr data-rr data-i="'+i+'">'); S.dirty=true; bind(); }; });
+      m.querySelectorAll('[data-rstop]').forEach(function(b){ b.onclick=function(){ var r=own[+b.dataset.rstop];
+        if(!confirm('Stop the redirect from '+r.from+'?\n\nThat address opens again (if the page exists) and goes back in the sitemap. You can undo it in "Earlier versions".')) return;
+        b.closest('tr').remove(); save('redirects',collect()); }; });
+    };
+    bind();
+    $('#rr-add',m).addEventListener('click',function(){ $('#rr-body',m).insertAdjacentHTML('beforeend',editRow({from:'',to:'',type:301})); bind(); var ins=m.querySelectorAll('#rr-body input[data-k=from]'); ins[ins.length-1].focus(); });
+    m.querySelectorAll('[data-sysrd]').forEach(function(b){ b.addEventListener('click',function(){ var r=sys.redirects[+b.dataset.sysrd];
+      $('#rr-body',m).insertAdjacentHTML('beforeend',editRow({from:r.from,to:r.to,type:r.type,note:'replaces the website\'s own redirect'})); bind(); S.dirty=true;
+      var ins=m.querySelectorAll('#rr-body input[data-k=to]'); var last=ins[ins.length-1]; last.scrollIntoView({behavior:'smooth',block:'center'}); last.focus(); last.select();
+      toast('Write the new address in "To" and press Save.','good'); }); });
     $('#stf',m).addEventListener('input',function(){ S.dirty=true; });
-    $('#stf',m).addEventListener('submit',function(e){ e.preventDefault();
-      var v=[].map.call(m.querySelectorAll('[data-rr]'),function(tr){ var o={}; tr.querySelectorAll('[data-k]').forEach(function(i){ o[i.dataset.k]=i.value.trim(); }); o.type=+o.type; return o; })
-        .filter(function(o){ return o.from||o.to; });
-      save('redirects',v); });
+    $('#stf',m).addEventListener('submit',function(e){ e.preventDefault(); save('redirects',collect()); });
   }
 
   if(tab==='noindex'){
-    box.innerHTML='<div class="alert info">Add your own noindex pages here; the pages that are already noindex are listed below. Pages listed here get <b>noindex</b> (Google does not show them) and are left out of the sitemaps. One address per line; end with <b>*</b> for a whole section, e.g. <code>/products/old-mouse/</code> or <code>/blogs/test-*</code>.</div>'+
-      '<div class="card"><div class="cbody"><form id="stf"><div class="field"><label for="st-noindex">Noindex addresses</label>'+
-      '<textarea id="st-noindex" rows="10" spellcheck="false" style="font-family:ui-monospace,Consolas,monospace">'+esc((d.noindex||[]).join('\n'))+'</textarea></div>'+saveBtn()+'</form></div></div>'+sysNoindex+histCard;
-    $('#stf',m).addEventListener('input',function(){ S.dirty=true; });
-    $('#stf',m).addEventListener('submit',function(e){ e.preventDefault(); save('noindex',$('#st-noindex',m).value); });
+    var list=(d.noindex||[]).slice();
+    box.innerHTML='<div class="alert info"><b>Noindex</b> = Google does not show the page in search, and it is left out of the sitemaps. Visitors can still open it. '+
+      'Type the address of a page on this site, like <code>/products/old-mouse/</code>, and press <b>Add</b>: it is saved straight away and that page says noindex. '+
+      'End with <b>*</b> for a whole section (<code>/blogs/test-*</code>). <b>✕</b> takes noindex off again: the page can be shown in Google and goes back in the sitemap.</div>'+
+      '<div class="card"><div class="chead"><h3>Your noindex pages ('+list.length+')</h3></div><div class="cbody">'+
+      (list.length?'<table class="list" style="margin-bottom:12px"><tbody>'+list.map(function(x,i){
+        return '<tr data-ni="'+i+'"><td class="t-slug">'+esc(x)+'</td><td style="text-align:right;white-space:nowrap"><a class="btn sm" href="'+esc(x.replace(/\*$/,''))+'" target="_blank" rel="noopener">View ↗</a> '+
+          '<button class="btn sm" type="button" data-niedit="'+i+'" title="Edit">✎</button> <button class="btn sm" type="button" data-nidel="'+i+'" title="Take noindex off">✕</button></td></tr>'; }).join('')+'</tbody></table>':
+        '<div class="hint" style="margin-bottom:10px">None yet.</div>')+
+      '<div style="display:flex;gap:8px"><input type="text" id="st-noindex" list="ni-pages" placeholder="/page-address/" style="flex:1" spellcheck="false"><button class="btn primary" type="button" id="ni-add">Add</button></div>'+
+      '<datalist id="ni-pages"></datalist></div></div>'+sysNoindex+histCard;
+    var put=function(next){ save('noindex',next); };
+    $('#ni-add',m).addEventListener('click',function(){ var v=$('#st-noindex',m).value.trim(); if(!v){ $('#st-noindex',m).focus(); return; }
+      if(v.indexOf('http')===0) v=v.replace(/^https?:\/\/[^/]+/,''); if(v.charAt(0)!=='/') v='/'+v; if(!/\*$/.test(v) && !/\/$/.test(v) && v.indexOf('.')===-1) v+='/';
+      put(list.concat([v])); });
+    $('#st-noindex',m).addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); $('#ni-add',m).click(); } });
+    m.querySelectorAll('[data-nidel]').forEach(function(b){ b.addEventListener('click',function(){ var x=list[+b.dataset.nidel];
+      if(!confirm('Take noindex off '+x+'?\n\nGoogle may show it again and it goes back in the sitemap.')) return;
+      put(list.filter(function(_,i){ return i!==+b.dataset.nidel; })); }); });
+    m.querySelectorAll('[data-niedit]').forEach(function(b){ b.addEventListener('click',function(){ var i=+b.dataset.niedit, tr=b.closest('tr');
+      tr.innerHTML='<td><input type="text" value="'+esc(list[i])+'" style="width:100%"></td><td style="text-align:right"><button class="btn sm primary" type="button">✓ Save</button></td>';
+      var inp=tr.querySelector('input'); inp.focus();
+      tr.querySelector('button').addEventListener('click',function(){ var c=list.slice(); c[i]=inp.value.trim(); put(c.filter(Boolean)); }); }); });
+    m.querySelectorAll('[data-idx]').forEach(function(b){ b.addEventListener('click',async function(){
+      if(!confirm('Take noindex off this page? Google may show it again and it goes back in the sitemap.')) return;
+      try{ var r=await api('site-settings.php',{action:'index_db',table:b.dataset.idx,slug:b.dataset.slug}); toast(r.message,'good'); reload(); }catch(e){ toast(e.message,'bad'); } }); });
+    // Suggestions: the pages the site has.
+    api('page-metas.php').then(function(x){ var dl=$('#ni-pages',m); if(!dl) return;
+      dl.innerHTML=(x.pages||x.rows||[]).slice(0,600).map(function(p){ var u=p.path||p.url||p.key; return u?'<option value="'+esc(u)+'">'+esc(p.label||p.title||'')+'</option>':''; }).join(''); }).catch(function(){});
   }
 
   if(tab==='robots'||tab==='llms'){
@@ -3548,7 +4065,7 @@ async function renderSettings(m){
     $('#stf',m).addEventListener('input',function(){ S.dirty=true; });
     $('#stf',m).addEventListener('submit',function(e){ e.preventDefault(); save(tab,$('#st-file',m).value); });
   }
-  settingsHistory($('#set-hist',m), tab, reload);
+  settingsHistory($('#set-hist',m), tab==='noindex'?'noindex,noindex_db':tab, reload);
 }
 
 /* -------------------------------------------------------------- sitemap */
@@ -4332,6 +4849,9 @@ async function load(){
     loadProdNames().then(function(){ if(S.view==='dashboard'&&!S.editing) renderShell(); });
     renderShell();
     startActivityPolling();
+    // How many pages the website already has (for the Pages count in the sidebar).
+    if(can('pages','view')) api('site-pages.php').then(function(d){ S.sitePagesN=(d.pages||[]).length;
+      var c=document.querySelector('[data-go="cmspages"] .ct'); if(c) c.textContent=S.pages.length+S.sitePagesN; }).catch(function(){});
   }catch(e){
     app.innerHTML='<div class="gate"><div class="gcard"><h2 style="font-size:18px">Cannot reach the CMS</h2>'+
       '<p style="color:var(--ink-3);font-size:13px">'+esc(e.message)+'</p>'+

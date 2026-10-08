@@ -29,9 +29,10 @@ define('ROC_SITE_LAYER_LIB', 1);
 const ROC_LAYER_FILE = '/cms-templates/site-layer.json';
 /** Where each part is stored (cms_settings.setting_key). */
 const ROC_LAYER_KEYS = ['announcement' => 'site_announcement', 'code' => 'site_code', 'meta' => 'meta_overrides', 'code_pages' => 'site_code_pages',
-                        'tracking' => 'site_tracking', 'noindex' => 'noindex_rules', 'sitemap' => 'sitemap_rules', 'nav' => 'site_nav'];
+                        'tracking' => 'site_tracking', 'noindex' => 'noindex_rules', 'sitemap' => 'sitemap_rules', 'nav' => 'site_nav',
+                        'edits' => 'site_edits'];
 /** Parts that are plain lists/maps (saved as they are, not merged with defaults). */
-const ROC_LAYER_LISTS = ['meta', 'code_pages', 'noindex', 'nav'];
+const ROC_LAYER_LISTS = ['meta', 'code_pages', 'noindex', 'nav', 'edits'];
 /** Built pages live in these folders; the others are served by PHP or are not pages. */
 const ROC_LAYER_SKIP_DIRS = ['api', 'cms', 'cms-templates', 'uploads', 'images', 'assets', 'fonts', 'products',
                              'categories', 'blogs', 'gaming-platforms', 'partnerships', 'policy', 'node_modules', 'cgi-bin', '.well-known'];
@@ -59,6 +60,7 @@ function rocLayerDefaults(): array {
         'noindex' => [],                                   // ["/path/", "/old-section/*"]
         'sitemap' => ['exclude' => [], 'extra' => []],     // exclude: paths; extra: [{path, title}]
         'nav' => [],                                       // CMS > Menus & footer ([] = the site's own menu)
+        'edits' => [],                                     // CMS > Site builder: [{id, scope, sel, text?, href?, src?, alt?, hide?, style?, html?, pos?}]
         'updated' => '',
     ];
 }
@@ -79,6 +81,7 @@ function rocLayerLoad(string $root): array {
         $d['noindex'] = array_values(array_filter((array)($j['noindex'] ?? []), 'is_string'));
         if (is_array($j['sitemap'] ?? null)) $d['sitemap'] = array_merge($d['sitemap'], $j['sitemap']);
         $d['nav'] = is_array($j['nav'] ?? null) ? $j['nav'] : [];
+        $d['edits'] = array_values(array_filter((array)($j['edits'] ?? []), 'is_array'));
         $d['updated'] = (string)($j['updated'] ?? '');
     }
     return $cache[$root] = $d;
@@ -190,7 +193,68 @@ function rocLayerPathIn(string $path, array $rules): bool {
 function rocLayerSitemapSkip(string $root, string $loc): bool {
     $L = rocLayerLoad($root);
     $path = (string)(parse_url($loc, PHP_URL_PATH) ?: '/');
-    return rocLayerPathIn($path, (array)($L['sitemap']['exclude'] ?? [])) || rocLayerPathIn($path, (array)($L['noindex'] ?? []));
+    return rocLayerPathIn($path, (array)($L['sitemap']['exclude'] ?? [])) || rocLayerPathIn($path, (array)($L['noindex'] ?? []))
+        || rocLayerPathIn($path, rocLayerRedirectFroms($root));
+}
+
+/** Addresses redirected (or gone) by CMS > Settings > Redirects, read from .htaccess: ["/old/", "/old-blog/*"]. */
+function rocLayerRedirectFroms(string $root): array {
+    static $cache = [];
+    if (isset($cache[$root])) return $cache[$root];
+    $out = []; $in = false;
+    foreach (preg_split('/\R/', (string)@file_get_contents($root . '/.htaccess')) as $line) {
+        $t = trim($line);
+        if (strpos($t, '# ROC cms-redirects BEGIN') === 0) { $in = true; continue; }
+        if (strpos($t, '# ROC cms-redirects END') === 0) break;
+        if (!$in || !preg_match('/^RewriteRule\s+\^(\S*?)(\/\?\$|\(\/\.\*\)\?\$)\s+\S+\s+\[([^\]]*)\]/', $t, $m)) continue;
+        if (!preg_match('/(^|,)(R=\d+|G)(,|$)/', $m[3])) continue;      // a "keep" rule, not a redirect
+        $p = '/' . stripslashes($m[1]);
+        $out[] = $m[2] === '/?$' ? rtrim($p, '/') . '/' : rtrim($p, '/') . '/*';
+        if ($m[2] !== '/?$') $out[] = rtrim($p, '/') . '/';
+    }
+    return $cache[$root] = $out;
+}
+
+/* ------------------------------------------------------------ site builder */
+/* CMS > Site builder: changes made by clicking on the page. Looks (colours, sizes,
+   hiding) become CSS here, so they show from the first paint. Text, links, pictures and
+   added blocks are put in by /roc-edits.js after React has taken over the page, and again
+   whenever React redraws it. Each change has a scope: "*" (whole site), "/products/*"
+   (pages like this) or one address. */
+
+const ROC_EDIT_STYLE = ['color', 'background-color', 'font-size', 'font-weight', 'text-align', 'padding', 'margin',
+                        'border-radius', 'line-height', 'letter-spacing', 'text-transform'];
+
+function rocEditScope(string $scope, string $path): bool {
+    if ($scope === '*') return true;
+    if (substr($scope, -1) === '*') { $pre = substr($scope, 0, -1); return strpos($path, $pre) === 0 && $path !== $pre; }
+    return $scope === $path;
+}
+
+/** CSS for the changes that apply to $path (same rules as cssFor() in /roc-edits.js). */
+function rocEditCss(array $edits, string $path): string {
+    $out = '';
+    foreach ($edits as $e) {
+        if (!rocEditScope((string)($e['scope'] ?? ''), $path)) continue;
+        $sel = (string)($e['sel'] ?? '');
+        if ($sel === '' || preg_match('/[<{};]/', $sel)) continue;
+        $rules = [];
+        if (!empty($e['hide'])) $rules[] = 'display:none!important';
+        foreach ((array)($e['style'] ?? []) as $k => $v) {
+            if (in_array($k, ROC_EDIT_STYLE, true) && preg_match('/^[#a-zA-Z0-9 .,%()\-]{1,60}$/', (string)$v)) $rules[] = $k . ':' . $v . '!important';
+        }
+        if ($rules) $out .= $sel . '{' . implode(';', $rules) . '}';
+    }
+    return $out;
+}
+
+/** What goes in <head> when the site builder has changes. */
+function rocEditHead(array $edits, string $path): string {
+    if (!$edits) return '';
+    $v = @filemtime(dirname(__DIR__, 3) . '/roc-edits.js') ?: 1;
+    return '<style id="roc-edits-css">' . str_ireplace('</style', '<\/style', rocEditCss($edits, $path)) . '</style>'
+        . '<script>window.__ROC_EDITS=' . json_encode(array_values($edits), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) . ';</script>'
+        . '<script src="/roc-edits.js?v=' . $v . '" defer></script>';
 }
 
 /* ---------------------------------------------------------- menus & footer */
@@ -407,6 +471,7 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
     }
     if ($noindex) $html = rocLayerSetRobots($html, 'noindex, follow');      // CMS > Settings > Noindex rules
     $head .= rocLayerTrackingHead((array)($L['tracking'] ?? []), $path);
+    $head .= rocEditHead((array)($L['edits'] ?? []), $path);
     if ($nav) $head .= '<script>window.__ROC_NAV=' . json_encode($nav, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) . ';</script>';
     $ann = rocLayerAnnouncementOn($L['announcement']);
     // Whole-site code first, then code for page groups (/products/*) and for this page.
