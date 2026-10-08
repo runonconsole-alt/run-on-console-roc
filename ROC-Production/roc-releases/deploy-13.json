@@ -1,0 +1,32 @@
+{
+ "deploy": 13,
+ "date": "2026-10-08",
+ "title": "Metas tab, announcement bar, template & code, live version",
+ "changes": [
+  "CMS → Metas: title and description of every page, changed live from the CMS",
+  "CMS → Announcement bar: a message above the header on every page",
+  "CMS → Template & code: custom CSS and HTML on every page",
+  "CMS → Live version: which deploy is on the server",
+  "Login cookie renamed to ROCSESSID (everyone signed out once)",
+  "Blog posts without an author show \"Run On Console\""
+ ],
+ "checks": [
+  {
+   "label": "Login cookie installer (cli-session-name.php)",
+   "type": "contains",
+   "path": "api/v1/config.php",
+   "text": "session_name('ROCSESSID')"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-DfvNy2u9.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/22",
+ "build": "index-DfvNy2u9.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

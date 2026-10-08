@@ -11,7 +11,8 @@
  * once into public_html/cms-templates/. After uploading a new website build (for
  * example a changed header menu), run this so the PHP pages get the new layout too.
  *
- * It only touches public_html/cms-templates/*.html. Nothing else changes.
+ * It touches public_html/cms-templates/*.html, then puts the CMS announcement bar,
+ * site code and meta overrides back into the built pages (see cms/site-layer-lib.php).
  */
 
 if (PHP_SAPI !== 'cli') { http_response_code(403); exit; }
@@ -35,6 +36,17 @@ if ($rollback !== null) {
     echo "\nDone.\n";
     exit(0);
 }
+
+// After the templates: put the CMS announcement bar, site code and meta overrides back
+// into the built pages (a deploy replaces those files). Runs however this script ends.
+register_shutdown_function(function () use ($ROOT, $apply) {
+    $lib = $ROOT . '/api/v1/cms/site-layer-lib.php';
+    if (!is_file($lib)) return;
+    require_once $lib;
+    $n = rocLayerApplyFiles($ROOT, rocLayerLoad($ROOT), null, $apply);
+    echo "\nCMS announcement, site code and metas: " . ($n === 0 ? "all built pages are current.\n"
+        : ($apply ? "re-applied to {$n} built page(s).\n" : "{$n} built page(s) need them - run with --apply.\n"));
+});
 
 function firstPage(string $root, string $pattern, array $skip = []): ?string {
     foreach (glob($root . '/' . $pattern, GLOB_NOSORT) ?: [] as $f) {
