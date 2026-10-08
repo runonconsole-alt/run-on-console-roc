@@ -1,36 +1,37 @@
 import { GAME_COMPATIBILITY_DATA } from './gameCompatibilityData.js';
 export { GAME_COMPATIBILITY_DATA };
 
+// Home hero carousel: real sections of the site (no dated sample articles).
 export const HERO_SLIDES = [
   {
-    id: "blog-1",
-    title: "Call of Duty: Black Ops 6 – Everything We Know So Far",
-    badge: "FEATURED",
-    date: "May 20, 2024",
-    author: "Omar Abobakar",
+    id: "gear",
+    title: "Gaming gear picks for every setup",
+    badge: "PRODUCTS",
     image: "/images/hero_cod.jpg",
-    summary: "From full omnidirectional movement to round-based zombies and multiplayer gameplay deep dive.",
-    category: "PC / Handheld PC"
+    summary: "Keyboards, mice, headsets, speakers, monitors and graphics cards, each with what it is best for.",
+    category: "120+ products",
+    href: "/products/",
+    cta: "Browse all gear"
   },
   {
-    id: "blog-2",
-    title: "Elden Ring: Shadow of the Erdtree Full Boss & Performance Analysis",
-    badge: "FEATURED",
-    date: "May 19, 2024",
-    author: "Alex Vance",
+    id: "checker",
+    title: "Can my PC run it? Check 500+ games",
+    badge: "FREE CHECKER",
     image: "/images/trending_elden.jpg",
-    summary: "Exploring the Realm of Shadow with deep combat breakdowns and frame pacing tests across RTX 40 series and PS5.",
-    category: "PC / Handheld PC"
+    summary: "Pick a game and your graphics card, processor and RAM: compared with the official requirements.",
+    category: "PC games",
+    href: "/compatibility/",
+    cta: "Check a game"
   },
   {
-    id: "blog-3",
-    title: "Spider-Man 2 Next-Gen Ray Tracing & Performance Masterclass",
-    badge: "FEATURED",
-    date: "May 18, 2024",
-    author: "Sarah Kai",
+    id: "platforms",
+    title: "Every gaming platform, from PlayStation to handhelds",
+    badge: "PLATFORMS",
     image: "/images/trending_spiderman.jpg",
-    summary: "How Insomniac pushed dynamic resolution and ray-traced reflections on the PlayStation 5 hardware.",
-    category: "Sony PlayStation"
+    summary: "Devices, games and buying tips for 15 gaming platforms.",
+    category: "15 platforms",
+    href: "/gaming-platforms/",
+    cta: "See all platforms"
   }
 ];
 

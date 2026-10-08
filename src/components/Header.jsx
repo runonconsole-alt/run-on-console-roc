@@ -198,7 +198,7 @@ export const Header = () => {
                             <Icon className="w-4 h-4" />
                           </div>
                           <div className="min-w-0">
-                            <h5 className="font-display font-bold text-xs text-slate-900 group-hover:text-emerald-700 truncate">{group.title}</h5>
+                            <span className="block font-display font-bold text-xs text-slate-900 group-hover:text-emerald-700 truncate">{group.title}</span>
                             <span className="text-[10px] text-slate-500 block truncate">{group.desc}</span>
                           </div>
                         </div>
