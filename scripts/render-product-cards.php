@@ -2,7 +2,10 @@
 /**
  * Run On Console — draw the product name cards as WebP images.
  *
- *   php scripts/render-product-cards.php products.json public/images/products
+ *   php scripts/render-product-cards.php products.json public/images/products [public/images/products/share]
+ *
+ * With the third argument it also writes a 1200 x 630 JPG per product for link
+ * previews (WhatsApp, LinkedIn and Facebook do not all show WebP).
  *
  * Called by scripts/generate-product-cards.mjs, which passes the catalog as JSON
  * ([{slug, title, brand, categorySlug}]). Needs PHP with GD (WebP + FreeType).
@@ -14,7 +17,7 @@
  */
 
 if (PHP_SAPI !== 'cli') exit(1);
-[$self, $jsonFile, $outDir] = $argv + [null, null, null];
+[$self, $jsonFile, $outDir, $shareDir] = $argv + [null, null, null, null];
 if (!$jsonFile || !$outDir) exit("usage: php render-product-cards.php products.json outdir\n");
 if (!function_exists('imagewebp') || !function_exists('imagettftext')) exit("STOP: PHP GD with WebP and FreeType is needed.\n");
 
@@ -139,15 +142,41 @@ function card(array $p, string $font, array $ACCENT): GdImage {
     return $im;
 }
 
+/**
+ * Link preview image (Open Graph): 1200 x 630 JPG. The card is scaled to the full
+ * height and centred; each row's edge colour is carried out to the sides, so the
+ * gradient has no seam.
+ */
+function share(GdImage $card): string {
+    $out = imagecreatetruecolor(1200, 630);
+    $cw = (int)round(W * S * 630 / (H * S));          // 1050
+    $x0 = (int)((1200 - $cw) / 2);
+    imagecopyresampled($out, $card, $x0, 0, 0, 0, $cw, 630, W * S, H * S);
+    for ($y = 0; $y < 630; $y++) {
+        imageline($out, 0, $y, $x0, $y, imagecolorat($out, $x0 + 1, $y));
+        imageline($out, $x0 + $cw - 1, $y, 1199, $y, imagecolorat($out, $x0 + $cw - 2, $y));
+    }
+    ob_start(); imagejpeg($out, null, 84); $data = ob_get_clean();
+    imagedestroy($out);
+    return $data;
+}
+
 $products = json_decode((string)file_get_contents($jsonFile), true);
 if (!is_array($products)) exit("STOP: could not read $jsonFile\n");
 if (!is_dir($outDir)) mkdir($outDir, 0775, true);
-$written = 0;
+$written = 0; $shared = 0;
+if ($shareDir && !is_dir($shareDir)) mkdir($shareDir, 0775, true);
 foreach ($products as $p) {
     $im = card($p, $font, $ACCENT);
     ob_start(); imagewebp($im, null, 82); $data = ob_get_clean();
-    imagedestroy($im);
     $file = rtrim($outDir, '/\\') . '/' . $p['slug'] . '.webp';
     if (!is_file($file) || file_get_contents($file) !== $data) { file_put_contents($file, $data); $written++; }
+    if ($shareDir) {
+        $data = share($im);
+        $file = rtrim($shareDir, '/\\') . '/' . $p['slug'] . '.jpg';
+        if (!is_file($file) || file_get_contents($file) !== $data) { file_put_contents($file, $data); $shared++; }
+    }
+    imagedestroy($im);
 }
 echo "Product cards: " . count($products) . " products, $written WebP file(s) written to $outDir\n";
+if ($shareDir) echo "Share images: $shared JPG file(s) (1200x630) written to $shareDir\n";

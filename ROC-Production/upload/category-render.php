@@ -136,6 +136,7 @@ function rocCatHead(string $title, string $desc, string $url, string $image, str
     if ($image !== '') $h .= '    <meta property="og:image" content="' . rocH(rocAbs($image)) . "\" />\n";
     $h .= "    <meta property=\"og:site_name\" content=\"Run On Console\" />\n";
     $h .= "    <meta name=\"twitter:card\" content=\"summary_large_image\" />\n";
+    $h .= "    <meta name=\"twitter:site\" content=\"@RunOnConsole\" />\n";
     $h .= '    <meta name="twitter:title" content="' . rocH($title) . "\" />\n";
     $h .= '    <meta name="twitter:description" content="' . rocH($desc) . "\" />\n";
     if ($image !== '') $h .= '    <meta name="twitter:image" content="' . rocH(rocAbs($image)) . "\" />\n";
@@ -176,16 +177,24 @@ function rocRenderHub(string $root, PDO $pdo, array $c, array $cats): void {
     $url     = rocPlatformUrl($slug);
     $desc    = trim((string)($c['description'] ?? ''));
     $image   = trim((string)($c['image'] ?? ''));
-    $badge   = trim((string)($c['badge'] ?? '')) ?: 'Verified Platform';
+    $badge   = trim((string)($c['badge'] ?? '')) ?: 'Platform Guide';
     $era     = trim((string)($c['era'] ?? '')) ?: 'Modern & Retro';
     $focus   = rocJsonList($c['focus_json'] ?? null);
     $devices = rocGamingDevices($pdo, $slug);
     $guides  = rocPlatformGuides($pdo, $slug);
     $mod     = rocCatModified($c, $devices);
-    $metaT   = trim((string)($c['meta_title'] ?? '')) ?: ($title . ' Hardware, Devices & Games | Run On Console');
+    $metaT   = trim((string)($c['meta_title'] ?? ''));
+    // Titles saved with the old automatic patterns count as automatic (they are often too long).
+    if (in_array($metaT, [$title . ' Hardware & Specs Hub | Run On Console', $title . ' Hardware, Devices & Games | Run On Console'], true)) $metaT = '';
+    if ($metaT === '') {
+        // First pattern that fits in 60 characters (Google cuts longer titles).
+        foreach ([$title . ' Hardware, Devices & Games | Run On Console', $title . ' Devices & Games | Run On Console', $title . ' | Run On Console', $title] as $metaT) {
+            if (mb_strlen($metaT) <= 60) break;
+        }
+    }
     $metaD   = trim((string)($c['meta_description'] ?? '')) ?: rocCatTruncate($desc, 155);
     [$faqHtml, $faqLd] = rocFaqBlock('FAQs About ' . $title,
-        'Frequently asked hardware, testing, emulation, and purchasing questions for ' . $title . '.', rocJsonList($c['faq_json'] ?? null));
+        'Common questions about hardware, games and buying for ' . $title . '.', rocJsonList($c['faq_json'] ?? null));
 
     $h  = rocCatHead($metaT, $metaD, $url, $image, !empty($c['is_noindex']) ? 'noindex, follow' : 'index, follow, max-image-preview:large');
     $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => [
@@ -218,7 +227,7 @@ function rocRenderHub(string $root, PDO $pdo, array $c, array $cats): void {
         $m .= '</div>';
     }
     $m .= '</div><div class="lg:col-span-5"><div class="bg-slate-900/85 border-2 border-emerald-400/40 rounded-3xl p-4 shadow-2xl">'
-        . ($image !== '' ? '<img src="' . rocH($image) . '" alt="' . rocH($title) . '" class="w-full h-56 sm:h-64 object-cover rounded-2xl" fetchpriority="high"/>' : '')
+        . ($image !== '' ? '<img width="1200" height="675" src="' . rocH($image) . '" alt="' . rocH($title) . '" class="w-full h-56 sm:h-64 object-cover rounded-2xl" fetchpriority="high"/>' : '')
         . '<div class="pt-3 flex items-center justify-between text-xs"><span class="text-emerald-300 font-bold">&#10003; ' . rocH($badge) . '</span>'
         . '<span class="text-white font-extrabold bg-emerald-600 px-2.5 py-0.5 rounded-md">' . count($devices) . ' Hardware Models Listed</span></div>'
         . '</div></div></div></div>';
@@ -256,12 +265,23 @@ function rocRenderHub(string $root, PDO $pdo, array $c, array $cats): void {
             $href = '/gaming-platforms/' . $slug . '/' . $g['slug'] . '/';
             $img = trim((string)($g['image'] ?? ''));
             $m .= '<a href="' . rocH($href) . '" class="block no-underline"><div class="game-card group flex flex-col h-full">'
-                . ($img !== '' ? '<div class="relative h-40 bg-slate-900 overflow-hidden"><img src="' . rocH($img) . '" alt="' . rocH($g['title']) . '" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/></div>' : '')
+                . ($img !== '' ? '<div class="relative h-40 bg-slate-900 overflow-hidden"><img width="1200" height="675" src="' . rocH($img) . '" alt="' . rocH($g['title']) . '" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/></div>' : '')
                 . '<div class="p-5 space-y-2"><h3 class="font-display font-extrabold text-base text-slate-900 group-hover:text-emerald-700 transition-colors">' . rocH($g['title']) . '</h3>'
                 . (trim((string)($g['excerpt'] ?? '')) !== '' ? '<p class="text-xs text-slate-500 leading-relaxed line-clamp-2">' . rocH($g['excerpt']) . '</p>' : '')
                 . '<span class="text-xs font-bold text-emerald-600">Read guide &rarr;</span></div></div></a>';
         }
         $m .= '</div></section>';
+    }
+    // Links to every other platform, the checker and the gear picks.
+    $others = array_filter($cats, function ($o) use ($slug) { return (string)$o['slug'] !== $slug; });
+    if ($others) {
+        $m .= '<section class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4" aria-labelledby="other-platforms">'
+            . '<h2 id="other-platforms" class="font-display font-extrabold text-xl text-slate-900">Other gaming platforms</h2>'
+            . '<ul class="flex flex-wrap gap-2 list-none p-0 m-0">';
+        foreach ($others as $o) {
+            $m .= '<li><a href="' . rocH('/gaming-platforms/' . $o['slug'] . '/') . '" class="inline-block text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 hover:border-emerald-500 hover:text-emerald-700 px-3 py-1.5 rounded-xl no-underline">' . rocH($o['title']) . '</a></li>';
+        }
+        $m .= '</ul><p class="text-xs text-slate-500 pt-2">Playing on PC? <a href="/compatibility/" class="font-bold text-emerald-700">Check if your PC can run a game</a> or see our <a href="/products/" class="font-bold text-emerald-700">gaming gear picks</a>.</p></section>';
     }
     $m .= $faqHtml . '</div>';
 
@@ -312,7 +332,7 @@ function rocRenderPlatformList(string $root, PDO $pdo, array $cats): void {
         $img = trim((string)($c['image'] ?? ''));
         $m .= '<a href="/gaming-platforms/' . rocH($s) . '/" class="block no-underline"><div class="game-card group cursor-pointer flex flex-col justify-between h-full">'
             . '<div class="relative h-48 bg-slate-900 overflow-hidden">'
-            . ($img !== '' ? '<img src="' . rocH($img) . '" alt="' . rocH($c['title']) . '" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>' : '')
+            . ($img !== '' ? '<img width="1200" height="675" src="' . rocH($img) . '" alt="' . rocH($c['title']) . '" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>' : '')
             . (trim((string)($c['badge'] ?? '')) !== '' ? '<span class="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-extrabold px-2.5 py-1 rounded shadow-sm badge-glow">' . rocH($c['badge']) . '</span>' : '')
             . '<span class="absolute bottom-3 right-3 bg-slate-900/90 text-white text-[10px] font-bold px-2 py-0.5 rounded backdrop-blur-sm">' . count($devs) . ' Models Listed</span></div>'
             . '<div class="p-5 flex-1 flex flex-col justify-between space-y-4"><div>'

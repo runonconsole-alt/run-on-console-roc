@@ -13,33 +13,33 @@ export const AboutView = () => {
   const pillars = [
     {
       icon: ShieldCheck,
-      title: "100% Honest Gaming & Hardware Reviews",
-      desc: "We test every keyboard, mouse, headset, and monitor in our dedicated hardware lab. Our reviews feature real oscilloscope latency readings, acoustic analysis, and zero sponsored bias."
+      title: "Honest Gaming Gear Picks",
+      desc: "We compare keyboards, mice, headsets, speakers, monitors and graphics cards on their specs, official data and published reviews, and say who each one is for. Brands cannot buy a place on our lists."
     },
     {
       icon: ShoppingCart,
-      title: "Direct Buying & Verified Affiliate Deals",
-      desc: "Discover tested gaming accessories with real-time verified pricing from authorized retailers like Amazon, Best Buy, and official brand stores with manufacturer warranties."
+      title: "Straight Links to Amazon",
+      desc: "Every product links to Amazon, where you see the current price, stock and seller. We are an Amazon Associate and may earn a small commission, at no extra cost to you."
     },
     {
       icon: Gamepad2,
       title: "Game & Platform Compatibility Engine",
-      desc: "Confused about whether GTA 6, Black Ops 6, or Elden Ring will run smoothly on your PC, PS5, Xbox, or Handheld? Our compatibility matrix provides exact FPS targets and hardware requirements."
+      desc: "Confused about whether GTA 6, Black Ops 6, or Elden Ring will run smoothly on your PC, PS5, Xbox, or Handheld? Our free checker compares your hardware with the official minimum and recommended requirements of 500+ games."
     }
   ];
 
   const aboutFaqs = [
     {
       q: "What makes Run On Console different from other gaming review websites?",
-      a: "Unlike typical review outlets, Run On Console operates an independent testing lab equipped with optical sensor motion analyzers, audio acoustics testing, and click latency oscilloscopes to provide 100% objective, data-backed reviews."
+      a: "We keep things simple and honest: clear picks for each type of gear, the specs that matter, who each product is for, and a free checker built on official game requirements. We do not invent test results or prices."
     },
     {
       q: "Can I purchase gaming accessories directly through Run On Console?",
-      a: "Yes! Every reviewed product features verified direct purchase links to Amazon and authorized retailers with daily price tracking and verified discount badges."
+      a: "We do not sell anything ourselves. Every product has a link to Amazon, where you can see the current price and buy it. As an Amazon Associate we may earn a commission on qualifying purchases."
     },
     {
       q: "How does the Game Compatibility Engine work?",
-      a: "Our hardware team benchmarks major gaming releases across various GPU tiers (RTX 4090 down to RTX 4050 and console hardware) so you know exactly what performance to expect before buying."
+      a: "Pick a game, then choose your graphics card, processor and memory. The checker compares them with the publisher's official minimum and recommended requirements (from Steam for PC games) and shows where your PC stands."
     }
   ];
 
@@ -63,22 +63,22 @@ export const AboutView = () => {
             <h1 className="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight">
               <BouncyText text="Honest Reviews." enableAudio={true} /> <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300">
-                <BouncyText text="Verified Deals. True FPS." enableAudio={true} />
+                <BouncyText text="Clear Picks. Real Specs." enableAudio={true} />
               </span>
             </h1>
             <p className="text-emerald-100 text-xs sm:text-sm leading-relaxed max-w-lg">
-              Run On Console is an independent gaming authority and hardware benchmarking lab built by gamers, for gamers. We help you choose the right console and PC gear, buy at the best price, and optimize your setup.
+              Run On Console is an independent gaming site built by gamers, for gamers. We help you choose the right console and PC gear, check whether your PC can run a game, and find your way around every gaming platform.
             </p>
 
             <div className="flex flex-wrap gap-2.5 pt-2">
               <span className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
                 <Microscope className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                <BouncyText text="Independent Hardware Lab" />
+                <BouncyText text="Independent Picks" />
               </span>
 
               <span className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5" style={{ animationDelay: '0.6s' }}>
                 <Cpu className="w-3.5 h-3.5 text-teal-400 animate-pulse" />
-                <BouncyText text="0% Sponsored Bias" />
+                <BouncyText text="Sponsored Posts Labelled" />
               </span>
             </div>
           </div>
@@ -86,22 +86,28 @@ export const AboutView = () => {
           <div className="lg:col-span-5 grid grid-cols-2 gap-3">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
               <img 
-                src="/images/battlestation_pc.jpg" 
-                alt="Hardware Lab" 
+                src="/images/battlestation_pc.jpg"
+                width="400"
+                height="224"
+                loading="lazy" 
+                alt="Gaming PC setup" 
                 className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform" 
               />
-              <div className="text-xs font-display font-bold text-white">Oscilloscope Lab</div>
-              <div className="text-[10px] text-emerald-300 font-medium">Sub-1ms Latency Testing</div>
+              <div className="text-xs font-display font-bold text-white">PC & Console Gear</div>
+              <div className="text-[10px] text-emerald-300 font-medium">Keyboards, mice, monitors, GPUs</div>
             </Tilt3DCard>
 
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
               <img 
-                src="/images/tactical_headset.jpg" 
-                alt="Acoustic Testing" 
+                src="/images/tactical_headset.jpg"
+                width="400"
+                height="224"
+                loading="lazy" 
+                alt="Gaming headset" 
                 className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform" 
               />
-              <div className="text-xs font-display font-bold text-white">Audio Acoustics</div>
-              <div className="text-[10px] text-emerald-300 font-medium">Spatial Audio Benchmarking</div>
+              <div className="text-xs font-display font-bold text-white">Gaming Audio</div>
+              <div className="text-[10px] text-emerald-300 font-medium">Headsets and speakers</div>
             </Tilt3DCard>
           </div>
 
@@ -115,7 +121,7 @@ export const AboutView = () => {
             <BouncyText text="What We Do at Run On Console" />
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Three pillars that guide our independent editorial and benchmarking standards.
+            Three things we do, and how we keep them honest.
           </p>
         </div>
 
@@ -145,55 +151,64 @@ export const AboutView = () => {
         </div>
       </section>
 
-      {/* The Testing Methodology */}
+      {/* How we choose products */}
       <section className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm space-y-6">
         <h2 className="font-display font-extrabold text-2xl text-slate-900 border-b border-slate-100 pb-3">
-          <BouncyText text="Our Hardware Testing Standards" />
+          <BouncyText text="How We Choose Products" />
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs sm:text-sm text-slate-700 leading-relaxed">
           <div className="space-y-3">
-            <h4 className="font-display font-bold text-base text-slate-900 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-emerald-600" /> Latency & Sensor Precision
-            </h4>
+            <h3 className="font-display font-bold text-base text-slate-900 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-600" /> Specs and published data
+            </h3>
             <p>
-              We measure click-to-photon latency, debouncing delay, and optical sensor tracking accuracy up to 8000Hz polling rate to ensure competitive players get genuine esports advantages.
+              We compare the specifications that matter for each type of gear (sensor and weight for mice, panel and refresh rate for monitors, VRAM and power for graphics cards) together with the maker&apos;s own data and well-known published reviews.
             </p>
           </div>
 
           <div className="space-y-3">
-            <h4 className="font-display font-bold text-base text-slate-900 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-emerald-600" /> Long-Term Durability
-            </h4>
+            <h3 className="font-display font-bold text-base text-slate-900 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-600" /> Who it is for
+            </h3>
             <p>
-              Hardware is tested over hundreds of hours of intense gameplay across FPS, MOBA, Sim Racing, and RPG titles to evaluate switch bounce, thermal throttling, and ergonomic fatigue.
+              Every pick says what it is best for, so you can find the right product for your games and budget. When we test a product ourselves, the article says so. Brands cannot pay for a place on our lists.
             </p>
           </div>
+        </div>
+
+        <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-xs sm:text-sm text-slate-700 leading-relaxed">
+          <strong className="text-slate-900">Who runs Run On Console?</strong>{' '}
+          The site is run by <a href="/author/omar-abobakar/" rel="author" className="font-bold text-emerald-700 hover:text-emerald-900">Omar Abobakar</a>, its founder and editor.
+          Questions or corrections are welcome on our <a href="/contact/" className="font-bold text-emerald-700 hover:text-emerald-900">contact page</a>.
         </div>
 
         <div className="pt-4 border-t border-slate-100 flex flex-wrap gap-4 items-center justify-between">
           <div className="text-xs text-slate-500 font-semibold">
             Ready to find the best gear for your favorite game?
           </div>
-          <div className="flex gap-3">
-            <button 
-              onClick={() => {
-                playClickSound();
-                navigateTo('products');
-              }}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-5 rounded-xl flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all hover:scale-105"
+          <div className="flex flex-wrap gap-3">
+            <a
+              href="/products/"
+              onClick={() => playClickSound()}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-5 rounded-xl flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all hover:scale-105 no-underline"
             >
               Browse All Products <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-            <button 
-              onClick={() => {
-                playClickSound();
-                navigateTo('compatibility');
-              }}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-2.5 px-5 rounded-xl transition-colors"
+            </a>
+            <a
+              href="/compatibility/"
+              onClick={() => playClickSound()}
+              className="bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-2.5 px-5 rounded-xl transition-colors no-underline"
             >
-              View Game Compatibility Matrix
-            </button>
+              Can my PC run it?
+            </a>
+            <a
+              href="/gaming-platforms/"
+              onClick={() => playClickSound()}
+              className="bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-2.5 px-5 rounded-xl transition-colors no-underline"
+            >
+              Gaming platforms
+            </a>
           </div>
         </div>
       </section>
@@ -202,7 +217,7 @@ export const AboutView = () => {
       <FAQSection 
         faqs={aboutFaqs}
         title="About Run On Console FAQs"
-        subtitle="Learn more about our mission, testing ethics, and editorial independence."
+        subtitle="Our mission, how we choose products and how we stay independent."
       />
 
     </div>

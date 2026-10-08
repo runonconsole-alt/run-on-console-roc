@@ -287,7 +287,7 @@ export const CategoriesView = () => {
                     <span>Technical Architecture & Specs</span>
                   </div>
                   <p className="text-slate-800 font-mono text-xs leading-relaxed">
-                    {selectedDeviceModal.specs || "Custom architecture and hardware profile verified by Run On Console Laboratory."}
+                    {selectedDeviceModal.specs || "Key specs for this device."}
                   </p>
                 </div>
 
@@ -651,7 +651,7 @@ export const CategoriesView = () => {
                   <span>Technical Architecture & Specs</span>
                 </div>
                 <p className="text-slate-800 font-mono text-xs leading-relaxed">
-                  {selectedDeviceModal.specs || "Custom architecture and hardware profile verified by Run On Console Laboratory."}
+                  {selectedDeviceModal.specs || "Key specs for this device."}
                 </p>
               </div>
 
