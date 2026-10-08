@@ -7,6 +7,8 @@
     @apply bg-[#F8FAFC] text-[#0F172A] font-body min-h-screen;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    /* clip (not hidden) so position: sticky works: the header and the CMS announcement bar stay at the top */
+    overflow-x: clip;
     max-width: 100vw;
     width: 100%;
   }
