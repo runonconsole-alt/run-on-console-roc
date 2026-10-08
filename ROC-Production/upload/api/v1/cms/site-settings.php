@@ -107,6 +107,101 @@ function ssApplyRedirects(string $ROOT, array $rules): ?string {
     return null;
 }
 
+/* ------------------------------------------------- already on the site */
+/* Redirects and noindex pages that the website set up itself (installers, page code,
+   database). Shown read-only next to the CMS rules. */
+
+/** "^categories/(.+)$" -> "/categories/*" */
+function ssHuman(string $p): string {
+    $p = preg_replace('/^\^|\$$/', '', $p);
+    $p = str_replace(['(/.*)?', '(.*)', '(.+)', '/?'], ['*', '*', '*', '/'], $p);
+    $p = preg_replace('/\(\[a-z0-9-\]\+\)|\(\[a-z0-9\]\+\(\?:-\[a-z0-9\]\+\)\*\)/', '{name}', $p);
+    $p = str_replace(['\\.', '\\'], ['.', ''], $p);
+    if ($p === '*' || $p === '') return 'every address';
+    return '/' . ltrim($p, '/');
+}
+
+function ssSystemRedirects(string $ROOT): array {
+    $out = [];
+    $section = ''; $inCms = false;
+    $conds = [];
+    foreach (preg_split('/\R/', (string)@file_get_contents($ROOT . '/.htaccess')) as $line) {
+        $t = trim($line);
+        if ($t === '') continue;
+        if (strpos($t, '# ROC cms-redirects BEGIN') === 0) { $inCms = true; continue; }
+        if (strpos($t, '# ROC cms-redirects END') === 0) { $inCms = false; continue; }
+        if ($t[0] === '#') {
+            $c = trim(ltrim($t, '# '));
+            if (preg_match('/^(END|BEGIN cPanel)/i', $c) || preg_match('/ END$/', $c) || preg_match('/^=+$/', $c)) continue;
+            $section = preg_replace('/\s*BEGIN\b/', '', $c);
+            continue;
+        }
+        if ($inCms) continue;
+        if (stripos($t, 'RewriteCond') === 0) { $conds[] = $t; continue; }
+        if (!preg_match('/^RewriteRule\s+(\S+)\s+(\S+)(?:\s+\[([^\]]*)\])?/i', $t, $m)) { $conds = []; continue; }
+        $flags = strtoupper($m[3] ?? '');
+        $type = null;
+        if (preg_match('/\bR=(30[1278])\b/', $flags, $r)) $type = (int)$r[1];
+        elseif (preg_match('/(^|,)R(,|$)/', $flags)) $type = 302;
+        elseif (preg_match('/(^|,)G(,|$)/', $flags)) $type = 410;
+        if ($type !== null) {
+            $to = $type === 410 ? '' : preg_replace('/\$\d/', '*', $m[2]);
+            $from = ssHuman($m[1]);
+            if ($from === 'every address') {   // host / https rules: describe them
+                $c = strtolower(implode(' ', $conds));
+                $from = strpos($c, 'www') !== false ? 'www.runonconsole.com/…' : (strpos($c, 'https') !== false || strpos($c, '443') !== false ? 'http://… (not secure)' : 'every address');
+                $to = preg_replace('#https://%\{HTTP_HOST\}/\*#', 'https://runonconsole.com/…', $to);
+                $to = preg_replace('#https://runonconsole\.com/\*#', 'https://runonconsole.com/…', $to);
+            }
+            $out[] = ['from' => $from, 'to' => $to, 'type' => $type, 'source' => $section ?: '.htaccess'];
+        }
+        $conds = [];
+    }
+    // Renamed products: old address folders that only redirect (products/{old}/index.php).
+    foreach (glob($ROOT . '/products/*/index.php') ?: [] as $stub) {
+        $s = (string)@file_get_contents($stub, false, null, 0, 4000);
+        if (preg_match('#Location:\s*([^\'"\s]+)#i', $s, $m)) {
+            $out[] = ['from' => '/products/' . basename(dirname($stub)) . '/', 'to' => $m[1], 'type' => 301, 'source' => 'Renamed product'];
+        }
+    }
+    return $out;
+}
+
+function ssSystemNoindex(PDO $pdo, string $ROOT, array $L): array {
+    $out = [];
+    // Built pages that say noindex in their own code (not because of a CMS rule).
+    foreach (rocLayerStaticFiles($ROOT) as $path => $file) {
+        [$html] = rocLayerStrip((string)file_get_contents($file, false, null, 0, 60000));
+        if (preg_match('#<meta\s+name="robots"\s+content="[^"]*noindex#i', $html)) {
+            $out[] = $path === '/404' ? ['path' => '404 page (not found)', 'why' => 'Page code: error page']
+                                      : ['path' => $path, 'why' => 'Page code: private or account page'];
+        }
+    }
+    // Folders whose own .htaccess sends "X-Robots-Tag: noindex".
+    foreach (['auth', 'profile', 'cms', 'api'] as $d) {
+        $h = (string)@file_get_contents($ROOT . '/' . $d . '/.htaccess');
+        if (stripos($h, 'noindex') !== false) $out[] = ['path' => '/' . $d . '/*', 'why' => 'Folder rule (.htaccess)'];
+    }
+    // Database rows switched to noindex in their editors.
+    $tables = ['products' => ['Product', '/products/%s/'], 'product_categories' => ['Product category', '/products/%s/'],
+               'gaming_categories' => ['Gaming platform', '/gaming-platforms/%s/'], 'blogs' => ['Blog post', '/blogs/%s/'], 'pages' => ['CMS page', '/%s/']];
+    foreach ($tables as $t => [$label, $fmt]) {
+        try { $rows = $pdo->query("SELECT slug FROM {$t} WHERE is_noindex = 1")->fetchAll(PDO::FETCH_COLUMN); } catch (\Throwable $e) { continue; }
+        foreach ($rows as $slug) $out[] = ['path' => sprintf($fmt, $slug), 'why' => $label . ' set to noindex in its editor'];
+    }
+    return $out;
+}
+
+/** robots.txt "Disallow" lines (crawlers are asked not to visit these). */
+function ssDisallow(string $ROOT): array {
+    $out = []; $agent = '*';
+    foreach (preg_split('/\R/', (string)@file_get_contents($ROOT . '/robots.txt')) as $l) {
+        if (preg_match('/^\s*User-agent:\s*(.+)$/i', $l, $m)) $agent = trim($m[1]);
+        elseif (preg_match('/^\s*Disallow:\s*(\S+)/i', $l, $m)) $out[] = ['path' => $m[1], 'agent' => $agent];
+    }
+    return $out;
+}
+
 /** Validates and saves one part. Returns [savedValue, message]. */
 function ssSave(PDO $pdo, string $ROOT, string $part, $v, array $session): array {
     $before = ssGet($pdo, $ROOT, $part);
@@ -215,6 +310,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
     if (isset($_GET['history'])) ssOut(200, ['success' => true, 'days' => ROC_HISTORY_DAYS, 'history' => rocHistList($ROOT, 'settings', (string)$_GET['history'])]);
     $out = ['success' => true];
     foreach (['tracking', 'noindex', 'sitemap', 'robots', 'llms', 'redirects'] as $p) $out[$p] = ssGet($pdo, $ROOT, $p);
+    $out['system'] = ['redirects' => ssSystemRedirects($ROOT), 'noindex' => ssSystemNoindex($pdo, $ROOT, rocLayerFromDb($pdo, $ROOT)), 'disallow' => ssDisallow($ROOT)];
     ssOut(200, $out);
 }
 

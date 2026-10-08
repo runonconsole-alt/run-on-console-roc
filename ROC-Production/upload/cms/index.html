@@ -3458,6 +3458,18 @@ async function renderSettings(m){
   if(S.view!=='settings') return;
   var box=$('#set-body',m), reload=function(){ renderSettings(m); };
   var histCard='<div class="card"><div class="chead"><h3>Earlier versions</h3><span class="note">Kept 30 days</span></div><div class="cbody" id="set-hist"></div></div>';
+  var sys=d.system||{redirects:[],noindex:[],disallow:[]};
+  var srcName=function(x){ return String(x||'').replace(/^ROC\s+/,'').replace(/\s*\(cli-[a-z-]+\.php\)/,'').replace(/^./,function(c){return c.toUpperCase();}); };
+  // What the website already does (installers, page code, database): read-only.
+  var sysRedirects='<div class="card"><div class="chead"><h3>Already on the site ('+sys.redirects.length+')</h3><span class="note">Set up by the website itself · read-only</span></div>'+
+    (sys.redirects.length?'<table class="list"><thead><tr><th>From</th><th>To</th><th>Type</th><th>Set by</th></tr></thead><tbody>'+sys.redirects.map(function(r){
+      return '<tr><td class="t-slug">'+esc(r.from)+'</td><td class="t-slug">'+(r.type==410?'<span class="hint">removed</span>':esc(r.to))+'</td><td><span class="tag ro">'+r.type+'</span></td><td class="hint">'+esc(srcName(r.source))+'</td></tr>'; }).join('')+'</tbody></table>'
+      :'<div class="cbody hint">None found.</div>')+'</div>';
+  var sysNoindex='<div class="card"><div class="chead"><h3>Already noindex ('+sys.noindex.length+')</h3><span class="note">Set by the website itself · read-only</span></div>'+
+    (sys.noindex.length?'<table class="list"><thead><tr><th>Page</th><th>Why</th></tr></thead><tbody>'+sys.noindex.map(function(r){
+      return '<tr><td class="t-slug">'+esc(r.path)+'</td><td class="hint">'+esc(r.why)+'</td></tr>'; }).join('')+'</tbody></table>':'<div class="cbody hint">None found.</div>')+'</div>'+
+    (sys.disallow.length?'<div class="card"><div class="chead"><h3>Blocked in robots.txt ('+sys.disallow.length+')</h3><span class="note">Crawlers are asked not to visit</span></div><table class="list"><thead><tr><th>Address</th><th>For</th></tr></thead><tbody>'+
+      sys.disallow.map(function(r){ return '<tr><td class="t-slug">'+esc(r.path)+'</td><td class="hint">'+(r.agent==='*'?'all crawlers':esc(r.agent))+'</td></tr>'; }).join('')+'</tbody></table></div>':'');
   function saveBtn(){ return '<button class="btn primary" type="submit">Save to website</button>'; }
   function showErrors(err, map){
     toast(err.message,'bad');
@@ -3502,10 +3514,10 @@ async function renderSettings(m){
       '<td><input type="text" data-k="to" value="'+esc(r.to)+'" placeholder="/new-page/ or https://…" id="st-to'+i+'"></td>'+
       '<td><input type="text" data-k="note" value="'+esc(r.note||'')+'" placeholder="note (optional)"></td>'+
       '<td><button class="btn sm" type="button" data-rdel title="Remove">✕</button></td></tr>'; };
-    box.innerHTML='<div class="alert info">Send an old address to a new one. <b>From</b> is an address on this site; end it with <b>*</b> for a whole section (/old-blog/*). '+
+    box.innerHTML='<div class="alert info">Your own redirects go in the table below; the ones the website already has are listed under it. Send an old address to a new one. <b>From</b> is an address on this site; end it with <b>*</b> for a whole section (/old-blog/*). '+
       '<b>410 gone</b> tells Google a page was removed for good. After saving, the server checks the site still opens and undoes the change if it does not.</div>'+
       '<div class="card"><div class="cbody"><form id="stf"><table class="list"><thead><tr><th>From</th><th>Type</th><th>To</th><th>Note</th><th></th></tr></thead><tbody id="rr-body">'+
-      rows.map(row).join('')+'</tbody></table><div style="display:flex;gap:8px;margin-top:10px"><button class="btn" type="button" id="rr-add">＋ Add row</button>'+saveBtn()+'</div></form></div></div>'+histCard;
+      rows.map(row).join('')+'</tbody></table><div style="display:flex;gap:8px;margin-top:10px"><button class="btn" type="button" id="rr-add">＋ Add row</button>'+saveBtn()+'</div></form></div></div>'+sysRedirects+histCard;
     $('#rr-add',m).addEventListener('click',function(){ var tb=$('#rr-body',m); tb.insertAdjacentHTML('beforeend',row({from:'',to:'',type:301,note:''},tb.children.length)); bindDel(); });
     function bindDel(){ m.querySelectorAll('[data-rdel]').forEach(function(b){ b.onclick=function(){ b.closest('tr').remove(); S.dirty=true; }; }); }
     bindDel();
@@ -3517,9 +3529,9 @@ async function renderSettings(m){
   }
 
   if(tab==='noindex'){
-    box.innerHTML='<div class="alert info">Pages listed here get <b>noindex</b> (Google does not show them) and are left out of the sitemaps. One address per line; end with <b>*</b> for a whole section, e.g. <code>/products/old-mouse/</code> or <code>/blogs/test-*</code>.</div>'+
+    box.innerHTML='<div class="alert info">Add your own noindex pages here; the pages that are already noindex are listed below. Pages listed here get <b>noindex</b> (Google does not show them) and are left out of the sitemaps. One address per line; end with <b>*</b> for a whole section, e.g. <code>/products/old-mouse/</code> or <code>/blogs/test-*</code>.</div>'+
       '<div class="card"><div class="cbody"><form id="stf"><div class="field"><label for="st-noindex">Noindex addresses</label>'+
-      '<textarea id="st-noindex" rows="10" spellcheck="false" style="font-family:ui-monospace,Consolas,monospace">'+esc((d.noindex||[]).join('\n'))+'</textarea></div>'+saveBtn()+'</form></div></div>'+histCard;
+      '<textarea id="st-noindex" rows="10" spellcheck="false" style="font-family:ui-monospace,Consolas,monospace">'+esc((d.noindex||[]).join('\n'))+'</textarea></div>'+saveBtn()+'</form></div></div>'+sysNoindex+histCard;
     $('#stf',m).addEventListener('input',function(){ S.dirty=true; });
     $('#stf',m).addEventListener('submit',function(e){ e.preventDefault(); save('noindex',$('#st-noindex',m).value); });
   }

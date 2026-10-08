@@ -108,6 +108,12 @@ RELEASES = [
          changes=['/author/roc-team/ shows the ROC page again (its address contains "/auth", which the router took for sign-in)'],
          checks=[dict(label='ROC page has the right heading', type='contains', path='author/roc-team/index.html', text='ROC (Run On Console)</h1>')],
          pr=REPO + '27'),
+    dict(deploy=20, date='2026-10-08', title='Settings: see the redirects and noindex pages the site already has',
+         changes=['Redirects tab lists every redirect already on the site (www, https, old addresses, renamed products) and what set it up',
+                  'Noindex tab lists every page that is already noindex, and what robots.txt blocks',
+                  'Includes the fix for the ROC author page (deploy 19)'],
+         checks=[dict(label='ROC page has the right heading', type='contains', path='author/roc-team/index.html', text='ROC (Run On Console)</h1>')],
+         pr=REPO + '27'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

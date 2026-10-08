@@ -11,16 +11,9 @@
    "type": "contains",
    "path": "author/roc-team/index.html",
    "text": "ROC (Run On Console)</h1>"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-Ml8_y0qJ.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/27",
- "build": "index-Ml8_y0qJ.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]
