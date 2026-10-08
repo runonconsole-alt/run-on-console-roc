@@ -1287,6 +1287,7 @@ function renderShell(){
 function go(v){
   if(S.dirty && !confirm('You have unsaved changes. Leave without saving?'))return;
   if(S.editing) releaseLock(S.editing.id);
+  clearLayerTimers(); S.prevView=S.view;
   S.dirty=false; S.editing=null; S.view=v; S.search=''; S.filter='all'; S.mediaLoaded=false; S.sitePages=null; S.siteUsers=null; S.metaRows=null; metaLive={};
   renderShell();
 }
@@ -2969,11 +2970,11 @@ async function renderMetas(m){
   var pages=Math.max(1,Math.ceil(rows.length/PER)); if(page>=pages) page=pages-1;
   var shown=rows.slice(page*PER,page*PER+PER);
   var nCustom=all.filter(function(r){return r.title||r.description;}).length;
-  m.innerHTML=head('Metas','Title and description of every page on runonconsole.com')+
+  m.innerHTML=head('Metas','Title and description of every page on runonconsole.com','<button class="btn" id="march">🕘 Archive (30 days)</button>')+
   '<div class="body">'+
   '<div class="alert info">Leave a box <b>empty</b> to use the automatic title or description. When you press <b>Save</b>, the live page changes right away: '+
   'built pages are rewritten, the others (blogs, products, platforms) use it from the next visit. <b>Live now</b> is read from the website itself. '+
-  'Good lengths: title up to <b>60</b> characters, description up to <b>160</b>.</div>'+
+  'Good lengths: title up to <b>60</b> characters, description up to <b>160</b>. Nothing is lost: every earlier version is kept for <b>30 days</b> (History button or Archive).</div>'+
   '<div class="card"><div class="chead" style="flex-wrap:wrap;gap:10px">'+
     '<div class="search" style="max-width:260px;flex:1"><input type="text" id="mq" placeholder="Search page, URL or title" value="'+esc(S.mq||'')+'"></div>'+
     '<div class="chips">'+groups.map(function(x){
@@ -2994,9 +2995,11 @@ async function renderMetas(m){
             '<div class="hint" data-mtl></div></div>'+
           '<div class="field" style="margin-bottom:6px"><textarea data-md rows="2" maxlength="500" placeholder="Automatic description">'+esc(r.description)+'</textarea>'+
             '<div class="hint" data-mdl></div></div>'+
-          '<div class="hint" data-mlive style="line-height:1.5"><span class="spin" style="width:10px;height:10px"></span> reading live page…</div></td>'+
+          '<div class="hint" data-mlive style="line-height:1.5"><span class="spin" style="width:10px;height:10px"></span> reading live page…</div>'+
+          '<div data-mhist style="display:none"></div></td>'+
         '<td style="vertical-align:top;text-align:right"><button class="btn sm primary" data-msave>Save</button>'+
-          (r.title||r.description?'<button class="btn sm" data-mreset style="margin-top:6px">Reset</button>':'')+'</td></tr>';
+          (r.title||r.description?'<button class="btn sm" data-mreset style="margin-top:6px">Reset</button>':'')+
+          '<button class="btn sm" data-mh style="margin-top:6px">History</button></td></tr>';
     }).join('')+'</tbody></table>'
     :'<div class="empty"><div class="big">🔎</div><div>No pages match.</div></div>')+
   (pages>1?'<div class="cbody" style="display:flex;gap:8px;align-items:center;justify-content:flex-end">'+
@@ -3004,6 +3007,7 @@ async function renderMetas(m){
     '<button class="btn sm" data-mp="1"'+(page>=pages-1?' disabled':'')+'>Next ›</button></div>':'')+
   '</div></div>';
 
+  $('#march',m).addEventListener('click',function(){ metaArchive(m); });
   var mq=$('#mq',m);
   mq.addEventListener('input',function(){ S.mq=mq.value; S.mpage=0; var at=mq.selectionStart; renderMetas(m); var x=$('#mq',m); if(x){x.focus(); x.setSelectionRange(at,at);} });
   m.querySelectorAll('[data-mg]').forEach(function(b){ b.addEventListener('click',function(){ S.mgroup=b.dataset.mg; S.mpage=0; renderMetas(m); }); });
@@ -3031,7 +3035,7 @@ async function renderMetas(m){
     async function save(t,d){
       var btn=$('[data-msave]',tr); btn.disabled=true;
       try{
-        var res=await api('page-metas.php',{key:r.key,title:t,description:d});
+        var res=await api('page-metas.php',{key:r.key,title:t,description:d,label:r.label});
         r.title=t.trim(); r.description=d.trim();
         toast(res.message,'good');
         $('[data-mlive]',tr).innerHTML='<span class="spin" style="width:10px;height:10px"></span> checking the live page…';
@@ -3044,6 +3048,20 @@ async function renderMetas(m){
       btn.disabled=false;
     }
     $('[data-msave]',tr).addEventListener('click',function(){ save(ti.value,de.value); });
+    $('[data-mh]',tr).addEventListener('click',async function(){
+      var hb=$('[data-mhist]',tr);
+      if(hb.style.display!=='none'){ hb.style.display='none'; return; }
+      hb.style.display=''; hb.innerHTML='<span class="spin" style="width:10px;height:10px"></span>';
+      try{
+        var h=await api('page-metas.php?history='+encodeURIComponent(r.key));
+        hb.innerHTML='<div class="hint" style="margin-top:8px"><b>Earlier versions</b> (last '+h.days+' days)</div>'+metaHistHtml(h.history,false);
+        bindMetaRestore(hb,function(res){
+          r.title=res.title; r.description=res.description; ti.value=res.title; de.value=res.description; counts();
+          hb.style.display='none';
+          metaFetchLive(r.path,showLive,true);
+        });
+      }catch(e){ hb.innerHTML='<div class="hint">'+esc(e.message)+'</div>'; }
+    });
     var rs=$('[data-mreset]',tr);
     if(rs) rs.addEventListener('click',function(){ if(!confirm('Go back to the automatic title and description for this page?')) return; ti.value=''; de.value=''; save('',''); });
   });
@@ -3088,7 +3106,9 @@ async function renderAnnouncement(m){
         '<div class="field"><label for="an-end">Hide automatically after (optional)</label><input type="datetime-local" id="an-end" value="'+esc(toLocalInput(a.ends_at))+'"></div>'+
         '<label class="field" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="an-x"'+(a.dismissible?' checked':'')+'> Visitors can close it (×)</label></div>'+
       '<button class="btn primary" type="submit">Save to website</button></form></div></div>'+
+    '<div class="card"><div class="chead"><h3>Earlier versions</h3><span class="note">Kept 30 days</span></div><div class="cbody" id="an-hist"></div></div>'+
     '<div class="hint">Saved changes are on every page straight away. A visitor who closes the bar sees it again when you change the message.</div>';
+  layerHistory($('#an-hist',m),'announcement',function(){ renderAnnouncement(m); });
   function cur(){
     var end=$('#an-end',m).value;
     return { enabled:$('#an-on',m).checked, icon:$('#an-icon',m).value, title:$('#an-title',m).value, text:$('#an-text',m).value,
@@ -3116,19 +3136,93 @@ async function renderAnnouncement(m){
 /* --------------------------------------------------------- template & code */
 /* Custom CSS and HTML added to every page (api/v1/cms/site-layer.php). */
 
+/* ------------------------------------------------------------- history */
+/* Earlier versions kept 30 days on the server (site-layer-lib.php rocHistAdd). */
+
+function histWhen(iso){ var d=new Date(iso); return isNaN(d)?esc(iso):d.toLocaleString(undefined,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); }
+function histMeta(v){
+  v=v||{}; return '<div><b>'+(v.title?esc(v.title):'<i style="color:var(--ink-3)">automatic title</i>')+'</b></div>'+
+    '<div style="color:var(--ink-3)">'+(v.description?esc(v.description):'<i>automatic description</i>')+'</div>';
+}
+/* List of meta changes; onRestore(row) after a restore. */
+function metaHistHtml(list, showPage){
+  if(!list.length) return '<div class="hint">No earlier versions in the last 30 days.</div>';
+  return list.map(function(h){
+    return '<div style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0;font-size:12.5px">'+
+      '<div class="hint" style="margin-bottom:6px">'+histWhen(h.at)+(h.user&&isNaN(h.user)?' · '+esc(h.user):'')+(showPage?' · <b>'+esc(h.label)+'</b>':'')+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+        '<div><div class="hint">Before</div>'+histMeta(h.before)+'<button class="btn sm" style="margin-top:6px" data-hrest="'+esc(h.id)+'" data-which="before">Restore this</button></div>'+
+        '<div><div class="hint">Changed to</div>'+histMeta(h.after)+'<button class="btn sm" style="margin-top:6px" data-hrest="'+esc(h.id)+'" data-which="after">Restore this</button></div>'+
+      '</div></div>';
+  }).join('');
+}
+function bindMetaRestore(box, done){
+  box.querySelectorAll('[data-hrest]').forEach(function(b){ b.addEventListener('click',async function(){
+    if(!confirm('Put this title and description back on the live page? The current one stays in the archive.')) return;
+    try{ var r=await api('page-metas.php',{action:'restore',id:b.dataset.hrest,which:b.dataset.which}); toast(r.message,'good'); done(r); }
+    catch(e){ toast(e.message,'bad'); }
+  }); });
+}
+async function metaArchive(m){
+  var d; try{ d=await api('page-metas.php?history=all'); }catch(e){ toast(e.message,'bad'); return; }
+  m.innerHTML=head('Metas archive','Every title and description change of the last '+d.days+' days','<button class="btn" id="mback">‹ Back to Metas</button>')+
+    '<div class="body narrow"><div class="card"><div class="cbody" id="mhist">'+metaHistHtml(d.history,true)+'</div></div></div>';
+  $('#mback',m).addEventListener('click',function(){ S.metaRows=null; renderMetas(m); });
+  bindMetaRestore($('#mhist',m), function(){ metaLive={}; metaArchive(m); });
+}
+
+/* Versions of the announcement or the site code. */
+function layerHistHtml(list, kind){
+  if(!list.length) return '<div class="hint">No earlier versions in the last 30 days.</div>';
+  var desc=function(v){
+    v=v||{};
+    if(kind==='announcement') return (v.enabled?'<b style="color:#059669">shown</b>':'<b>hidden</b>')+' · '+esc(((v.title||'')+' '+(v.text||'')).trim().slice(0,90)||'(empty)');
+    var parts=[['CSS',v.css],['head',v.head_html],['top',v.body_top_html],['bottom',v.body_end_html]].filter(function(x){return x[1];});
+    return parts.length?parts.map(function(x){return esc(x[0])+' '+String(x[1]).length+' chars';}).join(' · '):'(all empty)';
+  };
+  return '<table class="list"><thead><tr><th>When</th><th>Before</th><th>Changed to</th></tr></thead><tbody>'+list.map(function(h){
+    return '<tr><td style="white-space:nowrap">'+histWhen(h.at)+(h.user&&isNaN(h.user)?'<div class="hint">'+esc(h.user)+'</div>':'')+'</td>'+
+      '<td>'+desc(h.before)+'<div><button class="btn sm" data-lrest="'+esc(h.id)+'" data-which="before" style="margin-top:4px">Restore</button></div></td>'+
+      '<td>'+desc(h.after)+'<div><button class="btn sm" data-lrest="'+esc(h.id)+'" data-which="after" style="margin-top:4px">Restore</button></div></td></tr>';
+  }).join('')+'</tbody></table>';
+}
+async function layerHistory(box, kind, reload){
+  box.innerHTML='<div class="empty"><span class="spin"></span></div>';
+  var d; try{ d=await api('site-layer.php?history='+kind); }catch(e){ box.innerHTML='<div class="hint">'+esc(e.message)+'</div>'; return; }
+  box.innerHTML=layerHistHtml(d.history, kind);
+  box.querySelectorAll('[data-lrest]').forEach(function(b){ b.addEventListener('click',async function(){
+    if(!confirm('Put this version back on the website? What is live now stays in the archive.')) return;
+    try{ var r=await api('site-layer.php',{action:'restore',id:b.dataset.lrest,which:b.dataset.which}); toast(r.message,'good');
+      if(kind==='code') codeUndoSet(r.history_id); reload(); }
+    catch(e){ toast(e.message,'bad'); }
+  }); });
+}
+
+/* --------------------------------------------- template: undo for 30 minutes */
+var CODE_UNDO_MIN=30;
+function codeUndoSet(id){ try{ localStorage.setItem('roc-code-undo', JSON.stringify({id:id, at:Date.now()})); }catch(e){} }
+function codeUndoGet(){
+  try{ var u=JSON.parse(localStorage.getItem('roc-code-undo')||'null'); if(u&&u.id&&Date.now()-u.at<CODE_UNDO_MIN*60000) return u; }catch(e){}
+  return null;
+}
+function clearLayerTimers(){ (S.layerTimers||[]).forEach(function(t){ clearInterval(t); clearTimeout(t); }); S.layerTimers=[]; var o=$('#idle-ov'); if(o) o.remove(); }
+
 async function renderSiteCode(m){
+  clearLayerTimers();
   m.innerHTML=head('Template & code','Change the look of every page or add your own HTML')+
     '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
   var d; try{ d=await api('site-layer.php'); }catch(e){ toast(e.message,'bad'); return; }
+  if(S.view!=='sitecode') return;
   var c=d.code;
   var box=function(id,label,help,val,ph){
     return '<div class="field"><label for="'+id+'">'+label+'</label><div class="hint" style="margin:-2px 0 6px">'+help+'</div>'+
       '<textarea id="'+id+'" rows="8" spellcheck="false" style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px;white-space:pre" placeholder="'+esc(ph)+'">'+esc(val)+'</textarea></div>';
   };
   $('.body',m).innerHTML=
+    '<div id="sc-undo"></div>'+
     '<div class="alert info">What you write here is added to <b>every page</b> of the website (not the CMS) as soon as you save. '+
-    'Use it to restyle the header or footer, add a div or a banner, or paste a tracking or verification code. '+
-    'A mistake can break the look of the site: change one thing at a time and check the website after saving. Empty a box and save to remove it.</div>'+
+    'After saving you have <b>30 minutes</b> to undo with one click, and every earlier version stays in the archive below for <b>30 days</b>. '+
+    'Change one thing at a time and check the website after saving. Empty a box and save to remove it.</div>'+
     '<div class="card"><div class="cbody"><form id="scf">'+
       box('sc-css','Custom CSS','Styles for the whole site. Example: make the header darker, hide an element, change a colour.',
         c.css,'header { background: #022c22 !important; }\n.my-banner { padding: 12px; text-align: center; }')+
@@ -3138,13 +3232,68 @@ async function renderSiteCode(m){
         c.body_top_html,'<div class="my-banner">Free shipping on all orders this week</div>')+
       box('sc-end','HTML at the bottom of the page','Added at the end of every page: chat widgets, scripts that change the page, extra divs.',
         c.body_end_html,'<div id="my-chat-widget"></div>')+
-      '<button class="btn primary" type="submit">Save to website</button></form></div></div>';
+      '<button class="btn primary" type="submit">Save to website</button></form></div></div>'+
+    '<div class="card"><div class="chead"><h3>Earlier versions</h3><span class="note">Kept 30 days</span></div><div class="cbody" id="sc-hist"></div></div>';
+
+  function reload(){ renderSiteCode(m); }
+  layerHistory($('#sc-hist',m), 'code', reload);
+
+  // Undo strip: 30 minutes after the last save.
+  function drawUndo(){
+    var u=codeUndoGet(), el=$('#sc-undo',m); if(!el) return;
+    if(!u){ el.innerHTML=''; return; }
+    var left=Math.max(0, CODE_UNDO_MIN*60000-(Date.now()-u.at)), mm=Math.floor(left/60000), ss=Math.floor(left%60000/1000);
+    el.innerHTML='<div class="alert" style="display:flex;gap:10px;align-items:center;justify-content:space-between;background:#ecfdf5;border-color:#a7f3d0">'+
+      '<span>✓ Your last change is live. You can undo it for <b>'+mm+':'+(ss<10?'0':'')+ss+'</b>.</span>'+
+      '<button class="btn sm" id="sc-undo-btn">↶ Undo last change</button></div>';
+    $('#sc-undo-btn',el).addEventListener('click',async function(){
+      if(!confirm('Undo your last change? The website goes back to how it was before you saved.')) return;
+      try{ await api('site-layer.php',{action:'restore',id:u.id,which:'before'}); try{ localStorage.removeItem('roc-code-undo'); }catch(e){}
+        toast('Undone. The website is back to the previous version.','good'); reload(); }
+      catch(e){ toast(e.message,'bad'); }
+    });
+  }
+  drawUndo();
+  S.layerTimers.push(setInterval(drawUndo, 1000));
+
+  // Nothing changed for 1 minute: count down 5…1 and go back to where you came from.
+  var changed=false, idleT;
+  function armIdle(){
+    clearTimeout(idleT);
+    if(changed) return;
+    idleT=setTimeout(function(){
+      if(S.view!=='sitecode'||changed) return;
+      var n=5, ov=document.createElement('div');
+      ov.id='idle-ov';
+      ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;z-index:999';
+      ov.innerHTML='<div class="card" style="max-width:380px;text-align:center;padding:26px"><div style="font-size:30px">⏱</div>'+
+        '<h3 style="margin:8px 0">You have not changed anything</h3><div class="hint">Going back in</div>'+
+        '<div id="idle-n" style="font-size:44px;font-weight:800;color:var(--brand,#059669)">5</div>'+
+        '<button class="btn" id="idle-stay">Stay on Template & code</button></div>';
+      document.body.appendChild(ov);
+      var tick=setInterval(function(){
+        n--; var el=$('#idle-n'); if(el) el.textContent=n;
+        if(n<=0){ clearInterval(tick); ov.remove(); if(S.view==='sitecode' && !changed) go(S.prevView && S.prevView!=='sitecode' ? S.prevView : 'dashboard'); }
+      },1000);
+      S.layerTimers.push(tick);
+      $('#idle-stay',ov).addEventListener('click',function(){ clearInterval(tick); ov.remove(); armIdle(); });
+    }, 60000);
+    S.layerTimers.push(idleT);
+  }
+  armIdle();
+  $('#scf',m).addEventListener('input',function(){ changed=true; clearTimeout(idleT); S.dirty=true; });
+
   $('#scf',m).addEventListener('submit',async function(e){
     e.preventDefault();
     m.querySelectorAll('.publish-error').forEach(function(n){n.remove();});
     var v={css:$('#sc-css',m).value, head_html:$('#sc-head',m).value, body_top_html:$('#sc-top',m).value, body_end_html:$('#sc-end',m).value};
-    try{ var r=await api('site-layer.php',{part:'code',value:v}); toast(r.message,'good'); }
-    catch(err){
+    try{
+      var r=await api('site-layer.php',{part:'code',value:v});
+      S.dirty=false;
+      if(r.history_id) codeUndoSet(r.history_id);
+      toast(r.message+' You can undo it for 30 minutes.','good');
+      reload();
+    }catch(err){
       toast(err.message,'bad');
       var map={css:'sc-css',head_html:'sc-head',body_top_html:'sc-top',body_end_html:'sc-end'}, errs=(err.data&&err.data.errors)||{};
       Object.keys(errs).forEach(function(k){ var i=$('#'+map[k],m); if(!i) return;

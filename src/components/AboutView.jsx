@@ -179,7 +179,7 @@ export const AboutView = () => {
 
         <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-xs sm:text-sm text-slate-700 leading-relaxed">
           <strong className="text-slate-900">Who runs Run On Console?</strong>{' '}
-          The site is run by <a href="/author/omar-abobakar/" rel="author" className="font-bold text-emerald-700 hover:text-emerald-900">Omar Abobakar</a>, its founder and editor.
+          The site is run by the <strong className="text-slate-900">ROC (Run On Console)</strong> team, an independent group of gamers.
           Questions or corrections are welcome on our <a href="/contact/" className="font-bold text-emerald-700 hover:text-emerald-900">contact page</a>.
         </div>
 

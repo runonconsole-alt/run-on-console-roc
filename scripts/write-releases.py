@@ -66,6 +66,13 @@ RELEASES = [
          checks=[dict(label='Login cookie installer (cli-session-name.php)', type='contains', path='api/v1/config.php', text="session_name('ROCSESSID')"),
                 ],
          pr=REPO + '22'),
+    dict(deploy=14, date='2026-10-08', title='30-day history and undo for Metas, announcement and template',
+         changes=['Every Metas, announcement and Template & code change is kept for 30 days and can be restored',
+                  'Metas: History button on each page and an Archive of all changes',
+                  'Template & code: one-click Undo for 30 minutes after saving',
+                  'Template & code: after 1 minute without changes, a 5-second countdown returns to the previous page',
+                  'About page: "run by the ROC (Run On Console) team"'],
+         checks=[], pr=REPO + '23'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
