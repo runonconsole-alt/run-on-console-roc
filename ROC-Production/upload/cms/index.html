@@ -2969,8 +2969,8 @@ async function renderMetas(m){
     try{ S.metaRows=(await api('page-metas.php')).rows||[]; }catch(e){ toast(e.message,'bad'); S.metaRows=[]; }
     if(S.view!=='metas'||S.editing) return;
   }
-  var all=S.metaRows, g=S.mgroup||'all', q=(S.mq||'').toLowerCase(), page=S.mpage||0, PER=30;
-  // Search: every word must appear in the page name, address, or its title/description (custom or live).
+  var all=S.metaRows, q=(S.mq||'').toLowerCase(), page=S.mpage||0, PER=30;
+  // Search: every word must appear in the page name, address, or its title/description.
   var words=q.split(/\s+/).filter(Boolean);
   var rows=all.filter(function(r){
     var live=metaLive[r.path]||{};
@@ -2981,13 +2981,13 @@ async function renderMetas(m){
   var shown=rows.slice(page*PER,page*PER+PER);
   m.innerHTML=head('Metas','Title and description of every page on runonconsole.com','<button class="btn" id="march">🕘 Archive (30 days)</button>')+
   '<div class="body">'+
-  '<div class="alert info">Leave a box <b>empty</b> to use the automatic title or description. When you press <b>Save</b>, the live page changes right away: '+
-  'built pages are rewritten, the others (blogs, products, platforms) use it from the next visit. <b>Live now</b> is read from the website itself. '+
-  'Good lengths: title up to <b>60</b> characters, description up to <b>160</b>. Nothing is lost: every earlier version is kept for <b>30 days</b> (History button or Archive).</div>'+
+  '<div class="alert info">Each page shows the title and description that are <b>live now</b>. Press <b>✎</b> to change them, then <b>✓</b> to save: '+
+  'the live page changes right away. Good lengths: title up to <b>60</b> characters, description up to <b>160</b>. '+
+  'Nothing is lost: every earlier version is kept for <b>30 days</b> (History or Archive).</div>'+
   '<div class="card"><div class="chead" style="flex-wrap:wrap;gap:10px">'+
     '<div class="search" style="max-width:520px;flex:1"><input type="text" id="mq" placeholder="Search: home, about, mice, /products/…" value="'+esc(S.mq||'')+'"></div>'+
     '<span class="hint">'+(q?rows.length+' of '+all.length+' pages':all.length+' pages, in the order of the website')+'</span></div>'+
-  (shown.length?'<table class="list"><thead><tr><th style="width:26%">Page</th><th>Title and description</th><th style="width:96px"></th></tr></thead><tbody>'+
+  (shown.length?'<table class="list"><thead><tr><th style="width:26%">Page</th><th>Title and description (live now)</th><th style="width:110px"></th></tr></thead><tbody>'+
     shown.map(function(r,i){
       var idx=page*PER+i;
       return '<tr data-mrow="'+idx+'"><td style="vertical-align:top"><div style="font-weight:600">'+esc(r.label)+'</div>'+
@@ -2995,17 +2995,10 @@ async function renderMetas(m){
           '<div style="margin-top:4px">'+
           (r.status&&r.status!=='published'?' <span class="tag draft">'+esc(r.status)+'</span>':'')+
           (r.noindex?' <span class="tag off">noindex</span>':'')+
-          (r.title||r.description?' <span class="tag published">custom</span>':'')+'</div></td>'+
-        '<td style="vertical-align:top">'+
-          '<div class="field" style="margin-bottom:6px"><input type="text" data-mt maxlength="255" value="'+esc(r.title)+'" placeholder="Automatic title">'+
-            '<div class="hint" data-mtl></div></div>'+
-          '<div class="field" style="margin-bottom:6px"><textarea data-md rows="2" maxlength="500" placeholder="Automatic description">'+esc(r.description)+'</textarea>'+
-            '<div class="hint" data-mdl></div></div>'+
-          '<div class="hint" data-mlive style="line-height:1.5"><span class="spin" style="width:10px;height:10px"></span> reading live page…</div>'+
-          '<div data-mhist style="display:none"></div></td>'+
-        '<td style="vertical-align:top;text-align:right"><button class="btn sm primary" data-msave>Save</button>'+
-          (r.title||r.description?'<button class="btn sm" data-mreset style="margin-top:6px">Reset</button>':'')+
-          '<button class="btn sm" data-mh style="margin-top:6px">History</button></td></tr>';
+          (r.title||r.description?' <span class="tag published">set by you</span>':'')+'</div></td>'+
+        '<td style="vertical-align:top" data-mbody><span class="hint"><span class="spin" style="width:10px;height:10px"></span> reading live page…</span></td>'+
+        '<td style="vertical-align:top;text-align:right;white-space:nowrap" data-mbtns></td></tr>'+
+        '<tr data-mhrow="'+idx+'" style="display:none"><td></td><td colspan="2" data-mhist></td></tr>';
     }).join('')+'</tbody></table>'
     :'<div class="empty"><div class="big">🔎</div><div>No pages match.</div></div>')+
   (pages>1?'<div class="cbody" style="display:flex;gap:8px;align-items:center;justify-content:flex-end">'+
@@ -3020,55 +3013,84 @@ async function renderMetas(m){
 
   m.querySelectorAll('[data-mrow]').forEach(function(tr){
     var r=rows[+tr.dataset.mrow];
-    var ti=$('[data-mt]',tr), de=$('[data-md]',tr);
-    function counts(){
-      var live=metaLive[r.path]||{t:'',d:''};
-      $('[data-mtl]',tr).innerHTML=metaLen((ti.value||live.t).length,60)+(ti.value?'':' <span class="hint">automatic</span>');
-      $('[data-mdl]',tr).innerHTML=metaLen((de.value||live.d).length,160)+(de.value?'':' <span class="hint">automatic</span>');
+    var body=$('[data-mbody]',tr), btns=$('[data-mbtns]',tr);
+    var hrow=m.querySelector('[data-mhrow="'+tr.dataset.mrow+'"]'), hb=$('[data-mhist]',hrow);
+    var live={t:'',d:'',ok:false}, note='';
+
+    // What is shown: the live page's title/description (falls back to the saved values).
+    function cur(){ return {t: live.ok?live.t:r.title, d: live.ok?live.d:r.description}; }
+
+    function view(){
+      var c=cur();
+      body.innerHTML=(note?'<div style="margin-bottom:6px">'+note+'</div>':'')+
+        (live.ok||c.t||c.d
+          ?'<div style="font-weight:600;color:var(--ink)">'+esc(c.t||'(no title)')+'</div><div style="margin:2px 0 6px">'+metaLen(c.t.length,60)+'</div>'+
+           '<div style="color:var(--ink-2);line-height:1.5">'+esc(c.d||'(no description)')+'</div><div style="margin-top:2px">'+metaLen(c.d.length,160)+'</div>'
+          :'<span class="hint">Live page could not be read'+(r.status&&r.status!=='published'?' (not published)':'')+'.</span>');
+      btns.innerHTML='<button class="btn sm primary" data-medit title="Change title and description">✎ Edit</button>'+
+        '<div style="margin-top:6px"><button class="btn sm" data-mh>History</button></div>'+
+        (r.title||r.description?'<div style="margin-top:6px"><button class="btn sm" data-mreset title="Use the automatic title and description again">Reset</button></div>':'');
+      $('[data-medit]',btns).addEventListener('click',edit);
+      $('[data-mh]',btns).addEventListener('click',history);
+      var rs=$('[data-mreset]',btns);
+      if(rs) rs.addEventListener('click',function(){ if(!confirm('Go back to the automatic title and description for this page?')) return; save('',''); });
     }
-    function showLive(l){
-      var box=$('[data-mlive]',tr); if(!box) return;
-      if(!l.ok){ box.innerHTML='<span style="color:var(--ink-3)">Live page could not be read'+(r.status&&r.status!=='published'?' (not published)':'')+'.</span>'; return; }
-      box.innerHTML='<b style="color:var(--ink-2)">Live now:</b> '+esc(l.t||'(no title)')+'<br><span style="color:var(--ink-3)">'+esc(l.d||'(no description)')+'</span>';
-      ti.placeholder=l.t?('Automatic: '+l.t):'Automatic title'; de.placeholder=l.d?('Automatic: '+l.d):'Automatic description';
-      if(r.title) ti.placeholder='Automatic title'; if(r.description) de.placeholder='Automatic description';
+
+    function edit(){
+      var c=cur();
+      note='';
+      body.innerHTML=
+        '<div class="field" style="margin-bottom:6px"><input type="text" data-mt maxlength="255" value="'+esc(r.title||c.t)+'"><div class="hint" data-mtl></div></div>'+
+        '<div class="field" style="margin-bottom:0"><textarea data-md rows="3" maxlength="500">'+esc(r.description||c.d)+'</textarea><div class="hint" data-mdl></div></div>';
+      btns.innerHTML='<button class="btn sm primary" data-mok title="Save to the live page">✓ Save</button>'+
+        '<div style="margin-top:6px"><button class="btn sm" data-mcancel>✕ Cancel</button></div>';
+      var ti=$('[data-mt]',body), de=$('[data-md]',body);
+      function counts(){
+        var wt=ti.value.trim().split(/\s+/).filter(Boolean).length, wd=de.value.trim().split(/\s+/).filter(Boolean).length;
+        $('[data-mtl]',body).innerHTML=metaLen(ti.value.length,60)+' <span class="hint">characters · '+wt+' words</span>';
+        $('[data-mdl]',body).innerHTML=metaLen(de.value.length,160)+' <span class="hint">characters · '+wd+' words</span>';
+      }
       counts();
+      ti.addEventListener('input',counts); de.addEventListener('input',counts);
+      ti.focus(); ti.setSelectionRange(ti.value.length,ti.value.length);
+      $('[data-mok]',btns).addEventListener('click',function(){
+        var c0=cur();
+        if(ti.value.trim()===c0.t && de.value.trim()===c0.d && !r.title && !r.description){ view(); return; }   // nothing changed
+        save(ti.value,de.value);
+      });
+      $('[data-mcancel]',btns).addEventListener('click',view);
     }
-    counts();
-    metaFetchLive(r.path, showLive);
-    ti.addEventListener('input',counts); de.addEventListener('input',counts);
+
     async function save(t,d){
-      var btn=$('[data-msave]',tr); btn.disabled=true;
+      btns.querySelectorAll('button').forEach(function(b){ b.disabled=true; });
       try{
         var res=await api('page-metas.php',{key:r.key,title:t,description:d,label:r.label});
         r.title=t.trim(); r.description=d.trim();
         toast(res.message,'good');
-        $('[data-mlive]',tr).innerHTML='<span class="spin" style="width:10px;height:10px"></span> checking the live page…';
+        body.innerHTML='<span class="hint"><span class="spin" style="width:10px;height:10px"></span> checking the live page…</span>';
         metaFetchLive(r.path,function(l){
-          showLive(l);
+          live=l;
           var ok=(!r.title||l.t===r.title)&&(!r.description||l.d===r.description);
-          $('[data-mlive]',tr).insertAdjacentHTML('afterbegin', ok?'<b style="color:#059669">✓ Live page updated.</b> ':'<b style="color:#b45309">Saved; the live page has not picked it up yet.</b> ');
+          note=ok?'<b style="color:#059669">✓ Saved. The live page now shows this.</b>':'<b style="color:#b45309">Saved; the live page has not picked it up yet.</b>';
+          view();
         },true);
-      }catch(e){ toast(e.message,'bad'); }
-      btn.disabled=false;
+      }catch(e){ toast(e.message,'bad'); btns.querySelectorAll('button').forEach(function(b){ b.disabled=false; }); }
     }
-    $('[data-msave]',tr).addEventListener('click',function(){ save(ti.value,de.value); });
-    $('[data-mh]',tr).addEventListener('click',async function(){
-      var hb=$('[data-mhist]',tr);
-      if(hb.style.display!=='none'){ hb.style.display='none'; return; }
-      hb.style.display=''; hb.innerHTML='<span class="spin" style="width:10px;height:10px"></span>';
+
+    async function history(){
+      if(hrow.style.display!=='none'){ hrow.style.display='none'; return; }
+      hrow.style.display=''; hb.innerHTML='<span class="spin" style="width:10px;height:10px"></span>';
       try{
         var h=await api('page-metas.php?history='+encodeURIComponent(r.key));
-        hb.innerHTML='<div class="hint" style="margin-top:8px"><b>Earlier versions</b> (last '+h.days+' days)</div>'+metaHistHtml(h.history,false);
+        hb.innerHTML='<div class="hint"><b>Earlier versions</b> (last '+h.days+' days)</div>'+metaHistHtml(h.history,false);
         bindMetaRestore(hb,function(res){
-          r.title=res.title; r.description=res.description; ti.value=res.title; de.value=res.description; counts();
-          hb.style.display='none';
-          metaFetchLive(r.path,showLive,true);
+          r.title=res.title; r.description=res.description; hrow.style.display='none';
+          metaFetchLive(r.path,function(l){ live=l; note='<b style="color:#059669">✓ Earlier version restored.</b>'; view(); },true);
         });
       }catch(e){ hb.innerHTML='<div class="hint">'+esc(e.message)+'</div>'; }
-    });
-    var rs=$('[data-mreset]',tr);
-    if(rs) rs.addEventListener('click',function(){ if(!confirm('Go back to the automatic title and description for this page?')) return; ti.value=''; de.value=''; save('',''); });
+    }
+
+    metaFetchLive(r.path,function(l){ live=l; view(); });
   });
 }
 

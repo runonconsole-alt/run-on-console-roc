@@ -1,0 +1,24 @@
+{
+ "deploy": 16,
+ "date": "2026-10-08",
+ "title": "Metas edit with pencil, honest home hero, heading fixes",
+ "changes": [
+  "Metas: shows the live title and description; ✎ to edit, character and word counter, ✓ to save",
+  "Home hero: no more \"live benchmark\" and \"latency\" badges; the carousel shows Products, the game checker and platforms instead of old sample articles",
+  "The first heading on every page is now the H1 (header menu labels are no longer headings)",
+  "Contact page: plain reply-time note instead of \"senior testing columnists\""
+ ],
+ "checks": [
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BI8mqqLw.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/25",
+ "build": "index-BI8mqqLw.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

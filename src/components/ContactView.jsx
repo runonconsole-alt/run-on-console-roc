@@ -81,7 +81,7 @@ export const ContactView = () => {
                     <BouncyText text="Send an Editorial Message" />
                   </h2>
                   <p className="text-xs text-emerald-700 font-semibold">
-                    Direct inquiry line to senior testing columnists & hardware team
+                    We read every message and reply by email, usually within 1-2 working days.
                   </p>
                 </div>
               </div>
