@@ -340,6 +340,15 @@ CSS;
 }
 
 function rocSendHtml(string $html, ?int $modified = null): void {
+    // Announcement bar, site code and meta overrides from the CMS (api/v1/cms/site-layer-lib.php).
+    $lib = __DIR__ . '/api/v1/cms/site-layer-lib.php';
+    if (is_file($lib)) {
+        require_once $lib;
+        $uri = (string)($_SERVER['REQUEST_URI'] ?? '/');
+        $path = (string)(parse_url($uri, PHP_URL_PATH) ?: '/');
+        // Page 2, searches etc. keep their own titles.
+        $html = rocLayerApply($html, $path, rocLayerLoad(__DIR__), (string)parse_url($uri, PHP_URL_QUERY) === '');
+    }
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: public, max-age=0, must-revalidate');
     header('X-Content-Type-Options: nosniff');
@@ -377,7 +386,10 @@ function rocRenderPost(string $root, array $p): void {
     $image    = trim((string)($p['image'] ?? ''));
     $imageAbs = rocAbs($image);
     $alt      = trim((string)($p['image_alt'] ?? '')) ?: $title;
-    $author   = trim((string)($p['author_name'] ?? '')) ?: 'Omar Abobakar';
+    // No author typed in the CMS: the post is by the site itself (no person's name is added).
+    $author   = trim((string)($p['author_name'] ?? ''));
+    $byPerson = $author !== '';
+    if (!$byPerson) $author = 'Run On Console';
     $authorUrl = in_array(strtolower($author), ['omar abobakar', 'omar'], true) ? '/author/omar-abobakar/' : '';
     $category = rocCategoryLabel($p['category'] ?? '');
     $pub      = rocPublished($p);
@@ -427,7 +439,7 @@ function rocRenderPost(string $root, array $p): void {
     if ($imageAbs) $article['image'] = [$imageAbs];
     if ($pub) $article['datePublished'] = gmdate('c', $pub);
     if ($mod) $article['dateModified'] = gmdate('c', $mod);
-    $article['author'] = ['@type' => 'Person', 'name' => $author];
+    $article['author'] = $byPerson ? ['@type' => 'Person', 'name' => $author] : ['@type' => 'Organization', 'name' => 'Run On Console', 'url' => ROC_PUBLIC_URL . '/'];
     if ($authorUrl !== '') $article['author']['url'] = ROC_PUBLIC_URL . $authorUrl;
     $article['publisher'] = [
         '@type' => 'Organization',

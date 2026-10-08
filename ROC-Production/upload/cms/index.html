@@ -1243,18 +1243,19 @@ function renderShell(){
   '<div class="shell"><aside class="side">'+
     '<div class="side-top"><div class="brand"><div class="mark"><svg viewBox="0 0 100 100" width="24" height="24" fill="none" aria-hidden="true"><path d="M12 28 C8 28 4 36 2 54 C0 72 8 88 22 88 C30 88 36 78 44 68 L56 68 C64 78 70 88 78 88 C92 88 100 72 98 54 C96 36 92 28 88 28 C76 28 68 36 50 36 C32 36 24 28 12 28 Z" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 44 V64 M16 54 H36" stroke="#fff" stroke-width="7" stroke-linecap="round"/><circle cx="74" cy="48" r="4.5" fill="#fff"/><circle cx="84" cy="58" r="4.5" fill="#fff"/><circle cx="64" cy="58" r="4.5" fill="#fff"/><circle cx="74" cy="68" r="4.5" fill="#fff"/></svg></div>'+
     '<div><div class="bname">RUN ON <span style="color:#6ee7b7">CONSOLE</span></div><div class="bsub">Content management</div></div></div></div>'+
-    '<div class="snav"><div class="slabel">Workspace</div>'+item('dashboard','Dashboard','◱')+
+    '<div class="snav"><div class="slabel">Workspace</div>'+item('dashboard','Dashboard','◱')+item('releases','Live version','🚀')+
       (can('activity','view')?item('activity','Live activity','⚡',S.actUnseen?S.actUnseen:undefined):'')+
       (admin?item('messages','Messages','✉',S.msgCounts&&S.msgCounts['new']?S.msgCounts['new']:undefined):'')+'</div>'+
     '<div class="snav"><div class="slabel">Content</div>'+
       (can('blogs','view')?item('blogs','Blog posts','✎',S.blogs.length):'')+
       (can('media','view')?item('media','Media library','❖',S.media.length):'')+
       (can('pages','view')?item('cmspages','Pages','▦',S.pages.length):'')+
-      (can('pages','view')?item('pages','Website pages & SEO','▤'):'')+
+      (can('pages','view')?item('pages','Website pages & SEO','▤')+item('metas','Metas','🏷'):'')+
       (can('pages','view')?item('platforms','Gaming platforms','◈'):'')+
       item('games','Games','🎮')+
       (can('products','view')?item('products','Products','▣')+item('product-images','Product images','▨')+item('product-categories','Product categories','▤'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
+      item('announce','Announcement bar','📣')+item('sitecode','Template & code','⌨')+
       item('siteusers','Site users','👤')+item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+'</div>':'')+
     '<div class="sfoot"><div class="who"><div class="av">'+
       esc((S.user.username||'?').slice(0,2).toUpperCase())+'</div>'+
@@ -1286,14 +1287,18 @@ function renderShell(){
 function go(v){
   if(S.dirty && !confirm('You have unsaved changes. Leave without saving?'))return;
   if(S.editing) releaseLock(S.editing.id);
-  S.dirty=false; S.editing=null; S.view=v; S.search=''; S.filter='all'; S.mediaLoaded=false; S.sitePages=null; S.siteUsers=null;
+  S.dirty=false; S.editing=null; S.view=v; S.search=''; S.filter='all'; S.mediaLoaded=false; S.sitePages=null; S.siteUsers=null; S.metaRows=null; metaLive={};
   renderShell();
 }
 
 function renderView(){
   var m=$('#main');
   if(S.editing) return renderEditor(m);
-  if(S.view==='dashboard') return renderDash(m);
+  if(S.view==='dashboard'){ renderDash(m); liveVersionCard(m); return; }
+  if(S.view==='releases') return renderReleases(m);
+  if(S.view==='metas' && can('pages','view')) return renderMetas(m);
+  if(S.view==='announce' && S.user.role==='administrator') return renderAnnouncement(m);
+  if(S.view==='sitecode' && S.user.role==='administrator') return renderSiteCode(m);
   if(S.view==='media') return renderMedia(m);
   if(S.view==='pages') return renderPages(m);
   if(S.view==='platforms' && can('pages','view')) return renderPlatforms(m);
@@ -2739,7 +2744,7 @@ async function renderPages(m){
   '<div class="body">'+
   '<div class="alert info"><b>Editable</b> pages come from the CMS database: blog posts, CMS pages, products, product categories and gaming platforms. '+
   'Edit them and the live page updates. <b>Read-only</b> pages (home, about, contact, compatibility…) are written in the website code: '+
-  'their <b>SEO</b> (meta title, description, share image) can still be changed here with the SEO button.</div>'+
+  'their title and description can still be changed with the <b>Metas</b> button.</div>'+
   '<div class="card"><div class="chead" style="flex-wrap:wrap;gap:10px">'+
     '<div class="search" style="max-width:260px;flex:1"><input type="text" id="pq" placeholder="Search title or URL" value="'+esc(S.pq)+'"></div>'+
     '<div class="chips">'+groups.map(function(g){
@@ -2762,7 +2767,7 @@ async function renderPages(m){
         (db&&db.type==='product'&&can('products','edit')?'<button class="btn sm" data-dbe="product" data-id="'+esc(db.id)+'">Edit</button> ':'')+
         (db&&db.type==='pcat'&&can('products','edit')?'<button class="btn sm" data-dbe="pcat" data-id="'+esc(db.id)+'">Edit</button> ':'')+
         (db&&db.type==='platform'&&can('pages','edit')?'<button class="btn sm" data-dbe="platform" data-id="'+esc(db.id)+'">Edit</button> ':'')+
-        (!editable&&p.group!=='Account pages'?'<button class="btn sm" data-seo="'+esc(p.url)+'">'+(S.seo&&S.seo[p.url]&&S.seo[p.url].override?'SEO ✓':'SEO')+'</button> ':'')+
+        '<button class="btn sm" data-metas="'+esc(p.url)+'">Metas</button> '+
         '<a class="btn sm" href="'+esc(p.url)+'" target="_blank" rel="noopener">View ↗</a></td></tr>';
   }).join(''):'<tr><td colspan="4" class="empty">No pages match.</td></tr>')+
   '</tbody></table></div></div>';
@@ -2775,6 +2780,7 @@ async function renderPages(m){
   m.querySelectorAll('[data-pe]').forEach(function(b){ b.addEventListener('click',function(){ S.view='blogs'; openBlog(b.dataset.pe); }); });
   m.querySelectorAll('[data-ppe]').forEach(function(b){ b.addEventListener('click',function(){ S.view='cmspages'; openPage(b.dataset.ppe); }); });
   m.querySelectorAll('[data-seo]').forEach(function(b){ b.addEventListener('click',function(){ seoEditor(b.dataset.seo); }); });
+  m.querySelectorAll('[data-metas]').forEach(function(b){ b.addEventListener('click',function(){ S.mq=b.dataset.metas; S.mgroup='all'; S.mpage=0; go('metas'); }); });
   m.querySelectorAll('[data-dbe]').forEach(function(b){ b.addEventListener('click',async function(){
     var id=b.dataset.id, t=b.dataset.dbe;
     if(t==='product'){ S.view='products'; renderShell(); openProductEditor(id); return; }
@@ -2919,6 +2925,276 @@ async function renderSocial(m){
         var n=document.createElement('div'); n.className='hint publish-error'; n.style.color='#e11d48'; n.textContent=errs[k]; i.parentNode.appendChild(n); });
     }
   });
+}
+
+/* ----------------------------------------------------------- metas (SEO) */
+/* Title and description of every page (api/v1/cms/page-metas.php). The "Live now"
+   line is read from the live page itself, so it always shows what Google sees. */
+
+var metaLive={};          // path -> {t, d} read from the live page
+var metaQueue=[], metaBusy=0;
+function metaFetchLive(path, cb, force){
+  if(metaLive[path] && !force) return cb(metaLive[path]);
+  metaQueue.push([path,cb]); metaPump();
+}
+function metaPump(){
+  while(metaBusy<4 && metaQueue.length){
+    var job=metaQueue.shift(); metaBusy++;
+    (function(path,cb){
+      fetch(path,{credentials:'same-origin',cache:'no-store'}).then(function(r){ return r.ok?r.text():Promise.reject(r.status); })
+      .then(function(h){
+        var doc=new DOMParser().parseFromString(h,'text/html');
+        var d=doc.querySelector('meta[name="description"]');
+        metaLive[path]={t:(doc.title||'').trim(), d:d?(d.getAttribute('content')||'').trim():'', ok:true};
+      }).catch(function(e){ metaLive[path]={t:'',d:'',ok:false,err:String(e)}; })
+      .then(function(){ metaBusy--; cb(metaLive[path]); metaPump(); });
+    })(job[0],job[1]);
+  }
+}
+function metaLen(n,max){ return '<span class="hint" style="color:'+(n===0?'var(--ink-3)':n>max?'#e11d48':'#059669')+'">'+n+' / '+max+'</span>'; }
+
+async function renderMetas(m){
+  if(!S.metaRows){
+    m.innerHTML=head('Metas','Loading…')+'<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+    try{ S.metaRows=(await api('page-metas.php')).rows||[]; }catch(e){ toast(e.message,'bad'); S.metaRows=[]; }
+    if(S.view!=='metas'||S.editing) return;
+  }
+  var all=S.metaRows, g=S.mgroup||'all', q=(S.mq||'').toLowerCase(), page=S.mpage||0, PER=30;
+  var groups=['all'].concat(all.map(function(r){return r.group;}).filter(function(x,i,a){return a.indexOf(x)===i;}));
+  var rows=all.filter(function(r){
+    if(g==='custom'){ if(!r.title&&!r.description) return false; }
+    else if(g!=='all' && r.group!==g) return false;
+    return !q || (r.label+' '+r.path+' '+r.title).toLowerCase().indexOf(q)!==-1;
+  });
+  var pages=Math.max(1,Math.ceil(rows.length/PER)); if(page>=pages) page=pages-1;
+  var shown=rows.slice(page*PER,page*PER+PER);
+  var nCustom=all.filter(function(r){return r.title||r.description;}).length;
+  m.innerHTML=head('Metas','Title and description of every page on runonconsole.com')+
+  '<div class="body">'+
+  '<div class="alert info">Leave a box <b>empty</b> to use the automatic title or description. When you press <b>Save</b>, the live page changes right away: '+
+  'built pages are rewritten, the others (blogs, products, platforms) use it from the next visit. <b>Live now</b> is read from the website itself. '+
+  'Good lengths: title up to <b>60</b> characters, description up to <b>160</b>.</div>'+
+  '<div class="card"><div class="chead" style="flex-wrap:wrap;gap:10px">'+
+    '<div class="search" style="max-width:260px;flex:1"><input type="text" id="mq" placeholder="Search page, URL or title" value="'+esc(S.mq||'')+'"></div>'+
+    '<div class="chips">'+groups.map(function(x){
+      var n=x==='all'?all.length:all.filter(function(r){return r.group===x;}).length;
+      return '<button class="chip'+(g===x?' on':'')+'" data-mg="'+esc(x)+'">'+(x==='all'?'All':esc(x))+'<span class="n">'+n+'</span></button>';
+    }).join('')+'<button class="chip'+(g==='custom'?' on':'')+'" data-mg="custom">Custom<span class="n">'+nCustom+'</span></button></div></div>'+
+  (shown.length?'<table class="list"><thead><tr><th style="width:26%">Page</th><th>Title and description</th><th style="width:96px"></th></tr></thead><tbody>'+
+    shown.map(function(r,i){
+      var idx=page*PER+i;
+      return '<tr data-mrow="'+idx+'"><td style="vertical-align:top"><div style="font-weight:600">'+esc(r.label)+'</div>'+
+          '<div class="t-slug"><a href="'+esc(r.path)+'" target="_blank" rel="noopener">'+esc(r.path)+' ↗</a></div>'+
+          '<div style="margin-top:4px">'+'<span class="tag ro">'+esc(r.group)+'</span>'+
+          (r.status&&r.status!=='published'?' <span class="tag draft">'+esc(r.status)+'</span>':'')+
+          (r.noindex?' <span class="tag off">noindex</span>':'')+
+          (r.title||r.description?' <span class="tag published">custom</span>':'')+'</div></td>'+
+        '<td style="vertical-align:top">'+
+          '<div class="field" style="margin-bottom:6px"><input type="text" data-mt maxlength="255" value="'+esc(r.title)+'" placeholder="Automatic title">'+
+            '<div class="hint" data-mtl></div></div>'+
+          '<div class="field" style="margin-bottom:6px"><textarea data-md rows="2" maxlength="500" placeholder="Automatic description">'+esc(r.description)+'</textarea>'+
+            '<div class="hint" data-mdl></div></div>'+
+          '<div class="hint" data-mlive style="line-height:1.5"><span class="spin" style="width:10px;height:10px"></span> reading live page…</div></td>'+
+        '<td style="vertical-align:top;text-align:right"><button class="btn sm primary" data-msave>Save</button>'+
+          (r.title||r.description?'<button class="btn sm" data-mreset style="margin-top:6px">Reset</button>':'')+'</td></tr>';
+    }).join('')+'</tbody></table>'
+    :'<div class="empty"><div class="big">🔎</div><div>No pages match.</div></div>')+
+  (pages>1?'<div class="cbody" style="display:flex;gap:8px;align-items:center;justify-content:flex-end">'+
+    '<button class="btn sm" data-mp="-1"'+(page===0?' disabled':'')+'>‹ Previous</button><span class="hint">Page '+(page+1)+' of '+pages+' · '+rows.length+' pages</span>'+
+    '<button class="btn sm" data-mp="1"'+(page>=pages-1?' disabled':'')+'>Next ›</button></div>':'')+
+  '</div></div>';
+
+  var mq=$('#mq',m);
+  mq.addEventListener('input',function(){ S.mq=mq.value; S.mpage=0; var at=mq.selectionStart; renderMetas(m); var x=$('#mq',m); if(x){x.focus(); x.setSelectionRange(at,at);} });
+  m.querySelectorAll('[data-mg]').forEach(function(b){ b.addEventListener('click',function(){ S.mgroup=b.dataset.mg; S.mpage=0; renderMetas(m); }); });
+  m.querySelectorAll('[data-mp]').forEach(function(b){ b.addEventListener('click',function(){ S.mpage=page+(+b.dataset.mp); renderMetas(m); m.scrollTop=0; }); });
+
+  m.querySelectorAll('[data-mrow]').forEach(function(tr){
+    var r=rows[+tr.dataset.mrow];
+    var ti=$('[data-mt]',tr), de=$('[data-md]',tr);
+    function counts(){
+      var live=metaLive[r.path]||{t:'',d:''};
+      $('[data-mtl]',tr).innerHTML=metaLen((ti.value||live.t).length,60)+(ti.value?'':' <span class="hint">automatic</span>');
+      $('[data-mdl]',tr).innerHTML=metaLen((de.value||live.d).length,160)+(de.value?'':' <span class="hint">automatic</span>');
+    }
+    function showLive(l){
+      var box=$('[data-mlive]',tr); if(!box) return;
+      if(!l.ok){ box.innerHTML='<span style="color:var(--ink-3)">Live page could not be read'+(r.status&&r.status!=='published'?' (not published)':'')+'.</span>'; return; }
+      box.innerHTML='<b style="color:var(--ink-2)">Live now:</b> '+esc(l.t||'(no title)')+'<br><span style="color:var(--ink-3)">'+esc(l.d||'(no description)')+'</span>';
+      ti.placeholder=l.t?('Automatic: '+l.t):'Automatic title'; de.placeholder=l.d?('Automatic: '+l.d):'Automatic description';
+      if(r.title) ti.placeholder='Automatic title'; if(r.description) de.placeholder='Automatic description';
+      counts();
+    }
+    counts();
+    metaFetchLive(r.path, showLive);
+    ti.addEventListener('input',counts); de.addEventListener('input',counts);
+    async function save(t,d){
+      var btn=$('[data-msave]',tr); btn.disabled=true;
+      try{
+        var res=await api('page-metas.php',{key:r.key,title:t,description:d});
+        r.title=t.trim(); r.description=d.trim();
+        toast(res.message,'good');
+        $('[data-mlive]',tr).innerHTML='<span class="spin" style="width:10px;height:10px"></span> checking the live page…';
+        metaFetchLive(r.path,function(l){
+          showLive(l);
+          var ok=(!r.title||l.t===r.title)&&(!r.description||l.d===r.description);
+          $('[data-mlive]',tr).insertAdjacentHTML('afterbegin', ok?'<b style="color:#059669">✓ Live page updated.</b> ':'<b style="color:#b45309">Saved; the live page has not picked it up yet.</b> ');
+        },true);
+      }catch(e){ toast(e.message,'bad'); }
+      btn.disabled=false;
+    }
+    $('[data-msave]',tr).addEventListener('click',function(){ save(ti.value,de.value); });
+    var rs=$('[data-mreset]',tr);
+    if(rs) rs.addEventListener('click',function(){ if(!confirm('Go back to the automatic title and description for this page?')) return; ti.value=''; de.value=''; save('',''); });
+  });
+}
+
+/* ------------------------------------------------------- announcement bar */
+/* A strip above the header on every page (api/v1/cms/site-layer.php). */
+
+var ANN_PRESETS=[['Lime','#e4ff1a','#111111'],['Green','#059669','#ffffff'],['Dark','#0f172a','#ffffff'],['Red','#dc2626','#ffffff'],['Amber','#f59e0b','#111111'],['Blue','#2563eb','#ffffff']];
+
+function annBar(a){
+  var t=(a.title||'').trim(), x=(a.text||'').trim();
+  return '<div style="position:relative;background:'+esc(a.bg)+';color:'+esc(a.fg)+';font:500 13px/1.45 Inter,system-ui,sans-serif;padding:10px 46px 10px 16px;text-align:center;border-radius:10px">'+
+    (a.icon?esc(a.icon)+' ':'')+(t?'<strong style="font-weight:800">'+esc(t)+'</strong>':'')+(t&&x?' — ':'')+esc(x)+
+    (a.link_url?' <u style="font-weight:700;margin-left:6px">'+esc(a.link_text||'Learn more')+'</u>':'')+
+    (a.dismissible?'<span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:20px">×</span>':'')+'</div>';
+}
+function toLocalInput(iso){ if(!iso) return ''; var d=new Date(iso); if(isNaN(d)) return ''; d=new Date(d.getTime()-d.getTimezoneOffset()*60000); return d.toISOString().slice(0,16); }
+
+async function renderAnnouncement(m){
+  m.innerHTML=head('Announcement bar','A message above the header on every page: sales, offers, news, maintenance')+
+    '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d; try{ d=await api('site-layer.php'); }catch(e){ toast(e.message,'bad'); return; }
+  var a=d.announcement;
+  $('.body',m).innerHTML=
+    '<div class="card"><div class="chead"><h3>Preview</h3><span class="note">'+(d.live?'<b style="color:#059669">● Live on the website</b>':'Not shown on the website')+'</span></div>'+
+      '<div class="cbody" id="an-prev"></div></div>'+
+    '<div class="card"><div class="cbody"><form id="anf">'+
+      '<label style="display:flex;gap:10px;align-items:center;font-weight:700;margin-bottom:14px"><input type="checkbox" id="an-on"'+(a.enabled?' checked':'')+'> Show the announcement on the website</label>'+
+      '<div style="display:grid;grid-template-columns:80px 1fr;gap:10px">'+
+        '<div class="field"><label for="an-icon">Icon</label><input type="text" id="an-icon" maxlength="4" value="'+esc(a.icon)+'"></div>'+
+        '<div class="field"><label for="an-title">Title (bold)</label><input type="text" id="an-title" maxlength="120" value="'+esc(a.title)+'" placeholder="e.g. Big Sale"></div></div>'+
+      '<div class="field"><label for="an-text">Message</label><textarea id="an-text" rows="2" maxlength="300" placeholder="e.g. Up to 30% off gaming mice this week only.">'+esc(a.text)+'</textarea></div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+        '<div class="field"><label for="an-url">Link (optional)</label><input type="text" id="an-url" value="'+esc(a.link_url)+'" placeholder="/products/mice/ or https://…"></div>'+
+        '<div class="field"><label for="an-lt">Link text</label><input type="text" id="an-lt" maxlength="40" value="'+esc(a.link_text)+'" placeholder="Shop now"></div></div>'+
+      '<div class="field"><label>Colours</label><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'+
+        ANN_PRESETS.map(function(p){ return '<button type="button" class="btn sm" data-anp="'+p[1]+'|'+p[2]+'" style="background:'+p[1]+';color:'+p[2]+';border-color:transparent">'+p[0]+'</button>'; }).join('')+
+        '<span class="hint" style="margin-left:6px">Background</span><input type="color" id="an-bg" value="'+esc(a.bg)+'">'+
+        '<span class="hint">Text</span><input type="color" id="an-fg" value="'+esc(a.fg)+'"></div></div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end">'+
+        '<div class="field"><label for="an-end">Hide automatically after (optional)</label><input type="datetime-local" id="an-end" value="'+esc(toLocalInput(a.ends_at))+'"></div>'+
+        '<label class="field" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="an-x"'+(a.dismissible?' checked':'')+'> Visitors can close it (×)</label></div>'+
+      '<button class="btn primary" type="submit">Save to website</button></form></div></div>'+
+    '<div class="hint">Saved changes are on every page straight away. A visitor who closes the bar sees it again when you change the message.</div>';
+  function cur(){
+    var end=$('#an-end',m).value;
+    return { enabled:$('#an-on',m).checked, icon:$('#an-icon',m).value, title:$('#an-title',m).value, text:$('#an-text',m).value,
+      link_url:$('#an-url',m).value.trim(), link_text:$('#an-lt',m).value, bg:$('#an-bg',m).value, fg:$('#an-fg',m).value,
+      dismissible:$('#an-x',m).checked, ends_at: end?new Date(end).toISOString():'' };
+  }
+  function prev(){ $('#an-prev',m).innerHTML=annBar(cur()); }
+  prev();
+  $('#anf',m).addEventListener('input',prev);
+  m.querySelectorAll('[data-anp]').forEach(function(b){ b.addEventListener('click',function(){
+    var c=b.dataset.anp.split('|'); $('#an-bg',m).value=c[0]; $('#an-fg',m).value=c[1]; prev(); }); });
+  $('#anf',m).addEventListener('submit',async function(e){
+    e.preventDefault();
+    m.querySelectorAll('.publish-error').forEach(function(n){n.remove();});
+    try{ var r=await api('site-layer.php',{part:'announcement',value:cur()}); toast(r.message,'good'); renderAnnouncement(m); }
+    catch(err){
+      toast(err.message,'bad');
+      var map={bg:'an-bg',fg:'an-fg',link_url:'an-url',ends_at:'an-end',text:'an-text'}, errs=(err.data&&err.data.errors)||{};
+      Object.keys(errs).forEach(function(k){ var i=$('#'+(map[k]||''),m); if(!i) return;
+        var n=document.createElement('div'); n.className='hint publish-error'; n.style.color='#e11d48'; n.textContent=errs[k]; i.parentNode.appendChild(n); });
+    }
+  });
+}
+
+/* --------------------------------------------------------- template & code */
+/* Custom CSS and HTML added to every page (api/v1/cms/site-layer.php). */
+
+async function renderSiteCode(m){
+  m.innerHTML=head('Template & code','Change the look of every page or add your own HTML')+
+    '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d; try{ d=await api('site-layer.php'); }catch(e){ toast(e.message,'bad'); return; }
+  var c=d.code;
+  var box=function(id,label,help,val,ph){
+    return '<div class="field"><label for="'+id+'">'+label+'</label><div class="hint" style="margin:-2px 0 6px">'+help+'</div>'+
+      '<textarea id="'+id+'" rows="8" spellcheck="false" style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px;white-space:pre" placeholder="'+esc(ph)+'">'+esc(val)+'</textarea></div>';
+  };
+  $('.body',m).innerHTML=
+    '<div class="alert info">What you write here is added to <b>every page</b> of the website (not the CMS) as soon as you save. '+
+    'Use it to restyle the header or footer, add a div or a banner, or paste a tracking or verification code. '+
+    'A mistake can break the look of the site: change one thing at a time and check the website after saving. Empty a box and save to remove it.</div>'+
+    '<div class="card"><div class="cbody"><form id="scf">'+
+      box('sc-css','Custom CSS','Styles for the whole site. Example: make the header darker, hide an element, change a colour.',
+        c.css,'header { background: #022c22 !important; }\n.my-banner { padding: 12px; text-align: center; }')+
+      box('sc-head','Code inside &lt;head&gt;','For meta tags, verification codes, fonts or tracking scripts.',
+        c.head_html,'<meta name="p:domain_verify" content="…" />')+
+      box('sc-top','HTML at the top of the page','Shown above the header (below the announcement bar), on every page.',
+        c.body_top_html,'<div class="my-banner">Free shipping on all orders this week</div>')+
+      box('sc-end','HTML at the bottom of the page','Added at the end of every page: chat widgets, scripts that change the page, extra divs.',
+        c.body_end_html,'<div id="my-chat-widget"></div>')+
+      '<button class="btn primary" type="submit">Save to website</button></form></div></div>';
+  $('#scf',m).addEventListener('submit',async function(e){
+    e.preventDefault();
+    m.querySelectorAll('.publish-error').forEach(function(n){n.remove();});
+    var v={css:$('#sc-css',m).value, head_html:$('#sc-head',m).value, body_top_html:$('#sc-top',m).value, body_end_html:$('#sc-end',m).value};
+    try{ var r=await api('site-layer.php',{part:'code',value:v}); toast(r.message,'good'); }
+    catch(err){
+      toast(err.message,'bad');
+      var map={css:'sc-css',head_html:'sc-head',body_top_html:'sc-top',body_end_html:'sc-end'}, errs=(err.data&&err.data.errors)||{};
+      Object.keys(errs).forEach(function(k){ var i=$('#'+map[k],m); if(!i) return;
+        var n=document.createElement('div'); n.className='hint publish-error'; n.style.color='#e11d48'; n.textContent=errs[k]; i.parentNode.appendChild(n); });
+    }
+  });
+}
+
+/* ------------------------------------------------------------ live version */
+/* Which deploy is on the server (api/v1/cms/releases.php). */
+
+function relChecks(r){
+  if(!r.checks||!r.checks.length) return '';
+  return '<ul style="list-style:none;padding:0;margin:8px 0 0">'+r.checks.map(function(c){
+    return '<li style="font-size:13px;margin:3px 0">'+(c.ok===true?'<b style="color:#059669">✓</b>':c.ok===false?'<b style="color:#e11d48">✗</b>':'<b style="color:var(--ink-3)">?</b>')+' '+esc(c.label)+
+      (c.ok===false?' <span class="hint">(installer not run yet)</span>':'')+'</li>';
+  }).join('')+'</ul>';
+}
+
+async function liveVersionCard(m){
+  var d; try{ d=await api('releases.php'); }catch(e){ return; }
+  if(!d.live || S.view!=='dashboard' || S.editing) return;
+  var r=d.live, body=$('.body',m); if(!body) return;
+  var bad=(r.checks||[]).filter(function(c){return c.ok===false;}).length;
+  var el=document.createElement('div'); el.className='card';
+  el.innerHTML='<div class="cbody" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">'+
+    '<div style="font-size:26px">🚀</div><div style="flex:1;min-width:200px"><div class="hint">Live version</div>'+
+    '<div style="font-weight:700;font-size:15px">Deploy '+r.deploy+' · '+esc(r.title)+'</div>'+
+    '<div class="hint">'+esc(r.date)+(r.served?' · <b style="color:#059669">website files are live</b>':'')+
+      (bad?' · <b style="color:#b45309">'+bad+' installer step(s) not run</b>':'')+'</div></div>'+
+    '<button class="btn sm" data-go2="releases">Details</button></div>';
+  body.insertBefore(el, body.firstChild);
+  $('[data-go2]',el).addEventListener('click',function(){ go('releases'); });
+}
+
+async function renderReleases(m){
+  m.innerHTML=head('Live version','What is on the website now, and earlier deploys')+
+    '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d; try{ d=await api('releases.php'); }catch(e){ toast(e.message,'bad'); return; }
+  var body=$('.body',m);
+  if(!d.releases.length){ body.innerHTML='<div class="card"><div class="empty"><div class="big">🚀</div><div>No deploy information on the server yet.</div></div></div>'; return; }
+  body.innerHTML=d.releases.map(function(r,i){
+    return '<div class="card"><div class="chead"><h3>'+(i===0?'🚀 Live: ':'')+'Deploy '+r.deploy+' · '+esc(r.title)+'</h3><span class="note">'+esc(r.date)+
+        (r.served?' · <b style="color:#059669">files live</b>':'')+'</span></div>'+
+      '<div class="cbody">'+
+        (r.changes.length?'<ul style="margin:0;padding-left:18px">'+r.changes.map(function(c){return '<li style="margin:3px 0">'+esc(c)+'</li>';}).join('')+'</ul>':'')+
+        (i===0?relChecks(r):'')+
+        (r.pr?'<div class="hint" style="margin-top:8px"><a href="'+esc(r.pr)+'" target="_blank" rel="noopener">Code changes (pull request) ↗</a></div>':'')+
+      '</div></div>';
+  }).join('')+'<div class="hint">Website build being served: '+esc(d.build||'unknown')+'</div>';
 }
 
 /* -------------------------------------------------------- products (read-only list) */

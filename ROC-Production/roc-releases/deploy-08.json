@@ -1,0 +1,14 @@
+{
+ "deploy": 8,
+ "date": "2026-10-07",
+ "title": "Product URLs, sitemaps, home blog section",
+ "changes": [
+  "Product categories at /products/{category}/ (old /category/ links redirect)",
+  "Products page: All / PC Hardware / Gaming Hardware",
+  "Sitemaps with page names",
+  "Home shows the newest blog posts automatically"
+ ],
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

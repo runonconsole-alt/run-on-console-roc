@@ -1,0 +1,21 @@
+{
+ "deploy": 10,
+ "date": "2026-10-07",
+ "title": "/gaming-platforms/, Write for us + advertising, light Terms page",
+ "changes": [
+  "Platform hubs at /gaming-platforms/ (old /categories/ links redirect)",
+  "Advertising merged into Write for us; review samples into Contact",
+  "Terms page in site colours"
+ ],
+ "checks": [
+  {
+   "label": "Gaming platforms installer",
+   "type": "htaccess",
+   "marker": "# ROC gaming-platforms BEGIN"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/19",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

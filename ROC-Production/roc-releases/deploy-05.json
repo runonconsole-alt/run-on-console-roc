@@ -1,0 +1,15 @@
+{
+ "deploy": 5,
+ "date": "2026-10-07",
+ "title": "New header, site search, contact and profile cleanup",
+ "changes": [
+  "Header: Products (PC / Gaming Hardware), Systems, Blogs, About Us",
+  "Search with All / Products / Blogs / Games and spelling tolerance",
+  "Contact page without fake address and phone; Discord link from the CMS",
+  "Green spotlight hover instead of blur"
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/17",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

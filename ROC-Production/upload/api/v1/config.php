@@ -75,7 +75,9 @@ if (session_status() === PHP_SESSION_NONE && php_sapi_name() !== 'cli') {
     if (defined('ROC_SESSION_NAME')) {
         session_name(ROC_SESSION_NAME);
     } else {
-        session_name('ROCSTAGINGSESSID');
+        session_name('ROCSESSID');
+        // The staging-named cookie used before October 2026: remove it from the browser.
+        if (isset($_COOKIE['ROCSTAGINGSESSID'])) setcookie('ROCSTAGINGSESSID', '', ['expires' => time() - 3600, 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Lax']);
     }
 
     session_set_cookie_params([
