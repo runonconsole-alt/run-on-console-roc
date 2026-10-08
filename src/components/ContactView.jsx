@@ -157,9 +157,9 @@ export const ContactView = () => {
         <div className="lg:col-span-5 space-y-6">
           
           <Tilt3DCard className="bg-white border-2 border-emerald-500/20 rounded-3xl p-7 sm:p-8 shadow-sm space-y-5">
-            <h3 className="font-display font-extrabold text-lg sm:text-xl text-emerald-950 border-b border-emerald-100 pb-3">
+            <h2 className="font-display font-extrabold text-lg sm:text-xl text-emerald-950 border-b border-emerald-100 pb-3">
               <BouncyText text="Contact Details" />
-            </h3>
+            </h2>
 
             <div className="space-y-4 pt-1">
               <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/60 flex items-start gap-4 transition-all hover:bg-emerald-100/60 shadow-xs">
@@ -181,9 +181,9 @@ export const ContactView = () => {
           {/* Shown by roc-nav.js once a Discord link is saved in CMS -> Social & Amazon tag. */}
           <div data-roc-social-box="discord" style={{ display: 'none' }}>
           <Tilt3DCard className="bg-gradient-to-tr from-[#064E3B] to-[#047857] text-white rounded-3xl p-7 sm:p-8 shadow-md space-y-3 border border-emerald-500/40">
-            <h4 className="font-display font-bold text-lg text-white">
+            <p className="m-0 tracking-tight font-display font-bold text-lg text-white">
               <BouncyText text="Join Our Discord Community" />
-            </h4>
+            </p>
             <p className="text-xs text-emerald-100 leading-relaxed">
               Connect with other PC builders and gamers, share your battlestation, and get advice on gear.
             </p>

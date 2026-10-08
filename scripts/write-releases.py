@@ -86,7 +86,8 @@ RELEASES = [
          changes=['Metas: shows the live title and description; ✎ to edit, character and word counter, ✓ to save',
                   'Home hero: no more "live benchmark" and "latency" badges; the carousel shows Products, the game checker and platforms instead of old sample articles',
                   'The first heading on every page is now the H1 (header menu labels are no longer headings)',
-                  'Contact page: plain reply-time note instead of "senior testing columnists"'],
+                  'Contact page: plain reply-time note instead of "senior testing columnists"',
+                  'Heading order on every page: one H1, H2 sections, H3 inside them; footer, value boxes, launchers and social cards are plain text'],
          checks=[], pr=REPO + '25'),
 ]
 
