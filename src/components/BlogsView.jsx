@@ -434,7 +434,7 @@ export const BlogsView = () => {
                 <BouncyText text="Submit Review Sample & Hardware Suggestions" />
               </h2>
               <p className="text-xs sm:text-sm text-emerald-800 font-semibold">
-                Send your hardware testing suggestions, feedback, or review samples directly to the administrator for moderation & lab queue placement.
+                Send us product or article suggestions, feedback or a review sample. Every message is read by our editor.
               </p>
             </div>
           </div>
@@ -475,7 +475,7 @@ export const BlogsView = () => {
               >
                 <option value="Hardware Review Sample Submission">Hardware Review Sample Submission (Peripherals / Rig)</option>
                 <option value="Blog Topic / Game Benchmark Suggestion">Blog Topic / Game Benchmark Suggestion</option>
-                <option value="Product Lab Latency Retest Request">Product Lab Latency Retest Request</option>
+                <option value="Product Correction">Correction to a product page</option>
                 <option value="General Editorial Feedback">General Editorial & Content Feedback</option>
               </select>
             </div>
@@ -485,7 +485,7 @@ export const BlogsView = () => {
               <textarea 
                 required
                 rows={4}
-                placeholder="Describe the hardware model, benchmark parameters, or article topic you want our lab to review..."
+                placeholder="Tell us the product, game or article topic you have in mind..."
                 value={sugDetails}
                 onChange={(e) => setSugDetails(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
@@ -507,7 +507,7 @@ export const BlogsView = () => {
       <FAQSection 
         faqs={pageFaqs.blogs}
         title="Editorial & Review Policy FAQs"
-        subtitle="How our editorial team reviews games, handles review samples, and conducts lab testing."
+        subtitle="How we choose products, handle review samples and keep our articles honest."
       />
 
     </div>

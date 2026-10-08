@@ -98,6 +98,7 @@ for (const routePath of uniqueRoutes) {
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@RunOnConsole" />
     ${canonical ? `<meta name="twitter:url" content="${escapeHtml(canonical)}" />` : ''}
     <meta name="twitter:title" content="${escapeHtml(title)}" />
     <meta name="twitter:description" content="${escapeHtml(description)}" />

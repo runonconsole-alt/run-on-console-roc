@@ -20,13 +20,13 @@ export const ValuePropsFooter = () => {
   const valueProps = [
     {
       icon: ShieldCheck,
-      title: "HONEST LAB REVIEWS",
-      desc: "100% independent oscilloscope & frame-time testing standards. Zero sponsored bias."
+      title: "INDEPENDENT PICKS",
+      desc: "Picked from specs, official data and published reviews. Brands cannot pay for a place on our lists."
     },
     {
       icon: Cpu,
       title: "CONSOLE & PC MATRIX",
-      desc: "Instant system compatibility verification across 15 platforms & 100+ hardware devices."
+      desc: "Check 500+ PC games against your hardware, and explore guides to 15 gaming platforms."
     },
     {
       icon: Tag,
@@ -210,17 +210,17 @@ export const ValuePropsFooter = () => {
             </a>
 
             <p className="text-xs text-emerald-100/90 leading-relaxed max-w-md">
-              <BouncyText text="ROC (Run On Console) is an independent gaming authority dedicated to providing 100% honest, benchmark-tested reviews on consoles, PC hardware, and accessories with verified game compatibility matrices." />
+              <BouncyText text="ROC (Run On Console) is an independent gaming site: gear picks for PC and console players, guides for every gaming platform and a free &quot;Can I run it&quot; checker built on official game requirements." />
             </p>
 
             <div className="pt-1 space-y-1.5">
               <div className="flex items-center gap-2 text-xs text-emerald-300 font-semibold">
                 <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Independent Laboratory Benchmark Testing Standards</span>
+                <span>Independent picks based on specs and published reviews</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-emerald-300/80 font-mono">
                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Zero Sponsored Bias • Verified Storefront Pricing</span>
+                <span>Sponsored content is always labelled</span>
               </div>
             </div>
           </div>
@@ -320,7 +320,7 @@ export const ValuePropsFooter = () => {
           © {new Date().getFullYear()} ROC (Run On Console). All rights reserved. Built for gamers & console enthusiasts.
         </div>
         <div className="text-[11px] text-emerald-300/90 font-mono">
-          Amazon Associate • Prices and stock availability verified daily.
+          As an Amazon Associate we earn from qualifying purchases. Prices and stock are shown on Amazon.
         </div>
       </div>
 
