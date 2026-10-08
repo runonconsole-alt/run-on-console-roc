@@ -43,7 +43,7 @@ export const ContactView = () => {
 
         <div className="relative z-10 space-y-3">
           <span className="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5 badge-glow">
-            <Sparkles className="w-3.5 h-3.5" /> GET IN TOUCH WITH THE LAB
+            <Sparkles className="w-3.5 h-3.5" /> GET IN TOUCH
           </span>
           <h1 className="font-display font-extrabold text-3xl sm:text-5xl text-white my-3">
             <BouncyText text="Contact Run On Console" />

@@ -14,11 +14,11 @@
    "label": "Page templates refreshed (cli-refresh-templates.php)",
    "type": "contains",
    "path": "cms-templates/product-page.html",
-   "text": "index-DBiesh-v.js"
+   "text": "index-DZkEVFkE.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/25",
- "build": "index-DBiesh-v.js",
+ "build": "index-DZkEVFkE.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]
