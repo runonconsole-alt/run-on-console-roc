@@ -12,9 +12,8 @@
  *   - the Amazon link becomes https://www.amazon.com/dp/ASIN, but only while it is still an
  *     Amazon search link or empty (a link set by hand in the CMS is kept). The affiliate tag
  *     from CMS > Social & Amazon tag is added when the page is shown, as before;
- *   - the picture becomes the SiteStripe image link (Amazon serves it; nothing is copied),
- *     but only while it is still a shared placeholder photo, a name card or empty
- *     (a picture set in the CMS is kept). The name card stays as the fallback after "#fb=".
+ *   - pictures are not changed: Amazon's SiteStripe image widget returns a blank image now.
+ *     A SiteStripe picture set by an earlier run goes back to the site's name card.
  */
 
 if (PHP_SAPI !== 'cli') { http_response_code(403); exit; }
@@ -77,15 +76,14 @@ foreach ($data['products'] as $slug => $a) {
     $link = trim((string)$p['affiliate_amazon']);
     $img = trim((string)$p['image']);
     $newLink = ($link === '' || preg_match('#amazon\.[a-z.]+/s\?#i', $link)) ? $a['link'] : null;
+    // Amazon's SiteStripe image widget no longer returns pictures (a blank image comes back),
+    // so pictures are not changed any more; one set by an earlier run goes back to the name card.
     $newImg = null;
-    if ($img === '' || in_array($img, $placeholders, true) || strpos($img, '/images/products/') === 0) {
-        $newImg = $a['image'];
-        if ($tag !== '') $newImg = str_replace('&language=en_US', '&tag=' . rawurlencode($tag) . '&language=en_US', $newImg);
-    }
+    if (strpos($img, 'amazon-adsystem.com') !== false) $newImg = preg_match('/#fb=(.+)$/', $img, $fm) ? $fm[1] : '';
     if ($newLink === null && $newImg === null) { echo "  =  {$slug}: already set by hand (kept)\n"; continue; }
     $changes[$slug] = ['link' => $newLink, 'image' => $newImg, 'json' => $hasJson ? $p['affiliate_links_json'] : null];
     $backup[$slug] = ['affiliate_amazon' => $p['affiliate_amazon'], 'image' => $p['image'], 'affiliate_links_json' => $hasJson ? $p['affiliate_links_json'] : null];
-    echo '  +  ' . str_pad($slug, 46) . ' ' . $a['asin'] . ($newLink ? '  link' : '') . ($newImg ? '  picture' : '') . "\n";
+    echo '  +  ' . str_pad($slug, 46) . ' ' . $a['asin'] . ($newLink ? '  link' : '') . ($newImg ? '  picture back to name card' : '') . "\n";
 }
 
 echo "\n" . count($changes) . ' product(s) to update' . ($tag !== '' ? " (tag {$tag} on pictures)" : '') . ".\n";

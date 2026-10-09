@@ -165,6 +165,12 @@ RELEASES = [
                   'Installer: cli-product-asin.php (dry run, --apply with backup, --rollback)'],
          checks=[dict(label='ASIN installer', type='file', path='api/v1/cron/cli-product-asin.php')],
          pr=REPO + '30'),
+    dict(deploy=30, date='2026-10-09', title='Products: product cards back (Amazon image widget is blank); /dp/ links stay',
+         changes=['Amazon SiteStripe image links now return a blank picture, so products show their own name cards again',
+                  'The exact Amazon links (amazon.com/dp/ASIN) stay',
+                  'A blocked or blank Amazon picture anywhere is replaced by the website picture, even when it failed before the page script ran'],
+         checks=[dict(label='Pictures back (run cli-product-asin.php --apply)', type='file', path='api/v1/cron/cli-product-asin.php')],
+         pr=REPO + '30'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

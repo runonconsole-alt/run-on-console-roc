@@ -60,11 +60,14 @@ def main():
         cur = (p.get('affiliateLinks') or {}).get('amazon', '')
         if not cur or '/s?' in cur:
             p.setdefault('affiliateLinks', {})['amazon'] = a['link']; links += 1
-        if p.get('image', '') in PLACEHOLDERS or not p.get('image'):
-            p['image'] = a['image']; images += 1
+        # Amazon's SiteStripe image widget no longer returns pictures (blank image), so a
+        # SiteStripe picture set earlier goes back to the site's own name card.
+        if 'amazon-adsystem.com' in p.get('image', ''):
+            m = re.search(r'#fb=(.+)$', p['image'])
+            p['image'] = m.group(1) if m else ''; images += 1
     new = head + sep + json.dumps(products, indent=1, ensure_ascii=False) + body[end:]
     open(CATALOG, 'w', encoding='utf-8', newline='\n').write(new)
-    print('productCatalog.js: links', links, 'images', images)
+    print('productCatalog.js: links', links, 'pictures put back', images)
 
 
 if __name__ == '__main__':

@@ -393,18 +393,27 @@
   });
 })();
 
-/* Amazon product pictures (SiteStripe links) can be blocked by ad blockers: show the
-   site's own picture instead. The fallback is in the link after "#fb=" (or the
-   data-fb attribute); without one, the picture is hidden. */
+/* Amazon product pictures (SiteStripe links) can be blocked by ad blockers or come back
+   blank: show the site's own picture instead. The fallback is in the link after "#fb="
+   (or the data-fb attribute); without one, the picture is hidden. Pictures that failed
+   before this script ran are found by the scan below. */
 (function () {
-  window.addEventListener('error', function (e) {
-    var img = e.target;
-    if (!img || img.tagName !== 'IMG' || img.getAttribute('data-roc-fb-done')) return;
+  var AMZ = /amazon-adsystem\.com|media-amazon\.com/;
+  function swap(img) {
+    if (!img || img.getAttribute('data-roc-fb-done')) return;
     var src = img.getAttribute('src') || '';
-    if (!/amazon-adsystem\.com|media-amazon\.com/.test(src)) return;
+    if (!AMZ.test(src)) return;
     img.setAttribute('data-roc-fb-done', '1');
     var m = src.match(/#fb=([^#]+)$/), fb = img.getAttribute('data-fb') || (m ? decodeURIComponent(m[1]) : '');
     if (fb) { img.removeAttribute('srcset'); img.src = fb; img.style.objectFit = 'cover'; img.style.padding = '0'; }
     else img.style.visibility = 'hidden';
-  }, true);
+  }
+  function bad(img) { return img.complete && img.naturalWidth <= 2; }
+  window.addEventListener('error', function (e) { if (e.target && e.target.tagName === 'IMG') swap(e.target); }, true);
+  window.addEventListener('load', function (e) { var t = e.target; if (t && t.tagName === 'IMG' && AMZ.test(t.src) && bad(t)) swap(t); }, true);
+  function scan() { [].forEach.call(document.querySelectorAll('img'), function (i) { if (AMZ.test(i.getAttribute('src') || '') && bad(i)) swap(i); }); }
+  scan();
+  document.addEventListener('DOMContentLoaded', scan);
+  window.addEventListener('load', function () { scan(); setTimeout(scan, 1500); });
+  if (window.MutationObserver) new MutationObserver(function () { setTimeout(scan, 300); }).observe(document.documentElement, { childList: true, subtree: true });
 })();

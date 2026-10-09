@@ -88,7 +88,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST WIRELESS OVERALL",
   "bestFor": "Best Wireless Overall",
   "rank": 2,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0C7KFZ5TL&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-strix-scope-ii-96-wireless.webp",
+  "image": "/images/products/asus-rog-strix-scope-ii-96-wireless.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0C7KFZ5TL"
   },
@@ -117,7 +117,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST HALL EFFECT / 96%",
   "bestFor": "Best Hall Effect / 96%",
   "rank": 3,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FKHPRZ45&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/corsair-vanguard-pro-96.webp",
+  "image": "/images/products/corsair-vanguard-pro-96.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0FKHPRZ45"
   },
@@ -147,7 +147,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST COMPETITIVE TKL",
   "bestFor": "Best Competitive TKL",
   "rank": 4,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CG7BWG7J&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-huntsman-v3-pro-tkl.webp",
+  "image": "/images/products/razer-huntsman-v3-pro-tkl.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0CG7BWG7J"
   },
@@ -177,7 +177,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST RAZER MAGNETIC",
   "bestFor": "Best Razer Magnetic",
   "rank": 5,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H47Z2J3T&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-huntsman-v3-he.webp",
+  "image": "/images/products/razer-huntsman-v3-he.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0H47Z2J3T"
   },
@@ -206,7 +206,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST TKL GAMING",
   "bestFor": "Best TKL Gaming",
   "rank": 6,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DF2QL2GK&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-apex-pro-tkl-gen-3.webp",
+  "image": "/images/products/steelseries-apex-pro-tkl-gen-3.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DF2QL2GK"
   },
@@ -235,7 +235,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST PREMIUM TYPING + GAMING",
   "bestFor": "Best Premium Typing + Gaming",
   "rank": 7,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D89ZFWJX&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/keychron-q1-he.webp",
+  "image": "/images/products/keychron-q1-he.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0D89ZFWJX"
   },
@@ -265,7 +265,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST VALUE MAGNETIC",
   "bestFor": "Best Value Magnetic",
   "rank": 8,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DCVQBMVP&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/keychron-k2-he.webp",
+  "image": "/images/products/keychron-k2-he.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DCVQBMVP"
   },
@@ -295,7 +295,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST MID-RANGE",
   "bestFor": "Best Mid-Range",
   "rank": 9,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DY7KTB87&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/lemokey-p1-he.webp",
+  "image": "/images/products/lemokey-p1-he.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DY7KTB87"
   },
@@ -325,7 +325,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST WIRELESS MAGNETIC",
   "bestFor": "Best Wireless Magnetic",
   "rank": 10,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GJXBMY43&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-azoth-96-he.webp",
+  "image": "/images/products/asus-rog-azoth-96-he.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0GJXBMY43"
   },
@@ -355,7 +355,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST WIRELESS MECHANICAL",
   "bestFor": "Best Wireless Mechanical",
   "rank": 11,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BSKSCGZ4&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-azoth.webp",
+  "image": "/images/products/asus-rog-azoth.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0BSKSCGZ4"
   },
@@ -385,7 +385,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST NEW MECHANICAL / TYPING",
   "bestFor": "Best New Mechanical / Typing",
   "rank": 12,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GJ4V9XFJ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/epomaker-glyph.webp",
+  "image": "/images/products/epomaker-glyph.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0GJ4V9XFJ"
   },
@@ -415,7 +415,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST FEATURE-RICH TKL",
   "bestFor": "Best Feature-Rich TKL",
   "rank": 13,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GWD2D7S3&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/turtle-beach-command-series-kb7-tkl.webp",
+  "image": "/images/products/turtle-beach-command-series-kb7-tkl.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0GWD2D7S3"
   },
@@ -446,7 +446,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST PREMIUM MECHANICAL",
   "bestFor": "Best Premium Mechanical",
   "rank": 14,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DD5S8TM8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-blackwidow-v4-pro-75.webp",
+  "image": "/images/products/razer-blackwidow-v4-pro-75.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DD5S8TM8"
   },
@@ -477,7 +477,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST LOW-PROFILE WIRELESS",
   "bestFor": "Best Low-Profile Wireless",
   "rank": 15,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DB1WY5L9&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g915-x-lightspeed.webp",
+  "image": "/images/products/logitech-g915-x-lightspeed.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DB1WY5L9"
   },
@@ -506,7 +506,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST COMPACT MAINSTREAM",
   "bestFor": "Best Compact Mainstream",
   "rank": 16,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BRSQ2DSX&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-pro-x-60-lightspeed.webp",
+  "image": "/images/products/logitech-g-pro-x-60-lightspeed.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0BRSQ2DSX"
   },
@@ -536,7 +536,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST CUSTOMIZABLE 75%",
   "bestFor": "Best Customizable 75%",
   "rank": 17,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D5Q89DWL&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/nuphy-halo75-v2.webp",
+  "image": "/images/products/nuphy-halo75-v2.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0D5Q89DWL"
   },
@@ -566,7 +566,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET HALL EFFECT",
   "bestFor": "Best Budget Hall Effect",
   "rank": 18,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DQWNJJ6X&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/monsgeek-fun60-ultra.webp",
+  "image": "/images/products/monsgeek-fun60-ultra.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DQWNJJ6X"
   },
@@ -596,7 +596,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET MECHANICAL",
   "bestFor": "Best Budget Mechanical",
   "rank": 19,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H9CC8JCZ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-reclusa-x-mini-65.webp",
+  "image": "/images/products/razer-reclusa-x-mini-65.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0H9CC8JCZ"
   },
@@ -626,7 +626,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST QUIET MECHANICAL",
   "bestFor": "Best Quiet Mechanical",
   "rank": 20,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H9VDD7C7&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/be-quiet-light-mount-tkl.webp",
+  "image": "/images/products/be-quiet-light-mount-tkl.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0H9VDD7C7"
   },
@@ -686,7 +686,7 @@ export const ALL_PRODUCTS = [
   "badge": "PREMIUM ALL-ROUNDER",
   "bestFor": "Premium All-Rounder",
   "rank": 1,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09ZLRCH1H&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-nova-pro-wireless.webp",
+  "image": "/images/products/steelseries-arctis-nova-pro-wireless.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B09ZLRCH1H"
   },
@@ -716,7 +716,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST OVERALL / PREMIUM 2026",
   "bestFor": "Best Overall / Premium 2026",
   "rank": 2,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GS7PZH2P&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-nova-pro-omni.webp",
+  "image": "/images/products/steelseries-arctis-nova-pro-omni.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0GS7PZH2P"
   },
@@ -745,7 +745,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST PC GAMING HEADSET",
   "bestFor": "Best PC Gaming Headset",
   "rank": 3,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F3QDLZKG&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-blackshark-v3-pro.webp",
+  "image": "/images/products/razer-blackshark-v3-pro.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0F3QDLZKG"
   },
@@ -775,7 +775,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST OVERALL VALUE",
   "bestFor": "Best Overall Value",
   "rank": 4,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FRNR8Y11&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-nova-7-wireless-gen-2.webp",
+  "image": "/images/products/steelseries-arctis-nova-7-wireless-gen-2.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0FRNR8Y11"
   },
@@ -804,7 +804,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST CONSOLE VALUE",
   "bestFor": "Best Console Value",
   "rank": 5,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D2YBQQ1P&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-nova-5-wireless.webp",
+  "image": "/images/products/steelseries-arctis-nova-5-wireless.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0D2YBQQ1P"
   },
@@ -833,7 +833,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST AFFORDABLE WIRELESS",
   "bestFor": "Best Affordable Wireless",
   "rank": 6,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F956KHT9&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-nova-3-wireless.webp",
+  "image": "/images/products/steelseries-arctis-nova-3-wireless.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0F956KHT9"
   },
@@ -862,7 +862,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST WIRELESS GAMING HEADSET",
   "bestFor": "Best Wireless Gaming Headset",
   "rank": 7,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0B3F8V4JG&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-pro-x-2-lightspeed.webp",
+  "image": "/images/products/logitech-g-pro-x-2-lightspeed.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0B3F8V4JG"
   },
@@ -891,7 +891,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST MULTI-PLATFORM",
   "bestFor": "Best Multi-Platform",
   "rank": 8,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BRXJDQC1&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-astro-a50-x.webp",
+  "image": "/images/products/logitech-g-astro-a50-x.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0BRXJDQC1"
   },
@@ -920,7 +920,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BATTERY LIFE",
   "bestFor": "Best Battery Life",
   "rank": 9,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09TRW57WB&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/hyperx-cloud-alpha-wireless.webp",
+  "image": "/images/products/hyperx-cloud-alpha-wireless.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B09TRW57WB"
   },
@@ -949,7 +949,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST AUDIOPHILE GAMING",
   "bestFor": "Best Audiophile Gaming",
   "rank": 10,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G98TB4ZF&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/audeze-maxwell-2.webp",
+  "image": "/images/products/audeze-maxwell-2.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0G98TB4ZF"
   },
@@ -978,7 +978,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST OPEN-BACK GAMING",
   "bestFor": "Best Open-Back Gaming",
   "rank": 11,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D13VX3S6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/turtle-beach-atlas-air.webp",
+  "image": "/images/products/turtle-beach-atlas-air.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0D13VX3S6"
   },
@@ -1008,7 +1008,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET WIRELESS",
   "bestFor": "Best Budget Wireless",
   "rank": 12,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CZX86R9F&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/turtle-beach-stealth-500.webp",
+  "image": "/images/products/turtle-beach-stealth-500.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0CZX86R9F"
   },
@@ -1037,7 +1037,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET GAMING HEADSET",
   "bestFor": "Best Budget Gaming Headset",
   "rank": 13,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G12HGD6R&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-g325-lightspeed.webp",
+  "image": "/images/products/logitech-g-g325-lightspeed.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0G12HGD6R"
   },
@@ -1066,7 +1066,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST GAMING EARBUDS",
   "bestFor": "Best Gaming Earbuds",
   "rank": 14,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DFX4TPS6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-gamebuds.webp",
+  "image": "/images/products/steelseries-arctis-gamebuds.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DFX4TPS6"
   },
@@ -1095,7 +1095,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST LOW-LATENCY EARBUDS",
   "bestFor": "Best Low-Latency Earbuds",
   "rank": 15,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CJHB7B59&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/sony-inzone-buds.webp",
+  "image": "/images/products/sony-inzone-buds.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0CJHB7B59"
   },
@@ -1124,7 +1124,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST WIRED GAMING AUDIO",
   "bestFor": "Best Wired Gaming Audio",
   "rank": 16,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09FPCVHVN&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/epos-h6pro.webp",
+  "image": "/images/products/epos-h6pro.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B09FPCVHVN"
   },
@@ -1153,7 +1153,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST STUDIO HEADPHONES FOR GAMING",
   "bestFor": "Best Studio Headphones for Gaming",
   "rank": 17,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B00HVLUR86&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/audio-technica-ath-m50x.webp",
+  "image": "/images/products/audio-technica-ath-m50x.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B00HVLUR86"
   },
@@ -1181,7 +1181,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST AUDIOPHILE BUDGET HEADPHONES",
   "bestFor": "Best Audiophile Budget Headphones",
   "rank": 18,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B08J9MVB6W&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/sennheiser-hd-560s.webp",
+  "image": "/images/products/sennheiser-hd-560s.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B08J9MVB6W"
   },
@@ -1210,7 +1210,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST USB GAMING MIC",
   "bestFor": "Best USB Gaming Mic",
   "rank": 19,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B088HHWC47&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/elgato-wave3.webp",
+  "image": "/images/products/elgato-wave3.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B088HHWC47"
   },
@@ -1239,7 +1239,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST RGB USB MIC",
   "bestFor": "Best RGB USB Mic",
   "rank": 20,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DG9X4WHW&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/hyperx-quadcast-2-s.webp",
+  "image": "/images/products/hyperx-quadcast-2-s.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DG9X4WHW"
   },
@@ -1269,7 +1269,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST PLUG-AND-PLAY MIC",
   "bestFor": "Best Plug-and-Play Mic",
   "rank": 21,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CBNTXNWV&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-alias.webp",
+  "image": "/images/products/steelseries-alias.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0CBNTXNWV"
   },
@@ -1297,7 +1297,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET MIC",
   "bestFor": "Best Budget Mic",
   "rank": 22,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CT787NLW&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-seiren-v3-mini.webp",
+  "image": "/images/products/razer-seiren-v3-mini.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0CT787NLW"
   },
@@ -1326,7 +1326,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST COMPACT GAMING SPEAKERS",
   "bestFor": "Best Compact Gaming Speakers",
   "rank": 23,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B00UAFSN5O&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/edifier-g2000.webp",
+  "image": "/images/products/edifier-g2000.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B00UAFSN5O"
   },
@@ -1355,7 +1355,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST OVERALL / COMPETITIVE FPS",
   "bestFor": "Best Overall / Competitive FPS",
   "rank": 1,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GMLBSSTD&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-viper-v4-pro.webp",
+  "image": "/images/products/razer-viper-v4-pro.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0GMLBSSTD"
   },
@@ -1384,7 +1384,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST COMPETITIVE FPS / PREMIUM",
   "bestFor": "Best Competitive FPS / Premium",
   "rank": 2,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G12HGHGM&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-pro-x2-superstrike.webp",
+  "image": "/images/products/logitech-g-pro-x2-superstrike.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0G12HGHGM"
   },
@@ -1413,7 +1413,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST ERGONOMIC GAMING MOUSE",
   "bestFor": "Best Ergonomic Gaming Mouse",
   "rank": 3,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F3QCXL82&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-deathadder-v4-pro.webp",
+  "image": "/images/products/razer-deathadder-v4-pro.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0F3QCXL82"
   },
@@ -1442,7 +1442,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST MMO / VERSATILE",
   "bestFor": "Best MMO / Versatile",
   "rank": 4,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H4SBT4SH&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-naga-v3-pro.webp",
+  "image": "/images/products/razer-naga-v3-pro.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0H4SBT4SH"
   },
@@ -1471,7 +1471,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST LIGHTWEIGHT MAINSTREAM",
   "bestFor": "Best Lightweight Mainstream",
   "rank": 5,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09NBWL8J5&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-pro-x-superlight-2.webp",
+  "image": "/images/products/logitech-g-pro-x-superlight-2.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B09NBWL8J5"
   },
@@ -1500,7 +1500,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST WORK & PLAY / FEATURE-RICH",
   "bestFor": "Best Work & Play / Feature-Rich",
   "rank": 6,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B092CB69Q4&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g502-x-plus.webp",
+  "image": "/images/products/logitech-g502-x-plus.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B092CB69Q4"
   },
@@ -1530,7 +1530,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST WIRED COMPETITIVE",
   "bestFor": "Best Wired Competitive",
   "rank": 7,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FB8VWW8Y&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/endgame-gear-op1-8k-v2.webp",
+  "image": "/images/products/endgame-gear-op1-8k-v2.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0FB8VWW8Y"
   },
@@ -1559,7 +1559,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST ULTRA-LIGHT / FINGERTIP",
   "bestFor": "Best Ultra-Light / Fingertip",
   "rank": 8,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FM2K41Y6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/pulsar-x2f-crazylight.webp",
+  "image": "/images/products/pulsar-x2f-crazylight.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0FM2K41Y6"
   },
@@ -1588,7 +1588,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST SMALL ULTRA-LIGHT",
   "bestFor": "Best Small Ultra-Light",
   "rank": 9,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DVXD49L8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/pulsar-x2-crazylight-mini.webp",
+  "image": "/images/products/pulsar-x2-crazylight-mini.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DVXD49L8"
   },
@@ -1617,7 +1617,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST LIGHTWEIGHT ERGONOMIC",
   "bestFor": "Best Lightweight Ergonomic",
   "rank": 10,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FFGN4381&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/pulsar-xlite-crazylight.webp",
+  "image": "/images/products/pulsar-xlite-crazylight.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0FFGN4381"
   },
@@ -1646,7 +1646,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST MID-RANGE",
   "bestFor": "Best Mid-Range",
   "rank": 11,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0HBV6L6X8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/mchose-l7-ultra.webp",
+  "image": "/images/products/mchose-l7-ultra.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0HBV6L6X8"
   },
@@ -1675,7 +1675,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST VALUE LIGHTWEIGHT",
   "bestFor": "Best Value Lightweight",
   "rank": 12,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DSPR5SFW&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/mchose-a7.webp",
+  "image": "/images/products/mchose-a7.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DSPR5SFW"
   },
@@ -1703,7 +1703,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET COMPETITIVE",
   "bestFor": "Best Budget Competitive",
   "rank": 13,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FN7HCZT1&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/vxe-r1-pro.webp",
+  "image": "/images/products/vxe-r1-pro.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0FN7HCZT1"
   },
@@ -1732,7 +1732,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST SMALL PREMIUM",
   "bestFor": "Best Small Premium",
   "rank": 14,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DG6DQ2DP&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-harpe-ace-mini.webp",
+  "image": "/images/products/asus-rog-harpe-ace-mini.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DG6DQ2DP"
   },
@@ -1761,7 +1761,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST MID-RANGE WIRELESS",
   "bestFor": "Best Mid-Range Wireless",
   "rank": 15,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CTN26P3Z&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/corsair-m75-wireless.webp",
+  "image": "/images/products/corsair-m75-wireless.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0CTN26P3Z"
   },
@@ -1790,7 +1790,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST COMPACT ERGONOMIC",
   "bestFor": "Best Compact Ergonomic",
   "rank": 16,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09BRFNP6F&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-prime-wireless-mini.webp",
+  "image": "/images/products/steelseries-prime-wireless-mini.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B09BRFNP6F"
   },
@@ -1818,7 +1818,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST ESPORTS ERGONOMIC",
   "bestFor": "Best Esports Ergonomic",
   "rank": 17,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F1XD5MK8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/zowie-ec2-dw.webp",
+  "image": "/images/products/zowie-ec2-dw.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0F1XD5MK8"
   },
@@ -1847,7 +1847,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET WIRELESS",
   "bestFor": "Best Budget Wireless",
   "rank": 18,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0B8TKY2YT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/cooler-master-mm311.webp",
+  "image": "/images/products/cooler-master-mm311.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0B8TKY2YT"
   },
@@ -1876,7 +1876,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST ERGONOMIC FEATURE-RICH",
   "bestFor": "Best Ergonomic Feature-Rich",
   "rank": 19,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0B6Y3XYFG&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-basilisk-v3-pro.webp",
+  "image": "/images/products/razer-basilisk-v3-pro.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0B6Y3XYFG"
   },
@@ -1934,7 +1934,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST OVERALL PC SPEAKERS",
   "bestFor": "Best Overall PC Speakers",
   "rank": 1,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DFZQGZ37&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/mackie-cr35bt-cr8sbt.webp",
+  "image": "/images/products/mackie-cr35bt-cr8sbt.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DFZQGZ37"
   },
@@ -1963,7 +1963,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET PC SPEAKERS",
   "bestFor": "Best Budget PC Speakers",
   "rank": 2,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DXW25R3D&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-pebble-pro.webp",
+  "image": "/images/products/creative-pebble-pro.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DXW25R3D"
   },
@@ -1993,7 +1993,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST ULTRA-BUDGET",
   "bestFor": "Best Ultra-Budget",
   "rank": 3,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B08F57GSJ7&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-pebble-v3.webp",
+  "image": "/images/products/creative-pebble-v3.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B08F57GSJ7"
   },
@@ -2023,7 +2023,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET 2.1",
   "bestFor": "Best Budget 2.1",
   "rank": 4,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B07NWLWM9B&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-pebble-plus.webp",
+  "image": "/images/products/creative-pebble-plus.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B07NWLWM9B"
   },
@@ -2052,7 +2052,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST MID-RANGE COMPACT",
   "bestFor": "Best Mid-Range Compact",
   "rank": 5,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H946F5J9&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-xf1.webp",
+  "image": "/images/products/creative-xf1.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0H946F5J9"
   },
@@ -2081,7 +2081,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST GAMING SOUNDBAR",
   "bestFor": "Best Gaming Soundbar",
   "rank": 6,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FCXVPBZY&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-stage-pro.webp",
+  "image": "/images/products/creative-stage-pro.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0FCXVPBZY"
   },
@@ -2112,7 +2112,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET SOUNDBAR",
   "bestFor": "Best Budget Soundbar",
   "rank": 7,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CTHBSG6X&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-sound-blaster-gs3.webp",
+  "image": "/images/products/creative-sound-blaster-gs3.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0CTHBSG6X"
   },
@@ -2142,7 +2142,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST GAMING SPEAKERS",
   "bestFor": "Best Gaming Speakers",
   "rank": 8,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0C2Y8JYCZ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-nommo-v2-pro.webp",
+  "image": "/images/products/razer-nommo-v2-pro.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0C2Y8JYCZ"
   },
@@ -2172,7 +2172,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST GENERAL-PURPOSE PC SPEAKERS",
   "bestFor": "Best General-Purpose PC Speakers",
   "rank": 9,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0719C132V&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/edifier-r1280db.webp",
+  "image": "/images/products/edifier-r1280db.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0719C132V"
   },
@@ -2202,7 +2202,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST 2.1 PC SPEAKERS",
   "bestFor": "Best 2.1 PC Speakers",
   "rank": 10,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B077Y6PHKQ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/edifier-s350db.webp",
+  "image": "/images/products/edifier-s350db.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B077Y6PHKQ"
   },
@@ -2232,7 +2232,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST PREMIUM DESKTOP SPEAKERS",
   "bestFor": "Best Premium Desktop Speakers",
   "rank": 11,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B07NP3CS11&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/edifier-s3000-pro.webp",
+  "image": "/images/products/edifier-s3000-pro.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B07NP3CS11"
   },
@@ -2261,7 +2261,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST COMPACT PREMIUM",
   "bestFor": "Best Compact Premium",
   "rank": 12,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D95QG8W4&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/edifier-m60.webp",
+  "image": "/images/products/edifier-m60.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0D95QG8W4"
   },
@@ -2291,7 +2291,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST PREMIUM SMALL SPEAKERS",
   "bestFor": "Best Premium Small Speakers",
   "rank": 13,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B010OIVSDA&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/audioengine-a2.webp",
+  "image": "/images/products/audioengine-a2.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B010OIVSDA"
   },
@@ -2321,7 +2321,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST AUDIOPHILE DESKTOP SPEAKERS",
   "bestFor": "Best Audiophile Desktop Speakers",
   "rank": 14,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B079TB99K3&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/audioengine-a5-wireless.webp",
+  "image": "/images/products/audioengine-a5-wireless.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B079TB99K3"
   },
@@ -2351,7 +2351,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST STUDIO REFERENCE",
   "bestFor": "Best Studio Reference",
   "rank": 15,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B01C5RZWCQ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/ik-multimedia-iloud-micro-monitor.webp",
+  "image": "/images/products/ik-multimedia-iloud-micro-monitor.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B01C5RZWCQ"
   },
@@ -2380,7 +2380,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST STUDIO VALUE",
   "bestFor": "Best Studio Value",
   "rank": 16,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B00GP56OYA&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/presonus-eris-e45.webp",
+  "image": "/images/products/presonus-eris-e45.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B00GP56OYA"
   },
@@ -2408,7 +2408,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST GAMING 2.0",
   "bestFor": "Best Gaming 2.0",
   "rank": 17,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09KNYBT4Q&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arena-3.webp",
+  "image": "/images/products/steelseries-arena-3.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B09KNYBT4Q"
   },
@@ -2438,7 +2438,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST MID-RANGE GAMING 2.1",
   "bestFor": "Best Mid-Range Gaming 2.1",
   "rank": 18,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09D45L52J&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arena-7.webp",
+  "image": "/images/products/steelseries-arena-7.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B09D45L52J"
   },
@@ -2469,7 +2469,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST SURROUND GAMING",
   "bestFor": "Best Surround Gaming",
   "rank": 19,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09KNWMGKF&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arena-9.webp",
+  "image": "/images/products/steelseries-arena-9.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B09KNWMGKF"
   },
@@ -2499,7 +2499,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST RGB GAMING SPEAKERS",
   "bestFor": "Best RGB Gaming Speakers",
   "rank": 20,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B07B2WLS17&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g560-lightsync.webp",
+  "image": "/images/products/logitech-g560-lightsync.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B07B2WLS17"
   },
@@ -2529,7 +2529,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST VALUE 2.1",
   "bestFor": "Best Value 2.1",
   "rank": 21,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0877BPCJM&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-z407.webp",
+  "image": "/images/products/logitech-z407.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0877BPCJM"
   },
@@ -2559,7 +2559,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST 5.1 SURROUND",
   "bestFor": "Best 5.1 Surround",
   "rank": 22,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B004M18O60&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-z906.webp",
+  "image": "/images/products/logitech-z906.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B004M18O60"
   },
@@ -2589,7 +2589,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST GAMING SOUNDBAR ALTERNATIVE",
   "bestFor": "Best Gaming Soundbar Alternative",
   "rank": 23,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09VX86JR6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-leviathan-v2.webp",
+  "image": "/images/products/razer-leviathan-v2.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B09VX86JR6"
   },
@@ -2647,7 +2647,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET TV/CONSOLE SOUNDBAR SYSTEM",
   "bestFor": "Best Budget TV/Console Soundbar System",
   "rank": 25,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CBRXTWGP&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/hisense-ax5125h.webp",
+  "image": "/images/products/hisense-ax5125h.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0CBRXTWGP"
   },
@@ -2677,7 +2677,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST OVERALL / PREMIUM",
   "bestFor": "Best Overall / Premium",
   "rank": 1,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G31KVQ1H&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-swift-oled-pg32ucdm-gen3.webp",
+  "image": "/images/products/asus-rog-swift-oled-pg32ucdm-gen3.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0G31KVQ1H"
   },
@@ -2706,7 +2706,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST 27-INCH 4K OLED",
   "bestFor": "Best 27-inch 4K OLED",
   "rank": 2,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DM6SHQTN&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-swift-oled-pg27ucdm.webp",
+  "image": "/images/products/asus-rog-swift-oled-pg27ucdm.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DM6SHQTN"
   },
@@ -2736,7 +2736,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST COMPETITIVE / ESPORTS",
   "bestFor": "Best Competitive / Esports",
   "rank": 3,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FX8FD62M&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-swift-oled-pg27aqwp-w.webp",
+  "image": "/images/products/asus-rog-swift-oled-pg27aqwp-w.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0FX8FD62M"
   },
@@ -2765,7 +2765,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST DUAL-MODE OLED",
   "bestFor": "Best Dual-Mode OLED",
   "rank": 4,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D7NNK43H&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-swift-oled-pg32ucdp.webp",
+  "image": "/images/products/asus-rog-swift-oled-pg32ucdp.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0D7NNK43H"
   },
@@ -2794,7 +2794,7 @@ export const ALL_PRODUCTS = [
   "badge": "PREMIUM 4K ALTERNATIVE",
   "bestFor": "Premium 4K Alternative",
   "rank": 5,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GWGSNVLT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/samsung-odyssey-oled-g80sh-s32hg802s.webp",
+  "image": "/images/products/samsung-odyssey-oled-g80sh-s32hg802s.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0GWGSNVLT"
   },
@@ -2824,7 +2824,7 @@ export const ALL_PRODUCTS = [
   "badge": "HIGH-END 4K GAMING",
   "bestFor": "High-End 4K Gaming",
   "rank": 6,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GY62Y41K&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/samsung-odyssey-oled-g73sh-s32hg732s.webp",
+  "image": "/images/products/samsung-odyssey-oled-g73sh-s32hg732s.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0GY62Y41K"
   },
@@ -2854,7 +2854,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST VALUE 4K QD-OLED",
   "bestFor": "Best Value 4K QD-OLED",
   "rank": 7,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F148HG5M&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/alienware-aw2725q.webp",
+  "image": "/images/products/alienware-aw2725q.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0F148HG5M"
   },
@@ -2884,7 +2884,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST VALUE OLED",
   "bestFor": "Best Value OLED",
   "rank": 8,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GYG3VLMR&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/alienware-aw2726dm.webp",
+  "image": "/images/products/alienware-aw2726dm.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0GYG3VLMR"
   },
@@ -2914,7 +2914,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST 1440P ULTRAWIDE",
   "bestFor": "Best 1440p Ultrawide",
   "rank": 9,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0HFHZJ6C2&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/alienware-aw3426dw.webp",
+  "image": "/images/products/alienware-aw3426dw.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0HFHZJ6C2"
   },
@@ -2944,7 +2944,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST 4K GAMING",
   "bestFor": "Best 4K Gaming",
   "rank": 10,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DPXYZYPT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/msi-mpg-321urxw-qd-oled.webp",
+  "image": "/images/products/msi-mpg-321urxw-qd-oled.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DPXYZYPT"
   },
@@ -2974,7 +2974,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST ULTRAWIDE HIGH REFRESH",
   "bestFor": "Best Ultrawide High Refresh",
   "rank": 11,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GL9NWNTQ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/msi-mpg-341cqr-qd-oled-x36.webp",
+  "image": "/images/products/msi-mpg-341cqr-qd-oled-x36.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0GL9NWNTQ"
   },
@@ -3004,7 +3004,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST EXTREME REFRESH RATE",
   "bestFor": "Best Extreme Refresh Rate",
   "rank": 12,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FKVWSLS6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/msi-mag-272qp-qd-oled-x50.webp",
+  "image": "/images/products/msi-mag-272qp-qd-oled-x50.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0FKVWSLS6"
   },
@@ -3034,7 +3034,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST DUAL-RESOLUTION",
   "bestFor": "Best Dual-Resolution",
   "rank": 13,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CV1Y7NLT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/lg-ultragear-32gs95ue-b.webp",
+  "image": "/images/products/lg-ultragear-32gs95ue-b.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0CV1Y7NLT"
   },
@@ -3064,7 +3064,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST LARGE ULTRAWIDE",
   "bestFor": "Best Large Ultrawide",
   "rank": 14,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DYG9DKX8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/lg-ultragear-45gx950a-b.webp",
+  "image": "/images/products/lg-ultragear-45gx950a-b.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DYG9DKX8"
   },
@@ -3121,7 +3121,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET OLED",
   "bestFor": "Best Budget OLED",
   "rank": 16,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FTS1KC43&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/aoc-gaming-q27gazd.webp",
+  "image": "/images/products/aoc-gaming-q27gazd.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0FTS1KC43"
   },
@@ -3181,7 +3181,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET HIGH REFRESH",
   "bestFor": "Best Budget High Refresh",
   "rank": 18,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09SG26D3F&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/koorui-gn02.webp",
+  "image": "/images/products/koorui-gn02.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B09SG26D3F"
   },
@@ -3210,7 +3210,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST ENTRY-LEVEL",
   "bestFor": "Best Entry-Level",
   "rank": 19,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B07WVN6CWT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/aoc-24g2.webp",
+  "image": "/images/products/aoc-24g2.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B07WVN6CWT"
   },
@@ -3239,7 +3239,7 @@ export const ALL_PRODUCTS = [
   "badge": "BEST SUPER ULTRAWIDE",
   "bestFor": "Best Super Ultrawide",
   "rank": 20,
-  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DSGJRKCR&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/samsung-odyssey-oled-g9.webp",
+  "image": "/images/products/samsung-odyssey-oled-g9.webp",
   "affiliateLinks": {
    "amazon": "https://www.amazon.com/dp/B0DSGJRKCR"
   },

@@ -13,16 +13,9 @@
    "label": "ASIN installer",
    "type": "file",
    "path": "api/v1/cron/cli-product-asin.php"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-CKNtKMp0.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/30",
- "build": "index-CKNtKMp0.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]
