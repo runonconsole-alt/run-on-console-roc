@@ -3442,14 +3442,14 @@ async function renderBlogAgent(m, fresh){
       opt('off','Off','No new posts are written. Scheduled posts still go live.')+
       '<div class="field" style="margin-top:12px"><label>Publishing times (Pakistan time)</label><div id="ba-times" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>'+
         '<div class="hint">One post per time, every day. The writer starts about 2 hours before.</div></div>'+
-      '<div class="field"><label>Google Gemini key '+(d.gemini.set?'<span class="tag published">saved ••••'+esc(d.gemini.end)+'</span>':'<span class="tag off">not saved</span>')+'</label>'+
+      '<div class="field"><label>Google Gemini key '+(d.gemini.set?'<span class="tag published">saved ••••'+esc(d.gemini.end)+'</span> <button class="btn sm" type="button" data-rmkey="gemini">Remove key</button>':'<span class="tag off">not saved</span>')+'</label>'+
         '<input type="password" id="ba-key" autocomplete="off" placeholder="'+(d.gemini.set?'Leave empty to keep the saved key':'Paste the key here (starts with AIza or AQ.)')+'">'+
         '<details style="margin-top:6px"><summary class="hint" style="cursor:pointer">How to get the free key (2 minutes)</summary><ol class="hint" style="margin:6px 0 0 18px;line-height:1.7">'+
           '<li>Open <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> and sign in with your Google account.</li>'+
           '<li>Click <b>Create API key</b> (accept Google\'s terms if asked).</li><li>Copy the key, paste it in the box above and press <b>Save</b>, then <b>Test the key</b>.</li>'+
           '<li>The free plan is enough for a few posts a day. Do not paste the key anywhere else or in a chat.</li></ol>'+
           '<div class="hint" style="margin-top:6px">Google may use what is sent on the free plan to improve its services; here that is only the article brief.</div></details></div>'+
-      '<div class="field"><label>Groq key '+(d.groq&&d.groq.set?'<span class="tag published">saved ••••'+esc(d.groq.end)+'</span>'+(d.groq.model?' <span class="hint">'+esc(d.groq.model)+'</span>':''):'<span class="tag off">not saved</span>')+'</label>'+
+      '<div class="field"><label>Groq key '+(d.groq&&d.groq.set?'<span class="tag published">saved ••••'+esc(d.groq.end)+'</span>'+(d.groq.model?' <span class="hint">'+esc(d.groq.model)+'</span>':'')+' <button class="btn sm" type="button" data-rmkey="groq">Remove key</button>':'<span class="tag off">not saved</span>')+'</label>'+
         '<input type="password" id="ba-gkey" autocomplete="off" placeholder="'+(d.groq&&d.groq.set?'Leave empty to keep the saved key':'Paste the key here (starts with gsk_)')+'">'+
         '<details style="margin-top:6px"><summary class="hint" style="cursor:pointer">How to get the free Groq key (2 minutes)</summary><ol class="hint" style="margin:6px 0 0 18px;line-height:1.7">'+
           '<li>Open <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a> and sign up (Google sign-in works).</li>'+
@@ -3540,6 +3540,10 @@ async function renderBlogAgent(m, fresh){
     catch(e){ toast(e.message,'bad'); if(btn){ btn.disabled=false; btn.textContent=old; } }
   };
   $('#ba-save',m).addEventListener('click',function(){ call({action:'settings',engine:engine,slots:times,gemini_key:$('#ba-key',m).value.trim(),groq_key:$('#ba-gkey',m).value.trim(),model:$('#ba-model',m).value.trim()},this); });
+  m.querySelectorAll('[data-rmkey]').forEach(function(b){ b.addEventListener('click',function(){
+    var g=b.dataset.rmkey==='gemini';
+    if(!confirm('Remove the saved '+(g?'Gemini':'Groq')+' key? The writer then uses only the other key.')) return;
+    var p={action:'settings',engine:engine,slots:times}; p[g?'gemini_key':'groq_key']='-'; call(p,b); }); });
   var bt=$('#ba-test',m); if(bt) bt.addEventListener('click',function(){ call({action:'test_key'},this,false).then(function(){ bt.disabled=false; bt.textContent='Test the keys'; }); });
   var bw=$('#ba-write',m); if(bw) bw.addEventListener('click',function(){
     if(!confirm('Write the next post now? It takes 1-2 minutes and is scheduled for the next free time.')) return;

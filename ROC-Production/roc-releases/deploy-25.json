@@ -1,0 +1,27 @@
+{
+ "deploy": 25,
+ "date": "2026-10-09",
+ "title": "Blog writer: Remove key buttons",
+ "changes": [
+  "CMS > Blog writer: a \"Remove key\" button next to each saved key (Gemini, Groq)"
+ ],
+ "checks": [
+  {
+   "label": "Remove key button",
+   "type": "contains",
+   "path": "cms/index.html",
+   "text": "data-rmkey"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BIM9tp1e.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/29",
+ "build": "index-BIM9tp1e.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

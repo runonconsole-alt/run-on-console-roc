@@ -139,6 +139,10 @@ RELEASES = [
                   '"Test the keys" now writes a short test with each key, so a blocked key shows at once'],
          checks=[dict(label='Groq writer', type='contains', path='api/v1/cms/blog-engine-lib.php', text='ROC_GROQ_API')],
          pr=REPO + '29'),
+    dict(deploy=25, date='2026-10-09', title='Blog writer: Remove key buttons',
+         changes=['CMS > Blog writer: a "Remove key" button next to each saved key (Gemini, Groq)'],
+         checks=[dict(label='Remove key button', type='contains', path='cms/index.html', text='data-rmkey')],
+         pr=REPO + '29'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
