@@ -1,0 +1,623 @@
+{
+ "generated": "scripts/asin/build_asin.py",
+ "products": {
+  "asus-rog-strix-scope-ii-96-wireless": {
+   "asin": "B0C7KFZ5TL",
+   "link": "https://www.amazon.com/dp/B0C7KFZ5TL",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0C7KFZ5TL&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-strix-scope-ii-96-wireless.webp",
+   "note": ""
+  },
+  "corsair-vanguard-pro-96": {
+   "asin": "B0FKHPRZ45",
+   "link": "https://www.amazon.com/dp/B0FKHPRZ45",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FKHPRZ45&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/corsair-vanguard-pro-96.webp",
+   "note": ""
+  },
+  "razer-huntsman-v3-pro-tkl": {
+   "asin": "B0CG7BWG7J",
+   "link": "https://www.amazon.com/dp/B0CG7BWG7J",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CG7BWG7J&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-huntsman-v3-pro-tkl.webp",
+   "note": "black, original"
+  },
+  "razer-huntsman-v3-he": {
+   "asin": "B0H47Z2J3T",
+   "link": "https://www.amazon.com/dp/B0H47Z2J3T",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H47Z2J3T&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-huntsman-v3-he.webp",
+   "note": "TKL"
+  },
+  "steelseries-apex-pro-tkl-gen-3": {
+   "asin": "B0DF2QL2GK",
+   "link": "https://www.amazon.com/dp/B0DF2QL2GK",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DF2QL2GK&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-apex-pro-tkl-gen-3.webp",
+   "note": "US wired"
+  },
+  "keychron-q1-he": {
+   "asin": "B0D89ZFWJX",
+   "link": "https://www.amazon.com/dp/B0D89ZFWJX",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D89ZFWJX&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/keychron-q1-he.webp",
+   "note": "carbon black"
+  },
+  "keychron-k2-he": {
+   "asin": "B0DCVQBMVP",
+   "link": "https://www.amazon.com/dp/B0DCVQBMVP",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DCVQBMVP&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/keychron-k2-he.webp",
+   "note": ""
+  },
+  "lemokey-p1-he": {
+   "asin": "B0DY7KTB87",
+   "link": "https://www.amazon.com/dp/B0DY7KTB87",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DY7KTB87&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/lemokey-p1-he.webp",
+   "note": ""
+  },
+  "asus-rog-azoth-96-he": {
+   "asin": "B0GJXBMY43",
+   "link": "https://www.amazon.com/dp/B0GJXBMY43",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GJXBMY43&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-azoth-96-he.webp",
+   "note": "black PBT"
+  },
+  "asus-rog-azoth": {
+   "asin": "B0BSKSCGZ4",
+   "link": "https://www.amazon.com/dp/B0BSKSCGZ4",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BSKSCGZ4&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-azoth.webp",
+   "note": ""
+  },
+  "epomaker-glyph": {
+   "asin": "B0GJ4V9XFJ",
+   "link": "https://www.amazon.com/dp/B0GJ4V9XFJ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GJ4V9XFJ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/epomaker-glyph.webp",
+   "note": ""
+  },
+  "turtle-beach-command-series-kb7-tkl": {
+   "asin": "B0GWD2D7S3",
+   "link": "https://www.amazon.com/dp/B0GWD2D7S3",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GWD2D7S3&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/turtle-beach-command-series-kb7-tkl.webp",
+   "note": "listing said unavailable at search time"
+  },
+  "razer-blackwidow-v4-pro-75": {
+   "asin": "B0DD5S8TM8",
+   "link": "https://www.amazon.com/dp/B0DD5S8TM8",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DD5S8TM8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-blackwidow-v4-pro-75.webp",
+   "note": ""
+  },
+  "logitech-g915-x-lightspeed": {
+   "asin": "B0DB1WY5L9",
+   "link": "https://www.amazon.com/dp/B0DB1WY5L9",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DB1WY5L9&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g915-x-lightspeed.webp",
+   "note": "full size, linear, black"
+  },
+  "logitech-g-pro-x-60-lightspeed": {
+   "asin": "B0BRSQ2DSX",
+   "link": "https://www.amazon.com/dp/B0BRSQ2DSX",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BRSQ2DSX&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-pro-x-60-lightspeed.webp",
+   "note": "linear, black"
+  },
+  "nuphy-halo75-v2": {
+   "asin": "B0D5Q89DWL",
+   "link": "https://www.amazon.com/dp/B0D5Q89DWL",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D5Q89DWL&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/nuphy-halo75-v2.webp",
+   "note": ""
+  },
+  "monsgeek-fun60-ultra": {
+   "asin": "B0DQWNJJ6X",
+   "link": "https://www.amazon.com/dp/B0DQWNJJ6X",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DQWNJJ6X&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/monsgeek-fun60-ultra.webp",
+   "note": "black"
+  },
+  "razer-reclusa-x-mini-65": {
+   "asin": "B0H9CC8JCZ",
+   "link": "https://www.amazon.com/dp/B0H9CC8JCZ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H9CC8JCZ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-reclusa-x-mini-65.webp",
+   "note": ""
+  },
+  "be-quiet-light-mount-tkl": {
+   "asin": "B0H9VDD7C7",
+   "link": "https://www.amazon.com/dp/B0H9VDD7C7",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H9VDD7C7&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/be-quiet-light-mount-tkl.webp",
+   "note": "linear"
+  },
+  "steelseries-arctis-nova-pro-wireless": {
+   "asin": "B09ZLRCH1H",
+   "link": "https://www.amazon.com/dp/B09ZLRCH1H",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09ZLRCH1H&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-nova-pro-wireless.webp",
+   "note": "multi-system, black"
+  },
+  "steelseries-arctis-nova-pro-omni": {
+   "asin": "B0GS7PZH2P",
+   "link": "https://www.amazon.com/dp/B0GS7PZH2P",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GS7PZH2P&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-nova-pro-omni.webp",
+   "note": "graphite"
+  },
+  "razer-blackshark-v3-pro": {
+   "asin": "B0F3QDLZKG",
+   "link": "https://www.amazon.com/dp/B0F3QDLZKG",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F3QDLZKG&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-blackshark-v3-pro.webp",
+   "note": "PC, black"
+  },
+  "steelseries-arctis-nova-7-wireless-gen-2": {
+   "asin": "B0FRNR8Y11",
+   "link": "https://www.amazon.com/dp/B0FRNR8Y11",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FRNR8Y11&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-nova-7-wireless-gen-2.webp",
+   "note": "black"
+  },
+  "steelseries-arctis-nova-5-wireless": {
+   "asin": "B0D2YBQQ1P",
+   "link": "https://www.amazon.com/dp/B0D2YBQQ1P",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D2YBQQ1P&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-nova-5-wireless.webp",
+   "note": "black"
+  },
+  "steelseries-arctis-nova-3-wireless": {
+   "asin": "B0F956KHT9",
+   "link": "https://www.amazon.com/dp/B0F956KHT9",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F956KHT9&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-nova-3-wireless.webp",
+   "note": "wireless Nova 3X (Amazon has no plain \"Nova 3 Wireless\")"
+  },
+  "logitech-g-pro-x-2-lightspeed": {
+   "asin": "B0B3F8V4JG",
+   "link": "https://www.amazon.com/dp/B0B3F8V4JG",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0B3F8V4JG&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-pro-x-2-lightspeed.webp",
+   "note": "black"
+  },
+  "logitech-g-astro-a50-x": {
+   "asin": "B0BRXJDQC1",
+   "link": "https://www.amazon.com/dp/B0BRXJDQC1",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BRXJDQC1&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-astro-a50-x.webp",
+   "note": "black"
+  },
+  "hyperx-cloud-alpha-wireless": {
+   "asin": "B09TRW57WB",
+   "link": "https://www.amazon.com/dp/B09TRW57WB",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09TRW57WB&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/hyperx-cloud-alpha-wireless.webp",
+   "note": ""
+  },
+  "audeze-maxwell-2": {
+   "asin": "B0G98TB4ZF",
+   "link": "https://www.amazon.com/dp/B0G98TB4ZF",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G98TB4ZF&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/audeze-maxwell-2.webp",
+   "note": "PC/PlayStation version"
+  },
+  "turtle-beach-atlas-air": {
+   "asin": "B0D13VX3S6",
+   "link": "https://www.amazon.com/dp/B0D13VX3S6",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D13VX3S6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/turtle-beach-atlas-air.webp",
+   "note": ""
+  },
+  "turtle-beach-stealth-500": {
+   "asin": "B0CZX86R9F",
+   "link": "https://www.amazon.com/dp/B0CZX86R9F",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CZX86R9F&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/turtle-beach-stealth-500.webp",
+   "note": "PC/PS5 version"
+  },
+  "logitech-g-g325-lightspeed": {
+   "asin": "B0G12HGD6R",
+   "link": "https://www.amazon.com/dp/B0G12HGD6R",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G12HGD6R&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-g325-lightspeed.webp",
+   "note": "black"
+  },
+  "steelseries-arctis-gamebuds": {
+   "asin": "B0DFX4TPS6",
+   "link": "https://www.amazon.com/dp/B0DFX4TPS6",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DFX4TPS6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-gamebuds.webp",
+   "note": "black"
+  },
+  "sony-inzone-buds": {
+   "asin": "B0CJHB7B59",
+   "link": "https://www.amazon.com/dp/B0CJHB7B59",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CJHB7B59&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/sony-inzone-buds.webp",
+   "note": "black"
+  },
+  "epos-h6pro": {
+   "asin": "B09FPCVHVN",
+   "link": "https://www.amazon.com/dp/B09FPCVHVN",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09FPCVHVN&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/epos-h6pro.webp",
+   "note": "open-back, black (in stock)"
+  },
+  "audio-technica-ath-m50x": {
+   "asin": "B00HVLUR86",
+   "link": "https://www.amazon.com/dp/B00HVLUR86",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B00HVLUR86&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/audio-technica-ath-m50x.webp",
+   "note": "black"
+  },
+  "sennheiser-hd-560s": {
+   "asin": "B08J9MVB6W",
+   "link": "https://www.amazon.com/dp/B08J9MVB6W",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B08J9MVB6W&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/sennheiser-hd-560s.webp",
+   "note": ""
+  },
+  "elgato-wave3": {
+   "asin": "B088HHWC47",
+   "link": "https://www.amazon.com/dp/B088HHWC47",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B088HHWC47&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/elgato-wave3.webp",
+   "note": ""
+  },
+  "hyperx-quadcast-2-s": {
+   "asin": "B0DG9X4WHW",
+   "link": "https://www.amazon.com/dp/B0DG9X4WHW",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DG9X4WHW&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/hyperx-quadcast-2-s.webp",
+   "note": ""
+  },
+  "steelseries-alias": {
+   "asin": "B0CBNTXNWV",
+   "link": "https://www.amazon.com/dp/B0CBNTXNWV",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CBNTXNWV&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-alias.webp",
+   "note": ""
+  },
+  "razer-seiren-v3-mini": {
+   "asin": "B0CT787NLW",
+   "link": "https://www.amazon.com/dp/B0CT787NLW",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CT787NLW&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-seiren-v3-mini.webp",
+   "note": "black"
+  },
+  "edifier-g2000": {
+   "asin": "B00UAFSN5O",
+   "link": "https://www.amazon.com/dp/B00UAFSN5O",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B00UAFSN5O&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/edifier-g2000.webp",
+   "note": "black"
+  },
+  "razer-viper-v4-pro": {
+   "asin": "B0GMLBSSTD",
+   "link": "https://www.amazon.com/dp/B0GMLBSSTD",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GMLBSSTD&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-viper-v4-pro.webp",
+   "note": "black"
+  },
+  "logitech-g-pro-x2-superstrike": {
+   "asin": "B0G12HGHGM",
+   "link": "https://www.amazon.com/dp/B0G12HGHGM",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G12HGHGM&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-pro-x2-superstrike.webp",
+   "note": ""
+  },
+  "razer-deathadder-v4-pro": {
+   "asin": "B0F3QCXL82",
+   "link": "https://www.amazon.com/dp/B0F3QCXL82",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F3QCXL82&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-deathadder-v4-pro.webp",
+   "note": "black"
+  },
+  "razer-naga-v3-pro": {
+   "asin": "B0H4SBT4SH",
+   "link": "https://www.amazon.com/dp/B0H4SBT4SH",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H4SBT4SH&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-naga-v3-pro.webp",
+   "note": ""
+  },
+  "logitech-g-pro-x-superlight-2": {
+   "asin": "B09NBWL8J5",
+   "link": "https://www.amazon.com/dp/B09NBWL8J5",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09NBWL8J5&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-pro-x-superlight-2.webp",
+   "note": "black"
+  },
+  "logitech-g502-x-plus": {
+   "asin": "B092CB69Q4",
+   "link": "https://www.amazon.com/dp/B092CB69Q4",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B092CB69Q4&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g502-x-plus.webp",
+   "note": "black"
+  },
+  "endgame-gear-op1-8k-v2": {
+   "asin": "B0FB8VWW8Y",
+   "link": "https://www.amazon.com/dp/B0FB8VWW8Y",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FB8VWW8Y&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/endgame-gear-op1-8k-v2.webp",
+   "note": "black"
+  },
+  "pulsar-x2f-crazylight": {
+   "asin": "B0FM2K41Y6",
+   "link": "https://www.amazon.com/dp/B0FM2K41Y6",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FM2K41Y6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/pulsar-x2f-crazylight.webp",
+   "note": "Lab X2F mini black; unavailable at search time"
+  },
+  "pulsar-x2-crazylight-mini": {
+   "asin": "B0DVXD49L8",
+   "link": "https://www.amazon.com/dp/B0DVXD49L8",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DVXD49L8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/pulsar-x2-crazylight-mini.webp",
+   "note": "white"
+  },
+  "pulsar-xlite-crazylight": {
+   "asin": "B0FFGN4381",
+   "link": "https://www.amazon.com/dp/B0FFGN4381",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FFGN4381&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/pulsar-xlite-crazylight.webp",
+   "note": "mini, black"
+  },
+  "mchose-l7-ultra": {
+   "asin": "B0HBV6L6X8",
+   "link": "https://www.amazon.com/dp/B0HBV6L6X8",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0HBV6L6X8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/mchose-l7-ultra.webp",
+   "note": "base L7 Ultra"
+  },
+  "mchose-a7": {
+   "asin": "B0DSPR5SFW",
+   "link": "https://www.amazon.com/dp/B0DSPR5SFW",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DSPR5SFW&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/mchose-a7.webp",
+   "note": "A7 Ultra, white"
+  },
+  "vxe-r1-pro": {
+   "asin": "B0FN7HCZT1",
+   "link": "https://www.amazon.com/dp/B0FN7HCZT1",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FN7HCZT1&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/vxe-r1-pro.webp",
+   "note": "black"
+  },
+  "asus-rog-harpe-ace-mini": {
+   "asin": "B0DG6DQ2DP",
+   "link": "https://www.amazon.com/dp/B0DG6DQ2DP",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DG6DQ2DP&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-harpe-ace-mini.webp",
+   "note": "black"
+  },
+  "corsair-m75-wireless": {
+   "asin": "B0CTN26P3Z",
+   "link": "https://www.amazon.com/dp/B0CTN26P3Z",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CTN26P3Z&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/corsair-m75-wireless.webp",
+   "note": "black, PC"
+  },
+  "steelseries-prime-wireless-mini": {
+   "asin": "B09BRFNP6F",
+   "link": "https://www.amazon.com/dp/B09BRFNP6F",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09BRFNP6F&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-prime-wireless-mini.webp",
+   "note": "listed as \"Esports Mini Wireless (Prime Mini Edition)\""
+  },
+  "zowie-ec2-dw": {
+   "asin": "B0F1XD5MK8",
+   "link": "https://www.amazon.com/dp/B0F1XD5MK8",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F1XD5MK8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/zowie-ec2-dw.webp",
+   "note": "unavailable at search time"
+  },
+  "cooler-master-mm311": {
+   "asin": "B0B8TKY2YT",
+   "link": "https://www.amazon.com/dp/B0B8TKY2YT",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0B8TKY2YT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/cooler-master-mm311.webp",
+   "note": "black"
+  },
+  "razer-basilisk-v3-pro": {
+   "asin": "B0B6Y3XYFG",
+   "link": "https://www.amazon.com/dp/B0B6Y3XYFG",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0B6Y3XYFG&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-basilisk-v3-pro.webp",
+   "note": "black"
+  },
+  "mackie-cr35bt-cr8sbt": {
+   "asin": "B0DFZQGZ37",
+   "link": "https://www.amazon.com/dp/B0DFZQGZ37",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DFZQGZ37&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/mackie-cr35bt-cr8sbt.webp",
+   "note": "CR3.5BT pair (sub CR8SBT is B0DFZTYJTJ)"
+  },
+  "creative-pebble-pro": {
+   "asin": "B0DXW25R3D",
+   "link": "https://www.amazon.com/dp/B0DXW25R3D",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DXW25R3D&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-pebble-pro.webp",
+   "note": "black"
+  },
+  "creative-pebble-v3": {
+   "asin": "B08F57GSJ7",
+   "link": "https://www.amazon.com/dp/B08F57GSJ7",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B08F57GSJ7&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-pebble-v3.webp",
+   "note": "black"
+  },
+  "creative-pebble-plus": {
+   "asin": "B07NWLWM9B",
+   "link": "https://www.amazon.com/dp/B07NWLWM9B",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B07NWLWM9B&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-pebble-plus.webp",
+   "note": "black"
+  },
+  "creative-xf1": {
+   "asin": "B0H946F5J9",
+   "link": "https://www.amazon.com/dp/B0H946F5J9",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H946F5J9&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-xf1.webp",
+   "note": ""
+  },
+  "creative-stage-pro": {
+   "asin": "B0FCXVPBZY",
+   "link": "https://www.amazon.com/dp/B0FCXVPBZY",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FCXVPBZY&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-stage-pro.webp",
+   "note": "no featured offer at search time"
+  },
+  "creative-sound-blaster-gs3": {
+   "asin": "B0CTHBSG6X",
+   "link": "https://www.amazon.com/dp/B0CTHBSG6X",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CTHBSG6X&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-sound-blaster-gs3.webp",
+   "note": "black"
+  },
+  "razer-nommo-v2-pro": {
+   "asin": "B0C2Y8JYCZ",
+   "link": "https://www.amazon.com/dp/B0C2Y8JYCZ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0C2Y8JYCZ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-nommo-v2-pro.webp",
+   "note": "unavailable at search time"
+  },
+  "edifier-r1280db": {
+   "asin": "B0719C132V",
+   "link": "https://www.amazon.com/dp/B0719C132V",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0719C132V&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/edifier-r1280db.webp",
+   "note": "wood grain"
+  },
+  "edifier-s350db": {
+   "asin": "B077Y6PHKQ",
+   "link": "https://www.amazon.com/dp/B077Y6PHKQ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B077Y6PHKQ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/edifier-s350db.webp",
+   "note": ""
+  },
+  "edifier-s3000-pro": {
+   "asin": "B07NP3CS11",
+   "link": "https://www.amazon.com/dp/B07NP3CS11",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B07NP3CS11&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/edifier-s3000-pro.webp",
+   "note": ""
+  },
+  "edifier-m60": {
+   "asin": "B0D95QG8W4",
+   "link": "https://www.amazon.com/dp/B0D95QG8W4",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D95QG8W4&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/edifier-m60.webp",
+   "note": "black"
+  },
+  "audioengine-a2": {
+   "asin": "B010OIVSDA",
+   "link": "https://www.amazon.com/dp/B010OIVSDA",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B010OIVSDA&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/audioengine-a2.webp",
+   "note": "wired pair (red listing)"
+  },
+  "audioengine-a5-wireless": {
+   "asin": "B079TB99K3",
+   "link": "https://www.amazon.com/dp/B079TB99K3",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B079TB99K3&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/audioengine-a5-wireless.webp",
+   "note": ""
+  },
+  "ik-multimedia-iloud-micro-monitor": {
+   "asin": "B01C5RZWCQ",
+   "link": "https://www.amazon.com/dp/B01C5RZWCQ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B01C5RZWCQ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/ik-multimedia-iloud-micro-monitor.webp",
+   "note": "black"
+  },
+  "presonus-eris-e45": {
+   "asin": "B00GP56OYA",
+   "link": "https://www.amazon.com/dp/B00GP56OYA",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B00GP56OYA&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/presonus-eris-e45.webp",
+   "note": "wired pair"
+  },
+  "steelseries-arena-3": {
+   "asin": "B09KNYBT4Q",
+   "link": "https://www.amazon.com/dp/B09KNYBT4Q",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09KNYBT4Q&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arena-3.webp",
+   "note": ""
+  },
+  "steelseries-arena-7": {
+   "asin": "B09D45L52J",
+   "link": "https://www.amazon.com/dp/B09D45L52J",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09D45L52J&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arena-7.webp",
+   "note": ""
+  },
+  "steelseries-arena-9": {
+   "asin": "B09KNWMGKF",
+   "link": "https://www.amazon.com/dp/B09KNWMGKF",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09KNWMGKF&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arena-9.webp",
+   "note": ""
+  },
+  "logitech-g560-lightsync": {
+   "asin": "B07B2WLS17",
+   "link": "https://www.amazon.com/dp/B07B2WLS17",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B07B2WLS17&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g560-lightsync.webp",
+   "note": ""
+  },
+  "logitech-z407": {
+   "asin": "B0877BPCJM",
+   "link": "https://www.amazon.com/dp/B0877BPCJM",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0877BPCJM&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-z407.webp",
+   "note": ""
+  },
+  "logitech-z906": {
+   "asin": "B004M18O60",
+   "link": "https://www.amazon.com/dp/B004M18O60",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B004M18O60&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-z906.webp",
+   "note": ""
+  },
+  "razer-leviathan-v2": {
+   "asin": "B09VX86JR6",
+   "link": "https://www.amazon.com/dp/B09VX86JR6",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09VX86JR6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-leviathan-v2.webp",
+   "note": ""
+  },
+  "hisense-ax5125h": {
+   "asin": "B0CBRXTWGP",
+   "link": "https://www.amazon.com/dp/B0CBRXTWGP",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CBRXTWGP&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/hisense-ax5125h.webp",
+   "note": "unavailable at search time"
+  },
+  "asus-rog-swift-oled-pg32ucdm-gen3": {
+   "asin": "B0G31KVQ1H",
+   "link": "https://www.amazon.com/dp/B0G31KVQ1H",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G31KVQ1H&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-swift-oled-pg32ucdm-gen3.webp",
+   "note": "listed as PG32UCDM3"
+  },
+  "asus-rog-swift-oled-pg27ucdm": {
+   "asin": "B0DM6SHQTN",
+   "link": "https://www.amazon.com/dp/B0DM6SHQTN",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DM6SHQTN&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-swift-oled-pg27ucdm.webp",
+   "note": ""
+  },
+  "asus-rog-swift-oled-pg27aqwp-w": {
+   "asin": "B0FX8FD62M",
+   "link": "https://www.amazon.com/dp/B0FX8FD62M",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FX8FD62M&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-swift-oled-pg27aqwp-w.webp",
+   "note": ""
+  },
+  "asus-rog-swift-oled-pg32ucdp": {
+   "asin": "B0D7NNK43H",
+   "link": "https://www.amazon.com/dp/B0D7NNK43H",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D7NNK43H&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-swift-oled-pg32ucdp.webp",
+   "note": ""
+  },
+  "samsung-odyssey-oled-g80sh-s32hg802s": {
+   "asin": "B0GWGSNVLT",
+   "link": "https://www.amazon.com/dp/B0GWGSNVLT",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GWGSNVLT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/samsung-odyssey-oled-g80sh-s32hg802s.webp",
+   "note": "32 inch"
+  },
+  "samsung-odyssey-oled-g73sh-s32hg732s": {
+   "asin": "B0GY62Y41K",
+   "link": "https://www.amazon.com/dp/B0GY62Y41K",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GY62Y41K&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/samsung-odyssey-oled-g73sh-s32hg732s.webp",
+   "note": ""
+  },
+  "alienware-aw2725q": {
+   "asin": "B0F148HG5M",
+   "link": "https://www.amazon.com/dp/B0F148HG5M",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F148HG5M&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/alienware-aw2725q.webp",
+   "note": ""
+  },
+  "alienware-aw2726dm": {
+   "asin": "B0GYG3VLMR",
+   "link": "https://www.amazon.com/dp/B0GYG3VLMR",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GYG3VLMR&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/alienware-aw2726dm.webp",
+   "note": ""
+  },
+  "alienware-aw3426dw": {
+   "asin": "B0HFHZJ6C2",
+   "link": "https://www.amazon.com/dp/B0HFHZJ6C2",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0HFHZJ6C2&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/alienware-aw3426dw.webp",
+   "note": ""
+  },
+  "msi-mpg-321urxw-qd-oled": {
+   "asin": "B0DPXYZYPT",
+   "link": "https://www.amazon.com/dp/B0DPXYZYPT",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DPXYZYPT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/msi-mpg-321urxw-qd-oled.webp",
+   "note": ""
+  },
+  "msi-mpg-341cqr-qd-oled-x36": {
+   "asin": "B0GL9NWNTQ",
+   "link": "https://www.amazon.com/dp/B0GL9NWNTQ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GL9NWNTQ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/msi-mpg-341cqr-qd-oled-x36.webp",
+   "note": "unavailable at search time"
+  },
+  "msi-mag-272qp-qd-oled-x50": {
+   "asin": "B0FKVWSLS6",
+   "link": "https://www.amazon.com/dp/B0FKVWSLS6",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FKVWSLS6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/msi-mag-272qp-qd-oled-x50.webp",
+   "note": ""
+  },
+  "lg-ultragear-32gs95ue-b": {
+   "asin": "B0CV1Y7NLT",
+   "link": "https://www.amazon.com/dp/B0CV1Y7NLT",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CV1Y7NLT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/lg-ultragear-32gs95ue-b.webp",
+   "note": ""
+  },
+  "lg-ultragear-45gx950a-b": {
+   "asin": "B0DYG9DKX8",
+   "link": "https://www.amazon.com/dp/B0DYG9DKX8",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DYG9DKX8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/lg-ultragear-45gx950a-b.webp",
+   "note": ""
+  },
+  "aoc-gaming-q27gazd": {
+   "asin": "B0FTS1KC43",
+   "link": "https://www.amazon.com/dp/B0FTS1KC43",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FTS1KC43&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/aoc-gaming-q27gazd.webp",
+   "note": ""
+  },
+  "koorui-gn02": {
+   "asin": "B09SG26D3F",
+   "link": "https://www.amazon.com/dp/B09SG26D3F",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09SG26D3F&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/koorui-gn02.webp",
+   "note": ""
+  },
+  "aoc-24g2": {
+   "asin": "B07WVN6CWT",
+   "link": "https://www.amazon.com/dp/B07WVN6CWT",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B07WVN6CWT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/aoc-24g2.webp",
+   "note": ""
+  },
+  "samsung-odyssey-oled-g9": {
+   "asin": "B0DSGJRKCR",
+   "link": "https://www.amazon.com/dp/B0DSGJRKCR",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DSGJRKCR&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/samsung-odyssey-oled-g9.webp",
+   "note": "G91SD"
+  }
+ }
+}

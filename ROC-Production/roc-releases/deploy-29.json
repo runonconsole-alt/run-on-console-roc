@@ -1,0 +1,22 @@
+{
+ "deploy": 29,
+ "date": "2026-10-09",
+ "title": "Products: real Amazon links (/dp/ASIN) and SiteStripe pictures",
+ "changes": [
+  "103 products get their exact Amazon product link (amazon.com/dp/ASIN) instead of an Amazon search",
+  "Their picture becomes the SiteStripe product image (served by Amazon); if a browser blocks it, the website picture shows instead",
+  "Links or pictures already set by hand in the CMS are kept; graphics cards and products not sold on Amazon keep the search link",
+  "Installer: cli-product-asin.php (dry run, --apply with backup, --rollback)"
+ ],
+ "checks": [
+  {
+   "label": "ASIN installer",
+   "type": "file",
+   "path": "api/v1/cron/cli-product-asin.php"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/30",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

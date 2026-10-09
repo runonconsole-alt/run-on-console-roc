@@ -301,6 +301,11 @@ function rocProductList(array $p, string $key): array {
 function rocProductUrl(string $slug): string { return ROC_PUBLIC_URL . '/products/' . $slug . '/'; }
 function rocCategoryUrl(string $slug): string { return ROC_PUBLIC_URL . '/products/' . $slug . '/'; }
 
+/** Amazon product photo (SiteStripe link): white background, shown whole rather than cropped. */
+function rocIsAmazonImg(string $src): bool {
+    return (bool)preg_match('#^https://(ws-[a-z]+\.amazon-adsystem\.com|m\.media-amazon\.com)/#i', $src);
+}
+
 /**
  * Image shown for a product: its own photo when one is set in the CMS; otherwise
  * its own name card (/images/products/{slug}.webp; older sites had .svg); otherwise the category image.
@@ -323,7 +328,7 @@ function rocProductImage(array $p, array $categories): string {
  * LinkedIn and Facebook do not all show WebP or SVG.
  */
 function rocShareImage(string $image, array $p, array $categories): string {
-    $isCard = strpos($image, '/images/products/') === 0;
+    $isCard = strpos($image, '/images/products/') === 0 || rocIsAmazonImg($image);   // Amazon pictures are small squares: use the share card
     if ($image !== '' && !$isCard && substr($image, -4) !== '.svg') return $image;
     $share = '/images/products/share/' . $p['slug'] . '.jpg';
     if (is_file(__DIR__ . $share)) return $share;
@@ -360,7 +365,7 @@ function rocProductCard(PDO $pdo, array $p, array $categories): string {
     $sub   = trim((string)($p['subtitle'] ?? '')) ?: trim((string)($p['short_desc'] ?? ''));
     return '<div class="transition-shadow duration-300 will-change-transform game-card flex flex-col justify-between group p-5 space-y-4"><div class="space-y-3">'
         . '<a href="/products/' . rocH($slug) . '/" class="relative block h-44 rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-sm">'
-        . ($img !== '' ? '<img src="' . rocH($img) . '" alt="' . rocH($alt) . '" width="400" height="300" loading="lazy" decoding="async" class="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500"/>' : '')
+        . ($img !== '' ? '<img src="' . rocH($img) . '" alt="' . rocH($alt) . '" width="400" height="300" loading="lazy" decoding="async" class="w-full h-full ' . (rocIsAmazonImg($img) ? 'object-contain bg-white p-3' : 'object-cover opacity-90') . ' group-hover:scale-105 transition-transform duration-500"/>' : '')
         . ($badge !== '' ? '<span class="absolute top-2.5 left-2.5 max-w-[80%] truncate bg-emerald-600 text-white text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase shadow-sm">' . rocH($badge) . '</span>' : '')
         . ($brand !== '' ? '<span class="absolute bottom-2.5 left-2.5 bg-slate-900/90 text-white text-[10px] font-extrabold px-2 py-0.5 rounded backdrop-blur-xs">' . rocH($brand) . '</span>' : '')
         . '</a><div>'
@@ -515,7 +520,7 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
 
     $m .= '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-8">'
         . '<div class="lg:col-span-5 flex flex-col justify-center"><div class="transition-shadow duration-300 will-change-transform relative rounded-2xl overflow-hidden bg-slate-950 p-4 border border-slate-800 shadow-xl group">'
-        . ($image !== '' ? '<img width="800" height="480" src="' . rocH($image) . '" alt="' . rocH($alt) . '" class="w-full h-80 object-cover rounded-xl group-hover:scale-105 transition-transform duration-500" fetchpriority="high"/>' : '')
+        . ($image !== '' ? '<img width="800" height="480" src="' . rocH($image) . '" alt="' . rocH($alt) . '" class="w-full h-80 ' . (rocIsAmazonImg($image) ? 'object-contain bg-white p-4' : 'object-cover') . ' rounded-xl group-hover:scale-105 transition-transform duration-500" fetchpriority="high"/>' : '')
         . ($badge !== '' ? '<span class="absolute top-4 left-4 max-w-[85%] bg-emerald-600 text-white font-extrabold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider badge-glow">' . rocH($badge) . '</span>' : '')
         . '</div></div>'
         . '<div class="lg:col-span-7 space-y-5"><div>'
