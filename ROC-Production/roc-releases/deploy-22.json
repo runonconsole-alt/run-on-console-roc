@@ -19,16 +19,9 @@
    "label": "Blog engine",
    "type": "file",
    "path": "api/v1/cms/blog-engine-lib.php"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-BIM9tp1e.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/29",
- "build": "index-BIM9tp1e.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]

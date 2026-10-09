@@ -1,0 +1,27 @@
+{
+ "deploy": 23,
+ "date": "2026-10-09",
+ "title": "Blog writer accepts the new Google key format",
+ "changes": [
+  "CMS > Blog writer accepts Gemini keys that start with \"AQ.\" (the new Google format) as well as \"AIza\""
+ ],
+ "checks": [
+  {
+   "label": "New key format accepted",
+   "type": "contains",
+   "path": "api/v1/cms/blog-agent-admin.php",
+   "text": "AIza or AQ."
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BIM9tp1e.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/29",
+ "build": "index-BIM9tp1e.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}
