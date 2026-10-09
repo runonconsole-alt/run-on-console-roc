@@ -3517,7 +3517,8 @@ async function renderBlogAgent(m, fresh){
         return '<tr><td><div style="font-weight:600">'+esc(p.title)+'</div><div class="t-slug"><a href="/blogs/'+esc(p.slug)+'/" target="_blank" rel="noopener">/blogs/'+esc(p.slug)+'/ ↗</a> · '+esc(p.words)+' words'+
             (p.stage?' · '+stageTag(p.stage):'')+(p.by?' · by '+esc(String(p.by).replace(/^server/,'server')):'')+'</div></td>'+
           '<td style="white-space:nowrap">'+esc(pkTime(p.publish_at))+'</td>'+
-          '<td><span class="tag '+(p.status==='published'?'published':p.status==='scheduled'?'draft':'off')+'">'+esc(p.status)+'</span></td></tr>';
+          '<td><span class="tag '+(p.status==='published'?'published':p.status==='scheduled'?'draft':'off')+'">'+esc(p.status)+'</span>'+
+            (p.status!=='deleted'?' <button class="btn sm" type="button" data-cover="'+esc(p.id)+'" title="Draw the cover picture again (title + product photo)">New cover</button>':'')+'</td></tr>';
       }).join('')+'</tbody></table>':'<div class="empty"><div class="big">✍</div><div>No posts written yet.</div></div>')+'</div>';
   }
 
@@ -3544,6 +3545,8 @@ async function renderBlogAgent(m, fresh){
     var g=b.dataset.rmkey==='gemini';
     if(!confirm('Remove the saved '+(g?'Gemini':'Groq')+' key? The writer then uses only the other key.')) return;
     var p={action:'settings',engine:engine,slots:times}; p[g?'gemini_key':'groq_key']='-'; call(p,b); }); });
+  m.querySelectorAll('[data-cover]').forEach(function(b){ b.addEventListener('click',function(){ call({action:'cover',id:b.dataset.cover},b).then(function(r){
+    if(r&&r.image) window.open(r.image,'_blank','noopener'); }); }); });
   var bt=$('#ba-test',m); if(bt) bt.addEventListener('click',function(){ call({action:'test_key'},this,false).then(function(){ bt.disabled=false; bt.textContent='Test the keys'; }); });
   var bw=$('#ba-write',m); if(bw) bw.addEventListener('click',function(){
     if(!confirm('Write the next post now? It takes 1-2 minutes and is scheduled for the next free time.')) return;

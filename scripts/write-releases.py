@@ -143,6 +143,11 @@ RELEASES = [
          changes=['CMS > Blog writer: a "Remove key" button next to each saved key (Gemini, Groq)'],
          checks=[dict(label='Remove key button', type='contains', path='cms/index.html', text='data-rmkey')],
          pr=REPO + '29'),
+    dict(deploy=26, date='2026-10-09', title='Blog covers are drawn again (font included), New cover button',
+         changes=['Blog cover pictures are drawn on the server with the post title (the font now comes with the site, so covers no longer fall back to an old site photo)',
+                  'CMS > Blog writer > Posts written: "New cover" draws the cover again for a post'],
+         checks=[dict(label='Cover font', type='file', path='api/v1/cms/fonts/Montserrat-ExtraBold.ttf')],
+         pr=REPO + '29'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

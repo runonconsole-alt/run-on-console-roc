@@ -356,7 +356,7 @@ function rocBlogCreate(PDO $pdo, string $root, array $in, string $source): array
     foreach ($plan['topics'] as $tp) if ($tp['id'] === $topicId) $topic = $tp;
     if ($topic) $content = rocBlogWithRelated($pdo, $plan, $topic, $content, '');
 
-    $image = rocBlogCover($root, $slug, $title, $category);
+    $image = rocBlogCover($root, $slug, $title, $category, rocBlogCoverPhoto($pdo, $root, $topic));
     $cols = rocBlogCols($pdo, 'blogs');
     $id = 'blog-' . bin2hex(random_bytes(4));
     $now = gmdate('Y-m-d H:i:s');
@@ -444,14 +444,37 @@ function rocBlogRelink(PDO $pdo, string $postId): int {
     return $n;
 }
 
-/* Cover image: 1200 x 630 JPG with the title (falls back to a site photo). */
-function rocBlogCover(string $root, string $slug, string $title, string $category): string {
+/** A product photo for a topic's cover: one of its products, else one from its cluster (site files only). */
+function rocBlogCoverPhoto(PDO $pdo, string $root, ?array $topic): ?string {
+    // Off until the products have real photos (today most are name cards, which repeat the title).
+    if (!rocBlogGet($pdo, 'blog_cover_photos', false)) return null;
+    if (!$topic || !rocBlogCols($pdo, 'products')) return null;
+    $slugs = (array)($topic['products'] ?? []);
+    if (!$slugs && strpos((string)$topic['pillar'], 'cat-') === 0) {
+        $S = rocBlogSite($pdo);
+        $cat = substr($topic['pillar'], 4);
+        foreach ($S['products'] as $ps => $pr) if ($pr['cat'] === $cat) $slugs[] = $ps;
+        // A different product for each post of the cluster.
+        if ($slugs) $slugs = [$slugs[abs(crc32($topic['id'])) % count($slugs)]];
+    }
+    $st = $pdo->prepare('SELECT image FROM products WHERE slug = ?');
+    foreach ($slugs as $ps) {
+        $st->execute([$ps]);
+        $img = (string)$st->fetchColumn();
+        // Only pictures stored on this site (never copies of Amazon pictures).
+        if (preg_match('#^/(images|uploads)/[^?"<>]+\.(jpe?g|png|webp)$#i', $img) && is_file($root . $img)) return $root . $img;
+    }
+    return null;
+}
+
+/* Cover image: 1200 x 630 JPG: category and title on the left, the product photo on the right. */
+function rocBlogCover(string $root, string $slug, string $title, string $category, ?string $photo = null): string {
     $fallback = '/images/hero_cod.jpg';
     if (!function_exists('imagettftext') || !function_exists('imagejpeg')) return $fallback;
     $font = null;
-    foreach (array_merge(['/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
-                          '/usr/share/fonts/liberation/LiberationSans-Bold.ttf', '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
-                          'C:/Windows/Fonts/segoeuib.ttf'], glob('/usr/share/fonts/*/*Bold.ttf') ?: [], glob('/usr/share/fonts/*/*/*Bold.ttf') ?: []) as $f) {
+    foreach (array_merge([__DIR__ . '/fonts/Montserrat-ExtraBold.ttf', '/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+                          '/usr/share/fonts/liberation/LiberationSans-Bold.ttf', 'C:/Windows/Fonts/segoeuib.ttf'],
+                         glob('/usr/share/fonts/*/*Bold.ttf') ?: [], glob('/usr/share/fonts/*/*/*Bold.ttf') ?: []) as $f) {
         if (is_file($f)) { $font = $f; break; }
     }
     if (!$font) return $fallback;
@@ -461,27 +484,66 @@ function rocBlogCover(string $root, string $slug, string $title, string $categor
         $k = ($x / $W + $y / $H) / 2;
         imagefilledrectangle($im, $x, $y, $x + 5, $y, imagecolorallocate($im, (int)(2 + 13 * $k), (int)(44 - 21 * $k), (int)(34 + 8 * $k)));
     }
+    // The product photo, filling the right part, fading into the background.
+    $textW = 1000;
+    $src = null;
+    if ($photo && is_file($photo)) {
+        $ext = strtolower(pathinfo($photo, PATHINFO_EXTENSION));
+        if ($ext === 'webp' && function_exists('imagecreatefromwebp')) $src = @imagecreatefromwebp($photo);
+        elseif ($ext === 'png') $src = @imagecreatefrompng($photo);
+        elseif (in_array($ext, ['jpg', 'jpeg'], true)) $src = @imagecreatefromjpeg($photo);
+    }
+    if ($src) {
+        $px = 600; $pw = $W - $px; $sw = imagesx($src); $sh = imagesy($src);
+        $scale = max($pw / $sw, $H / $sh);
+        $cw = (int)($pw / $scale); $ch = (int)($H / $scale);
+        imagecopyresampled($im, $src, $px, 0, (int)(($sw - $cw) / 2), (int)(($sh - $ch) / 2), $pw, $H, $cw, $ch);
+        imagedestroy($src);
+        imagealphablending($im, true);
+        for ($x = 0; $x < 220; $x += 2) {
+            $alpha = (int)(127 * $x / 220);
+            $c = imagecolorallocatealpha($im, 6, 36, 30, $alpha);
+            imagefilledrectangle($im, $px + $x, 0, $px + $x + 1, $H, $c);
+        }
+        $textW = 560;
+    }
     $green = imagecolorallocate($im, 52, 211, 153); $white = imagecolorallocate($im, 248, 250, 252); $soft = imagecolorallocate($im, 167, 243, 208);
-    imagefilledrectangle($im, 80, 96, 86, 534, $green);
-    imagettftext($im, 22, 0, 116, 140, $green, $font, strtoupper(mb_substr($category, 0, 40)));
-    for ($size = 56; $size >= 30; $size -= 2) {
+    imagefilledrectangle($im, 70, 96, 76, 534, $green);
+    imagettftext($im, 20, 0, 104, 140, $green, $font, strtoupper(mb_substr($category, 0, 40)));
+    for ($size = $src ? 46 : 56; $size >= 26; $size -= 2) {
         $lines = []; $cur = '';
         foreach (preg_split('/\s+/', $title) as $w) {
             $try = $cur === '' ? $w : "$cur $w";
-            $b = imagettfbbox($size, 0, $font, $try);
-            if ($cur !== '' && $b[2] - $b[0] > 1000) { $lines[] = $cur; $cur = $w; } else $cur = $try;
+            $bb = imagettfbbox($size, 0, $font, $try);
+            if ($cur !== '' && $bb[2] - $bb[0] > $textW) { $lines[] = $cur; $cur = $w; } else $cur = $try;
         }
         if ($cur !== '') $lines[] = $cur;
-        if (count($lines) <= 4) break;
+        if (count($lines) <= 5) break;
     }
-    $lines = array_slice($lines, 0, 4);
-    foreach ($lines as $i => $l) imagettftext($im, $size, 0, 116, 220 + $i * (int)($size * 1.35), $white, $font, $l);
-    imagettftext($im, 20, 0, 116, 560, $soft, $font, 'runonconsole.com');
+    $lines = array_slice($lines, 0, 5);
+    foreach ($lines as $i => $l) imagettftext($im, $size, 0, 104, 214 + $i * (int)($size * 1.32), $white, $font, $l);
+    imagettftext($im, 18, 0, 104, 560, $soft, $font, 'runonconsole.com');
     $dir = $root . '/uploads/blog-covers';
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
-    $ok = imagejpeg($im, $dir . '/' . $slug . '.jpg', 84);
+    $ok = imagejpeg($im, $dir . '/' . $slug . '.jpg', 86);
     imagedestroy($im);
-    return $ok ? '/uploads/blog-covers/' . $slug . '.jpg' : $fallback;
+    return $ok ? '/uploads/blog-covers/' . $slug . '.jpg?v=' . time() : $fallback;
+}
+
+/** Draws a new cover for a post (CMS > Blog writer > "New cover"). */
+function rocBlogRecover(PDO $pdo, string $root, string $postId): ?string {
+    $st = $pdo->prepare('SELECT id, slug, title, category FROM blogs WHERE id = ?');
+    $st->execute([$postId]);
+    $b = $st->fetch(PDO::FETCH_ASSOC);
+    if (!$b) return null;
+    $topic = null;
+    foreach (rocBlogPlan($pdo)['topics'] as $t) if (($t['post_id'] ?? '') === $postId) $topic = $t;
+    $img = rocBlogCover($root, $b['slug'], $b['title'], (string)$b['category'], rocBlogCoverPhoto($pdo, $root, $topic));
+    $cols = rocBlogCols($pdo, 'blogs');
+    $set = array_values(array_intersect(['image', 'og_image', 'twitter_image'], $cols));
+    $pdo->prepare('UPDATE blogs SET ' . implode(' = ?, ', $set) . ' = ?, updated_at = ? WHERE id = ?')
+        ->execute(array_merge(array_fill(0, count($set), $img), [gmdate('Y-m-d H:i:s'), $postId]));
+    return $img;
 }
 
 /* ----------------------------------------------------------- the brief */

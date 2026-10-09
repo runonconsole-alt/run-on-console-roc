@@ -123,6 +123,11 @@ if ($act === 'write_now') {
     $ok = $msg !== null && strpos($msg, 'Written:') === 0;
     rocBaOut($ok ? 200 : 422, ['success' => $ok, 'message' => $msg, 'error' => $ok ? null : ($msg ?: 'No free slot in the next 2 days.')]);
 }
+if ($act === 'cover') {
+    $img = rocBlogRecover($pdo, dirname(__DIR__, 3), (string)($in['id'] ?? ''));
+    if ($img === null) rocBaOut(404, ['success' => false, 'error' => 'Post not found.']);
+    rocBaOut(200, ['success' => true, 'image' => $img, 'message' => 'New cover made.']);
+}
 if ($act === 'plan_refresh') {
     $plan = rocBlogPlanSeed($pdo, rocBlogPlan($pdo));
     rocBlogSet($pdo, 'blog_plan', $plan, $uid);
