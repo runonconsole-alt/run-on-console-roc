@@ -88,9 +88,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST WIRELESS OVERALL",
   "bestFor": "Best Wireless Overall",
   "rank": 2,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0C7KFZ5TL&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-strix-scope-ii-96-wireless.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+ROG+Strix+Scope+II+96+Wireless"
+   "amazon": "https://www.amazon.com/dp/B0C7KFZ5TL"
   },
   "shortDesc": "The ASUS ROG Strix Scope II 96 Wireless is a gaming keyboard from ASUS ROG: 96%, mechanical, 2.4GHz/Bluetooth/USB-C. Our pick: Best Wireless Overall.",
   "specs": {
@@ -117,9 +117,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST HALL EFFECT / 96%",
   "bestFor": "Best Hall Effect / 96%",
   "rank": 3,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FKHPRZ45&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/corsair-vanguard-pro-96.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Corsair+Vanguard+Pro+96"
+   "amazon": "https://www.amazon.com/dp/B0FKHPRZ45"
   },
   "shortDesc": "The Corsair Vanguard Pro 96 is a gaming keyboard from Corsair: 96%, Hall Effect, adjustable actuation, Rapid Trigger. Our pick: Best Hall Effect / 96%.",
   "specs": {
@@ -147,9 +147,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST COMPETITIVE TKL",
   "bestFor": "Best Competitive TKL",
   "rank": 4,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CG7BWG7J&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-huntsman-v3-pro-tkl.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Razer+Huntsman+V3+Pro+TKL"
+   "amazon": "https://www.amazon.com/dp/B0CG7BWG7J"
   },
   "shortDesc": "The Razer Huntsman V3 Pro TKL is a gaming keyboard from Razer: TKL, analog optical, adjustable actuation, Rapid Trigger. Our pick: Best Competitive TKL.",
   "specs": {
@@ -177,9 +177,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST RAZER MAGNETIC",
   "bestFor": "Best Razer Magnetic",
   "rank": 5,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H47Z2J3T&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-huntsman-v3-he.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Razer+Huntsman+V3+HE"
+   "amazon": "https://www.amazon.com/dp/B0H47Z2J3T"
   },
   "shortDesc": "The Razer Huntsman V3 HE is a gaming keyboard from Razer: Magnetic Hall Effect, 8K polling, adjustable actuation. Our pick: Best Razer Magnetic.",
   "specs": {
@@ -206,9 +206,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST TKL GAMING",
   "bestFor": "Best TKL Gaming",
   "rank": 6,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DF2QL2GK&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-apex-pro-tkl-gen-3.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=SteelSeries+Apex+Pro+TKL+Gen+3"
+   "amazon": "https://www.amazon.com/dp/B0DF2QL2GK"
   },
   "shortDesc": "The SteelSeries Apex Pro TKL Gen 3 is a gaming keyboard from SteelSeries: TKL, OmniPoint 3.0 Hall Effect, adjustable actuation. Our pick: Best TKL Gaming.",
   "specs": {
@@ -235,9 +235,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST PREMIUM TYPING + GAMING",
   "bestFor": "Best Premium Typing + Gaming",
   "rank": 7,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D89ZFWJX&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/keychron-q1-he.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Keychron+Q1+HE"
+   "amazon": "https://www.amazon.com/dp/B0D89ZFWJX"
   },
   "shortDesc": "The Keychron Q1 HE is a gaming keyboard from Keychron: 75%, Hall Effect, wireless, hot-swappable. Our pick: Best Premium Typing + Gaming.",
   "specs": {
@@ -265,9 +265,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST VALUE MAGNETIC",
   "bestFor": "Best Value Magnetic",
   "rank": 8,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DCVQBMVP&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/keychron-k2-he.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Keychron+K2+HE"
+   "amazon": "https://www.amazon.com/dp/B0DCVQBMVP"
   },
   "shortDesc": "The Keychron K2 HE is a gaming keyboard from Keychron: 75%, Hall Effect, wireless, hot-swappable. Our pick: Best Value Magnetic.",
   "specs": {
@@ -295,9 +295,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST MID-RANGE",
   "bestFor": "Best Mid-Range",
   "rank": 9,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DY7KTB87&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/lemokey-p1-he.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Lemokey+P1+HE"
+   "amazon": "https://www.amazon.com/dp/B0DY7KTB87"
   },
   "shortDesc": "The Lemokey P1 HE is a gaming keyboard from Lemokey: 75%, Hall Effect, adjustable actuation, wireless. Our pick: Best Mid-Range.",
   "specs": {
@@ -325,9 +325,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST WIRELESS MAGNETIC",
   "bestFor": "Best Wireless Magnetic",
   "rank": 10,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GJXBMY43&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-azoth-96-he.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+ROG+Azoth+96+HE"
+   "amazon": "https://www.amazon.com/dp/B0GJXBMY43"
   },
   "shortDesc": "The ASUS ROG Azoth 96 HE is a gaming keyboard from ASUS ROG: 96%, Hall Effect, wireless, adjustable actuation. Our pick: Best Wireless Magnetic.",
   "specs": {
@@ -355,9 +355,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST WIRELESS MECHANICAL",
   "bestFor": "Best Wireless Mechanical",
   "rank": 11,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BSKSCGZ4&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-azoth.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+ROG+Azoth"
+   "amazon": "https://www.amazon.com/dp/B0BSKSCGZ4"
   },
   "shortDesc": "The ASUS ROG Azoth is a gaming keyboard from ASUS ROG: 75%, mechanical, tri-mode wireless, hot-swappable. Our pick: Best Wireless Mechanical.",
   "specs": {
@@ -385,9 +385,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST NEW MECHANICAL / TYPING",
   "bestFor": "Best New Mechanical / Typing",
   "rank": 12,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GJ4V9XFJ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/epomaker-glyph.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Epomaker+Glyph+keyboard"
+   "amazon": "https://www.amazon.com/dp/B0GJ4V9XFJ"
   },
   "shortDesc": "The Epomaker Glyph is a gaming keyboard from Epomaker: mechanical, dual displays, RGB, premium typing. Our pick: Best New Mechanical / Typing.",
   "specs": {
@@ -415,9 +415,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST FEATURE-RICH TKL",
   "bestFor": "Best Feature-Rich TKL",
   "rank": 13,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GWD2D7S3&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/turtle-beach-command-series-kb7-tkl.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Turtle+Beach+Command+Series+KB7+TKL"
+   "amazon": "https://www.amazon.com/dp/B0GWD2D7S3"
   },
   "shortDesc": "The Turtle Beach Command Series KB7 TKL is a gaming keyboard from Turtle Beach: TKL, Hall Effect, 8K polling, touchscreen, Rapid Trigger. Our pick: Best Feature-Rich TKL.",
   "specs": {
@@ -446,9 +446,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST PREMIUM MECHANICAL",
   "bestFor": "Best Premium Mechanical",
   "rank": 14,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DD5S8TM8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-blackwidow-v4-pro-75.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Razer+BlackWidow+V4+Pro+75"
+   "amazon": "https://www.amazon.com/dp/B0DD5S8TM8"
   },
   "shortDesc": "The Razer BlackWidow V4 Pro 75% is a gaming keyboard from Razer: 75%, mechanical, hot-swappable, RGB, wireless. Our pick: Best Premium Mechanical.",
   "specs": {
@@ -477,9 +477,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST LOW-PROFILE WIRELESS",
   "bestFor": "Best Low-Profile Wireless",
   "rank": 15,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DB1WY5L9&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g915-x-lightspeed.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Logitech+G915+X+LIGHTSPEED"
+   "amazon": "https://www.amazon.com/dp/B0DB1WY5L9"
   },
   "shortDesc": "The Logitech G915 X LIGHTSPEED is a gaming keyboard from Logitech G: low-profile mechanical, wireless, full-size. Our pick: Best Low-Profile Wireless.",
   "specs": {
@@ -506,9 +506,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST COMPACT MAINSTREAM",
   "bestFor": "Best Compact Mainstream",
   "rank": 16,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BRSQ2DSX&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-pro-x-60-lightspeed.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Logitech+G+PRO+X+60+LIGHTSPEED"
+   "amazon": "https://www.amazon.com/dp/B0BRSQ2DSX"
   },
   "shortDesc": "The Logitech G PRO X 60 LIGHTSPEED is a gaming keyboard from Logitech G: 60%, hot-swappable, wireless, low-latency. Our pick: Best Compact Mainstream.",
   "specs": {
@@ -536,9 +536,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST CUSTOMIZABLE 75%",
   "bestFor": "Best Customizable 75%",
   "rank": 17,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D5Q89DWL&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/nuphy-halo75-v2.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=NuPhy+Halo75+V2"
+   "amazon": "https://www.amazon.com/dp/B0D5Q89DWL"
   },
   "shortDesc": "The NuPhy Halo75 V2 is a gaming keyboard from NuPhy: 75%, mechanical, wireless, hot-swappable. Our pick: Best Customizable 75%.",
   "specs": {
@@ -566,9 +566,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET HALL EFFECT",
   "bestFor": "Best Budget Hall Effect",
   "rank": 18,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DQWNJJ6X&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/monsgeek-fun60-ultra.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=MonsGeek+FUN60+Ultra"
+   "amazon": "https://www.amazon.com/dp/B0DQWNJJ6X"
   },
   "shortDesc": "The MonsGeek FUN60 Ultra is a gaming keyboard from MonsGeek: 60%, Hall Effect, 8K polling, adjustable actuation. Our pick: Best Budget Hall Effect.",
   "specs": {
@@ -596,9 +596,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET MECHANICAL",
   "bestFor": "Best Budget Mechanical",
   "rank": 19,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H9CC8JCZ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-reclusa-x-mini-65.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Razer+Reclusa+X+Mini+65"
+   "amazon": "https://www.amazon.com/dp/B0H9CC8JCZ"
   },
   "shortDesc": "The Razer Reclusa X Mini 65% is a gaming keyboard from Razer: 65%, mechanical, hot-swappable, Gen-3 Orange switches. Our pick: Best Budget Mechanical.",
   "specs": {
@@ -626,9 +626,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST QUIET MECHANICAL",
   "bestFor": "Best Quiet Mechanical",
   "rank": 20,
-  "image": "/images/cyber_keyboard.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H9VDD7C7&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/be-quiet-light-mount-tkl.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=be+quiet+Light+Mount+TKL"
+   "amazon": "https://www.amazon.com/dp/B0H9VDD7C7"
   },
   "shortDesc": "The be quiet! Light Mount TKL is a gaming keyboard from be quiet!: TKL, mechanical, silent switches, RGB. Our pick: Best Quiet Mechanical.",
   "specs": {
@@ -686,9 +686,9 @@ export const ALL_PRODUCTS = [
   "badge": "PREMIUM ALL-ROUNDER",
   "bestFor": "Premium All-Rounder",
   "rank": 1,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09ZLRCH1H&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-nova-pro-wireless.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=SteelSeries+Arctis+Nova+Pro+Wireless"
+   "amazon": "https://www.amazon.com/dp/B09ZLRCH1H"
   },
   "shortDesc": "The SteelSeries Arctis Nova Pro Wireless is a gaming headset from SteelSeries: wireless, ANC, hot-swappable batteries, multi-platform. Our pick: Premium All-Rounder.",
   "specs": {
@@ -716,9 +716,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST OVERALL / PREMIUM 2026",
   "bestFor": "Best Overall / Premium 2026",
   "rank": 2,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GS7PZH2P&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-nova-pro-omni.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=SteelSeries+Arctis+Nova+Pro+Omni"
+   "amazon": "https://www.amazon.com/dp/B0GS7PZH2P"
   },
   "shortDesc": "The SteelSeries Arctis Nova Pro Omni is a gaming headset from SteelSeries: Hi-Res, hot-swappable batteries, multi-source mixing. Our pick: Best Overall / Premium 2026.",
   "specs": {
@@ -745,9 +745,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST PC GAMING HEADSET",
   "bestFor": "Best PC Gaming Headset",
   "rank": 3,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F3QDLZKG&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-blackshark-v3-pro.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Razer+BlackShark+V3+Pro"
+   "amazon": "https://www.amazon.com/dp/B0F3QDLZKG"
   },
   "shortDesc": "The Razer BlackShark V3 Pro is a gaming headset from Razer: wireless, high-end mic, low-latency, ANC. Our pick: Best PC Gaming Headset.",
   "specs": {
@@ -775,9 +775,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST OVERALL VALUE",
   "bestFor": "Best Overall Value",
   "rank": 4,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FRNR8Y11&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-nova-7-wireless-gen-2.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=SteelSeries+Arctis+Nova+7+Wireless+Gen+2"
+   "amazon": "https://www.amazon.com/dp/B0FRNR8Y11"
   },
   "shortDesc": "The SteelSeries Arctis Nova 7 Wireless Gen 2 is a gaming headset from SteelSeries: 2.4GHz + Bluetooth, 50+ hour battery, 40mm drivers. Our pick: Best Overall Value.",
   "specs": {
@@ -804,9 +804,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST CONSOLE VALUE",
   "bestFor": "Best Console Value",
   "rank": 5,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D2YBQQ1P&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-nova-5-wireless.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=SteelSeries+Arctis+Nova+5+Wireless"
+   "amazon": "https://www.amazon.com/dp/B0D2YBQQ1P"
   },
   "shortDesc": "The SteelSeries Arctis Nova 5 Wireless is a gaming headset from SteelSeries: wireless, multi-platform, customizable EQ. Our pick: Best Console Value.",
   "specs": {
@@ -833,9 +833,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST AFFORDABLE WIRELESS",
   "bestFor": "Best Affordable Wireless",
   "rank": 6,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F956KHT9&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-nova-3-wireless.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=SteelSeries+Arctis+Nova+3+Wireless"
+   "amazon": "https://www.amazon.com/dp/B0F956KHT9"
   },
   "shortDesc": "The SteelSeries Arctis Nova 3 Wireless is a gaming headset from SteelSeries: wireless, detachable mic, multi-platform. Our pick: Best Affordable Wireless.",
   "specs": {
@@ -862,9 +862,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST WIRELESS GAMING HEADSET",
   "bestFor": "Best Wireless Gaming Headset",
   "rank": 7,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0B3F8V4JG&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-pro-x-2-lightspeed.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Logitech+G+Pro+X+2+LIGHTSPEED"
+   "amazon": "https://www.amazon.com/dp/B0B3F8V4JG"
   },
   "shortDesc": "The Logitech G Pro X 2 LIGHTSPEED is a gaming headset from Logitech G: 50mm graphene drivers, LIGHTSPEED, Bluetooth. Our pick: Best Wireless Gaming Headset.",
   "specs": {
@@ -891,9 +891,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST MULTI-PLATFORM",
   "bestFor": "Best Multi-Platform",
   "rank": 8,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BRXJDQC1&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-astro-a50-x.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Logitech+G+Astro+A50+X"
+   "amazon": "https://www.amazon.com/dp/B0BRXJDQC1"
   },
   "shortDesc": "The Logitech G Astro A50 X is a gaming headset from Logitech G: graphene drivers, PLAYSYNC HDMI switch, wireless base station. Our pick: Best Multi-Platform.",
   "specs": {
@@ -920,9 +920,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BATTERY LIFE",
   "bestFor": "Best Battery Life",
   "rank": 9,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09TRW57WB&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/hyperx-cloud-alpha-wireless.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=HyperX+Cloud+Alpha+Wireless"
+   "amazon": "https://www.amazon.com/dp/B09TRW57WB"
   },
   "shortDesc": "The HyperX Cloud Alpha Wireless is a gaming headset from HyperX: 300-hour battery, 50mm drivers, 2.4GHz. Our pick: Best Battery Life.",
   "specs": {
@@ -949,9 +949,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST AUDIOPHILE GAMING",
   "bestFor": "Best Audiophile Gaming",
   "rank": 10,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G98TB4ZF&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/audeze-maxwell-2.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Audeze+Maxwell+2"
+   "amazon": "https://www.amazon.com/dp/B0G98TB4ZF"
   },
   "shortDesc": "The Audeze Maxwell 2 is a gaming headset from Audeze: planar magnetic, high-resolution wireless, premium mic. Our pick: Best Audiophile Gaming.",
   "specs": {
@@ -978,9 +978,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST OPEN-BACK GAMING",
   "bestFor": "Best Open-Back Gaming",
   "rank": 11,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D13VX3S6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/turtle-beach-atlas-air.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Turtle+Beach+Atlas+Air"
+   "amazon": "https://www.amazon.com/dp/B0D13VX3S6"
   },
   "shortDesc": "The Turtle Beach Atlas Air is a gaming headset from Turtle Beach: open-back, wireless, lightweight, high-resolution audio. Our pick: Best Open-Back Gaming.",
   "specs": {
@@ -1008,9 +1008,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET WIRELESS",
   "bestFor": "Best Budget Wireless",
   "rank": 12,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CZX86R9F&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/turtle-beach-stealth-500.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Turtle+Beach+Stealth+500"
+   "amazon": "https://www.amazon.com/dp/B0CZX86R9F"
   },
   "shortDesc": "The Turtle Beach Stealth 500 is a gaming headset from Turtle Beach: wireless, Bluetooth, flip-to-mute mic. Our pick: Best Budget Wireless.",
   "specs": {
@@ -1037,9 +1037,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET GAMING HEADSET",
   "bestFor": "Best Budget Gaming Headset",
   "rank": 13,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G12HGD6R&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-g325-lightspeed.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Logitech+G+G325+LIGHTSPEED"
+   "amazon": "https://www.amazon.com/dp/B0G12HGD6R"
   },
   "shortDesc": "The Logitech G G325 LIGHTSPEED is a gaming headset from Logitech G: wireless, lightweight, budget-focused. Our pick: Best Budget Gaming Headset.",
   "specs": {
@@ -1066,9 +1066,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST GAMING EARBUDS",
   "bestFor": "Best Gaming Earbuds",
   "rank": 14,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DFX4TPS6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arctis-gamebuds.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=SteelSeries+Arctis+GameBuds"
+   "amazon": "https://www.amazon.com/dp/B0DFX4TPS6"
   },
   "shortDesc": "The SteelSeries Arctis GameBuds is a pair of gaming earbuds from SteelSeries: true wireless, 2.4GHz + Bluetooth, gaming ANC. Our pick: Best Gaming Earbuds.",
   "specs": {
@@ -1095,9 +1095,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST LOW-LATENCY EARBUDS",
   "bestFor": "Best Low-Latency Earbuds",
   "rank": 15,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CJHB7B59&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/sony-inzone-buds.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Sony+INZONE+Buds"
+   "amazon": "https://www.amazon.com/dp/B0CJHB7B59"
   },
   "shortDesc": "The Sony INZONE Buds is a pair of gaming earbuds from Sony: true wireless, 12-hour battery, low-latency 2.4GHz. Our pick: Best Low-Latency Earbuds.",
   "specs": {
@@ -1124,9 +1124,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST WIRED GAMING AUDIO",
   "bestFor": "Best Wired Gaming Audio",
   "rank": 16,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09FPCVHVN&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/epos-h6pro.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=EPOS+H6PRO"
+   "amazon": "https://www.amazon.com/dp/B09FPCVHVN"
   },
   "shortDesc": "The EPOS H6PRO is a gaming headset from EPOS: wired, open/closed-back options, detachable mic. Our pick: Best Wired Gaming Audio.",
   "specs": {
@@ -1153,9 +1153,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST STUDIO HEADPHONES FOR GAMING",
   "bestFor": "Best Studio Headphones for Gaming",
   "rank": 17,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B00HVLUR86&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/audio-technica-ath-m50x.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Audio-Technica+ATH-M50x"
+   "amazon": "https://www.amazon.com/dp/B00HVLUR86"
   },
   "shortDesc": "The Audio-Technica ATH-M50x is a pair of headphones from Audio-Technica: closed-back studio headphones, wired. Our pick: Best Studio Headphones for Gaming.",
   "specs": {
@@ -1181,9 +1181,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST AUDIOPHILE BUDGET HEADPHONES",
   "bestFor": "Best Audiophile Budget Headphones",
   "rank": 18,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B08J9MVB6W&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/sennheiser-hd-560s.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Sennheiser+HD+560S"
+   "amazon": "https://www.amazon.com/dp/B08J9MVB6W"
   },
   "shortDesc": "The Sennheiser HD 560S is a pair of headphones from Sennheiser: open-back, wired, wide soundstage. Our pick: Best Audiophile Budget Headphones.",
   "specs": {
@@ -1210,9 +1210,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST USB GAMING MIC",
   "bestFor": "Best USB Gaming Mic",
   "rank": 19,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B088HHWC47&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/elgato-wave3.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Elgato+Wave+3"
+   "amazon": "https://www.amazon.com/dp/B088HHWC47"
   },
   "shortDesc": "The Elgato Wave:3 is a USB microphone from Elgato: USB condenser microphone, clipguard, software mixer. Our pick: Best USB Gaming Mic.",
   "specs": {
@@ -1239,9 +1239,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST RGB USB MIC",
   "bestFor": "Best RGB USB Mic",
   "rank": 20,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DG9X4WHW&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/hyperx-quadcast-2-s.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=HyperX+QuadCast+2+S"
+   "amazon": "https://www.amazon.com/dp/B0DG9X4WHW"
   },
   "shortDesc": "The HyperX QuadCast 2 S is a USB microphone from HyperX: USB condenser, RGB, multi-pattern, high-resolution. Our pick: Best RGB USB Mic.",
   "specs": {
@@ -1269,9 +1269,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST PLUG-AND-PLAY MIC",
   "bestFor": "Best Plug-and-Play Mic",
   "rank": 21,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CBNTXNWV&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-alias.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=SteelSeries+Alias+microphone"
+   "amazon": "https://www.amazon.com/dp/B0CBNTXNWV"
   },
   "shortDesc": "The SteelSeries Alias is a USB microphone from SteelSeries: USB condenser microphone, gaming-focused software. Our pick: Best Plug-and-Play Mic.",
   "specs": {
@@ -1297,9 +1297,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET MIC",
   "bestFor": "Best Budget Mic",
   "rank": 22,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CT787NLW&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-seiren-v3-mini.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Razer+Seiren+V3+Mini"
+   "amazon": "https://www.amazon.com/dp/B0CT787NLW"
   },
   "shortDesc": "The Razer Seiren V3 Mini is a USB microphone from Razer: USB condenser, compact, tap-to-mute. Our pick: Best Budget Mic.",
   "specs": {
@@ -1326,9 +1326,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST COMPACT GAMING SPEAKERS",
   "bestFor": "Best Compact Gaming Speakers",
   "rank": 23,
-  "image": "/images/tactical_headset.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B00UAFSN5O&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/edifier-g2000.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Edifier+G2000+gaming+speakers"
+   "amazon": "https://www.amazon.com/dp/B00UAFSN5O"
   },
   "shortDesc": "The Edifier G2000 is a speaker system from Edifier: 2.0 gaming speakers, Bluetooth, USB/3.5mm. Our pick: Best Compact Gaming Speakers.",
   "specs": {
@@ -1355,9 +1355,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST OVERALL / COMPETITIVE FPS",
   "bestFor": "Best Overall / Competitive FPS",
   "rank": 1,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GMLBSSTD&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-viper-v4-pro.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Razer+Viper+V4+Pro"
+   "amazon": "https://www.amazon.com/dp/B0GMLBSSTD"
   },
   "shortDesc": "The Razer Viper V4 Pro is a gaming mouse from Razer: 50,000 DPI, 8,000Hz, wireless. Our pick: Best Overall / Competitive FPS.",
   "specs": {
@@ -1384,9 +1384,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST COMPETITIVE FPS / PREMIUM",
   "bestFor": "Best Competitive FPS / Premium",
   "rank": 2,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G12HGHGM&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-pro-x2-superstrike.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Logitech+G+PRO+X2+SUPERSTRIKE"
+   "amazon": "https://www.amazon.com/dp/B0G12HGHGM"
   },
   "shortDesc": "The Logitech G PRO X2 SUPERSTRIKE is a gaming mouse from Logitech G: HERO 2 sensor, haptic inductive switches, wireless. Our pick: Best Competitive FPS / Premium.",
   "specs": {
@@ -1413,9 +1413,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST ERGONOMIC GAMING MOUSE",
   "bestFor": "Best Ergonomic Gaming Mouse",
   "rank": 3,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F3QCXL82&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-deathadder-v4-pro.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Razer+DeathAdder+V4+Pro"
+   "amazon": "https://www.amazon.com/dp/B0F3QCXL82"
   },
   "shortDesc": "The Razer DeathAdder V4 Pro is a gaming mouse from Razer: 45,000 DPI, 8,000Hz, wireless. Our pick: Best Ergonomic Gaming Mouse.",
   "specs": {
@@ -1442,9 +1442,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST MMO / VERSATILE",
   "bestFor": "Best MMO / Versatile",
   "rank": 4,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H4SBT4SH&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-naga-v3-pro.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Razer+Naga+V3+Pro"
+   "amazon": "https://www.amazon.com/dp/B0H4SBT4SH"
   },
   "shortDesc": "The Razer Naga V3 Pro is a gaming mouse from Razer: 50K sensor, 2/6/12-button side plates, wireless. Our pick: Best MMO / Versatile.",
   "specs": {
@@ -1471,9 +1471,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST LIGHTWEIGHT MAINSTREAM",
   "bestFor": "Best Lightweight Mainstream",
   "rank": 5,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09NBWL8J5&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g-pro-x-superlight-2.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Logitech+G+PRO+X+Superlight+2"
+   "amazon": "https://www.amazon.com/dp/B09NBWL8J5"
   },
   "shortDesc": "The Logitech G PRO X Superlight 2 is a gaming mouse from Logitech G: HERO 2, lightweight, wireless. Our pick: Best Lightweight Mainstream.",
   "specs": {
@@ -1500,9 +1500,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST WORK & PLAY / FEATURE-RICH",
   "bestFor": "Best Work & Play / Feature-Rich",
   "rank": 6,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B092CB69Q4&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g502-x-plus.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Logitech+G502+X+PLUS"
+   "amazon": "https://www.amazon.com/dp/B092CB69Q4"
   },
   "shortDesc": "The Logitech G502 X PLUS is a gaming mouse from Logitech G: HERO 25K, LIGHTFORCE switches, RGB, wireless. Our pick: Best Work & Play / Feature-Rich.",
   "specs": {
@@ -1530,9 +1530,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST WIRED COMPETITIVE",
   "bestFor": "Best Wired Competitive",
   "rank": 7,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FB8VWW8Y&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/endgame-gear-op1-8k-v2.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Endgame+Gear+OP1+8K+V2"
+   "amazon": "https://www.amazon.com/dp/B0FB8VWW8Y"
   },
   "shortDesc": "The Endgame Gear OP1 8K V2 is a gaming mouse from Endgame Gear: 50g, 8K polling, wired. Our pick: Best Wired Competitive.",
   "specs": {
@@ -1559,9 +1559,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST ULTRA-LIGHT / FINGERTIP",
   "bestFor": "Best Ultra-Light / Fingertip",
   "rank": 8,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FM2K41Y6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/pulsar-x2f-crazylight.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Pulsar+X2F+CrazyLight"
+   "amazon": "https://www.amazon.com/dp/B0FM2K41Y6"
   },
   "shortDesc": "The Pulsar X2F CrazyLight is a gaming mouse from Pulsar: 29g, ultra-light, SX2 sensor. Our pick: Best Ultra-Light / Fingertip.",
   "specs": {
@@ -1588,9 +1588,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST SMALL ULTRA-LIGHT",
   "bestFor": "Best Small Ultra-Light",
   "rank": 9,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DVXD49L8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/pulsar-x2-crazylight-mini.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Pulsar+X2+CrazyLight+Mini"
+   "amazon": "https://www.amazon.com/dp/B0DVXD49L8"
   },
   "shortDesc": "The Pulsar X2 CrazyLight Mini is a gaming mouse from Pulsar: 35g, ultra-light, wireless. Our pick: Best Small Ultra-Light.",
   "specs": {
@@ -1617,9 +1617,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST LIGHTWEIGHT ERGONOMIC",
   "bestFor": "Best Lightweight Ergonomic",
   "rank": 10,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FFGN4381&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/pulsar-xlite-crazylight.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Pulsar+Xlite+CrazyLight"
+   "amazon": "https://www.amazon.com/dp/B0FFGN4381"
   },
   "shortDesc": "The Pulsar Xlite CrazyLight is a gaming mouse from Pulsar: ergonomic, ultra-light, wireless. Our pick: Best Lightweight Ergonomic.",
   "specs": {
@@ -1646,9 +1646,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST MID-RANGE",
   "bestFor": "Best Mid-Range",
   "rank": 11,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0HBV6L6X8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/mchose-l7-ultra.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=MCHOSE+L7+Ultra"
+   "amazon": "https://www.amazon.com/dp/B0HBV6L6X8"
   },
   "shortDesc": "The MCHOSE L7 Ultra is a gaming mouse from MCHOSE: high-end sensor, lightweight, wireless. Our pick: Best Mid-Range.",
   "specs": {
@@ -1675,9 +1675,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST VALUE LIGHTWEIGHT",
   "bestFor": "Best Value Lightweight",
   "rank": 12,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DSPR5SFW&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/mchose-a7.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=MCHOSE+A7"
+   "amazon": "https://www.amazon.com/dp/B0DSPR5SFW"
   },
   "shortDesc": "The MCHOSE A7 is a gaming mouse from MCHOSE: lightweight, high-polling wireless. Our pick: Best Value Lightweight.",
   "specs": {
@@ -1703,9 +1703,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET COMPETITIVE",
   "bestFor": "Best Budget Competitive",
   "rank": 13,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FN7HCZT1&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/vxe-r1-pro.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=VXE+R1+Pro"
+   "amazon": "https://www.amazon.com/dp/B0FN7HCZT1"
   },
   "shortDesc": "The VXE R1 Pro is a gaming mouse from VXE: lightweight, PAW3395, wireless. Our pick: Best Budget Competitive.",
   "specs": {
@@ -1732,9 +1732,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST SMALL PREMIUM",
   "bestFor": "Best Small Premium",
   "rank": 14,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DG6DQ2DP&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-harpe-ace-mini.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+ROG+Harpe+Ace+Mini"
+   "amazon": "https://www.amazon.com/dp/B0DG6DQ2DP"
   },
   "shortDesc": "The ASUS ROG Harpe Ace Mini is a gaming mouse from ASUS ROG: 49g, high-end sensor, wireless. Our pick: Best Small Premium.",
   "specs": {
@@ -1761,9 +1761,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST MID-RANGE WIRELESS",
   "bestFor": "Best Mid-Range Wireless",
   "rank": 15,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CTN26P3Z&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/corsair-m75-wireless.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Corsair+M75+Wireless"
+   "amazon": "https://www.amazon.com/dp/B0CTN26P3Z"
   },
   "shortDesc": "The Corsair M75 Wireless is a gaming mouse from Corsair: wireless, dual connectivity, symmetrical. Our pick: Best Mid-Range Wireless.",
   "specs": {
@@ -1790,9 +1790,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST COMPACT ERGONOMIC",
   "bestFor": "Best Compact Ergonomic",
   "rank": 16,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09BRFNP6F&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-prime-wireless-mini.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=SteelSeries+Prime+Wireless+Mini"
+   "amazon": "https://www.amazon.com/dp/B09BRFNP6F"
   },
   "shortDesc": "The SteelSeries Prime Wireless Mini is a gaming mouse from SteelSeries: wireless, compact ergonomic design. Our pick: Best Compact Ergonomic.",
   "specs": {
@@ -1818,9 +1818,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST ESPORTS ERGONOMIC",
   "bestFor": "Best Esports Ergonomic",
   "rank": 17,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F1XD5MK8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/zowie-ec2-dw.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ZOWIE+EC2-DW"
+   "amazon": "https://www.amazon.com/dp/B0F1XD5MK8"
   },
   "shortDesc": "The ZOWIE EC2-DW is a gaming mouse from BenQ ZOWIE: wireless, ergonomic, esports-focused. Our pick: Best Esports Ergonomic.",
   "specs": {
@@ -1847,9 +1847,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET WIRELESS",
   "bestFor": "Best Budget Wireless",
   "rank": 18,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0B8TKY2YT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/cooler-master-mm311.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Cooler+Master+MM311"
+   "amazon": "https://www.amazon.com/dp/B0B8TKY2YT"
   },
   "shortDesc": "The Cooler Master MM311 is a gaming mouse from Cooler Master: wireless, lightweight, budget-focused. Our pick: Best Budget Wireless.",
   "specs": {
@@ -1876,9 +1876,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST ERGONOMIC FEATURE-RICH",
   "bestFor": "Best Ergonomic Feature-Rich",
   "rank": 19,
-  "image": "/images/apex_mouse.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0B6Y3XYFG&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-basilisk-v3-pro.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Razer+Basilisk+V3+Pro"
+   "amazon": "https://www.amazon.com/dp/B0B6Y3XYFG"
   },
   "shortDesc": "The Razer Basilisk V3 Pro is a gaming mouse from Razer: 30K-class sensor, ergonomic, wireless, RGB. Our pick: Best Ergonomic Feature-Rich.",
   "specs": {
@@ -1934,9 +1934,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST OVERALL PC SPEAKERS",
   "bestFor": "Best Overall PC Speakers",
   "rank": 1,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DFZQGZ37&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/mackie-cr35bt-cr8sbt.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Mackie+CR3.5BT+CR8SBT"
+   "amazon": "https://www.amazon.com/dp/B0DFZQGZ37"
   },
   "shortDesc": "The Mackie CR3.5BT + CR8SBT is a speaker system from Mackie: 2.1, 3.5-inch monitors + 8-inch subwoofer, Bluetooth 5.0. Our pick: Best Overall PC Speakers.",
   "specs": {
@@ -1963,9 +1963,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET PC SPEAKERS",
   "bestFor": "Best Budget PC Speakers",
   "rank": 2,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DXW25R3D&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-pebble-pro.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Creative+Pebble+Pro"
+   "amazon": "https://www.amazon.com/dp/B0DXW25R3D"
   },
   "shortDesc": "The Creative Pebble Pro is a speaker system from Creative: 2.0, USB-C, Bluetooth, compact. Our pick: Best Budget PC Speakers.",
   "specs": {
@@ -1993,9 +1993,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST ULTRA-BUDGET",
   "bestFor": "Best Ultra-Budget",
   "rank": 3,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B08F57GSJ7&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-pebble-v3.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Creative+Pebble+V3"
+   "amazon": "https://www.amazon.com/dp/B08F57GSJ7"
   },
   "shortDesc": "The Creative Pebble V3 is a speaker system from Creative: 2.0, USB-C, Bluetooth 5.0, compact. Our pick: Best Ultra-Budget.",
   "specs": {
@@ -2023,9 +2023,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET 2.1",
   "bestFor": "Best Budget 2.1",
   "rank": 4,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B07NWLWM9B&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-pebble-plus.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Creative+Pebble+Plus"
+   "amazon": "https://www.amazon.com/dp/B07NWLWM9B"
   },
   "shortDesc": "The Creative Pebble Plus is a speaker system from Creative: 2.1, USB-powered, down-firing subwoofer. Our pick: Best Budget 2.1.",
   "specs": {
@@ -2052,9 +2052,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST MID-RANGE COMPACT",
   "bestFor": "Best Mid-Range Compact",
   "rank": 5,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H946F5J9&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-xf1.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Creative+XF1"
+   "amazon": "https://www.amazon.com/dp/B0H946F5J9"
   },
   "shortDesc": "The Creative XF1 is a speaker system from Creative: 2.0, compact desktop speakers, modern connectivity. Our pick: Best Mid-Range Compact.",
   "specs": {
@@ -2081,9 +2081,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST GAMING SOUNDBAR",
   "bestFor": "Best Gaming Soundbar",
   "rank": 6,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FCXVPBZY&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-stage-pro.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Creative+Stage+Pro"
+   "amazon": "https://www.amazon.com/dp/B0FCXVPBZY"
   },
   "shortDesc": "The Creative Stage Pro is a soundbar from Creative: soundbar + subwoofer, HDMI ARC, optical, Bluetooth 5.3, USB-C. Our pick: Best Gaming Soundbar.",
   "specs": {
@@ -2112,9 +2112,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET SOUNDBAR",
   "bestFor": "Best Budget Soundbar",
   "rank": 7,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CTHBSG6X&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/creative-sound-blaster-gs3.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Creative+Sound+Blaster+GS3"
+   "amazon": "https://www.amazon.com/dp/B0CTHBSG6X"
   },
   "shortDesc": "The Creative Sound Blaster GS3 is a soundbar from Creative: desktop soundbar, Bluetooth, USB, compact. Our pick: Best Budget Soundbar.",
   "specs": {
@@ -2142,9 +2142,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST GAMING SPEAKERS",
   "bestFor": "Best Gaming Speakers",
   "rank": 8,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0C2Y8JYCZ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-nommo-v2-pro.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Razer+Nommo+V2+Pro"
+   "amazon": "https://www.amazon.com/dp/B0C2Y8JYCZ"
   },
   "shortDesc": "The Razer Nommo V2 Pro is a speaker system from Razer: 2.1, wireless subwoofer, THX Spatial Audio, RGB. Our pick: Best Gaming Speakers.",
   "specs": {
@@ -2172,9 +2172,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST GENERAL-PURPOSE PC SPEAKERS",
   "bestFor": "Best General-Purpose PC Speakers",
   "rank": 9,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0719C132V&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/edifier-r1280db.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Edifier+R1280DB"
+   "amazon": "https://www.amazon.com/dp/B0719C132V"
   },
   "shortDesc": "The Edifier R1280DB is a speaker system from Edifier: 2.0 bookshelf speakers, Bluetooth, optical, RCA. Our pick: Best General-Purpose PC Speakers.",
   "specs": {
@@ -2202,9 +2202,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST 2.1 PC SPEAKERS",
   "bestFor": "Best 2.1 PC Speakers",
   "rank": 10,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B077Y6PHKQ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/edifier-s350db.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Edifier+S350DB"
+   "amazon": "https://www.amazon.com/dp/B077Y6PHKQ"
   },
   "shortDesc": "The Edifier S350DB is a speaker system from Edifier: 2.1, subwoofer, Bluetooth, optical/coaxial. Our pick: Best 2.1 PC Speakers.",
   "specs": {
@@ -2232,9 +2232,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST PREMIUM DESKTOP SPEAKERS",
   "bestFor": "Best Premium Desktop Speakers",
   "rank": 11,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B07NP3CS11&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/edifier-s3000-pro.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Edifier+S3000+Pro"
+   "amazon": "https://www.amazon.com/dp/B07NP3CS11"
   },
   "shortDesc": "The Edifier S3000 Pro is a speaker system from Edifier: 2.0 premium bookshelf speakers, Bluetooth, aptX HD. Our pick: Best Premium Desktop Speakers.",
   "specs": {
@@ -2261,9 +2261,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST COMPACT PREMIUM",
   "bestFor": "Best Compact Premium",
   "rank": 12,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D95QG8W4&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/edifier-m60.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Edifier+M60"
+   "amazon": "https://www.amazon.com/dp/B0D95QG8W4"
   },
   "shortDesc": "The Edifier M60 is a speaker system from Edifier: 2.0, compact, Bluetooth, USB-C. Our pick: Best Compact Premium.",
   "specs": {
@@ -2291,9 +2291,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST PREMIUM SMALL SPEAKERS",
   "bestFor": "Best Premium Small Speakers",
   "rank": 13,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B010OIVSDA&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/audioengine-a2.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Audioengine+A2+"
+   "amazon": "https://www.amazon.com/dp/B010OIVSDA"
   },
   "shortDesc": "The Audioengine A2+ is a speaker system from Audioengine: 2.0, USB, Bluetooth, compact premium. Our pick: Best Premium Small Speakers.",
   "specs": {
@@ -2321,9 +2321,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST AUDIOPHILE DESKTOP SPEAKERS",
   "bestFor": "Best Audiophile Desktop Speakers",
   "rank": 14,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B079TB99K3&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/audioengine-a5-wireless.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Audioengine+A5+Wireless"
+   "amazon": "https://www.amazon.com/dp/B079TB99K3"
   },
   "shortDesc": "The Audioengine A5+ Wireless is a speaker system from Audioengine: 2.0, 5-inch drivers, Bluetooth, premium. Our pick: Best Audiophile Desktop Speakers.",
   "specs": {
@@ -2351,9 +2351,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST STUDIO REFERENCE",
   "bestFor": "Best Studio Reference",
   "rank": 15,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B01C5RZWCQ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/ik-multimedia-iloud-micro-monitor.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=IK+Multimedia+iLoud+Micro+Monitor"
+   "amazon": "https://www.amazon.com/dp/B01C5RZWCQ"
   },
   "shortDesc": "The IK Multimedia iLoud Micro Monitor is a pair of studio monitors from IK Multimedia: 2.0 studio monitors, compact, reference-focused. Our pick: Best Studio Reference.",
   "specs": {
@@ -2380,9 +2380,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST STUDIO VALUE",
   "bestFor": "Best Studio Value",
   "rank": 16,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B00GP56OYA&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/presonus-eris-e45.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=PreSonus+Eris+E4.5"
+   "amazon": "https://www.amazon.com/dp/B00GP56OYA"
   },
   "shortDesc": "The PreSonus Eris E4.5 is a pair of studio monitors from PreSonus: 2.0 studio monitors, 4.5-inch drivers. Our pick: Best Studio Value.",
   "specs": {
@@ -2408,9 +2408,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST GAMING 2.0",
   "bestFor": "Best Gaming 2.0",
   "rank": 17,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09KNYBT4Q&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arena-3.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=SteelSeries+Arena+3"
+   "amazon": "https://www.amazon.com/dp/B09KNYBT4Q"
   },
   "shortDesc": "The SteelSeries Arena 3 is a speaker system from SteelSeries: 2.0, gaming-focused, Bluetooth, USB/3.5mm. Our pick: Best Gaming 2.0.",
   "specs": {
@@ -2438,9 +2438,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST MID-RANGE GAMING 2.1",
   "bestFor": "Best Mid-Range Gaming 2.1",
   "rank": 18,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09D45L52J&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arena-7.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=SteelSeries+Arena+7"
+   "amazon": "https://www.amazon.com/dp/B09D45L52J"
   },
   "shortDesc": "The SteelSeries Arena 7 is a speaker system from SteelSeries: 2.1, subwoofer, USB, Bluetooth, RGB. Our pick: Best Mid-Range Gaming 2.1.",
   "specs": {
@@ -2469,9 +2469,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST SURROUND GAMING",
   "bestFor": "Best Surround Gaming",
   "rank": 19,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09KNWMGKF&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/steelseries-arena-9.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=SteelSeries+Arena+9"
+   "amazon": "https://www.amazon.com/dp/B09KNWMGKF"
   },
   "shortDesc": "The SteelSeries Arena 9 is a speaker system from SteelSeries: 5.1, wireless rear speakers, subwoofer, RGB. Our pick: Best Surround Gaming.",
   "specs": {
@@ -2499,9 +2499,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST RGB GAMING SPEAKERS",
   "bestFor": "Best RGB Gaming Speakers",
   "rank": 20,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B07B2WLS17&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-g560-lightsync.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Logitech+G560"
+   "amazon": "https://www.amazon.com/dp/B07B2WLS17"
   },
   "shortDesc": "The Logitech G560 LIGHTSYNC is a speaker system from Logitech G: 2.1, LIGHTSYNC RGB, DTS:X Ultra, USB/Bluetooth. Our pick: Best RGB Gaming Speakers.",
   "specs": {
@@ -2529,9 +2529,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST VALUE 2.1",
   "bestFor": "Best Value 2.1",
   "rank": 21,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0877BPCJM&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-z407.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Logitech+Z407"
+   "amazon": "https://www.amazon.com/dp/B0877BPCJM"
   },
   "shortDesc": "The Logitech Z407 is a speaker system from Logitech: 2.1, Bluetooth, wireless control dial, USB. Our pick: Best Value 2.1.",
   "specs": {
@@ -2559,9 +2559,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST 5.1 SURROUND",
   "bestFor": "Best 5.1 Surround",
   "rank": 22,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B004M18O60&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/logitech-z906.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Logitech+Z906"
+   "amazon": "https://www.amazon.com/dp/B004M18O60"
   },
   "shortDesc": "The Logitech Z906 is a speaker system from Logitech: 5.1, THX-certified, optical/coaxial, 500W RMS. Our pick: Best 5.1 Surround.",
   "specs": {
@@ -2589,9 +2589,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST GAMING SOUNDBAR ALTERNATIVE",
   "bestFor": "Best Gaming Soundbar Alternative",
   "rank": 23,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09VX86JR6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/razer-leviathan-v2.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Razer+Leviathan+V2"
+   "amazon": "https://www.amazon.com/dp/B09VX86JR6"
   },
   "shortDesc": "The Razer Leviathan V2 is a soundbar from Razer: soundbar + subwoofer, THX Spatial Audio, Bluetooth. Our pick: Best Gaming Soundbar Alternative.",
   "specs": {
@@ -2647,9 +2647,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET TV/CONSOLE SOUNDBAR SYSTEM",
   "bestFor": "Best Budget TV/Console Soundbar System",
   "rank": 25,
-  "image": "/images/streaming_vr_gear.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CBRXTWGP&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/hisense-ax5125h.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Hisense+AX5125H"
+   "amazon": "https://www.amazon.com/dp/B0CBRXTWGP"
   },
   "shortDesc": "The Hisense AX5125H is a speaker system from Hisense: 5.1.2, Dolby Atmos, DTS:X, wireless surround + subwoofer. Our pick: Best Budget TV/Console Soundbar System.",
   "specs": {
@@ -2677,9 +2677,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST OVERALL / PREMIUM",
   "bestFor": "Best Overall / Premium",
   "rank": 1,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G31KVQ1H&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-swift-oled-pg32ucdm-gen3.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+ROG+Swift+OLED+PG32UCDM+Gen3"
+   "amazon": "https://www.amazon.com/dp/B0G31KVQ1H"
   },
   "shortDesc": "The ASUS ROG Swift OLED PG32UCDM Gen3 is a gaming monitor from ASUS: 4K, 240Hz, QD-OLED. Our pick: Best Overall / Premium.",
   "specs": {
@@ -2706,9 +2706,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST 27-INCH 4K OLED",
   "bestFor": "Best 27-inch 4K OLED",
   "rank": 2,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DM6SHQTN&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-swift-oled-pg27ucdm.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+ROG+Swift+OLED+PG27UCDM"
+   "amazon": "https://www.amazon.com/dp/B0DM6SHQTN"
   },
   "shortDesc": "The ASUS ROG Swift OLED PG27UCDM is a gaming monitor from ASUS: 27-inch, 4K, 240Hz, QD-OLED. Our pick: Best 27-inch 4K OLED.",
   "specs": {
@@ -2736,9 +2736,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST COMPETITIVE / ESPORTS",
   "bestFor": "Best Competitive / Esports",
   "rank": 3,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FX8FD62M&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-swift-oled-pg27aqwp-w.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+ROG+Swift+OLED+PG27AQWP-W"
+   "amazon": "https://www.amazon.com/dp/B0FX8FD62M"
   },
   "shortDesc": "The ASUS ROG Swift OLED PG27AQWP-W is a gaming monitor from ASUS: 27-inch, 1440p, 540Hz OLED. Our pick: Best Competitive / Esports.",
   "specs": {
@@ -2765,9 +2765,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST DUAL-MODE OLED",
   "bestFor": "Best Dual-Mode OLED",
   "rank": 4,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D7NNK43H&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/asus-rog-swift-oled-pg32ucdp.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+ROG+Swift+OLED+PG32UCDP"
+   "amazon": "https://www.amazon.com/dp/B0D7NNK43H"
   },
   "shortDesc": "The ASUS ROG Swift OLED PG32UCDP is a gaming monitor from ASUS: 32-inch, 4K 240Hz, 1080p 480Hz OLED. Our pick: Best Dual-Mode OLED.",
   "specs": {
@@ -2794,9 +2794,9 @@ export const ALL_PRODUCTS = [
   "badge": "PREMIUM 4K ALTERNATIVE",
   "bestFor": "Premium 4K Alternative",
   "rank": 5,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GWGSNVLT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/samsung-odyssey-oled-g80sh-s32hg802s.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Samsung+Odyssey+OLED+G80SH+S32HG802S"
+   "amazon": "https://www.amazon.com/dp/B0GWGSNVLT"
   },
   "shortDesc": "The Samsung Odyssey OLED G80SH S32HG802S is a gaming monitor from Samsung: 32-inch, 4K, 240Hz, QD-OLED. Our pick: Premium 4K Alternative.",
   "specs": {
@@ -2824,9 +2824,9 @@ export const ALL_PRODUCTS = [
   "badge": "HIGH-END 4K GAMING",
   "bestFor": "High-End 4K Gaming",
   "rank": 6,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GY62Y41K&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/samsung-odyssey-oled-g73sh-s32hg732s.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Samsung+Odyssey+OLED+G73SH+S32HG732S"
+   "amazon": "https://www.amazon.com/dp/B0GY62Y41K"
   },
   "shortDesc": "The Samsung Odyssey OLED G73SH S32HG732S is a gaming monitor from Samsung: 32-inch, 4K, 240Hz, QD-OLED. Our pick: High-End 4K Gaming.",
   "specs": {
@@ -2854,9 +2854,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST VALUE 4K QD-OLED",
   "bestFor": "Best Value 4K QD-OLED",
   "rank": 7,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F148HG5M&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/alienware-aw2725q.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Alienware+AW2725Q"
+   "amazon": "https://www.amazon.com/dp/B0F148HG5M"
   },
   "shortDesc": "The Alienware AW2725Q is a gaming monitor from Alienware: 27-inch, 4K, 240Hz, QD-OLED. Our pick: Best Value 4K QD-OLED.",
   "specs": {
@@ -2884,9 +2884,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST VALUE OLED",
   "bestFor": "Best Value OLED",
   "rank": 8,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GYG3VLMR&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/alienware-aw2726dm.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Alienware+AW2726DM"
+   "amazon": "https://www.amazon.com/dp/B0GYG3VLMR"
   },
   "shortDesc": "The Alienware AW2726DM is a gaming monitor from Alienware: 27-inch, 1440p, 240Hz, OLED. Our pick: Best Value OLED.",
   "specs": {
@@ -2914,9 +2914,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST 1440P ULTRAWIDE",
   "bestFor": "Best 1440p Ultrawide",
   "rank": 9,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0HFHZJ6C2&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/alienware-aw3426dw.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Alienware+AW3426DW"
+   "amazon": "https://www.amazon.com/dp/B0HFHZJ6C2"
   },
   "shortDesc": "The Alienware AW3426DW is a gaming monitor from Alienware: 34-inch, 3440x1440, 280Hz, OLED. Our pick: Best 1440p Ultrawide.",
   "specs": {
@@ -2944,9 +2944,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST 4K GAMING",
   "bestFor": "Best 4K Gaming",
   "rank": 10,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DPXYZYPT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/msi-mpg-321urxw-qd-oled.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=MSI+MPG+321URXW+QD-OLED"
+   "amazon": "https://www.amazon.com/dp/B0DPXYZYPT"
   },
   "shortDesc": "The MSI MPG 321URXW QD-OLED is a gaming monitor from MSI: 32-inch, 4K, 240Hz, QD-OLED. Our pick: Best 4K Gaming.",
   "specs": {
@@ -2974,9 +2974,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST ULTRAWIDE HIGH REFRESH",
   "bestFor": "Best Ultrawide High Refresh",
   "rank": 11,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GL9NWNTQ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/msi-mpg-341cqr-qd-oled-x36.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=MSI+MPG+341CQR+QD-OLED+X36"
+   "amazon": "https://www.amazon.com/dp/B0GL9NWNTQ"
   },
   "shortDesc": "The MSI MPG 341CQR QD-OLED X36 is a gaming monitor from MSI: 34-inch, Ultrawide, 360Hz, QD-OLED. Our pick: Best Ultrawide High Refresh.",
   "specs": {
@@ -3004,9 +3004,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST EXTREME REFRESH RATE",
   "bestFor": "Best Extreme Refresh Rate",
   "rank": 12,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FKVWSLS6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/msi-mag-272qp-qd-oled-x50.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=MSI+MAG+272QP+QD-OLED+X50"
+   "amazon": "https://www.amazon.com/dp/B0FKVWSLS6"
   },
   "shortDesc": "The MSI MAG 272QP QD-OLED X50 is a gaming monitor from MSI: 27-inch, 1440p, 500Hz, QD-OLED. Our pick: Best Extreme Refresh Rate.",
   "specs": {
@@ -3034,9 +3034,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST DUAL-RESOLUTION",
   "bestFor": "Best Dual-Resolution",
   "rank": 13,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CV1Y7NLT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/lg-ultragear-32gs95ue-b.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=LG+UltraGear+32GS95UE-B"
+   "amazon": "https://www.amazon.com/dp/B0CV1Y7NLT"
   },
   "shortDesc": "The LG UltraGear 32GS95UE-B is a gaming monitor from LG: 32-inch, 4K 240Hz, 1080p 480Hz, OLED. Our pick: Best Dual-Resolution.",
   "specs": {
@@ -3064,9 +3064,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST LARGE ULTRAWIDE",
   "bestFor": "Best Large Ultrawide",
   "rank": 14,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DYG9DKX8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/lg-ultragear-45gx950a-b.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=LG+UltraGear+45GX950A-B"
+   "amazon": "https://www.amazon.com/dp/B0DYG9DKX8"
   },
   "shortDesc": "The LG UltraGear 45GX950A-B is a gaming monitor from LG: 45-inch, Ultrawide OLED, Dual-Mode. Our pick: Best Large Ultrawide.",
   "specs": {
@@ -3121,9 +3121,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET OLED",
   "bestFor": "Best Budget OLED",
   "rank": 16,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FTS1KC43&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/aoc-gaming-q27gazd.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=AOC+Q27GAZD"
+   "amazon": "https://www.amazon.com/dp/B0FTS1KC43"
   },
   "shortDesc": "The AOC Gaming Q27GAZD is a gaming monitor from AOC: 27-inch, 1440p, 240Hz, QD-OLED. Our pick: Best Budget OLED.",
   "specs": {
@@ -3181,9 +3181,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST BUDGET HIGH REFRESH",
   "bestFor": "Best Budget High Refresh",
   "rank": 18,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09SG26D3F&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/koorui-gn02.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=KOORUI+GN02"
+   "amazon": "https://www.amazon.com/dp/B09SG26D3F"
   },
   "shortDesc": "The KOORUI GN02 is a gaming monitor from KOORUI: 1080p, 240Hz, VA. Our pick: Best Budget High Refresh.",
   "specs": {
@@ -3210,9 +3210,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST ENTRY-LEVEL",
   "bestFor": "Best Entry-Level",
   "rank": 19,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B07WVN6CWT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/aoc-24g2.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=AOC+24G2"
+   "amazon": "https://www.amazon.com/dp/B07WVN6CWT"
   },
   "shortDesc": "The AOC 24G2 is a gaming monitor from AOC: 24-inch, 1080p, 144Hz. Our pick: Best Entry-Level.",
   "specs": {
@@ -3239,9 +3239,9 @@ export const ALL_PRODUCTS = [
   "badge": "BEST SUPER ULTRAWIDE",
   "bestFor": "Best Super Ultrawide",
   "rank": 20,
-  "image": "/images/gaming_monitor.jpg",
+  "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DSGJRKCR&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/samsung-odyssey-oled-g9.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Samsung+Odyssey+OLED+G9"
+   "amazon": "https://www.amazon.com/dp/B0DSGJRKCR"
   },
   "shortDesc": "The Samsung Odyssey OLED G9 is a gaming monitor from Samsung: 49-inch, Super Ultrawide, OLED. Our pick: Best Super Ultrawide.",
   "specs": {

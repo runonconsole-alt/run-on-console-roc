@@ -158,6 +158,13 @@ RELEASES = [
          changes=['CMS > Blog writer: key and token boxes are not filled in by the browser with a saved password'],
          checks=[dict(label='No autofill', type='contains', path='cms/index.html', text='id="ba-key" autocomplete="new-password"')],
          pr=REPO + '29'),
+    dict(deploy=29, date='2026-10-09', title='Products: real Amazon links (/dp/ASIN) and SiteStripe pictures',
+         changes=['103 products get their exact Amazon product link (amazon.com/dp/ASIN) instead of an Amazon search',
+                  'Their picture becomes the SiteStripe product image (served by Amazon); if a browser blocks it, the website picture shows instead',
+                  'Links or pictures already set by hand in the CMS are kept; graphics cards and products not sold on Amazon keep the search link',
+                  'Installer: cli-product-asin.php (dry run, --apply with backup, --rollback)'],
+         checks=[dict(label='ASIN installer', type='file', path='api/v1/cron/cli-product-asin.php')],
+         pr=REPO + '30'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

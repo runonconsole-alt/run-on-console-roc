@@ -392,3 +392,19 @@
     }
   });
 })();
+
+/* Amazon product pictures (SiteStripe links) can be blocked by ad blockers: show the
+   site's own picture instead. The fallback is in the link after "#fb=" (or the
+   data-fb attribute); without one, the picture is hidden. */
+(function () {
+  window.addEventListener('error', function (e) {
+    var img = e.target;
+    if (!img || img.tagName !== 'IMG' || img.getAttribute('data-roc-fb-done')) return;
+    var src = img.getAttribute('src') || '';
+    if (!/amazon-adsystem\.com|media-amazon\.com/.test(src)) return;
+    img.setAttribute('data-roc-fb-done', '1');
+    var m = src.match(/#fb=([^#]+)$/), fb = img.getAttribute('data-fb') || (m ? decodeURIComponent(m[1]) : '');
+    if (fb) { img.removeAttribute('srcset'); img.src = fb; img.style.objectFit = 'cover'; img.style.padding = '0'; }
+    else img.style.visibility = 'hidden';
+  }, true);
+})();

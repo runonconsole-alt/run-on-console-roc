@@ -1,0 +1,110 @@
+# slug | ASIN (or "search" = keep the Amazon search link) | note
+wooting-80he | search | Wooting sells direct; Amazon listing B0DMPKS8NF unavailable
+asus-rog-strix-scope-ii-96-wireless | B0C7KFZ5TL |
+corsair-vanguard-pro-96 | B0FKHPRZ45 |
+razer-huntsman-v3-pro-tkl | B0CG7BWG7J | black, original
+razer-huntsman-v3-he | B0H47Z2J3T | TKL
+steelseries-apex-pro-tkl-gen-3 | B0DF2QL2GK | US wired
+keychron-q1-he | B0D89ZFWJX | carbon black
+keychron-k2-he | B0DCVQBMVP |
+lemokey-p1-he | B0DY7KTB87 |
+asus-rog-azoth-96-he | B0GJXBMY43 | black PBT
+asus-rog-azoth | B0BSKSCGZ4 |
+epomaker-glyph | B0GJ4V9XFJ |
+turtle-beach-command-series-kb7-tkl | B0GWD2D7S3 | listing said unavailable at search time
+razer-blackwidow-v4-pro-75 | B0DD5S8TM8 |
+logitech-g915-x-lightspeed | B0DB1WY5L9 | full size, linear, black
+logitech-g-pro-x-60-lightspeed | B0BRSQ2DSX | linear, black
+nuphy-halo75-v2 | B0D5Q89DWL |
+monsgeek-fun60-ultra | B0DQWNJJ6X | black
+razer-reclusa-x-mini-65 | B0H9CC8JCZ |
+be-quiet-light-mount-tkl | B0H9VDD7C7 | linear
+wooting-60he-v2 | search | no official v2 listing on Amazon
+steelseries-arctis-nova-pro-wireless | B09ZLRCH1H | multi-system, black
+steelseries-arctis-nova-pro-omni | B0GS7PZH2P | graphite
+razer-blackshark-v3-pro | B0F3QDLZKG | PC, black
+steelseries-arctis-nova-7-wireless-gen-2 | B0FRNR8Y11 | black
+steelseries-arctis-nova-5-wireless | B0D2YBQQ1P | black
+steelseries-arctis-nova-3-wireless | B0F956KHT9 | wireless Nova 3X (Amazon has no plain "Nova 3 Wireless")
+logitech-g-pro-x-2-lightspeed | B0B3F8V4JG | black
+logitech-g-astro-a50-x | B0BRXJDQC1 | black
+hyperx-cloud-alpha-wireless | B09TRW57WB |
+audeze-maxwell-2 | B0G98TB4ZF | PC/PlayStation version
+turtle-beach-atlas-air | B0D13VX3S6 |
+turtle-beach-stealth-500 | B0CZX86R9F | PC/PS5 version
+logitech-g-g325-lightspeed | B0G12HGD6R | black
+steelseries-arctis-gamebuds | B0DFX4TPS6 | black
+sony-inzone-buds | B0CJHB7B59 | black
+epos-h6pro | B09FPCVHVN | open-back, black (in stock)
+audio-technica-ath-m50x | B00HVLUR86 | black
+sennheiser-hd-560s | B08J9MVB6W |
+elgato-wave3 | B088HHWC47 |
+hyperx-quadcast-2-s | B0DG9X4WHW |
+steelseries-alias | B0CBNTXNWV |
+razer-seiren-v3-mini | B0CT787NLW | black
+edifier-g2000 | B00UAFSN5O | black
+razer-viper-v4-pro | B0GMLBSSTD | black
+logitech-g-pro-x2-superstrike | B0G12HGHGM |
+razer-deathadder-v4-pro | B0F3QCXL82 | black
+razer-naga-v3-pro | B0H4SBT4SH |
+logitech-g-pro-x-superlight-2 | B09NBWL8J5 | black
+logitech-g502-x-plus | B092CB69Q4 | black
+endgame-gear-op1-8k-v2 | B0FB8VWW8Y | black
+pulsar-x2f-crazylight | B0FM2K41Y6 | Lab X2F mini black; unavailable at search time
+pulsar-x2-crazylight-mini | B0DVXD49L8 | white
+pulsar-xlite-crazylight | B0FFGN4381 | mini, black
+mchose-l7-ultra | B0HBV6L6X8 | base L7 Ultra
+mchose-a7 | B0DSPR5SFW | A7 Ultra, white
+vxe-r1-pro | B0FN7HCZT1 | black
+asus-rog-harpe-ace-mini | B0DG6DQ2DP | black
+corsair-m75-wireless | B0CTN26P3Z | black, PC
+steelseries-prime-wireless-mini | B09BRFNP6F | listed as "Esports Mini Wireless (Prime Mini Edition)"
+zowie-ec2-dw | B0F1XD5MK8 | unavailable at search time
+cooler-master-mm311 | B0B8TKY2YT | black
+razer-basilisk-v3-pro | B0B6Y3XYFG | black
+finalmouse-starlight-x | search | not sold on Amazon
+mackie-cr35bt-cr8sbt | B0DFZQGZ37 | CR3.5BT pair (sub CR8SBT is B0DFZTYJTJ)
+creative-pebble-pro | B0DXW25R3D | black
+creative-pebble-v3 | B08F57GSJ7 | black
+creative-pebble-plus | B07NWLWM9B | black
+creative-xf1 | B0H946F5J9 |
+creative-stage-pro | B0FCXVPBZY | no featured offer at search time
+creative-sound-blaster-gs3 | B0CTHBSG6X | black
+razer-nommo-v2-pro | B0C2Y8JYCZ | unavailable at search time
+edifier-r1280db | B0719C132V | wood grain
+edifier-s350db | B077Y6PHKQ |
+edifier-s3000-pro | B07NP3CS11 |
+edifier-m60 | B0D95QG8W4 | black
+audioengine-a2 | B010OIVSDA | wired pair (red listing)
+audioengine-a5-wireless | B079TB99K3 |
+ik-multimedia-iloud-micro-monitor | B01C5RZWCQ | black
+presonus-eris-e45 | B00GP56OYA | wired pair
+steelseries-arena-3 | B09KNYBT4Q |
+steelseries-arena-7 | B09D45L52J |
+steelseries-arena-9 | B09KNWMGKF |
+logitech-g560-lightsync | B07B2WLS17 |
+logitech-z407 | B0877BPCJM |
+logitech-z906 | B004M18O60 |
+razer-leviathan-v2 | B09VX86JR6 |
+creative-sound-blaster-katana-v3 | search | no Katana V3 listing found on Amazon
+hisense-ax5125h | B0CBRXTWGP | unavailable at search time
+asus-rog-swift-oled-pg32ucdm-gen3 | B0G31KVQ1H | listed as PG32UCDM3
+asus-rog-swift-oled-pg27ucdm | B0DM6SHQTN |
+asus-rog-swift-oled-pg27aqwp-w | B0FX8FD62M |
+asus-rog-swift-oled-pg32ucdp | B0D7NNK43H |
+samsung-odyssey-oled-g80sh-s32hg802s | B0GWGSNVLT | 32 inch
+samsung-odyssey-oled-g73sh-s32hg732s | B0GY62Y41K |
+alienware-aw2725q | B0F148HG5M |
+alienware-aw2726dm | B0GYG3VLMR |
+alienware-aw3426dw | B0HFHZJ6C2 |
+msi-mpg-321urxw-qd-oled | B0DPXYZYPT |
+msi-mpg-341cqr-qd-oled-x36 | B0GL9NWNTQ | unavailable at search time
+msi-mag-272qp-qd-oled-x50 | B0FKVWSLS6 |
+lg-ultragear-32gs95ue-b | B0CV1Y7NLT |
+lg-ultragear-45gx950a-b | B0DYG9DKX8 |
+sony-inzone-m10s-ii | search | only the original M10S is on Amazon
+aoc-gaming-q27gazd | B0FTS1KC43 |
+asrock-phantom-gaming-pgo27qsa | search | model not found on Amazon
+koorui-gn02 | B09SG26D3F |
+aoc-24g2 | B07WVN6CWT |
+samsung-odyssey-oled-g9 | B0DSGJRKCR | G91SD
