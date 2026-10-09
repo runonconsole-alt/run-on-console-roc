@@ -36,6 +36,8 @@ const ROC_BLOG_AUTHOR = 'ROC';
 const ROC_GEMINI_MODEL = 'gemini-2.5-flash';
 const ROC_GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta';
 const ROC_GROQ_API = 'https://api.groq.com/openai/v1';
+const ROC_CF_API = 'https://api.cloudflare.com/client/v4';
+const ROC_CF_IMAGE_MODEL = '@cf/black-forest-labs/flux-1-schnell';
 /** Groq models to prefer, best first (the first one this key can use is taken). */
 const ROC_GROQ_MODELS = ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile', 'moonshotai/kimi-k2-instruct', 'qwen/qwen3-32b', 'llama-3.1-8b-instant'];
 const ROC_BLOG_STAGES = ['tofu', 'mofu', 'bofu'];
@@ -356,7 +358,8 @@ function rocBlogCreate(PDO $pdo, string $root, array $in, string $source): array
     foreach ($plan['topics'] as $tp) if ($tp['id'] === $topicId) $topic = $tp;
     if ($topic) $content = rocBlogWithRelated($pdo, $plan, $topic, $content, '');
 
-    $image = rocBlogCover($root, $slug, $title, $category, rocBlogCoverPhoto($pdo, $root, $topic));
+    $image = rocBlogAiCover($pdo, $root, $slug, $title, (string)($in['image_prompt'] ?? ''))
+          ?? rocBlogCover($root, $slug, $title, $category, rocBlogCoverPhoto($pdo, $root, $topic));
     $cols = rocBlogCols($pdo, 'blogs');
     $id = 'blog-' . bin2hex(random_bytes(4));
     $now = gmdate('Y-m-d H:i:s');
@@ -530,6 +533,69 @@ function rocBlogCover(string $root, string $slug, string $title, string $categor
     return $ok ? '/uploads/blog-covers/' . $slug . '.jpg?v=' . time() : $fallback;
 }
 
+/* ------------------------------------------- AI cover (Cloudflare Workers AI) */
+
+/** Cloudflare account ID and token from CMS > Blog writer, or null. */
+function rocBlogCf(PDO $pdo): ?array {
+    $a = trim((string)rocBlogGet($pdo, 'blog_cf_account', ''));
+    $t = trim((string)rocBlogGet($pdo, 'blog_cf_token', ''));
+    return $a !== '' && $t !== '' ? ['account' => $a, 'token' => $t] : null;
+}
+
+/** Makes one picture with FLUX on Cloudflare Workers AI. Returns JPEG/PNG bytes or an error. */
+function rocCfImage(array $cf, string $prompt): array {
+    $url = (getenv('ROC_CF_TEST_BASE') ?: ROC_CF_API) . '/accounts/' . rawurlencode($cf['account']) . '/ai/run/' . ROC_CF_IMAGE_MODEL;   // env: local tests only
+    $c = curl_init($url);
+    curl_setopt_array($c, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 90, CURLOPT_CONNECTTIMEOUT => 15, CURLOPT_POST => true,
+                           CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $cf['token'], 'Content-Type: application/json'],
+                           CURLOPT_POSTFIELDS => json_encode(['prompt' => $prompt, 'steps' => 6], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)]);
+    $raw = (string)curl_exec($c);
+    $code = (int)curl_getinfo($c, CURLINFO_HTTP_CODE);
+    $err = curl_error($c);
+    curl_close($c);
+    $j = json_decode($raw, true);
+    if ($code !== 200 || empty($j['result']['image'])) {
+        $m = (string)($j['errors'][0]['message'] ?? ($err ?: "HTTP {$code}"));
+        return ['ok' => false, 'error' => 'Cloudflare: ' . $m];
+    }
+    $bytes = base64_decode((string)$j['result']['image'], true);
+    return $bytes ? ['ok' => true, 'bytes' => $bytes] : ['ok' => false, 'error' => 'Cloudflare sent no picture.'];
+}
+
+/** The picture description: the writer's, else one made from the title. */
+function rocBlogImagePrompt(string $title, string $given): string {
+    $given = trim(preg_replace('/\s+/', ' ', strip_tags($given)));
+    $scene = $given !== '' ? $given : 'a modern gaming setup that fits the article "' . $title . '"';
+    return 'Photorealistic editorial cover photo, wide shot: ' . $scene . '. Cinematic lighting with subtle green and teal accents, sharp focus, '
+         . 'high detail, clean composition with space on the left. No text, no letters, no words, no logos, no watermarks, no people faces.';
+}
+
+/** AI cover, cropped to 1200 x 630. Null when Cloudflare is not set up or fails (then the title cover is used). */
+function rocBlogAiCover(PDO $pdo, string $root, string $slug, string $title, string $prompt): ?string {
+    $cf = rocBlogCf($pdo);
+    if (!$cf || !function_exists('imagecreatefromstring')) return null;
+    $r = rocCfImage($cf, rocBlogImagePrompt($title, $prompt));
+    if (!$r['ok']) {
+        $st = rocBlogGet($pdo, 'blog_engine_state', []); $st = is_array($st) ? $st : [];
+        $st['last_image_error'] = gmdate('Y-m-d H:i') . ' UTC: ' . $r['error'];
+        rocBlogSet($pdo, 'blog_engine_state', $st);
+        return null;
+    }
+    $src = @imagecreatefromstring($r['bytes']);
+    if (!$src) return null;
+    $W = 1200; $H = 630; $sw = imagesx($src); $sh = imagesy($src);
+    $scale = max($W / $sw, $H / $sh);
+    $cw = (int)($W / $scale); $ch = (int)($H / $scale);
+    $im = imagecreatetruecolor($W, $H);
+    imagecopyresampled($im, $src, 0, 0, (int)(($sw - $cw) / 2), (int)(($sh - $ch) / 2), $W, $H, $cw, $ch);
+    imagedestroy($src);
+    $dir = $root . '/uploads/blog-covers';
+    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+    $ok = imagejpeg($im, $dir . '/' . $slug . '.jpg', 86);
+    imagedestroy($im);
+    return $ok ? '/uploads/blog-covers/' . $slug . '.jpg?v=' . time() : null;
+}
+
 /** Draws a new cover for a post (CMS > Blog writer > "New cover"). */
 function rocBlogRecover(PDO $pdo, string $root, string $postId): ?string {
     $st = $pdo->prepare('SELECT id, slug, title, category FROM blogs WHERE id = ?');
@@ -538,7 +604,8 @@ function rocBlogRecover(PDO $pdo, string $root, string $postId): ?string {
     if (!$b) return null;
     $topic = null;
     foreach (rocBlogPlan($pdo)['topics'] as $t) if (($t['post_id'] ?? '') === $postId) $topic = $t;
-    $img = rocBlogCover($root, $b['slug'], $b['title'], (string)$b['category'], rocBlogCoverPhoto($pdo, $root, $topic));
+    $img = rocBlogAiCover($pdo, $root, $b['slug'], $b['title'], '')
+        ?? rocBlogCover($root, $b['slug'], $b['title'], (string)$b['category'], rocBlogCoverPhoto($pdo, $root, $topic));
     $cols = rocBlogCols($pdo, 'blogs');
     $set = array_values(array_intersect(['image', 'og_image', 'twitter_image'], $cols));
     $pdo->prepare('UPDATE blogs SET ' . implode(' = ?, ', $set) . ' = ?, updated_at = ? WHERE id = ?')
@@ -591,6 +658,7 @@ function rocBlogPrompt(array $brief, string $publishAt): string {
         . "{\"title\": \"30-70 characters, with the focus keyword\", \"focus_keyword\": \"...\", \"meta_title\": \"max 60 characters\", "
         . "\"meta_description\": \"120-155 characters with the keyword and a clear benefit\", \"excerpt\": \"1-2 sentences\", "
         . "\"category\": \"one of: " . implode(', ', $brief['categories']) . "\", \"content_html\": \"the article HTML\", \"image_alt\": \"short description of the cover\", "
+        . "\"image_prompt\": \"one sentence describing a realistic cover photo for this article: the gaming gear or scene, lighting, setting; no text, no letters, no brand logos, no faces\", "
         . "\"topic_id\": \"{$brief['topic_id']}\", \"publish_at\": \"{$publishAt}\"}\n";
 }
 

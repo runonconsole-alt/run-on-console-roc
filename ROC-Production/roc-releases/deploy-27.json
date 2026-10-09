@@ -1,0 +1,29 @@
+{
+ "deploy": 27,
+ "date": "2026-10-09",
+ "title": "Blog covers made by AI for each title (Cloudflare, free)",
+ "changes": [
+  "CMS > Blog writer: Cloudflare Account ID and token; each new post gets a cover picture made for its title (FLUX on Workers AI)",
+  "The writer describes the picture; if Cloudflare is not set up or fails, the title cover is used",
+  "\"Test the keys\" also tests Cloudflare pictures; \"New cover\" makes a new AI picture"
+ ],
+ "checks": [
+  {
+   "label": "AI covers",
+   "type": "contains",
+   "path": "api/v1/cms/blog-engine-lib.php",
+   "text": "ROC_CF_IMAGE_MODEL"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BIM9tp1e.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/29",
+ "build": "index-BIM9tp1e.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

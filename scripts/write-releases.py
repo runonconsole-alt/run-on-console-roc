@@ -148,6 +148,12 @@ RELEASES = [
                   'CMS > Blog writer > Posts written: "New cover" draws the cover again for a post'],
          checks=[dict(label='Cover font', type='file', path='api/v1/cms/fonts/Montserrat-ExtraBold.ttf')],
          pr=REPO + '29'),
+    dict(deploy=27, date='2026-10-09', title='Blog covers made by AI for each title (Cloudflare, free)',
+         changes=['CMS > Blog writer: Cloudflare Account ID and token; each new post gets a cover picture made for its title (FLUX on Workers AI)',
+                  'The writer describes the picture; if Cloudflare is not set up or fails, the title cover is used',
+                  '"Test the keys" also tests Cloudflare pictures; "New cover" makes a new AI picture'],
+         checks=[dict(label='AI covers', type='contains', path='api/v1/cms/blog-engine-lib.php', text='ROC_CF_IMAGE_MODEL')],
+         pr=REPO + '29'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

@@ -53,6 +53,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
         'created' => (string)rocBaGet($pdo, 'blog_agent_token_created'), 'posts' => $log,
         'engine' => rocBlogEngine($pdo), 'slots' => rocBlogSlots($pdo), 'free_slots' => $slots,
         'gemini' => ['set' => $key !== '', 'end' => $key !== '' ? substr($key, -4) : '', 'model' => (string)rocBlogGet($pdo, 'blog_gemini_model', ROC_GEMINI_MODEL)],
+        'cf' => ['set' => (bool)rocBlogCf($pdo), 'account_end' => substr((string)rocBlogGet($pdo, 'blog_cf_account', ''), -4)],
         'groq' => (function () use ($pdo) { $k = trim((string)rocBlogGet($pdo, 'blog_groq_key', '')); return ['set' => $k !== '', 'end' => $k !== '' ? substr($k, -4) : '', 'model' => (string)rocBlogGet($pdo, 'blog_groq_model', '')]; })(),
         'state' => rocBlogGet($pdo, 'blog_engine_state', []) ?: new stdClass(), 'plan' => $plan, 'next' => $next['id'] ?? null]);
 }
@@ -96,6 +97,12 @@ if ($act === 'settings') {
         rocBlogSet($pdo, 'blog_groq_key', $gk, $uid);
         rocBlogSet($pdo, 'blog_groq_model', '', $uid);
     }
+    $ca = trim((string)($in['cf_account'] ?? '')); $ct = trim((string)($in['cf_token'] ?? ''));
+    if ($ca === '-' || $ct === '-') { rocBlogSet($pdo, 'blog_cf_account', '', $uid); rocBlogSet($pdo, 'blog_cf_token', '', $uid); }
+    else {
+        if ($ca !== '') { if (!preg_match('/^[a-f0-9]{32}$/i', $ca)) rocBaOut(422, ['success' => false, 'error' => 'The Cloudflare Account ID is 32 letters and numbers (a-f, 0-9).']); rocBlogSet($pdo, 'blog_cf_account', strtolower($ca), $uid); }
+        if ($ct !== '') { if (!preg_match('/^[A-Za-z0-9_\-]{30,120}$/', $ct)) rocBaOut(422, ['success' => false, 'error' => 'That does not look like a Cloudflare API token.']); rocBlogSet($pdo, 'blog_cf_token', $ct, $uid); }
+    }
     if ($engine === 'server' && !rocBlogWriters($pdo)) rocBaOut(422, ['success' => false, 'error' => 'Paste a free Gemini or Groq key first (see the steps), then choose "Server".']);
     $model = trim((string)($in['model'] ?? ''));
     if ($model !== '') {
@@ -115,6 +122,7 @@ if ($act === 'test_key') {
     $names = ['gemini' => 'Gemini', 'groq' => 'Groq'];
     $parts = []; $any = false;
     foreach ($t as $n => $r) { $any = $any || $r['ok']; $parts[] = $names[$n] . ': ' . ($r['ok'] ? 'works (' . $r['model'] . ')' : 'NOT working: ' . $r['error']); }
+    if ($cf = rocBlogCf($pdo)) { $ri = rocCfImage($cf, 'A gaming headset on a desk, soft green light. No text.'); $parts[] = 'Cloudflare pictures: ' . ($ri['ok'] ? 'works' : 'NOT working: ' . $ri['error']); }
     rocBaOut($any ? 200 : 422, ['success' => $any, 'message' => implode(' · ', $parts), 'error' => $any ? null : implode(' · ', $parts)]);
 }
 if ($act === 'write_now') {
