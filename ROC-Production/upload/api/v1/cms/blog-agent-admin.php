@@ -85,7 +85,7 @@ if ($act === 'settings') {
     $key = trim((string)($in['gemini_key'] ?? ''));
     if ($key === '-') rocBlogSet($pdo, 'blog_gemini_key', '', $uid);
     elseif ($key !== '') {
-        if (!preg_match('/^[A-Za-z0-9_\-]{20,80}$/', $key)) rocBaOut(422, ['success' => false, 'error' => 'That does not look like a Gemini API key (it starts with AIza).']);
+        if (!preg_match('/^[A-Za-z0-9_.\-]{20,200}$/', $key)) rocBaOut(422, ['success' => false, 'error' => 'That does not look like a Gemini API key (it starts with AIza or AQ.).']);
         rocBlogSet($pdo, 'blog_gemini_key', $key, $uid);
     }
     if ($engine === 'server' && trim((string)rocBlogGet($pdo, 'blog_gemini_key', '')) === '') rocBaOut(422, ['success' => false, 'error' => 'Paste your free Gemini key first (see the steps), then choose "Server".']);

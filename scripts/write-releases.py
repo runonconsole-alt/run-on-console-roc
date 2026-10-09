@@ -130,6 +130,10 @@ RELEASES = [
          checks=[dict(label='Site builder script', type='file', path='roc-edits.js'),
                  dict(label='Blog engine', type='file', path='api/v1/cms/blog-engine-lib.php')],
          pr=REPO + '29'),
+    dict(deploy=23, date='2026-10-09', title='Blog writer accepts the new Google key format',
+         changes=['CMS > Blog writer accepts Gemini keys that start with "AQ." (Google's new format) as well as "AIza"'],
+         checks=[dict(label='New key format accepted', type='contains', path='api/v1/cms/blog-agent-admin.php', text='AIza or AQ.')],
+         pr=REPO + '29'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

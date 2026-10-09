@@ -3443,7 +3443,7 @@ async function renderBlogAgent(m, fresh){
       '<div class="field" style="margin-top:12px"><label>Publishing times (Pakistan time)</label><div id="ba-times" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>'+
         '<div class="hint">One post per time, every day. The writer starts about 2 hours before.</div></div>'+
       '<div class="field"><label>Google Gemini key '+(d.gemini.set?'<span class="tag published">saved ••••'+esc(d.gemini.end)+'</span>':'<span class="tag off">not saved</span>')+'</label>'+
-        '<input type="password" id="ba-key" autocomplete="off" placeholder="'+(d.gemini.set?'Leave empty to keep the saved key':'Paste the key here (starts with AIza)')+'">'+
+        '<input type="password" id="ba-key" autocomplete="off" placeholder="'+(d.gemini.set?'Leave empty to keep the saved key':'Paste the key here (starts with AIza or AQ.)')+'">'+
         '<details style="margin-top:6px"><summary class="hint" style="cursor:pointer">How to get the free key (2 minutes)</summary><ol class="hint" style="margin:6px 0 0 18px;line-height:1.7">'+
           '<li>Open <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> and sign in with your Google account.</li>'+
           '<li>Click <b>Create API key</b> (accept Google\'s terms if asked).</li><li>Copy the key, paste it in the box above and press <b>Save</b>, then <b>Test the key</b>.</li>'+
