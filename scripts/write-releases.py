@@ -134,6 +134,11 @@ RELEASES = [
          changes=['CMS > Blog writer accepts Gemini keys that start with "AQ." (the new Google format) as well as "AIza"'],
          checks=[dict(label='New key format accepted', type='contains', path='api/v1/cms/blog-agent-admin.php', text='AIza or AQ.')],
          pr=REPO + '29'),
+    dict(deploy=24, date='2026-10-09', title='Blog writer: free Groq key as well as Gemini',
+         changes=['CMS > Blog writer takes a free Groq key; with both keys Gemini is tried first and Groq takes over if it fails',
+                  '"Test the keys" now writes a short test with each key, so a blocked key shows at once'],
+         checks=[dict(label='Groq writer', type='contains', path='api/v1/cms/blog-engine-lib.php', text='ROC_GROQ_API')],
+         pr=REPO + '29'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

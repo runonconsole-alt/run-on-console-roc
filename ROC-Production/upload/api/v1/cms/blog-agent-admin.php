@@ -53,6 +53,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
         'created' => (string)rocBaGet($pdo, 'blog_agent_token_created'), 'posts' => $log,
         'engine' => rocBlogEngine($pdo), 'slots' => rocBlogSlots($pdo), 'free_slots' => $slots,
         'gemini' => ['set' => $key !== '', 'end' => $key !== '' ? substr($key, -4) : '', 'model' => (string)rocBlogGet($pdo, 'blog_gemini_model', ROC_GEMINI_MODEL)],
+        'groq' => (function () use ($pdo) { $k = trim((string)rocBlogGet($pdo, 'blog_groq_key', '')); return ['set' => $k !== '', 'end' => $k !== '' ? substr($k, -4) : '', 'model' => (string)rocBlogGet($pdo, 'blog_groq_model', '')]; })(),
         'state' => rocBlogGet($pdo, 'blog_engine_state', []) ?: new stdClass(), 'plan' => $plan, 'next' => $next['id'] ?? null]);
 }
 
@@ -88,7 +89,14 @@ if ($act === 'settings') {
         if (!preg_match('/^[A-Za-z0-9_.\-]{20,200}$/', $key)) rocBaOut(422, ['success' => false, 'error' => 'That does not look like a Gemini API key (it starts with AIza or AQ.).']);
         rocBlogSet($pdo, 'blog_gemini_key', $key, $uid);
     }
-    if ($engine === 'server' && trim((string)rocBlogGet($pdo, 'blog_gemini_key', '')) === '') rocBaOut(422, ['success' => false, 'error' => 'Paste your free Gemini key first (see the steps), then choose "Server".']);
+    $gk = trim((string)($in['groq_key'] ?? ''));
+    if ($gk === '-') rocBlogSet($pdo, 'blog_groq_key', '', $uid);
+    elseif ($gk !== '') {
+        if (!preg_match('/^gsk_[A-Za-z0-9]{20,120}$/', $gk)) rocBaOut(422, ['success' => false, 'error' => 'That does not look like a Groq key (it starts with gsk_).']);
+        rocBlogSet($pdo, 'blog_groq_key', $gk, $uid);
+        rocBlogSet($pdo, 'blog_groq_model', '', $uid);
+    }
+    if ($engine === 'server' && !rocBlogWriters($pdo)) rocBaOut(422, ['success' => false, 'error' => 'Paste a free Gemini or Groq key first (see the steps), then choose "Server".']);
     $model = trim((string)($in['model'] ?? ''));
     if ($model !== '') {
         if (!preg_match('/^[a-z0-9.\-]{3,60}$/', $model)) rocBaOut(422, ['success' => false, 'error' => 'The model name looks wrong.']);
@@ -101,12 +109,13 @@ if ($act === 'settings') {
         ($engine === 'server' ? '; the server writes them (your PC can be off).' : ($engine === 'pc' ? '; the PC writer (Claude app) writes them.' : '; the writer is off.'))]);
 }
 if ($act === 'test_key') {
-    $key = trim((string)rocBlogGet($pdo, 'blog_gemini_key', ''));
-    if ($key === '') rocBaOut(422, ['success' => false, 'error' => 'No key saved yet.']);
-    $r = rocGeminiCall($key, 'GET', '/models?pageSize=200', null, 20);
-    if (!$r['ok']) rocBaOut(422, ['success' => false, 'error' => 'Google said: ' . $r['error']]);
-    $m = rocGeminiPickModel($key);
-    rocBaOut(200, ['success' => true, 'message' => 'The key works.' . ($m ? ' Newest free flash model: ' . $m . '.' : '')]);
+    @set_time_limit(120);
+    if (!rocBlogWriters($pdo)) rocBaOut(422, ['success' => false, 'error' => 'No key saved yet.']);
+    $t = rocBlogTestWriters($pdo);
+    $names = ['gemini' => 'Gemini', 'groq' => 'Groq'];
+    $parts = []; $any = false;
+    foreach ($t as $n => $r) { $any = $any || $r['ok']; $parts[] = $names[$n] . ': ' . ($r['ok'] ? 'works (' . $r['model'] . ')' : 'NOT working: ' . $r['error']); }
+    rocBaOut($any ? 200 : 422, ['success' => $any, 'message' => implode(' · ', $parts), 'error' => $any ? null : implode(' · ', $parts)]);
 }
 if ($act === 'write_now') {
     @set_time_limit(400);

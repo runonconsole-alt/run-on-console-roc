@@ -18,7 +18,10 @@
  *   to its sister posts and down to the products; the hub gets links back from every post.
  *   Topics rotate TOFU (learn) -> MOFU (compare) -> BOFU (buy) so every cluster grows evenly.
  *
- * Settings (cms_settings): blog_engine (server | pc | off), blog_gemini_key, blog_gemini_model,
+ * Server writers: Google Gemini (blog_gemini_key) first, then Groq (blog_groq_key, free, OpenAI-style API)
+ * when Gemini is missing or fails. Either key alone is enough.
+ *
+ * Settings (cms_settings): blog_engine (server | pc | off), blog_gemini_key, blog_gemini_model, blog_groq_key, blog_groq_model,
  *   blog_slots (["16:00","23:00"], Pakistan time), blog_plan, blog_agent_log, blog_engine_state.
  */
 if (defined('ROC_BLOG_ENGINE_LIB')) return;
@@ -32,6 +35,9 @@ const ROC_BLOG_SLOTS = ['16:00', '23:00'];
 const ROC_BLOG_AUTHOR = 'ROC';
 const ROC_GEMINI_MODEL = 'gemini-2.5-flash';
 const ROC_GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta';
+const ROC_GROQ_API = 'https://api.groq.com/openai/v1';
+/** Groq models to prefer, best first (the first one this key can use is taken). */
+const ROC_GROQ_MODELS = ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile', 'moonshotai/kimi-k2-instruct', 'qwen/qwen3-32b', 'llama-3.1-8b-instant'];
 const ROC_BLOG_STAGES = ['tofu', 'mofu', 'bofu'];
 const ROC_RELATED_H2 = 'Keep reading';
 
@@ -580,14 +586,94 @@ function rocGeminiWrite(PDO $pdo, string $key, string $prompt, ?string &$used = 
     return ['ok' => true, 'article' => $a];
 }
 
+/* ----------------------------------------------------------- Groq writer */
+
+function rocGroqCall(string $key, string $method, string $path, ?array $body = null, int $timeout = 170): array {
+    $c = curl_init((getenv('ROC_GROQ_TEST_BASE') ?: ROC_GROQ_API) . $path);   // env: local tests only
+    curl_setopt_array($c, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => $timeout, CURLOPT_CONNECTTIMEOUT => 15, CURLOPT_CUSTOMREQUEST => $method,
+                           CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $key, 'Content-Type: application/json']]);
+    if ($body !== null) curl_setopt($c, CURLOPT_POSTFIELDS, json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+    $raw = (string)curl_exec($c);
+    $code = (int)curl_getinfo($c, CURLINFO_HTTP_CODE);
+    $err = curl_error($c);
+    curl_close($c);
+    $j = json_decode($raw, true);
+    if ($code !== 200) return ['ok' => false, 'code' => $code, 'error' => (string)($j['error']['message'] ?? ($err ?: "HTTP {$code}"))];
+    return ['ok' => true, 'data' => $j];
+}
+
+/** The best model this Groq key can use (from ROC_GROQ_MODELS). */
+function rocGroqPickModel(string $key): ?string {
+    $r = rocGroqCall($key, 'GET', '/models', null, 20);
+    if (!$r['ok']) return null;
+    $have = array_column((array)($r['data']['data'] ?? []), 'id');
+    foreach (ROC_GROQ_MODELS as $m) if (in_array($m, $have, true)) return $m;
+    foreach ($have as $m) if (preg_match('/70b|120b|kimi|qwen/i', (string)$m)) return $m;
+    return $have[0] ?? null;
+}
+
+/** Writes the article JSON with Groq. */
+function rocGroqWrite(PDO $pdo, string $key, string $prompt, ?string &$used = null): array {
+    $model = (string)rocBlogGet($pdo, 'blog_groq_model', '');
+    if ($model === '') { $model = rocGroqPickModel($key) ?: ROC_GROQ_MODELS[1]; rocBlogSet($pdo, 'blog_groq_model', $model); }
+    $body = ['model' => $model, 'temperature' => 0.7, 'max_tokens' => 8000, 'response_format' => ['type' => 'json_object'],
+             'messages' => [['role' => 'system', 'content' => 'You are an expert gaming hardware writer. Answer with one JSON object only.'],
+                            ['role' => 'user', 'content' => $prompt]]];
+    $r = rocGroqCall($key, 'POST', '/chat/completions', $body);
+    if (!$r['ok'] && in_array($r['code'], [400, 404], true) && stripos($r['error'], 'model') !== false) {
+        $alt = rocGroqPickModel($key);
+        if ($alt && $alt !== $model) { $model = $alt; rocBlogSet($pdo, 'blog_groq_model', $alt); $body['model'] = $alt; $r = rocGroqCall($key, 'POST', '/chat/completions', $body); }
+    }
+    $used = $model;
+    if (!$r['ok']) return ['ok' => false, 'error' => 'Groq: ' . $r['error']];
+    $text = trim((string)($r['data']['choices'][0]['message']['content'] ?? ''));
+    $text = trim(preg_replace('/^```(?:json)?\s*|\s*```$/', '', $text));
+    $a = json_decode($text, true);
+    if (!is_array($a)) return ['ok' => false, 'error' => 'Groq did not answer with an article.'];
+    return ['ok' => true, 'article' => $a];
+}
+
+/** Writers that have a key, in order: Gemini, then Groq. */
+function rocBlogWriters(PDO $pdo): array {
+    $w = [];
+    $g = trim((string)rocBlogGet($pdo, 'blog_gemini_key', ''));
+    $q = trim((string)rocBlogGet($pdo, 'blog_groq_key', ''));
+    if ($g !== '') $w['gemini'] = $g;
+    if ($q !== '') $w['groq'] = $q;
+    return $w;
+}
+
+/** Writes with the first writer that works. */
+function rocBlogWriteAny(PDO $pdo, string $prompt, ?string &$used = null): array {
+    $errors = [];
+    foreach (rocBlogWriters($pdo) as $name => $key) {
+        $model = null;
+        $r = $name === 'gemini' ? rocGeminiWrite($pdo, $key, $prompt, $model) : rocGroqWrite($pdo, $key, $prompt, $model);
+        if ($r['ok']) { $used = $name . ' ' . $model; return $r; }
+        $errors[] = $r['error'];
+    }
+    return ['ok' => false, 'error' => $errors ? implode(' | ', $errors) : 'No writer key saved.'];
+}
+
+/** A short real test of each saved key (writes one sentence). */
+function rocBlogTestWriters(PDO $pdo): array {
+    $out = [];
+    foreach (rocBlogWriters($pdo) as $name => $key) {
+        $p = 'Answer with JSON {"ok": true, "word": "<one gaming word>"}.';
+        $m = null;
+        $r = $name === 'gemini' ? rocGeminiWrite($pdo, $key, $p, $m) : rocGroqWrite($pdo, $key, $p, $m);
+        $out[$name] = $r['ok'] ? ['ok' => true, 'model' => $m] : ['ok' => false, 'error' => $r['error']];
+    }
+    return $out;
+}
+
 /**
  * Server writer, run by the scheduler cron every 10 minutes. Writes the next post when the
  * next free slot is less than 2.5 hours away. One try every 30 minutes at most.
  */
 function rocBlogServerTick(PDO $pdo, string $root, bool $force = false): ?string {
     if (!$force && rocBlogEngine($pdo) !== 'server') return null;
-    $key = trim((string)rocBlogGet($pdo, 'blog_gemini_key', ''));
-    if ($key === '') return 'No Gemini key saved (CMS > Blog agent).';
+    if (!rocBlogWriters($pdo)) return 'No Gemini or Groq key saved (CMS > Blog writer).';
     $state = rocBlogGet($pdo, 'blog_engine_state', []);
     $state = is_array($state) ? $state : [];
     if (!$force && !empty($state['last_try']) && time() - strtotime($state['last_try'] . ' UTC') < 1800) return null;
@@ -603,7 +689,8 @@ function rocBlogServerTick(PDO $pdo, string $root, bool $force = false): ?string
     $prompt = rocBlogPrompt($brief, $at);
     $msg = null;
     for ($try = 1; $try <= 2; $try++) {
-        $w = rocGeminiWrite($pdo, $key, $prompt, $model);
+        $model = null;
+        $w = rocBlogWriteAny($pdo, $prompt, $model);
         if (!$w['ok']) { $msg = $w['error']; continue; }
         $a = $w['article'];
         $a['publish_at'] = $at; $a['topic_id'] = $brief['topic_id'];
@@ -611,7 +698,7 @@ function rocBlogServerTick(PDO $pdo, string $root, bool $force = false): ?string
         if (mb_strlen((string)($a['meta_description'] ?? '')) > 160) $a['meta_description'] = rtrim(mb_substr((string)$a['meta_description'], 0, 157)) . '…';
         $r = rocBlogCreate($pdo, $root, $a, 'server (' . $model . ')');
         if ($r['ok']) {
-            $state['last_ok'] = gmdate('Y-m-d H:i:s'); $state['last_error'] = '';
+            $state['last_ok'] = gmdate('Y-m-d H:i:s'); $state['last_error'] = ''; $state['last_by'] = $model;
             rocBlogSet($pdo, 'blog_engine_state', $state);
             return 'Written: ' . $r['url'] . ' (' . $r['publish_local'] . ')';
         }

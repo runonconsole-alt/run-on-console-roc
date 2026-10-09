@@ -3437,7 +3437,7 @@ async function renderBlogAgent(m, fresh){
       '<input type="radio" name="ba-eng" value="'+v+'"'+(engine===v?' checked':'')+' style="margin-top:3px"><span><b>'+title+'</b><br><span class="hint">'+txt+'</span></span></label>'; };
     return '<div class="card"><div class="chead"><h3>Who writes the posts</h3><span class="note">'+
         (engine==='server'?'<b style="color:#059669">● Server</b>':engine==='pc'?'<b style="color:#2563eb">● PC</b>':'<b style="color:#b45309">● Off</b>')+'</span></div><div class="cbody">'+
-      opt('server','Server, with Google Gemini (free) <span class="tag published">recommended</span>','Works by itself every day: your PC can be off and no Claude subscription is needed. Needs a free key from Google (steps below).')+
+      opt('server','Server, with a free AI key <span class="tag published">recommended</span>','Works by itself every day: your PC can be off and no Claude subscription is needed. Needs a free key from Groq or Google Gemini (steps below). With both, Gemini is tried first and Groq takes over if it fails.')+
       opt('pc','Your PC, with the Claude app','The "ROC blog writer" task in the Claude app writes the posts while the PC and the app are on.')+
       opt('off','Off','No new posts are written. Scheduled posts still go live.')+
       '<div class="field" style="margin-top:12px"><label>Publishing times (Pakistan time)</label><div id="ba-times" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>'+
@@ -3449,10 +3449,16 @@ async function renderBlogAgent(m, fresh){
           '<li>Click <b>Create API key</b> (accept Google\'s terms if asked).</li><li>Copy the key, paste it in the box above and press <b>Save</b>, then <b>Test the key</b>.</li>'+
           '<li>The free plan is enough for a few posts a day. Do not paste the key anywhere else or in a chat.</li></ol>'+
           '<div class="hint" style="margin-top:6px">Google may use what is sent on the free plan to improve its services; here that is only the article brief.</div></details></div>'+
-      '<div class="field"><label>Model <span class="hint">(optional)</span></label><input type="text" id="ba-model" value="'+esc(d.gemini.model||'')+'" placeholder="gemini-2.5-flash"><div class="hint">Leave as it is. If Google retires it, the newest free "flash" model is picked automatically.</div></div>'+
+      '<div class="field"><label>Groq key '+(d.groq&&d.groq.set?'<span class="tag published">saved ••••'+esc(d.groq.end)+'</span>'+(d.groq.model?' <span class="hint">'+esc(d.groq.model)+'</span>':''):'<span class="tag off">not saved</span>')+'</label>'+
+        '<input type="password" id="ba-gkey" autocomplete="off" placeholder="'+(d.groq&&d.groq.set?'Leave empty to keep the saved key':'Paste the key here (starts with gsk_)')+'">'+
+        '<details style="margin-top:6px"><summary class="hint" style="cursor:pointer">How to get the free Groq key (2 minutes)</summary><ol class="hint" style="margin:6px 0 0 18px;line-height:1.7">'+
+          '<li>Open <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a> and sign up (Google sign-in works).</li>'+
+          '<li>Click <b>Create API Key</b>, give it a name (roc-blog) and copy it.</li><li>Paste it in the box above, press <b>Save</b>, then <b>Test the keys</b>.</li>'+
+          '<li>Free plan, no card needed. Do not paste the key anywhere else or in a chat.</li></ol></details></div>'+
+      '<div class="field"><label>Gemini model <span class="hint">(optional)</span></label><input type="text" id="ba-model" value="'+esc(d.gemini.model||'')+'" placeholder="gemini-2.5-flash"><div class="hint">Leave as it is. If Google retires it, the newest free "flash" model is picked automatically.</div></div>'+
       (st.last_ok||st.last_error?'<div class="hint" style="margin:6px 0">'+(st.last_ok?'Last post written: '+esc(pkTime(st.last_ok))+'. ':'')+(st.last_error?'<span style="color:#b91c1c">Last problem: '+esc(st.last_error)+'</span>':'')+'</div>':'')+
       '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn primary" id="ba-save">Save</button>'+
-        (d.gemini.set?'<button class="btn" id="ba-test">Test the key</button><button class="btn" id="ba-write">Write the next post now</button>':'')+'</div>'+
+        (d.gemini.set||(d.groq&&d.groq.set)?'<button class="btn" id="ba-test">Test the keys</button><button class="btn" id="ba-write">Write the next post now</button>':'')+'</div>'+
       (d.free_slots&&d.free_slots.length?'<div class="hint" style="margin-top:8px">Next free times: '+d.free_slots.slice(0,4).map(esc).join(' · ')+'</div>':'')+
     '</div></div>';
   }
@@ -3533,8 +3539,8 @@ async function renderBlogAgent(m, fresh){
     try{ var r=await api('blog-agent-admin.php',payload); toast(r.message||'Done.','good'); if(reload!==false) renderBlogAgent(m); return r; }
     catch(e){ toast(e.message,'bad'); if(btn){ btn.disabled=false; btn.textContent=old; } }
   };
-  $('#ba-save',m).addEventListener('click',function(){ call({action:'settings',engine:engine,slots:times,gemini_key:$('#ba-key',m).value.trim(),model:$('#ba-model',m).value.trim()},this); });
-  var bt=$('#ba-test',m); if(bt) bt.addEventListener('click',function(){ call({action:'test_key'},this,false).then(function(){ bt.disabled=false; bt.textContent='Test the key'; }); });
+  $('#ba-save',m).addEventListener('click',function(){ call({action:'settings',engine:engine,slots:times,gemini_key:$('#ba-key',m).value.trim(),groq_key:$('#ba-gkey',m).value.trim(),model:$('#ba-model',m).value.trim()},this); });
+  var bt=$('#ba-test',m); if(bt) bt.addEventListener('click',function(){ call({action:'test_key'},this,false).then(function(){ bt.disabled=false; bt.textContent='Test the keys'; }); });
   var bw=$('#ba-write',m); if(bw) bw.addEventListener('click',function(){
     if(!confirm('Write the next post now? It takes 1-2 minutes and is scheduled for the next free time.')) return;
     call({action:'write_now'},this);
