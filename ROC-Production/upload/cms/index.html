@@ -3443,21 +3443,21 @@ async function renderBlogAgent(m, fresh){
       '<div class="field" style="margin-top:12px"><label>Publishing times (Pakistan time)</label><div id="ba-times" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>'+
         '<div class="hint">One post per time, every day. The writer starts about 2 hours before.</div></div>'+
       '<div class="field"><label>Google Gemini key '+(d.gemini.set?'<span class="tag published">saved ••••'+esc(d.gemini.end)+'</span> <button class="btn sm" type="button" data-rmkey="gemini">Remove key</button>':'<span class="tag off">not saved</span>')+'</label>'+
-        '<input type="password" id="ba-key" autocomplete="off" placeholder="'+(d.gemini.set?'Leave empty to keep the saved key':'Paste the key here (starts with AIza or AQ.)')+'">'+
+        '<input type="password" id="ba-key" autocomplete="new-password" data-lpignore="true" data-1p-ignore placeholder="'+(d.gemini.set?'Leave empty to keep the saved key':'Paste the key here (starts with AIza or AQ.)')+'">'+
         '<details style="margin-top:6px"><summary class="hint" style="cursor:pointer">How to get the free key (2 minutes)</summary><ol class="hint" style="margin:6px 0 0 18px;line-height:1.7">'+
           '<li>Open <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> and sign in with your Google account.</li>'+
           '<li>Click <b>Create API key</b> (accept Google\'s terms if asked).</li><li>Copy the key, paste it in the box above and press <b>Save</b>, then <b>Test the key</b>.</li>'+
           '<li>The free plan is enough for a few posts a day. Do not paste the key anywhere else or in a chat.</li></ol>'+
           '<div class="hint" style="margin-top:6px">Google may use what is sent on the free plan to improve its services; here that is only the article brief.</div></details></div>'+
       '<div class="field"><label>Groq key '+(d.groq&&d.groq.set?'<span class="tag published">saved ••••'+esc(d.groq.end)+'</span>'+(d.groq.model?' <span class="hint">'+esc(d.groq.model)+'</span>':'')+' <button class="btn sm" type="button" data-rmkey="groq">Remove key</button>':'<span class="tag off">not saved</span>')+'</label>'+
-        '<input type="password" id="ba-gkey" autocomplete="off" placeholder="'+(d.groq&&d.groq.set?'Leave empty to keep the saved key':'Paste the key here (starts with gsk_)')+'">'+
+        '<input type="password" id="ba-gkey" autocomplete="new-password" data-lpignore="true" data-1p-ignore placeholder="'+(d.groq&&d.groq.set?'Leave empty to keep the saved key':'Paste the key here (starts with gsk_)')+'">'+
         '<details style="margin-top:6px"><summary class="hint" style="cursor:pointer">How to get the free Groq key (2 minutes)</summary><ol class="hint" style="margin:6px 0 0 18px;line-height:1.7">'+
           '<li>Open <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a> and sign up (Google sign-in works).</li>'+
           '<li>Click <b>Create API Key</b>, give it a name (roc-blog) and copy it.</li><li>Paste it in the box above, press <b>Save</b>, then <b>Test the keys</b>.</li>'+
           '<li>Free plan, no card needed. Do not paste the key anywhere else or in a chat.</li></ol></details></div>'+
       '<div class="field"><label>Cover pictures with AI (Cloudflare, free) '+(d.cf&&d.cf.set?'<span class="tag published">on · account …'+esc(d.cf.account_end)+'</span> <button class="btn sm" type="button" data-rmkey="cf">Remove</button>':'<span class="tag off">off: title covers</span>')+'</label>'+
-        '<div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" id="ba-cfa" autocomplete="off" placeholder="'+(d.cf&&d.cf.set?'Account ID (leave empty to keep)':'Account ID')+'" style="flex:1;min-width:200px">'+
-        '<input type="password" id="ba-cft" autocomplete="off" placeholder="'+(d.cf&&d.cf.set?'API token (leave empty to keep)':'Workers AI API token')+'" style="flex:1;min-width:200px"></div>'+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" id="ba-cfa" autocomplete="new-password" data-lpignore="true" data-1p-ignore placeholder="'+(d.cf&&d.cf.set?'Account ID (leave empty to keep)':'Account ID')+'" style="flex:1;min-width:200px">'+
+        '<input type="password" id="ba-cft" autocomplete="new-password" data-lpignore="true" data-1p-ignore placeholder="'+(d.cf&&d.cf.set?'API token (leave empty to keep)':'Workers AI API token')+'" style="flex:1;min-width:200px"></div>'+
         '<details style="margin-top:6px"><summary class="hint" style="cursor:pointer">How to set it up (5 minutes)</summary><ol class="hint" style="margin:6px 0 0 18px;line-height:1.7">'+
           '<li>Sign up free at <a href="https://dash.cloudflare.com" target="_blank" rel="noopener">dash.cloudflare.com</a>.</li>'+
           '<li>Open <b>AI → Workers AI → Use REST API</b>. Copy the <b>Account ID</b>.</li>'+

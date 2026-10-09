@@ -154,6 +154,10 @@ RELEASES = [
                   '"Test the keys" also tests Cloudflare pictures; "New cover" makes a new AI picture'],
          checks=[dict(label='AI covers', type='contains', path='api/v1/cms/blog-engine-lib.php', text='ROC_CF_IMAGE_MODEL')],
          pr=REPO + '29'),
+    dict(deploy=28, date='2026-10-09', title='Blog writer: the browser no longer fills the key boxes',
+         changes=['CMS > Blog writer: key and token boxes are not filled in by the browser with a saved password'],
+         checks=[dict(label='No autofill', type='contains', path='cms/index.html', text='id="ba-key" autocomplete="new-password"')],
+         pr=REPO + '29'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
