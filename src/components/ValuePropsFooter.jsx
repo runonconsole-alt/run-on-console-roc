@@ -8,7 +8,7 @@ import { useApp } from '../context/AppContext';
 import { Tilt3DCard } from './Tilt3DCard';
 import { BouncyText } from './BouncyText';
 import { BrandLogo } from './BrandLogo';
-import { getSiteNav, iconSvg, footerSpan, currentYear } from '../data/siteNav';
+import { useSiteNav, iconSvg, footerSpan, currentYear } from '../data/siteNav';
 import { 
   SteamLogo, PlayStationLogo, XboxLogo, EpicGamesLogo, GooglePlayLogo, 
   AppleLogo, GOGLogo, BattleNetLogo, DiscordLogo, RedditLogo, 
@@ -17,7 +17,7 @@ import {
 
 export const ValuePropsFooter = () => {
   const { navigateTo, navigateToCategory } = useApp();
-  const siteNav = getSiteNav();
+  const siteNav = useSiteNav();
 
   const valueProps = [
     {
