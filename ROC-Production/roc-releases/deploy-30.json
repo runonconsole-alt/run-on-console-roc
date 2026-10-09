@@ -12,16 +12,9 @@
    "label": "Pictures back (run cli-product-asin.php --apply)",
    "type": "file",
    "path": "api/v1/cron/cli-product-asin.php"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-DhkaRrsp.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/30",
- "build": "index-DhkaRrsp.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]

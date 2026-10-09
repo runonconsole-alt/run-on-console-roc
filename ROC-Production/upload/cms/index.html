@@ -4018,7 +4018,7 @@ async function renderAnalytics(m, refresh){
               return ['<a href="'+esc(r[0])+'" target="_blank" rel="noopener" class="t-slug">'+esc(r[0].replace(/^https?:\/\/[^/]+/,''))+'</a>',anNum(r[1]),anNum(r[2]),r[4]]; })+'</div></div></div>';
       }
     }
-    if(R.made) html+='<div class="hint" style="margin-top:10px">Data from '+esc(pkTime(R.made))+'. It is kept for 1 hour; press Refresh for new data.</div>';
+    if(R.made) html+='<div class="hint" style="margin-top:10px">Data from '+esc(new Date(R.made).toLocaleString())+'. It is kept for 1 hour; press Refresh for new data.</div>';
     body.insertAdjacentHTML('beforeend',html);
   }
   // setup handlers
