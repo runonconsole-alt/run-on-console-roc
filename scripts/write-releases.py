@@ -194,7 +194,18 @@ RELEASES = [
                   'PC Hardware and Gaming Hardware pages show only their own categories',
                   'Blog writer: buying guides first (sales mode), keywords from what people search on Google, anchor text = the searched name of the page'],
          checks=[dict(label='Product versions file', type='file', path='api/v1/cms/product-variants.json')],
-         pr=REPO + '33'),
+         pr=REPO + '33', build='index-nFjVBE7y.js'),
+    dict(deploy=34, date='2026-10-12', title='Live news at /news/, email alerts, photo zoom, CMS Website info',
+         changes=['News: the server reads 20 trusted sources (PlayStation, Xbox, NVIDIA, Steam, IGN, PC Gamer, Tom’s Hardware and more) every 20 minutes',
+                  'A story is published only when 2+ trusted sources report it (or the company announces it) and it links to our products, categories or guides',
+                  'Each story: written in our own words, a Sources box (verified by N trusted sources) and a See it on Run On Console box with product pages and Amazon links',
+                  'Up to 5 stories a day, 09:00-23:00 Pakistan time; CMS > Blog and news writer > News for settings, sources and a Publish now button',
+                  'Email alerts when a blog post or a news story goes live',
+                  'Google News sitemap; NEWS in the header and footer menu',
+                  'Product photos open full size on click; new CMS page Website info (technology, tools, history)'],
+         checks=[dict(label='News engine', type='file', path='api/v1/cms/news-engine-lib.php'),
+                 dict(label='News routing (cli-news-routing.php --apply)', type='file', path='api/v1/cron/cli-news-routing.php')],
+         pr=REPO + '34'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

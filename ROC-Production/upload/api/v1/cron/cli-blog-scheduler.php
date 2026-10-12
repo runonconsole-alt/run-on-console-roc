@@ -12,12 +12,16 @@
  *   php cli-blog-scheduler.php            publish what is due
  *   php cli-blog-scheduler.php --list     show the queue, change nothing
  *   php cli-blog-scheduler.php --write    let the server writer write the next post now
+ *   php cli-blog-scheduler.php --news     read the news feeds and publish one story now
  *
  * Each run also:
  *   - refreshes the "Keep reading" links of a post that went live and of its sister
  *     posts in the same topic cluster (internal links both ways);
  *   - when CMS > Blog agent > Writer is "Server", writes the next post with Google Gemini
  *     (free key) about 2 hours before the next free publishing time. No PC needed.
+ *   - live news (CMS > Blog writer > News): reads the trusted news feeds every 20 minutes and
+ *     publishes a story at /news/ when 2+ trusted sources (or an official one) report it;
+ *   - emails the address in CMS > Blog writer > Email alerts when a post or a story goes live.
  */
 // cPanel -> Cron Jobs, "Every 10 minutes":
 // */10 * * * *  php /home2/runoncon/public_html/api/v1/cron/cli-blog-scheduler.php >> /home2/runoncon/logs/blog-scheduler.log 2>&1
@@ -33,10 +37,16 @@ if (!$pdo) { fwrite(STDERR, date('c') . " blog-scheduler: database unavailable\n
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 require_once $ROOT . '/api/v1/cms/blog-engine-lib.php';
+require_once $ROOT . '/api/v1/cms/news-engine-lib.php';
 $now = date('Y-m-d H:i:s');
 
 if (in_array('--write', array_slice($argv, 1), true)) {
     echo date('c') . ' writer: ' . (rocBlogServerTick($pdo, $ROOT, true) ?? 'nothing to do') . "\n";
+    exit(0);
+}
+
+if (in_array('--news', array_slice($argv, 1), true)) {
+    echo date('c') . ' news: ' . (rocNewsTick($pdo, $ROOT, true) ?? 'nothing to do') . "\n";
     exit(0);
 }
 
@@ -67,6 +77,7 @@ foreach ($rows as $r) {
     }
     echo date('c') . " published: {$r['title']} (scheduled for {$r['published_at']})\n";
     try { $n = rocBlogRelink($pdo, $r['id']); if ($n) echo date('c') . "   linked inside its cluster: {$n} post(s) updated\n"; } catch (\Throwable $e) {}
+    try { rocNotifyBlog($pdo, $r['id']); } catch (\Throwable $e) {}
 }
 
 // The server writer (quiet unless it writes or fails).
@@ -74,3 +85,9 @@ try {
     $w = rocBlogServerTick($pdo, $ROOT);
     if ($w !== null) echo date('c') . ' writer: ' . $w . "\n";
 } catch (\Throwable $e) { echo date('c') . ' writer error: ' . $e->getMessage() . "\n"; }
+
+// Live news (quiet unless it publishes or fails).
+try {
+    $n = rocNewsTick($pdo, $ROOT);
+    if ($n !== null) echo date('c') . ' news: ' . $n . "\n";
+} catch (\Throwable $e) { echo date('c') . ' news error: ' . $e->getMessage() . "\n"; }

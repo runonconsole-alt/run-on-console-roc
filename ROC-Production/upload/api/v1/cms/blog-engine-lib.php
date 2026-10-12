@@ -86,7 +86,8 @@ function rocBlogLog(PDO $pdo, array $entry): void {
 function rocBlogFreeSlots(PDO $pdo, int $days = 3): array {
     $tz = new DateTimeZone(ROC_BLOG_TZ);
     $taken = [];
-    $q = $pdo->query("SELECT published_at FROM blogs WHERE status IN ('scheduled', 'published') AND published_at >= '" . gmdate('Y-m-d H:i:s', time() - 86400) . "'");
+    // News (CMS > Blog writer > News) has its own limits and does not take a blog time.
+    $q = $pdo->query("SELECT published_at FROM blogs WHERE status IN ('scheduled', 'published') AND (category IS NULL OR category <> 'News') AND published_at >= '" . gmdate('Y-m-d H:i:s', time() - 86400) . "'");
     foreach ($q->fetchAll(PDO::FETCH_COLUMN) as $t) $taken[] = strtotime($t . ' UTC');
     $out = [];
     for ($d = 0; $d < $days; $d++) {
@@ -130,8 +131,8 @@ function rocBlogSite(PDO $pdo, bool $fresh = false): array {
         }
     }
     $posts = [];
-    foreach ($pdo->query("SELECT id, title, slug, status, published_at FROM blogs ORDER BY COALESCE(published_at, created_at) DESC")->fetchAll(PDO::FETCH_ASSOC) as $b) {
-        $posts[$b['id']] = $b + ['url' => '/blogs/' . $b['slug'] . '/'];
+    foreach ($pdo->query("SELECT id, title, slug, status, category, published_at FROM blogs ORDER BY COALESCE(published_at, created_at) DESC")->fetchAll(PDO::FETCH_ASSOC) as $b) {
+        $posts[$b['id']] = $b + ['url' => (strcasecmp(trim((string)$b['category']), 'News') === 0 ? '/news/' : '/blogs/') . $b['slug'] . '/'];
     }
     return $cache = ['cats' => $cats, 'products' => $products, 'platforms' => $plats, 'posts' => $posts];
 }
@@ -413,7 +414,7 @@ function rocBlogCreate(PDO $pdo, string $root, array $in, string $source): array
 /** Internal links must point to real pages: a link to an unknown address becomes plain text. */
 function rocBlogCleanLinks(string $html, PDO $pdo): string {
     $S = rocBlogSite($pdo);
-    $ok = ['/' => 1, '/products/' => 1, '/blogs/' => 1, '/compatibility/' => 1, '/gaming-platforms/' => 1, '/about/' => 1, '/contact/' => 1,
+    $ok = ['/' => 1, '/products/' => 1, '/blogs/' => 1, '/news/' => 1, '/compatibility/' => 1, '/gaming-platforms/' => 1, '/about/' => 1, '/contact/' => 1,
            '/products/pc-hardware/' => 1, '/products/gaming-hardware/' => 1];
     foreach ($S['cats'] as $c) $ok[$c['url']] = 1;
     foreach ($S['products'] as $p) $ok[$p['url']] = 1;

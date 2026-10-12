@@ -27,6 +27,7 @@ export const DEFAULT_SITE_NAV = {
     },
     { label: 'SYSTEMS', url: '/compatibility/' },
     { label: 'BLOGS', url: '/blogs/' },
+    { label: 'NEWS', url: '/news/' },
     { label: 'ABOUT US', url: '/about/' },
   ],
   footer: {
@@ -41,6 +42,7 @@ export const DEFAULT_SITE_NAV = {
         { label: 'Products', url: '/products/', icon: 'cpu' },
         { label: 'Systems', url: '/compatibility/', icon: 'gamepad' },
         { label: 'Blogs', url: '/blogs/', icon: 'book' },
+        { label: 'News', url: '/news/', icon: 'newspaper' },
         { label: 'Gaming Platforms', url: '/gaming-platforms/', icon: 'grid' },
         { label: 'About Run On Console', url: '/about/', icon: 'info' },
       ] },

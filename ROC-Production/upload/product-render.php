@@ -302,6 +302,23 @@ function rocProductUrl(string $slug): string { return ROC_PUBLIC_URL . '/product
 function rocCategoryUrl(string $slug): string { return ROC_PUBLIC_URL . '/products/' . $slug . '/'; }
 
 /**
+ * Click on the product photo: it opens full size over the page (Esc, a click or the X closes it;
+ * "Open picture" shows the file itself). Works with the "Choose version" photos too.
+ */
+function rocZoomScript(): string {
+    return '<script>(function(){var m=document.getElementById("roc-main-img");if(!m)return;m.style.cursor="zoom-in";m.title="Click to zoom";'
+        . 'm.addEventListener("click",function(){var src=m.currentSrc||m.src,o=document.createElement("div");'
+        . 'o.setAttribute("role","dialog");o.setAttribute("aria-label",m.alt||"Product photo");'
+        . 'o.style.cssText="position:fixed;inset:0;z-index:9999;background:rgba(2,6,23,.92);display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out";'
+        . 'o.innerHTML=\'<img alt="" style="max-width:100%;max-height:88vh;background:#fff;border-radius:16px;padding:12px;object-fit:contain">\''
+        . '+\'<button type="button" aria-label="Close" style="position:absolute;top:14px;right:16px;background:#fff;border:0;border-radius:999px;width:40px;height:40px;font-size:22px;font-weight:700;cursor:pointer">&times;</button>\''
+        . '+\'<a target="_blank" rel="noopener" style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:#059669;color:#fff;font:700 13px sans-serif;padding:8px 14px;border-radius:10px;text-decoration:none">Open picture</a>\';'
+        . 'o.querySelector("img").src=src;o.querySelector("img").alt=m.alt;o.querySelector("a").href=src;'
+        . 'var close=function(){o.remove();document.removeEventListener("keydown",esc);},esc=function(e){if(e.key==="Escape")close();};'
+        . 'o.addEventListener("click",function(e){if(e.target.tagName!=="A")close();});document.addEventListener("keydown",esc);document.body.appendChild(o);});})();</script>';
+}
+
+/**
  * "Choose version" buttons for products that come in versions (8GB / 16GB, 512GB / 1TB, ...),
  * from api/v1/cms/product-variants.json. A click shows that version's photo at once and opens
  * its own page (its own price link, details and address).
@@ -573,7 +590,8 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
         . '<div class="lg:col-span-5 flex flex-col justify-center"><div class="transition-shadow duration-300 will-change-transform relative rounded-2xl overflow-hidden bg-slate-950 p-4 border border-slate-800 shadow-xl group">'
         . ($image !== '' ? '<img id="roc-main-img" width="800" height="480" src="' . rocH($image) . '" alt="' . rocH($alt) . '" class="w-full h-80 ' . (rocIsAmazonImg($image) ? 'object-contain bg-white p-4' : 'object-cover') . ' rounded-xl group-hover:scale-105 transition-transform duration-500" fetchpriority="high"/>' : '')
         . ($badge !== '' ? '<span class="absolute top-4 left-4 max-w-[85%] bg-emerald-600 text-white font-extrabold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider badge-glow">' . rocH($badge) . '</span>' : '')
-        . '</div></div>'
+        . ($image !== '' ? '<span class="absolute bottom-3 right-3 bg-slate-900/80 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg pointer-events-none">Click to zoom</span>' : '')
+        . '</div></div>' . ($image !== '' ? rocZoomScript() : '')
         . '<div class="lg:col-span-7 space-y-5"><div>'
         . '<span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">' . rocH($catName) . '</span>'
         . '<h1 class="font-display font-extrabold text-2xl sm:text-3xl text-slate-900 leading-tight mt-1">' . rocH($title) . '</h1>'

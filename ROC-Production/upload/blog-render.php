@@ -7,6 +7,13 @@
  *   /blogs/                      -> listing          (blog-render.php)
  *   /blogs/{slug}/               -> single post      (blog-render.php?slug=...)
  *   /sitemaps/blogs-sitemap.xml  -> blog sitemap     (blog-render.php?sitemap=1)
+ *   /news/                       -> news listing     (blog-render.php?news=1)
+ *   /news/{slug}/                -> news story       (blog-render.php?news=1&slug=...)
+ *   /sitemaps/news-sitemap.xml   -> Google News sitemap, last 2 days (blog-render.php?news=1&sitemap=1)
+ *
+ * News stories are posts with the category "News" (written by api/v1/cms/news-engine-lib.php
+ * or in the CMS). They live at /news/{slug}/; a /blogs/ address of a story (or a /news/
+ * address of a blog post) sends the visitor to the right one with a 301.
  *
  * The site's own design is reused: header, footer, fonts and CSS come from the
  * prerendered HTML saved in /cms-templates/ by cli-blog-routing.php. The React
@@ -32,6 +39,7 @@ $slug     = isset($_GET['slug']) ? strtolower(trim((string)$_GET['slug'], "/ \t\
 $isMap    = isset($_GET['sitemap']);
 $query    = isset($_GET['q']) ? trim(mb_substr((string)$_GET['q'], 0, 80)) : '';
 $page     = max(1, (int)($_GET['page'] ?? 1));
+$isNews   = isset($_GET['news']);
 
 if ($slug !== '' && !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) {
     rocNotFound($ROOT);
@@ -79,11 +87,16 @@ if (!$pdo) {
 /* ------------------------------------------------------------ routing */
 
 if ($isMap) {
+    if ($isNews) rocNewsSitemap($pdo);
     rocSitemap($pdo);
 }
 if ($slug !== '') {
     $post = rocFetchPost($pdo, $slug);
     if (!$post) rocNotFound($ROOT);
+    if (rocIsNews($post) !== $isNews) {
+        header('Location: ' . rocPostUrl($slug, rocIsNews($post)), true, 301);
+        exit;
+    }
     rocRenderPost($ROOT, $post);
 }
 if (isset($_GET['json'])) {
@@ -95,12 +108,12 @@ if (isset($_GET['json'])) {
     echo json_encode(array_map(function ($r) {
         $pub = rocDate($r['published_at'] ?? null);
         return ['t' => (string)$r['title'], 'c' => rocCategoryLabel((string)($r['category'] ?? '')), 'e' => mb_substr((string)($r['excerpt'] ?? ''), 0, 160),
-                'u' => '/blogs/' . $r['slug'] . '/', 'i' => (string)($r['image'] ?? ''), 'a' => (string)($r['image_alt'] ?? ''),
+                'u' => (rocIsNews($r) ? '/news/' : '/blogs/') . $r['slug'] . '/', 'i' => (string)($r['image'] ?? ''), 'a' => (string)($r['image_alt'] ?? ''),
                 'd' => $pub ? gmdate('Y-m-d', $pub) : ''];
     }, $rows), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
-rocRenderList($ROOT, $pdo, $query, $page);
+rocRenderList($ROOT, $pdo, $query, $page, $isNews);
 }
 
 
@@ -135,8 +148,13 @@ function rocAbs(string $url): string {
     return ROC_PUBLIC_URL . $url;
 }
 
-function rocPostUrl(string $slug): string {
-    return ROC_PUBLIC_URL . '/blogs/' . $slug . '/';
+function rocPostUrl(string $slug, bool $news = false): string {
+    return ROC_PUBLIC_URL . ($news ? '/news/' : '/blogs/') . $slug . '/';
+}
+
+/** News stories are posts with the category "News". */
+function rocIsNews(array $p): bool {
+    return strcasecmp(trim((string)($p['category'] ?? '')), 'News') === 0;
 }
 
 function rocDate(?string $v): ?int {
@@ -380,7 +398,8 @@ function rocRenderPost(string $root, array $p): void {
     [$headTop, $bodyToMain, $mainOpen, , $afterMain] = rocTemplate($root, 'blog-post.html');
 
     $slug     = (string)$p['slug'];
-    $url      = rocPostUrl($slug);
+    $news     = rocIsNews($p);
+    $url      = rocPostUrl($slug, $news);
     $title    = trim((string)$p['title']);
     $metaT    = trim((string)($p['meta_title'] ?? '')) ?: ($title . ' | Run On Console');
     $excerpt  = trim((string)($p['excerpt'] ?? ''));
@@ -429,13 +448,13 @@ function rocRenderPost(string $root, array $p): void {
         '@type' => 'BreadcrumbList',
         'itemListElement' => [
             ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home',  'item' => ROC_PUBLIC_URL . '/'],
-            ['@type' => 'ListItem', 'position' => 2, 'name' => 'Blogs', 'item' => ROC_PUBLIC_URL . '/blogs/'],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => $news ? 'News' : 'Blogs', 'item' => ROC_PUBLIC_URL . ($news ? '/news/' : '/blogs/')],
             ['@type' => 'ListItem', 'position' => 3, 'name' => $title, 'item' => $url],
         ],
     ]);
     $article = [
         '@context' => 'https://schema.org',
-        '@type' => 'BlogPosting',
+        '@type' => $news ? 'NewsArticle' : 'BlogPosting',
         'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => $url],
         'url' => $url,
         'headline' => mb_substr($title, 0, 110),
@@ -462,8 +481,8 @@ function rocRenderPost(string $root, array $p): void {
     $m  = $mainOpen;
     $m .= '<article class="max-w-4xl mx-auto py-6 space-y-8">';
     $m .= '<div class="flex items-center justify-between">'
-        . '<a href="/blogs/" class="bg-white border border-slate-300 hover:border-emerald-600 text-slate-700 font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2 transition-colors shadow-sm no-underline">'
-        . '<span aria-hidden="true">&larr;</span><span>Back to All Blogs</span></a>'
+        . '<a href="' . ($news ? '/news/' : '/blogs/') . '" class="bg-white border border-slate-300 hover:border-emerald-600 text-slate-700 font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2 transition-colors shadow-sm no-underline">'
+        . '<span aria-hidden="true">&larr;</span><span>' . ($news ? 'Back to All News' : 'Back to All Blogs') . '</span></a>'
         . '<button type="button" data-roc-share class="p-2 bg-white border border-slate-300 rounded-xl text-slate-600 hover:text-emerald-600 text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors">'
         . '<span>Share Article</span></button></div>';
 
@@ -476,18 +495,18 @@ function rocRenderPost(string $root, array $p): void {
         .     '<div>' . ($authorUrl !== '' ? '<a href="' . $authorUrl . '" rel="author" class="font-bold text-slate-900 block no-underline hover:text-emerald-700">' . rocH($author) . '</a>' : '<span class="font-bold text-slate-900 block">' . rocH($author) . '</span>') . '</div>'
         .   '</div>'
         .   '<div class="flex items-center gap-3">'
-        .     ($pub ? '<time datetime="' . gmdate('Y-m-d', $pub) . '">' . rocH(date('M j, Y', $pub)) . '</time><span>•</span>' : '')
+        .     ($pub ? '<time datetime="' . gmdate('c', $pub) . '">' . rocH(date($news ? 'M j, Y, H:i' : 'M j, Y', $pub)) . ($news ? ' UTC' : '') . '</time><span>•</span>' : '')
         .     '<span class="text-emerald-600 font-bold">' . rocH($readTime) . '</span>'
         .   '</div>'
         . '</div></header>';
 
     if ($image !== '') {
         $m .= '<div class="relative rounded-3xl overflow-hidden shadow-2xl max-h-[480px] bg-slate-900">'
-            . '<img width="1200" height="675" src="' . rocH($image) . '" alt="' . rocH($alt) . '" class="w-full h-full object-cover max-h-[480px]" fetchpriority="high"/></div>';
+            . '<a href="' . rocH($image) . '" target="_blank" rel="noopener" title="Open the full picture"><img width="1200" height="675" src="' . rocH($image) . '" alt="' . rocH($alt) . '" class="w-full h-full object-cover max-h-[480px]" fetchpriority="high"/></a></div>';
     }
     if ($excerpt !== '') {
         $m .= '<div class="bg-emerald-50/80 border-l-4 border-emerald-600 p-5 rounded-r-2xl shadow-sm">'
-            . '<h2 class="font-display font-extrabold text-base text-emerald-950 mb-1">Article Overview &amp; Key Takeaways</h2>'
+            . '<h2 class="font-display font-extrabold text-base text-emerald-950 mb-1">' . ($news ? 'The story in short' : 'Article Overview &amp; Key Takeaways') . '</h2>'
             . '<p class="text-xs sm:text-sm text-emerald-900 leading-relaxed">' . rocH($excerpt) . '</p></div>';
     }
     $m .= '<div class="roc-article">' . $body . '</div>';
@@ -500,10 +519,11 @@ function rocRenderPost(string $root, array $p): void {
 /*                               listing                                */
 /* ==================================================================== */
 
-function rocRenderList(string $root, PDO $pdo, string $query, int $page): void {
+function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $news = false): void {
     [$headTop, $bodyToMain, $mainOpen, $mainInner, $afterMain] = rocTemplate($root, 'blog-list.html');
+    $base = $news ? '/news/' : '/blogs/';
 
-    $where = "status = 'published'";
+    $where = "status = 'published' AND " . ($news ? "category = 'News'" : "(category IS NULL OR category <> 'News')");
     $args = [];
     if ($query !== '') {
         $where .= ' AND (title LIKE ? OR excerpt LIKE ? OR category LIKE ?)';
@@ -525,7 +545,7 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page): void {
     $stmt->execute($args);
     $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $allPublished = (int)$pdo->query("SELECT COUNT(*) FROM blogs WHERE status = 'published'")->fetchColumn();
+    $allPublished = (int)$pdo->query("SELECT COUNT(*) FROM blogs WHERE status = 'published' AND " . ($news ? "category = 'News'" : "(category IS NULL OR category <> 'News')"))->fetchColumn();
 
     /* ---------------- head: keep the template's title/description */
     $tpl = (string)file_get_contents(is_file($root . '/cms-templates/blog-list.html')
@@ -534,8 +554,12 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page): void {
     $desc  = 'Explore in-depth benchmark reviews, PC build guides, game performance analyses, and hardware buying advice from the Run On Console testing lab.';
     if (preg_match('#<title>(.*?)</title>#is', $tpl, $m1)) $title = html_entity_decode(trim($m1[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
     if (preg_match('#<meta\s+name="description"\s+content="([^"]*)"#i', $tpl, $m2)) $desc = html_entity_decode($m2[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    if ($news) {
+        $title = 'Gaming & PC Hardware News Today | Run On Console';
+        $desc  = 'The latest gaming and PC hardware news: new GPUs, CPUs, handhelds, consoles and games, each story checked against trusted sources, with links to the products.';
+    }
 
-    $canonical = ROC_PUBLIC_URL . '/blogs/' . ($page > 1 ? '?page=' . $page : '');
+    $canonical = ROC_PUBLIC_URL . $base . ($page > 1 ? '?page=' . $page : '');
     if ($page > 1) $title = 'Page ' . $page . ' – ' . $title;
     $robots = $query !== '' ? 'noindex, follow' : 'index, follow, max-image-preview:large';
 
@@ -563,13 +587,13 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page): void {
         '@type' => 'BreadcrumbList',
         'itemListElement' => [
             ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home',  'item' => ROC_PUBLIC_URL . '/'],
-            ['@type' => 'ListItem', 'position' => 2, 'name' => 'Blogs', 'item' => ROC_PUBLIC_URL . '/blogs/'],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => $news ? 'News' : 'Blogs', 'item' => ROC_PUBLIC_URL . $base],
         ],
     ]);
     if ($posts && $query === '') {
         $items = [];
         foreach ($posts as $i => $p) {
-            $items[] = ['@type' => 'ListItem', 'position' => $offset + $i + 1, 'url' => rocPostUrl((string)$p['slug'])];
+            $items[] = ['@type' => 'ListItem', 'position' => $offset + $i + 1, 'url' => rocPostUrl((string)$p['slug'], $news)];
         }
         $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'ItemList', 'itemListElement' => $items]);
     }
@@ -581,12 +605,19 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page): void {
     $hero = $g !== false ? substr($mainInner, 0, $g) : '<div class="space-y-12 py-6">';
     $hero = preg_replace('/\d+(<!-- -->)?\s*Hardware Reviews &amp; Guides/', $allPublished . ' Hardware Reviews &amp; Guides', $hero, 1);
     $hero = preg_replace('#<canvas\b[^>]*></canvas>#i', '', $hero);
+    if ($news) {
+        $hero = '<div class="space-y-12 py-6"><div class="text-center space-y-3">'
+            . '<span class="inline-block bg-emerald-600 text-white text-[11px] font-extrabold uppercase px-3 py-1 rounded-md tracking-wider">Live</span>'
+            . '<h1 class="font-display font-extrabold text-3xl sm:text-5xl text-slate-900">Gaming &amp; PC Hardware News</h1>'
+            . '<p class="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto">New GPUs, CPUs, handhelds, consoles and games. Every story is checked against trusted sources (listed under it) and links to the products on Run On Console. '
+            . $allPublished . ' stor' . ($allPublished === 1 ? 'y' : 'ies') . ' so far.</p></div>';
+    }
 
     $cards = '';
     if ($query !== '') {
         $cards .= '<div class="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-600">'
             . '<span>' . $total . ' result' . ($total === 1 ? '' : 's') . ' for <strong class="text-slate-900">&ldquo;' . rocH($query) . '&rdquo;</strong></span>'
-            . '<a href="/blogs/" class="text-emerald-600 font-bold">Clear search</a></div>';
+            . '<a href="' . $base . '" class="text-emerald-600 font-bold">Clear search</a></div>';
     }
     $cards .= $gridMarker;
     foreach ($posts as $p) {
@@ -595,7 +626,7 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page): void {
         $alt  = trim((string)($p['image_alt'] ?? '')) ?: (string)$p['title'];
         $rt   = rocReadTime($p, rocBodyHtml((string)($p['content'] ?? '')));
         $by   = trim((string)($p['author_name'] ?? '')) ?: 'Run On Console';
-        $cards .= '<a href="/blogs/' . rocH($slug) . '/" class="block no-underline">'
+        $cards .= '<a href="' . $base . rocH($slug) . '/" class="block no-underline">'
             . '<div class="game-card flex flex-col justify-between group cursor-pointer h-full">'
             . '<div class="relative bg-slate-900 overflow-hidden" style="aspect-ratio:1200 / 630">'
             . ($img !== '' ? '<img width="1200" height="675" src="' . rocH($img) . '" alt="' . rocH($alt) . '" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>' : '')
@@ -607,25 +638,25 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page): void {
             . '<p class="text-xs text-slate-500 line-clamp-3 leading-relaxed">' . rocH($p['excerpt'] ?? '') . '</p></div>'
             . '<div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">'
             . '<div class="flex items-center gap-2 text-slate-600 font-medium"><span>By ' . rocH($by) . '</span></div>'
-            . '<span class="text-emerald-600 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">Read Article &rarr;</span>'
+            . '<span class="text-emerald-600 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">' . ($news ? rocH(($pd = rocPublished($p)) ? date('M j, H:i', $pd) . ' UTC' : 'Read') . ' &rarr;' : 'Read Article &rarr;') . '</span>'
             . '</div></div></div></a>';
     }
     $cards .= '</div>';
     if (!$posts) {
         $cards .= '<p class="text-center text-slate-500 text-sm py-10">'
-            . ($query !== '' ? 'No articles match that search.' : 'No articles published yet.') . '</p>';
+            . ($query !== '' ? 'No articles match that search.' : ($news ? 'No news yet. New stories appear here as soon as they are checked.' : 'No articles published yet.')) . '</p>';
     }
 
     if ($pages > 1) {
         $cards .= '<nav class="flex items-center justify-center gap-2 text-sm font-bold" aria-label="Pagination">';
         $qs = $query !== '' ? '&q=' . rawurlencode($query) : '';
         if ($page > 1) {
-            $prev = $page - 1 === 1 ? '/blogs/' . ($query !== '' ? '?q=' . rawurlencode($query) : '') : '/blogs/?page=' . ($page - 1) . $qs;
+            $prev = $page - 1 === 1 ? $base . ($query !== '' ? '?q=' . rawurlencode($query) : '') : $base . '?page=' . ($page - 1) . $qs;
             $cards .= '<a class="px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-700" href="' . rocH($prev) . '">&larr; Newer</a>';
         }
         $cards .= '<span class="px-3 text-slate-500">Page ' . $page . ' of ' . $pages . '</span>';
         if ($page < $pages) {
-            $cards .= '<a class="px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-700" href="/blogs/?page=' . ($page + 1) . rocH($qs) . '">Older &rarr;</a>';
+            $cards .= '<a class="px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-700" href="' . $base . '?page=' . ($page + 1) . rocH($qs) . '">Older &rarr;</a>';
         }
         $cards .= '</nav>';
     }
@@ -667,16 +698,40 @@ function rocSmLine(string $loc, ?int $mod, string $title = ''): string {
 
 
 function rocSitemap(PDO $pdo): void {
-    $rows = $pdo->query("SELECT slug, title, image, published_at, created_at, updated_at, content_modified_at
+    $rows = $pdo->query("SELECT slug, title, category, image, published_at, created_at, updated_at, content_modified_at
                            FROM blogs WHERE status = 'published' " . rocOrderSql())->fetchAll(PDO::FETCH_ASSOC);
     header('Content-Type: application/xml; charset=utf-8');
     header('Cache-Control: public, max-age=300');
     $out  = rocSmOpen();
-    $latest = null;
-    foreach ($rows as $r) { $t = rocModified($r); if ($t && (!$latest || $t > $latest)) $latest = $t; }
+    $latest = null; $latestNews = null;
+    foreach ($rows as $r) {
+        $t = rocModified($r);
+        if (rocIsNews($r)) { if ($t && (!$latestNews || $t > $latestNews)) $latestNews = $t; }
+        elseif ($t && (!$latest || $t > $latest)) $latest = $t;
+    }
     $out .= rocSmLine(ROC_PUBLIC_URL . '/blogs/', $latest, 'Blogs');
-    foreach ($rows as $r) $out .= rocSmLine(rocPostUrl((string)$r['slug']), rocModified($r), (string)$r['title']);
+    if ($latestNews) $out .= rocSmLine(ROC_PUBLIC_URL . '/news/', $latestNews, 'News');
+    foreach ($rows as $r) $out .= rocSmLine(rocPostUrl((string)$r['slug'], rocIsNews($r)), rocModified($r), (string)$r['title']);
     $out .= "</urlset>\n";
     echo $out;
+    exit;
+}
+
+/** Google News sitemap: stories of the last 2 days (https://developers.google.com/search/docs/crawling-indexing/sitemaps/news-sitemap). */
+function rocNewsSitemap(PDO $pdo): void {
+    $st = $pdo->prepare("SELECT slug, title, published_at FROM blogs WHERE status = 'published' AND category = 'News' AND published_at >= ? " . rocOrderSql() . ' LIMIT 1000');
+    $st->execute([gmdate('Y-m-d H:i:s', time() - 2 * 86400)]);
+    $x = function ($v) { return htmlspecialchars((string)$v, ENT_XML1 | ENT_QUOTES, 'UTF-8'); };
+    header('Content-Type: application/xml; charset=utf-8');
+    header('Cache-Control: public, max-age=300');
+    $out = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
+         . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">' . "\n";
+    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $pub = rocDate($r['published_at']);
+        $out .= '  <url><loc>' . $x(rocPostUrl((string)$r['slug'], true)) . '</loc><news:news><news:publication><news:name>Run On Console</news:name>'
+              . '<news:language>en</news:language></news:publication><news:publication_date>' . gmdate('c', $pub ?: time()) . '</news:publication_date>'
+              . '<news:title>' . $x($r['title']) . "</news:title></news:news></url>\n";
+    }
+    echo $out . "</urlset>\n";
     exit;
 }
