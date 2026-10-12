@@ -310,7 +310,7 @@
 }
 
 /* Amazon product pictures (SiteStripe links): white background, shown whole. */
-img[src*="amazon-adsystem.com"], img[src*="media-amazon.com"] {
+img[src*="amazon-adsystem.com"], img[src*="media-amazon.com"], img[src*="/images/products/photos/"] {
   object-fit: contain !important;
   background: #fff;
   padding: 6px;

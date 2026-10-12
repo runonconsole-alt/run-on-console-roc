@@ -18,10 +18,10 @@ export const DEFAULT_SITE_NAV = {
   header: [
     { label: 'HOME', url: '/' },
     {
-      label: 'PRODUCTS', url: '/products/',
+      label: 'CATEGORIES', url: '/products/',
       children: [
-        { title: 'PC Hardware', desc: 'Graphics cards and PC components', url: '/products/pc-hardware/', icon: 'cpu' },
-        { title: 'Gaming Hardware', desc: 'Monitors, mice, keyboards, headsets, speakers', url: '/products/gaming-hardware/', icon: 'gamepad' },
+        { title: 'PC Hardware', desc: 'GPUs, CPUs, RAM, cases, monitors, speakers', url: '/products/pc-hardware/', icon: 'cpu' },
+        { title: 'Gaming Hardware', desc: 'Keyboards, mice, headsets, chairs, handhelds, laptops', url: '/products/gaming-hardware/', icon: 'gamepad' },
       ],
       button: { label: 'View all products →', url: '/products/' },
     },

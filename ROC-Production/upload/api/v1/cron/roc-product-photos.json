@@ -1,0 +1,409 @@
+{
+ "generated": "owner product photos (Products Images zip, 2026-10-12)",
+ "products": {
+  "asus-rog-strix-scope-ii-96-wireless": {
+   "image": "/images/products/photos/asus-rog-strix-scope-ii-96-wireless.webp",
+   "source": "Keyboards/ASUS ROG Strix Scope II 96 Wireless.jpg"
+  },
+  "corsair-vanguard-pro-96": {
+   "image": "/images/products/photos/corsair-vanguard-pro-96.webp",
+   "source": "Keyboards/Corsair Vanguard Pro 96.jpg"
+  },
+  "razer-huntsman-v3-pro-tkl": {
+   "image": "/images/products/photos/razer-huntsman-v3-pro-tkl.webp",
+   "source": "Keyboards/Razer Huntsman V3 Pro TKL.jpg"
+  },
+  "razer-huntsman-v3-he": {
+   "image": "/images/products/photos/razer-huntsman-v3-he.webp",
+   "source": "Keyboards/Razer Huntsman V3 HE.jpg"
+  },
+  "steelseries-apex-pro-tkl-gen-3": {
+   "image": "/images/products/photos/steelseries-apex-pro-tkl-gen-3.webp",
+   "source": "Keyboards/SteelSeries Apex Pro TKL Gen 3.jpg"
+  },
+  "keychron-q1-he": {
+   "image": "/images/products/photos/keychron-q1-he.webp",
+   "source": "Keyboards/Keychron Q1 HE.jpg"
+  },
+  "keychron-k2-he": {
+   "image": "/images/products/photos/keychron-k2-he.webp",
+   "source": "Keyboards/Keychron K2 HE.jpg"
+  },
+  "asus-rog-azoth-96-he": {
+   "image": "/images/products/photos/asus-rog-azoth-96-he.webp",
+   "source": "Keyboards/ASUS ROG Azoth 96 HE.jpg"
+  },
+  "asus-rog-azoth": {
+   "image": "/images/products/photos/asus-rog-azoth.webp",
+   "source": "Keyboards/ASUS ROG Azoth.jpg"
+  },
+  "epomaker-glyph": {
+   "image": "/images/products/photos/epomaker-glyph.webp",
+   "source": "Keyboards/Epomaker Glyph.jpg"
+  },
+  "turtle-beach-command-series-kb7-tkl": {
+   "image": "/images/products/photos/turtle-beach-command-series-kb7-tkl.webp",
+   "source": "Keyboards/Turtle Beach Command Series KB7 TKL.jpg"
+  },
+  "razer-blackwidow-v4-pro-75": {
+   "image": "/images/products/photos/razer-blackwidow-v4-pro-75.webp",
+   "source": "Keyboards/Razer BlackWidow V4 Pro 75_.jpg"
+  },
+  "logitech-g915-x-lightspeed": {
+   "image": "/images/products/photos/logitech-g915-x-lightspeed.webp",
+   "source": "Keyboards/Logitech G915 X LIGHTSPEED.jpg"
+  },
+  "logitech-g-pro-x-60-lightspeed": {
+   "image": "/images/products/photos/logitech-g-pro-x-60-lightspeed.webp",
+   "source": "Keyboards/Logitech G PRO X 60 LIGHTSPEED.jpg"
+  },
+  "nuphy-halo75-v2": {
+   "image": "/images/products/photos/nuphy-halo75-v2.webp",
+   "source": "Keyboards/NuPhy Halo75 V2.jpg"
+  },
+  "monsgeek-fun60-ultra": {
+   "image": "/images/products/photos/monsgeek-fun60-ultra.webp",
+   "source": "Keyboards/MonsGeek FUN60 Ultra.jpg"
+  },
+  "razer-reclusa-x-mini-65": {
+   "image": "/images/products/photos/razer-reclusa-x-mini-65.webp",
+   "source": "Keyboards/Razer Reclusa X Mini 65_.jpg"
+  },
+  "be-quiet-light-mount-tkl": {
+   "image": "/images/products/photos/be-quiet-light-mount-tkl.webp",
+   "source": "Keyboards/be quiet! Light Mount TKL.jpg"
+  },
+  "steelseries-arctis-nova-pro-wireless": {
+   "image": "/images/products/photos/steelseries-arctis-nova-pro-wireless.webp",
+   "source": "Headsets & Audio Gear/SteelSeries Arctis Nova Pro Wireless.jpg"
+  },
+  "razer-blackshark-v3-pro": {
+   "image": "/images/products/photos/razer-blackshark-v3-pro.webp",
+   "source": "Headsets & Audio Gear/Razer BlackShark V3 Pro.jpg"
+  },
+  "steelseries-arctis-nova-7-wireless-gen-2": {
+   "image": "/images/products/photos/steelseries-arctis-nova-7-wireless-gen-2.webp",
+   "source": "Headsets & Audio Gear/SteelSeries Arctis Nova 7 Wireless Gen 2.jpg"
+  },
+  "steelseries-arctis-nova-5-wireless": {
+   "image": "/images/products/photos/steelseries-arctis-nova-5-wireless.webp",
+   "source": "Headsets & Audio Gear/SteelSeries Arctis Nova 5 Wireless.jpg"
+  },
+  "steelseries-arctis-nova-3-wireless": {
+   "image": "/images/products/photos/steelseries-arctis-nova-3-wireless.webp",
+   "source": "Headsets & Audio Gear/SteelSeries Arctis Nova 3 Wireless.jpg"
+  },
+  "logitech-g-pro-x-2-lightspeed": {
+   "image": "/images/products/photos/logitech-g-pro-x-2-lightspeed.webp",
+   "source": "Headsets & Audio Gear/Logitech G Pro X 2 LIGHTSPEED.jpg"
+  },
+  "logitech-g-astro-a50-x": {
+   "image": "/images/products/photos/logitech-g-astro-a50-x.webp",
+   "source": "Headsets & Audio Gear/Logitech G Astro A50 X.jpg"
+  },
+  "hyperx-cloud-alpha-wireless": {
+   "image": "/images/products/photos/hyperx-cloud-alpha-wireless.webp",
+   "source": "Headsets & Audio Gear/HyperX Cloud Alpha Wireless.webp"
+  },
+  "audeze-maxwell-2": {
+   "image": "/images/products/photos/audeze-maxwell-2.webp",
+   "source": "Headsets & Audio Gear/Audeze Maxwell 2.jpg"
+  },
+  "turtle-beach-atlas-air": {
+   "image": "/images/products/photos/turtle-beach-atlas-air.webp",
+   "source": "Headsets & Audio Gear/Turtle Beach Atlas Air.jpg"
+  },
+  "turtle-beach-stealth-500": {
+   "image": "/images/products/photos/turtle-beach-stealth-500.webp",
+   "source": "Headsets & Audio Gear/Turtle Beach Stealth 500.jpg"
+  },
+  "steelseries-arctis-gamebuds": {
+   "image": "/images/products/photos/steelseries-arctis-gamebuds.webp",
+   "source": "Headsets & Audio Gear/SteelSeries Arctis GameBuds.jpg"
+  },
+  "sony-inzone-buds": {
+   "image": "/images/products/photos/sony-inzone-buds.webp",
+   "source": "Headsets & Audio Gear/Sony INZONE Buds.jpg"
+  },
+  "epos-h6pro": {
+   "image": "/images/products/photos/epos-h6pro.webp",
+   "source": "Headsets & Audio Gear/EPOS H6PRO.jpg"
+  },
+  "audio-technica-ath-m50x": {
+   "image": "/images/products/photos/audio-technica-ath-m50x.webp",
+   "source": "Headsets & Audio Gear/Audio-Technica ATH-M50x.jpg"
+  },
+  "sennheiser-hd-560s": {
+   "image": "/images/products/photos/sennheiser-hd-560s.webp",
+   "source": "Headsets & Audio Gear/Sennheiser HD 560S.jpg"
+  },
+  "elgato-wave3": {
+   "image": "/images/products/photos/elgato-wave3.webp",
+   "source": "Headsets & Audio Gear/Elgato Wave-3.jpg"
+  },
+  "hyperx-quadcast-2-s": {
+   "image": "/images/products/photos/hyperx-quadcast-2-s.webp",
+   "source": "Headsets & Audio Gear/HyperX QuadCast 2 S.jpg"
+  },
+  "steelseries-alias": {
+   "image": "/images/products/photos/steelseries-alias.webp",
+   "source": "Headsets & Audio Gear/SteelSeries Alias.jpg"
+  },
+  "razer-seiren-v3-mini": {
+   "image": "/images/products/photos/razer-seiren-v3-mini.webp",
+   "source": "Headsets & Audio Gear/Razer Seiren V3 Mini.jpg"
+  },
+  "edifier-g2000": {
+   "image": "/images/products/photos/edifier-g2000.webp",
+   "source": "Headsets & Audio Gear/Edifier G2000.jpg"
+  },
+  "razer-viper-v4-pro": {
+   "image": "/images/products/photos/razer-viper-v4-pro.webp",
+   "source": "Gaming Mouse/Razer Viper V4 Pro.jpg"
+  },
+  "logitech-g-pro-x2-superstrike": {
+   "image": "/images/products/photos/logitech-g-pro-x2-superstrike.webp",
+   "source": "Gaming Mouse/Logitech G PRO X2 SUPERSTRIKE.jpg"
+  },
+  "razer-deathadder-v4-pro": {
+   "image": "/images/products/photos/razer-deathadder-v4-pro.webp",
+   "source": "Gaming Mouse/Razer DeathAdder V4 Pro.jpg"
+  },
+  "razer-naga-v3-pro": {
+   "image": "/images/products/photos/razer-naga-v3-pro.webp",
+   "source": "Gaming Mouse/Razer Naga V3 Pro.jpg"
+  },
+  "logitech-g-pro-x-superlight-2": {
+   "image": "/images/products/photos/logitech-g-pro-x-superlight-2.webp",
+   "source": "Gaming Mouse/Logitech G PRO X Superlight 2.jpg"
+  },
+  "logitech-g502-x-plus": {
+   "image": "/images/products/photos/logitech-g502-x-plus.webp",
+   "source": "Gaming Mouse/Logitech G502 X PLUS.jpg"
+  },
+  "endgame-gear-op1-8k-v2": {
+   "image": "/images/products/photos/endgame-gear-op1-8k-v2.webp",
+   "source": "Gaming Mouse/Endgame Gear OP1 8K V2.jpg"
+  },
+  "pulsar-x2f-crazylight": {
+   "image": "/images/products/photos/pulsar-x2f-crazylight.webp",
+   "source": "Gaming Mouse/Pulsar X2F CrazyLight.jpg"
+  },
+  "pulsar-x2-crazylight-mini": {
+   "image": "/images/products/photos/pulsar-x2-crazylight-mini.webp",
+   "source": "Gaming Mouse/Pulsar X2 CrazyLight Mini.jpg"
+  },
+  "pulsar-xlite-crazylight": {
+   "image": "/images/products/photos/pulsar-xlite-crazylight.webp",
+   "source": "Gaming Mouse/Pulsar Xlite CrazyLight.jpg"
+  },
+  "mchose-l7-ultra": {
+   "image": "/images/products/photos/mchose-l7-ultra.webp",
+   "source": "Gaming Mouse/MCHOSE L7 Ultra.jpg"
+  },
+  "mchose-a7": {
+   "image": "/images/products/photos/mchose-a7.webp",
+   "source": "Gaming Mouse/MCHOSE A7.jpg"
+  },
+  "vxe-r1-pro": {
+   "image": "/images/products/photos/vxe-r1-pro.webp",
+   "source": "Gaming Mouse/VXE R1 Pro.jpg"
+  },
+  "asus-rog-harpe-ace-mini": {
+   "image": "/images/products/photos/asus-rog-harpe-ace-mini.webp",
+   "source": "Gaming Mouse/ASUS ROG Harpe Ace Mini.jpg"
+  },
+  "corsair-m75-wireless": {
+   "image": "/images/products/photos/corsair-m75-wireless.webp",
+   "source": "Gaming Mouse/Corsair M75 Wireless.jpg"
+  },
+  "steelseries-prime-wireless-mini": {
+   "image": "/images/products/photos/steelseries-prime-wireless-mini.webp",
+   "source": "Gaming Mouse/SteelSeries Prime Wireless Mini.jpg"
+  },
+  "cooler-master-mm311": {
+   "image": "/images/products/photos/cooler-master-mm311.webp",
+   "source": "Gaming Mouse/Cooler Master MM311.jpg"
+  },
+  "razer-basilisk-v3-pro": {
+   "image": "/images/products/photos/razer-basilisk-v3-pro.webp",
+   "source": "Gaming Mouse/Razer Basilisk V3 Pro.jpg"
+  },
+  "mackie-cr35bt-cr8sbt": {
+   "image": "/images/products/photos/mackie-cr35bt-cr8sbt.webp",
+   "source": "Speakers & Soundbars/Mackie CR3.5BT + CR8SBT.jpg"
+  },
+  "creative-pebble-pro": {
+   "image": "/images/products/photos/creative-pebble-pro.webp",
+   "source": "Speakers & Soundbars/Creative Pebble Pro.jpg"
+  },
+  "creative-pebble-v3": {
+   "image": "/images/products/photos/creative-pebble-v3.webp",
+   "source": "Speakers & Soundbars/Creative Pebble V3.jpg"
+  },
+  "creative-pebble-plus": {
+   "image": "/images/products/photos/creative-pebble-plus.webp",
+   "source": "Speakers & Soundbars/Creative Pebble Plus.jpg"
+  },
+  "creative-xf1": {
+   "image": "/images/products/photos/creative-xf1.webp",
+   "source": "Speakers & Soundbars/Creative XF1.jpg"
+  },
+  "creative-stage-pro": {
+   "image": "/images/products/photos/creative-stage-pro.webp",
+   "source": "Speakers & Soundbars/Creative Stage Pro.jpg"
+  },
+  "creative-sound-blaster-gs3": {
+   "image": "/images/products/photos/creative-sound-blaster-gs3.webp",
+   "source": "Speakers & Soundbars/Creative Sound Blaster GS3.jpg"
+  },
+  "razer-nommo-v2-pro": {
+   "image": "/images/products/photos/razer-nommo-v2-pro.webp",
+   "source": "Speakers & Soundbars/Razer Nommo V2 Pro.jpg"
+  },
+  "edifier-r1280db": {
+   "image": "/images/products/photos/edifier-r1280db.webp",
+   "source": "Speakers & Soundbars/Edifier R1280DB.jpg"
+  },
+  "edifier-s350db": {
+   "image": "/images/products/photos/edifier-s350db.webp",
+   "source": "Speakers & Soundbars/Edifier S350DB.jpg"
+  },
+  "edifier-s3000-pro": {
+   "image": "/images/products/photos/edifier-s3000-pro.webp",
+   "source": "Speakers & Soundbars/Edifier S3000 Pro.jpg"
+  },
+  "edifier-m60": {
+   "image": "/images/products/photos/edifier-m60.webp",
+   "source": "Speakers & Soundbars/Edifier M60.jpg"
+  },
+  "audioengine-a2": {
+   "image": "/images/products/photos/audioengine-a2.webp",
+   "source": "Speakers & Soundbars/Audioengine A2+.jpg"
+  },
+  "audioengine-a5-wireless": {
+   "image": "/images/products/photos/audioengine-a5-wireless.webp",
+   "source": "Speakers & Soundbars/Audioengine A5+ Wireless.jpg"
+  },
+  "presonus-eris-e45": {
+   "image": "/images/products/photos/presonus-eris-e45.webp",
+   "source": "Speakers & Soundbars/PreSonus Eris E4.5.jpg"
+  },
+  "steelseries-arena-3": {
+   "image": "/images/products/photos/steelseries-arena-3.webp",
+   "source": "Headsets & Audio Gear/SteelSeries Arena 3.jpg"
+  },
+  "steelseries-arena-9": {
+   "image": "/images/products/photos/steelseries-arena-9.webp",
+   "source": "Speakers & Soundbars/SteelSeries Arena 9.jpg"
+  },
+  "razer-leviathan-v2": {
+   "image": "/images/products/photos/razer-leviathan-v2.webp",
+   "source": "Speakers & Soundbars/Razer Leviathan V2.jpg"
+  },
+  "creative-sound-blaster-katana-v3": {
+   "image": "/images/products/photos/creative-sound-blaster-katana-v3.webp",
+   "source": "Headsets & Audio Gear/Creative Sound Blaster Katana V3.jpg"
+  },
+  "hisense-ax5125h": {
+   "image": "/images/products/photos/hisense-ax5125h.webp",
+   "source": "Speakers & Soundbars/Hisense AX5125H.jpg"
+  },
+  "asus-rog-swift-oled-pg32ucdm-gen3": {
+   "image": "/images/products/photos/asus-rog-swift-oled-pg32ucdm-gen3.webp",
+   "source": "Displays/ASUS ROG Swift OLED PG32UCDM Gen3.webp"
+  },
+  "asus-rog-swift-oled-pg27ucdm": {
+   "image": "/images/products/photos/asus-rog-swift-oled-pg27ucdm.webp",
+   "source": "Displays/ASUS ROG Swift OLED PG27UCDM.webp"
+  },
+  "asus-rog-swift-oled-pg27aqwp-w": {
+   "image": "/images/products/photos/asus-rog-swift-oled-pg27aqwp-w.webp",
+   "source": "Displays/ASUS ROG Swift OLED PG27AQWP-W.jpg"
+  },
+  "asus-rog-swift-oled-pg32ucdp": {
+   "image": "/images/products/photos/asus-rog-swift-oled-pg32ucdp.webp",
+   "source": "Displays/ASUS ROG Swift OLED PG32UCDP.webp"
+  },
+  "samsung-odyssey-oled-g80sh-s32hg802s": {
+   "image": "/images/products/photos/samsung-odyssey-oled-g80sh-s32hg802s.webp",
+   "source": "Displays/Samsung Odyssey OLED G80SH S32HG802S.jpg"
+  },
+  "samsung-odyssey-oled-g73sh-s32hg732s": {
+   "image": "/images/products/photos/samsung-odyssey-oled-g73sh-s32hg732s.webp",
+   "source": "Displays/Samsung Odyssey OLED G73SH S32HG732S.webp"
+  },
+  "msi-mpg-321urxw-qd-oled": {
+   "image": "/images/products/photos/msi-mpg-321urxw-qd-oled.webp",
+   "source": "Displays/MSI MPG 321URXW QD-OLED.webp"
+  },
+  "msi-mpg-341cqr-qd-oled-x36": {
+   "image": "/images/products/photos/msi-mpg-341cqr-qd-oled-x36.webp",
+   "source": "Displays/MSI MPG 341CQR QD-OLED X36.jpg"
+  },
+  "lg-ultragear-45gx950a-b": {
+   "image": "/images/products/photos/lg-ultragear-45gx950a-b.webp",
+   "source": "Displays/LG UltraGear 45GX950A-B.jpg"
+  },
+  "sony-inzone-m10s-ii": {
+   "image": "/images/products/photos/sony-inzone-m10s-ii.webp",
+   "source": "Displays/Sony INZONE M10S II.jpg"
+  },
+  "aoc-gaming-q27gazd": {
+   "image": "/images/products/photos/aoc-gaming-q27gazd.webp",
+   "source": "Displays/AOC Gaming Q27GAZD.jpg"
+  },
+  "asrock-phantom-gaming-pgo27qsa": {
+   "image": "/images/products/photos/asrock-phantom-gaming-pgo27qsa.webp",
+   "source": "Displays/ASRock Phantom Gaming PGO27QSA.jpg"
+  },
+  "koorui-gn02": {
+   "image": "/images/products/photos/koorui-gn02.webp",
+   "source": "Displays/KOORUI GN02.jpg"
+  },
+  "aoc-24g2": {
+   "image": "/images/products/photos/aoc-24g2.webp",
+   "source": "Displays/AOC 24G2.jpg"
+  },
+  "nvidia-geforce-rtx-5080": {
+   "image": "/images/products/photos/nvidia-geforce-rtx-5080.webp",
+   "source": "Graphics Card/NVIDIA GeForce RTX 5080.jpg"
+  },
+  "nvidia-geforce-rtx-5070-ti": {
+   "image": "/images/products/photos/nvidia-geforce-rtx-5070-ti.webp",
+   "source": "Graphics Card/NVIDIA GeForce RTX 5070 Ti.jpg"
+  },
+  "nvidia-geforce-rtx-5060-ti-16gb": {
+   "image": "/images/products/photos/nvidia-geforce-rtx-5060-ti-16gb.webp",
+   "source": "Graphics Card/NVIDIA GeForce RTX 5060 Ti 16GB.jpg"
+  },
+  "nvidia-geforce-rtx-5060": {
+   "image": "/images/products/photos/nvidia-geforce-rtx-5060.webp",
+   "source": "Graphics Card/NVIDIA GeForce RTX 5060.jpg"
+  },
+  "amd-radeon-rx-9070-xt": {
+   "image": "/images/products/photos/amd-radeon-rx-9070-xt.webp",
+   "source": "Graphics Card/AMD Radeon RX 9070 XT.jpg"
+  },
+  "amd-radeon-rx-9070": {
+   "image": "/images/products/photos/amd-radeon-rx-9070.webp",
+   "source": "Graphics Card/AMD Radeon RX 9070.jpg"
+  },
+  "amd-radeon-rx-9060-xt-16gb": {
+   "image": "/images/products/photos/amd-radeon-rx-9060-xt-16gb.webp",
+   "source": "Graphics Card/AMD Radeon RX 9060 XT 16GB.jpg"
+  },
+  "amd-radeon-rx-9060-xt-8gb": {
+   "image": "/images/products/photos/amd-radeon-rx-9060-xt-8gb.webp",
+   "source": "Graphics Card/AMD Radeon RX 9060 XT 8GB.jpg"
+  },
+  "amd-radeon-rx-9070-gre": {
+   "image": "/images/products/photos/amd-radeon-rx-9070-gre.webp",
+   "source": "Graphics Card/AMD Radeon RX 9070 GRE.jpg"
+  },
+  "intel-arc-b580": {
+   "image": "/images/products/photos/intel-arc-b580.webp",
+   "source": "Graphics Card/Intel Arc B580.jpg"
+  }
+ }
+}

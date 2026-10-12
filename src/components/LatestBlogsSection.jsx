@@ -52,7 +52,7 @@ export const LatestBlogsSection = () => {
           <div className={`grid grid-cols-1 sm:grid-cols-2 ${more.length ? 'xl:grid-cols-4' : 'lg:grid-cols-4'} gap-4`}>
             {featured.map((p) => (
               <a key={p.u} href={p.u} className="group no-underline flex flex-col rounded-2xl border border-slate-200 hover:border-emerald-400 overflow-hidden bg-white transition-colors">
-                <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
+                <div className="relative bg-slate-100 overflow-hidden" style={{ aspectRatio: '1200 / 630' }}>
                   {p.i ? (
                     <img src={p.i} alt={p.a || p.t} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   ) : (
