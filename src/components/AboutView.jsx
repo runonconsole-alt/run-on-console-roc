@@ -45,17 +45,17 @@ export const AboutView = () => {
 
   return (
     <div className="space-y-12 py-6 max-w-5xl mx-auto animate-page-in">
-      
+
       {/* Visually Rich About Hero Banner with BouncyText */}
       <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">
-        
+
         <CyberMatrixHoloBackground />
 
         <div className="absolute -top-20 -left-20 w-80 h-80 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
-          
+
           <div className="lg:col-span-7 space-y-4">
             <span className="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5 badge-glow">
               <Sparkles className="w-3.5 h-3.5" /> THE RUN ON CONSOLE MISSION
@@ -71,44 +71,48 @@ export const AboutView = () => {
             </p>
 
             <div className="flex flex-wrap gap-2.5 pt-2">
-              <span className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
+              <a href="/products/" title="See our independent product picks" className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline">
                 <Microscope className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
                 <BouncyText text="Independent Picks" />
-              </span>
+              </a>
 
-              <span className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5" style={{ animationDelay: '0.6s' }}>
+              <a href="/privacy-policy/" title="How we label sponsored posts and affiliate links" className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline" style={{ animationDelay: '0.6s' }}>
                 <Cpu className="w-3.5 h-3.5 text-teal-400 animate-pulse" />
                 <BouncyText text="Sponsored Posts Labelled" />
-              </span>
+              </a>
             </div>
           </div>
 
           <div className="lg:col-span-5 grid grid-cols-2 gap-3">
+            <a href="/products/pc-hardware/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
               <img 
-                src="/images/battlestation_pc.jpg"
+                src="/images/products/photos/amd-radeon-rx-9070-xt.webp"
                 width="400"
                 height="224"
                 loading="lazy" 
-                alt="Gaming PC setup" 
-                className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform" 
+                alt="AMD Radeon RX 9070 XT graphics card" 
+                className="w-full h-28 object-contain bg-white p-2 rounded-xl mb-2 group-hover:scale-105 transition-transform" 
               />
-              <div className="text-xs font-display font-bold text-white">PC & Console Gear</div>
-              <div className="text-[10px] text-emerald-300 font-medium">Keyboards, mice, monitors, GPUs</div>
+              <div className="text-xs font-display font-bold text-white">PC Hardware</div>
+              <div className="text-[10px] text-emerald-300 font-medium">GPUs, CPUs, RAM, cases, monitors</div>
             </Tilt3DCard>
+            </a>
 
+            <a href="/products/audio/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
               <img 
-                src="/images/tactical_headset.jpg"
+                src="/images/products/photos/steelseries-arctis-nova-pro-wireless.webp"
                 width="400"
                 height="224"
                 loading="lazy" 
-                alt="Gaming headset" 
-                className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform" 
+                alt="SteelSeries Arctis Nova Pro Wireless gaming headset" 
+                className="w-full h-28 object-contain bg-white p-2 rounded-xl mb-2 group-hover:scale-105 transition-transform" 
               />
               <div className="text-xs font-display font-bold text-white">Gaming Audio</div>
-              <div className="text-[10px] text-emerald-300 font-medium">Headsets and speakers</div>
+              <div className="text-[10px] text-emerald-300 font-medium">Headsets, mics and speakers</div>
             </Tilt3DCard>
+            </a>
           </div>
 
         </div>
@@ -129,8 +133,8 @@ export const AboutView = () => {
           {pillars.map((p, idx) => {
             const Icon = p.icon;
             return (
-              <Tilt3DCard 
-                key={idx} 
+              <Tilt3DCard
+                key={idx}
                 onMouseEnter={playHoverSound}
                 className="bg-white border border-slate-200 rounded-3xl p-7 flex flex-col justify-between shadow-lg"
               >
@@ -214,7 +218,7 @@ export const AboutView = () => {
       </section>
 
       {/* About FAQs */}
-      <FAQSection 
+      <FAQSection
         faqs={aboutFaqs}
         title="About Run On Console FAQs"
         subtitle="Our mission, how we choose products and how we stay independent."

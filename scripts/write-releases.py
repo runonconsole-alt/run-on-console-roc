@@ -205,7 +205,16 @@ RELEASES = [
                   'Product photos open full size on click; new CMS page Website info (technology, tools, history)'],
          checks=[dict(label='News engine', type='file', path='api/v1/cms/news-engine-lib.php'),
                  dict(label='News routing (cli-news-routing.php --apply)', type='file', path='api/v1/cron/cli-news-routing.php')],
-         pr=REPO + '34'),
+         pr=REPO + '34', build='index-CQRz_y4C.js'),
+    dict(deploy=35, date='2026-10-12', title='New blog covers, LIVE news in the top bar, email through a mailbox, audit fixes',
+         changes=['Blog and news covers: product photo on a white diagonal panel, brand, category and title on the left; only real product photos are used',
+                  'Every new news story shows in the top bar of every page for a day: LIVE, its headline and a Read now link to the story',
+                  'Email alerts: sent through a cPanel mailbox when set in CMS (Send through a mailbox), else the server mail; the reason is shown when it fails',
+                  'Hero sections: badges link to their pages (picks, disclosure, news, checker), real product photos instead of the old AI pictures',
+                  'Gaming platforms: each platform gets its own picture (cli-platform-images.php, Cloudflare AI)',
+                  'Audit: /category/ (menu link, 404) now opens /products/, old category links inside posts fixed, product descriptions capped at 160 characters'],
+         checks=[dict(label='Audit fixes (cli-site-fixes.php --apply)', type='file', path='api/v1/cron/cli-site-fixes.php')],
+         pr=REPO + '35'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

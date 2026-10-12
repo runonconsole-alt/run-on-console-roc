@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  Clock, User, ArrowRight, ArrowLeft, MessageSquare, 
-  Send, Share2, Star, ShoppingCart, Tag, ExternalLink, Sparkles, 
-  BookOpen, Flame, Zap, ShieldCheck, FileText, CheckCircle2, 
-  PackageCheck, Check, ThumbsUp, HelpCircle 
+import {
+  Clock, User, ArrowRight, ArrowLeft, MessageSquare,
+  Send, Share2, Star, ShoppingCart, Tag, ExternalLink, Sparkles,
+  BookOpen, Flame, Zap, ShieldCheck, FileText, CheckCircle2,
+  PackageCheck, Check, ThumbsUp, HelpCircle
 } from 'lucide-react';
 import { FAQSection } from './FAQSection';
 import { Tilt3DCard } from './Tilt3DCard';
@@ -15,15 +15,15 @@ import { playClickSound, playHoverSound } from '../utils/audioEffects';
 import { slugify } from '../seo/routeRegistry';
 
 export const BlogsView = () => {
-  const { 
-    blogs, 
-    selectedBlogId, 
-    setSelectedBlogId, 
-    navigateToBlog, 
-    navigateToProduct, 
-    products, 
+  const {
+    blogs,
+    selectedBlogId,
+    setSelectedBlogId,
+    navigateToBlog,
+    navigateToProduct,
+    products,
     searchQuery,
-    pageFaqs 
+    pageFaqs
   } = useApp();
 
   const [commentName, setCommentName] = useState("");
@@ -78,10 +78,10 @@ export const BlogsView = () => {
 
     return (
       <article className="max-w-4xl mx-auto py-6 space-y-8 animate-page-in">
-        
+
         {/* Back and Share Navigation */}
         <div className="flex items-center justify-between">
-          <button 
+          <button
             onClick={() => {
               playClickSound();
               setSelectedBlogId(null);
@@ -92,7 +92,7 @@ export const BlogsView = () => {
             <span>Back to All Blogs</span>
           </button>
 
-          <button 
+          <button
             onClick={handleShare}
             className="p-2 bg-white border border-slate-300 rounded-xl text-slate-600 hover:text-emerald-600 text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors"
           >
@@ -173,7 +173,7 @@ export const BlogsView = () => {
                   <div className="flex items-center gap-3">
                     <img src={prod.image} alt={prod.title} className="w-14 h-14 rounded-xl object-cover shadow-sm" />
                     <div>
-                      <h4 
+                      <h4
                         onClick={() => {
                           playClickSound();
                           navigateToProduct(prod.id);
@@ -186,7 +186,7 @@ export const BlogsView = () => {
                     </div>
                   </div>
 
-                  <a 
+                  <a
                     href={prod.affiliateLinks?.amazon || `/products/${prod.slug}/`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -204,7 +204,7 @@ export const BlogsView = () => {
         )}
 
         {/* Blog-Specific FAQs */}
-        <FAQSection 
+        <FAQSection
           faqs={blog.faqs || pageFaqs.blogs}
           title={`FAQs: ${blog.title}`}
           subtitle="Frequently asked questions about this gaming guide and benchmarks."
@@ -218,7 +218,7 @@ export const BlogsView = () => {
           </h3>
 
           {commentSubmitted ? (
-            <SubmissionSuccessCard 
+            <SubmissionSuccessCard
               formType="comment"
               userName={commentsList[0]?.name || "Gamer"}
               onReset={() => {
@@ -229,14 +229,14 @@ export const BlogsView = () => {
             />
           ) : (
             <form onSubmit={handleComment} className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-sm">
-              <input 
+              <input
                 type="text"
                 placeholder="Your Name / Gamer Tag"
                 value={commentName}
                 onChange={(e) => setCommentName(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-500"
               />
-              <textarea 
+              <textarea
                 rows={3}
                 placeholder="Leave your thoughts or ask a hardware question... (Submitted to administrator for approval)"
                 value={commentText}
@@ -272,24 +272,24 @@ export const BlogsView = () => {
   let filtered = blogs.filter(b => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
-    return b.title.toLowerCase().includes(q) || 
-           (b.summary || "").toLowerCase().includes(q) || 
+    return b.title.toLowerCase().includes(q) ||
+           (b.summary || "").toLowerCase().includes(q) ||
            (b.category || "").toLowerCase().includes(q);
   });
 
   return (
     <div className="space-y-12 py-6 animate-page-in">
-      
+
       {/* Visually Rich Blogs Catalog Header Banner with BouncyText */}
       <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">
-        
+
         <CyberMatrixHoloBackground />
 
         <div className="absolute -top-20 -left-20 w-80 h-80 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
-          
+
           <div className="lg:col-span-7 space-y-4">
             <span className="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5 badge-glow">
               <Sparkles className="w-3.5 h-3.5" /> RUN ON CONSOLE EDITORIAL BLOG
@@ -305,35 +305,44 @@ export const BlogsView = () => {
             </p>
 
             <div className="flex flex-wrap gap-2.5 pt-2">
-              <span className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
+              <span className="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
                 <FileText className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
                 <span>{blogs.length} Hardware Reviews & Guides</span>
               </span>
+              <a href="/news/" className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline">
+                <span>📰 Latest gaming news</span>
+              </a>
             </div>
           </div>
 
           <div className="lg:col-span-5 grid grid-cols-2 gap-3">
-            <a href="/compatibility/?q=Elden%20Ring%3A%20Shadow%20of%20the%20Erdtree" className="block no-underline">
+            <a href="/products/gpu/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
               <img 
-                src="/images/trending_elden.jpg" 
-                alt="Elden Ring: Shadow of the Erdtree" 
-                className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform" 
+                src="/images/products/photos/nvidia-geforce-rtx-5080.webp"
+                width="400"
+                height="224"
+                loading="lazy" 
+                alt="NVIDIA GeForce RTX 5080 graphics card" 
+                className="w-full h-28 object-contain bg-white p-2 rounded-xl mb-2 group-hover:scale-105 transition-transform" 
               />
-              <div className="text-xs font-display font-bold text-white">Shadow of the Erdtree</div>
-              <div className="text-[10px] text-emerald-300 font-medium">Can your PC run it?</div>
+              <div className="text-xs font-display font-bold text-white">Best graphics cards</div>
+              <div className="text-[10px] text-emerald-300 font-medium">RTX 50 and Radeon RX 9000</div>
             </Tilt3DCard>
             </a>
 
  <a href="/products/mice/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
-              <img 
-                src="/images/hero_cod.jpg" 
-                alt="COD Black Ops 6" 
-                className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform" 
+<img 
+                src="/images/products/photos/razer-viper-v4-pro.webp"
+                width="400"
+                height="224"
+                loading="lazy" 
+                alt="Razer Viper V4 Pro gaming mouse" 
+                className="w-full h-28 object-contain bg-white p-2 rounded-xl mb-2 group-hover:scale-105 transition-transform" 
               />
-              <div className="text-xs font-display font-bold text-white">Black Ops 6 Gear</div>
-              <div className="text-[10px] text-emerald-300 font-medium">Low-latency gaming mice</div>
+              <div className="text-xs font-display font-bold text-white">Best gaming mice</div>
+              <div className="text-[10px] text-emerald-300 font-medium">Light, fast, wireless</div>
             </Tilt3DCard>
             </a>
           </div>
@@ -347,7 +356,7 @@ export const BlogsView = () => {
           const blogSlug = blog.slug || slugify(blog.title);
           const blogUrl = `/blogs/${blogSlug}/`;
           return (
-            <a 
+            <a
               key={blog.id}
               href={blogUrl}
               onClick={(e) => {
@@ -359,15 +368,15 @@ export const BlogsView = () => {
               }}
               className="block no-underline"
             >
-              <Tilt3DCard 
+              <Tilt3DCard
                 onMouseEnter={playHoverSound}
                 className="game-card flex flex-col justify-between group cursor-pointer h-full"
               >
                 {/* Image Box */}
                 <div className="relative bg-slate-900 overflow-hidden" style={{ aspectRatio: '1200 / 630' }}>
-                  <img 
-                    src={blog.image} 
-                    alt={blog.title} 
+                  <img
+                    src={blog.image}
+                    alt={blog.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <span className="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-md shadow-sm uppercase badge-glow">
@@ -408,7 +417,7 @@ export const BlogsView = () => {
 
       {/* DEDICATED REVIEW SAMPLE & EDITORIAL SUGGESTIONS SUBMISSION BOX (Bottom of Blogs Page) */}
       {sugSubmitted ? (
-        <SubmissionSuccessCard 
+        <SubmissionSuccessCard
           formType="suggestion"
           userName={sugName}
           referenceId={sugRef}
@@ -443,7 +452,7 @@ export const BlogsView = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-emerald-950 font-bold mb-1">YOUR NAME *</label>
-                <input 
+                <input
                   type="text"
                   required
                   placeholder="e.g. Elena Rostova"
@@ -455,7 +464,7 @@ export const BlogsView = () => {
 
               <div>
                 <label className="block text-emerald-950 font-bold mb-1">EMAIL ADDRESS *</label>
-                <input 
+                <input
                   type="email"
                   required
                   placeholder="e.g. elena@gaminglab.com"
@@ -482,7 +491,7 @@ export const BlogsView = () => {
 
             <div>
               <label className="block text-emerald-950 font-bold mb-1">YOUR REVIEW / SUGGESTION DETAILS *</label>
-              <textarea 
+              <textarea
                 required
                 rows={4}
                 placeholder="Tell us the product, game or article topic you have in mind..."
@@ -492,7 +501,7 @@ export const BlogsView = () => {
               ></textarea>
             </div>
 
-            <button 
+            <button
               type="submit"
               className="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-display font-extrabold text-sm py-4 px-6 rounded-xl shadow-lg border border-emerald-500/40 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
             >
@@ -504,7 +513,7 @@ export const BlogsView = () => {
       )}
 
       {/* Blogs Page FAQs */}
-      <FAQSection 
+      <FAQSection
         faqs={pageFaqs.blogs}
         title="Editorial & Review Policy FAQs"
         subtitle="How we choose products, handle review samples and keep our articles honest."

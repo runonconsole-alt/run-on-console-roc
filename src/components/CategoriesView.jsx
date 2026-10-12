@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  Gamepad2, Monitor, Laptop, ArrowRight, ShieldCheck, 
-  Cpu, Layers, Sparkles, CheckCircle, Flame, Zap, Tv, Cable, 
+import {
+  Gamepad2, Monitor, Laptop, ArrowRight, ShieldCheck,
+  Cpu, Layers, Sparkles, CheckCircle, Flame, Zap, Tv, Cable,
   ArrowLeft, Star, ShoppingCart, SlidersHorizontal, CheckCircle2, ExternalLink,
   Glasses, Terminal, Search, Filter, History, X, Info, ChevronRight,
   Disc, Award, Box, Radio, Smartphone, Cloud, Eye
@@ -14,16 +14,16 @@ import { BouncyText } from './BouncyText';
 import { playClickSound, playHoverSound } from '../utils/audioEffects';
 
 export const CategoriesView = () => {
-  const { 
-    categories = [], 
+  const {
+    categories = [],
     allDevices = [],
-    selectedCategorySlug, 
-    setSelectedCategorySlug, 
-    navigateToCategory, 
-    navigateToProduct, 
-    products = [], 
-    compareIds, 
-    pageFaqs 
+    selectedCategorySlug,
+    setSelectedCategorySlug,
+    navigateToCategory,
+    navigateToProduct,
+    products = [],
+    compareIds,
+    pageFaqs
   } = useApp();
 
   // Search & Filter state for devices
@@ -43,7 +43,7 @@ export const CategoriesView = () => {
 
   // Find the selected category if not 'all'
   const isCategorySelected = selectedCategorySlug && selectedCategorySlug !== 'all';
-  const currentCategory = isCategorySelected 
+  const currentCategory = isCategorySelected
     ? categories.find(c => c.slug === selectedCategorySlug || c.title.toLowerCase().includes(selectedCategorySlug.toLowerCase())) || categories[0]
     : null;
 
@@ -68,7 +68,7 @@ export const CategoriesView = () => {
     }
     if (deviceSearchQuery.trim()) {
       const q = deviceSearchQuery.toLowerCase();
-      list = list.filter(d => 
+      list = list.filter(d =>
         d.name.toLowerCase().includes(q) ||
         d.categoryTitle.toLowerCase().includes(q) ||
         d.type.toLowerCase().includes(q) ||
@@ -82,8 +82,8 @@ export const CategoriesView = () => {
   // If a specific category is selected, render the DEDICATED PLATFORM HUB PAGE
   if (isCategorySelected && currentCategory) {
     // Filter products belonging to this category / platform
-    const categoryProducts = products.filter(p => 
-      p.categorySlug === currentCategory.slug || 
+    const categoryProducts = products.filter(p =>
+      p.categorySlug === currentCategory.slug ||
       p.category.toLowerCase() === currentCategory.title.toLowerCase() ||
       (p.category || '').toLowerCase().includes(currentCategory.slug.replace('-', ' '))
     );
@@ -93,10 +93,10 @@ export const CategoriesView = () => {
 
     return (
       <div className="space-y-10 py-6 animate-page-in">
-        
+
         {/* Breadcrumb Navigation & Back to Directory Button */}
         <div className="flex items-center justify-between">
-          <button 
+          <button
             onClick={() => {
               playClickSound();
               setSelectedCategorySlug('all');
@@ -142,7 +142,7 @@ export const CategoriesView = () => {
                 <div className="flex flex-wrap gap-2 pt-2">
                   <span className="text-xs font-bold text-emerald-200 self-center mr-1">Focus Areas:</span>
                   {currentCategory.subcategories.map(sub => (
-                    <span 
+                    <span
                       key={sub}
                       className="badge-holo-glow text-emerald-300 text-xs font-bold px-3 py-1 rounded-xl"
                     >
@@ -156,10 +156,10 @@ export const CategoriesView = () => {
             {/* Right 3D Featured Image */}
             <div className="lg:col-span-5">
               <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-3xl p-4 shadow-2xl">
-                <img 
-                  src={currentCategory.image} 
-                  alt={currentCategory.title} 
-                  className="w-full h-56 sm:h-64 object-cover rounded-2xl" 
+                <img
+                  src={currentCategory.image}
+                  alt={currentCategory.title}
+                  className="w-full h-56 sm:h-64 object-cover rounded-2xl"
                 />
                 <div className="pt-3 flex items-center justify-between text-xs">
                   <span className="text-emerald-300 font-bold">✓ {currentCategory.badge || "Verified Platform"}</span>
@@ -248,7 +248,7 @@ export const CategoriesView = () => {
         </section>
 
         {/* 2. Category FAQs */}
-        <FAQSection 
+        <FAQSection
           faqs={pageFaqs.categories}
           title={`FAQs About ${currentCategory.title}`}
           subtitle={`Frequently asked hardware, testing, emulation, and purchasing questions for ${currentCategory.title}.`}
@@ -258,8 +258,8 @@ export const CategoriesView = () => {
         {selectedDeviceModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
             <div className="bg-white border-2 border-emerald-500 rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl relative space-y-6 max-h-[90vh] overflow-y-auto">
-              
-              <button 
+
+              <button
                 onClick={() => setSelectedDeviceModal(null)}
                 className="absolute top-5 right-5 p-2 bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 rounded-full transition-colors"
               >
@@ -324,7 +324,7 @@ export const CategoriesView = () => {
               </div>
 
               <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-                <button 
+                <button
                   onClick={() => setSelectedDeviceModal(null)}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-6 rounded-xl shadow-md transition-all hover:scale-105"
                 >
@@ -343,10 +343,10 @@ export const CategoriesView = () => {
   // --- GENERAL DIRECTORY OF ALL 15 PLATFORMS WITH ADVANCED SEARCH ENGINE ---
   return (
     <div className="space-y-12 py-6 animate-page-in">
-      
+
       {/* Visual Rich Categories Hero Banner with Live Cyber Matrix Wave Background & BouncyText */}
       <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">
-        
+
         {/* Live Cyber Wave & Laser Matrix Background Effect */}
         <CyberMatrixHoloBackground />
 
@@ -355,13 +355,13 @@ export const CategoriesView = () => {
         <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
-          
+
           {/* Left Content */}
           <div className="lg:col-span-7 space-y-4">
             <span className="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5 badge-glow">
               <Sparkles className="w-3.5 h-3.5" /> 15 GAMING PLATFORM CATEGORIES • 100+ DEVICES
             </span>
-            
+
             <h1 className="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight">
               <BouncyText text="Gaming Platforms &" enableAudio={true} /> <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300">
@@ -375,20 +375,20 @@ export const CategoriesView = () => {
 
             {/* Classy Animated Holographic Spec Badges with Word Hover Bounce */}
             <div className="flex flex-wrap gap-2.5 pt-2">
-              <span className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
+              <span className="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
                 <Gamepad2 className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
                 <BouncyText text="15 Dedicated Platform Hubs" />
               </span>
 
-              <span className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5" style={{ animationDelay: '0.6s' }}>
+              <a href="/products/" className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline" style={{ animationDelay: '0.6s' }}>
                 <Zap className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
-                <BouncyText text="100+ Hardware Devices" />
-              </span>
+                <BouncyText text="200+ Hardware Picks" />
+              </a>
 
-              <span className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5" style={{ animationDelay: '1.2s' }}>
+              <a href="/compatibility/" className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline" style={{ animationDelay: '1.2s' }}>
                 <ShieldCheck className="w-3.5 h-3.5 text-teal-400 animate-pulse" />
-                <BouncyText text="Lab Benchmark Certified" />
-              </span>
+                <BouncyText text="Can My PC Run It?" />
+              </a>
             </div>
           </div>
 
@@ -396,22 +396,28 @@ export const CategoriesView = () => {
           <div className="lg:col-span-5 grid grid-cols-2 gap-3">
  <a href="/gaming-platforms/pc-handheld-pc/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
-              <img 
-                src="/images/battlestation_pc.jpg" 
-                alt="PC & Handhelds" 
-                className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform" 
+<img 
+                src="/images/products/photos/steam-deck-oled-512gb.webp"
+                width="400"
+                height="224"
+                loading="lazy" 
+                alt="Steam Deck OLED handheld gaming PC" 
+                className="w-full h-28 object-contain bg-white p-2 rounded-xl mb-2 group-hover:scale-105 transition-transform" 
               />
               <div className="text-xs font-display font-bold text-white">PC & Handhelds</div>
-              <div className="text-[10px] text-emerald-300 font-medium">Steam Deck • ROG • RTX 4090</div>
+              <div className="text-[10px] text-emerald-300 font-medium">Steam Deck • ROG Ally • Legion Go</div>
             </Tilt3DCard>
             </a>
 
  <a href="/gaming-platforms/retro-handheld-brands/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
-              <img 
-                src="/images/handheld_console.jpg" 
-                alt="Retro & Emulation" 
-                className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform" 
+<img 
+                src="/images/products/photos/vita-pro-handheld.webp"
+                width="400"
+                height="224"
+                loading="lazy" 
+                alt="Anbernic RG Vita Pro retro handheld" 
+                className="w-full h-28 object-contain bg-white p-2 rounded-xl mb-2 group-hover:scale-105 transition-transform" 
               />
               <div className="text-xs font-display font-bold text-white">Retro & Emulation</div>
               <div className="text-[10px] text-emerald-300 font-medium">Miyoo • Anbernic • Dreamcast</div>
@@ -438,7 +444,7 @@ export const CategoriesView = () => {
           {/* Quick Search Input */}
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input 
+            <input
               type="text"
               placeholder="Search e.g. PS5 Pro, Miyoo Mini, GBA SP, Quest 3..."
               value={deviceSearchQuery}
@@ -446,7 +452,7 @@ export const CategoriesView = () => {
               className="w-full bg-slate-50 border-2 border-slate-200 focus:border-emerald-500 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-slate-900 font-bold focus:bg-white focus:outline-none transition-all shadow-inner"
             />
             {deviceSearchQuery && (
-              <button 
+              <button
                 onClick={() => setDeviceSearchQuery('')}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
               >
@@ -481,7 +487,7 @@ export const CategoriesView = () => {
           <div className="bg-slate-50 border border-emerald-200 rounded-2xl p-4 space-y-3 animate-fade-in">
             <div className="flex items-center justify-between text-xs font-bold text-slate-600">
               <span>{filteredDevices.length} Hardware Devices matching "{deviceSearchQuery}":</span>
-              <button 
+              <button
                 onClick={() => setDeviceSearchQuery('')}
                 className="text-emerald-700 hover:underline text-[11px]"
               >
@@ -535,7 +541,7 @@ export const CategoriesView = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories.map((cat) => (
-            <a 
+            <a
               key={cat.id}
               href={`/gaming-platforms/${cat.slug}/`}
               onClick={(e) => {
@@ -548,15 +554,15 @@ export const CategoriesView = () => {
               }}
               className="block no-underline"
             >
-              <Tilt3DCard 
+              <Tilt3DCard
                 onMouseEnter={playHoverSound}
                 className="game-card group cursor-pointer flex flex-col justify-between h-full"
               >
                 {/* Category Cover Image */}
                 <div className="relative h-48 bg-slate-900 overflow-hidden">
-                  <img 
-                    src={cat.image} 
-                    alt={cat.title} 
+                  <img
+                    src={cat.image}
+                    alt={cat.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <span className="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-extrabold px-2.5 py-1 rounded shadow-sm badge-glow">
@@ -612,7 +618,7 @@ export const CategoriesView = () => {
       </section>
 
       {/* 3. Platform FAQs */}
-      <FAQSection 
+      <FAQSection
         faqs={pageFaqs.categories}
         title="Gaming Platforms & Ecosystem FAQs"
         subtitle="Answers to platform performance, emulation, and console generations."
@@ -622,8 +628,8 @@ export const CategoriesView = () => {
       {selectedDeviceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
           <div className="bg-white border-2 border-emerald-500 rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl relative space-y-6 max-h-[90vh] overflow-y-auto">
-            
-            <button 
+
+            <button
               onClick={() => setSelectedDeviceModal(null)}
               className="absolute top-5 right-5 p-2 bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 rounded-full transition-colors"
             >
@@ -699,7 +705,7 @@ export const CategoriesView = () => {
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
-              <button 
+              <button
                 onClick={() => setSelectedDeviceModal(null)}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-6 rounded-xl shadow-md transition-all hover:scale-105"
               >

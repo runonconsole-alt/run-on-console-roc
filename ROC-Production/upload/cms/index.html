@@ -3478,6 +3478,16 @@ async function renderNewsWriter(m){
       '<div style="display:flex;gap:8px;flex-wrap:wrap"><input type="email" id="nw-mail" value="'+esc(d.notify_email||'')+'" placeholder="you@example.com" style="flex:1;min-width:220px">'+
       '<button class="btn primary" id="nw-msave">Save</button>'+(d.notify_email?'<button class="btn" id="nw-mtest">Send a test email</button>':'')+'</div>'+
       (st.last_email?'<div class="hint" style="margin-top:6px">Last email: '+esc(pkTime(String(st.last_email).replace(' (failed)','')))+(String(st.last_email).indexOf('failed')>0?' <span style="color:#b91c1c">(not sent)</span>':'')+'</div>':'')+
+      (st.last_email_error?'<div class="hint" style="margin-top:6px;color:#b91c1c">Last problem: '+esc(st.last_email_error)+'</div>':'')+
+      '<details style="margin-top:10px"'+(st.last_email_error&&!(d.smtp&&d.smtp.set)?' open':'')+'><summary class="hint" style="cursor:pointer"><b>Send through a mailbox</b> (use this if the test email does not arrive) '+(d.smtp&&d.smtp.set?'<span class="tag published">on · '+esc(d.smtp.user)+'</span>':'')+'</summary>'+
+        '<ol class="hint" style="margin:6px 0 8px 18px;line-height:1.7"><li>cPanel → <b>Email Accounts</b> → <b>Create</b>: alerts@runonconsole.com with a strong password.</li>'+
+        '<li>cPanel → Email Accounts → <b>Connect Devices</b>: copy the <b>Outgoing Server</b> (e.g. mail.runonconsole.com) and the SSL port (465).</li>'+
+        '<li>Type them here yourself and press <b>Save mailbox</b>, then <b>Send a test email</b>. Do not paste the password in any chat.</li></ol>'+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" id="nw-sh" placeholder="Outgoing server (mail.runonconsole.com)" value="'+esc(d.smtp&&d.smtp.host||'')+'" style="flex:2;min-width:200px">'+
+        '<select id="nw-sp"><option value="465"'+(d.smtp&&d.smtp.port===587?'':' selected')+'>465 (SSL)</option><option value="587"'+(d.smtp&&d.smtp.port===587?' selected':'')+'>587</option></select>'+
+        '<input type="text" id="nw-su" autocomplete="new-password" data-lpignore="true" data-1p-ignore placeholder="Mailbox (alerts@runonconsole.com)" value="'+esc(d.smtp&&d.smtp.user||'')+'" style="flex:2;min-width:200px">'+
+        '<input type="password" id="nw-sw" autocomplete="new-password" data-lpignore="true" data-1p-ignore placeholder="'+(d.smtp&&d.smtp.set?'Password saved (leave empty to keep)':'Mailbox password')+'" style="flex:2;min-width:180px">'+
+        '<button class="btn primary" type="button" id="nw-ssave">Save mailbox</button>'+(d.smtp&&d.smtp.set?'<button class="btn" type="button" id="nw-srm">Remove</button>':'')+'</div></details>'+
       '<div class="hint" style="margin-top:6px">The first emails may land in Spam: mark them "Not spam" once.</div></div></div>';
   }
   function feedsCard(){
@@ -3503,6 +3513,8 @@ async function renderNewsWriter(m){
     call({action:'publish_now'},this);
   });
   $('#nw-msave',m).addEventListener('click',function(){ var p=settings(); p.notify_email=$('#nw-mail',m).value.trim(); call(p,this); });
+  $('#nw-ssave',m).addEventListener('click',function(){ var p=settings(); p.smtp={host:$('#nw-sh',m).value.trim(),port:+$('#nw-sp',m).value,user:$('#nw-su',m).value.trim(),pass:$('#nw-sw',m).value}; call(p,this); });
+  var srm=$('#nw-srm',m); if(srm) srm.addEventListener('click',function(){ if(confirm('Remove the saved mailbox?')){ var p=settings(); p.smtp={remove:true}; call(p,this); } });
   var mt=$('#nw-mtest',m); if(mt) mt.addEventListener('click',function(){ call({action:'test_email'},this,false).then(function(){ mt.disabled=false; mt.textContent='Send a test email'; }); });
   var readFeeds=function(){ return feeds.map(function(f,i){ return {name:$('[data-fn="'+i+'"]',m).value,url:$('[data-fu="'+i+'"]',m).value,official:$('[data-fo="'+i+'"]',m).checked}; }); };
   function drawFeeds(){

@@ -473,28 +473,41 @@ function rocBlogRelink(PDO $pdo, string $postId): int {
 
 /** A product photo for a topic's cover: one of its products, else one from its cluster (site files only). */
 function rocBlogCoverPhoto(PDO $pdo, string $root, ?array $topic): ?string {
-    // Off until the products have real photos (today most are name cards, which repeat the title).
     if ((string)rocBlogGet($pdo, 'blog_cover_photos', '1') === '0') return null;
     if (!$topic || !rocBlogCols($pdo, 'products')) return null;
-    $slugs = (array)($topic['products'] ?? []);
-    if (!$slugs && strpos((string)$topic['pillar'], 'cat-') === 0) {
-        $S = rocBlogSite($pdo);
-        $cat = substr($topic['pillar'], 4);
-        foreach ($S['products'] as $ps => $pr) if ($pr['cat'] === $cat) $slugs[] = $ps;
-        // A different product for each post of the cluster.
-        if ($slugs) $slugs = [$slugs[abs(crc32($topic['id'])) % count($slugs)]];
-    }
+    $ok = function (string $img) use ($root): bool {
+        // Real photos only: /images/products/photos/... or an upload (never the old name cards, never Amazon copies).
+        return (bool)preg_match('#^/(images/products/photos|uploads)/[^?"<>]+\.(jpe?g|png|webp)$#i', $img) && is_file($root . $img);
+    };
     $st = $pdo->prepare('SELECT image FROM products WHERE slug = ?');
-    foreach ($slugs as $ps) {
+    foreach ((array)($topic['products'] ?? []) as $ps) {
         $st->execute([$ps]);
         $img = (string)$st->fetchColumn();
-        // Only pictures stored on this site (never copies of Amazon pictures).
-        if (preg_match('#^/(images|uploads)/[^?"<>]+\.(jpe?g|png|webp)$#i', $img) && is_file($root . $img)) return $root . $img;
+        if ($ok($img)) return $root . $img;
     }
-    return null;
+    // Else a photo from the cluster's category: a different product for each post.
+    $cat = strpos((string)($topic['pillar'] ?? ''), 'cat-') === 0 ? substr($topic['pillar'], 4) : '';
+    if ($cat === '' && !empty($topic['products'])) {
+        $S = rocBlogSite($pdo);
+        $cat = (string)($S['products'][$topic['products'][0]]['cat'] ?? '');
+    }
+    if ($cat === '') return null;
+    $S = rocBlogSite($pdo);
+    $pool = [];
+    foreach ($S['products'] as $ps => $pr) {
+        if ($pr['cat'] !== $cat) continue;
+        $st->execute([$ps]);
+        $img = (string)$st->fetchColumn();
+        if ($ok($img)) $pool[] = $img;
+    }
+    return $pool ? $root . $pool[abs(crc32((string)($topic['id'] ?? ''))) % count($pool)] : null;
 }
 
-/* Cover image: 1200 x 630 JPG: category and title on the left, the product photo on the right. */
+/**
+ * Cover image: 1200 x 630 JPG. Left: the brand, the category and the title on a dark green
+ * background with soft light; right: the product photo on a white diagonal panel (the photos
+ * are on white, so they blend into it). Without a photo: the title, bigger, with the same style.
+ */
 function rocBlogCover(string $root, string $slug, string $title, string $category, ?string $photo = null): string {
     $fallback = '/images/hero_cod.jpg';
     if (!function_exists('imagettftext') || !function_exists('imagejpeg')) return $fallback;
@@ -507,12 +520,24 @@ function rocBlogCover(string $root, string $slug, string $title, string $categor
     if (!$font) return $fallback;
     $W = 1200; $H = 630;
     $im = imagecreatetruecolor($W, $H);
-    for ($y = 0; $y < $H; $y++) for ($x = 0; $x < $W; $x += 6) {
-        $k = ($x / $W + $y / $H) / 2;
-        imagefilledrectangle($im, $x, $y, $x + 5, $y, imagecolorallocate($im, (int)(2 + 13 * $k), (int)(44 - 21 * $k), (int)(34 + 8 * $k)));
+    imagealphablending($im, true);
+    // Background: deep green gradient.
+    for ($y = 0; $y < $H; $y++) {
+        $k = $y / $H;
+        imageline($im, 0, $y, $W, $y, imagecolorallocate($im, (int)(3 + 4 * $k), (int)(38 - 12 * $k), (int)(33 - 6 * $k)));
     }
-    // The product photo, filling the right part, fading into the background.
-    $textW = 1000;
+    // Soft lights.
+    foreach ([[180, 120, 520, [16, 185, 129]], [520, 640, 460, [20, 184, 166]]] as [$cx, $cy, $r, $c]) {
+        for ($i = $r; $i > 0; $i -= 8) {
+            $a = (int)(127 - 18 * (1 - $i / $r));
+            imagefilledellipse($im, $cx, $cy, $i * 2, $i * 2, imagecolorallocatealpha($im, $c[0], $c[1], $c[2], max(110, $a)));
+        }
+    }
+    // Fine grid.
+    $grid = imagecolorallocatealpha($im, 110, 231, 183, 118);
+    for ($x = 0; $x < $W; $x += 40) imageline($im, $x, 0, $x, $H, $grid);
+    for ($y = 0; $y < $H; $y += 40) imageline($im, 0, $y, $W, $y, $grid);
+
     $src = null;
     if ($photo && is_file($photo)) {
         $ext = strtolower(pathinfo($photo, PATHINFO_EXTENSION));
@@ -520,39 +545,68 @@ function rocBlogCover(string $root, string $slug, string $title, string $categor
         elseif ($ext === 'png') $src = @imagecreatefrompng($photo);
         elseif (in_array($ext, ['jpg', 'jpeg'], true)) $src = @imagecreatefromjpeg($photo);
     }
+    $textW = 1000;
     if ($src) {
-        // Product photo on a white card on the right (the photos are on white).
-        $px = 640; $py = 70; $pw = 500; $ph = 490;
-        $wh = imagecolorallocate($im, 255, 255, 255);
-        imagefilledrectangle($im, $px + 24, $py, $px + $pw - 24, $py + $ph, $wh);
-        imagefilledrectangle($im, $px, $py + 24, $px + $pw, $py + $ph - 24, $wh);
-        foreach ([[$px + 24, $py + 24], [$px + $pw - 24, $py + 24], [$px + 24, $py + $ph - 24], [$px + $pw - 24, $py + $ph - 24]] as [$cx, $cy]) imagefilledellipse($im, $cx, $cy, 48, 48, $wh);
+        // White diagonal panel with a green edge, the photo inside it.
+        $x0 = 600; $slant = 110;
+        imagefilledpolygon($im, [$x0 - 14, 0, $W, 0, $W, $H, $x0 - 14 - $slant, $H], imagecolorallocate($im, 52, 211, 153));
+        imagefilledpolygon($im, [$x0, 0, $W, 0, $W, $H, $x0 - $slant, $H], imagecolorallocate($im, 255, 255, 255));
+        // Trim the white margin of the photo so the product fills the panel.
         $sw = imagesx($src); $sh = imagesy($src);
-        $scale = min(($pw - 40) / $sw, ($ph - 40) / $sh);
-        $dw = (int)($sw * $scale); $dh = (int)($sh * $scale);
-        imagecopyresampled($im, $src, $px + (int)(($pw - $dw) / 2), $py + (int)(($ph - $dh) / 2), 0, 0, $dw, $dh, $sw, $sh);
+        $l = $sw; $t = $sh; $r = 0; $b = 0;
+        for ($yy = 0; $yy < $sh; $yy += 3) for ($xx = 0; $xx < $sw; $xx += 3) {
+            $c = imagecolorat($src, $xx, $yy);
+            if ((($c >> 16) & 255) < 236 || (($c >> 8) & 255) < 236 || ($c & 255) < 236) { if ($xx < $l) $l = $xx; if ($xx > $r) $r = $xx; if ($yy < $t) $t = $yy; if ($yy > $b) $b = $yy; }
+        }
+        if ($r <= $l || $b <= $t) { $l = 0; $t = 0; $r = $sw - 1; $b = $sh - 1; }
+        $cw = $r - $l + 1; $ch = $b - $t + 1;
+        $bw = $W - $x0 - 40; $bh = $H - 90;
+        $scale = min($bw / $cw, $bh / $ch);
+        $dw = (int)($cw * $scale); $dh = (int)($ch * $scale);
+        imagecopyresampled($im, $src, $x0 - 30 + (int)(($bw - $dw) / 2) + 20, 45 + (int)(($bh - $dh) / 2), $l, $t, $dw, $dh, $cw, $ch);
         imagedestroy($src);
-        $textW = 500;
+        // Keep the diagonal clean over the photo's white edge.
+        imagefilledpolygon($im, [$x0 - 14 - 1, 0, $x0 - 1, 0, $x0 - $slant - 1, $H, $x0 - 14 - $slant - 1, $H], imagecolorallocate($im, 52, 211, 153));
+        $textW = 470;
     }
-    $green = imagecolorallocate($im, 52, 211, 153); $white = imagecolorallocate($im, 248, 250, 252); $soft = imagecolorallocate($im, 167, 243, 208);
-    imagefilledrectangle($im, 70, 96, 76, 534, $green);
-    imagettftext($im, 20, 0, 104, 140, $green, $font, strtoupper(mb_substr($category, 0, 40)));
-    for ($size = $src ? 46 : 56; $size >= 26; $size -= 2) {
+    $white = imagecolorallocate($im, 248, 250, 252); $green = imagecolorallocate($im, 52, 211, 153);
+    $mint = imagecolorallocate($im, 167, 243, 208); $dark = imagecolorallocate($im, 2, 44, 34);
+    $X = 64;
+    // Brand.
+    imagefilledellipse($im, $X + 7, 68, 14, 14, $green);
+    imagettftext($im, 15, 0, $X + 24, 75, $mint, $font, 'RUN ON CONSOLE');
+    // Category pill.
+    $cat = strtoupper(mb_substr($category, 0, 28));
+    $bb = imagettfbbox(15, 0, $font, $cat);
+    $pw = $bb[2] - $bb[0] + 36;
+    imagefilledrectangle($im, $X + 12, 108, $X + $pw - 12, 148, $green);
+    imagefilledellipse($im, $X + 12, 128, 40, 40, $green);
+    imagefilledellipse($im, $X + $pw - 12, 128, 40, 40, $green);
+    imagettftext($im, 15, 0, $X + 18, 136, $dark, $font, $cat);
+    // Title.
+    $max = $src ? 4 : 4;
+    for ($size = $src ? 44 : 60; $size >= 24; $size -= 2) {
         $lines = []; $cur = '';
-        foreach (preg_split('/\s+/', $title) as $w) {
+        foreach (preg_split('/\s+/', trim($title)) as $w) {
             $try = $cur === '' ? $w : "$cur $w";
-            $bb = imagettfbbox($size, 0, $font, $try);
-            if ($cur !== '' && $bb[2] - $bb[0] > $textW) { $lines[] = $cur; $cur = $w; } else $cur = $try;
+            $b2 = imagettfbbox($size, 0, $font, $try);
+            if ($cur !== '' && $b2[2] - $b2[0] > $textW) { $lines[] = $cur; $cur = $w; } else $cur = $try;
         }
         if ($cur !== '') $lines[] = $cur;
-        if (count($lines) <= 5) break;
+        if (count($lines) <= $max) break;
     }
-    $lines = array_slice($lines, 0, 5);
-    foreach ($lines as $i => $l) imagettftext($im, $size, 0, 104, 214 + $i * (int)($size * 1.32), $white, $font, $l);
-    imagettftext($im, 18, 0, 104, 560, $soft, $font, 'runonconsole.com');
+    $lines = array_slice($lines, 0, $max);
+    $lh = (int)($size * 1.28);
+    $y = 200 + $size;
+    foreach ($lines as $i => $l) imagettftext($im, $size, 0, $X, $y + $i * $lh, $white, $font, $l);
+    // Accent and call to action.
+    $yb = min(560, $y + count($lines) * $lh + 10);
+    imagefilledrectangle($im, $X, $yb - 6, $X + 70, $yb - 1, $green);
+    $cta = 'READ ON RUNONCONSOLE.COM';
+    imagettftext($im, 13, 0, $X, $yb + 34, $mint, $font, $cta);
     $dir = $root . '/uploads/blog-covers';
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
-    $ok = imagejpeg($im, $dir . '/' . $slug . '.jpg', 86);
+    $ok = imagejpeg($im, $dir . '/' . $slug . '.jpg', 88);
     imagedestroy($im);
     return $ok ? '/uploads/blog-covers/' . $slug . '.jpg?v=' . time() : $fallback;
 }

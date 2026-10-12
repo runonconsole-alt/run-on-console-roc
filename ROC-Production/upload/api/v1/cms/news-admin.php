@@ -47,7 +47,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
     $waiting = array_map('rocNaStory', array_slice(rocNewsCandidates($pdo, (array)rocBlogGet($pdo, 'news_items', [])), 0, 8));
     rocNaOut(200, ['success' => true, 'settings' => rocNewsSettings($pdo), 'feeds' => rocNewsFeeds($pdo), 'custom_feeds' => is_array(rocBlogGet($pdo, 'news_feeds', null)),
         'state' => $state ?: new stdClass(), 'today' => $today, 'log' => $log, 'waiting' => $waiting,
-        'notify_email' => (string)rocBlogGet($pdo, 'notify_email', ''), 'writers' => array_keys(rocBlogWriters($pdo)), 'mail' => function_exists('mail')]);
+        'notify_email' => (string)rocBlogGet($pdo, 'notify_email', ''), 'writers' => array_keys(rocBlogWriters($pdo)), 'mail' => function_exists('mail'),
+        'smtp' => (function () use ($pdo) { $m = rocBlogGet($pdo, 'notify_smtp', []); $m = is_array($m) ? $m : [];
+            return ['set' => !empty($m['pass']), 'host' => (string)($m['host'] ?? ''), 'port' => (int)($m['port'] ?? 465), 'user' => (string)($m['user'] ?? '')]; })()]);
 }
 
 $in = json_decode((string)file_get_contents('php://input'), true) ?: [];
@@ -80,6 +82,22 @@ if ($act === 'settings') {
         }
         if (count($feeds) < 2) rocNaOut(422, ['success' => false, 'error' => 'Keep at least 2 sources: a story needs 2 sources (or 1 official one).']);
         rocBlogSet($pdo, 'news_feeds', array_slice($feeds, 0, 40), $uid);
+    }
+    if (isset($in['smtp']) && is_array($in['smtp'])) {
+        $old = rocBlogGet($pdo, 'notify_smtp', []); $old = is_array($old) ? $old : [];
+        $sm = $in['smtp'];
+        if (($sm['remove'] ?? false)) rocBlogSet($pdo, 'notify_smtp', '', $uid);
+        else {
+            $host = trim((string)($sm['host'] ?? '')); $user = trim((string)($sm['user'] ?? '')); $pass = (string)($sm['pass'] ?? '');
+            $port = (int)($sm['port'] ?? 465);
+            if ($host !== '' || $user !== '' || $pass !== '') {
+                if (!preg_match('/^[a-z0-9.-]{3,120}$/i', $host)) rocNaOut(422, ['success' => false, 'error' => 'The mail server looks like mail.runonconsole.com.']);
+                if (!filter_var($user, FILTER_VALIDATE_EMAIL)) rocNaOut(422, ['success' => false, 'error' => 'The mailbox is a full email address, like alerts@runonconsole.com.']);
+                if (!in_array($port, [465, 587], true)) rocNaOut(422, ['success' => false, 'error' => 'Use port 465 (SSL) or 587.']);
+                if ($pass === '' && empty($old['pass'])) rocNaOut(422, ['success' => false, 'error' => 'Type the mailbox password.']);
+                rocBlogSet($pdo, 'notify_smtp', ['host' => strtolower($host), 'port' => $port, 'user' => $user, 'pass' => $pass !== '' ? $pass : $old['pass']], $uid);
+            }
+        }
     }
     if (isset($in['notify_email'])) {
         $e = trim((string)$in['notify_email']);
@@ -115,6 +133,6 @@ if ($act === 'test_email') {
     if ($e === '') rocNaOut(422, ['success' => false, 'error' => 'Save an email address first.']);
     $ok = rocNotify($pdo, 'Test from Run On Console', '<p>This is a test. Alerts for new blog posts and news stories will come to this address.</p>');
     rocNaOut($ok ? 200 : 422, ['success' => $ok, 'message' => 'Test email sent to ' . $e . '. If it is not in the inbox in 5 minutes, look in Spam and mark it "Not spam".',
-        'error' => $ok ? null : 'The server could not send the email (PHP mail). Ask the host to enable sending, or use another address.']);
+        'error' => $ok ? null : 'Not sent: ' . ((string)(rocNewsState($pdo)['last_email_error'] ?? '')) . '. Fill in "Send through a mailbox" below (a cPanel email account) and try again.']);
 }
 rocNaOut(400, ['success' => false, 'error' => 'Unknown request.']);

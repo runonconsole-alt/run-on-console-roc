@@ -138,6 +138,9 @@
   50%, 100% { left: 200%; }
 }
 
+.badge-holo-glow.badge-static { cursor: default; }
+.badge-holo-glow.badge-static:hover { transform: none; }
+
 .badge-holo-glow:hover {
   transform: translateY(-4px) scale(1.08);
   border-color: rgba(52, 211, 153, 1);
