@@ -84,33 +84,35 @@ export const AboutView = () => {
           </div>
 
           <div className="lg:col-span-5 grid grid-cols-2 gap-3">
-            <a href="/products/pc-hardware/" className="block no-underline">
+            <a href="/products/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
-              <img 
-                src="/images/products/photos/amd-radeon-rx-9070-xt.webp"
-                width="400"
-                height="224"
-                loading="lazy" 
-                alt="AMD Radeon RX 9070 XT graphics card" 
-                className="w-full h-28 object-contain bg-white p-2 rounded-xl mb-2 group-hover:scale-105 transition-transform" 
+              <img
+                src="/uploads/site/about-picks.webp"
+                width="800"
+                height="450"
+                loading="lazy"
+                alt="Comparing gaming gear specs for our independent picks"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform"
               />
-              <div className="text-xs font-display font-bold text-white">PC Hardware</div>
-              <div className="text-[10px] text-emerald-300 font-medium">GPUs, CPUs, RAM, cases, monitors</div>
+              <div className="text-xs font-display font-bold text-white">How we pick</div>
+              <div className="text-[10px] text-emerald-300 font-medium">Official specs, published reviews, no paid spots</div>
             </Tilt3DCard>
             </a>
 
-            <a href="/products/audio/" className="block no-underline">
+            <a href="/blogs/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
-              <img 
-                src="/images/products/photos/steelseries-arctis-nova-pro-wireless.webp"
-                width="400"
-                height="224"
-                loading="lazy" 
-                alt="SteelSeries Arctis Nova Pro Wireless gaming headset" 
-                className="w-full h-28 object-contain bg-white p-2 rounded-xl mb-2 group-hover:scale-105 transition-transform" 
+              <img
+                src="/uploads/site/about-gamers.webp"
+                width="800"
+                height="450"
+                loading="lazy"
+                alt="A gaming room: Run On Console is made by gamers, for gamers"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform"
               />
-              <div className="text-xs font-display font-bold text-white">Gaming Audio</div>
-              <div className="text-[10px] text-emerald-300 font-medium">Headsets, mics and speakers</div>
+              <div className="text-xs font-display font-bold text-white">Gamers, for gamers</div>
+              <div className="text-[10px] text-emerald-300 font-medium">Guides we would want to read</div>
             </Tilt3DCard>
             </a>
           </div>

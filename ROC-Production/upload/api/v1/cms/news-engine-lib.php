@@ -424,9 +424,8 @@ function rocNewsCreate(PDO $pdo, string $root, array $a, array $c, string $by): 
     for ($i = 2; $i < 20; $i++) { $st->execute([$slug]); if ((int)$st->fetchColumn() === 0) break; $slug = $base . '-' . $i; }
     $content = rtrim($content) . rocNewsBoxes($pdo, $c);
 
-    $photo = rocBlogCoverPhoto($pdo, $root, ['id' => $slug, 'pillar' => '', 'products' => array_keys($c['match']['products'])]);
-    $image = $photo ? rocBlogCover($root, $slug, $title, 'News', $photo)
-                    : (rocBlogAiCover($pdo, $root, $slug, $title, (string)($a['image_prompt'] ?? '')) ?? rocBlogCover($root, $slug, $title, 'News'));
+    $image = rocBlogMakeCover($pdo, $root, $slug, $title, 'News', ['id' => $slug, 'pillar' => '', 'products' => array_keys($c['match']['products'])],
+                              (string)($a['image_prompt'] ?? ''), $alt);
     $cols = rocBlogCols($pdo, 'blogs');
     $id = 'news-' . bin2hex(random_bytes(4));
     $now = gmdate('Y-m-d H:i:s');

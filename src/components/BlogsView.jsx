@@ -316,33 +316,35 @@ export const BlogsView = () => {
           </div>
 
           <div className="lg:col-span-5 grid grid-cols-2 gap-3">
-            <a href="/products/gpu/" className="block no-underline">
+            <a href="/blogs/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
-              <img 
-                src="/images/products/photos/nvidia-geforce-rtx-5080.webp"
-                width="400"
-                height="224"
-                loading="lazy" 
-                alt="NVIDIA GeForce RTX 5080 graphics card" 
-                className="w-full h-28 object-contain bg-white p-2 rounded-xl mb-2 group-hover:scale-105 transition-transform" 
+              <img
+                src="/uploads/site/blog-guides.webp"
+                width="800"
+                height="450"
+                loading="lazy"
+                alt="Reading a gaming buying guide on a laptop"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform"
               />
-              <div className="text-xs font-display font-bold text-white">Best graphics cards</div>
-              <div className="text-[10px] text-emerald-300 font-medium">RTX 50 and Radeon RX 9000</div>
+              <div className="text-xs font-display font-bold text-white">Buying guides</div>
+              <div className="text-[10px] text-emerald-300 font-medium">Picks, comparisons and how-tos</div>
             </Tilt3DCard>
             </a>
 
- <a href="/products/mice/" className="block no-underline">
+ <a href="/news/" className="block no-underline">
             <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
-<img 
-                src="/images/products/photos/razer-viper-v4-pro.webp"
-                width="400"
-                height="224"
-                loading="lazy" 
-                alt="Razer Viper V4 Pro gaming mouse" 
-                className="w-full h-28 object-contain bg-white p-2 rounded-xl mb-2 group-hover:scale-105 transition-transform" 
+<img
+                src="/uploads/site/blog-news.webp"
+                width="800"
+                height="450"
+                loading="lazy"
+                alt="Latest gaming news on a tablet"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform"
               />
-              <div className="text-xs font-display font-bold text-white">Best gaming mice</div>
-              <div className="text-[10px] text-emerald-300 font-medium">Light, fast, wireless</div>
+              <div className="text-xs font-display font-bold text-white">Gaming news</div>
+              <div className="text-[10px] text-emerald-300 font-medium">Checked against trusted sources</div>
             </Tilt3DCard>
             </a>
           </div>

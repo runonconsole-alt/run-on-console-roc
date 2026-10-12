@@ -15,7 +15,7 @@
     try {
       var u = new URL(href, location.href);
       // Blogs, news, products and gaming platforms are rendered by the server from the CMS database.
-      return u.origin === location.origin && /^\/(blogs|news|products|categories|gaming-platforms)(\/|$)/.test(u.pathname) ? u : null;
+      return u.origin === location.origin && /^\/(blogs|news|products|category|categories|gaming-platforms)(\/|$)/.test(u.pathname) ? u : null;
     } catch (e) { return null; }
   }
 
