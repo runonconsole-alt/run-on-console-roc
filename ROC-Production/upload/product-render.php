@@ -123,7 +123,7 @@ if ($slug !== '' && isset($categories[$slug])) {
 
 if ($slug !== '') {
     $product = rocFetchProduct($pdo, $slug);
-    if (!$product) rocOldProductRedirect($ROOT, $slug);
+    if (!$product) rocOldProductRedirect($ROOT, $slug, $pdo);
     rocRenderProduct($ROOT, $pdo, $product, $categories);
 }
 
@@ -301,6 +301,48 @@ function rocProductList(array $p, string $key): array {
 function rocProductUrl(string $slug): string { return ROC_PUBLIC_URL . '/products/' . $slug . '/'; }
 function rocCategoryUrl(string $slug): string { return ROC_PUBLIC_URL . '/products/' . $slug . '/'; }
 
+/**
+ * "Choose version" buttons for products that come in versions (8GB / 16GB, 512GB / 1TB, ...),
+ * from api/v1/cms/product-variants.json. A click shows that version's photo at once and opens
+ * its own page (its own price link, details and address).
+ */
+function rocVariantPicker(PDO $pdo, string $slug, array $categories): string {
+    static $groups = null;
+    if ($groups === null) $groups = (array)(json_decode((string)@file_get_contents(__DIR__ . '/api/v1/cms/product-variants.json'), true)['groups'] ?? []);
+    foreach ($groups as $vs) {
+        if (!in_array($slug, array_column($vs, 'slug'), true)) continue;
+        $h = ''; $n = 0;
+        foreach ($vs as $v) {
+            $row = rocFetchProduct($pdo, (string)$v['slug']);
+            if (!$row) continue;                                   // version taken off the site
+            $n++;
+            $img = rocProductImage($row, $categories);
+            $on = $v['slug'] === $slug;
+            $h .= '<a href="/products/' . rocH((string)$v['slug']) . '/" data-roc-variant-img="' . rocH($img) . '"'
+                . ($on ? ' aria-current="true"' : '')
+                . ' class="no-underline text-xs font-extrabold px-3 py-1.5 rounded-xl border transition-colors '
+                . ($on ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-500 hover:text-emerald-700') . '">'
+                . rocH((string)$v['label']) . '</a>';
+        }
+        if ($n < 2) return '';
+        return '<div class="pt-1"><p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Choose version</p>'
+            . '<div class="flex flex-wrap gap-2" data-roc-variants>' . $h . '</div></div>'
+            . '<script>(function(){var b=document.querySelector("[data-roc-variants]"),m=document.getElementById("roc-main-img");if(!b||!m)return;'
+            . 'b.addEventListener("click",function(e){var a=e.target.closest("a[data-roc-variant-img]");if(!a||a.getAttribute("aria-current"))return;'
+            . 'm.removeAttribute("srcset");m.src=a.getAttribute("data-roc-variant-img");});'
+            . '[].forEach.call(b.querySelectorAll("a[data-roc-variant-img]"),function(a){var i=new Image();i.src=a.getAttribute("data-roc-variant-img");});})();</script>';
+    }
+    return '';
+}
+
+/** Picture description: the one set in the CMS, or "Title - Category" (better than the bare name). */
+function rocImageAlt(array $p, string $title, array $categories): string {
+    $alt = trim((string)($p['image_alt'] ?? ''));
+    if ($alt !== '' && $alt !== $title) return $alt;
+    $cat = (string)(($categories[rocProductCategorySlug($p)]['name'] ?? null) ?: ($p['category'] ?? ''));
+    return $cat !== '' ? $title . ' - ' . $cat : $title;
+}
+
 /** Amazon product photo (SiteStripe link): white background, shown whole rather than cropped. */
 function rocIsAmazonImg(string $src): bool {
     return (bool)preg_match('#^(https://(ws-[a-z]+\.amazon-adsystem\.com|m\.media-amazon\.com)/|/images/products/photos/)#i', $src);
@@ -344,9 +386,18 @@ function rocFitTitle(array $options): string {
 }
 
 /** Products whose old static folder only holds a redirect stub (Phase 4 renames). */
-function rocOldProductRedirect(string $root, string $slug): void {
+function rocOldProductRedirect(string $root, string $slug, ?PDO $pdo = null): void {
     $stub = $root . '/products/' . $slug . '/index.php';
     if (is_file($stub)) { require $stub; exit; }
+    // A product taken off the site (unpublished in the CMS) sends visitors to its category.
+    if ($pdo) {
+        try {
+            $st = $pdo->prepare('SELECT * FROM products WHERE slug = ? LIMIT 1');
+            $st->execute([$slug]);
+            $row = $st->fetch(PDO::FETCH_ASSOC);
+            if ($row && ($cs = rocProductCategorySlug($row)) !== '') { header('Location: ' . rocCategoryUrl($cs), true, 301); exit; }
+        } catch (\Throwable $e) {}
+    }
     rocNotFound($root);
 }
 
@@ -358,7 +409,7 @@ function rocProductCard(PDO $pdo, array $p, array $categories): string {
     $slug  = (string)$p['slug'];
     $title = (string)$p['title'];
     $img   = rocProductImage($p, $categories);
-    $alt   = trim((string)($p['image_alt'] ?? '')) ?: $title;
+    $alt   = rocImageAlt($p, $title, $categories);
     $badge = trim((string)($p['badge'] ?? ''));
     $brand = trim((string)($p['brand'] ?? ''));
     $catN  = (string)(($categories[rocProductCategorySlug($p)]['name'] ?? null) ?: ($p['category'] ?? ''));
@@ -469,7 +520,7 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
     $bestFor = trim((string)($p['best_for'] ?? ''));
     $desc    = trim((string)($p['short_desc'] ?? '')) ?: trim((string)($p['summary'] ?? ''));
     $image   = rocProductImage($p, $categories);
-    $alt     = trim((string)($p['image_alt'] ?? '')) ?: $title;
+    $alt     = rocImageAlt($p, $title, $categories);
     $specs   = rocProductList($p, 'specs_json');
     $feats   = rocProductList($p, 'features_json');
     $amazon  = rocAmazonUrl($pdo, $p);
@@ -520,7 +571,7 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
 
     $m .= '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-8">'
         . '<div class="lg:col-span-5 flex flex-col justify-center"><div class="transition-shadow duration-300 will-change-transform relative rounded-2xl overflow-hidden bg-slate-950 p-4 border border-slate-800 shadow-xl group">'
-        . ($image !== '' ? '<img width="800" height="480" src="' . rocH($image) . '" alt="' . rocH($alt) . '" class="w-full h-80 ' . (rocIsAmazonImg($image) ? 'object-contain bg-white p-4' : 'object-cover') . ' rounded-xl group-hover:scale-105 transition-transform duration-500" fetchpriority="high"/>' : '')
+        . ($image !== '' ? '<img id="roc-main-img" width="800" height="480" src="' . rocH($image) . '" alt="' . rocH($alt) . '" class="w-full h-80 ' . (rocIsAmazonImg($image) ? 'object-contain bg-white p-4' : 'object-cover') . ' rounded-xl group-hover:scale-105 transition-transform duration-500" fetchpriority="high"/>' : '')
         . ($badge !== '' ? '<span class="absolute top-4 left-4 max-w-[85%] bg-emerald-600 text-white font-extrabold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider badge-glow">' . rocH($badge) . '</span>' : '')
         . '</div></div>'
         . '<div class="lg:col-span-7 space-y-5"><div>'
@@ -535,6 +586,7 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
         foreach ($feats as $f) $m .= '<li class="text-[11px] font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg">' . rocH($f) . '</li>';
         $m .= '</ul>';
     }
+    $m .= rocVariantPicker($pdo, (string)$p['slug'], $categories);
     $m .= '<div class="space-y-2 pt-2">'
         . '<a href="' . rocH($amazon) . '" target="_blank" rel="sponsored nofollow noopener noreferrer" aria-label="Check price of ' . rocH($title) . ' on Amazon" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-display font-extrabold text-sm py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all hover:scale-102 no-underline">'
         . ROC_ICON_CART . '<span>Check price &amp; stock on Amazon</span>' . ROC_ICON_EXT . '</a>'

@@ -117,9 +117,10 @@ function rocBlogSite(PDO $pdo, bool $fresh = false): array {
     }
     $products = [];
     if (rocBlogCols($pdo, 'products')) {
-        foreach ($pdo->query("SELECT title, slug, category FROM products WHERE status = 'published' ORDER BY category, title")->fetchAll(PDO::FETCH_ASSOC) as $p) {
+        foreach ($pdo->query("SELECT title, slug, category, affiliate_amazon FROM products WHERE status = 'published' ORDER BY category, title")->fetchAll(PDO::FETCH_ASSOC) as $p) {
             $cs = $byName[strtolower((string)$p['category'])] ?? (isset($cats[$p['category']]) ? $p['category'] : '');
-            $products[$p['slug']] = ['title' => $p['title'], 'url' => '/products/' . $p['slug'] . '/', 'cat' => $cs, 'category' => $p['category']];
+            $products[$p['slug']] = ['title' => $p['title'], 'url' => '/products/' . $p['slug'] . '/', 'cat' => $cs, 'category' => $p['category'],
+                                     'dp' => strpos((string)$p['affiliate_amazon'], '/dp/') !== false];
         }
     }
     $plats = [];
@@ -284,7 +285,21 @@ function rocBlogNextTopic(PDO $pdo, array $plan): ?array {
         usort($ids, function ($a, $b) use ($written) { return ($written[$a] ?? 0) <=> ($written[$b] ?? 0); });
         $focus = $ids[0];
     }
-    $want = ['tofu' => 0.40, 'mofu' => 0.35, 'bofu' => 0.25];
+    // "sales" (default): mostly buying posts, so readers click through to Amazon;
+    // "balanced": the long-term mix for topical authority (CMS setting blog_focus).
+    $sales = (string)rocBlogGet($pdo, 'blog_focus', 'sales') !== 'balanced';
+    $want = $sales ? ['bofu' => 0.50, 'mofu' => 0.35, 'tofu' => 0.15] : ['tofu' => 0.40, 'mofu' => 0.35, 'bofu' => 0.25];
+    if ($sales) {
+        // Buying topics about products with a direct Amazon page come first, in any cluster.
+        $S = rocBlogSite($pdo);
+        foreach (['bofu', 'mofu'] as $st) foreach ($open as $t) {
+            if ($t['stage'] !== $st || empty($t['products'])) continue;
+            $allDp = true;
+            foreach ($t['products'] as $ps) if (empty($S['products'][$ps]['dp'])) { $allDp = false; break; }
+            $doneSt = 0; foreach ($plan['topics'] as $x) if (($x['status'] ?? '') === 'written') $doneSt++;
+            if ($allDp && ($st === 'bofu' || $doneSt % 3 === 1)) return $t;
+        }
+    }
     $done = $byStage[$focus] ?? [];
     $total = max(1, array_sum($done));
     $order = array_keys($want);
@@ -622,6 +637,39 @@ function rocBlogRecover(PDO $pdo, string $root, string $postId): ?string {
     return $img;
 }
 
+/* ------------------------------------------------- real search keywords */
+
+/** Google's autocomplete for a phrase (what people search, most searched first). Free, no key. */
+function rocBlogSuggest(string $q): array {
+    if (!function_exists('curl_init')) return [];
+    $c = curl_init('https://suggestqueries.google.com/complete/search?client=firefox&hl=en&gl=us&q=' . rawurlencode($q));
+    curl_setopt_array($c, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 8, CURLOPT_CONNECTTIMEOUT => 5,
+                           CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; RunOnConsole/1.0)']);
+    $raw = (string)curl_exec($c);
+    curl_close($c);
+    $j = json_decode(mb_convert_encoding($raw, 'UTF-8', 'UTF-8, ISO-8859-1'), true);
+    return array_values(array_filter(array_map('strval', (array)($j[1] ?? []))));
+}
+
+/**
+ * Focus keyword = the most searched phrasing Google suggests for the topic keyword (it must keep
+ * the topic's main words); secondary keywords = the other popular phrasings.
+ */
+function rocBlogKeywords(string $kw): array {
+    $words = array_filter(preg_split('/\s+/', strtolower($kw)), function ($w) { return strlen($w) > 2 && !in_array($w, ['the', 'and', 'for', 'with', 'what', 'how', 'which', 'you'], true); });
+    $sugg = rocBlogSuggest($kw);
+    if (count($sugg) < 3) $sugg = array_merge($sugg, rocBlogSuggest(implode(' ', array_slice($words, 0, 3))));
+    $focus = $kw; $more = [];
+    foreach ($sugg as $sg) {
+        $l = strtolower($sg);
+        if (preg_match('/\b(reddit|near me|amazon|walmart|best buy|ebay|youtube|meme|wiki)\b/', $l)) continue;   // not keywords to write for
+        $hits = 0; foreach ($words as $w) if (strpos($l, rtrim($w, 's')) !== false) $hits++;
+        if ($focus === $kw && $words && $hits >= max(1, (int)ceil(count($words) * 0.7))) { $focus = $l; continue; }
+        if ($hits >= 1 && $l !== $focus) $more[] = $l;
+    }
+    return ['focus' => $focus, 'secondary' => array_slice(array_values(array_unique($more)), 0, 8), 'source' => $sugg ? 'google-autocomplete' : 'plan'];
+}
+
 /* ----------------------------------------------------------- the brief */
 
 /** What any writer (Gemini on the server or Claude on the PC) gets for the next post. */
@@ -636,8 +684,10 @@ function rocBlogBrief(PDO $pdo, ?array $topic = null): ?array {
                'mofu' => 'MOFU (middle of funnel): the reader is comparing options. Compare honestly (strengths, weaknesses, who each is for), use a comparison table, end with "which one should you pick" by type of gamer.',
                'bofu' => 'BOFU (bottom of funnel): the reader is ready to buy. Give clear picks with who each is for, key specs from the product pages, pros and cons, and a clear call to check the product page. No prices.'][$topic['stage']];
     $recent = array_slice(array_values(array_map(function ($b) { return $b['title']; }, rocBlogSite($pdo)['posts'])), 0, 60);
+    $kw = rocBlogKeywords((string)$topic['keyword']);
+    $secondary = array_values(array_unique(array_merge($kw['secondary'], (array)($topic['secondary'] ?? []))));
     return ['topic_id' => $topic['id'], 'stage' => $topic['stage'], 'cluster' => $pillarName, 'title_idea' => $topic['title'],
-            'focus_keyword' => $topic['keyword'], 'secondary_keywords' => (array)($topic['secondary'] ?? []), 'intent' => $intent,
+            'focus_keyword' => $kw['focus'], 'secondary_keywords' => array_slice($secondary, 0, 8), 'keyword_source' => $kw['source'], 'intent' => $intent,
             'links' => rocBlogTopicLinks($pdo, $plan, $topic), 'avoid_titles' => $recent,
             'categories' => ['Buying Guides', 'Can I Run It', 'How To', 'Platforms', 'Comparisons']];
 }
@@ -651,7 +701,7 @@ function rocBlogPrompt(array $brief, string $publishAt): string {
         . "TITLE IDEA: {$brief['title_idea']} (you may improve it; keep the focus keyword)\n"
         . "FOCUS KEYWORD: {$brief['focus_keyword']}\n"
         . ($brief['secondary_keywords'] ? 'SECONDARY KEYWORDS (use naturally): ' . implode(', ', $brief['secondary_keywords']) . "\n" : '')
-        . "\nINTERNAL LINKS YOU MUST USE (each once, with descriptive anchor text, never \"click here\"):\n" . $links($brief['links']['must'])
+        . "\nINTERNAL LINKS YOU MUST USE (each once). Anchor text = the searched keyword of the page it points to: for a product its full name plus its type (\"Razer Viper V4 Pro gaming mouse\"), for a hub page its \"best ...\" phrase (\"best gaming mice\"), for a post its main keyword. Never \"click here\" or \"this page\":\n" . $links($brief['links']['must'])
         . "\n\nINTERNAL LINKS YOU MAY USE (1-3 of them, only where they really help):\n" . $links($brief['links']['may'])
         . "\nUse NO other internal addresses. External links only to official sources (game publishers, manufacturers) and only if essential.\n\n"
         . "RULES\n"

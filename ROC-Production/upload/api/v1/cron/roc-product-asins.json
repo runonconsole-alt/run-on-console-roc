@@ -618,6 +618,666 @@
    "link": "https://www.amazon.com/dp/B0DSGJRKCR",
    "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DSGJRKCR&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US#fb=/images/products/samsung-odyssey-oled-g9.webp",
    "note": "G91SD"
+  },
+  "cooler-master-cosmos-alpha": {
+   "asin": "B0GJ13NDWD",
+   "link": "https://www.amazon.com/dp/B0GJ13NDWD",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GJ13NDWD&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "cooler-master-haf-700": {
+   "asin": "B0B2WZ14SP",
+   "link": "https://www.amazon.com/dp/B0B2WZ14SP",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0B2WZ14SP&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "corsair-3200d-airflow": {
+   "asin": "B0GBY1GSDX",
+   "link": "https://www.amazon.com/dp/B0GBY1GSDX",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GBY1GSDX&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "listed as 3200D RS"
+  },
+  "corsair-3500x": {
+   "asin": "B0CZV22HDF",
+   "link": "https://www.amazon.com/dp/B0CZV22HDF",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CZV22HDF&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "corsair-air-5400": {
+   "asin": "B0H1D3NTRH",
+   "link": "https://www.amazon.com/dp/B0H1D3NTRH",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H1D3NTRH&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "no-fan base model"
+  },
+  "fractal-design-north-xl": {
+   "asin": "B0CJCK95ZC",
+   "link": "https://www.amazon.com/dp/B0CJCK95ZC",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CJCK95ZC&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "charcoal black"
+  },
+  "fractal-design-north": {
+   "asin": "B09V878FXQ",
+   "link": "https://www.amazon.com/dp/B09V878FXQ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09V878FXQ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "charcoal black mesh"
+  },
+  "fractal-design-terra": {
+   "asin": "B09DKMQ5L1",
+   "link": "https://www.amazon.com/dp/B09DKMQ5L1",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09DKMQ5L1&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "graphite"
+  },
+  "hyte-y70-touch": {
+   "asin": "B0DKJKGPYZ",
+   "link": "https://www.amazon.com/dp/B0DKJKGPYZ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DKJKGPYZ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "Touch Infinite, black"
+  },
+  "hyte-y70": {
+   "asin": "B0DKW889MJ",
+   "link": "https://www.amazon.com/dp/B0DKW889MJ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DKW889MJ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "havn-bf-360": {
+   "asin": "B0FR5XTKVZ",
+   "link": "https://www.amazon.com/dp/B0FR5XTKVZ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FR5XTKVZ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "BF 360 Flow black"
+  },
+  "lian-li-lancool-216": {
+   "asin": "B0BN3SY5XW",
+   "link": "https://www.amazon.com/dp/B0BN3SY5XW",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BN3SY5XW&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "RGB black"
+  },
+  "lian-li-o11-dynamic-evo": {
+   "asin": "B0G54D3KL7",
+   "link": "https://www.amazon.com/dp/B0G54D3KL7",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G54D3KL7&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "black with fans"
+  },
+  "lian-li-o11-vision-compact": {
+   "asin": "B0DJPV8XG3",
+   "link": "https://www.amazon.com/dp/B0DJPV8XG3",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DJPV8XG3&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "black"
+  },
+  "montech-air-903-max": {
+   "asin": "B0CB26ZFKV",
+   "link": "https://www.amazon.com/dp/B0CB26ZFKV",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CB26ZFKV&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "black"
+  },
+  "montech-king-65-pro": {
+   "asin": "B0DJDW8B92",
+   "link": "https://www.amazon.com/dp/B0DJDW8B92",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DJDW8B92&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "black"
+  },
+  "montech-tg3": {
+   "asin": "B0H5F8GYQF",
+   "link": "https://www.amazon.com/dp/B0H5F8GYQF",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H5F8GYQF&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "Panoramic black"
+  },
+  "nzxt-h3-flow": {
+   "asin": "B0DQPMJ6MJ",
+   "link": "https://www.amazon.com/dp/B0DQPMJ6MJ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DQPMJ6MJ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "black"
+  },
+  "nzxt-h6-flow": {
+   "asin": "B0C89FCDFP",
+   "link": "https://www.amazon.com/dp/B0C89FCDFP",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0C89FCDFP&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "black"
+  },
+  "nzxt-h7-flow": {
+   "asin": "B0CV4R1TWS",
+   "link": "https://www.amazon.com/dp/B0CV4R1TWS",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CV4R1TWS&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "2024 black"
+  },
+  "nzxt-h9-flow-2025": {
+   "asin": "B0DQPPKNSS",
+   "link": "https://www.amazon.com/dp/B0DQPPKNSS",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DQPPKNSS&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "2025 black"
+  },
+  "phanteks-g500a": {
+   "asin": "B0BMPG47KQ",
+   "link": "https://www.amazon.com/dp/B0BMPG47KQ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BMPG47KQ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "DRGB black"
+  },
+  "phanteks-xt-pro-ultra": {
+   "asin": "B0CT5V2XJK",
+   "link": "https://www.amazon.com/dp/B0CT5V2XJK",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CT5V2XJK&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "black"
+  },
+  "thermaltake-s100-tg-snow-edition": {
+   "asin": "B087CDVBZD",
+   "link": "https://www.amazon.com/dp/B087CDVBZD",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B087CDVBZD&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "white"
+  },
+  "be-quiet-pure-base-501-airflow": {
+   "asin": "B0DGXR6TTD",
+   "link": "https://www.amazon.com/dp/B0DGXR6TTD",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DGXR6TTD&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "BG074 black"
+  },
+  "be-quiet-shadow-base-800": {
+   "asin": "B0C58SRL9T",
+   "link": "https://www.amazon.com/dp/B0C58SRL9T",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0C58SRL9T&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "BGW60 black"
+  },
+  "amd-ryzen-5-5500f": {
+   "asin": "B0HGMTDZM7",
+   "link": "https://www.amazon.com/dp/B0HGMTDZM7",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0HGMTDZM7&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "amd-ryzen-5-7600x3d": {
+   "asin": "B0F9XH8DBP",
+   "link": "https://www.amazon.com/dp/B0F9XH8DBP",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F9XH8DBP&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "boxed"
+  },
+  "amd-ryzen-5-8600g": {
+   "asin": "B0CQ4GYTTX",
+   "link": "https://www.amazon.com/dp/B0CQ4GYTTX",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CQ4GYTTX&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "boxed"
+  },
+  "amd-ryzen-7-5700x3d": {
+   "asin": "B0CQ4H4H7X",
+   "link": "https://www.amazon.com/dp/B0CQ4H4H7X",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CQ4H4H7X&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "AMD listing"
+  },
+  "amd-ryzen-7-7800x3d": {
+   "asin": "B0BTZB7F88",
+   "link": "https://www.amazon.com/dp/B0BTZB7F88",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BTZB7F88&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "amd-ryzen-7-9800x3d": {
+   "asin": "B0DKFMSMYK",
+   "link": "https://www.amazon.com/dp/B0DKFMSMYK",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DKFMSMYK&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "amd-ryzen-7-9850x3d": {
+   "asin": "B0G8JMLXNQ",
+   "link": "https://www.amazon.com/dp/B0G8JMLXNQ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G8JMLXNQ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "amd-ryzen-5-9600x": {
+   "asin": "B0D6NN6TM7",
+   "link": "https://www.amazon.com/dp/B0D6NN6TM7",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D6NN6TM7&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "amd-ryzen-7-9700x": {
+   "asin": "B0D6NMDNNX",
+   "link": "https://www.amazon.com/dp/B0D6NMDNNX",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D6NMDNNX&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "amd-ryzen-9-9900x": {
+   "asin": "B0D6NN87T8",
+   "link": "https://www.amazon.com/dp/B0D6NN87T8",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D6NN87T8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "amd-ryzen-9-9950x3d": {
+   "asin": "B0DVZSG8D5",
+   "link": "https://www.amazon.com/dp/B0DVZSG8D5",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DVZSG8D5&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "amd-ryzen-7-8700g": {
+   "asin": "B0CQ4JBKW3",
+   "link": "https://www.amazon.com/dp/B0CQ4JBKW3",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CQ4JBKW3&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "intel-core-ultra-9-285k": {
+   "asin": "B0DFKC99VL",
+   "link": "https://www.amazon.com/dp/B0DFKC99VL",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DFKC99VL&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "intel-core-ultra-7-265k": {
+   "asin": "B0DFK2MH2D",
+   "link": "https://www.amazon.com/dp/B0DFK2MH2D",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DFK2MH2D&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "intel-core-ultra-7-270k-plus": {
+   "asin": "B0GMLJCBBM",
+   "link": "https://www.amazon.com/dp/B0GMLJCBBM",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GMLJCBBM&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "intel-core-ultra-5-250k-plus": {
+   "asin": "B0GMKXVVJQ",
+   "link": "https://www.amazon.com/dp/B0GMKXVVJQ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GMKXVVJQ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "intel-core-i7-14700k": {
+   "asin": "B0CGJ41C9W",
+   "link": "https://www.amazon.com/dp/B0CGJ41C9W",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CGJ41C9W&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "intel-core-i5-14600k": {
+   "asin": "B0CHBGVFHP",
+   "link": "https://www.amazon.com/dp/B0CHBGVFHP",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CHBGVFHP&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "intel-core-i5-13600k": {
+   "asin": "B0BCDR9M33",
+   "link": "https://www.amazon.com/dp/B0BCDR9M33",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BCDR9M33&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "intel-core-i7-12700k": {
+   "asin": "B09FXNVDBJ",
+   "link": "https://www.amazon.com/dp/B09FXNVDBJ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09FXNVDBJ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "corsair-vengeance-ddr5-6000": {
+   "asin": "B0C3RYHZJQ",
+   "link": "https://www.amazon.com/dp/B0C3RYHZJQ",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0C3RYHZJQ&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "32GB 2x16 CL30 black"
+  },
+  "corsair-vengeance-ddr5-5200-64gb": {
+   "asin": "B09R7S7PXC",
+   "link": "https://www.amazon.com/dp/B09R7S7PXC",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09R7S7PXC&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "2x32 black"
+  },
+  "corsair-vengeance-ddr5-5200-192gb": {
+   "asin": "B0BY6ZF5KF",
+   "link": "https://www.amazon.com/dp/B0BY6ZF5KF",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BY6ZF5KF&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "4x48 black"
+  },
+  "crucial-pro-overclocking-ddr5-6000": {
+   "asin": "B0CTHXMYL8",
+   "link": "https://www.amazon.com/dp/B0CTHXMYL8",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CTHXMYL8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "CL36 black"
+  },
+  "g-skill-ripjaws-s5-ddr5-6000": {
+   "asin": "B09Y16CDLG",
+   "link": "https://www.amazon.com/dp/B09Y16CDLG",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09Y16CDLG&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "CL30 matte black"
+  },
+  "g-skill-ripjaws-v-ddr4-3200": {
+   "asin": "B0171GQR0C",
+   "link": "https://www.amazon.com/dp/B0171GQR0C",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0171GQR0C&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "2x16 CL16"
+  },
+  "g-skill-trident-z5-neo-ddr5-6000-cl30": {
+   "asin": "B0BF8FVLSL",
+   "link": "https://www.amazon.com/dp/B0BF8FVLSL",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BF8FVLSL&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "RGB EXPO"
+  },
+  "g-skill-trident-z5-rgb-ddr5-6400-96gb": {
+   "asin": "B0C2BGD6SM",
+   "link": "https://www.amazon.com/dp/B0C2BGD6SM",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0C2BGD6SM&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "matte black"
+  },
+  "kingston-fury-beast-ddr5-6000": {
+   "asin": "B0CYHC58P6",
+   "link": "https://www.amazon.com/dp/B0CYHC58P6",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CYHC58P6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "CL30 EXPO"
+  },
+  "patriot-viper-steel-ddr4-3600": {
+   "asin": "B088KSRW4S",
+   "link": "https://www.amazon.com/dp/B088KSRW4S",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B088KSRW4S&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "2x16 CL18"
+  },
+  "patriot-viper-venom-rgb-ddr5-6000": {
+   "asin": "B0D4NLTM6R",
+   "link": "https://www.amazon.com/dp/B0D4NLTM6R",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D4NLTM6R&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "CL30"
+  },
+  "samsung-ddr5-4800-32gb": {
+   "asin": "B0DTJHGH4G",
+   "link": "https://www.amazon.com/dp/B0DTJHGH4G",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DTJHGH4G&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "single 32GB UDIMM"
+  },
+  "teamgroup-t-force-delta-rgb-ddr5-6000": {
+   "asin": "B09LHQL3GF",
+   "link": "https://www.amazon.com/dp/B09LHQL3GF",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09LHQL3GF&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "2x16 CL38 black"
+  },
+  "teamgroup-t-force-delta-rgb-ddr5-6000-64gb": {
+   "asin": "B0BNTXVW8V",
+   "link": "https://www.amazon.com/dp/B0BNTXVW8V",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BNTXVW8V&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "2x32 CL38 white"
+  },
+  "teamgroup-t-force-xtreem-argb-ddr4-3600": {
+   "asin": "B08T1RD9KT",
+   "link": "https://www.amazon.com/dp/B08T1RD9KT",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B08T1RD9KT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "2x16 CL18 white"
+  },
+  "athena-pro-gaming-chair": {
+   "asin": "B0FX2KLHSD",
+   "link": "https://www.amazon.com/dp/B0FX2KLHSD",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FX2KLHSD&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "Blacklyte, black leather"
+  },
+  "autonomous-ergochair-pro": {
+   "asin": "B0FL2F3W34",
+   "link": "https://www.amazon.com/dp/B0FL2F3W34",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FL2F3W34&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "black foam"
+  },
+  "capot-gaming-chair": {
+   "asin": "B0D9VPSQM7",
+   "link": "https://www.amazon.com/dp/B0D9VPSQM7",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D9VPSQM7&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "ergonomic mesh"
+  },
+  "gtplayer-gaming-chair": {
+   "asin": "B0GK5ZF61X",
+   "link": "https://www.amazon.com/dp/B0GK5ZF61X",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GK5ZF61X&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "footrest, black fabric"
+  },
+  "gtplayer-comfort": {
+   "asin": "B0BBPRZHRX",
+   "link": "https://www.amazon.com/dp/B0BBPRZHRX",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BBPRZHRX&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "white faux leather, footrest"
+  },
+  "hon-ignition-2-0": {
+   "asin": "B06Y3PGPR2",
+   "link": "https://www.amazon.com/dp/B06Y3PGPR2",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B06Y3PGPR2&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "mid-back black"
+  },
+  "huanuo-gaming-chair": {
+   "asin": "B0BZS9CGNC",
+   "link": "https://www.amazon.com/dp/B0BZS9CGNC",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0BZS9CGNC&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "mesh, flip-up arms, black"
+  },
+  "razer-iskur-v2-x": {
+   "asin": "B0DP5SY554",
+   "link": "https://www.amazon.com/dp/B0DP5SY554",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DP5SY554&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "black"
+  },
+  "respawn-110-pro": {
+   "asin": "B0DGKVGH8X",
+   "link": "https://www.amazon.com/dp/B0DGKVGH8X",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DGKVGH8X&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "gray fabric"
+  },
+  "respawn-110": {
+   "asin": "B09V8C78YF",
+   "link": "https://www.amazon.com/dp/B09V8C78YF",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B09V8C78YF&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "steelcase-gesture": {
+   "asin": "B08LMM1148",
+   "link": "https://www.amazon.com/dp/B08LMM1148",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B08LMM1148&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "headrest, licorice"
+  },
+  "noblechairs-hero": {
+   "asin": "B07DCPSK74",
+   "link": "https://www.amazon.com/dp/B07DCPSK74",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B07DCPSK74&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "PU black"
+  },
+  "asus-rog-ally-x": {
+   "asin": "B0D49B5DTD",
+   "link": "https://www.amazon.com/dp/B0D49B5DTD",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0D49B5DTD&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "Z1 Extreme 24GB 1TB"
+  },
+  "asus-rog-ally-z1-extreme": {
+   "asin": "B0C52RFZXB",
+   "link": "https://www.amazon.com/dp/B0C52RFZXB",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0C52RFZXB&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "512GB white"
+  },
+  "ayaneo-3": {
+   "asin": "B0FB99FF4J",
+   "link": "https://www.amazon.com/dp/B0FB99FF4J",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FB99FF4J&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "HX 370 OLED"
+  },
+  "gpd-win-5": {
+   "asin": "B0G65LCKDP",
+   "link": "https://www.amazon.com/dp/B0G65LCKDP",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G65LCKDP&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "AI Max+ 395"
+  },
+  "gpd-win-mini-2025": {
+   "asin": "B0DT9YFC9T",
+   "link": "https://www.amazon.com/dp/B0DT9YFC9T",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DT9YFC9T&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "8840U"
+  },
+  "lenovo-legion-go-2": {
+   "asin": "B0FYR394K5",
+   "link": "https://www.amazon.com/dp/B0FYR394K5",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FYR394K5&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "lenovo-legion-go-s": {
+   "asin": "B0GWJZWNP4",
+   "link": "https://www.amazon.com/dp/B0GWJZWNP4",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GWJZWNP4&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "Z2 Go 512GB"
+  },
+  "lenovo-legion-go": {
+   "asin": "B0CM74YFSP",
+   "link": "https://www.amazon.com/dp/B0CM74YFSP",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CM74YFSP&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "Z1 Extreme 512GB"
+  },
+  "msi-claw-8-ai-plus": {
+   "asin": "B0DLPYC184",
+   "link": "https://www.amazon.com/dp/B0DLPYC184",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DLPYC184&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "A2VM-001US"
+  },
+  "msi-claw-8-ex-ai-plus": {
+   "asin": "B0H4H27WJN",
+   "link": "https://www.amazon.com/dp/B0H4H27WJN",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H4H27WJN&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "CG3EM-024US"
+  },
+  "msi-claw-a8": {
+   "asin": "B0GL4N9YQV",
+   "link": "https://www.amazon.com/dp/B0GL4N9YQV",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GL4N9YQV&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "BZ2EM-070US"
+  },
+  "rog-xbox-ally-x": {
+   "asin": "B0G2HTSJXT",
+   "link": "https://www.amazon.com/dp/B0G2HTSJXT",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0G2HTSJXT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "black 1TB"
+  },
+  "rog-xbox-ally": {
+   "asin": "B0FM6C3ZMN",
+   "link": "https://www.amazon.com/dp/B0FM6C3ZMN",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FM6C3ZMN&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "white 512GB"
+  },
+  "steam-deck-oled-1tb": {
+   "asin": "B0CQ3L4726",
+   "link": "https://www.amazon.com/dp/B0CQ3L4726",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0CQ3L4726&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "steam-deck-oled-512gb": {
+   "asin": "B0F2TPM644",
+   "link": "https://www.amazon.com/dp/B0F2TPM644",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F2TPM644&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "Valve, 45W PSU"
+  },
+  "asus-rog-strix-g16-2026": {
+   "asin": "B0F8JZB2ZS",
+   "link": "https://www.amazon.com/dp/B0F8JZB2ZS",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F8JZB2ZS&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "8940HX RTX 5070 Ti"
+  },
+  "asus-rog-strix-scar-18-2026": {
+   "asin": "B0H42KKW67",
+   "link": "https://www.amazon.com/dp/B0H42KKW67",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H42KKW67&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "G835LXG RTX 5090"
+  },
+  "asus-rog-zephyrus-g14-2026": {
+   "asin": "B0FRFPCPRB",
+   "link": "https://www.amazon.com/dp/B0FRFPCPRB",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FRFPCPRB&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "Ryzen 9 270 RTX 5060"
+  },
+  "asus-rog-zephyrus-g16-2026": {
+   "asin": "B0H12XC76C",
+   "link": "https://www.amazon.com/dp/B0H12XC76C",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H12XC76C&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "Ultra 9 285H RTX 5070"
+  },
+  "asus-tuf-gaming-a16-2026": {
+   "asin": "B0H6PM43KR",
+   "link": "https://www.amazon.com/dp/B0H6PM43KR",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H6PM43KR&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "Ryzen 7 170 RTX 4050"
+  },
+  "vita-pro-handheld": {
+   "asin": "B0GSSZML6Y",
+   "link": "https://www.amazon.com/dp/B0GSSZML6Y",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GSSZML6Y&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "Anbernic RG VITA Pro black"
+  },
+  "asus-zenbook-duo-laptop": {
+   "asin": "B0DPQ35KMW",
+   "link": "https://www.amazon.com/dp/B0DPQ35KMW",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DPQ35KMW&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "UX8406CA"
+  },
+  "acer-nitro-v-16s-ai": {
+   "asin": "B0F195W823",
+   "link": "https://www.amazon.com/dp/B0F195W823",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F195W823&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "ANV16S-41-R2AJ"
+  },
+  "acer-predator-helios-neo-16-ai": {
+   "asin": "B0FN15LKGD",
+   "link": "https://www.amazon.com/dp/B0FN15LKGD",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FN15LKGD&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "PHN16-73-92B8"
+  },
+  "alienware-15-2026": {
+   "asin": "B0H5M2WZYC",
+   "link": "https://www.amazon.com/dp/B0H5M2WZYC",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H5M2WZYC&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "Core 7 240H RTX 4050"
+  },
+  "alienware-16-area-51-2026": {
+   "asin": "B0F8P6MRQT",
+   "link": "https://www.amazon.com/dp/B0F8P6MRQT",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F8P6MRQT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "AA16250 RTX 5070 Ti"
+  },
+  "gigabyte-aorus-master-16": {
+   "asin": "B0DYJHX33G",
+   "link": "https://www.amazon.com/dp/B0DYJHX33G",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DYJHX33G&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "Ultra 9 275HX RTX 5080"
+  },
+  "lenovo-loq-15-essential-gen-11": {
+   "asin": "B0FMLCQZM8",
+   "link": "https://www.amazon.com/dp/B0FMLCQZM8",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FMLCQZM8&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "i5-12450HX"
+  },
+  "lenovo-legion-7i-gen-10": {
+   "asin": "B0FY37MXSG",
+   "link": "https://www.amazon.com/dp/B0FY37MXSG",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FY37MXSG&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "Ultra 9 275HX RTX 5070"
+  },
+  "lenovo-legion-pro-5i-gen-10": {
+   "asin": "B0F9XSW5HB",
+   "link": "https://www.amazon.com/dp/B0F9XSW5HB",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F9XSW5HB&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "RTX 5070 Ti"
+  },
+  "lenovo-legion-pro-7i-gen-10": {
+   "asin": "B0F3JC9F6L",
+   "link": "https://www.amazon.com/dp/B0F3JC9F6L",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F3JC9F6L&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "RTX 5080"
+  },
+  "msi-raider-a18-hx": {
+   "asin": "B0DVDNC7QG",
+   "link": "https://www.amazon.com/dp/B0DVDNC7QG",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0DVDNC7QG&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "A9WIG-082US RTX 5080"
+  },
+  "msi-titan-18-hx-ai": {
+   "asin": "B0F1DXXMHY",
+   "link": "https://www.amazon.com/dp/B0F1DXXMHY",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0F1DXXMHY&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "A2XWIG-616US RTX 5080"
+  },
+  "razer-blade-16-2026": {
+   "asin": "B0H31TTZJT",
+   "link": "https://www.amazon.com/dp/B0H31TTZJT",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H31TTZJT&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "RTX 5070 Ti 32GB 1TB"
+  },
+  "razer-blade-18-2026": {
+   "asin": "B0H322NHP6",
+   "link": "https://www.amazon.com/dp/B0H322NHP6",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0H322NHP6&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "RTX 5080 32GB 1TB"
+  },
+  "nuphy-wh80": {
+   "asin": "B0GGB9BTSH",
+   "link": "https://www.amazon.com/dp/B0GGB9BTSH",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0GGB9BTSH&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": ""
+  },
+  "acer-predator-helios-neo-slim-14": {
+   "asin": "B0FNXRP9G7",
+   "link": "https://www.amazon.com/dp/B0FNXRP9G7",
+   "image": "https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B0FNXRP9G7&Format=_SL500_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&language=en_US",
+   "note": "PHN14-71-906J RTX 5070"
   }
  }
 }

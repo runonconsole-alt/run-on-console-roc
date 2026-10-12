@@ -185,7 +185,16 @@ RELEASES = [
                   'Header: PRODUCTS is now CATEGORIES',
                   'Blog cards show the whole cover; new covers use the product photo next to the title'],
          checks=[dict(label='New categories and products (cli-product-expand.php --apply)', type='file', path='api/v1/cron/cli-product-expand.php')],
-         pr=REPO + '32'),
+         pr=REPO + '32', build='index-CXYG-kAx.js'),
+    dict(deploy=33, date='2026-10-12', title='Amazon links for the new products, versions, sales-focused blog keywords',
+         changes=['198 of the 213 products on the site now open their exact Amazon page (amazon.com/dp/ASIN), incl. 110 of the 112 new products',
+                  'Products without a photo are taken off the site (kept in the CMS as drafts; their address opens the category)',
+                  'Choose version buttons (8GB / 16GB, 512GB / 1TB and more): each version shows its own photo',
+                  'Every photo is WebP, under 100 KB, sharp, with alt text: product name and category',
+                  'PC Hardware and Gaming Hardware pages show only their own categories',
+                  'Blog writer: buying guides first (sales mode), keywords from what people search on Google, anchor text = the searched name of the page'],
+         checks=[dict(label='Product versions file', type='file', path='api/v1/cms/product-variants.json')],
+         pr=REPO + '33'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

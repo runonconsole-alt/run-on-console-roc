@@ -6,7 +6,11 @@
  *   php cli-product-photos.php --apply          sets the photos, with a backup
  *   php cli-product-photos.php --apply --covers also draws new covers for the blog posts
  *                                               (title + product photo)
- *   php cli-product-photos.php --rollback=FILE  puts the old pictures back
+ *   php cli-product-photos.php --apply --unpublish-unpictured
+ *                                               also takes the products that have no photo off the
+ *                                               site (status "draft"; their address sends visitors
+ *                                               to the category; the CMS keeps them)
+ *   php cli-product-photos.php --rollback=FILE  puts the old pictures (and published products) back
  *
  * Data: roc-product-photos.json; the photos are /images/products/photos/{slug}.webp
  * (1000 x 750 on white, from the deploy zip).
@@ -21,6 +25,7 @@ $HOME = dirname($ROOT);
 $args = array_slice($argv, 1);
 $apply = in_array('--apply', $args, true);
 $covers = in_array('--covers', $args, true);
+$unpub = in_array('--unpublish-unpictured', $args, true);
 $rollback = null;
 foreach ($args as $a) if (strpos($a, '--rollback=') === 0) $rollback = substr($a, 11);
 
@@ -41,7 +46,9 @@ if ($rollback !== null) {
     if (!is_array($b) || empty($b['products'])) exit("No backup found in {$rollback}\n");
     $u = $pdo->prepare('UPDATE products SET image = ? WHERE slug = ?');
     foreach ($b['products'] as $slug => $img) $u->execute([$img, $slug]);
-    exit('Restored ' . count($b['products']) . " picture(s) from {$rollback}\n");
+    $r = $pdo->prepare("UPDATE products SET status = 'published' WHERE slug = ?");
+    foreach ((array)($b['unpublished'] ?? []) as $slug) $r->execute([$slug]);
+    exit('Restored ' . count($b['products']) . ' picture(s) and ' . count((array)($b['unpublished'] ?? [])) . " product(s) from {$rollback}\n");
 }
 
 $data = json_decode((string)@file_get_contents(__DIR__ . '/roc-product-photos.json'), true);
@@ -63,15 +70,30 @@ foreach ($data['products'] as $slug => $p) {
     $changes[$slug] = $p['image']; $backup[$slug] = $img;
     echo '  +  ' . str_pad($slug, 46) . " {$p['image']}\n";
 }
-echo "\n" . count($changes) . " product(s) to update.\n";
+// Products that have no photo (not in this list, not a new product, no photo set by hand).
+$off = [];
+if ($unpub) {
+    $expand = json_decode((string)@file_get_contents(__DIR__ . '/roc-product-expand.json'), true);
+    $known = array_merge(array_keys($data['products']), array_column((array)($expand['products'] ?? []), 'slug'));
+    foreach ($pdo->query("SELECT slug, image FROM products WHERE status = 'published'")->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        if (in_array($r['slug'], $known, true)) continue;
+        $img = trim((string)$r['image']);
+        $own = $img !== '' && !in_array($img, $placeholders, true) && strpos($img, '/images/products/') !== 0 && strpos($img, 'amazon-adsystem.com') === false;
+        if ($own) { echo "  =  {$r['slug']}: has its own picture (kept on the site)\n"; continue; }
+        $off[] = $r['slug']; echo "  -  {$r['slug']}: no photo, taken off the site\n";
+    }
+}
+echo "\n" . count($changes) . " product(s) to update" . ($unpub ? ', ' . count($off) . ' to take off the site' : '') . ".\n";
 if (!$apply) { echo "Dry run: nothing changed. Run again with --apply" . ($covers ? ' --covers' : '') . ".\n"; exit(0); }
 
-if ($changes) {
+if ($changes || $off) {
     $file = $HOME . '/roc-photos-backup-' . date('Ymd-His') . '.json';
-    file_put_contents($file, json_encode(['made' => date('c'), 'products' => $backup], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    file_put_contents($file, json_encode(['made' => date('c'), 'products' => $backup, 'unpublished' => $off], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    $d = $pdo->prepare("UPDATE products SET status = 'draft'" . ($hasUpd ? ', updated_at = ?' : '') . ' WHERE slug = ?');
+    foreach ($off as $slug) $d->execute($hasUpd ? [date('Y-m-d H:i:s'), $slug] : [$slug]);
     $u = $pdo->prepare('UPDATE products SET image = ?' . ($hasUpd ? ', updated_at = ?' : '') . ' WHERE slug = ?');
     foreach ($changes as $slug => $img) $u->execute($hasUpd ? [$img, date('Y-m-d H:i:s'), $slug] : [$img, $slug]);
-    echo 'Updated ' . count($changes) . " product(s).\nBackup: {$file}\nRollback: php " . __FILE__ . " --rollback={$file}\n";
+    echo 'Updated ' . count($changes) . ' product(s), took ' . count($off) . " off the site.\nBackup: {$file}\nRollback: php " . __FILE__ . " --rollback={$file}\n";
 }
 
 if ($covers) {

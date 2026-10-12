@@ -1,0 +1,31 @@
+{
+ "deploy": 33,
+ "date": "2026-10-12",
+ "title": "Amazon links for the new products, versions, sales-focused blog keywords",
+ "changes": [
+  "198 of the 213 products on the site now open their exact Amazon page (amazon.com/dp/ASIN), incl. 110 of the 112 new products",
+  "Products without a photo are taken off the site (kept in the CMS as drafts; their address opens the category)",
+  "Choose version buttons (8GB / 16GB, 512GB / 1TB and more): each version shows its own photo",
+  "Every photo is WebP, under 100 KB, sharp, with alt text: product name and category",
+  "PC Hardware and Gaming Hardware pages show only their own categories",
+  "Blog writer: buying guides first (sales mode), keywords from what people search on Google, anchor text = the searched name of the page"
+ ],
+ "checks": [
+  {
+   "label": "Product versions file",
+   "type": "file",
+   "path": "api/v1/cms/product-variants.json"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-nFjVBE7y.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/33",
+ "build": "index-nFjVBE7y.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}
