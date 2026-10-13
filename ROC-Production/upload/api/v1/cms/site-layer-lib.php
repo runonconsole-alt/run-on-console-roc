@@ -27,6 +27,8 @@ if (defined('ROC_SITE_LAYER_LIB')) return;
 define('ROC_SITE_LAYER_LIB', 1);
 
 const ROC_LAYER_FILE = '/cms-templates/site-layer.json';
+/** Where each part is stored (cms_settings.setting_key). */
+const ROC_LAYER_KEYS = ['announcement' => 'site_announcement', 'code' => 'site_code', 'meta' => 'meta_overrides', 'code_pages' => 'site_code_pages'];
 /** Built pages live in these folders; the others are served by PHP or are not pages. */
 const ROC_LAYER_SKIP_DIRS = ['api', 'cms', 'cms-templates', 'uploads', 'images', 'assets', 'fonts', 'products',
                              'categories', 'blogs', 'gaming-platforms', 'partnerships', 'policy', 'node_modules', 'cgi-bin', '.well-known'];
@@ -42,9 +44,10 @@ const ROC_LAYER_PHP_PAGES = [
 function rocLayerDefaults(): array {
     return [
         'announcement' => ['enabled' => false, 'icon' => '📣', 'title' => '', 'text' => '', 'link_url' => '', 'link_text' => '',
-                           'bg' => '#e4ff1a', 'fg' => '#111111', 'dismissible' => true, 'ends_at' => ''],
+                           'bg' => '#e4ff1a', 'fg' => '#111111', 'dismissible' => true, 'ends_at' => '', 'scroll' => true, 'speed' => 3],
         'code' => ['css' => '', 'head_html' => '', 'body_top_html' => '', 'body_end_html' => ''],
         'meta' => [],
+        'code_pages' => [],
         'updated' => '',
     ];
 }
@@ -60,6 +63,7 @@ function rocLayerLoad(string $root): array {
         $d['announcement'] = array_merge($d['announcement'], (array)($j['announcement'] ?? []));
         $d['code'] = array_merge($d['code'], (array)($j['code'] ?? []));
         $d['meta'] = (array)($j['meta'] ?? []);
+        $d['code_pages'] = (array)($j['code_pages'] ?? []);
         $d['updated'] = (string)($j['updated'] ?? '');
     }
     return $cache[$root] = $d;
@@ -76,12 +80,23 @@ function rocLayerAnnouncementOn(array $a): bool {
 }
 
 function rocLayerAnnouncementCss(): string {
-    return '.roc-ann{position:relative;z-index:60;background:var(--roc-ann-bg);color:var(--roc-ann-fg);'
-        . 'font:500 13px/1.45 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;padding:10px 46px 10px 16px;text-align:center}'
+    // Sticky at the top (stays visible while scrolling); the site header (sticky top-0)
+    // moves down by the bar's height (--roc-ann-h, set by the bar's script).
+    return '.roc-ann{position:sticky;top:0;z-index:1001;background:var(--roc-ann-bg);color:var(--roc-ann-fg);'
+        . 'font:500 13px/1.45 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;padding:10px 46px 10px 16px;text-align:center;overflow:hidden}'
         . '.roc-ann[hidden]{display:none}.roc-ann p{margin:0}.roc-ann strong{font-weight:800}'
+        . 'header.sticky{top:var(--roc-ann-h,0px)!important}'
+        // overflow-x:hidden on html/body stops position:sticky from working; clip keeps the same look.
+        . 'html,body{overflow-x:clip!important}'
         . '.roc-ann a{color:inherit;text-decoration:underline;text-underline-offset:2px;font-weight:700;margin-left:6px;white-space:nowrap}'
-        . '.roc-ann-x{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;color:inherit;'
-        . 'font-size:22px;line-height:1;cursor:pointer;padding:6px 10px;border-radius:8px}.roc-ann-x:hover{background:rgba(0,0,0,.08)}';
+        . '.roc-ann-x{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:var(--roc-ann-bg);border:0;color:inherit;'
+        . 'font-size:22px;line-height:1;cursor:pointer;padding:6px 10px;border-radius:8px;z-index:1}.roc-ann-x:hover{filter:brightness(.92)}'
+        // Running text: enters from the right, leaves on the left, starts again. Pauses under the mouse.
+        . '.roc-ann-run{text-align:left;white-space:nowrap}'
+        . '.roc-ann-run p{display:inline-block;padding-left:100%;animation:roc-ann-run var(--roc-ann-dur,20s) linear infinite}'
+        . '.roc-ann-run:hover p{animation-play-state:paused}'
+        . '@keyframes roc-ann-run{from{transform:translateX(0)}to{transform:translateX(-100%)}}'
+        . '@media (prefers-reduced-motion:reduce){.roc-ann-run{text-align:center;white-space:normal}.roc-ann-run p{padding-left:0;animation:none}}';
 }
 
 function rocLayerAnnouncementHtml(array $a): string {
@@ -89,18 +104,24 @@ function rocLayerAnnouncementHtml(array $a): string {
     $url = trim((string)$a['link_url']); $label = trim((string)$a['link_text']) ?: 'Learn more';
     $id = substr(md5($title . '|' . $text . '|' . $url), 0, 10);
     $end = strtotime((string)($a['ends_at'] ?? '')) ?: 0;
+    $run = !empty($a['scroll']);
+    // Speed: 1 slow … 5 fast. Longer messages get more time so they read at the same pace.
+    $speed = max(1, min(5, (int)($a['speed'] ?? 3)));
+    $dur = (int)round((12 + mb_strlen($title . $text . ($url !== '' ? $label : '')) * 0.18) * (1.6 - $speed * 0.2));
     $p = (trim((string)$a['icon']) !== '' ? '<span aria-hidden="true">' . rocLayerH((string)$a['icon']) . '</span> ' : '')
         . ($title !== '' ? '<strong>' . rocLayerH($title) . '</strong>' : '')
         . ($title !== '' && $text !== '' ? ' — ' : '')
         . rocLayerH($text)
         . ($url !== '' ? '<a href="' . rocLayerH($url) . '"' . (preg_match('#^https?://#i', $url) && stripos($url, 'runonconsole.com') === false ? ' target="_blank" rel="noopener"' : '') . '>' . rocLayerH($label) . '</a>' : '');
-    $h = '<div class="roc-ann" id="roc-ann" data-ann="' . $id . '" data-end="' . ($end * 1000) . '" role="region" aria-label="Announcement"'
-        . ' style="--roc-ann-bg:' . rocLayerH((string)$a['bg']) . ';--roc-ann-fg:' . rocLayerH((string)$a['fg']) . '"><p>' . $p . '</p>';
+    $h = '<div class="roc-ann' . ($run ? ' roc-ann-run' : '') . '" id="roc-ann" data-ann="' . $id . '" data-end="' . ($end * 1000) . '" role="region" aria-label="Announcement"'
+        . ' style="--roc-ann-bg:' . rocLayerH((string)$a['bg']) . ';--roc-ann-fg:' . rocLayerH((string)$a['fg']) . ($run ? ';--roc-ann-dur:' . $dur . 's' : '') . '"><p>' . $p . '</p>';
     if (!empty($a['dismissible'])) {
-        $h .= '<button type="button" class="roc-ann-x" aria-label="Close announcement" onclick="var b=this.parentNode;b.hidden=true;try{localStorage.setItem(\'roc-ann-x\',b.getAttribute(\'data-ann\'))}catch(e){}">&times;</button>';
+        $h .= '<button type="button" class="roc-ann-x" aria-label="Close announcement" onclick="var b=this.parentNode;b.hidden=true;document.documentElement.style.setProperty(\'--roc-ann-h\',\'0px\');try{localStorage.setItem(\'roc-ann-x\',b.getAttribute(\'data-ann\'))}catch(e){}">&times;</button>';
     }
-    $h .= '</div><script>(function(){var b=document.getElementById("roc-ann");if(!b)return;var e=+b.getAttribute("data-end");'
-        . 'try{if((e&&Date.now()>e)||localStorage.getItem("roc-ann-x")===b.getAttribute("data-ann"))b.hidden=true}catch(x){}})();</script>';
+    // Hide when closed or expired; otherwise tell the sticky header how far to move down.
+    $h .= '</div><script>(function(){var b=document.getElementById("roc-ann");if(!b)return;var e=+b.getAttribute("data-end"),r=document.documentElement;'
+        . 'try{if((e&&Date.now()>e)||localStorage.getItem("roc-ann-x")===b.getAttribute("data-ann"))b.hidden=true}catch(x){}'
+        . 'function h(){r.style.setProperty("--roc-ann-h",(b.hidden?0:b.offsetHeight)+"px")}h();addEventListener("resize",h);addEventListener("load",h)})();</script>';
     return $h;
 }
 
@@ -157,11 +178,16 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
         $html = rocLayerSetMeta($html, trim((string)($ov['title'] ?? '')), trim((string)($ov['description'] ?? '')));
     }
     $ann = rocLayerAnnouncementOn($L['announcement']);
-    $css = ($ann ? rocLayerAnnouncementCss() : '') . trim((string)$L['code']['css']);
+    // Whole-site code first, then code for page groups (/products/*) and for this page.
+    $codes = [$L['code']];
+    foreach ((array)($L['code_pages'] ?? []) as $scope => $c) if (is_array($c) && rocLayerScopeMatch((string)$scope, $path)) $codes[] = $c;
+    $pick = function (string $k) use ($codes) { $o = ''; foreach ($codes as $c) $o .= (string)($c[$k] ?? ''); return $o; };
+    $css = ($ann ? rocLayerAnnouncementCss() : '');
+    foreach ($codes as $c) if (trim((string)($c['css'] ?? '')) !== '') $css .= ($css !== '' ? "\n" : '') . trim((string)$c['css']);
     if ($css !== '') $head .= '<style id="roc-site-css">' . str_ireplace('</style', '<\/style', $css) . '</style>';
-    if (trim((string)$L['code']['head_html']) !== '') $head .= "\n" . $L['code']['head_html'] . "\n";
-    $top = ($ann ? rocLayerAnnouncementHtml($L['announcement']) : '') . (string)$L['code']['body_top_html'];
-    $end = (string)$L['code']['body_end_html'];
+    if (trim($pick('head_html')) !== '') $head .= "\n" . $pick('head_html') . "\n";
+    $top = ($ann ? rocLayerAnnouncementHtml($L['announcement']) : '') . $pick('body_top_html');
+    $end = $pick('body_end_html');
 
     if ($head !== '') {
         $at = stripos($html, '<title');
@@ -178,6 +204,16 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
         if ($at !== false) $html = substr($html, 0, $at) . '<!--roc-layer-end-->' . $end . '<!--/roc-layer-end-->' . substr($html, $at);
     }
     return $html;
+}
+
+/** Scope of page code: an exact address (/about/) or a group ending in * (/products/*). */
+function rocLayerScopeMatch(string $scope, string $path): bool {
+    if ($scope === '' || $scope === '*') return false;          // whole-site code lives in $L['code']
+    if (substr($scope, -1) === '*') {
+        $pre = substr($scope, 0, -1);
+        return strpos($path, $pre) === 0 && $path !== $pre;     // /products/* = pages below /products/, not the list itself
+    }
+    return $scope === $path;
 }
 
 /* ---------------------------------------------------------- built pages */
@@ -242,10 +278,10 @@ function rocLayerSettingSet(PDO $pdo, string $key, string $value, ?int $userId):
 /** Settings as stored in the database (falls back to the published file). */
 function rocLayerFromDb(PDO $pdo, string $root): array {
     $L = rocLayerLoad($root);
-    foreach (['announcement' => 'site_announcement', 'code' => 'site_code', 'meta' => 'meta_overrides'] as $k => $key) {
+    foreach (ROC_LAYER_KEYS as $k => $key) {
         $v = rocLayerSettingGet($pdo, $key);
         $d = $v !== null ? json_decode($v, true) : null;
-        if (is_array($d)) $L[$k] = $k === 'meta' ? $d : array_merge(rocLayerDefaults()[$k], $d);
+        if (is_array($d)) $L[$k] = in_array($k, ['meta', 'code_pages'], true) ? $d : array_merge(rocLayerDefaults()[$k], $d);
     }
     return $L;
 }
@@ -298,10 +334,9 @@ function rocHistGet(string $root, string $id): ?array {
 
 /** Saves one part, publishes site-layer.json and rewrites the built pages. Returns files changed. */
 function rocLayerSave(PDO $pdo, string $root, string $part, array $value, ?int $userId, ?array $onlyPaths = null): int {
-    $keys = ['announcement' => 'site_announcement', 'code' => 'site_code', 'meta' => 'meta_overrides'];
-    rocLayerSettingSet($pdo, $keys[$part], (string)json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), $userId);
+    rocLayerSettingSet($pdo, ROC_LAYER_KEYS[$part], (string)json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), $userId);
     $L = rocLayerFromDb($pdo, $root);
-    $L[$part] = $part === 'meta' ? $value : array_merge(rocLayerDefaults()[$part], $value);
+    $L[$part] = in_array($part, ['meta', 'code_pages'], true) ? $value : array_merge(rocLayerDefaults()[$part], $value);
     $L['updated'] = gmdate('c');
     $file = $root . ROC_LAYER_FILE;
     if (!is_dir(dirname($file))) @mkdir(dirname($file), 0755, true);

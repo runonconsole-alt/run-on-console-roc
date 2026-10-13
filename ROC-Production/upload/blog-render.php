@@ -347,7 +347,11 @@ function rocSendHtml(string $html, ?int $modified = null): void {
         $uri = (string)($_SERVER['REQUEST_URI'] ?? '/');
         $path = (string)(parse_url($uri, PHP_URL_PATH) ?: '/');
         // Page 2, searches etc. keep their own titles.
-        $html = rocLayerApply($html, $path, rocLayerLoad(__DIR__), (string)parse_url($uri, PHP_URL_QUERY) === '');
+        $L = rocLayerLoad(__DIR__);
+        $html = rocLayerApply($html, $path, $L, (string)parse_url($uri, PHP_URL_QUERY) === '');
+        // A new announcement, code or meta counts as a change of the page (browsers then fetch it again).
+        $lu = $L['updated'] !== '' ? strtotime($L['updated']) : false;
+        if ($modified && $lu && $lu > $modified) $modified = $lu;
     }
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: public, max-age=0, must-revalidate');

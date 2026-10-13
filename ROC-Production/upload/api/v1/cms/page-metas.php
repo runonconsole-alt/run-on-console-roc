@@ -97,6 +97,41 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
                        'title' => (string)($r['meta_title'] ?? ''), 'description' => (string)($r['meta_description'] ?? '')];
         }
     }
+    // Plain names and the website's own order: Home, About, Products … then account pages.
+    $names = ['/' => 'Home page', '/about/' => 'About us', '/products/' => 'Products (all products)',
+        '/products/pc-hardware/' => 'Products: PC Hardware', '/products/gaming-hardware/' => 'Products: Gaming Hardware',
+        '/compatibility/' => 'Compatibility checker (Can I run it)', '/gaming-platforms/' => 'Gaming platforms (all platforms)',
+        '/blogs/' => 'Blogs (all posts)', '/contact/' => 'Contact us', '/write-for-us/' => 'Write for us & advertising',
+        '/privacy-policy/' => 'Privacy policy & affiliate disclosure', '/terms-and-conditions/' => 'Terms and conditions',
+        '/profile/' => 'Account: profile', '/auth/' => 'Account: sign in portal', '/auth/login/' => 'Account: sign in',
+        '/auth/signup/' => 'Account: sign up', '/auth/forgot-password/' => 'Account: forgot password',
+        '/auth/reset-password/' => 'Account: reset password', '/auth/verify-email/' => 'Account: verify email'];
+    $prefix = ['product' => 'Product: ', 'pcat' => 'Product category: ', 'platform' => 'Gaming platform: ', 'blog' => 'Blog: ', 'cmspage' => 'Page: '];
+    $rank = function (array $r): int {
+        $p = $r['path'];
+        $fixed = ['/' => 0, '/about/' => 1, '/products/' => 2, '/products/pc-hardware/' => 3, '/products/gaming-hardware/' => 3,
+                  '/compatibility/' => 7, '/gaming-platforms/' => 8, '/blogs/' => 10, '/contact/' => 12, '/write-for-us/' => 13,
+                  '/privacy-policy/' => 14, '/terms-and-conditions/' => 15];
+        if (isset($fixed[$p])) return $fixed[$p];
+        switch ($r['type']) {
+            case 'pcat': return 4;
+            case 'product': return 5;
+            case 'platform': return 9;
+            case 'blog': return 11;
+            case 'cmspage': return 17;
+        }
+        if (strpos($p, '/author/') === 0) return 16;
+        if (strpos($p, '/auth/') === 0 || $p === '/profile/') return 20;
+        return 18;
+    };
+    foreach ($rows as $i => &$r) {
+        if (isset($names[$r['path']])) $r['label'] = $names[$r['path']];
+        elseif (isset($prefix[$r['type']])) $r['label'] = $prefix[$r['type']] . $r['label'];
+        elseif (strpos($r['path'], '/author/') === 0) $r['label'] = 'Author page: ' . $r['label'];
+        $r['order'] = $rank($r) * 10000 + $i;
+    }
+    unset($r);
+    usort($rows, function ($a, $b) { return $a['order'] <=> $b['order']; });
     rocPmOut(200, ['success' => true, 'rows' => $rows]);
 }
 

@@ -73,6 +73,15 @@ RELEASES = [
                   'Template & code: after 1 minute without changes, a 5-second countdown returns to the previous page',
                   'About page: "run by the ROC (Run On Console) team"'],
          checks=[], pr=REPO + '23'),
+    dict(deploy=15, date='2026-10-08', title='Running announcement bar, page-by-page template code, easier Metas',
+         changes=['Announcement bar stays at the top while scrolling and can run from right to left',
+                  'Built pages are checked for changes on every visit: no more Ctrl+Shift+R',
+                  'Template & code: choose the page (or all product / blog / platform pages) the code is for',
+                  'Metas: plain page names in the website order (Home, About, Products …), simpler search',
+                  'CMS sidebar keeps its scroll position; darker icons',
+                  'The website header now stays at the top while scrolling'],
+         checks=[dict(label='Fresh pages installer (cli-html-cache.php)', type='htaccess', marker='# ROC html-cache BEGIN')],
+         pr=REPO + '24'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
