@@ -7,8 +7,9 @@
  *   php cli-site-fixes.php --rollback=FILE  undoes an --apply
  *
  * What --apply does:
- *   1. .htaccess: /category/ (the menu link) -> /products/, /category/{x}/ -> /products/{x}/ (301).
- *   2. Menu saved in the CMS: a link to /category/ becomes /products/.
+ *   1. .htaccess: /category/ (the menu link) shows every product category (product-render.php?hub=1);
+ *      /category/{x}/ -> /products/{x}/ (301). An older block that sent /category/ to /products/ is replaced.
+ *   2. Menu saved in the CMS: the CATEGORY item and its "View all" button open /category/.
  *   2b. .htaccess: a Content-Security-Policy header that blocks framing by other sites, plugins and
  *       mixed content (it does not limit scripts, so analytics and the site keep working).
  *   3. Blog posts and news: links to /products/category/{x}/ (old address, 301) become /products/{x}/;
@@ -26,9 +27,12 @@ foreach ($args as $a) if (strpos($a, '--rollback=') === 0) $rollback = substr($a
 
 const FIX_BEGIN = '  # ROC fixes BEGIN (cli-site-fixes.php)';
 const FIX_BLOCK = FIX_BEGIN . "\n"
-    . "  # Old menu address: the product categories are at /products/\n"
-    . "  RewriteRule ^category/?$ /products/ [R=301,L]\n"
+    . "  # Product categories hub (the menu's CATEGORY link)\n"
+    . "  RewriteRule ^category$ /category/ [R=301,L]\n"
+    . "  RewriteRule ^category/$ product-render.php?hub=1 [L,QSA]\n"
     . "  RewriteRule ^category/([a-z0-9-]+)/?$ /products/\$1/ [R=301,L]\n"
+    . "  # Sitemaps submitted without /sitemaps/ (Search Console): send them to the real files\n"
+    . "  RewriteRule ^(pages|products|categories|blogs|news|cms-pages)-sitemap\\.xml$ /sitemaps/\$1-sitemap.xml [R=301,L]\n"
     . "  # ROC fixes END\n";
 // Blocks framing by other sites, plugins and mixed content; scripts are not limited, so analytics keep working.
 const CSP_BEGIN = '# ROC csp BEGIN (cli-site-fixes.php)';
@@ -57,12 +61,17 @@ if ($rollback !== null) {
 
 /* 1. .htaccess */
 $ht = (string)@file_get_contents($ROOT . '/.htaccess');
+// An older version of the block (it redirected /category/ to /products/): take it out, the new one goes in.
+if (strpos($ht, FIX_BEGIN) !== false && strpos($ht, '-sitemap.xml [R=301,L]') === false) {
+    $ht0 = $ht;
+    $ht = (string)preg_replace('#' . preg_quote(FIX_BEGIN, '#') . '.*?\# ROC fixes END\n?\n?#s', '', $ht);
+}
 $htDone = strpos($ht, FIX_BEGIN) !== false;
 $anchor = null;
 foreach (['  # ROC news BEGIN', '  # Blogs come from the CMS database', '  RewriteRule ^blogs$ /blogs/', '  # Real file or folder'] as $a) if (strpos($ht, $a) !== false) { $anchor = $a; break; }
 $cspDone = strpos($ht, CSP_BEGIN) !== false;
 echo $cspDone ? "  =  .htaccess already sends a Content-Security-Policy\n" : "  +  .htaccess: Content-Security-Policy header\n";
-echo $htDone ? "  =  .htaccess already redirects /category/\n" : ($anchor ? "  +  .htaccess: /category/ -> /products/ (301)\n" : "  !  .htaccess: no place found for the redirect (skipped)\n");
+echo $htDone ? "  =  .htaccess already has the /category/ page\n" : ($anchor ? "  +  .htaccess: /category/ shows all product categories\n" : "  !  .htaccess: no place found for the /category/ rules (skipped)\n");
 
 /* 2. menu */
 $navRaw = rocLayerSettingGet($pdo, 'site_nav');
@@ -72,12 +81,20 @@ if (is_array($nav)) {
     $fix = function (&$node) use (&$fix, &$changed) {
         if (!is_array($node)) return;
         foreach ($node as $k => &$v) {
-            if ($k === 'url' && is_string($v) && preg_match('#^/category(/([a-z0-9-]+))?/?$#', $v, $m)) { $v = '/products/' . (!empty($m[2]) ? $m[2] . '/' : ''); $changed = true; }
-            elseif (is_array($v)) $fix($v);
+            if (is_array($v) && isset($v['children']) && is_array($v['children'])) {
+                // The CATEGORY item (it holds the PC / Gaming Hardware groups) and its "View all" button.
+                $isCat = false;
+                foreach ($v['children'] as $ch) if (preg_match('#^/products/(pc|gaming)-hardware/?$#', (string)($ch['url'] ?? ''))) $isCat = true;
+                if ($isCat) {
+                    if (($v['url'] ?? '') !== '/category/') { $v['url'] = '/category/'; $changed = true; }
+                    if (isset($v['button']['url']) && $v['button']['url'] !== '/category/') { $v['button']['url'] = '/category/'; $changed = true; }
+                }
+            }
+            if (is_array($v)) $fix($v);
         }
     };
     $changed = false; $copy = $nav; $fix($copy);
-    if ($changed) { $navNew = $copy; echo "  +  Menu: /category/ link -> /products/\n"; } else echo "  =  Menu has no /category/ link\n";
+    if ($changed) { $navNew = $copy; echo "  +  Menu: CATEGORY and its View all button open /category/\n"; } else echo "  =  Menu already opens /category/\n";
 } else echo "  =  Menu: the built-in one\n";
 
 /* 3. posts */
@@ -102,7 +119,7 @@ echo "\n" . count($posts) . " post(s) to fix.\n";
 if (!$apply) { echo "Dry run: nothing changed. Run again with --apply.\n"; exit(0); }
 
 $file = $HOME . '/roc-fixes-backup-' . date('Ymd-His') . '.json';
-file_put_contents($file, json_encode(['made' => date('c'), 'htaccess' => ((!$htDone && $anchor) || !$cspDone) ? $ht : '', 'nav' => $navNew !== null ? $nav : null,
+file_put_contents($file, json_encode(['made' => date('c'), 'htaccess' => ((!$htDone && $anchor) || !$cspDone) ? ($ht0 ?? $ht) : '', 'nav' => $navNew !== null ? $nav : null,
     'blogs' => array_map(function ($x) { return $x[0]; }, $posts)], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
 if (!$htDone && $anchor) {
     file_put_contents($ROOT . '/.htaccess.roc-tmp', str_replace($anchor, FIX_BLOCK . "\n" . $anchor, $ht));

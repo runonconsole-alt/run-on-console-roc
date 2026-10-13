@@ -9,7 +9,7 @@
  *   php cli-platform-images.php --apply --force  also replaces pictures uploaded in the CMS
  *   php cli-platform-images.php --rollback=FILE  puts the old pictures back
  *
- * Pictures: public_html/uploads/platforms/{slug}.jpg, 1200 x 675. The prompts describe the
+ * Pictures: public_html/uploads/platforms/{slug}.webp, 1200 x 675, under 90 KB, with alt text. The prompts describe the
  * hardware without brand names or logos. A picture set by hand in the CMS (anything that is not
  * one of the old shared /images/*.jpg pictures) is kept unless --force.
  */
@@ -102,10 +102,16 @@ foreach ($todo as $slug => $old) {
     $im = imagecreatetruecolor($W, $H);
     imagecopyresampled($im, $src, 0, 0, (int)(($sw - $cw) / 2), (int)(($sh - $ch) / 2), $W, $H, $cw, $ch);
     imagedestroy($src);
-    $q = 84;
-    do { imagejpeg($im, $dir . '/' . $slug . '.jpg', $q); clearstatcache(); $q -= 6; } while (filesize($dir . '/' . $slug . '.jpg') > 160000 && $q > 50);
+    // WebP under 90 KB (JPG when the server cannot write WebP).
+    $ext = function_exists('imagewebp') ? 'webp' : 'jpg';
+    for ($q = 82; $q >= 35; $q -= 7) {
+        $ext === 'webp' ? imagewebp($im, $dir . '/' . $slug . '.webp', $q) : imagejpeg($im, $dir . '/' . $slug . '.jpg', $q);
+        clearstatcache(); if (filesize($dir . '/' . $slug . '.' . $ext) <= 90000) break;
+    }
     imagedestroy($im);
-    $url = '/uploads/platforms/' . $slug . '.jpg?v=' . time();
+    $url = '/uploads/platforms/' . $slug . '.' . $ext . '?v=' . time();
+    $title = (string)$pdo->query('SELECT title FROM gaming_categories WHERE slug = ' . $pdo->quote($slug))->fetchColumn();
+    rocMediaAlt($pdo, $ROOT, $url, $title . ' gaming platform - Run On Console');
     $done[$slug] = $old;
     file_put_contents($file, json_encode(['made' => date('c'), 'platforms' => $done], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     $u->execute($hasUpd ? [$url, date('Y-m-d H:i:s'), $slug] : [$url, $slug]);

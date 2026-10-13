@@ -222,7 +222,16 @@ RELEASES = [
                   'Two broken picture links on the products list (Ryzen 5 5500F, Cosmos Alpha) fixed',
                   'Content-Security-Policy header added; shorter title and description on the game checker'],
          checks=[dict(label='Audit fixes (cli-site-fixes.php --apply)', type='file', path='api/v1/cron/cli-site-fixes.php')],
-         pr=REPO + '36'),
+         pr=REPO + '36', build='index-DVX_22gI.js'),
+    dict(deploy=37, date='2026-10-12', title='Categories page, AI blog covers, page pictures, Blog and News split in the CMS',
+         changes=['New /category/ page: every product category in its group with a real photo; the CATEGORY menu opens it',
+                  'Blog and news covers: a picture made for each post (different every time) in the same ROC pattern; WebP under 95 KB with alt text',
+                  'About, Blogs and Can I run it pages get their own pictures (cli-site-images.php); platform pictures WebP under 90 KB with alt text',
+                  'CMS: Blog and news posts list with All, Blog and News filters, a type column and the right address for news',
+                  'Email: labelled mailbox fields (server mail.runonconsole.com, port 465, mailbox, password)',
+                  'Sitemaps submitted without /sitemaps/ now open the right file'],
+         checks=[dict(label='Site pictures (cli-site-images.php --apply)', type='file', path='api/v1/cron/cli-site-images.php')],
+         pr=REPO + '37'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

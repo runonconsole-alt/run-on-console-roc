@@ -963,8 +963,10 @@ var KINDS={
 function K(x){ var k=(x&&x._kind)||(S.editing&&S.editing._kind)||'blog'; return KINDS[k]; }
 function liveUrl(kind, slug){ return KINDS[kind].base+slug+'/'; }
 /* Public path of a post or page (category guides live under their category). */
+function isNewsPost(x){ return K(x)===KINDS.blog && String(x.category||'').trim().toLowerCase()==='news'; }
 function itemPath(x, slug){
   if(slug==null) slug=x.slug||'…';
+  if(isNewsPost(x)) return '/news/'+slug+'/';
   if(K(x)===KINDS.page && x.page_type==='category' && x.category_slug) return '/gaming-platforms/'+x.category_slug+'/'+slug+'/';
   return K(x).base+slug+'/';
 }
@@ -1288,7 +1290,7 @@ function renderShell(){
       (can('activity','view')?item('activity','Live activity','⚡',S.actUnseen?S.actUnseen:undefined):'')+
       (admin?item('messages','Messages','✉',S.msgCounts&&S.msgCounts['new']?S.msgCounts['new']:undefined):'')+'</div>'+
     '<div class="snav"><div class="slabel">Content</div>'+
-      (can('blogs','view')?item('blogs','Blog posts','✎',S.blogs.length):'')+
+      (can('blogs','view')?item('blogs','Blog & news posts','✎',S.blogs.length):'')+
       (can('media','view')?item('media','Media library','❖',S.media.length):'')+
       (can('pages','view')?item('cmspages','Pages','▦',S.pages.length+(S.sitePagesN||0))+item('metas','Metas','🏷'):'')+
       (can('pages','view')?item('platforms','Gaming platforms','◈'):'')+
@@ -1584,24 +1586,30 @@ async function deleteFromList(b){
 /* --------------------------------------------------------------- blogs */
 
 function renderBlogs(m){
+  S.ptype=S.ptype||'all';
+  var nNews=S.blogs.filter(isNewsPost).length, nBlog=S.blogs.length-nNews;
   var rows=S.blogs.filter(function(b){
+    if(S.ptype==='news' && !isNewsPost(b)) return false;
+    if(S.ptype==='blog' && isNewsPost(b)) return false;
     if(S.filter!=='all' && S.filter!==(b.status==='published'||b.status==='scheduled'?b.status:'draft'))return false;
     if(S.search){ var h=(b.title+' '+(b.slug||'')).toLowerCase();
       if(h.indexOf(S.search.toLowerCase())===-1)return false; }
     return true;
   });
 
-  m.innerHTML = head('Blog posts', rows.length+' of '+S.blogs.length+' shown',
+  m.innerHTML = head('Blog & news posts', rows.length+' of '+S.blogs.length+' shown · '+nBlog+' blog posts (/blogs/) · '+nNews+' news stories (/news/)',
     can('blogs','edit')?'<button class="btn primary" id="newpost">＋ New post</button>':'')+
   '<div class="body"><div class="card">'+
     '<div class="chead" style="gap:8px">'+
+      '<div class="seg" id="ptype">'+[['all','All ('+S.blogs.length+')'],['blog','✎ Blog ('+nBlog+')'],['news','📰 News ('+nNews+')']].map(function(x){
+        return '<button type="button" data-pt="'+x[0]+'"'+(S.ptype===x[0]?' class="on"':'')+'>'+x[1]+'</button>'; }).join('')+'</div>'+
       '<div class="search" style="max-width:280px;flex:1"><input type="text" id="q" placeholder="Search title or slug" value="'+esc(S.search)+'"></div>'+
       '<select id="f" style="max-width:150px">'+
       ['all','published','scheduled','draft'].map(function(s){
         return '<option value="'+s+'"'+(S.filter===s?' selected':'')+'>'+
           (s==='all'?'All':s.charAt(0).toUpperCase()+s.slice(1))+'</option>';
       }).join('')+'</select></div>'+
-    (rows.length?'<table class="list"><thead><tr><th>Title</th><th>Status</th><th>SEO</th><th>Updated</th><th style="text-align:right">Actions</th></tr></thead><tbody>'+
+    (rows.length?'<table class="list"><thead><tr><th>Title</th><th>Type</th><th>Status</th><th>SEO</th><th>Updated</th><th style="text-align:right">Actions</th></tr></thead><tbody>'+
       rows.map(function(b){
         var g=[];
         if(!b.meta_title)g.push('title');
@@ -1611,7 +1619,8 @@ function renderBlogs(m){
           (Date.now() - new Date(String(b.locked_at).replace(' ','T')).getTime()) < 900000;
         return '<tr><td><div class="t-title" data-open="'+esc(b.id)+'">'+esc(b.title)+
           (locked?' <span style="color:var(--amber);font-size:11px">● being edited</span>':'')+'</div>'+
-          '<div class="t-slug">/blogs/'+esc(b.slug||'')+'/</div></td>'+
+          '<div class="t-slug">'+esc(itemPath(b, b.slug||''))+'</div></td>'+
+          '<td>'+(isNewsPost(b)?'<span class="tag" style="background:#fee2e2;color:#b91c1c;border-color:#fecaca">📰 News</span>':'<span class="tag" style="background:#ecfdf5;color:#047857;border-color:#a7f3d0">✎ Blog</span>')+'</td>'+
           '<td><span class="tag '+(b.status==='published'?'published':'draft')+'">'+esc(b.status)+'</span>'+
             (b.status==='scheduled'?'<div class="hint" style="margin-top:4px">'+esc(fmtWhen(b.published_at_iso))+'</div>':'')+'</td>'+
           '<td>'+(g.length?'<span style="color:var(--amber);font-size:12px">▲ '+esc(g.join(', '))+'</span>'
@@ -1632,6 +1641,7 @@ function renderBlogs(m){
     var f=$('#q',$('#main')); if(f){f.focus();f.setSelectionRange(at,at);}
   });
   $('#f',m).addEventListener('change',function(){ S.filter=this.value; renderView(); });
+  m.querySelectorAll('[data-pt]').forEach(function(b){ b.addEventListener('click',function(){ S.ptype=b.dataset.pt; renderView(); }); });
   var np=$('#newpost',m); if(np) np.addEventListener('click',newBlog);
   wireOpen(m);
   m.querySelectorAll('[data-del]').forEach(function(el){
@@ -3483,10 +3493,10 @@ async function renderNewsWriter(m){
         '<ol class="hint" style="margin:6px 0 8px 18px;line-height:1.7"><li>cPanel → <b>Email Accounts</b> → <b>Create</b>: alerts@runonconsole.com with a strong password.</li>'+
         '<li>cPanel → Email Accounts → <b>Connect Devices</b>: copy the <b>Outgoing Server</b> (e.g. mail.runonconsole.com) and the SSL port (465).</li>'+
         '<li>Type them here yourself and press <b>Save mailbox</b>, then <b>Send a test email</b>. Do not paste the password in any chat.</li></ol>'+
-        '<div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" id="nw-sh" placeholder="Outgoing server (mail.runonconsole.com)" value="'+esc(d.smtp&&d.smtp.host||'')+'" style="flex:2;min-width:200px">'+
-        '<select id="nw-sp"><option value="465"'+(d.smtp&&d.smtp.port===587?'':' selected')+'>465 (SSL)</option><option value="587"'+(d.smtp&&d.smtp.port===587?' selected':'')+'>587</option></select>'+
-        '<input type="text" id="nw-su" autocomplete="new-password" data-lpignore="true" data-1p-ignore placeholder="Mailbox (alerts@runonconsole.com)" value="'+esc(d.smtp&&d.smtp.user||'')+'" style="flex:2;min-width:200px">'+
-        '<input type="password" id="nw-sw" autocomplete="new-password" data-lpignore="true" data-1p-ignore placeholder="'+(d.smtp&&d.smtp.set?'Password saved (leave empty to keep)':'Mailbox password')+'" style="flex:2;min-width:180px">'+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end"><label class="hint" style="flex:2;min-width:200px">Outgoing server<input type="text" id="nw-sh" placeholder="mail.runonconsole.com" value="'+esc(d.smtp&&d.smtp.host||'mail.runonconsole.com')+'" style="width:100%"></label>'+
+        '<label class="hint">Port<select id="nw-sp" style="display:block"><option value="465"'+(d.smtp&&d.smtp.port===587?'':' selected')+'>465 (SSL)</option><option value="587"'+(d.smtp&&d.smtp.port===587?' selected':'')+'>587</option></select></label>'+
+        '<label class="hint" style="flex:2;min-width:200px">Mailbox (username)<input type="text" id="nw-su" autocomplete="new-password" data-lpignore="true" data-1p-ignore placeholder="alerts@runonconsole.com" value="'+esc(d.smtp&&d.smtp.user||'')+'" style="width:100%"></label>'+
+        '<label class="hint" style="flex:2;min-width:180px">Mailbox password<input type="password" id="nw-sw" autocomplete="new-password" data-lpignore="true" data-1p-ignore placeholder="'+(d.smtp&&d.smtp.set?'Saved (leave empty to keep)':'the alerts@ password')+'" style="width:100%"></label>'+
         '<button class="btn primary" type="button" id="nw-ssave">Save mailbox</button>'+(d.smtp&&d.smtp.set?'<button class="btn" type="button" id="nw-srm">Remove</button>':'')+'</div></details>'+
       '<div class="hint" style="margin-top:6px">The first emails may land in Spam: mark them "Not spam" once.</div></div></div>';
   }

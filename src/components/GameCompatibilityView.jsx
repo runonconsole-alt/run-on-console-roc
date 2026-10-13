@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  Gamepad2, Search, Filter, Sparkles, CheckCircle, Flame, Zap, 
+import {
+  Gamepad2, Search, Filter, Sparkles, CheckCircle, Flame, Zap,
   Monitor, Laptop, Cpu, ShieldCheck, ArrowRight, RotateCcw, Volume2,
   HardDrive, Cloud, Smartphone, Disc, HelpCircle, CheckCircle2,
   AlertTriangle, RefreshCw, Layers, ExternalLink, ChevronRight, Play,
@@ -256,7 +256,7 @@ export const GameCompatibilityView = () => {
 
   return (
     <div className="space-y-12 py-6 animate-page-in">
-      
+
       {/* 1. Game Compatibility Hero Banner with BouncyText */}
       <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">
         <CyberMatrixHoloBackground />
@@ -265,7 +265,7 @@ export const GameCompatibilityView = () => {
         <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
-          
+
           <div className="lg:col-span-8 space-y-4">
             <div className="flex flex-wrap items-center gap-3">
               <span className="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5 badge-glow">
@@ -315,20 +315,28 @@ export const GameCompatibilityView = () => {
           </div>
 
           <div className="lg:col-span-4 bg-slate-900/85 border-2 border-emerald-400/40 rounded-3xl p-6 backdrop-blur-md shadow-2xl space-y-4">
+            <img
+              src="/uploads/site/compat-hero.webp"
+              width="1200"
+              height="675"
+              alt="A gaming PC running a game: check if your PC can run it"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              className="w-full h-32 object-cover rounded-2xl"
+            />
             <div className="flex items-center justify-between border-b border-slate-700 pb-3">
               <span className="text-xs font-display font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
                 <span>Compatibility Index</span>
               </span>
               <span className="bg-emerald-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded badge-glow">
-                16+ Games Indexed
+                500+ Games
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-center">
               <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
-                <div className="text-2xl font-display font-extrabold text-emerald-400">100%</div>
-                <div className="text-[10px] text-slate-300 font-semibold">Specs Tested</div>
+                <div className="text-2xl font-display font-extrabold text-emerald-400">Min + Rec</div>
+                <div className="text-[10px] text-slate-300 font-semibold">Official requirements</div>
               </div>
               <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
                 <div className="text-2xl font-display font-extrabold text-emerald-400">4K 120Hz</div>
@@ -346,7 +354,7 @@ export const GameCompatibilityView = () => {
 
       {/* 2. "CUSTOM PC SPECS & HARDWARE COMPATIBILITY ANALYZER" */}
       <section className="bg-white border-2 border-emerald-500/30 rounded-3xl p-6 sm:p-8 shadow-md space-y-6 relative overflow-hidden">
-        
+
         {/* Header & Mode Switch */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-emerald-100 pb-4">
           <div className="flex items-center gap-2.5 text-emerald-700">
@@ -406,7 +414,7 @@ export const GameCompatibilityView = () => {
             <Gamepad2 className="w-4 h-4 text-emerald-600" />
             <span>Select Target Game to Test:</span>
           </label>
-          <select 
+          <select
             value={checkerGameId}
             onChange={(e) => {
               playClickSound();
@@ -473,7 +481,7 @@ export const GameCompatibilityView = () => {
         {/* MODE A: CUSTOM PC SPECS INPUT FORM */}
         {checkerMode === 'custom' && (
           <div className="bg-slate-50/80 border-2 border-emerald-500/20 rounded-2xl p-5 sm:p-6 space-y-5">
-            
+
             <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
               <span className="text-xs font-display font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                 <Sliders className="w-4 h-4 text-emerald-600" />
@@ -486,7 +494,7 @@ export const GameCompatibilityView = () => {
 
             {/* Custom Specs Inputs Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              
+
               {/* 1. CPU / Processor Tier */}
               <div className="space-y-1.5">
                 <label className="text-[11px] font-bold text-slate-700 block">
@@ -574,7 +582,7 @@ export const GameCompatibilityView = () => {
             {/* Custom Specs Analysis Result Card */}
             {customAnalysisResult && (
               <div className={`p-5 sm:p-6 rounded-2xl border-2 transition-all space-y-4 ${customAnalysisResult.statusColor}`}>
-                
+
                 {/* Score & Verdict Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-current/20 pb-3">
                   <div>
@@ -698,7 +706,7 @@ export const GameCompatibilityView = () => {
                 <Monitor className="w-4 h-4 text-emerald-600" />
                 <span>Select Device Preset:</span>
               </label>
-              <select 
+              <select
                 value={checkerDeviceId}
                 onChange={(e) => {
                   playClickSound();
@@ -745,7 +753,7 @@ export const GameCompatibilityView = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          
+
           {/* Option 1: Hardware Upgrade */}
           <Tilt3DCard className="bg-slate-800/90 border border-emerald-500/40 p-5 rounded-2xl space-y-3 flex flex-col justify-between">
             <div>
@@ -825,7 +833,7 @@ export const GameCompatibilityView = () => {
       <section id="game-list" className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-5 scroll-mt-24">
         <h2 className="font-display font-extrabold text-xl sm:text-2xl text-slate-900">Popular games and their requirements</h2>
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-          
+
           <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
             <span className="text-xs font-bold text-slate-500 mr-1 hidden sm:inline">Release Era:</span>
             {eras.map((era) => (
@@ -848,7 +856,7 @@ export const GameCompatibilityView = () => {
 
           <div className="relative w-full lg:w-72 shrink-0">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input 
+            <input
               type="text"
               placeholder="Search GTA 5, GPU, 60FPS..."
               value={searchQuery}
@@ -898,11 +906,11 @@ export const GameCompatibilityView = () => {
 
       {/* 5. Main Compatibility Grid & Matrix Cards with BouncyText */}
       <section className="space-y-6">
-        
+
         {filteredGames.length === 0 ? (
           <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-3">
             <p className="text-slate-500 text-sm font-semibold">No games match your selected era and platform filters.</p>
-            <button 
+            <button
               onClick={handleReset}
               className="bg-emerald-600 text-white text-xs font-bold py-2.5 px-6 rounded-xl shadow-md"
             >
@@ -953,7 +961,7 @@ export const GameCompatibilityView = () => {
                   <span className="text-[10px] font-bold text-slate-400 block mb-1.5">Compatible Platforms:</span>
                   <div className="flex flex-wrap gap-1.5">
                     {game.platforms.map((p, idx) => (
-                      <span 
+                      <span
                         key={idx}
                         className="bg-white border border-slate-200 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-md shadow-2xs group-hover:border-emerald-300"
                       >
@@ -1003,7 +1011,7 @@ export const GameCompatibilityView = () => {
       </section>
 
       {/* 6. Comprehensive Game Compatibility FAQs with User's Specific Questions */}
-      <FAQSection 
+      <FAQSection
         faqs={pageFaqs.compatibility || pageFaqs.categories}
         title="Game Compatibility & Hardware FAQs"
         subtitle="Answers on minimum specs, copying game files via external drives, cloud streaming, and casual APK ports."

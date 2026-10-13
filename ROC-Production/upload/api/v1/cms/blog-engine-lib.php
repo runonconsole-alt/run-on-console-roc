@@ -381,9 +381,7 @@ function rocBlogCreate(PDO $pdo, string $root, array $in, string $source): array
     if ($topic) $content = rocBlogWithRelated($pdo, $plan, $topic, $content, '');
 
     // The product photo of the topic says best what the post is about; AI picture only without one.
-    $photo = rocBlogCoverPhoto($pdo, $root, $topic);
-    $image = $photo ? rocBlogCover($root, $slug, $title, $category, $photo)
-                    : (rocBlogAiCover($pdo, $root, $slug, $title, (string)($in['image_prompt'] ?? '')) ?? rocBlogCover($root, $slug, $title, $category));
+    $image = rocBlogMakeCover($pdo, $root, $slug, $title, $category, $topic, (string)($in['image_prompt'] ?? ''), $alt);
     $cols = rocBlogCols($pdo, 'blogs');
     $id = 'blog-' . bin2hex(random_bytes(4));
     $now = gmdate('Y-m-d H:i:s');
@@ -508,7 +506,7 @@ function rocBlogCoverPhoto(PDO $pdo, string $root, ?array $topic): ?string {
  * background with soft light; right: the product photo on a white diagonal panel (the photos
  * are on white, so they blend into it). Without a photo: the title, bigger, with the same style.
  */
-function rocBlogCover(string $root, string $slug, string $title, string $category, ?string $photo = null): string {
+function rocBlogCover(string $root, string $slug, string $title, string $category, ?string $photo = null, bool $fill = false): string {
     $fallback = '/images/hero_cod.jpg';
     if (!function_exists('imagettftext') || !function_exists('imagejpeg')) return $fallback;
     $font = null;
@@ -538,6 +536,9 @@ function rocBlogCover(string $root, string $slug, string $title, string $categor
     for ($x = 0; $x < $W; $x += 40) imageline($im, $x, 0, $x, $H, $grid);
     for ($y = 0; $y < $H; $y += 40) imageline($im, 0, $y, $W, $y, $grid);
 
+    // The background alone, to repaint the left side over a picture that fills the panel.
+    $bg = imagecreatetruecolor($W, $H);
+    imagecopy($bg, $im, 0, 0, 0, 0, $W, $H);
     $src = null;
     if ($photo && is_file($photo)) {
         $ext = strtolower(pathinfo($photo, PATHINFO_EXTENSION));
@@ -546,7 +547,22 @@ function rocBlogCover(string $root, string $slug, string $title, string $categor
         elseif (in_array($ext, ['jpg', 'jpeg'], true)) $src = @imagecreatefromjpeg($photo);
     }
     $textW = 1000;
-    if ($src) {
+    if ($src && $fill) {
+        // A picture made for this post (AI): it fills the right panel, cut along the diagonal.
+        $x0 = 640; $slant = 120;
+        $left = $x0 - $slant - 14;
+        $sw = imagesx($src); $sh = imagesy($src);
+        $pw = $W - $left; $scale = max($pw / $sw, $H / $sh);
+        $cw = (int)($pw / $scale); $ch = (int)($H / $scale);
+        imagecopyresampled($im, $src, $left, 0, (int)(($sw - $cw) / 2), (int)(($sh - $ch) / 2), $pw, $H, $cw, $ch);
+        imagedestroy($src); $src = true;
+        for ($y = 0; $y < $H; $y++) {
+            $xb = (int)($x0 - 14 - $slant * $y / $H);
+            if ($xb > 0) imagecopy($im, $bg, 0, $y, 0, $y, $xb, 1);
+        }
+        imagefilledpolygon($im, [$x0 - 14, 0, $x0, 0, $x0 - $slant, $H, $x0 - 14 - $slant, $H], imagecolorallocate($im, 52, 211, 153));
+        $textW = 470;
+    } elseif ($src) {
         // White diagonal panel with a green edge, the photo inside it.
         $x0 = 600; $slant = 110;
         imagefilledpolygon($im, [$x0 - 14, 0, $W, 0, $W, $H, $x0 - 14 - $slant, $H], imagecolorallocate($im, 52, 211, 153));
@@ -604,11 +620,70 @@ function rocBlogCover(string $root, string $slug, string $title, string $categor
     imagefilledrectangle($im, $X, $yb - 6, $X + 70, $yb - 1, $green);
     $cta = 'READ ON RUNONCONSOLE.COM';
     imagettftext($im, 13, 0, $X, $yb + 34, $mint, $font, $cta);
+    imagedestroy($bg);
+    return rocBlogSaveCover($im, $root, $slug) ?? $fallback;
+}
+
+/** Saves a cover as WebP under 95 KB (JPG when the server has no WebP). Returns its address or null. */
+function rocBlogSaveCover($im, string $root, string $slug): ?string {
     $dir = $root . '/uploads/blog-covers';
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
-    $ok = imagejpeg($im, $dir . '/' . $slug . '.jpg', 88);
+    $ok = false;
+    if (function_exists('imagewebp')) {
+        $f = $dir . '/' . $slug . '.webp';
+        for ($q = 82; $q >= 40; $q -= 7) { $ok = imagewebp($im, $f, $q); clearstatcache(); if (!$ok || filesize($f) <= 95000) break; }
+        if ($ok) { imagedestroy($im); if (is_file($dir . '/' . $slug . '.jpg')) @unlink($dir . '/' . $slug . '.jpg'); return '/uploads/blog-covers/' . $slug . '.webp?v=' . time(); }
+    }
+    $f = $dir . '/' . $slug . '.jpg';
+    for ($q = 86; $q >= 50; $q -= 6) { $ok = imagejpeg($im, $f, $q); clearstatcache(); if (!$ok || filesize($f) <= 95000) break; }
     imagedestroy($im);
-    return $ok ? '/uploads/blog-covers/' . $slug . '.jpg?v=' . time() : $fallback;
+    return $ok ? '/uploads/blog-covers/' . $slug . '.jpg?v=' . time() : null;
+}
+
+/**
+ * The cover of a post or a news story: a picture made for its title (Cloudflare AI, different for
+ * every post) in the ROC pattern; without Cloudflare the product photo; else the title alone.
+ * The alt text goes to the media library too.
+ */
+function rocBlogMakeCover(PDO $pdo, string $root, string $slug, string $title, string $category, ?array $topic, string $prompt = '', string $alt = ''): string {
+    $img = null;
+    $cf = rocBlogCf($pdo);
+    if ($cf && function_exists('imagecreatefromstring')) {
+        $r = rocCfImage($cf, rocBlogImagePrompt($title, $prompt));
+        if ($r['ok']) {
+            $tmp = tempnam(sys_get_temp_dir(), 'roccov');
+            file_put_contents($tmp, $r['bytes']);
+            $probe = @imagecreatefromstring($r['bytes']);
+            if ($probe) { imagejpeg($probe, $tmp . '.jpg', 92); imagedestroy($probe); $img = rocBlogCover($root, $slug, $title, $category, $tmp . '.jpg', true); @unlink($tmp . '.jpg'); }
+            @unlink($tmp);
+        } else {
+            $st = rocBlogGet($pdo, 'blog_engine_state', []); $st = is_array($st) ? $st : [];
+            $st['last_image_error'] = gmdate('Y-m-d H:i') . ' UTC: ' . $r['error'];
+            rocBlogSet($pdo, 'blog_engine_state', $st);
+        }
+    }
+    if ($img === null) {
+        $photo = rocBlogCoverPhoto($pdo, $root, $topic);
+        $img = $photo ? rocBlogCover($root, $slug, $title, $category, $photo) : rocBlogCover($root, $slug, $title, $category);
+    }
+    rocMediaAlt($pdo, $root, $img, $alt !== '' ? $alt : $title . ' - Run On Console');
+    return $img;
+}
+
+/** Puts a file of /uploads in the media library with its alt text (or updates the alt text). */
+function rocMediaAlt(PDO $pdo, string $root, string $url, string $alt): void {
+    $path = (string)strtok($url, '?');
+    if (strpos($path, '/uploads/') !== 0 || !is_file($root . $path)) return;
+    try {
+        $size = (int)filesize($root . $path); $dim = @getimagesize($root . $path) ?: [0, 0];
+        $mime = (string)(@mime_content_type($root . $path) ?: 'image/webp');
+        $st = $pdo->prepare('SELECT id FROM cms_media WHERE file_url = ?');
+        $st->execute([$path]);
+        $id = $st->fetchColumn();
+        if ($id) $pdo->prepare('UPDATE cms_media SET alt_text = ?, file_size = ?, width = ?, height = ?, mime_type = ? WHERE id = ?')->execute([mb_substr($alt, 0, 250), $size, $dim[0], $dim[1], $mime, $id]);
+        else $pdo->prepare('INSERT INTO cms_media (filename, original_name, filepath, file_url, mime_type, file_size, width, height, alt_text, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+                 ->execute([basename($path), basename($path), $root . $path, $path, $mime, $size, $dim[0], $dim[1], mb_substr($alt, 0, 250), gmdate('Y-m-d H:i:s')]);
+    } catch (\Throwable $e) { /* the media library is optional */ }
 }
 
 /* ------------------------------------------- AI cover (Cloudflare Workers AI) */
@@ -667,24 +742,18 @@ function rocBlogAiCover(PDO $pdo, string $root, string $slug, string $title, str
     $im = imagecreatetruecolor($W, $H);
     imagecopyresampled($im, $src, 0, 0, (int)(($sw - $cw) / 2), (int)(($sh - $ch) / 2), $W, $H, $cw, $ch);
     imagedestroy($src);
-    $dir = $root . '/uploads/blog-covers';
-    if (!is_dir($dir)) @mkdir($dir, 0755, true);
-    $ok = imagejpeg($im, $dir . '/' . $slug . '.jpg', 86);
-    imagedestroy($im);
-    return $ok ? '/uploads/blog-covers/' . $slug . '.jpg?v=' . time() : null;
+    return rocBlogSaveCover($im, $root, $slug);
 }
 
 /** Draws a new cover for a post (CMS > Blog writer > "New cover"). */
 function rocBlogRecover(PDO $pdo, string $root, string $postId): ?string {
-    $st = $pdo->prepare('SELECT id, slug, title, category FROM blogs WHERE id = ?');
+    $st = $pdo->prepare('SELECT id, slug, title, category, image_alt FROM blogs WHERE id = ?');
     $st->execute([$postId]);
     $b = $st->fetch(PDO::FETCH_ASSOC);
     if (!$b) return null;
     $topic = null;
     foreach (rocBlogPlan($pdo)['topics'] as $t) if (($t['post_id'] ?? '') === $postId) $topic = $t;
-    $photo = rocBlogCoverPhoto($pdo, $root, $topic);
-    $img = $photo ? rocBlogCover($root, $b['slug'], $b['title'], (string)$b['category'], $photo)
-                  : (rocBlogAiCover($pdo, $root, $b['slug'], $b['title'], '') ?? rocBlogCover($root, $b['slug'], $b['title'], (string)$b['category']));
+    $img = rocBlogMakeCover($pdo, $root, $b['slug'], $b['title'], (string)$b['category'], $topic, '', (string)($b['image_alt'] ?? ''));
     $cols = rocBlogCols($pdo, 'blogs');
     $set = array_values(array_intersect(['image', 'og_image', 'twitter_image'], $cols));
     $pdo->prepare('UPDATE blogs SET ' . implode(' = ?, ', $set) . ' = ?, updated_at = ? WHERE id = ?')
