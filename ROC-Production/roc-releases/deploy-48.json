@@ -13,16 +13,9 @@
    "label": "Content writer (cli-content-writer.php)",
    "type": "file",
    "path": "api/v1/cron/cli-content-writer.php"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-BWSHvK1-.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/48",
- "build": "index-BWSHvK1-.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]

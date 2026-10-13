@@ -304,14 +304,17 @@ export const GameCompatibilityView = () => {
           </div>
 
           <div className="lg:col-span-4 bg-slate-900/85 border-2 border-emerald-400/40 rounded-3xl p-6 backdrop-blur-md shadow-2xl space-y-4">
-            <img
-              src="/uploads/site/compat-hero.webp"
-              width="1200"
-              height="675"
-              alt="A gaming PC running a game: check if your PC can run it"
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              className="w-full h-32 object-cover rounded-2xl"
-            />
+            {/* The picture shows a gaming PC (graphics card, fans, monitor): it opens the PC Hardware category. */}
+            <a href="/category/pc-hardware/" title="PC Hardware: graphics cards, processors, memory, cases and monitors" className="block rounded-2xl overflow-hidden group">
+              <img
+                src="/uploads/site/compat-hero.webp"
+                width="1200"
+                height="675"
+                alt="A gaming PC with a graphics card and a monitor: PC hardware picks"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                className="w-full h-32 object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500"
+              />
+            </a>
             <div className="flex items-center justify-between border-b border-slate-700 pb-3">
               <span className="text-xs font-display font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />

@@ -312,6 +312,11 @@ RELEASES = [
                   'Links: product pages link to the gaming platforms they are used on; every category page links to its guides, gaming platforms and the game checker; the products page links to categories, platforms, the checker and the guides'],
          checks=[dict(label='Content writer (cli-content-writer.php)', type='file', path='api/v1/cron/cli-content-writer.php')],
          pr=REPO + '48'),
+    dict(deploy=49, date='2026-10-13', title='Hero pictures that link to what they show',
+         changes=['/category/: each of the four product photos opens its own category (graphics card to Graphics Cards, processor to Processors, headset to Gaming Headsets and Audio, chair to Gaming Chairs)',
+                  'Can I run it: the gaming PC picture in the hero opens PC Hardware'],
+         checks=[dict(label='Page templates refreshed (cli-refresh-templates.php)', type='file', path='product-render.php')],
+         pr=REPO + '49'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
