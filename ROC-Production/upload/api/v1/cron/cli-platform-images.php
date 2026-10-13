@@ -109,7 +109,7 @@ foreach ($todo as $slug => $old) {
         clearstatcache(); if (filesize($dir . '/' . $slug . '.' . $ext) <= 90000) break;
     }
     imagedestroy($im);
-    $url = '/uploads/platforms/' . $slug . '.' . $ext . '?v=' . time();
+    $url = '/uploads/platforms/' . $slug . '.' . $ext;
     $title = (string)$pdo->query('SELECT title FROM gaming_categories WHERE slug = ' . $pdo->quote($slug))->fetchColumn();
     rocMediaAlt($pdo, $ROOT, $url, $title . ' gaming platform - Run On Console');
     $done[$slug] = $old;

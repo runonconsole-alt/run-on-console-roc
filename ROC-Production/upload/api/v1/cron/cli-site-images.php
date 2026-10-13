@@ -23,17 +23,19 @@ $apply = in_array('--apply', $args, true);
 $force = in_array('--force', $args, true);
 
 const ROC_SITE_IMAGES = [
-    'about-picks'  => [800, 450, 'an editor desk comparing two gaming mice and a mechanical keyboard, printed spec sheets and a laptop with comparison charts, warm desk lamp',
-                       'Comparing gaming gear specs for our independent picks'],
-    'about-gamers' => [800, 450, 'a cozy home gaming room with two gaming chairs, a large monitor, a console and two controllers, evening ambient light',
-                       'A gaming room: Run On Console is made by gamers, for gamers'],
-    'blog-guides'  => [800, 450, 'an open laptop showing a long article with headings next to a coffee mug, a notebook with handwritten notes and a gaming headset on a wooden desk',
-                       'Reading a gaming buying guide on a laptop'],
-    'blog-news'    => [800, 450, 'a tablet showing breaking gaming news headlines and thumbnails, a game controller beside it, soft newsroom lights in the background',
-                       'Latest gaming news on a tablet'],
-    'compat-hero'  => [1200, 675, 'a gaming PC with a glass side panel showing a graphics card and RGB fans next to a monitor running a fast racing game, glowing performance meters',
-                       'A gaming PC running a game: check if your PC can run it'],
+    'about-1'     => [800, 450, 'close-up of two hands comparing two gaming mice side by side on a light wooden desk next to spec cards and a ruler, soft daylight',
+                      'Comparing two gaming mice side by side: how we pick'],
+    'about-2'     => [800, 450, 'a cozy living room at night with two game controllers resting on a sofa in front of a large TV glowing with abstract colors',
+                      'Two game controllers on a sofa: made by gamers, for gamers'],
+    'blog-1'      => [800, 450, 'top-down flat lay of a gaming headset, a wireless mouse and a compact keyboard neatly arranged on a light desk with a small notebook, soft daylight',
+                      'Gaming headset, mouse and keyboard: buying guides'],
+    'blog-2'      => [800, 450, 'a game controller and a smartphone lying on a dark desk lit by pink and teal neon light, glossy reflections',
+                      'A game controller and a phone: the latest gaming news'],
+    'compat-hero' => [1200, 675, 'a gaming PC with a glass side panel and a glowing graphics card beside a monitor showing abstract colorful motion, dark room',
+                      'A gaming PC beside a monitor: check if your PC can run a game'],
 ];
+/** Older page pictures, replaced by the ones above (removed when the new ones are made). */
+const ROC_SITE_OLD = ['about-picks', 'about-gamers', 'blog-guides', 'blog-news'];
 
 echo "Run On Console - site pictures\n\n";
 ob_start();
@@ -68,6 +70,11 @@ foreach ($pdo->query('SELECT slug, title, image FROM gaming_categories')->fetchA
         echo '  +  platform ' . str_pad($r['slug'], 24) . 'JPG ' . (int)(filesize($ROOT . $img) / 1024) . " KB -> WebP, alt text\n";
     }
 }
+$plainv = [];
+foreach ($pdo->query("SELECT slug, image FROM gaming_categories WHERE image LIKE '/uploads/platforms/%?v=%'")->fetchAll(PDO::FETCH_ASSOC) as $r) {
+    $plainv[$r['slug']] = (string)strtok((string)$r['image'], '?');
+    echo "  +  platform {$r['slug']}: address without ?v= (the media library then sees it is used)\n";
+}
 /* 2. page pictures */
 $make = [];
 foreach (ROC_SITE_IMAGES as $name => $def) {
@@ -77,11 +84,12 @@ foreach (ROC_SITE_IMAGES as $name => $def) {
 }
 /* 3. covers */
 $covers = [];
-foreach ($pdo->query("SELECT slug, title, image, image_alt FROM blogs WHERE image LIKE '/uploads/%'")->fetchAll(PDO::FETCH_ASSOC) as $b) $covers[] = $b;
+foreach ($pdo->query("SELECT slug, title, image, image_alt FROM blogs WHERE image LIKE '/uploads/%' AND image NOT LIKE '%?v=%'")->fetchAll(PDO::FETCH_ASSOC) as $b) $covers[] = $b;
 echo '  +  alt text for ' . count($covers) . " cover(s) in the media library\n";
 if (!$apply) { echo "\nDry run: nothing changed. Run again with --apply.\n"; exit(0); }
 
 $u = $pdo->prepare('UPDATE gaming_categories SET image = ? WHERE slug = ?');
+foreach ($plainv as $slug => $img) $u->execute([$img, $slug]);
 foreach ($plat as $r) {
     $src = @imagecreatefromjpeg($ROOT . $r['path']);
     if (!$src) { echo "  !  {$r['slug']}: could not read the picture\n"; continue; }
@@ -89,7 +97,7 @@ foreach ($plat as $r) {
     $new = '/uploads/platforms/' . $r['slug'] . '.webp';
     if (!rocSaveWebp($im, $ROOT . $new)) { echo "  !  {$r['slug']}: could not save\n"; continue; }
     imagedestroy($im);
-    $u->execute([$new . '?v=' . time(), $r['slug']]);
+    $u->execute([$new, $r['slug']]);
     rocMediaAlt($pdo, $ROOT, $new, $r['title'] . ' gaming platform - Run On Console');
     @unlink($ROOT . $r['path']);
     try { $pdo->prepare('DELETE FROM cms_media WHERE file_url = ?')->execute([$r['path']]); } catch (\Throwable $e) {}
@@ -102,7 +110,7 @@ if ($make) {
         if (!is_dir($ROOT . '/uploads/site')) @mkdir($ROOT . '/uploads/site', 0755, true);
         foreach ($make as $name => [$W, $H, $prompt, $alt]) {
             $r = null;
-            for ($try = 1; $try <= 2 && (!$r || !$r['ok']); $try++) $r = rocCfImage($cf, 'Photorealistic wide editorial photo: ' . $prompt . '. Cinematic lighting, sharp focus, high detail. No text, no letters, no words, no logos, no brand names, no watermarks, no people faces.');
+            for ($try = 1; $try <= 2 && (!$r || !$r['ok']); $try++) $r = rocCfImage($cf, 'Photorealistic photo: ' . $prompt . '. Sharp focus, high detail. Any screen shows only abstract colors. Absolutely no text, no letters, no words, no numbers, no captions, no signs, no logos, no brand names, no watermarks, no people faces.');
             if (!$r['ok']) { echo "  !  {$name}: {$r['error']}\n"; continue; }
             $src = @imagecreatefromstring($r['bytes']);
             if (!$src) { echo "  !  {$name}: unreadable picture\n"; continue; }
@@ -111,6 +119,10 @@ if ($make) {
             rocSaveWebp($im, $ROOT . $path); imagedestroy($im);
             rocMediaAlt($pdo, $ROOT, $path, $alt);
             echo "  ok {$path}: " . (int)(filesize($ROOT . $path) / 1024) . " KB\n";
+        }
+        foreach (ROC_SITE_OLD as $old) {
+            $f = '/uploads/site/' . $old . '.webp';
+            if (is_file($ROOT . $f)) { @unlink($ROOT . $f); try { $pdo->prepare('DELETE FROM cms_media WHERE file_url = ?')->execute([$f]); } catch (\Throwable $e) {} echo "  -  old picture {$f} removed\n"; }
         }
     }
 }

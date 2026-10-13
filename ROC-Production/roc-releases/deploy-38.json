@@ -1,0 +1,32 @@
+{
+ "deploy": 38,
+ "date": "2026-10-13",
+ "title": "Covers without text, new page pictures, media clean-up, llms.txt, writer timer",
+ "changes": [
+  "AI covers never contain words: the title is not sent to the image model, only the subject, and each cover gets its own setting and light",
+  "Blog list: no second category label on our covers; cover files get their own names, so the media library sees them as used",
+  "New About and Blogs pictures (cli-site-images.php), both cards the same size",
+  "Unused pictures (old name cards, share cards, old covers) move to a trash folder (cli-media-cleanup.php), with a way back",
+  "llms.txt is written from the live site and updated after every new post or news story (cli-llms.php)",
+  "The server writer starts exactly 2 hours before each publishing time; the dashboard counts down to the next automatic post",
+  "CMS: opening a post no longer asks Close without saving when nothing was changed; dashboard counts only published products"
+ ],
+ "checks": [
+  {
+   "label": "llms.txt writer (cli-llms.php --apply)",
+   "type": "file",
+   "path": "api/v1/cron/cli-llms.php"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-D4rpe-IM.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/38",
+ "build": "index-D4rpe-IM.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

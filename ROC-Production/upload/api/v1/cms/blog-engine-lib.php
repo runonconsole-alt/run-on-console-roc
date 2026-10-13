@@ -42,6 +42,8 @@ const ROC_CF_IMAGE_MODEL = '@cf/black-forest-labs/flux-1-schnell';
 const ROC_GROQ_MODELS = ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile', 'moonshotai/kimi-k2-instruct', 'qwen/qwen3-32b', 'llama-3.1-8b-instant'];
 const ROC_BLOG_STAGES = ['tofu', 'mofu', 'bofu'];
 const ROC_RELATED_H2 = 'Keep reading';
+/** The server writer starts this many seconds before each publishing time (2 hours). */
+const ROC_WRITER_LEAD = 7200;
 
 /* -------------------------------------------------------------- settings */
 
@@ -630,14 +632,27 @@ function rocBlogSaveCover($im, string $root, string $slug): ?string {
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
     $ok = false;
     if (function_exists('imagewebp')) {
-        $f = $dir . '/' . $slug . '.webp';
+        $name = $slug . '-' . time() . '.webp';
+        $f = $dir . '/' . $name;
         for ($q = 82; $q >= 40; $q -= 7) { $ok = imagewebp($im, $f, $q); clearstatcache(); if (!$ok || filesize($f) <= 95000) break; }
-        if ($ok) { imagedestroy($im); if (is_file($dir . '/' . $slug . '.jpg')) @unlink($dir . '/' . $slug . '.jpg'); return '/uploads/blog-covers/' . $slug . '.webp?v=' . time(); }
+        if ($ok) { imagedestroy($im); rocBlogDropOldCovers($dir, $slug, $name); return '/uploads/blog-covers/' . $name; }
     }
-    $f = $dir . '/' . $slug . '.jpg';
+    $name = $slug . '-' . time() . '.jpg';
+    $f = $dir . '/' . $name;
     for ($q = 86; $q >= 50; $q -= 6) { $ok = imagejpeg($im, $f, $q); clearstatcache(); if (!$ok || filesize($f) <= 95000) break; }
     imagedestroy($im);
-    return $ok ? '/uploads/blog-covers/' . $slug . '.jpg?v=' . time() : null;
+    if ($ok) rocBlogDropOldCovers($dir, $slug, $name);
+    return $ok ? '/uploads/blog-covers/' . $name : null;
+}
+
+/**
+ * Removes the earlier covers of a post. Each cover has its own file name (slug-time.webp), so pages
+ * and the media library always point at the file in use, without "?v=".
+ */
+function rocBlogDropOldCovers(string $dir, string $slug, string $keep): void {
+    foreach (glob($dir . '/' . $slug . '*') ?: [] as $f) {
+        if (basename($f) !== $keep && preg_match('/^' . preg_quote($slug, '/') . '(-\d{9,})?\.(webp|jpg)$/', basename($f))) @unlink($f);
+    }
 }
 
 /**
@@ -716,11 +731,44 @@ function rocCfImage(array $cf, string $prompt): array {
 }
 
 /** The picture description: the writer's, else one made from the title. */
+/**
+ * The picture description. The title itself is never sent: the image model would paint its words
+ * on the picture. Instead the subject (headset, mouse, console...) is taken from the title, and the
+ * setting, angle and light change every time, so no two covers look alike.
+ */
 function rocBlogImagePrompt(string $title, string $given): string {
-    $given = trim(preg_replace('/\s+/', ' ', strip_tags($given)));
-    $scene = $given !== '' ? $given : 'a modern gaming setup that fits the article "' . $title . '"';
-    return 'Photorealistic editorial cover photo, wide shot: ' . $scene . '. Cinematic lighting with subtle green and teal accents, sharp focus, '
-         . 'high detail, clean composition with space on the left. No text, no letters, no words, no logos, no watermarks, no people faces.';
+    $t = strtolower($title . ' ' . $given);
+    $subjects = [
+        'microphone|\bmic\b|wave:?3|quadcast|seiren|alias' => 'a studio USB microphone on a boom arm',
+        'speaker|soundbar|edifier|pebble|nommo|arena|audioengine' => 'a pair of desktop speakers with soft RGB glow',
+        'headset|headphone|earbud|audio|audeze|maxwell|arctis|astro|blackshark|inzone|hyperx|ath-m50|hd 560' => 'a premium over-ear gaming headset',
+        'mouse|mice' => 'a sleek wireless gaming mouse on a large mouse pad',
+        'keyboard' => 'a mechanical gaming keyboard with glowing keycaps',
+        'monitor|oled|display' => 'a curved gaming monitor showing abstract colorful light',
+        'graphics card|gpu|rtx|radeon|geforce' => 'a modern graphics card with three fans',
+        'cpu|processor|ryzen|intel core' => 'a desktop processor chip on a motherboard socket',
+        '\bram\b|memory|ddr5|ddr4' => 'RGB desktop memory sticks in a motherboard',
+        'case|tower|airflow' => 'a glass-panel PC case with RGB fans',
+        'chair' => 'an ergonomic gaming chair in a tidy room',
+        'handheld|steam deck|rog ally|legion go|claw' => 'a handheld gaming PC held at an angle',
+        'laptop|notebook' => 'a thin gaming laptop with a backlit keyboard',
+        'playstation|ps5|ps4' => 'a white home video game console with a wireless gamepad',
+        'xbox' => 'a black tower video game console with a controller',
+        'nintendo|switch' => 'a hybrid video game console with small detachable controllers',
+        '\bvr\b|virtual reality|quest' => 'a virtual reality headset with two motion controllers',
+        'news|sales|market|launch' => 'video game consoles and controllers arranged on a shelf',
+    ];
+    $subject = 'a modern gaming setup with a PC, monitor, keyboard and headset';
+    foreach ($subjects as $re => $what) if (preg_match('/' . $re . '/', $t)) { $subject = $what; break; }
+    $settings = ['on a wooden desk in a cozy room', 'on a clean white desk by a window', 'on a dark desk with neon reflections',
+                 'in a minimal studio with a soft gradient backdrop', 'on a concrete shelf with plants', 'on a glass desk in a modern apartment',
+                 'next to a coffee cup and a notebook', 'on a gaming desk with LED strips behind it'];
+    $light  = ['warm evening light', 'cool teal and green light', 'soft morning daylight', 'dramatic side light', 'purple and blue ambient light', 'bright studio light'];
+    $angle  = ['close-up product shot', 'three-quarter angle', 'top-down flat lay', 'low angle hero shot', 'wide shot with depth of field'];
+    $pick = function (array $a) { return $a[random_int(0, count($a) - 1)]; };
+    return 'Photorealistic photo, ' . $pick($angle) . ': ' . $subject . ' ' . $pick($settings) . ', ' . $pick($light) . ', sharp focus, high detail. '
+         . 'Any screen shows only abstract colors. Absolutely no text, no letters, no words, no numbers, no captions, no titles, no signs, no logos, '
+         . 'no brand names, no watermarks, no people faces.';
 }
 
 /** AI cover, cropped to 1200 x 630. Null when Cloudflare is not set up or fails (then the title cover is used). */
@@ -993,7 +1041,7 @@ function rocBlogServerTick(PDO $pdo, string $root, bool $force = false): ?string
     $free = rocBlogFreeSlots($pdo, 2);
     if (!$free) return null;
     $slot = array_key_first($free);
-    if (!$force && strtotime($slot . ' UTC') - time() > 9000) return null;     // not yet
+    if (!$force && strtotime($slot . ' UTC') - time() > ROC_WRITER_LEAD) return null;     // not yet: 2 hours before the time
     $brief = rocBlogBrief($pdo);
     if (!$brief) return 'The content plan has no topics left. Add topics or press "Refresh plan" in CMS > Blog agent.';
     $state['last_try'] = gmdate('Y-m-d H:i:s');

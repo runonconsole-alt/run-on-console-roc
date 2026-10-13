@@ -1391,7 +1391,7 @@ function renderDash(m){
     if(!b.image)g.push('cover image');
     if(g.length)gaps.push({b:b,g:g});
   });
-  var products=S.prodNames?Object.keys(S.prodNames).length:null;
+  var products=S.prodNames?Object.keys(S.prodNames).filter(function(k){ var st=S.prodNames[k].status; return !st||st==='published'; }).length:null;
   var newMsgs=S.msgCounts?(S.msgCounts['new']||0):null;
   var admin=S.user&&(S.user.is_admin||S.user.role==='administrator');
 
@@ -1503,6 +1503,27 @@ function renderDash(m){
       tEl.textContent=(h>99?Math.floor(h/24)+'d '+(h%24):String(h).padStart(2,'0'))+':'+String(mi).padStart(2,'0')+':'+String(se).padStart(2,'0');
     };
     tick(); S.dashTimer=setInterval(tick,1000);
+  } else if(admin){
+    // Nothing scheduled by hand: count down to the next automatic post. The server writer starts
+    // writing it exactly 2 hours before; then it shows here as a scheduled post.
+    api('blog-agent-admin.php').then(function(d){
+      if(!d || !d.next_slot || d.engine!=='server') return;
+      var tEl=$('#dash-timer',m); if(!tEl) return;
+      var box=tEl.parentNode, ls=box.querySelectorAll('.l');
+      var at=new Date(d.next_slot).getTime(), start=at-(d.writer_lead||7200)*1000;
+      ls[0].textContent='Next automatic post';
+      ls[1].textContent=d.next_topic||'From your content plan';
+      var tick=function(){
+        if(!document.body.contains(tEl)){ clearInterval(S.dashTimer); S.dashTimer=null; return; }
+        var now=Date.now(), target=now<start?start:at;
+        var s=Math.max(0,Math.floor((target-now)/1000)), h=Math.floor(s/3600), mi=Math.floor(s%3600/60), se=s%60;
+        tEl.textContent=String(h).padStart(2,'0')+':'+String(mi).padStart(2,'0')+':'+String(se).padStart(2,'0');
+        ls[2].textContent=now<start
+          ? 'Writer starts in this time (2 h before) · live '+new Date(at).toLocaleString('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Karachi'})+' PKT'
+          : 'Writing now · goes live '+new Date(at).toLocaleString('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Karachi'})+' PKT';
+      };
+      tick(); if(S.dashTimer) clearInterval(S.dashTimer); S.dashTimer=setInterval(tick,1000);
+    }).catch(function(){});
   }
   fillDashSite(m);
 }
@@ -1887,10 +1908,17 @@ function renderEditor(m){
     '<div class="cbody"><div class="advice" id="advice"></div></div></div>'+
   '</div></div></div>';
 
+  // The editor tidies the stored HTML when it opens (attribute order, spacing); that is not a change.
+  // Only a real edit (typing, pasting, a toolbar button) makes the post "unsaved".
+  var touched=false, mnt=$('#mount', m);
+  ['keydown','paste','drop','cut'].forEach(function(ev){ mnt.addEventListener(ev,function(){ touched=true; },true); });
+  mnt.addEventListener('mousedown',function(e){ if(e.target.closest('button,select,[role=button]')) touched=true; },true);
   S.editor = window.ROCEditor.create({
-    mount: $('#mount', m),
+    mount: mnt,
     onChange: function(html){
-      if(S.editing.content!==html){ S.editing.content=html; markDirty(); checks(); }
+      if(S.editing.content===html) return;
+      S.editing.content=html;
+      if(touched){ markDirty(); checks(); }
     },
     onPickImage: function(done){ pickMedia(done); },
     onPickInternal: function(done){ pickInternal(done); }
@@ -2296,7 +2324,7 @@ async function loadProdNames(){
   if(S.prodNames || !can('products','view')) return;
   try{
     var d=await api('products.php'); S.prodNames={};
-    (d.products||[]).forEach(function(p){ S.prodNames[p.slug]={title:p.title,image_alt:p.image_alt,id:p.id}; });
+    (d.products||[]).forEach(function(p){ S.prodNames[p.slug]={title:p.title,image_alt:p.image_alt,id:p.id,status:p.status}; });
     prepMedia(S.media.map(function(x){ delete x.alt_auto; return x; }));
   }catch(e){}
 }

@@ -91,3 +91,11 @@ try {
     $n = rocNewsTick($pdo, $ROOT);
     if ($n !== null) echo date('c') . ' news: ' . $n . "\n";
 } catch (\Throwable $e) { echo date('c') . ' news error: ' . $e->getMessage() . "\n"; }
+
+// Something new went live (a post or a news story): /llms.txt lists it.
+try {
+    require_once $ROOT . '/api/v1/cms/llms-lib.php';
+    if ($rows || (isset($n) && is_string($n) && strpos($n, 'News published:') === 0)) {
+        if (rocLlmsWrite($pdo, $ROOT)) echo date('c') . " llms.txt updated\n";
+    }
+} catch (\Throwable $e) { echo date('c') . ' llms.txt error: ' . $e->getMessage() . "\n"; }

@@ -316,35 +316,35 @@ export const BlogsView = () => {
           </div>
 
           <div className="lg:col-span-5 grid grid-cols-2 gap-3">
-            <a href="/blogs/" className="block no-underline">
-            <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
+            <a href="/blogs/" className="block no-underline h-full">
+            <Tilt3DCard className="h-full bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
               <img
-                src="/uploads/site/blog-guides.webp"
+                src="/uploads/site/blog-1.webp"
                 width="800"
                 height="450"
                 loading="lazy"
-                alt="Reading a gaming buying guide on a laptop"
+                alt="Gaming headset, mouse and keyboard: buying guides"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform"
               />
               <div className="text-xs font-display font-bold text-white">Buying guides</div>
-              <div className="text-[10px] text-emerald-300 font-medium">Picks, comparisons and how-tos</div>
+              <div className="text-[10px] text-emerald-300 font-medium">Picks and comparisons</div>
             </Tilt3DCard>
             </a>
 
- <a href="/news/" className="block no-underline">
-            <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
+ <a href="/news/" className="block no-underline h-full">
+            <Tilt3DCard className="h-full bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
 <img
-                src="/uploads/site/blog-news.webp"
+                src="/uploads/site/blog-2.webp"
                 width="800"
                 height="450"
                 loading="lazy"
-                alt="Latest gaming news on a tablet"
+                alt="A game controller and a phone: the latest gaming news"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform"
               />
               <div className="text-xs font-display font-bold text-white">Gaming news</div>
-              <div className="text-[10px] text-emerald-300 font-medium">Checked against trusted sources</div>
+              <div className="text-[10px] text-emerald-300 font-medium">Checked with trusted sources</div>
             </Tilt3DCard>
             </a>
           </div>
@@ -381,9 +381,9 @@ export const BlogsView = () => {
                     alt={blog.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <span className="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-md shadow-sm uppercase badge-glow">
+                  {!String(blog.image || '').startsWith('/uploads/blog-covers/') && (<span className="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-md shadow-sm uppercase badge-glow">
                     {blog.category}
-                  </span>
+                  </span>)}
                   <span className="absolute bottom-3 right-3 bg-slate-900/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 backdrop-blur-sm">
                     <Clock className="w-3 h-3" /> {blog.readTime}
                   </span>
