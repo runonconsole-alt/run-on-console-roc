@@ -144,9 +144,9 @@ if (!headers_sent()) {
 header('Content-Type: application/xml; charset=utf-8');
 header('X-Robots-Tag: noindex');
 echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . ROC_SM_STYLE . "\n"
-   . '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:roc="https://runonconsole.com/ns/sitemap">' . "\n";
+   . '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+// Plain sitemap index: Google reports any extra tag here as "Invalid XML tag" (sitemap.xsl names them from the address).
 foreach ($children as $name => [$t, $label]) {
-    echo '  <sitemap><loc>' . ROC_SM_BASE . '/sitemaps/' . $name . '-sitemap.xml</loc><lastmod>' . gmdate('c', $t) . '</lastmod>'
-       . '<roc:title>' . rocSmEsc($label) . "</roc:title></sitemap>\n";
+    echo '  <sitemap><loc>' . ROC_SM_BASE . '/sitemaps/' . $name . '-sitemap.xml</loc><lastmod>' . gmdate('c', $t) . "</lastmod></sitemap>\n";
 }
 echo "</sitemapindex>\n";

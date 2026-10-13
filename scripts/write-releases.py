@@ -284,6 +284,11 @@ RELEASES = [
                   'Header: CATEGORY is a plain link to /category/ (no dropdown, no View all categories button), on the site and in the CMS menu'],
          checks=[dict(label='Menu (cli-menu-products.php --apply)', type='file', path='api/v1/cron/cli-menu-products.php')],
          pr=REPO + '44'),
+    dict(deploy=45, date='2026-10-13', title='Sitemap index without extra tags, safer media clean-up',
+         changes=['sitemap.xml lists only the standard tags, so Search Console no longer reports Invalid XML tag; the browser view still names each sitemap',
+                  'Media clean-up asks the database for the covers before reading the files and checks every cover again before moving it: a cover a post shows is never moved, and if the database does not answer nothing moves'],
+         checks=[dict(label='Sitemap index (sitemap-render.php)', type='file', path='sitemap-render.php')],
+         pr=REPO + '45'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

@@ -1,0 +1,27 @@
+{
+ "deploy": 45,
+ "date": "2026-10-13",
+ "title": "Sitemap index without extra tags, safer media clean-up",
+ "changes": [
+  "sitemap.xml lists only the standard tags, so Search Console no longer reports Invalid XML tag; the browser view still names each sitemap",
+  "Media clean-up asks the database for the covers before reading the files and checks every cover again before moving it: a cover a post shows is never moved, and if the database does not answer nothing moves"
+ ],
+ "checks": [
+  {
+   "label": "Sitemap index (sitemap-render.php)",
+   "type": "file",
+   "path": "sitemap-render.php"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BWSHvK1-.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/45",
+ "build": "index-BWSHvK1-.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

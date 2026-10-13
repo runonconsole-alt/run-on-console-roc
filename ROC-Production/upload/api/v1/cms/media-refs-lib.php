@@ -37,6 +37,25 @@ function rocMediaRefs(PDO $pdo, string $root): array {
         try { $st = $pdo->query('SELECT * FROM ' . $t); } catch (\Throwable $e) { continue; }
         while ($row = $st->fetch(PDO::FETCH_NUM)) foreach ($row as $v) if (is_string($v) && (stripos($v, 'uploads/') !== false || stripos($v, 'images/') !== false)) $grab($v);
     }
+    // Database answers first: on shared hosting the database connection can close while the files
+    // are read (a long scan), and a lost answer must never turn pictures in use into "not used".
+    // Covers: only the picture a post shows (image) and pictures inside its text count; og_image and
+    // twitter_image can still hold an older cover that no page shows.
+    $covers = [];
+    $rows = $pdo->query('SELECT image, content FROM blogs')->fetchAll(PDO::FETCH_ASSOC);   // fails loudly: no guessing
+    foreach ($rows as $b)
+        foreach ($b as $v) if (is_string($v) && stripos($v, 'blog-covers/') !== false && preg_match_all('#uploads/blog-covers/[A-Za-z0-9_.%-]+?\.(?:jpe?g|png|webp|gif|avif)#i', $v, $m))
+            foreach ($m[0] as $u) $covers['/' . rawurldecode($u)] = 1;
+    // Name cards and share cards: used only by a published product that has no real photo.
+    $cards = [];
+    foreach ($pdo->query("SELECT slug, image FROM products WHERE status = 'published'")->fetchAll(PDO::FETCH_ASSOC) as $p) {
+        $img = trim((string)$p['image']);
+        // Link previews use the share card unless the product has its own photo on this site
+        // (Amazon pictures are small squares, so those products keep it too). See rocShareImage().
+        if (!preg_match('#^(/images/products/photos/|/uploads/)#', $img)) $cards['/images/products/share/' . $p['slug'] . '.jpg'] = 1;
+        if (preg_match('#^(/images/products/photos/|/uploads/|https?://)#', $img)) continue;
+        foreach (['.webp', '.svg'] as $e) $cards['/images/products/' . $p['slug'] . $e] = 1;
+    }
     $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS));
     foreach ($it as $f) {
         $p = $f->getPathname();
@@ -47,28 +66,9 @@ function rocMediaRefs(PDO $pdo, string $root): array {
         if (preg_match('#/cron/[^/]+[.]json$#i', $q) || stripos(basename($q), 'backup') !== false) continue;   // installer data and backups
         $grab((string)file_get_contents($p));
     }
-    // Covers: only what the posts use now.
-    foreach (array_keys($refs) as $u) if (strpos($u, '/uploads/blog-covers/') === 0) unset($refs[$u]);
-    try {
-        // Only the picture the page shows (image) and pictures inside the text count; og_image and
-        // twitter_image can still hold an older cover that no page shows.
-        foreach ($pdo->query('SELECT image, content FROM blogs')->fetchAll(PDO::FETCH_ASSOC) as $b)
-            foreach ($b as $v) if (is_string($v) && stripos($v, 'blog-covers/') !== false && preg_match_all('#uploads/blog-covers/[A-Za-z0-9_.%-]+?\.(?:jpe?g|png|webp|gif|avif)#i', $v, $m))
-                foreach ($m[0] as $u) $refs['/' . rawurldecode($u)] = 1;
-    } catch (\Throwable $e) {}
-    // Name cards and share cards: used only by a published product that has no real photo.
-    foreach (array_keys($refs) as $u) if (preg_match('#^/images/products/(share/)?[a-z0-9-]+\.(webp|svg|jpg|png)$#', $u)) unset($refs[$u]);
-    try {
-        foreach ($pdo->query("SELECT slug, image FROM products WHERE status = 'published'")->fetchAll(PDO::FETCH_ASSOC) as $p) {
-            $img = trim((string)$p['image']);
-            // Link previews use the share card unless the product has its own photo on this site
-            // (Amazon pictures are small squares, so those products keep it too). See rocShareImage().
-            if (!preg_match('#^(/images/products/photos/|/uploads/)#', $img)) $refs['/images/products/share/' . $p['slug'] . '.jpg'] = 1;
-            if (preg_match('#^(/images/products/photos/|/uploads/|https?://)#', $img)) continue;
-            foreach (['.webp', '.svg'] as $e) $refs['/images/products/' . $p['slug'] . $e] = 1;
-        }
-    } catch (\Throwable $e) {}
-    return $refs;
+    foreach (array_keys($refs) as $u)
+        if (strpos($u, '/uploads/blog-covers/') === 0 || preg_match('#^/images/products/(share/)?[a-z0-9-]+\.(webp|svg|jpg|png)$#', $u)) unset($refs[$u]);
+    return $refs + $covers + $cards;
 }
 
 /** Saves the scan for the CMS Media library (api/v1/cms/media-usage.php reads it). */
