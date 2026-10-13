@@ -302,6 +302,39 @@ function rocProductUrl(string $slug): string { return ROC_PUBLIC_URL . '/product
 function rocCategoryUrl(string $slug): string { return ROC_PUBLIC_URL . '/products/' . $slug . '/'; }
 
 /**
+ * Questions buyers ask, answered from this product's own data (specs, who it is for, the other
+ * products of its category), with FAQPage structured data. No invented facts or prices.
+ */
+function rocProductFaq(string $title, string $catName, string $catSlug, string $bestFor, string $desc, array $specs, array $related, string $amazon): string {
+    $qa = [];
+    $list = [];
+    foreach ($specs as $k => $v) { if (is_array($v)) $v = implode(', ', $v); $v = trim((string)$v); if ($v !== '' && count($list) < 6) $list[] = $k . ': ' . $v; }
+    if ($list) $qa[] = ['What are the main specs of the ' . $title . '?', 'The ' . $title . ' comes with ' . implode('; ', $list) . '. The full list is in the specifications above.'];
+    $first = trim((string)preg_replace('/(?<=[.!?])\s.*$/s', '', $desc));
+    if ($bestFor !== '' || $first !== '') {
+        $qa[] = ['Who is the ' . $title . ' best for?', ($bestFor !== '' ? 'It is a good pick for ' . rtrim(lcfirst($bestFor), '.') . '. ' : '') . $first];
+    }
+    $names = array_map(function ($r) { return (string)$r['title']; }, array_slice($related, 0, 3));
+    $qa[] = ['What are alternatives to the ' . $title . '?', $names
+        ? 'Other ' . $catName . ' worth comparing: the ' . implode(', the ', $names) . '. All ' . (count($related) + 1) . ' picks are on our ' . $catName . ' page, with their specs side by side.'
+        : 'See our ' . $catName . ' page for the other picks in this category.'];
+    $qa[] = ['Where can I buy the ' . $title . '?', 'The button on this page opens the ' . $title . ' on Amazon, where you can see the current price, stock and seller. Prices change often, so we do not list them here.'];
+    $h = '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">'
+        . '<h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">' . rocH($title) . ': questions buyers ask</h2>';
+    foreach ($qa as [$q, $a]) {
+        $ans = rocH($a);
+        if ($names && strpos($q, 'alternatives') !== false) $ans = str_replace(rocH($catName) . ' page', '<a href="/products/' . rocH($catSlug) . '/" class="text-emerald-700 font-bold underline">' . rocH($catName) . ' page</a>', $ans);
+        $h .= '<details class="group border border-slate-100 rounded-2xl p-4 bg-slate-50"' . ($q === $qa[0][0] ? ' open' : '') . '><summary class="font-bold text-sm text-slate-900 cursor-pointer">' . rocH($q) . '</summary>'
+            . '<p class="text-xs sm:text-sm text-slate-600 leading-relaxed mt-2">' . $ans . '</p></details>';
+    }
+    $ld = ['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => array_map(function ($x) {
+        return ['@type' => 'Question', 'name' => $x[0], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $x[1]]];
+    }, $qa)];
+    $h .= '<script type="application/ld+json">' . str_replace('</', '<\/', (string)json_encode($ld, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) . '</script></div>';
+    return $h;
+}
+
+/**
  * Click on the product photo: it opens full size over the page (Esc, a click or the X closes it;
  * "Open picture" shows the file itself). Works with the "Choose version" photos too.
  */
@@ -398,7 +431,8 @@ function rocShareImage(string $image, array $p, array $categories): string {
 
 /** First title that fits in 60 characters (Google cuts longer ones). */
 function rocFitTitle(array $options): string {
-    foreach ($options as $t) if (mb_strlen($t) <= 60) return $t;
+    // 55 characters stay inside Google's ~560 px title width.
+    foreach ($options as $t) if (mb_strlen($t) <= 55) return $t;
     return end($options);
 }
 
@@ -556,7 +590,7 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
         $title,
     ]);
     $metaD = trim((string)($p['meta_description'] ?? '')) ?: rocCmsTruncatePlain($desc, 155);
-    if (mb_strlen($metaD) > 160) $metaD = rocCmsTruncatePlain($metaD, 155);
+    if (mb_strlen($metaD) > 155) $metaD = rocCmsTruncatePlain($metaD, 150);
 
     /* ---------------- head */
     $h  = rocHeadMeta($metaT, $metaD, $url, rocShareImage($image, $p, $categories), $noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large', 'product', $alt);
@@ -614,7 +648,7 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
 
     if ($specs) {
         $m .= '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">'
-            . '<h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider flex items-center gap-2"><span>Key specifications</span></h2>'
+            . '<h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider flex items-center gap-2"><span>' . rocH($title) . ' key specifications</span></h2>'
             . '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">';
         foreach ($specs as $k => $v) {
             if (is_array($v)) $v = implode(', ', $v);
@@ -626,6 +660,7 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
     }
 
     $related = array_values(array_filter(rocFetchProducts($pdo, $cat), function ($r) use ($slug) { return $r['slug'] !== $slug; }));
+    $m .= rocProductFaq($title, $catName, $catSlug, $bestFor, $desc, $specs ?: [], $related, $amazon);
     if ($related) {
         $m .= '<div class="space-y-4"><div class="flex items-center justify-between gap-3">'
             . '<h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">More ' . rocH($catName) . '</h2>'

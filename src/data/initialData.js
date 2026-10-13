@@ -462,7 +462,7 @@ export { PRODUCT_CATEGORIES };
 // set in the CMS, show the product's own card (scripts/generate-product-cards.mjs).
 const SHARED_CATEGORY_PHOTOS = new Set(PRODUCT_CATEGORIES.map((c) => c.image));
 export const ALL_PRODUCTS = CATALOG_PRODUCTS.map((p) =>
-  SHARED_CATEGORY_PHOTOS.has(p.image) ? { ...p, image: `/images/products/${p.slug}.webp` } : p
+  SHARED_CATEGORY_PHOTOS.has(p.image) && !String(p.image).startsWith('/images/products/photos/') ? { ...p, image: `/images/products/${p.slug}.webp` } : p
 );
 
 export const ALL_BLOGS = [

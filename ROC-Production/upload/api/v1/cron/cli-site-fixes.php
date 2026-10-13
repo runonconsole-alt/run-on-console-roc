@@ -9,6 +9,8 @@
  * What --apply does:
  *   1. .htaccess: /category/ (the menu link) -> /products/, /category/{x}/ -> /products/{x}/ (301).
  *   2. Menu saved in the CMS: a link to /category/ becomes /products/.
+ *   2b. .htaccess: a Content-Security-Policy header that blocks framing by other sites, plugins and
+ *       mixed content (it does not limit scripts, so analytics and the site keep working).
  *   3. Blog posts and news: links to /products/category/{x}/ (old address, 301) become /products/{x}/;
  *      links to a product that is no longer on the site go to its category page.
  */
@@ -28,6 +30,11 @@ const FIX_BLOCK = FIX_BEGIN . "\n"
     . "  RewriteRule ^category/?$ /products/ [R=301,L]\n"
     . "  RewriteRule ^category/([a-z0-9-]+)/?$ /products/\$1/ [R=301,L]\n"
     . "  # ROC fixes END\n";
+// Blocks framing by other sites, plugins and mixed content; scripts are not limited, so analytics keep working.
+const CSP_BEGIN = '# ROC csp BEGIN (cli-site-fixes.php)';
+const CSP_BLOCK = "\n" . CSP_BEGIN . "\n<IfModule mod_headers.c>\n"
+    . "  Header always set Content-Security-Policy \"upgrade-insecure-requests; frame-ancestors 'self'; object-src 'none'; base-uri 'self'\"\n"
+    . "</IfModule>\n# ROC csp END\n";
 
 echo "Run On Console - audit fixes\n\n";
 ob_start();
@@ -53,6 +60,8 @@ $ht = (string)@file_get_contents($ROOT . '/.htaccess');
 $htDone = strpos($ht, FIX_BEGIN) !== false;
 $anchor = null;
 foreach (['  # ROC news BEGIN', '  # Blogs come from the CMS database', '  RewriteRule ^blogs$ /blogs/', '  # Real file or folder'] as $a) if (strpos($ht, $a) !== false) { $anchor = $a; break; }
+$cspDone = strpos($ht, CSP_BEGIN) !== false;
+echo $cspDone ? "  =  .htaccess already sends a Content-Security-Policy\n" : "  +  .htaccess: Content-Security-Policy header\n";
 echo $htDone ? "  =  .htaccess already redirects /category/\n" : ($anchor ? "  +  .htaccess: /category/ -> /products/ (301)\n" : "  !  .htaccess: no place found for the redirect (skipped)\n");
 
 /* 2. menu */
@@ -93,12 +102,16 @@ echo "\n" . count($posts) . " post(s) to fix.\n";
 if (!$apply) { echo "Dry run: nothing changed. Run again with --apply.\n"; exit(0); }
 
 $file = $HOME . '/roc-fixes-backup-' . date('Ymd-His') . '.json';
-file_put_contents($file, json_encode(['made' => date('c'), 'htaccess' => (!$htDone && $anchor) ? $ht : '', 'nav' => $navNew !== null ? $nav : null,
+file_put_contents($file, json_encode(['made' => date('c'), 'htaccess' => ((!$htDone && $anchor) || !$cspDone) ? $ht : '', 'nav' => $navNew !== null ? $nav : null,
     'blogs' => array_map(function ($x) { return $x[0]; }, $posts)], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
 if (!$htDone && $anchor) {
     file_put_contents($ROOT . '/.htaccess.roc-tmp', str_replace($anchor, FIX_BLOCK . "\n" . $anchor, $ht));
     rename($ROOT . '/.htaccess.roc-tmp', $ROOT . '/.htaccess');
     echo ".htaccess updated\n";
+}
+if (!$cspDone) {
+    file_put_contents($ROOT . '/.htaccess', rtrim((string)file_get_contents($ROOT . '/.htaccess')) . "\n" . CSP_BLOCK);
+    echo "Content-Security-Policy added\n";
 }
 if ($navNew !== null) { $k = rocLayerSave($pdo, $ROOT, 'nav', $navNew, null); echo "Menu updated ({$k} built page(s) redrawn)\n"; }
 $u = $pdo->prepare('UPDATE blogs SET content = ?, updated_at = ? WHERE id = ?');

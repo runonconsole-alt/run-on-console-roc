@@ -180,8 +180,8 @@ export const STATIC_PUBLIC_ROUTES = [
   {
     path: '/compatibility/',
     canonical: `${BASE_DOMAIN}/compatibility/`,
-    title: 'Can I Run It? PC Game Requirements Checker | Run On Console',
-    description: 'Check if your PC can run 500+ games. Pick a game and your graphics card, processor and RAM to compare them with the official minimum and recommended specs.',
+    title: 'Can I Run It? PC Game Requirements Checker | ROC',
+    description: 'Check if your PC can run 500+ games: pick a game, your graphics card, CPU and RAM, and compare them with the official minimum and recommended specs.',
     h1: 'Can I Run It',
     category: 'Compatibility',
     lastmod: '2024-05-12T10:00:00+00:00'

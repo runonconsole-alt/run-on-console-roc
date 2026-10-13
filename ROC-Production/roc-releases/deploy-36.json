@@ -1,0 +1,30 @@
+{
+ "deploy": 36,
+ "date": "2026-10-12",
+ "title": "Screaming Frog audit fixes: product FAQ, titles, descriptions, CSP",
+ "changes": [
+  "Most audit errors (Unauthorized Access, missing H1, titles, canonicals) came from the hosting firewall blocking the crawler, not from the site",
+  "Product pages: a questions buyers ask section built from each product (specs, who it is for, alternatives, where to buy) with FAQ structured data",
+  "Product titles fit 55 characters, descriptions 155; each product has its own specifications heading",
+  "Two broken picture links on the products list (Ryzen 5 5500F, Cosmos Alpha) fixed",
+  "Content-Security-Policy header added; shorter title and description on the game checker"
+ ],
+ "checks": [
+  {
+   "label": "Audit fixes (cli-site-fixes.php --apply)",
+   "type": "file",
+   "path": "api/v1/cron/cli-site-fixes.php"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-DVX_22gI.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/36",
+ "build": "index-DVX_22gI.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

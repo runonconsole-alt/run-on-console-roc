@@ -214,7 +214,15 @@ RELEASES = [
                   'Gaming platforms: each platform gets its own picture (cli-platform-images.php, Cloudflare AI)',
                   'Audit: /category/ (menu link, 404) now opens /products/, old category links inside posts fixed, product descriptions capped at 160 characters'],
          checks=[dict(label='Audit fixes (cli-site-fixes.php --apply)', type='file', path='api/v1/cron/cli-site-fixes.php')],
-         pr=REPO + '35'),
+         pr=REPO + '35', build='index-RkGclLGs.js'),
+    dict(deploy=36, date='2026-10-12', title='Screaming Frog audit fixes: product FAQ, titles, descriptions, CSP',
+         changes=['Most audit errors (Unauthorized Access, missing H1, titles, canonicals) came from the hosting firewall blocking the crawler, not from the site',
+                  'Product pages: a questions buyers ask section built from each product (specs, who it is for, alternatives, where to buy) with FAQ structured data',
+                  'Product titles fit 55 characters, descriptions 155; each product has its own specifications heading',
+                  'Two broken picture links on the products list (Ryzen 5 5500F, Cosmos Alpha) fixed',
+                  'Content-Security-Policy header added; shorter title and description on the game checker'],
+         checks=[dict(label='Audit fixes (cli-site-fixes.php --apply)', type='file', path='api/v1/cron/cli-site-fixes.php')],
+         pr=REPO + '36'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
