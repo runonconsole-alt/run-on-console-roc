@@ -317,6 +317,12 @@ RELEASES = [
                   'Can I run it: the gaming PC picture in the hero opens PC Hardware'],
          checks=[dict(label='Page templates refreshed (cli-refresh-templates.php)', type='file', path='product-render.php')],
          pr=REPO + '49'),
+    dict(deploy=50, date='2026-10-14', title='Our own pictures on the home page and in link previews',
+         changes=['Home page slides: our own pictures (gaming setup, gaming PC for the checker, PlayStation for the platforms) instead of Call of Duty, Elden Ring and Spider-Man key art',
+                  'The default link preview picture (Facebook, WhatsApp, X) is our own home picture',
+                  'Categories and News pages show their new hero pictures (made by cli-site-images.php)'],
+         checks=[dict(label='Home picture (cli-site-images.php)', type='file', path='uploads/site/home-hero.webp')],
+         pr=REPO + '50'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

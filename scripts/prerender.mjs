@@ -68,7 +68,7 @@ for (const routePath of uniqueRoutes) {
   const canonical = isStaging ? rawCanonical.replace('https://runonconsole.com', 'https://staging.runonconsole.com') : rawCanonical;
   const robots = isStaging ? 'noindex, nofollow' : (is404Route ? 'noindex, follow' : (seo.robots || 'index, follow'));
   const ogType = seo.ogType || 'website';
-  const rawOgImage = seo.ogImage || 'https://runonconsole.com/images/hero_cod.jpg';
+  const rawOgImage = seo.ogImage || 'https://runonconsole.com/uploads/site/home-hero.webp';
   const ogImage = isStaging ? rawOgImage.replace('https://runonconsole.com', 'https://staging.runonconsole.com') : rawOgImage;
   
   const jsonLdString = (!is404Route && seo.jsonLd && seo.jsonLd.length > 0) 

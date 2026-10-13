@@ -1,0 +1,28 @@
+{
+ "deploy": 50,
+ "date": "2026-10-14",
+ "title": "Our own pictures on the home page and in link previews",
+ "changes": [
+  "Home page slides: our own pictures (gaming setup, gaming PC for the checker, PlayStation for the platforms) instead of Call of Duty, Elden Ring and Spider-Man key art",
+  "The default link preview picture (Facebook, WhatsApp, X) is our own home picture",
+  "Categories and News pages show their new hero pictures (made by cli-site-images.php)"
+ ],
+ "checks": [
+  {
+   "label": "Home picture (cli-site-images.php)",
+   "type": "file",
+   "path": "uploads/site/home-hero.webp"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-CsuP9rek.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/50",
+ "build": "index-CsuP9rek.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}
