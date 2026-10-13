@@ -89,6 +89,11 @@ const MainRouter = () => {
 };
 
 export default function App({ initialUrl = null }) {
+  // After hydration: CMS site-builder edits (/roc-edits.js) can be applied safely now.
+  useEffect(() => {
+    window.__ROC_HYDRATED = true;
+    window.dispatchEvent(new Event('roc:hydrated'));
+  }, []);
   return (
     <AppProvider initialUrl={initialUrl}>
       <MainRouter />

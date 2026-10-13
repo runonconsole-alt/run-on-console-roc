@@ -10,6 +10,7 @@
  * Tailwind classes used only through this data (so the CSS build keeps them):
  * lg:col-span-1 lg:col-span-2 lg:col-span-3 lg:col-span-4 lg:col-span-7 contents
  */
+import { useEffect, useState } from 'react';
 import { NAV_ICONS } from './navIcons.js';
 
 export const DEFAULT_SITE_NAV = {
@@ -56,6 +57,20 @@ export const DEFAULT_SITE_NAV = {
     disclaimer: 'As an Amazon Associate we earn from qualifying purchases. Prices and stock are shown on Amazon.',
   },
 };
+
+/**
+ * The menu as a React hook: redraws when the CMS site builder sends a new menu
+ * (it sets window.__ROC_NAV and fires "roc:nav" for a live preview).
+ */
+export function useSiteNav() {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const redraw = () => setTick((t) => t + 1);
+    window.addEventListener('roc:nav', redraw);
+    return () => window.removeEventListener('roc:nav', redraw);
+  }, []);
+  return getSiteNav();
+}
 
 /** The menu in use: the CMS one when the page carries it, else the default. */
 export function getSiteNav() {

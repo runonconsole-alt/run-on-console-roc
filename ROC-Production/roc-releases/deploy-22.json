@@ -1,0 +1,28 @@
+{
+ "deploy": 22,
+ "date": "2026-10-08",
+ "title": "Site builder, blog writer without the PC, redirects and noindex you can undo",
+ "changes": [
+  "CMS > Site builder: the real page; click anything to change its text, link, picture, colours or size, hide it or add a block; menu, footer and logo edited on the page (replaces Template & code and Menus & footer)",
+  "Blog writer: a content plan of topic clusters (learn / compare / buy) with internal links both ways; posts at 16:00 and 23:00 Pakistan time",
+  "Blog writer can run on the server with a free Google Gemini key: no PC and no Claude subscription needed",
+  "Settings: redirects and noindex pages can be edited, stopped (the page comes back and returns to the sitemap) or changed",
+  "Pages shows the pages already on the website with their count; \"Website pages & SEO\" removed"
+ ],
+ "checks": [
+  {
+   "label": "Site builder script",
+   "type": "file",
+   "path": "roc-edits.js"
+  },
+  {
+   "label": "Blog engine",
+   "type": "file",
+   "path": "api/v1/cms/blog-engine-lib.php"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/29",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { getSiteNav } from '../data/siteNav';
+import { useSiteNav } from '../data/siteNav';
 
 export const BrandLogo = ({ 
   size = 'normal', 
@@ -11,7 +11,7 @@ export const BrandLogo = ({
   const isSmall = size === 'small';
   const isDark = theme === 'dark';
   // Logo text and image from CMS > Menus & footer (the server swaps the marked parts the same way).
-  const logo = getSiteNav().logo;
+  const logo = useSiteNav().logo;
 
   return (
     <div 

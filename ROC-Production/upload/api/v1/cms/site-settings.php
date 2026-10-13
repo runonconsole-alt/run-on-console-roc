@@ -21,6 +21,7 @@
  */
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/site-layer-lib.php';
+require_once __DIR__ . '/cms-html.php';
 
 $session = requireCmsAdmin();
 $pdo = getDBConnection();
@@ -54,6 +55,7 @@ function ssGet(PDO $pdo, string $ROOT, string $part) {
         case 'llms':     return ssFile($ROOT, 'llms.txt');
         case 'redirects': return ssRedirects($pdo);
         case 'nav':      return $L['nav'];
+        case 'edits':    return array_values((array)$L['edits']);
     }
     return null;
 }
@@ -80,19 +82,21 @@ function ssApplyRedirects(string $ROOT, array $rules): ?string {
     $ht = (string)@file_get_contents($file);
     if ($ht === '') return '.htaccess not found.';
     $block = ssRewriteBlock($rules);
+    $rest = $ht;
     $start = strpos($ht, SS_RD_BEGIN);
     if ($start !== false) {
         $end = strpos($ht, SS_RD_END, $start);
         if ($end === false) return 'The redirect block in .htaccess is damaged. Nothing was changed.';
         $end += strlen(SS_RD_END);
         if (substr($ht, $end, 1) === "\n") $end++;
-        $new = substr($ht, 0, $start) . $block . substr($ht, $end);
-    } else {
-        $anchor = null;
-        foreach (['  # ROC team BEGIN', '  # Sitemaps are generated automatically', '  # Real file or folder'] as $a) if (strpos($ht, $a) !== false) { $anchor = $a; break; }
-        if (!$anchor) return 'Could not find where to add redirects in .htaccess. Nothing was changed.';
-        $new = str_replace($anchor, $block . $anchor, $ht);
+        $rest = substr($ht, 0, $start) . substr($ht, $end);
     }
+    // Before the website's own redirects (auth aliases, renamed products…), so a CMS rule wins.
+    $anchor = null;
+    foreach (['  # Auth aliases', '  # ROC team BEGIN', '  # Sitemaps are generated automatically', '  # Real file or folder'] as $a) if (strpos($rest, $a) !== false) { $anchor = $a; break; }
+    if (!$anchor) return 'Could not find where to add redirects in .htaccess. Nothing was changed.';
+    $pos = strpos($rest, $anchor);
+    $new = substr($rest, 0, $pos) . $block . substr($rest, $pos);
     $backup = rocHistDir($ROOT) . '/htaccess-' . gmdate('Ymd-His') . '.bak';
     if (!is_dir(dirname($backup))) @mkdir(dirname($backup), 0700, true);
     @file_put_contents($backup, $ht);
@@ -155,7 +159,11 @@ function ssSystemRedirects(string $ROOT): array {
                 $to = preg_replace('#https://%\{HTTP_HOST\}/\*#', 'https://runonconsole.com/…', $to);
                 $to = preg_replace('#https://runonconsole\.com/\*#', 'https://runonconsole.com/…', $to);
             }
-            $out[] = ['from' => $from, 'to' => $to, 'type' => $type, 'source' => $section ?: '.htaccess'];
+            $row = ['from' => $from, 'to' => $to, 'type' => $type, 'source' => $section ?: '.htaccess'];
+            if (strpos($from, '/') !== 0) $row['lock'] = 'Keeps one address for the whole site (needed for Google).';
+            elseif (preg_match('/[*{]/', $from)) $row['lock'] = 'A rule for many addresses at once; change single pages with your own redirect above.';
+            elseif (preg_match('#index\.html$#', $from) || rtrim($to, '/') === rtrim($from, '/')) $row['lock'] = 'Only tidies the address (adds the ending /).';
+            $out[] = $row;
         }
         $conds = [];
     }
@@ -175,21 +183,21 @@ function ssSystemNoindex(PDO $pdo, string $ROOT, array $L): array {
     foreach (rocLayerStaticFiles($ROOT) as $path => $file) {
         [$html] = rocLayerStrip((string)file_get_contents($file, false, null, 0, 60000));
         if (preg_match('#<meta\s+name="robots"\s+content="[^"]*noindex#i', $html)) {
-            $out[] = $path === '/404' ? ['path' => '404 page (not found)', 'why' => 'Page code: error page']
-                                      : ['path' => $path, 'why' => 'Page code: private or account page'];
+            $out[] = $path === '/404' ? ['path' => '404 page (not found)', 'why' => 'Page code: error page', 'lock' => 'Error pages are never shown in Google.']
+                                      : ['path' => $path, 'why' => 'Page code: private or account page', 'lock' => 'Sign-in and account pages must stay out of Google.'];
         }
     }
     // Folders whose own .htaccess sends "X-Robots-Tag: noindex".
     foreach (['auth', 'profile', 'cms', 'api'] as $d) {
         $h = (string)@file_get_contents($ROOT . '/' . $d . '/.htaccess');
-        if (stripos($h, 'noindex') !== false) $out[] = ['path' => '/' . $d . '/*', 'why' => 'Folder rule (.htaccess)'];
+        if (stripos($h, 'noindex') !== false) $out[] = ['path' => '/' . $d . '/*', 'why' => 'Folder rule (.htaccess)', 'lock' => 'Private folder: must stay out of Google.'];
     }
     // Database rows switched to noindex in their editors.
     $tables = ['products' => ['Product', '/products/%s/'], 'product_categories' => ['Product category', '/products/%s/'],
                'gaming_categories' => ['Gaming platform', '/gaming-platforms/%s/'], 'blogs' => ['Blog post', '/blogs/%s/'], 'pages' => ['CMS page', '/%s/']];
     foreach ($tables as $t => [$label, $fmt]) {
         try { $rows = $pdo->query("SELECT slug FROM {$t} WHERE is_noindex = 1")->fetchAll(PDO::FETCH_COLUMN); } catch (\Throwable $e) { continue; }
-        foreach ($rows as $slug) $out[] = ['path' => sprintf($fmt, $slug), 'why' => $label . ' set to noindex in its editor'];
+        foreach ($rows as $slug) $out[] = ['path' => sprintf($fmt, $slug), 'why' => $label . ' set to noindex in its editor', 'table' => $t, 'slug' => $slug];
     }
     return $out;
 }
@@ -334,6 +342,49 @@ function ssSave(PDO $pdo, string $ROOT, string $part, $v, array $session): array
             rocLayerSave($pdo, $ROOT, 'nav', $v, (int)$session['user_id']);
             $msg = 'Saved. The menu, footer and logo are updated on every page.';
             break;
+        case 'edits':
+            $list = []; $seen = [];
+            $url = '#^(/[^\s"<>]*|https://[^\s"<>]+|mailto:[^\s"<>]+|tel:[0-9+ -]+|\#[A-Za-z0-9_-]*)$#i';
+            foreach (array_slice((array)$v, 0, 400) as $i => $e) {
+                if (!is_array($e)) continue;
+                $n = $i + 1;
+                $scope = trim((string)($e['scope'] ?? ''));
+                if ($scope !== '*' && !preg_match(SS_PATH_RE, $scope)) { $err['edits'] = "Change {$n}: unknown page."; continue; }
+                $sel = trim((string)($e['sel'] ?? ''));
+                if ($sel === '' || strlen($sel) > 500 || preg_match('/[<{};]/', $sel)) { $err['edits'] = "Change {$n}: the element could not be identified."; continue; }
+                $k = $scope . '|' . $sel;
+                if (isset($seen[$k])) continue;
+                $seen[$k] = 1;
+                $o = ['id' => preg_match('/^[a-z0-9]{4,20}$/', (string)($e['id'] ?? '')) ? $e['id'] : bin2hex(random_bytes(5)), 'scope' => $scope, 'sel' => $sel,
+                      'label' => mb_substr(strip_tags((string)($e['label'] ?? '')), 0, 80)];
+                if (isset($e['text'])) $o['text'] = mb_substr(str_replace(["\r", "\0"], '', strip_tags((string)$e['text'])), 0, 3000);
+                if (isset($e['href'])) { $h = trim((string)$e['href']); if (!preg_match($url, $h)) { $err['edits'] = "Change {$n}: not a valid link ({$h})."; continue; } $o['href'] = $h; }
+                if (isset($e['src'])) {
+                    $u = trim((string)$e['src']);
+                    if (!preg_match('#^(/[^\s"<>]+|https://[^\s"<>]+)\.(png|jpe?g|webp|svg|gif|avif)(\?[^\s"<>]*)?$#i', $u)) { $err['edits'] = "Change {$n}: the picture must be a png, jpg, webp or svg link."; continue; }
+                    $o['src'] = $u;
+                }
+                if (isset($o['text']) && !empty($e['mixed'])) $o['mixed'] = true;
+                if (isset($e['alt'])) $o['alt'] = mb_substr(strip_tags((string)$e['alt']), 0, 200);
+                if (!empty($e['hide'])) $o['hide'] = true;
+                $st = [];
+                foreach ((array)($e['style'] ?? []) as $sk => $sv) {
+                    $sv = trim((string)$sv);
+                    if ($sv === '') continue;
+                    if (!in_array($sk, ROC_EDIT_STYLE, true) || !preg_match('/^[#a-zA-Z0-9 .,%()\-]{1,60}$/', $sv)) { $err['edits'] = "Change {$n}: style \"{$sk}: {$sv}\" is not allowed."; continue 2; }
+                    $st[$sk] = $sv;
+                }
+                if ($st) $o['style'] = $st;
+                if (isset($e['html']) && trim((string)$e['html']) !== '') {
+                    $o['html'] = mb_substr(rocCmsSanitizeHtml((string)$e['html']), 0, 20000);
+                    $o['pos'] = ($e['pos'] ?? '') === 'before' ? 'before' : 'after';
+                }
+                if (count($o) > 4) $list[] = $o;        // something besides id/scope/sel/label
+            }
+            if ($err) ssOut(422, ['success' => false, 'error' => $err['edits'], 'errors' => $err]);
+            rocLayerSave($pdo, $ROOT, 'edits', $list, (int)$session['user_id']);
+            $v = $list; $msg = 'Saved. ' . count($list) . ' change(s) are live on the website.';
+            break;
         case 'redirects':
             $rules = [];
             foreach ((array)$v as $i => $r) {
@@ -362,9 +413,14 @@ function ssSave(PDO $pdo, string $ROOT, string $part, $v, array $session): array
 }
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
-    if (isset($_GET['history'])) ssOut(200, ['success' => true, 'days' => ROC_HISTORY_DAYS, 'history' => rocHistList($ROOT, 'settings', (string)$_GET['history'])]);
+    if (isset($_GET['history'])) {
+        $h = [];
+        foreach (array_slice(explode(',', (string)$_GET['history']), 0, 4) as $k) $h = array_merge($h, rocHistList($ROOT, 'settings', $k));
+        usort($h, function ($a, $b) { return strcmp((string)$b['at'], (string)$a['at']); });
+        ssOut(200, ['success' => true, 'days' => ROC_HISTORY_DAYS, 'history' => $h]);
+    }
     $out = ['success' => true];
-    foreach (['tracking', 'noindex', 'sitemap', 'robots', 'llms', 'redirects', 'nav'] as $p) $out[$p] = ssGet($pdo, $ROOT, $p);
+    foreach (['tracking', 'noindex', 'sitemap', 'robots', 'llms', 'redirects', 'nav', 'edits'] as $p) $out[$p] = ssGet($pdo, $ROOT, $p);
     $out['nav_custom'] = (bool)$out['nav'];
     if (!$out['nav']) $out['nav'] = rocNavDefault();
     $out['nav_icons'] = array_keys(json_decode((string)@file_get_contents(__DIR__ . '/nav-icons.json'), true) ?: []);
@@ -373,9 +429,26 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
 }
 
 $in = json_decode((string)file_get_contents('php://input'), true) ?: [];
+if (($in['action'] ?? '') === 'index_db') {
+    $t = (string)($in['table'] ?? ''); $slug = (string)($in['slug'] ?? '');
+    if (!in_array($t, ['products', 'product_categories', 'gaming_categories', 'blogs', 'pages'], true) || !preg_match('/^[a-z0-9\-\/]{1,200}$/i', $slug))
+        ssOut(422, ['success' => false, 'error' => 'Unknown page.']);
+    $st = $pdo->prepare("UPDATE {$t} SET is_noindex = 0 WHERE slug = ? AND is_noindex = 1");
+    $st->execute([$slug]);
+    if ($st->rowCount() === 0) ssOut(404, ['success' => false, 'error' => 'That page is not noindex any more.']);
+    rocHistAdd($ROOT, 'settings', 'noindex_db', 'Noindex (page editor)', ['table' => $t, 'slug' => $slug, 'is_noindex' => 1], ['table' => $t, 'slug' => $slug, 'is_noindex' => 0], $session);
+    logCmsAudit('cms_settings_index_db', $t, $slug, []);
+    ssOut(200, ['success' => true, 'message' => 'Done: the page can be shown in Google again and is back in the sitemap.']);
+}
 if (($in['action'] ?? '') === 'restore') {
     $h = rocHistGet($ROOT, (string)($in['id'] ?? ''));
     if (!$h || $h['kind'] !== 'settings') ssOut(404, ['success' => false, 'error' => 'That version is no longer in the archive.']);
+    if ($h['key'] === 'noindex_db') {
+        $v = $h[($in['which'] ?? 'before') === 'after' ? 'after' : 'before'];
+        if (!in_array($v['table'] ?? '', ['products', 'product_categories', 'gaming_categories', 'blogs', 'pages'], true)) ssOut(422, ['success' => false, 'error' => 'Unknown page.']);
+        $pdo->prepare("UPDATE {$v['table']} SET is_noindex = ? WHERE slug = ?")->execute([(int)$v['is_noindex'], (string)$v['slug']]);
+        ssOut(200, ['success' => true, 'message' => 'Earlier version restored.']);
+    }
     [$v, $msg] = ssSave($pdo, $ROOT, (string)$h['key'], $h[($in['which'] ?? 'before') === 'after' ? 'after' : 'before'], $session);
     ssOut(200, ['success' => true, 'part' => $h['key'], 'value' => $v, 'message' => 'Earlier version restored. ' . $msg]);
 }

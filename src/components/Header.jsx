@@ -11,7 +11,7 @@ import { playClickSound } from '../utils/audioEffects';
 import { BrandLogo } from './BrandLogo';
 import { GameDetailModal } from './GameDetailModal';
 import { GamingAvatar } from './GamingProfileEditor';
-import { getSiteNav, navIsActive, iconSvg } from '../data/siteNav';
+import { useSiteNav, navIsActive, iconSvg } from '../data/siteNav';
 
 const NAV_ON = 'bg-emerald-600 text-white shadow-sm';
 const NAV_OFF = 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50';
@@ -31,7 +31,7 @@ export const Header = () => {
     logoutUser,
     currentPath
   } = useApp();
-  const siteNav = getSiteNav();
+  const siteNav = useSiteNav();
 
   const [activeDropdown, setActiveDropdown] = useState(null);
   // Menus open on hover with CSS too (server-rendered pages have no React). After a click
