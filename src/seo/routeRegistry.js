@@ -92,8 +92,7 @@ export const ENHANCED_BLOGS = ALL_BLOGS.map(blog => {
   const slug = blog.slug || slugify(blog.title);
   const resolvedContent = resolveInternalLinks(blog.content);
 
-  const isOmar = (blog.author || '').toLowerCase().includes('omar');
-  const authorUrl = isOmar ? `${BASE_DOMAIN}/author/omar-abobakar/` : `${BASE_DOMAIN}/about/`;
+  const authorUrl = `${BASE_DOMAIN}/author/roc-team/`;
 
   let isoDate = '2024-05-20';
   if (blog.date) {
@@ -197,11 +196,11 @@ export const STATIC_PUBLIC_ROUTES = [
     lastmod: '2024-05-10T10:00:00+00:00'
   },
   {
-    path: '/author/omar-abobakar/',
-    canonical: `${BASE_DOMAIN}/author/omar-abobakar/`,
-    title: 'Omar Abobakar, Founder & Editor | Run On Console',
-    description: 'Omar Abobakar is the founder and editor of Run On Console. Read his bio and his articles on gaming gear, PC hardware and game requirements.',
-    h1: 'Omar Abobakar',
+    path: '/author/roc-team/',
+    canonical: `${BASE_DOMAIN}/author/roc-team/`,
+    title: 'ROC Team: the people behind Run On Console',
+    description: 'The ROC (Run On Console) team writes the guides, keeps the gaming gear picks and the game requirements checker up to date.',
+    h1: 'ROC Team',
     category: 'Author',
     lastmod: '2024-05-20T10:00:00+00:00'
   },

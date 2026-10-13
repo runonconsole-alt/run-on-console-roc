@@ -91,8 +91,8 @@ export const AppProvider = ({ children, initialUrl = null }) => {
       return { page: 'categories', param: null, is404: false };
     }
 
-    if (path.includes('/author/omar-abobakar')) {
-      return { page: 'author', param: 'omar-abobakar', is404: false };
+    if (path.includes('/author/roc-team') || path.includes('/author/omar-abobakar')) {
+      return { page: 'author', param: 'roc-team', is404: false };
     }
 
     return { page: '404', param: null, is404: true };

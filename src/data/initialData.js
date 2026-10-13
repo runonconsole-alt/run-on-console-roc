@@ -61,7 +61,7 @@ export const INITIAL_TRENDING = [
     date: "May 17, 2024",
     image: "/images/trending_forza.jpg",
     readTime: "8 min read",
-    author: "Omar Abobakar"
+    author: "ROC Team"
   },
   {
     id: "trend-4",
@@ -474,7 +474,7 @@ export const ALL_BLOGS = [
     categorySlug: "deals",
     date: "May 20, 2024",
     readTime: "7 min read",
-    author: "Omar Abobakar",
+    author: "ROC Team",
     image: "/images/hero_cod.jpg",
     featured: true,
     summary: "A deep dive into Black Ops 6 omnidirectional sprinting and sliding mechanics, campaign story details, multiplayer weapon balancing, and recommended PC hardware requirements.",

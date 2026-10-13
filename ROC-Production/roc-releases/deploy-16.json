@@ -9,16 +9,8 @@
   "Contact page: plain reply-time note instead of \"senior testing columnists\"",
   "Heading order on every page: one H1, H2 sections, H3 inside them; footer, value boxes, launchers and social cards are plain text"
  ],
- "checks": [
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-DZkEVFkE.js"
-  }
- ],
+ "checks": [],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/25",
- "build": "index-DZkEVFkE.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]

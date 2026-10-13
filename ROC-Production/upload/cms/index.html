@@ -1263,7 +1263,7 @@ function renderShell(){
       item('games','Games','🎮')+
       (can('products','view')?item('products','Products','▣')+item('product-images','Product images','▨')+item('product-categories','Product categories','▤'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
-      item('announce','Announcement bar','📣')+item('sitecode','Template & code','⌨')+
+      item('blogagent','Blog agent','✍')+item('announce','Announcement bar','📣')+item('sitecode','Template & code','⌨')+
       item('siteusers','Site users','👤')+item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+'</div>':'')+
     '<div class="sfoot"><div class="who"><div class="av">'+
       esc((S.user.username||'?').slice(0,2).toUpperCase())+'</div>'+
@@ -1308,6 +1308,7 @@ function renderView(){
   if(S.view==='releases') return renderReleases(m);
   if(S.view==='metas' && can('pages','view')) return renderMetas(m);
   if(S.view==='announce' && S.user.role==='administrator') return renderAnnouncement(m);
+  if(S.view==='blogagent' && S.user.role==='administrator') return renderBlogAgent(m);
   if(S.view==='sitecode' && S.user.role==='administrator') return renderSiteCode(m);
   if(S.view==='media') return renderMedia(m);
   if(S.view==='pages') return renderPages(m);
@@ -3366,6 +3367,57 @@ async function renderSiteCode(m){
       Object.keys(errs).forEach(function(k){ var i=$('#'+map[k],m); if(!i) return;
         var n=document.createElement('div'); n.className='hint publish-error'; n.style.color='#e11d48'; n.textContent=errs[k]; i.parentNode.appendChild(n); });
     }
+  });
+}
+
+/* ------------------------------------------------------------- blog agent */
+/* Posts written on the owner's PC (Claude scheduled task) and sent to
+   /api/v1/blog-agent.php; they are scheduled for 12:00 and 18:00 Pakistan time. */
+
+function pkTime(utc){
+  var d=new Date(String(utc).replace(' ','T')+(String(utc).indexOf('Z')===-1?'Z':''));
+  return isNaN(d)?esc(utc):d.toLocaleString('en-GB',{timeZone:'Asia/Karachi',weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+}
+
+async function renderBlogAgent(m, fresh){
+  m.innerHTML=head('Blog agent','Two new blog posts a day, written on your PC and published at 12:00 and 18:00')+
+    '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d; try{ d=await api('blog-agent-admin.php'); }catch(e){ toast(e.message,'bad'); return; }
+  if(S.view!=='blogagent') return;
+  var body=$('.body',m);
+  body.innerHTML=
+    '<div class="alert info"><b>How it works:</b> while your PC and the Claude app are on, the "ROC blog writer" task runs at 11:30 and 17:30. '+
+    'It picks a new topic, writes an SEO article with links to your products and the game checker, and sends it here. '+
+    'The post is <b>scheduled</b> for 12:00 or 18:00 (Pakistan time) and the server publishes it then, even if the PC is off. '+
+    'You can read, edit or delete it in <b>Blog posts</b> before it goes live. The cover image is made automatically.</div>'+
+    '<div class="card"><div class="chead"><h3>Connection</h3><span class="note">'+
+      (d.active?'<b style="color:#059669">● On</b>'+(d.created?' · token made '+esc(pkTime(d.created)):''):'<b style="color:#b45309">● Off: make a token</b>')+'</span></div>'+
+      '<div class="cbody">'+
+      (fresh?'<div class="alert" style="background:#ecfdf5;border-color:#a7f3d0"><b>Your new token</b> (shown only now). Save it on your PC: open <b>PowerShell</b>, paste this line and press Enter:'+
+        '<pre id="ba-cmd" style="white-space:pre-wrap;word-break:break-all;background:#0f172a;color:#e2e8f0;padding:10px;border-radius:8px;margin:8px 0">Set-Content -Path "$env:USERPROFILE\\.roc-blog-agent-token" -Value "'+esc(fresh)+'" -NoNewline</pre>'+
+        '<button class="btn sm" id="ba-copy">Copy</button> <span class="hint">Do not share this token with anyone or paste it in a chat.</span></div>':'')+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="ba-new">'+(d.active?'Make a new token':'Make a token')+'</button>'+
+      (d.active?'<button class="btn danger" id="ba-off">Switch off</button>':'')+'</div>'+
+      '<div class="hint" style="margin-top:8px">A new token replaces the old one (the PC then needs the new one).</div></div></div>'+
+    '<div class="card"><div class="chead"><h3>Posts from the agent</h3><span class="note">last 100</span></div>'+
+      (d.posts.length?'<table class="list"><thead><tr><th>Post</th><th>Goes live</th><th>Status</th></tr></thead><tbody>'+d.posts.map(function(p){
+        return '<tr><td><div style="font-weight:600">'+esc(p.title)+'</div><div class="t-slug"><a href="/blogs/'+esc(p.slug)+'/" target="_blank" rel="noopener">/blogs/'+esc(p.slug)+'/ ↗</a> · '+esc(p.words)+' words</div></td>'+
+          '<td style="white-space:nowrap">'+esc(pkTime(p.publish_at))+'</td>'+
+          '<td><span class="tag '+(p.status==='published'?'published':p.status==='scheduled'?'draft':'off')+'">'+esc(p.status)+'</span></td></tr>';
+      }).join('')+'</tbody></table>':'<div class="empty"><div class="big">✍</div><div>No posts from the agent yet.</div></div>')+'</div>';
+  $('#ba-new',m).addEventListener('click',async function(){
+    if(d.active && !confirm('Make a new token? The PC will need the new one; the old one stops working.')) return;
+    try{ var r=await api('blog-agent-admin.php',{action:'new_token'}); toast(r.message,'good'); renderBlogAgent(m, r.token); }catch(e){ toast(e.message,'bad'); }
+  });
+  var off=$('#ba-off',m);
+  if(off) off.addEventListener('click',async function(){
+    if(!confirm('Switch the blog agent off? Scheduled posts stay scheduled.')) return;
+    try{ var r=await api('blog-agent-admin.php',{action:'revoke'}); toast(r.message,'good'); renderBlogAgent(m); }catch(e){ toast(e.message,'bad'); }
+  });
+  var cp=$('#ba-copy',m);
+  if(cp) cp.addEventListener('click',function(){
+    var t=$('#ba-cmd',m).textContent;
+    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){ toast('Copied.','good'); },function(){ toast('Select the line and copy it.','bad'); });
   });
 }
 
