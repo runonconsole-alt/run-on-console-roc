@@ -273,6 +273,11 @@ RELEASES = [
                   'Media library: the clean-up saves its usage check for the CMS, and the CMS says so when the full check fails'],
          checks=[dict(label='Menu and footer (cli-menu-products.php --apply)', type='file', path='api/v1/cron/cli-menu-products.php')],
          pr=REPO + '42'),
+    dict(deploy=43, date='2026-10-13', title='Media library: old covers and empty entries cleared',
+         changes=['Covers count as used only when a post shows them (its picture or its text); old covers left in the share fields are cleared and those fields follow the cover',
+                  'Media library entries whose file is gone (empty not used cards) are removed by cli-media-cleanup.php, with a backup'],
+         checks=[dict(label='Media clean-up (cli-media-cleanup.php --apply)', type='file', path='api/v1/cron/cli-media-cleanup.php')],
+         pr=REPO + '43'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

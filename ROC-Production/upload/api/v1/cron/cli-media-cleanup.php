@@ -45,7 +45,9 @@ if ($rollback !== null) {
         if (rename($from, $to)) $n++;
     }
     foreach ((array)($man['media_rows'] ?? []) as $row) {
-        try { $pdo->prepare('INSERT INTO cms_media (' . implode(', ', array_keys($row)) . ') VALUES (' . implode(', ', array_fill(0, count($row), '?')) . ')')->execute(array_values($row)); } catch (\Throwable $e) {}
+        $t = 'cms_media';
+        if (isset($row['table'], $row['row'])) { $t = $row['table']; $row = $row['row']; }
+        try { $pdo->prepare('INSERT INTO ' . $t . ' (' . implode(', ', array_keys($row)) . ') VALUES (' . implode(', ', array_fill(0, count($row), '?')) . ')')->execute(array_values($row)); } catch (\Throwable $e) {}
     }
     exit("Put back {$n} picture(s).\n");
 }
@@ -69,8 +71,10 @@ foreach (glob($HOME . '/roc-media-trash/*/MANIFEST.json') ?: [] as $mf) {
         if (!@rename($dir . $f, $ROOT . $f)) { $keep[] = $f; continue; }
         $back++;
         foreach ((array)($man['media_rows'] ?? []) as $row) {
-            if (($row['file_url'] ?? '') !== $f) continue;
-            try { $pdo->prepare('INSERT INTO cms_media (' . implode(', ', array_keys($row)) . ') VALUES (' . implode(', ', array_fill(0, count($row), '?')) . ')')->execute(array_values($row)); } catch (\Throwable $e) {}
+            $t = 'cms_media';
+            if (isset($row['table'], $row['row'])) { $t = $row['table']; $row = $row['row']; }
+            if (strpos(implode(' ', array_filter($row, 'is_string')), $f) === false) continue;
+            try { $pdo->prepare('INSERT INTO ' . $t . ' (' . implode(', ', array_keys($row)) . ') VALUES (' . implode(', ', array_fill(0, count($row), '?')) . ')')->execute(array_values($row)); } catch (\Throwable $e) {}
         }
     }
     if ($apply && count($keep) !== count((array)$man['files'])) { $man['files'] = $keep; file_put_contents($mf, json_encode($man, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); }
@@ -90,6 +94,28 @@ ksort($groups);
 foreach ($groups as $g => $n) echo '  -  ' . str_pad($g . '/', 34) . $n . " picture(s) not used\n";
 if (in_array('--list', $args, true)) foreach ($unused as $u) echo "       {$u}\n";
 echo "\n" . count($unused) . ' of ' . count($cands) . ' picture(s) are not used anywhere (' . round($bytes / 1048576, 1) . " MB).\n";
+/* Media library entries whose file is gone (moved or deleted earlier): they show as empty
+   "not used" cards in CMS > Media library. Picked out after the move below too. */
+$orphans = function () use ($pdo, $ROOT): array {
+    $out = [];
+    foreach (['cms_media', 'media'] as $t) {
+        try { $all = $pdo->query('SELECT * FROM ' . $t)->fetchAll(PDO::FETCH_ASSOC); } catch (\Throwable $e) { continue; }
+        foreach ($all as $row) {
+            $paths = [];
+            foreach ($row as $v) if (is_string($v) && preg_match('#(?:https?://[^/"\s]+)?(/(?:uploads|images)/[^"\'\s?]+?\.(?:jpe?g|png|webp|gif|svg|avif))#i', $v, $m)) $paths[] = rawurldecode($m[1]);
+            if (!$paths) continue;
+            $gone = true;
+            foreach ($paths as $pth) if (is_file($ROOT . $pth)) { $gone = false; break; }
+            if ($gone) $out[] = ['table' => $t, 'row' => $row, 'path' => $paths[0]];
+        }
+    }
+    return $out;
+};
+$orph = $orphans();
+if ($orph) {
+    echo count($orph) . " media library entr" . (count($orph) === 1 ? 'y points' : 'ies point') . " to a picture that is no longer there.\n";
+    if (in_array('--list', $args, true)) foreach ($orph as $o) echo "       {$o['path']}\n";
+}
 if (!$apply) { echo "Dry run: nothing moved. Add --list to see every file, --apply to move them to the trash folder.\n"; exit(0); }
 
 $dir = $HOME . '/roc-media-trash/' . date('Ymd-His');
@@ -100,12 +126,25 @@ foreach ($unused as $u) {
     if (!is_dir(dirname($to))) @mkdir(dirname($to), 0755, true);
     if (@rename($ROOT . $u, $to)) {
         $moved[] = $u;
-        try {
-            $st = $pdo->prepare('SELECT * FROM cms_media WHERE file_url = ?'); $st->execute([$u]);
-            foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) { unset($r['id']); $rows[] = $r; }
-            $pdo->prepare('DELETE FROM cms_media WHERE file_url = ?')->execute([$u]);
-        } catch (\Throwable $e) {}
     }
 }
+// Library entries of the moved pictures and of pictures already gone (the backup keeps them).
+$gone = 0;
+foreach ($orphans() as $o) {
+    $row = $o['row'];
+    try {
+        if (isset($row['id'])) $pdo->prepare('DELETE FROM ' . $o['table'] . ' WHERE id = ?')->execute([$row['id']]);
+        else continue;
+        unset($row['id']);
+        $rows[] = ['table' => $o['table'], 'row' => $row];
+        $gone++;
+    } catch (\Throwable $e) {}
+}
+if ($gone) echo "Removed {$gone} media library entr" . ($gone === 1 ? 'y' : 'ies') . " without a picture.\n";
+// Posts: share pictures (og_image, twitter_image) that still name an old cover follow the cover.
+try {
+    foreach (['og_image', 'twitter_image'] as $col)
+        $pdo->exec("UPDATE blogs SET {$col} = image WHERE {$col} LIKE '%/blog-covers/%' AND image LIKE '%/blog-covers/%' AND {$col} <> image");
+} catch (\Throwable $e) {}
 file_put_contents($dir . '/MANIFEST.json', json_encode(['made' => date('c'), 'files' => $moved, 'media_rows' => $rows], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 echo 'Moved ' . count($moved) . " picture(s) to {$dir}\nPut back: php " . __FILE__ . " --rollback={$dir}\n";
