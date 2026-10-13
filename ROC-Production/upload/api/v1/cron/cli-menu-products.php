@@ -10,6 +10,7 @@
  *   1. PRODUCTS (/products/, every product) right after CATEGORY (the two categories).
  *   2. NEWS leaves the header (it made the header too wide) ...
  *   3. ... and goes to the footer's PARTNERS column (once; removed from other columns).
+ *   4. CATEGORY is a plain link to /category/ (no dropdown, no View all button).
  * Each step does nothing when it is already done.
  */
 
@@ -77,6 +78,13 @@ if (!empty($new['footer']['columns']) && is_array($new['footer']['columns'])) {
         echo '  +  Footer: News in ' . ($new['footer']['columns'][$pi]['title'] ?? 'PARTNERS') . "\n";
     }
 }
+// 4. CATEGORY without a dropdown
+foreach ($new['header'] as &$it) {
+    if (!$isUrl($it, '/category') || (empty($it['children']) && empty($it['button']))) continue;
+    unset($it['children'], $it['button']);
+    echo "  +  Header: CATEGORY dropdown removed (plain link to /category/)\n";
+}
+unset($it);
 if ($new == $nav) exit("  =  Menu and footer already up to date.\n");
 echo '     Header now: ' . implode(' | ', array_map(function ($it) { return (string)($it['label'] ?? ''); }, $new['header'])) . "\n";
 if (!$apply) { echo "Dry run: nothing changed. Run again with --apply.\n"; exit(0); }

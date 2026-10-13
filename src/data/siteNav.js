@@ -17,14 +17,7 @@ export const DEFAULT_SITE_NAV = {
   logo: { line1: 'RUN ON', line2: 'CONSOLE', tagline: 'THE GAMING & HARDWARE HUB', image: '' },
   header: [
     { label: 'HOME', url: '/' },
-    {
-      label: 'CATEGORIES', url: '/category/',
-      children: [
-        { title: 'PC Hardware', desc: 'GPUs, CPUs, RAM, cases, monitors, speakers', url: '/category/pc-hardware/', icon: 'cpu' },
-        { title: 'Gaming Hardware', desc: 'Keyboards, mice, headsets, chairs, handhelds, laptops', url: '/category/gaming-hardware/', icon: 'gamepad' },
-      ],
-      button: { label: 'View all categories →', url: '/category/' },
-    },
+    { label: 'CATEGORY', url: '/category/' },
     { label: 'PRODUCTS', url: '/products/' },
     { label: 'SYSTEMS', url: '/compatibility/' },
     { label: 'BLOGS', url: '/blogs/' },

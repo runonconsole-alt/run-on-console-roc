@@ -33,6 +33,8 @@ const ROC_SITE_IMAGES = [
                       'A game controller and a phone: the latest gaming news'],
     'compat-hero' => [1200, 675, 'a gaming PC with a glass side panel and a glowing graphics card beside a monitor showing abstract colorful motion, dark room',
                       'A gaming PC beside a monitor: check if your PC can run a game'],
+    'category-hero' => [1200, 675, 'two neat groups of gaming gear on a dark desk: on the left a graphics card, a processor box and memory sticks, on the right a mechanical keyboard, a gaming mouse and a headset, soft green rim light, studio photo',
+                      'PC hardware and gaming hardware side by side: product categories'],
     'news-hero'   => [1200, 675, 'a modern gaming desk at night with a new graphics card box, a handheld gaming console and a game controller under a soft spotlight, monitor glowing with abstract colors, cinematic',
                       'New gaming hardware on a desk: gaming and PC hardware news'],
 ];
