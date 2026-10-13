@@ -289,6 +289,14 @@ RELEASES = [
                   'Media clean-up asks the database for the covers before reading the files and checks every cover again before moving it: a cover a post shows is never moved, and if the database does not answer nothing moves'],
          checks=[dict(label='Sitemap index (sitemap-render.php)', type='file', path='sitemap-render.php')],
          pr=REPO + '45'),
+    dict(deploy=46, date='2026-10-13', title='Main categories in the CMS, 24 products per page with Load more, product versions and old addresses in the CMS',
+         changes=['CMS > Product categories > Main categories: name, description and picture of PC Hardware and Gaming Hardware, and which category is in which',
+                  'Products, PC Hardware, Gaming Hardware and every category page show 24 products, then Load more (the products page went from 668 KB to about 150 KB)',
+                  'CMS > Product categories > Product versions: the Choose version sets (8GB / 16GB ...)',
+                  'CMS > Product categories > Old addresses: deleted product addresses and the page each one opens',
+                  'cli-site-images.php also makes the new home page picture (used in the next deploy)'],
+         checks=[dict(label='Catalog settings (catalog-admin.php)', type='file', path='api/v1/cms/catalog-admin.php')],
+         pr=REPO + '46'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
