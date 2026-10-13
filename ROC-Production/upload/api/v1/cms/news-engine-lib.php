@@ -457,16 +457,80 @@ function rocNewsCreate(PDO $pdo, string $root, array $a, array $c, string $by): 
 /** Sends an alert to the address in CMS > Blog writer > Email alerts (nothing when none is set). */
 function rocNotify(PDO $pdo, string $subject, string $html): bool {
     $to = trim((string)rocBlogGet($pdo, 'notify_email', ''));
-    if (!filter_var($to, FILTER_VALIDATE_EMAIL) || !function_exists('mail')) return false;
-    $from = 'Run On Console <alerts@runonconsole.com>';
+    if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return false;
+    $smtp = rocBlogGet($pdo, 'notify_smtp', []);
+    $smtp = is_array($smtp) ? $smtp : [];
+    $fromAddr = filter_var((string)($smtp['user'] ?? ''), FILTER_VALIDATE_EMAIL) ? (string)$smtp['user'] : 'alerts@runonconsole.com';
     $body = '<!doctype html><html><body style="font-family:Arial,sans-serif;font-size:15px;color:#0f172a;line-height:1.6">' . $html
-          . '<p style="color:#64748b;font-size:12px;margin-top:24px">Sent by runonconsole.com. Change or remove this address in CMS &gt; Blog writer &gt; Email alerts.</p></body></html>';
-    $headers = "MIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\nFrom: {$from}\r\nReply-To: {$to}\r\nX-Mailer: RunOnConsole";
-    $subject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
-    $ok = @mail($to, $subject, $body, $headers, '-f alerts@runonconsole.com');
-    if (!$ok) $ok = @mail($to, $subject, $body, $headers);
-    $s = rocNewsState($pdo); $s['last_email'] = gmdate('Y-m-d H:i:s') . ($ok ? '' : ' (failed)'); rocNewsSaveState($pdo, $s);
+          . '<p style="color:#64748b;font-size:12px;margin-top:24px">Sent by runonconsole.com. Change or remove this address in CMS &gt; Blog &amp; news writer &gt; News &gt; Email alerts.</p></body></html>';
+    $subj = '=?UTF-8?B?' . base64_encode($subject) . '?=';
+    $headers = "MIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\nFrom: Run On Console <{$fromAddr}>\r\nReply-To: {$to}\r\n"
+             . 'Date: ' . gmdate('D, d M Y H:i:s') . " +0000\r\nMessage-ID: <" . bin2hex(random_bytes(8)) . "@runonconsole.com>\r\nX-Mailer: RunOnConsole";
+    $errors = [];
+    $ok = false;
+    // 1. The mailbox from the CMS (most reliable: signed in, so Gmail trusts it).
+    if (!empty($smtp['host']) && !empty($smtp['user']) && !empty($smtp['pass'])) {
+        $r = rocSmtpSend($smtp, $fromAddr, $to, $subj, $headers, $body);
+        $ok = $r === true; if (!$ok) $errors[] = 'SMTP: ' . $r;
+    }
+    // 2. The server's own mail program.
+    if (!$ok && function_exists('mail')) {
+        foreach (['-f' . $fromAddr, ''] as $extra) {
+            error_clear_last();
+            $ok = $extra !== '' ? @mail($to, $subj, $body, $headers, $extra) : @mail($to, $subj, $body, $headers);
+            if ($ok) break;
+            $e = error_get_last(); $errors[] = 'mail(): ' . ($e['message'] ?? 'refused');
+        }
+    } elseif (!$ok) $errors[] = 'mail() is switched off on this server';
+    // 3. sendmail directly.
+    if (!$ok && function_exists('popen')) {
+        foreach (['/usr/sbin/sendmail', '/usr/lib/sendmail'] as $bin) {
+            if (!is_executable($bin)) continue;
+            $h = @popen($bin . ' -t -i -f' . escapeshellarg($fromAddr), 'w');
+            if (!$h) continue;
+            fwrite($h, "To: {$to}\r\nSubject: {$subj}\r\n{$headers}\r\n\r\n{$body}\r\n");
+            $code = pclose($h);
+            if ($code === 0) { $ok = true; break; }
+            $errors[] = "sendmail exit {$code}";
+        }
+    }
+    $s = rocNewsState($pdo);
+    $s['last_email'] = gmdate('Y-m-d H:i:s') . ($ok ? '' : ' (failed)');
+    $s['last_email_error'] = $ok ? '' : mb_substr(implode(' | ', $errors) ?: 'no way to send mail on this server', 0, 400);
+    rocNewsSaveState($pdo, $s);
     return $ok;
+}
+
+/** Minimal SMTP client (SSL on 465, STARTTLS on 587). Returns true or an error text. */
+function rocSmtpSend(array $c, string $from, string $to, string $subj, string $headers, string $body) {
+    $host = (string)$c['host']; $port = (int)($c['port'] ?? 465) ?: 465;
+    $ctx = stream_context_create(['ssl' => ['verify_peer' => true, 'verify_peer_name' => true, 'SNI_enabled' => true, 'peer_name' => $host]]);
+    $fp = @stream_socket_client(($port === 465 ? 'ssl://' : 'tcp://') . $host . ':' . $port, $en, $es, 15, STREAM_CLIENT_CONNECT, $ctx);
+    if (!$fp) return "cannot connect to {$host}:{$port} ({$es})";
+    stream_set_timeout($fp, 20);
+    $read = function () use ($fp) { $d = ''; while (($l = fgets($fp, 1024)) !== false) { $d .= $l; if (strlen($l) < 4 || $l[3] === ' ') break; } return $d; };
+    $cmd = function (string $line, array $okCodes) use ($fp, $read) {
+        if ($line !== '') fwrite($fp, $line . "\r\n");
+        $r = $read();
+        return in_array((int)substr($r, 0, 3), $okCodes, true) ? true : trim($r);
+    };
+    $steps = [['', [220]], ['EHLO runonconsole.com', [250]]];
+    foreach ($steps as [$l, $codes]) { $r = $cmd($l, $codes); if ($r !== true) { fclose($fp); return $r ?: 'no answer'; } }
+    if ($port !== 465) {
+        $r = $cmd('STARTTLS', [220]);
+        if ($r !== true || !stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) { fclose($fp); return 'STARTTLS failed'; }
+        $r = $cmd('EHLO runonconsole.com', [250]); if ($r !== true) { fclose($fp); return $r; }
+    }
+    foreach ([['AUTH LOGIN', [334]], [base64_encode((string)$c['user']), [334]], [base64_encode((string)$c['pass']), [235]],
+              ['MAIL FROM:<' . $from . '>', [250]], ['RCPT TO:<' . $to . '>', [250, 251]], ['DATA', [354]]] as [$l, $codes]) {
+        $r = $cmd($l, $codes);
+        if ($r !== true) { fclose($fp); return stripos($l, 'AUTH') === 0 || $codes === [235] ? 'sign-in refused: ' . $r : $r; }
+    }
+    $msg = "To: {$to}\r\nSubject: {$subj}\r\n{$headers}\r\n\r\n" . preg_replace('/^\./m', '..', $body);
+    $r = $cmd($msg . "\r\n.", [250]);
+    $cmd('QUIT', [221]);
+    fclose($fp);
+    return $r;
 }
 
 function rocNotifyNews(PDO $pdo, array $r, array $c): void {
@@ -487,6 +551,17 @@ function rocNotifyBlog(PDO $pdo, string $postId): void {
     rocNotify($pdo, 'Blog published: ' . $b['title'],
         '<p><b>A blog post went live on Run On Console.</b></p><p style="font-size:18px"><a href="' . rocLayerH($url) . '">' . rocLayerH((string)$b['title']) . '</a></p>'
         . '<p>' . rocLayerH((string)$b['excerpt']) . '</p>');
+}
+
+/** Shows the newest story in the announcement bar of every page ("LIVE" + headline, linked to it) for 24 hours. */
+function rocNewsToBar(PDO $pdo, string $root, string $title, string $url): void {
+    $raw = rocLayerSettingGet($pdo, ROC_LAYER_KEYS['announcement']);
+    $a = $raw ? (json_decode($raw, true) ?: []) : [];
+    $a = array_merge(rocLayerDefaults()['announcement'], $a);
+    $a['live_title'] = mb_substr($title, 0, 140);
+    $a['live_url'] = $url;
+    $a['live_at'] = gmdate('c');
+    rocLayerSave($pdo, $root, 'announcement', $a, null);
 }
 
 /* -------------------------------------------------------------------- tick */
@@ -548,6 +623,7 @@ function rocNewsTick(PDO $pdo, string $root, bool $force = false): ?string {
             $state = rocNewsState($pdo);
             $state['last_ok'] = gmdate('Y-m-d H:i:s'); $state['last_error'] = '';
             rocNewsSaveState($pdo, $state);
+            try { rocNewsToBar($pdo, $root, $r['title'], '/news/' . $r['slug'] . '/'); } catch (\Throwable $e) {}
             try { rocNotifyNews($pdo, $r, $c); } catch (\Throwable $e) {}
             return 'News published: ' . $r['url'];
         }

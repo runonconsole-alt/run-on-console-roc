@@ -207,7 +207,7 @@ export const STATIC_PUBLIC_ROUTES = [
   {
     path: '/contact/',
     canonical: `${BASE_DOMAIN}/contact/`,
-    title: 'Contact Us | Run On Console',
+    title: 'Contact Run On Console: Support & Partnerships',
     description: 'Contact Run On Console: questions, corrections, review samples and partnerships. Email support@runonconsole.com or use the form.',
     h1: 'Contact Run On Console',
     category: 'Contact',

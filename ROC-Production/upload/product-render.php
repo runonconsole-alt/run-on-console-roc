@@ -556,6 +556,7 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
         $title,
     ]);
     $metaD = trim((string)($p['meta_description'] ?? '')) ?: rocCmsTruncatePlain($desc, 155);
+    if (mb_strlen($metaD) > 160) $metaD = rocCmsTruncatePlain($metaD, 155);
 
     /* ---------------- head */
     $h  = rocHeadMeta($metaT, $metaD, $url, rocShareImage($image, $p, $categories), $noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large', 'product', $alt);

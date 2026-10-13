@@ -384,14 +384,14 @@ export const ProductsView = () => {
                 : 'Keyboards, mice, headsets, speakers, monitors and graphics cards, each with what it is best for, key specs and a direct Amazon link.'}
             </p>
             <div className="flex flex-wrap gap-2.5 pt-2">
-              <span className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
+              <span className="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
                 <PackageCheck className="w-3.5 h-3.5 text-emerald-400" />
                 <span>{inScope.length} products</span>
               </span>
-              <span className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
+              <a href="/privacy-policy/" title="Our Amazon affiliate disclosure" className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline">
                 <ShoppingCart className="w-3.5 h-3.5 text-teal-400" />
                 <span>Direct Amazon links</span>
-              </span>
+              </a>
             </div>
           </div>
 

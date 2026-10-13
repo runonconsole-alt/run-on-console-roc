@@ -91,7 +91,16 @@ function rocLayerH(string $s): string { return htmlspecialchars($s, ENT_QUOTES |
 
 /* --------------------------------------------------------------- pieces */
 
+/** The latest news story (set by api/v1/cms/news-engine-lib.php) while it is less than a day old. */
+function rocLayerLiveNews(array $a): ?array {
+    $t = trim((string)($a['live_title'] ?? '')); $u = trim((string)($a['live_url'] ?? ''));
+    $at = strtotime((string)($a['live_at'] ?? '')) ?: 0;
+    if ($t === '' || !preg_match('#^/news/[a-z0-9-]+/$#', $u) || $at < time() - 86400 || !empty($a['live_off'])) return null;
+    return ['title' => $t, 'url' => $u];
+}
+
 function rocLayerAnnouncementOn(array $a): bool {
+    if (rocLayerLiveNews($a)) return true;                          // a new story shows the bar by itself
     if (empty($a['enabled']) || (trim((string)$a['title']) === '' && trim((string)$a['text']) === '')) return false;
     $end = trim((string)($a['ends_at'] ?? ''));
     return $end === '' || strtotime($end) === false || strtotime($end) > time();
@@ -110,6 +119,9 @@ function rocLayerAnnouncementCss(): string {
         . '.roc-ann-x{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:var(--roc-ann-bg);border:0;color:inherit;'
         . 'font-size:22px;line-height:1;cursor:pointer;padding:6px 10px;border-radius:8px;z-index:1}.roc-ann-x:hover{filter:brightness(.92)}'
         // Running text: enters from the right, leaves on the left, starts again. Pauses under the mouse.
+        . '.roc-ann-live{display:inline-block;background:#dc2626;color:#fff;font-weight:800;font-size:11px;letter-spacing:.06em;padding:2px 7px;border-radius:6px;margin-right:4px;animation:roc-ann-blink 1.6s ease-in-out infinite}'
+        . '.roc-ann a.roc-ann-news{text-decoration:none;font-weight:700;margin-left:2px}'
+        . '@keyframes roc-ann-blink{50%{opacity:.55}}'
         . '.roc-ann-run{text-align:left;white-space:nowrap}'
         . '.roc-ann-run p{display:inline-block;padding-left:100%;animation:roc-ann-run var(--roc-ann-dur,20s) linear infinite}'
         . '.roc-ann-run:hover p{animation-play-state:paused}'
@@ -118,9 +130,12 @@ function rocLayerAnnouncementCss(): string {
 }
 
 function rocLayerAnnouncementHtml(array $a): string {
+    $live = rocLayerLiveNews($a);
+    $own = !empty($a['enabled']) && (trim((string)$a['title']) !== '' || trim((string)$a['text']) !== '');
+    if (!$own) { $a['title'] = ''; $a['text'] = ''; $a['link_url'] = ''; $a['icon'] = ''; }
     $title = trim((string)$a['title']); $text = trim((string)$a['text']);
     $url = trim((string)$a['link_url']); $label = trim((string)$a['link_text']) ?: 'Learn more';
-    $id = substr(md5($title . '|' . $text . '|' . $url), 0, 10);
+    $id = substr(md5($title . '|' . $text . '|' . $url . '|' . ($live['url'] ?? '')), 0, 10);
     $end = strtotime((string)($a['ends_at'] ?? '')) ?: 0;
     $run = !empty($a['scroll']);
     // Speed: 1 slow … 5 fast. Longer messages get more time so they read at the same pace.
@@ -130,7 +145,11 @@ function rocLayerAnnouncementHtml(array $a): string {
         . ($title !== '' ? '<strong>' . rocLayerH($title) . '</strong>' : '')
         . ($title !== '' && $text !== '' ? ' — ' : '')
         . rocLayerH($text)
-        . ($url !== '' ? '<a href="' . rocLayerH($url) . '"' . (preg_match('#^https?://#i', $url) && stripos($url, 'runonconsole.com') === false ? ' target="_blank" rel="noopener"' : '') . '>' . rocLayerH($label) . '</a>' : '');
+        . ($url !== '' ? '<a href="' . rocLayerH($url) . '"' . (preg_match('#^https?://#i', $url) && stripos($url, 'runonconsole.com') === false ? ' target="_blank" rel="noopener"' : '') . '>' . rocLayerH($label) . '</a>' : '')
+        // Latest news: "LIVE" + its headline, linked to the story on this site.
+        . ($live ? ($own ? ' &nbsp;·&nbsp; ' : '') . '<span class="roc-ann-live">LIVE</span> <a class="roc-ann-news" href="' . rocLayerH($live['url']) . '">'
+            . rocLayerH($live['title']) . '</a> <a href="' . rocLayerH($live['url']) . '">Read now &rarr;</a>' : '');
+    if ($live && !$own) { $a['bg'] = $a['bg'] ?: '#e4ff1a'; }
     $h = '<div class="roc-ann' . ($run ? ' roc-ann-run' : '') . '" id="roc-ann" data-ann="' . $id . '" data-end="' . ($end * 1000) . '" role="region" aria-label="Announcement"'
         . ' style="--roc-ann-bg:' . rocLayerH((string)$a['bg']) . ';--roc-ann-fg:' . rocLayerH((string)$a['fg']) . ($run ? ';--roc-ann-dur:' . $dur . 's' : '') . '"><p>' . $p . '</p>';
     if (!empty($a['dismissible'])) {
