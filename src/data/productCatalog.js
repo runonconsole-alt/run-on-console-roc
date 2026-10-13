@@ -6,42 +6,42 @@ export const PRODUCT_CATEGORIES = [
   "name": "Gaming Keyboards",
   "image": "/images/cyber_keyboard.jpg",
   "desc": "Hall Effect, rapid-trigger and mechanical gaming keyboards, from 60% esports boards to full-size wireless picks.",
-  "count": 22
+  "count": 19
  },
  {
   "slug": "audio",
   "name": "Gaming Headsets & Audio",
   "image": "/images/tactical_headset.jpg",
   "desc": "Wireless and wired gaming headsets, gaming earbuds, studio headphones and USB microphones.",
-  "count": 23
+  "count": 21
  },
  {
   "slug": "mice",
   "name": "Gaming Mice",
   "image": "/images/apex_mouse.jpg",
   "desc": "Ultra-light esports mice, ergonomic wireless mice and feature-rich MMO mice.",
-  "count": 20
+  "count": 18
  },
  {
   "slug": "speakers",
   "name": "Speakers & Soundbars",
   "image": "/images/streaming_vr_gear.jpg",
   "desc": "Desktop PC speakers, 2.1 and 5.1 systems, studio monitors and gaming soundbars.",
-  "count": 25
+  "count": 20
  },
  {
   "slug": "monitors",
   "name": "Gaming Monitors",
   "image": "/images/gaming_monitor.jpg",
   "desc": "OLED and QD-OLED gaming monitors, ultrawides and budget high-refresh displays.",
-  "count": 20
+  "count": 14
  },
  {
   "slug": "gpu",
   "name": "Graphics Cards (GPU)",
   "image": "/images/battlestation_pc.jpg",
   "desc": "NVIDIA GeForce RTX 50 series, AMD Radeon RX 9000 series and Intel Arc graphics cards by tier and resolution.",
-  "count": 13
+  "count": 10
  },
  {
   "slug": "cpu",
@@ -88,36 +88,6 @@ export const PRODUCT_CATEGORIES = [
 ];
 
 export const ALL_PRODUCTS = [
- {
-  "id": "wooting-80he",
-  "slug": "wooting-80he",
-  "title": "Wooting 80HE",
-  "subtitle": "80% TKL // Hall Effect // adjustable actuation // Rapid Trigger",
-  "brand": "Wooting",
-  "brandName": "Wooting",
-  "category": "Gaming Keyboards",
-  "categorySlug": "keyboards",
-  "badge": "BEST OVERALL / COMPETITIVE",
-  "bestFor": "Best Overall / Competitive",
-  "rank": 1,
-  "image": "/images/cyber_keyboard.jpg",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Wooting+80HE"
-  },
-  "shortDesc": "The Wooting 80HE is a gaming keyboard from Wooting: 80% TKL, Hall Effect, adjustable actuation, Rapid Trigger. Our pick: Best Overall / Competitive.",
-  "specs": {
-   "Brand": "Wooting",
-   "Best For": "Best Overall / Competitive",
-   "Key Specs": "80% TKL · Hall Effect · adjustable actuation · Rapid Trigger"
-  },
-  "features": [
-   "80% TKL",
-   "Hall Effect",
-   "adjustable actuation",
-   "Rapid Trigger"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
  {
   "id": "asus-rog-strix-scope-ii-96-wireless",
   "slug": "asus-rog-strix-scope-ii-96-wireless",
@@ -322,36 +292,6 @@ export const ALL_PRODUCTS = [
    "Hall Effect",
    "wireless",
    "hot-swappable"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
-  "id": "lemokey-p1-he",
-  "slug": "lemokey-p1-he",
-  "title": "Lemokey P1 HE",
-  "subtitle": "75% // Hall Effect // adjustable actuation // wireless",
-  "brand": "Lemokey",
-  "brandName": "Lemokey",
-  "category": "Gaming Keyboards",
-  "categorySlug": "keyboards",
-  "badge": "BEST MID-RANGE",
-  "bestFor": "Best Mid-Range",
-  "rank": 9,
-  "image": "/images/products/lemokey-p1-he.webp",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/dp/B0DY7KTB87"
-  },
-  "shortDesc": "The Lemokey P1 HE is a gaming keyboard from Lemokey: 75%, Hall Effect, adjustable actuation, wireless. Our pick: Best Mid-Range.",
-  "specs": {
-   "Brand": "Lemokey",
-   "Best For": "Best Mid-Range",
-   "Key Specs": "75% · Hall Effect · adjustable actuation · wireless"
-  },
-  "features": [
-   "75%",
-   "Hall Effect",
-   "adjustable actuation",
-   "wireless"
   ],
   "lastmod": "2026-09-29T10:00:00+05:00"
  },
@@ -687,36 +627,6 @@ export const ALL_PRODUCTS = [
   "lastmod": "2026-09-29T10:00:00+05:00"
  },
  {
-  "id": "wooting-60he-v2",
-  "slug": "wooting-60he-v2",
-  "title": "Wooting 60HE v2",
-  "subtitle": "60% // Hall Effect // adjustable actuation // Rapid Trigger",
-  "brand": "Wooting",
-  "brandName": "Wooting",
-  "category": "Gaming Keyboards",
-  "categorySlug": "keyboards",
-  "badge": "BEST 60% COMPETITIVE",
-  "bestFor": "Best 60% Competitive",
-  "rank": 21,
-  "image": "/images/cyber_keyboard.jpg",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Wooting+60HE+v2"
-  },
-  "shortDesc": "The Wooting 60HE v2 is a gaming keyboard from Wooting: 60%, Hall Effect, adjustable actuation, Rapid Trigger. Our pick: Best 60% Competitive.",
-  "specs": {
-   "Brand": "Wooting",
-   "Best For": "Best 60% Competitive",
-   "Key Specs": "60% · Hall Effect · adjustable actuation · Rapid Trigger"
-  },
-  "features": [
-   "60%",
-   "Hall Effect",
-   "adjustable actuation",
-   "Rapid Trigger"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
   "id": "steelseries-arctis-nova-pro-wireless",
   "slug": "steelseries-arctis-nova-pro-wireless",
   "title": "SteelSeries Arctis Nova Pro Wireless",
@@ -743,35 +653,6 @@ export const ALL_PRODUCTS = [
    "ANC",
    "hot-swappable batteries",
    "multi-platform"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
-  "id": "steelseries-arctis-nova-pro-omni",
-  "slug": "steelseries-arctis-nova-pro-omni",
-  "title": "SteelSeries Arctis Nova Pro Omni",
-  "subtitle": "Hi-Res // hot-swappable batteries // multi-source mixing",
-  "brand": "SteelSeries",
-  "brandName": "SteelSeries",
-  "category": "Gaming Headsets & Audio",
-  "categorySlug": "audio",
-  "badge": "BEST OVERALL / PREMIUM 2026",
-  "bestFor": "Best Overall / Premium 2026",
-  "rank": 2,
-  "image": "/images/products/steelseries-arctis-nova-pro-omni.webp",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/dp/B0GS7PZH2P"
-  },
-  "shortDesc": "The SteelSeries Arctis Nova Pro Omni is a gaming headset from SteelSeries: Hi-Res, hot-swappable batteries, multi-source mixing. Our pick: Best Overall / Premium 2026.",
-  "specs": {
-   "Brand": "SteelSeries",
-   "Best For": "Best Overall / Premium 2026",
-   "Key Specs": "Hi-Res · hot-swappable batteries · multi-source mixing"
-  },
-  "features": [
-   "Hi-Res",
-   "hot-swappable batteries",
-   "multi-source mixing"
   ],
   "lastmod": "2026-09-29T10:00:00+05:00"
  },
@@ -1064,35 +945,6 @@ export const ALL_PRODUCTS = [
    "Wireless",
    "Bluetooth",
    "flip-to-mute mic"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
-  "id": "logitech-g-g325-lightspeed",
-  "slug": "logitech-g-g325-lightspeed",
-  "title": "Logitech G G325 LIGHTSPEED",
-  "subtitle": "Wireless // lightweight // budget-focused",
-  "brand": "Logitech G",
-  "brandName": "Logitech G",
-  "category": "Gaming Headsets & Audio",
-  "categorySlug": "audio",
-  "badge": "BEST BUDGET GAMING HEADSET",
-  "bestFor": "Best Budget Gaming Headset",
-  "rank": 13,
-  "image": "/images/products/logitech-g-g325-lightspeed.webp",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/dp/B0G12HGD6R"
-  },
-  "shortDesc": "The Logitech G G325 LIGHTSPEED is a gaming headset from Logitech G: wireless, lightweight, budget-focused. Our pick: Best Budget Gaming Headset.",
-  "specs": {
-   "Brand": "Logitech G",
-   "Best For": "Best Budget Gaming Headset",
-   "Key Specs": "Wireless · lightweight · budget-focused"
-  },
-  "features": [
-   "Wireless",
-   "lightweight",
-   "budget-focused"
   ],
   "lastmod": "2026-09-29T10:00:00+05:00"
  },
@@ -1849,35 +1701,6 @@ export const ALL_PRODUCTS = [
   "lastmod": "2026-09-29T10:00:00+05:00"
  },
  {
-  "id": "zowie-ec2-dw",
-  "slug": "zowie-ec2-dw",
-  "title": "ZOWIE EC2-DW",
-  "subtitle": "Wireless // ergonomic // esports-focused",
-  "brand": "BenQ ZOWIE",
-  "brandName": "BenQ ZOWIE",
-  "category": "Gaming Mice",
-  "categorySlug": "mice",
-  "badge": "BEST ESPORTS ERGONOMIC",
-  "bestFor": "Best Esports Ergonomic",
-  "rank": 17,
-  "image": "/images/products/zowie-ec2-dw.webp",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/dp/B0F1XD5MK8"
-  },
-  "shortDesc": "The ZOWIE EC2-DW is a gaming mouse from BenQ ZOWIE: wireless, ergonomic, esports-focused. Our pick: Best Esports Ergonomic.",
-  "specs": {
-   "Brand": "BenQ ZOWIE",
-   "Best For": "Best Esports Ergonomic",
-   "Key Specs": "Wireless · ergonomic · esports-focused"
-  },
-  "features": [
-   "Wireless",
-   "ergonomic",
-   "esports-focused"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
   "id": "cooler-master-mm311",
   "slug": "cooler-master-mm311",
   "title": "Cooler Master MM311",
@@ -1933,34 +1756,6 @@ export const ALL_PRODUCTS = [
    "ergonomic",
    "wireless",
    "RGB"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
-  "id": "finalmouse-starlight-x",
-  "slug": "finalmouse-starlight-x",
-  "title": "Finalmouse Starlight X",
-  "subtitle": "TMR-based click architecture // ultra-light",
-  "brand": "Finalmouse",
-  "brandName": "Finalmouse",
-  "category": "Gaming Mice",
-  "categorySlug": "mice",
-  "badge": "LATEST / ENTHUSIAST",
-  "bestFor": "Latest / Enthusiast",
-  "rank": 20,
-  "image": "/images/apex_mouse.jpg",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Finalmouse+Starlight+X"
-  },
-  "shortDesc": "The Finalmouse Starlight X is a gaming mouse from Finalmouse: TMR-based click architecture, ultra-light. Our pick: Latest / Enthusiast.",
-  "specs": {
-   "Brand": "Finalmouse",
-   "Best For": "Latest / Enthusiast",
-   "Key Specs": "TMR-based click architecture · ultra-light"
-  },
-  "features": [
-   "TMR-based click architecture",
-   "ultra-light"
   ],
   "lastmod": "2026-09-29T10:00:00+05:00"
  },
@@ -2382,35 +2177,6 @@ export const ALL_PRODUCTS = [
   "lastmod": "2026-09-29T10:00:00+05:00"
  },
  {
-  "id": "ik-multimedia-iloud-micro-monitor",
-  "slug": "ik-multimedia-iloud-micro-monitor",
-  "title": "IK Multimedia iLoud Micro Monitor",
-  "subtitle": "2.0 studio monitors // compact // reference-focused",
-  "brand": "IK Multimedia",
-  "brandName": "IK Multimedia",
-  "category": "Speakers & Soundbars",
-  "categorySlug": "speakers",
-  "badge": "BEST STUDIO REFERENCE",
-  "bestFor": "Best Studio Reference",
-  "rank": 15,
-  "image": "/images/products/ik-multimedia-iloud-micro-monitor.webp",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/dp/B01C5RZWCQ"
-  },
-  "shortDesc": "The IK Multimedia iLoud Micro Monitor is a pair of studio monitors from IK Multimedia: 2.0 studio monitors, compact, reference-focused. Our pick: Best Studio Reference.",
-  "specs": {
-   "Brand": "IK Multimedia",
-   "Best For": "Best Studio Reference",
-   "Key Specs": "2.0 studio monitors · compact · reference-focused"
-  },
-  "features": [
-   "2.0 studio monitors",
-   "compact",
-   "reference-focused"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
   "id": "presonus-eris-e45",
   "slug": "presonus-eris-e45",
   "title": "PreSonus Eris E4.5",
@@ -2469,37 +2235,6 @@ export const ALL_PRODUCTS = [
   "lastmod": "2026-09-29T10:00:00+05:00"
  },
  {
-  "id": "steelseries-arena-7",
-  "slug": "steelseries-arena-7",
-  "title": "SteelSeries Arena 7",
-  "subtitle": "2.1 // subwoofer // USB // Bluetooth // RGB",
-  "brand": "SteelSeries",
-  "brandName": "SteelSeries",
-  "category": "Speakers & Soundbars",
-  "categorySlug": "speakers",
-  "badge": "BEST MID-RANGE GAMING 2.1",
-  "bestFor": "Best Mid-Range Gaming 2.1",
-  "rank": 18,
-  "image": "/images/products/steelseries-arena-7.webp",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/dp/B09D45L52J"
-  },
-  "shortDesc": "The SteelSeries Arena 7 is a speaker system from SteelSeries: 2.1, subwoofer, USB, Bluetooth, RGB. Our pick: Best Mid-Range Gaming 2.1.",
-  "specs": {
-   "Brand": "SteelSeries",
-   "Best For": "Best Mid-Range Gaming 2.1",
-   "Key Specs": "2.1 · subwoofer · USB · Bluetooth · RGB"
-  },
-  "features": [
-   "2.1",
-   "subwoofer",
-   "USB",
-   "Bluetooth",
-   "RGB"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
   "id": "steelseries-arena-9",
   "slug": "steelseries-arena-9",
   "title": "SteelSeries Arena 9",
@@ -2526,96 +2261,6 @@ export const ALL_PRODUCTS = [
    "wireless rear speakers",
    "subwoofer",
    "RGB"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
-  "id": "logitech-g560-lightsync",
-  "slug": "logitech-g560-lightsync",
-  "title": "Logitech G560 LIGHTSYNC",
-  "subtitle": "2.1 // LIGHTSYNC RGB // DTS:X Ultra // USB/Bluetooth",
-  "brand": "Logitech G",
-  "brandName": "Logitech G",
-  "category": "Speakers & Soundbars",
-  "categorySlug": "speakers",
-  "badge": "BEST RGB GAMING SPEAKERS",
-  "bestFor": "Best RGB Gaming Speakers",
-  "rank": 20,
-  "image": "/images/products/logitech-g560-lightsync.webp",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/dp/B07B2WLS17"
-  },
-  "shortDesc": "The Logitech G560 LIGHTSYNC is a speaker system from Logitech G: 2.1, LIGHTSYNC RGB, DTS:X Ultra, USB/Bluetooth. Our pick: Best RGB Gaming Speakers.",
-  "specs": {
-   "Brand": "Logitech G",
-   "Best For": "Best RGB Gaming Speakers",
-   "Key Specs": "2.1 · LIGHTSYNC RGB · DTS:X Ultra · USB/Bluetooth"
-  },
-  "features": [
-   "2.1",
-   "LIGHTSYNC RGB",
-   "DTS:X Ultra",
-   "USB/Bluetooth"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
-  "id": "logitech-z407",
-  "slug": "logitech-z407",
-  "title": "Logitech Z407",
-  "subtitle": "2.1 // Bluetooth // wireless control dial // USB",
-  "brand": "Logitech",
-  "brandName": "Logitech",
-  "category": "Speakers & Soundbars",
-  "categorySlug": "speakers",
-  "badge": "BEST VALUE 2.1",
-  "bestFor": "Best Value 2.1",
-  "rank": 21,
-  "image": "/images/products/logitech-z407.webp",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/dp/B0877BPCJM"
-  },
-  "shortDesc": "The Logitech Z407 is a speaker system from Logitech: 2.1, Bluetooth, wireless control dial, USB. Our pick: Best Value 2.1.",
-  "specs": {
-   "Brand": "Logitech",
-   "Best For": "Best Value 2.1",
-   "Key Specs": "2.1 · Bluetooth · wireless control dial · USB"
-  },
-  "features": [
-   "2.1",
-   "Bluetooth",
-   "wireless control dial",
-   "USB"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
-  "id": "logitech-z906",
-  "slug": "logitech-z906",
-  "title": "Logitech Z906",
-  "subtitle": "5.1 // THX-certified // optical/coaxial // 500W RMS",
-  "brand": "Logitech",
-  "brandName": "Logitech",
-  "category": "Speakers & Soundbars",
-  "categorySlug": "speakers",
-  "badge": "BEST 5.1 SURROUND",
-  "bestFor": "Best 5.1 Surround",
-  "rank": 22,
-  "image": "/images/products/logitech-z906.webp",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/dp/B004M18O60"
-  },
-  "shortDesc": "The Logitech Z906 is a speaker system from Logitech: 5.1, THX-certified, optical/coaxial, 500W RMS. Our pick: Best 5.1 Surround.",
-  "specs": {
-   "Brand": "Logitech",
-   "Best For": "Best 5.1 Surround",
-   "Key Specs": "5.1 · THX-certified · optical/coaxial · 500W RMS"
-  },
-  "features": [
-   "5.1",
-   "THX-certified",
-   "optical/coaxial",
-   "500W RMS"
   ],
   "lastmod": "2026-09-29T10:00:00+05:00"
  },
@@ -2885,96 +2530,6 @@ export const ALL_PRODUCTS = [
   "lastmod": "2026-09-29T10:00:00+05:00"
  },
  {
-  "id": "alienware-aw2725q",
-  "slug": "alienware-aw2725q",
-  "title": "Alienware AW2725Q",
-  "subtitle": "27-inch // 4K // 240Hz // QD-OLED",
-  "brand": "Alienware",
-  "brandName": "Alienware",
-  "category": "Gaming Monitors",
-  "categorySlug": "monitors",
-  "badge": "BEST VALUE 4K QD-OLED",
-  "bestFor": "Best Value 4K QD-OLED",
-  "rank": 7,
-  "image": "/images/products/alienware-aw2725q.webp",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/dp/B0F148HG5M"
-  },
-  "shortDesc": "The Alienware AW2725Q is a gaming monitor from Alienware: 27-inch, 4K, 240Hz, QD-OLED. Our pick: Best Value 4K QD-OLED.",
-  "specs": {
-   "Brand": "Alienware",
-   "Best For": "Best Value 4K QD-OLED",
-   "Key Specs": "27-inch · 4K · 240Hz · QD-OLED"
-  },
-  "features": [
-   "27-inch",
-   "4K",
-   "240Hz",
-   "QD-OLED"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
-  "id": "alienware-aw2726dm",
-  "slug": "alienware-aw2726dm",
-  "title": "Alienware AW2726DM",
-  "subtitle": "27-inch // 1440p // 240Hz // OLED",
-  "brand": "Alienware",
-  "brandName": "Alienware",
-  "category": "Gaming Monitors",
-  "categorySlug": "monitors",
-  "badge": "BEST VALUE OLED",
-  "bestFor": "Best Value OLED",
-  "rank": 8,
-  "image": "/images/products/alienware-aw2726dm.webp",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/dp/B0GYG3VLMR"
-  },
-  "shortDesc": "The Alienware AW2726DM is a gaming monitor from Alienware: 27-inch, 1440p, 240Hz, OLED. Our pick: Best Value OLED.",
-  "specs": {
-   "Brand": "Alienware",
-   "Best For": "Best Value OLED",
-   "Key Specs": "27-inch · 1440p · 240Hz · OLED"
-  },
-  "features": [
-   "27-inch",
-   "1440p",
-   "240Hz",
-   "OLED"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
-  "id": "alienware-aw3426dw",
-  "slug": "alienware-aw3426dw",
-  "title": "Alienware AW3426DW",
-  "subtitle": "34-inch // 3440x1440 // 280Hz // OLED",
-  "brand": "Alienware",
-  "brandName": "Alienware",
-  "category": "Gaming Monitors",
-  "categorySlug": "monitors",
-  "badge": "BEST 1440P ULTRAWIDE",
-  "bestFor": "Best 1440p Ultrawide",
-  "rank": 9,
-  "image": "/images/products/alienware-aw3426dw.webp",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/dp/B0HFHZJ6C2"
-  },
-  "shortDesc": "The Alienware AW3426DW is a gaming monitor from Alienware: 34-inch, 3440x1440, 280Hz, OLED. Our pick: Best 1440p Ultrawide.",
-  "specs": {
-   "Brand": "Alienware",
-   "Best For": "Best 1440p Ultrawide",
-   "Key Specs": "34-inch · 3440x1440 · 280Hz · OLED"
-  },
-  "features": [
-   "34-inch",
-   "3440x1440",
-   "280Hz",
-   "OLED"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
   "id": "msi-mpg-321urxw-qd-oled",
   "slug": "msi-mpg-321urxw-qd-oled",
   "title": "MSI MPG 321URXW QD-OLED",
@@ -3031,66 +2586,6 @@ export const ALL_PRODUCTS = [
    "Ultrawide",
    "360Hz",
    "QD-OLED"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
-  "id": "msi-mag-272qp-qd-oled-x50",
-  "slug": "msi-mag-272qp-qd-oled-x50",
-  "title": "MSI MAG 272QP QD-OLED X50",
-  "subtitle": "27-inch // 1440p // 500Hz // QD-OLED",
-  "brand": "MSI",
-  "brandName": "MSI",
-  "category": "Gaming Monitors",
-  "categorySlug": "monitors",
-  "badge": "BEST EXTREME REFRESH RATE",
-  "bestFor": "Best Extreme Refresh Rate",
-  "rank": 12,
-  "image": "/images/products/msi-mag-272qp-qd-oled-x50.webp",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/dp/B0FKVWSLS6"
-  },
-  "shortDesc": "The MSI MAG 272QP QD-OLED X50 is a gaming monitor from MSI: 27-inch, 1440p, 500Hz, QD-OLED. Our pick: Best Extreme Refresh Rate.",
-  "specs": {
-   "Brand": "MSI",
-   "Best For": "Best Extreme Refresh Rate",
-   "Key Specs": "27-inch · 1440p · 500Hz · QD-OLED"
-  },
-  "features": [
-   "27-inch",
-   "1440p",
-   "500Hz",
-   "QD-OLED"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
-  "id": "lg-ultragear-32gs95ue-b",
-  "slug": "lg-ultragear-32gs95ue-b",
-  "title": "LG UltraGear 32GS95UE-B",
-  "subtitle": "32-inch // 4K 240Hz // 1080p 480Hz // OLED",
-  "brand": "LG",
-  "brandName": "LG",
-  "category": "Gaming Monitors",
-  "categorySlug": "monitors",
-  "badge": "BEST DUAL-RESOLUTION",
-  "bestFor": "Best Dual-Resolution",
-  "rank": 13,
-  "image": "/images/products/lg-ultragear-32gs95ue-b.webp",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/dp/B0CV1Y7NLT"
-  },
-  "shortDesc": "The LG UltraGear 32GS95UE-B is a gaming monitor from LG: 32-inch, 4K 240Hz, 1080p 480Hz, OLED. Our pick: Best Dual-Resolution.",
-  "specs": {
-   "Brand": "LG",
-   "Best For": "Best Dual-Resolution",
-   "Key Specs": "32-inch · 4K 240Hz · 1080p 480Hz · OLED"
-  },
-  "features": [
-   "32-inch",
-   "4K 240Hz",
-   "1080p 480Hz",
-   "OLED"
   ],
   "lastmod": "2026-09-29T10:00:00+05:00"
  },
@@ -3270,63 +2765,6 @@ export const ALL_PRODUCTS = [
   "lastmod": "2026-09-29T10:00:00+05:00"
  },
  {
-  "id": "samsung-odyssey-oled-g9",
-  "slug": "samsung-odyssey-oled-g9",
-  "title": "Samsung Odyssey OLED G9",
-  "subtitle": "49-inch // Super Ultrawide // OLED",
-  "brand": "Samsung",
-  "brandName": "Samsung",
-  "category": "Gaming Monitors",
-  "categorySlug": "monitors",
-  "badge": "BEST SUPER ULTRAWIDE",
-  "bestFor": "Best Super Ultrawide",
-  "rank": 20,
-  "image": "/images/products/samsung-odyssey-oled-g9.webp",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/dp/B0DSGJRKCR"
-  },
-  "shortDesc": "The Samsung Odyssey OLED G9 is a gaming monitor from Samsung: 49-inch, Super Ultrawide, OLED. Our pick: Best Super Ultrawide.",
-  "specs": {
-   "Brand": "Samsung",
-   "Best For": "Best Super Ultrawide",
-   "Key Specs": "49-inch · Super Ultrawide · OLED"
-  },
-  "features": [
-   "49-inch",
-   "Super Ultrawide",
-   "OLED"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
-  "id": "nvidia-geforce-rtx-5090",
-  "slug": "nvidia-geforce-rtx-5090",
-  "title": "NVIDIA GeForce RTX 5090",
-  "subtitle": "Enthusiast // 4K",
-  "brand": "NVIDIA",
-  "brandName": "NVIDIA",
-  "category": "Graphics Cards (GPU)",
-  "categorySlug": "gpu",
-  "badge": "ENTHUSIAST",
-  "bestFor": "Enthusiast / 4K",
-  "rank": 1,
-  "image": "/images/battlestation_pc.jpg",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=NVIDIA+GeForce+RTX+5090"
-  },
-  "shortDesc": "The NVIDIA GeForce RTX 5090 is a enthusiast graphics card from NVIDIA, aimed at 4K gaming.",
-  "specs": {
-   "Brand": "NVIDIA",
-   "Tier": "Enthusiast",
-   "Target Resolution": "4K"
-  },
-  "features": [
-   "Enthusiast",
-   "4K"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
   "id": "nvidia-geforce-rtx-5080",
   "slug": "nvidia-geforce-rtx-5080",
   "title": "NVIDIA GeForce RTX 5080",
@@ -3379,34 +2817,6 @@ export const ALL_PRODUCTS = [
   "features": [
    "High-end",
    "1440p-4K"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
-  "id": "nvidia-geforce-rtx-5070",
-  "slug": "nvidia-geforce-rtx-5070",
-  "title": "NVIDIA GeForce RTX 5070",
-  "subtitle": "Upper mid-range // 1440p",
-  "brand": "NVIDIA",
-  "brandName": "NVIDIA",
-  "category": "Graphics Cards (GPU)",
-  "categorySlug": "gpu",
-  "badge": "UPPER MID-RANGE",
-  "bestFor": "Upper mid-range / 1440p",
-  "rank": 4,
-  "image": "/images/battlestation_pc.jpg",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=NVIDIA+GeForce+RTX+5070"
-  },
-  "shortDesc": "The NVIDIA GeForce RTX 5070 is a upper mid-range graphics card from NVIDIA, aimed at 1440p gaming.",
-  "specs": {
-   "Brand": "NVIDIA",
-   "Tier": "Upper mid-range",
-   "Target Resolution": "1440p"
-  },
-  "features": [
-   "Upper mid-range",
-   "1440p"
   ],
   "lastmod": "2026-09-29T10:00:00+05:00"
  },
@@ -3635,34 +3045,6 @@ export const ALL_PRODUCTS = [
   "lastmod": "2026-09-29T10:00:00+05:00"
  },
  {
-  "id": "intel-arc-b570",
-  "slug": "intel-arc-b570",
-  "title": "Intel Arc B570",
-  "subtitle": "Budget // 1080p",
-  "brand": "Intel",
-  "brandName": "Intel",
-  "category": "Graphics Cards (GPU)",
-  "categorySlug": "gpu",
-  "badge": "BUDGET",
-  "bestFor": "Budget / 1080p",
-  "rank": 13,
-  "image": "/images/battlestation_pc.jpg",
-  "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Intel+Arc+B570"
-  },
-  "shortDesc": "The Intel Arc B570 is a budget graphics card from Intel, aimed at 1080p gaming.",
-  "specs": {
-   "Brand": "Intel",
-   "Tier": "Budget",
-   "Target Resolution": "1080p"
-  },
-  "features": [
-   "Budget",
-   "1080p"
-  ],
-  "lastmod": "2026-09-29T10:00:00+05:00"
- },
- {
   "id": "cooler-master-cosmos-alpha",
   "slug": "cooler-master-cosmos-alpha",
   "title": "Cooler Master Cosmos Alpha",
@@ -3676,7 +3058,7 @@ export const ALL_PRODUCTS = [
   "rank": 1,
   "image": "/images/products/photos/cooler-master-cosmos-alpha.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Cooler+Master+Cosmos+Alpha"
+   "amazon": "https://www.amazon.com/dp/B0GJ13NDWD"
   },
   "shortDesc": "The Cooler Master Cosmos Alpha is a PC case from Cooler Master. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -3699,7 +3081,7 @@ export const ALL_PRODUCTS = [
   "rank": 2,
   "image": "/images/products/photos/cooler-master-haf-700.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Cooler+Master+HAF+700"
+   "amazon": "https://www.amazon.com/dp/B0B2WZ14SP"
   },
   "shortDesc": "The Cooler Master HAF 700 is a PC case from Cooler Master. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -3722,7 +3104,7 @@ export const ALL_PRODUCTS = [
   "rank": 3,
   "image": "/images/products/photos/corsair-3200d-airflow.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Corsair+3200D+Airflow"
+   "amazon": "https://www.amazon.com/dp/B0GBY1GSDX"
   },
   "shortDesc": "The Corsair 3200D Airflow is a PC case from Corsair. Key details: airflow front. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -3747,7 +3129,7 @@ export const ALL_PRODUCTS = [
   "rank": 4,
   "image": "/images/products/photos/corsair-3500x.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Corsair+3500X"
+   "amazon": "https://www.amazon.com/dp/B0CZV22HDF"
   },
   "shortDesc": "The Corsair 3500X is a PC case from Corsair. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -3770,7 +3152,7 @@ export const ALL_PRODUCTS = [
   "rank": 5,
   "image": "/images/products/photos/corsair-air-5400.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Corsair+Air+5400"
+   "amazon": "https://www.amazon.com/dp/B0H1D3NTRH"
   },
   "shortDesc": "The Corsair Air 5400 is a PC case from Corsair. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -3793,7 +3175,7 @@ export const ALL_PRODUCTS = [
   "rank": 6,
   "image": "/images/products/photos/fractal-design-north-xl.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Fractal+Design+North+XL"
+   "amazon": "https://www.amazon.com/dp/B0CJCK95ZC"
   },
   "shortDesc": "The Fractal Design North XL is a PC case from Fractal Design. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -3816,7 +3198,7 @@ export const ALL_PRODUCTS = [
   "rank": 7,
   "image": "/images/products/photos/fractal-design-north.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Fractal+Design+North"
+   "amazon": "https://www.amazon.com/dp/B09V878FXQ"
   },
   "shortDesc": "The Fractal Design North is a PC case from Fractal Design. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -3839,7 +3221,7 @@ export const ALL_PRODUCTS = [
   "rank": 8,
   "image": "/images/products/photos/fractal-design-terra.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Fractal+Design+Terra"
+   "amazon": "https://www.amazon.com/dp/B09DKMQ5L1"
   },
   "shortDesc": "The Fractal Design Terra is a PC case from Fractal Design. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -3862,7 +3244,7 @@ export const ALL_PRODUCTS = [
   "rank": 9,
   "image": "/images/products/photos/hyte-y70-touch.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=HYTE+Y70+Touch"
+   "amazon": "https://www.amazon.com/dp/B0DKJKGPYZ"
   },
   "shortDesc": "The HYTE Y70 Touch is a PC case from HYTE. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -3885,7 +3267,7 @@ export const ALL_PRODUCTS = [
   "rank": 10,
   "image": "/images/products/photos/hyte-y70.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=HYTE+Y70"
+   "amazon": "https://www.amazon.com/dp/B0DKW889MJ"
   },
   "shortDesc": "The HYTE Y70 is a PC case from HYTE. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -3908,7 +3290,7 @@ export const ALL_PRODUCTS = [
   "rank": 11,
   "image": "/images/products/photos/havn-bf-360.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Havn+BF+360"
+   "amazon": "https://www.amazon.com/dp/B0FR5XTKVZ"
   },
   "shortDesc": "The Havn BF 360 is a PC case from HAVN. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -3931,7 +3313,7 @@ export const ALL_PRODUCTS = [
   "rank": 12,
   "image": "/images/products/photos/lian-li-lancool-216.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Lian+Li+Lancool+216"
+   "amazon": "https://www.amazon.com/dp/B0BN3SY5XW"
   },
   "shortDesc": "The Lian Li Lancool 216 is a PC case from Lian Li. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -3954,7 +3336,7 @@ export const ALL_PRODUCTS = [
   "rank": 13,
   "image": "/images/products/photos/lian-li-o11-dynamic-evo.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Lian+Li+O11+Dynamic+EVO"
+   "amazon": "https://www.amazon.com/dp/B0G54D3KL7"
   },
   "shortDesc": "The Lian Li O11 Dynamic EVO is a PC case from Lian Li. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -3977,7 +3359,7 @@ export const ALL_PRODUCTS = [
   "rank": 14,
   "image": "/images/products/photos/lian-li-o11-vision-compact.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Lian+Li+O11+Vision+Compact"
+   "amazon": "https://www.amazon.com/dp/B0DJPV8XG3"
   },
   "shortDesc": "The Lian Li O11 Vision Compact is a PC case from Lian Li. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4000,7 +3382,7 @@ export const ALL_PRODUCTS = [
   "rank": 15,
   "image": "/images/products/photos/montech-air-903-max.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Montech+Air+903+Max"
+   "amazon": "https://www.amazon.com/dp/B0CB26ZFKV"
   },
   "shortDesc": "The Montech Air 903 Max is a PC case from Montech. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4023,7 +3405,7 @@ export const ALL_PRODUCTS = [
   "rank": 16,
   "image": "/images/products/photos/montech-king-65-pro.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Montech+King+65+Pro"
+   "amazon": "https://www.amazon.com/dp/B0DJDW8B92"
   },
   "shortDesc": "The Montech King 65 Pro is a PC case from Montech. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4046,7 +3428,7 @@ export const ALL_PRODUCTS = [
   "rank": 17,
   "image": "/images/products/photos/montech-tg3.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Montech+TG3"
+   "amazon": "https://www.amazon.com/dp/B0H5F8GYQF"
   },
   "shortDesc": "The Montech TG3 is a PC case from Montech. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4069,7 +3451,7 @@ export const ALL_PRODUCTS = [
   "rank": 18,
   "image": "/images/products/photos/nzxt-h3-flow.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=NZXT+H3+Flow"
+   "amazon": "https://www.amazon.com/dp/B0DQPMJ6MJ"
   },
   "shortDesc": "The NZXT H3 Flow is a PC case from NZXT. Key details: airflow front. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4094,7 +3476,7 @@ export const ALL_PRODUCTS = [
   "rank": 19,
   "image": "/images/products/photos/nzxt-h6-flow.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=NZXT+H6+Flow"
+   "amazon": "https://www.amazon.com/dp/B0C89FCDFP"
   },
   "shortDesc": "The NZXT H6 Flow is a PC case from NZXT. Key details: airflow front. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4119,7 +3501,7 @@ export const ALL_PRODUCTS = [
   "rank": 20,
   "image": "/images/products/photos/nzxt-h7-flow.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=NZXT+H7+Flow"
+   "amazon": "https://www.amazon.com/dp/B0CV4R1TWS"
   },
   "shortDesc": "The NZXT H7 Flow is a PC case from NZXT. Key details: airflow front. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4144,7 +3526,7 @@ export const ALL_PRODUCTS = [
   "rank": 21,
   "image": "/images/products/photos/nzxt-h9-flow-2025.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=NZXT+H9+Flow+2025"
+   "amazon": "https://www.amazon.com/dp/B0DQPPKNSS"
   },
   "shortDesc": "The NZXT H9 Flow (2025) is a PC case from NZXT. Key details: 2025 model, airflow front. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4171,7 +3553,7 @@ export const ALL_PRODUCTS = [
   "rank": 22,
   "image": "/images/products/photos/phanteks-g500a.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Phanteks+G500A"
+   "amazon": "https://www.amazon.com/dp/B0BMPG47KQ"
   },
   "shortDesc": "The Phanteks G500A is a PC case from Phanteks. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4194,7 +3576,7 @@ export const ALL_PRODUCTS = [
   "rank": 23,
   "image": "/images/products/photos/phanteks-xt-pro-ultra.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Phanteks+XT+Pro+Ultra"
+   "amazon": "https://www.amazon.com/dp/B0CT5V2XJK"
   },
   "shortDesc": "The Phanteks XT Pro Ultra is a PC case from Phanteks. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4217,7 +3599,7 @@ export const ALL_PRODUCTS = [
   "rank": 24,
   "image": "/images/products/photos/thermaltake-s100-tg-snow-edition.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Thermaltake+S100+TG+Snow+Edition"
+   "amazon": "https://www.amazon.com/dp/B087CDVBZD"
   },
   "shortDesc": "The Thermaltake S100 TG Snow Edition is a PC case from Thermaltake. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4240,7 +3622,7 @@ export const ALL_PRODUCTS = [
   "rank": 25,
   "image": "/images/products/photos/be-quiet-pure-base-501-airflow.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=be+quiet!+Pure+Base+501+Airflow"
+   "amazon": "https://www.amazon.com/dp/B0DGXR6TTD"
   },
   "shortDesc": "The be quiet! Pure Base 501 Airflow is a PC case from be quiet!. Key details: airflow front. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4265,7 +3647,7 @@ export const ALL_PRODUCTS = [
   "rank": 26,
   "image": "/images/products/photos/be-quiet-shadow-base-800.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=be+quiet!+Shadow+Base+800"
+   "amazon": "https://www.amazon.com/dp/B0C58SRL9T"
   },
   "shortDesc": "The be quiet! Shadow Base 800 is a PC case from be quiet!. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4288,7 +3670,7 @@ export const ALL_PRODUCTS = [
   "rank": 1,
   "image": "/images/products/photos/amd-ryzen-5-5500f.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=AMD+Ryzen+5+5500F"
+   "amazon": "https://www.amazon.com/dp/B0HGMTDZM7"
   },
   "shortDesc": "The AMD Ryzen 5 5500F is a desktop processor from AMD. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4311,7 +3693,7 @@ export const ALL_PRODUCTS = [
   "rank": 2,
   "image": "/images/products/photos/amd-ryzen-5-7600x3d.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=AMD+Ryzen+5+7600X3D"
+   "amazon": "https://www.amazon.com/dp/B0F9XH8DBP"
   },
   "shortDesc": "The AMD Ryzen 5 7600X3D is a desktop processor from AMD. Key details: 3D V-Cache. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4337,7 +3719,7 @@ export const ALL_PRODUCTS = [
   "rank": 3,
   "image": "/images/products/photos/amd-ryzen-5-8600g.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=AMD+Ryzen+5+8600G"
+   "amazon": "https://www.amazon.com/dp/B0CQ4GYTTX"
   },
   "shortDesc": "The AMD Ryzen 5 8600G is a desktop processor from AMD. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4360,7 +3742,7 @@ export const ALL_PRODUCTS = [
   "rank": 4,
   "image": "/images/products/photos/amd-ryzen-5-9600x.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=AMD+Ryzen+5+9600X"
+   "amazon": "https://www.amazon.com/dp/B0D6NN6TM7"
   },
   "shortDesc": "The AMD Ryzen 5 9600X is a desktop processor from AMD. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4383,7 +3765,7 @@ export const ALL_PRODUCTS = [
   "rank": 5,
   "image": "/images/products/photos/amd-ryzen-7-5700x3d.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=AMD+Ryzen+7+5700X3D"
+   "amazon": "https://www.amazon.com/dp/B0CQ4H4H7X"
   },
   "shortDesc": "The AMD Ryzen 7 5700X3D is a desktop processor from AMD. Key details: 3D V-Cache. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4409,7 +3791,7 @@ export const ALL_PRODUCTS = [
   "rank": 6,
   "image": "/images/products/photos/amd-ryzen-7-7800x3d.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=AMD+Ryzen+7+7800X3D"
+   "amazon": "https://www.amazon.com/dp/B0BTZB7F88"
   },
   "shortDesc": "The AMD Ryzen 7 7800X3D is a desktop processor from AMD. Key details: 3D V-Cache. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4435,7 +3817,7 @@ export const ALL_PRODUCTS = [
   "rank": 7,
   "image": "/images/products/photos/amd-ryzen-7-8700g.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=AMD+Ryzen+7+8700G"
+   "amazon": "https://www.amazon.com/dp/B0CQ4JBKW3"
   },
   "shortDesc": "The AMD Ryzen 7 8700G is a desktop processor from AMD. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4458,7 +3840,7 @@ export const ALL_PRODUCTS = [
   "rank": 8,
   "image": "/images/products/photos/amd-ryzen-7-9700x.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=AMD+Ryzen+7+9700X"
+   "amazon": "https://www.amazon.com/dp/B0D6NMDNNX"
   },
   "shortDesc": "The AMD Ryzen 7 9700X is a desktop processor from AMD. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4481,7 +3863,7 @@ export const ALL_PRODUCTS = [
   "rank": 9,
   "image": "/images/products/photos/amd-ryzen-7-9800x3d.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=AMD+Ryzen+7+9800X3D"
+   "amazon": "https://www.amazon.com/dp/B0DKFMSMYK"
   },
   "shortDesc": "The AMD Ryzen 7 9800X3D is a desktop processor from AMD. Key details: 3D V-Cache. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4507,7 +3889,7 @@ export const ALL_PRODUCTS = [
   "rank": 10,
   "image": "/images/products/photos/amd-ryzen-7-9850x3d.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=AMD+Ryzen+7+9850X3D"
+   "amazon": "https://www.amazon.com/dp/B0G8JMLXNQ"
   },
   "shortDesc": "The AMD Ryzen 7 9850X3D is a desktop processor from AMD. Key details: 3D V-Cache. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4533,7 +3915,7 @@ export const ALL_PRODUCTS = [
   "rank": 11,
   "image": "/images/products/photos/amd-ryzen-9-9900x.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=AMD+Ryzen+9+9900X"
+   "amazon": "https://www.amazon.com/dp/B0D6NN87T8"
   },
   "shortDesc": "The AMD Ryzen 9 9900X is a desktop processor from AMD. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4556,7 +3938,7 @@ export const ALL_PRODUCTS = [
   "rank": 12,
   "image": "/images/products/photos/amd-ryzen-9-9950x3d.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=AMD+Ryzen+9+9950X3D"
+   "amazon": "https://www.amazon.com/dp/B0DVZSG8D5"
   },
   "shortDesc": "The AMD Ryzen 9 9950X3D is a desktop processor from AMD. Key details: 3D V-Cache. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4582,7 +3964,7 @@ export const ALL_PRODUCTS = [
   "rank": 13,
   "image": "/images/products/photos/intel-core-ultra-5-250k-plus.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Intel+Core+Ultra+5+250K+Plus"
+   "amazon": "https://www.amazon.com/dp/B0GMKXVVJQ"
   },
   "shortDesc": "The Intel Core Ultra 5 250K Plus is a desktop processor from Intel. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4605,7 +3987,7 @@ export const ALL_PRODUCTS = [
   "rank": 14,
   "image": "/images/products/photos/intel-core-ultra-7-265k.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Intel+Core+Ultra+7+265K"
+   "amazon": "https://www.amazon.com/dp/B0DFK2MH2D"
   },
   "shortDesc": "The Intel Core Ultra 7 265K is a desktop processor from Intel. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4628,7 +4010,7 @@ export const ALL_PRODUCTS = [
   "rank": 15,
   "image": "/images/products/photos/intel-core-ultra-7-270k-plus.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Intel+Core+Ultra+7+270K+Plus"
+   "amazon": "https://www.amazon.com/dp/B0GMLJCBBM"
   },
   "shortDesc": "The Intel Core Ultra 7 270K Plus is a desktop processor from Intel. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4651,7 +4033,7 @@ export const ALL_PRODUCTS = [
   "rank": 16,
   "image": "/images/products/photos/intel-core-ultra-9-285k.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Intel+Core+Ultra+9+285K"
+   "amazon": "https://www.amazon.com/dp/B0DFKC99VL"
   },
   "shortDesc": "The Intel Core Ultra 9 285K is a desktop processor from Intel. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4674,7 +4056,7 @@ export const ALL_PRODUCTS = [
   "rank": 17,
   "image": "/images/products/photos/intel-core-i5-13600k.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Intel+Core+i5-13600K"
+   "amazon": "https://www.amazon.com/dp/B0BCDR9M33"
   },
   "shortDesc": "The Intel Core i5-13600K is a desktop processor from Intel. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4697,7 +4079,7 @@ export const ALL_PRODUCTS = [
   "rank": 18,
   "image": "/images/products/photos/intel-core-i5-14600k.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Intel+Core+i5-14600K"
+   "amazon": "https://www.amazon.com/dp/B0CHBGVFHP"
   },
   "shortDesc": "The Intel Core i5-14600K is a desktop processor from Intel. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4720,7 +4102,7 @@ export const ALL_PRODUCTS = [
   "rank": 19,
   "image": "/images/products/photos/intel-core-i7-12700k.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Intel+Core+i7-12700K"
+   "amazon": "https://www.amazon.com/dp/B09FXNVDBJ"
   },
   "shortDesc": "The Intel Core i7-12700K is a desktop processor from Intel. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4743,7 +4125,7 @@ export const ALL_PRODUCTS = [
   "rank": 20,
   "image": "/images/products/photos/intel-core-i7-14700k.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Intel+Core+i7-14700K"
+   "amazon": "https://www.amazon.com/dp/B0CGJ41C9W"
   },
   "shortDesc": "The Intel Core i7-14700K is a desktop processor from Intel. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4766,7 +4148,7 @@ export const ALL_PRODUCTS = [
   "rank": 1,
   "image": "/images/products/photos/athena-pro-gaming-chair.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Athena+Pro+Gaming+Chair"
+   "amazon": "https://www.amazon.com/dp/B0FX2KLHSD"
   },
   "shortDesc": "The Athena Pro Gaming Chair is a gaming chair. See the full specifications and the current price on Amazon.",
   "specs": {},
@@ -4787,7 +4169,7 @@ export const ALL_PRODUCTS = [
   "rank": 2,
   "image": "/images/products/photos/autonomous-ergochair-pro.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Autonomous+ErgoChair+Pro"
+   "amazon": "https://www.amazon.com/dp/B0FL2F3W34"
   },
   "shortDesc": "The Autonomous ErgoChair Pro is a gaming chair from Autonomous. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4810,7 +4192,7 @@ export const ALL_PRODUCTS = [
   "rank": 3,
   "image": "/images/products/photos/capot-gaming-chair.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=CAPOT+Gaming+Chair"
+   "amazon": "https://www.amazon.com/dp/B0D9VPSQM7"
   },
   "shortDesc": "The CAPOT Gaming Chair is a gaming chair from CAPOT. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4833,7 +4215,7 @@ export const ALL_PRODUCTS = [
   "rank": 4,
   "image": "/images/products/photos/gtplayer-gaming-chair.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=GTPLAYER+Gaming+Chair"
+   "amazon": "https://www.amazon.com/dp/B0GK5ZF61X"
   },
   "shortDesc": "The GTPLAYER Gaming Chair is a gaming chair from GTPLAYER. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4856,7 +4238,7 @@ export const ALL_PRODUCTS = [
   "rank": 5,
   "image": "/images/products/photos/gtplayer-comfort.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=GTPLAYER+Comfort"
+   "amazon": "https://www.amazon.com/dp/B0BBPRZHRX"
   },
   "shortDesc": "The GTPLAYER Comfort is a gaming chair from GTPLAYER. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4902,7 +4284,7 @@ export const ALL_PRODUCTS = [
   "rank": 7,
   "image": "/images/products/photos/hon-ignition-2-0.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=HON+Ignition+2.0"
+   "amazon": "https://www.amazon.com/dp/B06Y3PGPR2"
   },
   "shortDesc": "The HON Ignition 2.0 is a gaming chair from HON. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4925,7 +4307,7 @@ export const ALL_PRODUCTS = [
   "rank": 8,
   "image": "/images/products/photos/huanuo-gaming-chair.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=HUANUO+Gaming+Chair"
+   "amazon": "https://www.amazon.com/dp/B0BZS9CGNC"
   },
   "shortDesc": "The HUANUO Gaming Chair is a gaming chair from HUANUO. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4948,7 +4330,7 @@ export const ALL_PRODUCTS = [
   "rank": 9,
   "image": "/images/products/photos/razer-iskur-v2-x.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Razer+Iskur+V2+X"
+   "amazon": "https://www.amazon.com/dp/B0DP5SY554"
   },
   "shortDesc": "The Razer Iskur V2 X is a gaming chair from Razer. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4971,7 +4353,7 @@ export const ALL_PRODUCTS = [
   "rank": 10,
   "image": "/images/products/photos/respawn-110-pro.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Respawn+110+Pro"
+   "amazon": "https://www.amazon.com/dp/B0DGKVGH8X"
   },
   "shortDesc": "The Respawn 110 Pro is a gaming chair from RESPAWN. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -4994,7 +4376,7 @@ export const ALL_PRODUCTS = [
   "rank": 11,
   "image": "/images/products/photos/respawn-110.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Respawn+110"
+   "amazon": "https://www.amazon.com/dp/B09V8C78YF"
   },
   "shortDesc": "The Respawn 110 is a gaming chair from RESPAWN. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5017,7 +4399,7 @@ export const ALL_PRODUCTS = [
   "rank": 12,
   "image": "/images/products/photos/steelcase-gesture.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Steelcase+Gesture"
+   "amazon": "https://www.amazon.com/dp/B08LMM1148"
   },
   "shortDesc": "The Steelcase Gesture is a gaming chair from Steelcase. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5040,7 +4422,7 @@ export const ALL_PRODUCTS = [
   "rank": 13,
   "image": "/images/products/photos/noblechairs-hero.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=noblechairs+HERO"
+   "amazon": "https://www.amazon.com/dp/B07DCPSK74"
   },
   "shortDesc": "The noblechairs HERO is a gaming chair from noblechairs. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5063,7 +4445,7 @@ export const ALL_PRODUCTS = [
   "rank": 1,
   "image": "/images/products/photos/asus-rog-ally-x.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+ROG+Ally+X"
+   "amazon": "https://www.amazon.com/dp/B0D49B5DTD"
   },
   "shortDesc": "The ASUS ROG Ally X is a handheld gaming PC from ASUS. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5086,7 +4468,7 @@ export const ALL_PRODUCTS = [
   "rank": 2,
   "image": "/images/products/photos/asus-rog-ally-z1-extreme.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+ROG+Ally+Z1+Extreme"
+   "amazon": "https://www.amazon.com/dp/B0C52RFZXB"
   },
   "shortDesc": "The ASUS ROG Ally Z1 Extreme is a handheld gaming PC from ASUS. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5109,7 +4491,7 @@ export const ALL_PRODUCTS = [
   "rank": 3,
   "image": "/images/products/photos/ayaneo-3.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=AYANEO+3"
+   "amazon": "https://www.amazon.com/dp/B0FB99FF4J"
   },
   "shortDesc": "The AYANEO 3 is a handheld gaming PC from AYANEO. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5155,7 +4537,7 @@ export const ALL_PRODUCTS = [
   "rank": 5,
   "image": "/images/products/photos/gpd-win-5.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=GPD+WIN+5"
+   "amazon": "https://www.amazon.com/dp/B0G65LCKDP"
   },
   "shortDesc": "The GPD WIN 5 is a handheld gaming PC from GPD. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5178,7 +4560,7 @@ export const ALL_PRODUCTS = [
   "rank": 6,
   "image": "/images/products/photos/gpd-win-mini-2025.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=GPD+WIN+Mini+2025"
+   "amazon": "https://www.amazon.com/dp/B0DT9YFC9T"
   },
   "shortDesc": "The GPD WIN Mini 2025 is a handheld gaming PC from GPD. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5201,7 +4583,7 @@ export const ALL_PRODUCTS = [
   "rank": 7,
   "image": "/images/products/photos/lenovo-legion-go-2.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Lenovo+Legion+Go+2"
+   "amazon": "https://www.amazon.com/dp/B0FYR394K5"
   },
   "shortDesc": "The Lenovo Legion Go 2 is a handheld gaming PC from Lenovo. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5224,7 +4606,7 @@ export const ALL_PRODUCTS = [
   "rank": 8,
   "image": "/images/products/photos/lenovo-legion-go-s.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Lenovo+Legion+Go+S"
+   "amazon": "https://www.amazon.com/dp/B0GWJZWNP4"
   },
   "shortDesc": "The Lenovo Legion Go S is a handheld gaming PC from Lenovo. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5247,7 +4629,7 @@ export const ALL_PRODUCTS = [
   "rank": 9,
   "image": "/images/products/photos/lenovo-legion-go.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Lenovo+Legion+Go"
+   "amazon": "https://www.amazon.com/dp/B0CM74YFSP"
   },
   "shortDesc": "The Lenovo Legion Go is a handheld gaming PC from Lenovo. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5270,7 +4652,7 @@ export const ALL_PRODUCTS = [
   "rank": 10,
   "image": "/images/products/photos/msi-claw-8-ai-plus.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=MSI+Claw+8+AI+"
+   "amazon": "https://www.amazon.com/dp/B0DLPYC184"
   },
   "shortDesc": "The MSI Claw 8 AI+ is a handheld gaming PC from MSI. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5293,7 +4675,7 @@ export const ALL_PRODUCTS = [
   "rank": 11,
   "image": "/images/products/photos/msi-claw-8-ex-ai-plus.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=MSI+Claw+8+EX+AI+"
+   "amazon": "https://www.amazon.com/dp/B0H4H27WJN"
   },
   "shortDesc": "The MSI Claw 8 EX AI+ is a handheld gaming PC from MSI. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5316,7 +4698,7 @@ export const ALL_PRODUCTS = [
   "rank": 12,
   "image": "/images/products/photos/msi-claw-a8.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=MSI+Claw+A8"
+   "amazon": "https://www.amazon.com/dp/B0GL4N9YQV"
   },
   "shortDesc": "The MSI Claw A8 is a handheld gaming PC from MSI. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5339,7 +4721,7 @@ export const ALL_PRODUCTS = [
   "rank": 13,
   "image": "/images/products/photos/rog-xbox-ally-x.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ROG+Xbox+Ally+X"
+   "amazon": "https://www.amazon.com/dp/B0G2HTSJXT"
   },
   "shortDesc": "The ROG Xbox Ally X is a handheld gaming PC from ASUS. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5362,7 +4744,7 @@ export const ALL_PRODUCTS = [
   "rank": 14,
   "image": "/images/products/photos/rog-xbox-ally.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ROG+Xbox+Ally"
+   "amazon": "https://www.amazon.com/dp/B0FM6C3ZMN"
   },
   "shortDesc": "The ROG Xbox Ally is a handheld gaming PC from ASUS. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5385,7 +4767,7 @@ export const ALL_PRODUCTS = [
   "rank": 15,
   "image": "/images/products/photos/steam-deck-oled-1tb.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Steam+Deck+OLED+1TB"
+   "amazon": "https://www.amazon.com/dp/B0CQ3L4726"
   },
   "shortDesc": "The Steam Deck OLED 1TB is a handheld gaming PC from Valve. Key details: 1TB. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5411,7 +4793,7 @@ export const ALL_PRODUCTS = [
   "rank": 16,
   "image": "/images/products/photos/steam-deck-oled-512gb.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Steam+Deck+OLED+512GB"
+   "amazon": "https://www.amazon.com/dp/B0F2TPM644"
   },
   "shortDesc": "The Steam Deck OLED 512GB is a handheld gaming PC from Valve. Key details: 512GB. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5437,7 +4819,7 @@ export const ALL_PRODUCTS = [
   "rank": 17,
   "image": "/images/products/photos/vita-pro-handheld.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Vita+Pro+Handheld"
+   "amazon": "https://www.amazon.com/dp/B0GSSZML6Y"
   },
   "shortDesc": "The Vita Pro Handheld is a handheld gaming PC. See the full specifications and the current price on Amazon.",
   "specs": {},
@@ -5458,7 +4840,7 @@ export const ALL_PRODUCTS = [
   "rank": 1,
   "image": "/images/products/photos/asus-rog-strix-g16-2026.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+ROG+Strix+G16+2026"
+   "amazon": "https://www.amazon.com/dp/B0F8JZB2ZS"
   },
   "shortDesc": "The ASUS ROG Strix G16 (2026) is a gaming laptop from ASUS. Key details: 2026 model. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5484,7 +4866,7 @@ export const ALL_PRODUCTS = [
   "rank": 2,
   "image": "/images/products/photos/asus-rog-strix-scar-18-2026.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+ROG+Strix+SCAR+18+2026"
+   "amazon": "https://www.amazon.com/dp/B0H42KKW67"
   },
   "shortDesc": "The ASUS ROG Strix SCAR 18 (2026) is a gaming laptop from ASUS. Key details: 2026 model. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5510,7 +4892,7 @@ export const ALL_PRODUCTS = [
   "rank": 3,
   "image": "/images/products/photos/asus-rog-zephyrus-g14-2026.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+ROG+Zephyrus+G14+2026"
+   "amazon": "https://www.amazon.com/dp/B0FRFPCPRB"
   },
   "shortDesc": "The ASUS ROG Zephyrus G14 (2026) is a gaming laptop from ASUS. Key details: 2026 model. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5536,7 +4918,7 @@ export const ALL_PRODUCTS = [
   "rank": 4,
   "image": "/images/products/photos/asus-rog-zephyrus-g16-2026.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+ROG+Zephyrus+G16+2026"
+   "amazon": "https://www.amazon.com/dp/B0H12XC76C"
   },
   "shortDesc": "The ASUS ROG Zephyrus G16 (2026) is a gaming laptop from ASUS. Key details: 2026 model. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5562,7 +4944,7 @@ export const ALL_PRODUCTS = [
   "rank": 5,
   "image": "/images/products/photos/asus-tuf-gaming-a16-2026.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+TUF+Gaming+A16+2026"
+   "amazon": "https://www.amazon.com/dp/B0H6PM43KR"
   },
   "shortDesc": "The ASUS TUF Gaming A16 (2026) is a gaming laptop from ASUS. Key details: 2026 model. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5588,7 +4970,7 @@ export const ALL_PRODUCTS = [
   "rank": 6,
   "image": "/images/products/photos/asus-zenbook-duo-laptop.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=ASUS+Zenbook+Duo+Laptop"
+   "amazon": "https://www.amazon.com/dp/B0DPQ35KMW"
   },
   "shortDesc": "The ASUS Zenbook Duo Laptop is a gaming laptop from ASUS. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5611,7 +4993,7 @@ export const ALL_PRODUCTS = [
   "rank": 7,
   "image": "/images/products/photos/acer-nitro-v-16s-ai.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Acer+Nitro+V+16S+AI"
+   "amazon": "https://www.amazon.com/dp/B0F195W823"
   },
   "shortDesc": "The Acer Nitro V 16S AI is a gaming laptop from Acer. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5634,7 +5016,7 @@ export const ALL_PRODUCTS = [
   "rank": 8,
   "image": "/images/products/photos/acer-predator-helios-neo-16-ai.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Acer+Predator+Helios+Neo+16+AI"
+   "amazon": "https://www.amazon.com/dp/B0FN15LKGD"
   },
   "shortDesc": "The Acer Predator Helios Neo 16 AI is a gaming laptop from Acer. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5657,7 +5039,7 @@ export const ALL_PRODUCTS = [
   "rank": 9,
   "image": "/images/products/photos/acer-predator-helios-neo-slim-14.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Acer+Predator+Helios+Neo+Slim+14"
+   "amazon": "https://www.amazon.com/dp/B0FNXRP9G7"
   },
   "shortDesc": "The Acer Predator Helios Neo Slim 14 is a gaming laptop from Acer. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5680,7 +5062,7 @@ export const ALL_PRODUCTS = [
   "rank": 10,
   "image": "/images/products/photos/alienware-15-2026.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Alienware+15+2026"
+   "amazon": "https://www.amazon.com/dp/B0H5M2WZYC"
   },
   "shortDesc": "The Alienware 15 (2026) is a gaming laptop from Alienware. Key details: 2026 model. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5706,7 +5088,7 @@ export const ALL_PRODUCTS = [
   "rank": 11,
   "image": "/images/products/photos/alienware-16-area-51-2026.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Alienware+16+Area-51+2026"
+   "amazon": "https://www.amazon.com/dp/B0F8P6MRQT"
   },
   "shortDesc": "The Alienware 16 Area-51 (2026) is a gaming laptop from Alienware. Key details: 2026 model. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5732,7 +5114,7 @@ export const ALL_PRODUCTS = [
   "rank": 12,
   "image": "/images/products/photos/gigabyte-aorus-master-16.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Gigabyte+AORUS+Master+16"
+   "amazon": "https://www.amazon.com/dp/B0DYJHX33G"
   },
   "shortDesc": "The Gigabyte AORUS Master 16 is a gaming laptop from Gigabyte. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5755,7 +5137,7 @@ export const ALL_PRODUCTS = [
   "rank": 13,
   "image": "/images/products/photos/lenovo-loq-15-essential-gen-11.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Lenovo+LOQ+15+Essential+Gen+11"
+   "amazon": "https://www.amazon.com/dp/B0FMLCQZM8"
   },
   "shortDesc": "The Lenovo LOQ 15 Essential Gen 11 is a gaming laptop from Lenovo. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5778,7 +5160,7 @@ export const ALL_PRODUCTS = [
   "rank": 14,
   "image": "/images/products/photos/lenovo-legion-7i-gen-10.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Lenovo+Legion+7i+Gen+10"
+   "amazon": "https://www.amazon.com/dp/B0FY37MXSG"
   },
   "shortDesc": "The Lenovo Legion 7i Gen 10 is a gaming laptop from Lenovo. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5801,7 +5183,7 @@ export const ALL_PRODUCTS = [
   "rank": 15,
   "image": "/images/products/photos/lenovo-legion-pro-5i-gen-10.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Lenovo+Legion+Pro+5i+Gen+10"
+   "amazon": "https://www.amazon.com/dp/B0F9XSW5HB"
   },
   "shortDesc": "The Lenovo Legion Pro 5i Gen 10 is a gaming laptop from Lenovo. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5824,7 +5206,7 @@ export const ALL_PRODUCTS = [
   "rank": 16,
   "image": "/images/products/photos/lenovo-legion-pro-7i-gen-10.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Lenovo+Legion+Pro+7i+Gen+10"
+   "amazon": "https://www.amazon.com/dp/B0F3JC9F6L"
   },
   "shortDesc": "The Lenovo Legion Pro 7i Gen 10 is a gaming laptop from Lenovo. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5847,7 +5229,7 @@ export const ALL_PRODUCTS = [
   "rank": 17,
   "image": "/images/products/photos/msi-raider-a18-hx.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=MSI+Raider+A18+HX"
+   "amazon": "https://www.amazon.com/dp/B0DVDNC7QG"
   },
   "shortDesc": "The MSI Raider A18 HX is a gaming laptop from MSI. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5870,7 +5252,7 @@ export const ALL_PRODUCTS = [
   "rank": 18,
   "image": "/images/products/photos/msi-titan-18-hx-ai.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=MSI+Titan+18+HX+AI"
+   "amazon": "https://www.amazon.com/dp/B0F1DXXMHY"
   },
   "shortDesc": "The MSI Titan 18 HX AI is a gaming laptop from MSI. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5893,7 +5275,7 @@ export const ALL_PRODUCTS = [
   "rank": 19,
   "image": "/images/products/photos/razer-blade-16-2026.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Razer+Blade+16+2026"
+   "amazon": "https://www.amazon.com/dp/B0H31TTZJT"
   },
   "shortDesc": "The Razer Blade 16 (2026) is a gaming laptop from Razer. Key details: 2026 model. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5919,7 +5301,7 @@ export const ALL_PRODUCTS = [
   "rank": 20,
   "image": "/images/products/photos/razer-blade-18-2026.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Razer+Blade+18+2026"
+   "amazon": "https://www.amazon.com/dp/B0H322NHP6"
   },
   "shortDesc": "The Razer Blade 18 (2026) is a gaming laptop from Razer. Key details: 2026 model. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5945,7 +5327,7 @@ export const ALL_PRODUCTS = [
   "rank": 1,
   "image": "/images/products/photos/nuphy-wh80.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=NuPhy+WH80"
+   "amazon": "https://www.amazon.com/dp/B0GGB9BTSH"
   },
   "shortDesc": "The NuPhy WH80 is a gaming keyboard from NuPhy. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5968,7 +5350,7 @@ export const ALL_PRODUCTS = [
   "rank": 1,
   "image": "/images/products/photos/corsair-vengeance-ddr5-5200-192gb.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Corsair+Vengeance+DDR5-5200+192GB"
+   "amazon": "https://www.amazon.com/dp/B0BY6ZF5KF"
   },
   "shortDesc": "The Corsair Vengeance DDR5-5200 192GB is a memory kit from Corsair. Key details: DDR5, 5200 MT/s, 192GB. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -5998,7 +5380,7 @@ export const ALL_PRODUCTS = [
   "rank": 2,
   "image": "/images/products/photos/corsair-vengeance-ddr5-5200-64gb.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Corsair+Vengeance+DDR5-5200+64GB"
+   "amazon": "https://www.amazon.com/dp/B09R7S7PXC"
   },
   "shortDesc": "The Corsair Vengeance DDR5-5200 64GB is a memory kit from Corsair. Key details: DDR5, 5200 MT/s, 64GB. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -6028,7 +5410,7 @@ export const ALL_PRODUCTS = [
   "rank": 3,
   "image": "/images/products/photos/corsair-vengeance-ddr5-6000.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Corsair+Vengeance+DDR5-6000"
+   "amazon": "https://www.amazon.com/dp/B0C3RYHZJQ"
   },
   "shortDesc": "The Corsair Vengeance DDR5-6000 is a memory kit from Corsair. Key details: DDR5, 6000 MT/s. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -6056,7 +5438,7 @@ export const ALL_PRODUCTS = [
   "rank": 4,
   "image": "/images/products/photos/crucial-pro-overclocking-ddr5-6000.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Crucial+Pro+Overclocking+DDR5-6000"
+   "amazon": "https://www.amazon.com/dp/B0CTHXMYL8"
   },
   "shortDesc": "The Crucial Pro Overclocking DDR5-6000 is a memory kit from Crucial. Key details: DDR5, 6000 MT/s. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -6084,7 +5466,7 @@ export const ALL_PRODUCTS = [
   "rank": 5,
   "image": "/images/products/photos/g-skill-ripjaws-s5-ddr5-6000.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=G.Skill+Ripjaws+S5+DDR5-6000"
+   "amazon": "https://www.amazon.com/dp/B09Y16CDLG"
   },
   "shortDesc": "The G.Skill Ripjaws S5 DDR5-6000 is a memory kit from G.Skill. Key details: DDR5, 6000 MT/s. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -6112,7 +5494,7 @@ export const ALL_PRODUCTS = [
   "rank": 6,
   "image": "/images/products/photos/g-skill-ripjaws-v-ddr4-3200.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=G.Skill+Ripjaws+V+DDR4-3200"
+   "amazon": "https://www.amazon.com/dp/B0171GQR0C"
   },
   "shortDesc": "The G.Skill Ripjaws V DDR4-3200 is a memory kit from G.Skill. Key details: DDR4, 3200 MT/s. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -6140,7 +5522,7 @@ export const ALL_PRODUCTS = [
   "rank": 7,
   "image": "/images/products/photos/g-skill-trident-z5-neo-ddr5-6000-cl30.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=G.Skill+Trident+Z5+Neo+DDR5-6000+CL30"
+   "amazon": "https://www.amazon.com/dp/B0BF8FVLSL"
   },
   "shortDesc": "The G.Skill Trident Z5 Neo DDR5-6000 CL30 is a memory kit from G.Skill. Key details: DDR5, 6000 MT/s, CL30. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -6170,7 +5552,7 @@ export const ALL_PRODUCTS = [
   "rank": 8,
   "image": "/images/products/photos/g-skill-trident-z5-rgb-ddr5-6400-96gb.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=G.Skill+Trident+Z5+RGB+DDR5-6400+96GB"
+   "amazon": "https://www.amazon.com/dp/B0C2BGD6SM"
   },
   "shortDesc": "The G.Skill Trident Z5 RGB DDR5-6400 96GB is a memory kit from G.Skill. Key details: DDR5, 6400 MT/s, 96GB, RGB lighting. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -6201,7 +5583,7 @@ export const ALL_PRODUCTS = [
   "rank": 9,
   "image": "/images/products/photos/kingston-fury-beast-ddr5-6000.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Kingston+Fury+Beast+DDR5-6000"
+   "amazon": "https://www.amazon.com/dp/B0CYHC58P6"
   },
   "shortDesc": "The Kingston Fury Beast DDR5-6000 is a memory kit from Kingston. Key details: DDR5, 6000 MT/s. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -6229,7 +5611,7 @@ export const ALL_PRODUCTS = [
   "rank": 10,
   "image": "/images/products/photos/patriot-viper-steel-ddr4-3600.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Patriot+Viper+Steel+DDR4-3600"
+   "amazon": "https://www.amazon.com/dp/B088KSRW4S"
   },
   "shortDesc": "The Patriot Viper Steel DDR4-3600 is a memory kit from Patriot. Key details: DDR4, 3600 MT/s. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -6257,7 +5639,7 @@ export const ALL_PRODUCTS = [
   "rank": 11,
   "image": "/images/products/photos/patriot-viper-venom-rgb-ddr5-6000.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Patriot+Viper+Venom+RGB+DDR5-6000"
+   "amazon": "https://www.amazon.com/dp/B0D4NLTM6R"
   },
   "shortDesc": "The Patriot Viper Venom RGB DDR5-6000 is a memory kit from Patriot. Key details: DDR5, 6000 MT/s, RGB lighting. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -6286,7 +5668,7 @@ export const ALL_PRODUCTS = [
   "rank": 12,
   "image": "/images/products/photos/samsung-ddr5-4800-32gb.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=Samsung+DDR5-4800+32GB"
+   "amazon": "https://www.amazon.com/dp/B0DTJHGH4G"
   },
   "shortDesc": "The Samsung DDR5-4800 32GB is a memory kit from Samsung. Key details: DDR5, 4800 MT/s, 32GB. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -6316,7 +5698,7 @@ export const ALL_PRODUCTS = [
   "rank": 13,
   "image": "/images/products/photos/teamgroup-t-force-delta-rgb-ddr5-6000-64gb.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=TeamGroup+T-Force+Delta+RGB+DDR5-6000+64GB"
+   "amazon": "https://www.amazon.com/dp/B0BNTXVW8V"
   },
   "shortDesc": "The TeamGroup T-Force Delta RGB DDR5-6000 64GB is a memory kit from TeamGroup. Key details: DDR5, 6000 MT/s, 64GB, RGB lighting. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -6347,7 +5729,7 @@ export const ALL_PRODUCTS = [
   "rank": 14,
   "image": "/images/products/photos/teamgroup-t-force-delta-rgb-ddr5-6000.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=TeamGroup+T-Force+Delta+RGB+DDR5-6000"
+   "amazon": "https://www.amazon.com/dp/B09LHQL3GF"
   },
   "shortDesc": "The TeamGroup T-Force Delta RGB DDR5-6000 is a memory kit from TeamGroup. Key details: DDR5, 6000 MT/s, RGB lighting. See the full specifications and the current price on Amazon.",
   "specs": {
@@ -6376,7 +5758,7 @@ export const ALL_PRODUCTS = [
   "rank": 15,
   "image": "/images/products/photos/teamgroup-t-force-xtreem-argb-ddr4-3600.webp",
   "affiliateLinks": {
-   "amazon": "https://www.amazon.com/s?k=TeamGroup+T-Force+Xtreem+ARGB+DDR4-3600"
+   "amazon": "https://www.amazon.com/dp/B08T1RD9KT"
   },
   "shortDesc": "The TeamGroup T-Force Xtreem ARGB DDR4-3600 is a memory kit from TeamGroup. Key details: DDR4, 3600 MT/s, RGB lighting. See the full specifications and the current price on Amazon.",
   "specs": {

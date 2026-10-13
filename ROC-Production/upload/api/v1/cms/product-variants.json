@@ -1,0 +1,151 @@
+{
+ "note": "Product versions shown as \"Choose version\" on product pages (product-render.php).",
+ "groups": {
+  "amd-radeon-rx-9060-xt": [
+   {
+    "slug": "amd-radeon-rx-9060-xt-8gb",
+    "label": "8GB"
+   },
+   {
+    "slug": "amd-radeon-rx-9060-xt-16gb",
+    "label": "16GB"
+   }
+  ],
+  "steam-deck-oled": [
+   {
+    "slug": "steam-deck-oled-512gb",
+    "label": "512GB"
+   },
+   {
+    "slug": "steam-deck-oled-1tb",
+    "label": "1TB"
+   }
+  ],
+  "corsair-vengeance-ddr5": [
+   {
+    "slug": "corsair-vengeance-ddr5-6000",
+    "label": "DDR5-6000"
+   },
+   {
+    "slug": "corsair-vengeance-ddr5-5200-64gb",
+    "label": "DDR5-5200 64GB"
+   },
+   {
+    "slug": "corsair-vengeance-ddr5-5200-192gb",
+    "label": "DDR5-5200 192GB"
+   }
+  ],
+  "teamgroup-t-force-delta-rgb-ddr5-6000": [
+   {
+    "slug": "teamgroup-t-force-delta-rgb-ddr5-6000",
+    "label": "Standard kit"
+   },
+   {
+    "slug": "teamgroup-t-force-delta-rgb-ddr5-6000-64gb",
+    "label": "64GB"
+   }
+  ],
+  "fractal-design-north": [
+   {
+    "slug": "fractal-design-north",
+    "label": "North"
+   },
+   {
+    "slug": "fractal-design-north-xl",
+    "label": "North XL"
+   }
+  ],
+  "hyte-y70": [
+   {
+    "slug": "hyte-y70",
+    "label": "Y70"
+   },
+   {
+    "slug": "hyte-y70-touch",
+    "label": "Y70 Touch"
+   }
+  ],
+  "respawn-110": [
+   {
+    "slug": "respawn-110",
+    "label": "110"
+   },
+   {
+    "slug": "respawn-110-pro",
+    "label": "110 Pro"
+   }
+  ],
+  "gtplayer": [
+   {
+    "slug": "gtplayer-gaming-chair",
+    "label": "Standard"
+   },
+   {
+    "slug": "gtplayer-comfort",
+    "label": "Comfort"
+   }
+  ],
+  "msi-claw-8": [
+   {
+    "slug": "msi-claw-8-ai-plus",
+    "label": "Claw 8 AI+"
+   },
+   {
+    "slug": "msi-claw-8-ex-ai-plus",
+    "label": "Claw 8 EX AI+"
+   }
+  ],
+  "rog-xbox-ally": [
+   {
+    "slug": "rog-xbox-ally",
+    "label": "ROG Xbox Ally"
+   },
+   {
+    "slug": "rog-xbox-ally-x",
+    "label": "ROG Xbox Ally X"
+   }
+  ],
+  "asus-rog-ally": [
+   {
+    "slug": "asus-rog-ally-z1-extreme",
+    "label": "Z1 Extreme"
+   },
+   {
+    "slug": "asus-rog-ally-x",
+    "label": "Ally X"
+   }
+  ],
+  "lenovo-legion-go": [
+   {
+    "slug": "lenovo-legion-go",
+    "label": "Legion Go"
+   },
+   {
+    "slug": "lenovo-legion-go-s",
+    "label": "Legion Go S"
+   },
+   {
+    "slug": "lenovo-legion-go-2",
+    "label": "Legion Go 2"
+   }
+  ],
+  "nzxt-flow": [
+   {
+    "slug": "nzxt-h3-flow",
+    "label": "H3 Flow"
+   },
+   {
+    "slug": "nzxt-h6-flow",
+    "label": "H6 Flow"
+   },
+   {
+    "slug": "nzxt-h7-flow",
+    "label": "H7 Flow"
+   },
+   {
+    "slug": "nzxt-h9-flow-2025",
+    "label": "H9 Flow (2025)"
+   }
+  ]
+ }
+}

@@ -108,3 +108,116 @@ asrock-phantom-gaming-pgo27qsa | search | model not found on Amazon
 koorui-gn02 | B09SG26D3F |
 aoc-24g2 | B07WVN6CWT |
 samsung-odyssey-oled-g9 | B0DSGJRKCR | G91SD
+# --- new products (2026-10-12) ---
+cooler-master-cosmos-alpha | B0GJ13NDWD |
+cooler-master-haf-700 | B0B2WZ14SP |
+corsair-3200d-airflow | B0GBY1GSDX | listed as 3200D RS
+corsair-3500x | B0CZV22HDF |
+corsair-air-5400 | B0H1D3NTRH | no-fan base model
+fractal-design-north-xl | B0CJCK95ZC | charcoal black
+fractal-design-north | B09V878FXQ | charcoal black mesh
+fractal-design-terra | B09DKMQ5L1 | graphite
+hyte-y70-touch | B0DKJKGPYZ | Touch Infinite, black
+hyte-y70 | B0DKW889MJ |
+havn-bf-360 | B0FR5XTKVZ | BF 360 Flow black
+lian-li-lancool-216 | B0BN3SY5XW | RGB black
+lian-li-o11-dynamic-evo | B0G54D3KL7 | black with fans
+lian-li-o11-vision-compact | B0DJPV8XG3 | black
+montech-air-903-max | B0CB26ZFKV | black
+montech-king-65-pro | B0DJDW8B92 | black
+montech-tg3 | B0H5F8GYQF | Panoramic black
+nzxt-h3-flow | B0DQPMJ6MJ | black
+nzxt-h6-flow | B0C89FCDFP | black
+nzxt-h7-flow | B0CV4R1TWS | 2024 black
+nzxt-h9-flow-2025 | B0DQPPKNSS | 2025 black
+phanteks-g500a | B0BMPG47KQ | DRGB black
+phanteks-xt-pro-ultra | B0CT5V2XJK | black
+thermaltake-s100-tg-snow-edition | B087CDVBZD | white
+be-quiet-pure-base-501-airflow | B0DGXR6TTD | BG074 black
+be-quiet-shadow-base-800 | B0C58SRL9T | BGW60 black
+amd-ryzen-5-5500f | B0HGMTDZM7 |
+amd-ryzen-5-7600x3d | B0F9XH8DBP | boxed
+amd-ryzen-5-8600g | B0CQ4GYTTX | boxed
+amd-ryzen-7-5700x3d | B0CQ4H4H7X | AMD listing
+amd-ryzen-7-7800x3d | B0BTZB7F88 |
+amd-ryzen-7-9800x3d | B0DKFMSMYK |
+amd-ryzen-7-9850x3d | B0G8JMLXNQ |
+amd-ryzen-5-9600x | B0D6NN6TM7 |
+amd-ryzen-7-9700x | B0D6NMDNNX |
+amd-ryzen-9-9900x | B0D6NN87T8 |
+amd-ryzen-9-9950x3d | B0DVZSG8D5 |
+amd-ryzen-7-8700g | B0CQ4JBKW3 |
+intel-core-ultra-9-285k | B0DFKC99VL |
+intel-core-ultra-7-265k | B0DFK2MH2D |
+intel-core-ultra-7-270k-plus | B0GMLJCBBM |
+intel-core-ultra-5-250k-plus | B0GMKXVVJQ |
+intel-core-i7-14700k | B0CGJ41C9W |
+intel-core-i5-14600k | B0CHBGVFHP |
+intel-core-i5-13600k | B0BCDR9M33 |
+intel-core-i7-12700k | B09FXNVDBJ |
+corsair-vengeance-ddr5-6000 | B0C3RYHZJQ | 32GB 2x16 CL30 black
+corsair-vengeance-ddr5-5200-64gb | B09R7S7PXC | 2x32 black
+corsair-vengeance-ddr5-5200-192gb | B0BY6ZF5KF | 4x48 black
+crucial-pro-overclocking-ddr5-6000 | B0CTHXMYL8 | CL36 black
+g-skill-ripjaws-s5-ddr5-6000 | B09Y16CDLG | CL30 matte black
+g-skill-ripjaws-v-ddr4-3200 | B0171GQR0C | 2x16 CL16
+g-skill-trident-z5-neo-ddr5-6000-cl30 | B0BF8FVLSL | RGB EXPO
+g-skill-trident-z5-rgb-ddr5-6400-96gb | B0C2BGD6SM | matte black
+kingston-fury-beast-ddr5-6000 | B0CYHC58P6 | CL30 EXPO
+patriot-viper-steel-ddr4-3600 | B088KSRW4S | 2x16 CL18
+patriot-viper-venom-rgb-ddr5-6000 | B0D4NLTM6R | CL30
+samsung-ddr5-4800-32gb | B0DTJHGH4G | single 32GB UDIMM
+teamgroup-t-force-delta-rgb-ddr5-6000 | B09LHQL3GF | 2x16 CL38 black
+teamgroup-t-force-delta-rgb-ddr5-6000-64gb | B0BNTXVW8V | 2x32 CL38 white
+teamgroup-t-force-xtreem-argb-ddr4-3600 | B08T1RD9KT | 2x16 CL18 white
+athena-pro-gaming-chair | B0FX2KLHSD | Blacklyte, black leather
+autonomous-ergochair-pro | B0FL2F3W34 | black foam
+capot-gaming-chair | B0D9VPSQM7 | ergonomic mesh
+gtplayer-gaming-chair | B0GK5ZF61X | footrest, black fabric
+gtplayer-comfort | B0BBPRZHRX | white faux leather, footrest
+hon-ignition-2-0 | B06Y3PGPR2 | mid-back black
+huanuo-gaming-chair | B0BZS9CGNC | mesh, flip-up arms, black
+razer-iskur-v2-x | B0DP5SY554 | black
+respawn-110-pro | B0DGKVGH8X | gray fabric
+respawn-110 | B09V8C78YF |
+steelcase-gesture | B08LMM1148 | headrest, licorice
+noblechairs-hero | B07DCPSK74 | PU black
+asus-rog-ally-x | B0D49B5DTD | Z1 Extreme 24GB 1TB
+asus-rog-ally-z1-extreme | B0C52RFZXB | 512GB white
+ayaneo-3 | B0FB99FF4J | HX 370 OLED
+gpd-win-5 | B0G65LCKDP | AI Max+ 395
+gpd-win-mini-2025 | B0DT9YFC9T | 8840U
+lenovo-legion-go-2 | B0FYR394K5 |
+lenovo-legion-go-s | B0GWJZWNP4 | Z2 Go 512GB
+lenovo-legion-go | B0CM74YFSP | Z1 Extreme 512GB
+msi-claw-8-ai-plus | B0DLPYC184 | A2VM-001US
+msi-claw-8-ex-ai-plus | B0H4H27WJN | CG3EM-024US
+msi-claw-a8 | B0GL4N9YQV | BZ2EM-070US
+rog-xbox-ally-x | B0G2HTSJXT | black 1TB
+rog-xbox-ally | B0FM6C3ZMN | white 512GB
+steam-deck-oled-1tb | B0CQ3L4726 |
+steam-deck-oled-512gb | B0F2TPM644 | Valve, 45W PSU
+asus-rog-strix-g16-2026 | B0F8JZB2ZS | 8940HX RTX 5070 Ti
+asus-rog-strix-scar-18-2026 | B0H42KKW67 | G835LXG RTX 5090
+asus-rog-zephyrus-g14-2026 | B0FRFPCPRB | Ryzen 9 270 RTX 5060
+asus-rog-zephyrus-g16-2026 | B0H12XC76C | Ultra 9 285H RTX 5070
+asus-tuf-gaming-a16-2026 | B0H6PM43KR | Ryzen 7 170 RTX 4050
+vita-pro-handheld | B0GSSZML6Y | Anbernic RG VITA Pro black
+asus-zenbook-duo-laptop | B0DPQ35KMW | UX8406CA
+acer-nitro-v-16s-ai | B0F195W823 | ANV16S-41-R2AJ
+acer-predator-helios-neo-16-ai | B0FN15LKGD | PHN16-73-92B8
+alienware-15-2026 | B0H5M2WZYC | Core 7 240H RTX 4050
+alienware-16-area-51-2026 | B0F8P6MRQT | AA16250 RTX 5070 Ti
+gigabyte-aorus-master-16 | B0DYJHX33G | Ultra 9 275HX RTX 5080
+lenovo-loq-15-essential-gen-11 | B0FMLCQZM8 | i5-12450HX
+lenovo-legion-7i-gen-10 | B0FY37MXSG | Ultra 9 275HX RTX 5070
+lenovo-legion-pro-5i-gen-10 | B0F9XSW5HB | RTX 5070 Ti
+lenovo-legion-pro-7i-gen-10 | B0F3JC9F6L | RTX 5080
+msi-raider-a18-hx | B0DVDNC7QG | A9WIG-082US RTX 5080
+msi-titan-18-hx-ai | B0F1DXXMHY | A2XWIG-616US RTX 5080
+razer-blade-16-2026 | B0H31TTZJT | RTX 5070 Ti 32GB 1TB
+razer-blade-18-2026 | B0H322NHP6 | RTX 5080 32GB 1TB
+nuphy-wh80 | B0GGB9BTSH |
+acer-predator-helios-neo-slim-14 | B0FNXRP9G7 | PHN14-71-906J RTX 5070
+homall-gaming-chair | search | no Homall listing matches the RGB massage chair in the photo
+ayaneo-kun | search | not sold on Amazon.com

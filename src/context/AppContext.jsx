@@ -68,6 +68,8 @@ export const AppProvider = ({ children, initialUrl = null }) => {
         if (prod) return { page: 'products', param: prod.slug, is404: false };
         const cat = getProductCategoryBySlug(slug);
         if (cat) return { page: 'products', param: null, productCategory: cat.slug, is404: false };
+        // Group pages (PC Hardware / Gaming Hardware) are drawn by the server: never a 404 here.
+        if (slug === 'pc-hardware' || slug === 'gaming-hardware') return { page: 'products', param: null, is404: false };
         return { page: '404', param: null, is404: true };
       }
       return { page: 'products', param: null, is404: false };
