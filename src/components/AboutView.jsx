@@ -204,14 +204,14 @@ export const AboutView = () => {
             <a
               href="/compatibility/"
               onClick={() => playClickSound()}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-2.5 px-5 rounded-xl transition-colors no-underline"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-5 rounded-xl flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all hover:scale-105 no-underline"
             >
               Can my PC run it?
             </a>
             <a
               href="/gaming-platforms/"
               onClick={() => playClickSound()}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-2.5 px-5 rounded-xl transition-colors no-underline"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-5 rounded-xl flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all hover:scale-105 no-underline"
             >
               Gaming platforms
             </a>

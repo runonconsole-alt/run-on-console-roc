@@ -14,16 +14,9 @@
    "label": "Product clean-up (cli-product-prune.php --apply)",
    "type": "file",
    "path": "api/v1/cron/cli-product-prune.php"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-DnG6blSb.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/39",
- "build": "index-DnG6blSb.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]

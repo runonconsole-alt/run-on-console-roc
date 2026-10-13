@@ -59,7 +59,7 @@ foreach ($pdo->query("SELECT * FROM products WHERE status <> 'published'")->fetc
     if (preg_match('#^/(images/products/photos|uploads)/#', $img)) { echo "  =  {$r['slug']}: hidden but has a photo (kept)\n"; continue; }
     $rows[] = $r;
     $cs = (string)($r['category_slug'] ?? '') ?: ($cats[strtolower((string)$r['category'])] ?? '');
-    echo '  -  ' . str_pad($r['slug'], 42) . ($cs !== '' ? "-> /products/{$cs}/" : '-> /products/') . "\n";
+    echo '  -  ' . str_pad($r['slug'], 42) . ($cs !== '' ? "-> /category/{$cs}/" : '-> /products/') . "\n";
 }
 echo "\n" . count($rows) . " product(s) to delete.\n";
 if (!$apply) { echo "Dry run: nothing changed. Run again with --apply.\n"; exit(0); }
@@ -70,7 +70,7 @@ $folders = [];
 $map = json_decode((string)@file_get_contents($MAP), true) ?: [];
 foreach ($rows as $r) {
     $cs = (string)($r['category_slug'] ?? '') ?: ($cats[strtolower((string)$r['category'])] ?? '');
-    $map[$r['slug']] = $cs !== '' ? '/products/' . $cs . '/' : '/products/';
+    $map[$r['slug']] = $cs !== '' ? '/category/' . $cs . '/' : '/products/';
     $f = '/products/' . $r['slug'];
     if (is_dir($ROOT . $f)) { @mkdir(dirname($trash . $f), 0755, true); if (@rename($ROOT . $f, $trash . $f)) $folders[] = $f; }
 }

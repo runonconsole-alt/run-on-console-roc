@@ -54,11 +54,11 @@ export const ENHANCED_PRODUCTS = ALL_PRODUCTS.map(prod => {
   };
 });
 
-// Product categories (keyboards, mice, …): pages at /products/{slug}/ (rendered by the server). `path` is where
+// Product categories (keyboards, mice, …): pages at /category/{slug}/ (rendered by the server). `path` is where
 // the build writes the page that the server uses as its layout template.
 export const ENHANCED_PRODUCT_CATEGORIES = PRODUCT_CATEGORIES.map(cat => ({
   ...cat,
-  url: `${BASE_DOMAIN}/products/${cat.slug}/`,
+  url: `${BASE_DOMAIN}/category/${cat.slug}/`,
   path: `/products/category/${cat.slug}/`,
   lastmod: '2026-09-29T10:00:00+05:00'
 }));

@@ -463,21 +463,23 @@ function rocNotify(PDO $pdo, string $subject, string $html): bool {
     $body = '<!doctype html><html><body style="font-family:Arial,sans-serif;font-size:15px;color:#0f172a;line-height:1.6">' . $html
           . '<p style="color:#64748b;font-size:12px;margin-top:24px">Sent by runonconsole.com. Change or remove this address in CMS &gt; Blog &amp; news writer &gt; News &gt; Email alerts.</p></body></html>';
     $subj = '=?UTF-8?B?' . base64_encode($subject) . '?=';
-    $headers = "MIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\nFrom: Run On Console <{$fromAddr}>\r\nReply-To: {$to}\r\n"
+    // Base64 body: no line is longer than 76 characters (mail servers may refuse or break longer lines).
+    $body = rtrim(chunk_split(base64_encode($body), 76, "\r\n"));
+    $headers = "MIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\nFrom: Run On Console <{$fromAddr}>\r\nReply-To: {$to}\r\n"
              . 'Date: ' . gmdate('D, d M Y H:i:s') . " +0000\r\nMessage-ID: <" . bin2hex(random_bytes(8)) . "@runonconsole.com>\r\nX-Mailer: RunOnConsole";
     $errors = [];
-    $ok = false;
+    $ok = false; $via = '';
     // 1. The mailbox from the CMS (most reliable: signed in, so Gmail trusts it).
     if (!empty($smtp['host']) && !empty($smtp['user']) && !empty($smtp['pass'])) {
         $r = rocSmtpSend($smtp, $fromAddr, $to, $subj, $headers, $body);
-        $ok = $r === true; if (!$ok) $errors[] = 'SMTP: ' . $r;
+        $ok = $r === true; if (!$ok) $errors[] = 'SMTP: ' . $r; else $via = 'mailbox ' . $fromAddr;
     }
     // 2. The server's own mail program.
     if (!$ok && function_exists('mail')) {
         foreach (['-f' . $fromAddr, ''] as $extra) {
             error_clear_last();
             $ok = $extra !== '' ? @mail($to, $subj, $body, $headers, $extra) : @mail($to, $subj, $body, $headers);
-            if ($ok) break;
+            if ($ok) { $via = 'server mail program'; break; }
             $e = error_get_last(); $errors[] = 'mail(): ' . ($e['message'] ?? 'refused');
         }
     } elseif (!$ok) $errors[] = 'mail() is switched off on this server';
@@ -489,13 +491,15 @@ function rocNotify(PDO $pdo, string $subject, string $html): bool {
             if (!$h) continue;
             fwrite($h, "To: {$to}\r\nSubject: {$subj}\r\n{$headers}\r\n\r\n{$body}\r\n");
             $code = pclose($h);
-            if ($code === 0) { $ok = true; break; }
+            if ($code === 0) { $ok = true; $via = 'sendmail'; break; }
             $errors[] = "sendmail exit {$code}";
         }
     }
     $s = rocNewsState($pdo);
     $s['last_email'] = gmdate('Y-m-d H:i:s') . ($ok ? '' : ' (failed)');
-    $s['last_email_error'] = $ok ? '' : mb_substr(implode(' | ', $errors) ?: 'no way to send mail on this server', 0, 400);
+    $s['last_email_via'] = $via;
+    // When the mailbox failed but another way worked, keep the mailbox error to show it.
+    $s['last_email_error'] = $ok ? ($errors ? 'Sent by the ' . $via . ' because ' . mb_substr(implode(' | ', $errors), 0, 300) : '') : mb_substr(implode(' | ', $errors) ?: 'no way to send mail on this server', 0, 400);
     rocNewsSaveState($pdo, $s);
     return $ok;
 }

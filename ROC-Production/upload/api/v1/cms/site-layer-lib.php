@@ -40,8 +40,9 @@ const ROC_LAYER_SKIP_DIRS = ['api', 'cms', 'cms-templates', 'uploads', 'images',
 const ROC_LAYER_PHP_PAGES = [
     '/blogs/'                    => 'Blogs: list of all posts',
     '/products/'                 => 'Products: all products',
-    '/products/pc-hardware/'     => 'Products: PC Hardware group',
-    '/products/gaming-hardware/' => 'Products: Gaming Hardware group',
+    '/category/'                 => 'Categories: all categories',
+    '/category/pc-hardware/'     => 'Category: PC Hardware group',
+    '/category/gaming-hardware/' => 'Category: Gaming Hardware group',
     '/gaming-platforms/'         => 'Gaming platforms: all platforms',
 ];
 

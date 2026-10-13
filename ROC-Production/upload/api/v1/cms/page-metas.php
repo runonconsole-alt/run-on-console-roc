@@ -37,7 +37,7 @@ $DB = [
     'product'  => ['table' => 'products',           'label' => 'title', 'group' => 'Products',            'perm' => 'products',
                    'url' => function ($r) { return '/products/' . $r['slug'] . '/'; }],
     'pcat'     => ['table' => 'product_categories', 'label' => 'name',  'group' => 'Product categories',  'perm' => 'products',
-                   'url' => function ($r) { return '/products/' . $r['slug'] . '/'; }],
+                   'url' => function ($r) { return '/category/' . $r['slug'] . '/'; }],
     'platform' => ['table' => 'gaming_categories',  'label' => 'title', 'group' => 'Gaming platforms',    'perm' => 'pages',
                    'url' => function ($r) { return '/gaming-platforms/' . $r['slug'] . '/'; }],
     'blog'     => ['table' => 'blogs',              'label' => 'title', 'group' => 'Blog posts',          'perm' => 'blogs',
@@ -99,7 +99,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
     }
     // Plain names and the website's own order: Home, About, Products … then account pages.
     $names = ['/' => 'Home page', '/about/' => 'About us', '/products/' => 'Products (all products)',
-        '/products/pc-hardware/' => 'Products: PC Hardware', '/products/gaming-hardware/' => 'Products: Gaming Hardware',
+        '/category/' => 'Categories (all categories)', '/category/pc-hardware/' => 'Category: PC Hardware', '/category/gaming-hardware/' => 'Category: Gaming Hardware',
         '/compatibility/' => 'Compatibility checker (Can I run it)', '/gaming-platforms/' => 'Gaming platforms (all platforms)',
         '/blogs/' => 'Blogs (all posts)', '/contact/' => 'Contact us', '/write-for-us/' => 'Write for us & advertising',
         '/privacy-policy/' => 'Privacy policy & affiliate disclosure', '/terms-and-conditions/' => 'Terms and conditions',
@@ -109,7 +109,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
     $prefix = ['product' => 'Product: ', 'pcat' => 'Product category: ', 'platform' => 'Gaming platform: ', 'blog' => 'Blog: ', 'cmspage' => 'Page: '];
     $rank = function (array $r): int {
         $p = $r['path'];
-        $fixed = ['/' => 0, '/about/' => 1, '/products/' => 2, '/products/pc-hardware/' => 3, '/products/gaming-hardware/' => 3,
+        $fixed = ['/' => 0, '/about/' => 1, '/products/' => 2, '/category/' => 3, '/category/pc-hardware/' => 3, '/category/gaming-hardware/' => 3,
                   '/compatibility/' => 7, '/gaming-platforms/' => 8, '/blogs/' => 10, '/contact/' => 12, '/write-for-us/' => 13,
                   '/privacy-policy/' => 14, '/terms-and-conditions/' => 15];
         if (isset($fixed[$p])) return $fixed[$p];

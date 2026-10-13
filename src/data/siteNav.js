@@ -20,8 +20,8 @@ export const DEFAULT_SITE_NAV = {
     {
       label: 'CATEGORIES', url: '/category/',
       children: [
-        { title: 'PC Hardware', desc: 'GPUs, CPUs, RAM, cases, monitors, speakers', url: '/products/pc-hardware/', icon: 'cpu' },
-        { title: 'Gaming Hardware', desc: 'Keyboards, mice, headsets, chairs, handhelds, laptops', url: '/products/gaming-hardware/', icon: 'gamepad' },
+        { title: 'PC Hardware', desc: 'GPUs, CPUs, RAM, cases, monitors, speakers', url: '/category/pc-hardware/', icon: 'cpu' },
+        { title: 'Gaming Hardware', desc: 'Keyboards, mice, headsets, chairs, handhelds, laptops', url: '/category/gaming-hardware/', icon: 'gamepad' },
       ],
       button: { label: 'View all categories →', url: '/category/' },
     },
@@ -40,7 +40,7 @@ export const DEFAULT_SITE_NAV = {
       { title: 'EXPLORE HUB', icon: 'compass', links: [
         { label: 'Home', url: '/', icon: 'home' },
         { label: 'Products', url: '/products/', icon: 'cpu' },
-        { label: 'Systems', url: '/compatibility/', icon: 'gamepad' },
+        { label: 'Can I Run It? PC Game Checker', url: '/compatibility/', icon: 'gamepad' },
         { label: 'Blogs', url: '/blogs/', icon: 'book' },
         { label: 'News', url: '/news/', icon: 'newspaper' },
         { label: 'Gaming Platforms', url: '/gaming-platforms/', icon: 'grid' },
