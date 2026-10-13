@@ -1295,7 +1295,7 @@ function renderShell(){
       (can('pages','view')?item('cmspages','Pages','▦',S.pages.length+(S.sitePagesN||0))+item('metas','Metas','🏷'):'')+
       (can('pages','view')?item('platforms','Gaming platforms','◈'):'')+
       item('games','Games','🎮')+
-      (can('products','view')?item('products','Products','▣')+item('product-images','Product images','▨')+item('product-categories','Product categories','▤'):'')+'</div>'+
+      (can('products','view')?item('products','Products','▣')+item('product-categories','Product categories','▤'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
       item('builder','Site builder','✦')+item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Blog & news writer','✍')+item('announce','Announcement bar','📣')+
       item('siteusers','Site users','👤')+item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+item('siteinfo','Website info','ℹ')+'</div>':'')+
@@ -2309,6 +2309,17 @@ function mediaThumb(m){ return mediaUrl(m)+(m._v?'?v='+m._v:''); }
    name on the website; other site images get their alt text from each page's code.
    Neither is stored in the Media library, so neither counts as missing. */
 function prepMedia(list){
+  // The server's usage scan does not see blog covers, platform pictures or the page pictures
+  // written in the site code: count those here.
+  var used={};
+  (S.blogs||[]).forEach(function(b){ [b.image,b.og_image].forEach(function(u){ if(u) used[String(u).split('?')[0]]=(b.title||'post'); }); });
+  (list||[]).forEach(function(x){
+    var u=String(x.file_url||'').split('?')[0];
+    if(x.usage && !x.usage.length){
+      if(used[u]) x.usage=[{type:'blog',title:used[u]}];
+      else if(/^\/uploads\/(platforms|site)\//.test(u)) x.usage=[{type:'page',title:/platforms/.test(u)?'Gaming platform page':'Page picture (site code)'}];
+    }
+  });
   (list||[]).forEach(function(x){
     if(x.alt_text || x.folder==='uploads') return;
     var m=/^\/images\/products\/([a-z0-9-]+)\.(webp|svg)$/.exec(x.file_url||'');

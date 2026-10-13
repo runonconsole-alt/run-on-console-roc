@@ -75,7 +75,7 @@ function rocLlmsBuild(PDO $pdo): string {
     $o .= "\n## Optional\n";
     $o .= $line('Write for Us & Advertising', '/write-for-us/', 'guest posts and advertising');
     $o .= $line('Sitemap', '/sitemap.xml', 'every public page');
-    $o .= $line('News sitemap', '/sitemaps/news-sitemap.xml', 'news of the last 2 days');
+    $o .= $line('News sitemap', '/sitemaps/news-sitemap.xml', 'every news story');
     return $o;
 }
 

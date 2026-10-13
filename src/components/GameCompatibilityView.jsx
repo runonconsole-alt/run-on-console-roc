@@ -149,6 +149,10 @@ export const GameCompatibilityView = () => {
     percentage = Math.max(5, percentage);
 
     const bottlenecks = [];
+    if (req.min.est) {
+      const parts = Object.keys(req.min.est).map((k) => ({ gpu: 'graphics card', cpu: 'processor', ram: 'memory' }[k])).join(' and ');
+      bottlenecks.push(`Estimated: this game's official requirements name no exact ${parts}, so the score uses what they say (for example "1 GB video RAM" or "Dual Core").`);
+    }
     if (below(selectedGpu.score, req.min.gpu)) bottlenecks.push(`Graphics card is below this game's minimum (${selectedGpu.label.split(' (')[0]}).`);
     if (below(selectedCpu.score, req.min.cpu)) bottlenecks.push(`Processor is below this game's minimum (${selectedCpu.label.split(' (')[0]}).`);
     if (below(customRamGb, req.min.ram)) bottlenecks.push(`${customRamGb}GB RAM is below this game's minimum of ${req.min.ram}GB.`);

@@ -62,7 +62,7 @@ $isSqlite = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
 $tables = $isSqlite ? $pdo->query("SELECT name FROM sqlite_master WHERE type = 'table'")->fetchAll(PDO::FETCH_COLUMN)
                     : $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
 foreach ($tables as $t) {
-    if (preg_match('/(_bak_|backup|audit|log$|logs$|sessions?$|cache)/i', (string)$t)) continue;
+    if (preg_match('/(_bak_|backup|audit|log$|logs$|sessions?$|cache|^cms_media$|^media)/i', (string)$t)) continue;   // the media library's own list does not count as use
     try { $st = $pdo->query('SELECT * FROM ' . $t); } catch (\Throwable $e) { continue; }
     while ($row = $st->fetch(PDO::FETCH_NUM)) foreach ($row as $v) if (is_string($v) && (stripos($v, 'uploads/') !== false || stripos($v, 'images/') !== false)) $grab($v);
 }
@@ -72,6 +72,8 @@ foreach ($it as $f) {
     if (strpos($p, DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR) !== false || strpos($p, DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR) !== false) continue;
     if (!preg_match('/\.(html|js|css|json|php|txt|xml)$/i', $p) || $f->getSize() > 20000000) continue;
     if (preg_match('#cli-media-cleanup[.]php$#', $p)) continue;
+    $q = str_replace(DIRECTORY_SEPARATOR, '/', $p);
+    if (preg_match('#/cron/[^/]+[.]json$#i', $q) || stripos(basename($q), 'backup') !== false) continue;   // installer data and backups
     $grab((string)file_get_contents($p));
 }
 

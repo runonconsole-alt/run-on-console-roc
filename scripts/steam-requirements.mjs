@@ -141,13 +141,48 @@ export function ramGb(s) {
 
 const score = (b) => (b ? { cpu: cpuScore(b.cpu), gpu: gpuScore(b.gpu), ram: ramGb(b.ram) } : null);
 
+/**
+ * Small games often give no graphics card or processor model, only "1 GB video RAM", "DirectX 9",
+ * "Dual Core 2 GHz" or "Intel HD". Those still say how light the game is, so a part the model list
+ * could not read gets a low score from these words (marked est, shown as "estimated" on the page).
+ */
+export function estimate(b, sc) {
+  if (!b || !sc) return sc;
+  const est = {};
+  const all = String((b.gpu || '') + ' ' + (b.cpu || '') + ' ' + (b.os || '')).toLowerCase();
+  if (sc.gpu == null) {
+    const g = String(b.gpu || '').toLowerCase();
+    const mb = /(\d+(?:\.\d+)?)\s*(gb|mb)\b/.exec(g);
+    let v = null;
+    if (mb) { const gb = mb[2] === 'gb' ? +mb[1] : +mb[1] / 1024; v = gb <= 0.5 ? 1 : gb <= 1 ? 1.5 : gb <= 2 ? 2.5 : gb <= 4 ? 3.5 : 4.5; }
+    else if (/discrete|dedicated/.test(g)) v = 2;
+    else if (/dx\s*9|directx\s*9|directx\s*10|open\s*gl|shader model|intel|gma|integrated|hardware accelerated|any|low budget|high color|onboard/.test(g) || g.trim() === '') v = 1;
+    else if (/rtx series/.test(g)) v = 4.5;
+    else if (/9[0-9]{2}m|9xx|8[0-9]{3}\s*gt|gt[sx]?\s*[2-5][0-9]0|radeon\s*(hd\s*)?\d{4}/.test(g)) v = 2;
+    else v = 2;                                                          // a part named in words we do not know: a low score
+    if (v != null) { sc.gpu = v; est.gpu = true; }
+  }
+  if (sc.cpu == null) {
+    const c = String(b.cpu || '').toLowerCase();
+    let v = null;
+    if (/quad|4 cores?|i5/.test(c)) v = 3;
+    else if (/dual|2 cores?|i3|ghz|mhz|pentium|atom|athlon|core 2|yes/.test(c) || c.trim() === '') v = 1.5;
+    else v = 2;
+    if (v != null) { sc.cpu = v; est.cpu = true; }
+  }
+  if (sc.ram == null) { sc.ram = 2; est.ram = true; }
+  if (Object.keys(est).length) sc.est = est;
+  void all;
+  return sc;
+}
+
 /** Entry for public/roc-steam-games.json. */
 export function buildGame(app, year) {
   const min = readBlock(app.pc_requirements.minimum);
   const recHtml = app.pc_requirements.recommended;
   const rec = recHtml ? readBlock(recHtml) : null;
-  const sMin = score(min);
-  const sRec = score(rec) || sMin;
+  const sMin = estimate(min, score(min));
+  const sRec = estimate(rec, score(rec)) || sMin;
   // A recommended part that was not recognised falls back to the minimum.
   for (const k of ['cpu', 'gpu', 'ram']) if (sRec[k] == null) sRec[k] = sMin[k];
   return {

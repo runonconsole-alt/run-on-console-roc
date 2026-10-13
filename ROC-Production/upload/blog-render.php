@@ -710,9 +710,9 @@ function rocSitemap(PDO $pdo): void {
         if (rocIsNews($r)) { if ($t && (!$latestNews || $t > $latestNews)) $latestNews = $t; }
         elseif ($t && (!$latest || $t > $latest)) $latest = $t;
     }
+    // Blog posts only: news stories are in /sitemaps/news-sitemap.xml.
     $out .= rocSmLine(ROC_PUBLIC_URL . '/blogs/', $latest, 'Blogs');
-    if ($latestNews) $out .= rocSmLine(ROC_PUBLIC_URL . '/news/', $latestNews, 'News');
-    foreach ($rows as $r) $out .= rocSmLine(rocPostUrl((string)$r['slug'], rocIsNews($r)), rocModified($r), (string)$r['title']);
+    foreach ($rows as $r) if (!rocIsNews($r)) $out .= rocSmLine(rocPostUrl((string)$r['slug'], false), rocModified($r), (string)$r['title']);
     $out .= "</urlset>\n";
     echo $out;
     exit;
@@ -720,18 +720,25 @@ function rocSitemap(PDO $pdo): void {
 
 /** Google News sitemap: stories of the last 2 days (https://developers.google.com/search/docs/crawling-indexing/sitemaps/news-sitemap). */
 function rocNewsSitemap(PDO $pdo): void {
-    $st = $pdo->prepare("SELECT slug, title, published_at FROM blogs WHERE status = 'published' AND category = 'News' AND published_at >= ? " . rocOrderSql() . ' LIMIT 1000');
-    $st->execute([gmdate('Y-m-d H:i:s', time() - 2 * 86400)]);
+    // Every news story (and /news/); the ones of the last 2 days also carry the Google News tags.
+    $rows = $pdo->query("SELECT slug, title, published_at, created_at, updated_at, content_modified_at FROM blogs WHERE status = 'published' AND category = 'News' " . rocOrderSql() . ' LIMIT 5000')->fetchAll(PDO::FETCH_ASSOC);
     $x = function ($v) { return htmlspecialchars((string)$v, ENT_XML1 | ENT_QUOTES, 'UTF-8'); };
     header('Content-Type: application/xml; charset=utf-8');
     header('Cache-Control: public, max-age=300');
     $out = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
          . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">' . "\n";
-    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
-        $pub = rocDate($r['published_at']);
-        $out .= '  <url><loc>' . $x(rocPostUrl((string)$r['slug'], true)) . '</loc><news:news><news:publication><news:name>Run On Console</news:name>'
-              . '<news:language>en</news:language></news:publication><news:publication_date>' . gmdate('c', $pub ?: time()) . '</news:publication_date>'
-              . '<news:title>' . $x($r['title']) . "</news:title></news:news></url>\n";
+    $latest = null;
+    foreach ($rows as $r) { $t = rocModified($r); if ($t && (!$latest || $t > $latest)) $latest = $t; }
+    $out .= '  <url><loc>' . ROC_PUBLIC_URL . '/news/</loc>' . ($latest ? '<lastmod>' . gmdate('c', $latest) . '</lastmod>' : '') . "</url>\n";
+    foreach ($rows as $r) {
+        $pub = rocDate($r['published_at']) ?: time();
+        $mod = rocModified($r);
+        $out .= '  <url><loc>' . $x(rocPostUrl((string)$r['slug'], true)) . '</loc>' . ($mod ? '<lastmod>' . gmdate('c', $mod) . '</lastmod>' : '');
+        if ($pub >= time() - 2 * 86400) {
+            $out .= '<news:news><news:publication><news:name>Run On Console</news:name><news:language>en</news:language></news:publication>'
+                  . '<news:publication_date>' . gmdate('c', $pub) . '</news:publication_date><news:title>' . $x($r['title']) . '</news:title></news:news>';
+        }
+        $out .= "</url>\n";
     }
     echo $out . "</urlset>\n";
     exit;
