@@ -452,6 +452,11 @@ function rocOldProductRedirect(string $root, string $slug, ?PDO $pdo = null): vo
             if ($row && ($cs = rocProductCategorySlug($row)) !== '') { header('Location: ' . rocCategoryUrl($cs), true, 301); exit; }
         } catch (\Throwable $e) {}
     }
+    // A product deleted from the CMS (cli-product-prune.php): its category, so no old link breaks.
+    $map = json_decode((string)@file_get_contents($root . '/api/v1/cms/product-redirects.json'), true);
+    if (is_array($map) && !empty($map[$slug]) && preg_match('#^/products/[a-z0-9-]*/?$#', (string)$map[$slug])) {
+        header('Location: ' . ROC_PUBLIC_URL . $map[$slug], true, 301); exit;
+    }
     rocNotFound($root);
 }
 

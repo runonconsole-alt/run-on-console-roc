@@ -122,7 +122,7 @@ $children = [
     'products'   => [$fromDb('product-render.php', 'products'), 'Products and product categories'],
     'categories' => [$fromDb('category-render.php', 'categories'), 'Gaming platforms'],
     'blogs'      => [time(), 'Blog posts'],
-    'news'       => [time(), 'News of the last 2 days (Google News)'],
+    'news'       => [time(), 'News stories'],
 ];
 // CMS pages (About-style pages made in the CMS) are listed only once there is at least one.
 try {

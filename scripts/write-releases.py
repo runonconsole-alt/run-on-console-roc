@@ -241,7 +241,15 @@ RELEASES = [
                   'The server writer starts exactly 2 hours before each publishing time; the dashboard counts down to the next automatic post',
                   'CMS: opening a post no longer asks Close without saving when nothing was changed; dashboard counts only published products'],
          checks=[dict(label='llms.txt writer (cli-llms.php --apply)', type='file', path='api/v1/cron/cli-llms.php')],
-         pr=REPO + '38'),
+         pr=REPO + '38', build='index-D4rpe-IM.js'),
+    dict(deploy=39, date='2026-10-13', title='No hidden products, 500 games checked, honest media usage, separate news sitemap',
+         changes=['The 21 hidden products without a photo are deleted (backup kept); their old addresses open their category (cli-product-prune.php)',
+                  'Can I run it: all 500 Steam games get an automatic check; games that name no exact card or processor are scored from their own words and marked estimated',
+                  'Media library: blog covers, platform and page pictures count as used; the clean-up no longer counts the library list itself, so old covers and name cards go too',
+                  'CMS: the Product images page is gone (photos are set in Products)',
+                  'Sitemaps: blogs-sitemap has blog posts only, news-sitemap has every news story (Google News tags for the last 2 days)'],
+         checks=[dict(label='Product clean-up (cli-product-prune.php --apply)', type='file', path='api/v1/cron/cli-product-prune.php')],
+         pr=REPO + '39'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
