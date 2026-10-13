@@ -8,6 +8,7 @@ import {
   Tv, Radio, ThumbsUp, DownloadCloud, Sliders, Check, AlertCircle, Wrench, Bot
 } from 'lucide-react';
 import { FAQSection } from './FAQSection';
+import { GAMING_CATEGORIES } from '../data/initialData';
 import { Tilt3DCard } from './Tilt3DCard';
 import { CyberMatrixHoloBackground } from './CyberMatrixHoloBackground';
 import { BouncyText } from './BouncyText';
@@ -336,7 +337,7 @@ export const GameCompatibilityView = () => {
             </div>
 
             <p className="text-[11px] text-emerald-200/80 leading-relaxed text-center">
-              Verified with oscilloscope frame timers across PC, PlayStation, Xbox, Steam Deck, and Cloud.
+              Based on the official minimum and recommended requirements published for each game.
             </p>
           </div>
 
@@ -985,6 +986,19 @@ export const GameCompatibilityView = () => {
           </div>
         )}
 
+      </section>
+
+      {/* Every gaming platform hub (internal links) */}
+      <section className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4" aria-labelledby="platform-links">
+        <h2 id="platform-links" className="font-display font-extrabold text-xl text-slate-900">Not on PC? Find your gaming platform</h2>
+        <p className="text-xs sm:text-sm text-slate-600">Guides to the devices and games of every platform, from PlayStation and Xbox to handhelds, mobile and retro consoles.</p>
+        <ul className="flex flex-wrap gap-2 list-none p-0 m-0">
+          {GAMING_CATEGORIES.map((c) => (
+            <li key={c.id}>
+              <a href={`/gaming-platforms/${c.id}/`} className="inline-block text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 hover:border-emerald-500 hover:text-emerald-700 px-3 py-1.5 rounded-xl no-underline">{c.title}</a>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* 6. Comprehensive Game Compatibility FAQs with User's Specific Questions */}

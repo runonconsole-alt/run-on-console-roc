@@ -317,11 +317,25 @@ function rocProductImage(array $p, array $categories): string {
     return $img !== '' ? $img : $catImg;
 }
 
-/** Social networks do not show SVG: use the category photo for link previews. */
+/**
+ * Link preview image. A real product photo set in the CMS wins; otherwise the
+ * 1200 x 630 JPG card (/images/products/share/{slug}.jpg), because WhatsApp,
+ * LinkedIn and Facebook do not all show WebP or SVG.
+ */
 function rocShareImage(string $image, array $p, array $categories): string {
+    $isCard = strpos($image, '/images/products/') === 0;
+    if ($image !== '' && !$isCard && substr($image, -4) !== '.svg') return $image;
+    $share = '/images/products/share/' . $p['slug'] . '.jpg';
+    if (is_file(__DIR__ . $share)) return $share;
     if (substr($image, -4) !== '.svg') return $image;
     $c = $categories[rocProductCategorySlug($p)] ?? null;
     return $c ? trim((string)($c['image'] ?? '')) : '';
+}
+
+/** First title that fits in 60 characters (Google cuts longer ones). */
+function rocFitTitle(array $options): string {
+    foreach ($options as $t) if (mb_strlen($t) <= 60) return $t;
+    return end($options);
 }
 
 /** Products whose old static folder only holds a redirect stub (Phase 4 renames). */
@@ -403,7 +417,7 @@ function rocBreadcrumbLd(array $items): string {
     return rocJsonLd(['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => $list]);
 }
 
-function rocHeadMeta(string $title, string $desc, string $url, string $image, string $robots, string $ogType = 'website'): string {
+function rocHeadMeta(string $title, string $desc, string $url, string $image, string $robots, string $ogType = 'website', string $imageAlt = ''): string {
     $h  = '<title>' . rocH($title) . "</title>\n";
     $h .= '    <meta name="title" content="' . rocH($title) . "\" />\n";
     $h .= '    <meta name="description" content="' . rocH($desc) . "\" />\n";
@@ -413,9 +427,15 @@ function rocHeadMeta(string $title, string $desc, string $url, string $image, st
     $h .= '    <meta property="og:url" content="' . rocH($url) . "\" />\n";
     $h .= '    <meta property="og:title" content="' . rocH($title) . "\" />\n";
     $h .= '    <meta property="og:description" content="' . rocH($desc) . "\" />\n";
-    if ($image !== '') $h .= '    <meta property="og:image" content="' . rocH(rocAbs($image)) . "\" />\n";
+    if ($image !== '') {
+        $h .= '    <meta property="og:image" content="' . rocH(rocAbs($image)) . "\" />\n";
+        $size = strpos($image, '/') === 0 && is_file(__DIR__ . $image) ? @getimagesize(__DIR__ . $image) : false;
+        if ($size) $h .= '    <meta property="og:image:width" content="' . (int)$size[0] . "\" />\n" . '    <meta property="og:image:height" content="' . (int)$size[1] . "\" />\n";
+        $h .= '    <meta property="og:image:alt" content="' . rocH($imageAlt !== '' ? $imageAlt : $title) . "\" />\n";
+    }
     $h .= "    <meta property=\"og:site_name\" content=\"Run On Console\" />\n";
     $h .= "    <meta name=\"twitter:card\" content=\"summary_large_image\" />\n";
+    $h .= "    <meta name=\"twitter:site\" content=\"@RunOnConsole\" />\n";
     $h .= '    <meta name="twitter:title" content="' . rocH($title) . "\" />\n";
     $h .= '    <meta name="twitter:description" content="' . rocH($desc) . "\" />\n";
     if ($image !== '') $h .= '    <meta name="twitter:image" content="' . rocH(rocAbs($image)) . "\" />\n";
@@ -451,20 +471,35 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
     $mod     = rocProductModified($p);
     $noindex = !empty($p['is_noindex']);
 
-    $metaT = trim((string)($p['meta_title'] ?? '')) ?: ($title . ': Specs & Where to Buy | Run On Console');
+    // A title saved with the old automatic pattern counts as automatic (it is often too long).
+    $metaT = trim((string)($p['meta_title'] ?? ''));
+    if ($metaT === $title . ': Specs & Where to Buy | Run On Console') $metaT = '';
+    $metaT = $metaT ?: rocFitTitle([
+        $title . ': Specs & Where to Buy | Run On Console',
+        $title . ' Specs & Where to Buy | ROC',
+        $title . ': Specs & Where to Buy',
+        $title . ' Specs | Run On Console',
+        $title . ' | Run On Console',
+        $title,
+    ]);
     $metaD = trim((string)($p['meta_description'] ?? '')) ?: rocCmsTruncatePlain($desc, 155);
 
     /* ---------------- head */
-    $h  = rocHeadMeta($metaT, $metaD, $url, rocShareImage($image, $p, $categories), $noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large', 'product');
+    $h  = rocHeadMeta($metaT, $metaD, $url, rocShareImage($image, $p, $categories), $noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large', 'product', $alt);
     $h .= rocBreadcrumbLd([
         ['Home', ROC_PUBLIC_URL . '/'],
         ['Products', ROC_PUBLIC_URL . '/products/'],
         [$catName, rocCategoryUrl($catSlug)],
         [$title, $url],
     ]);
-    $ld = ['@context' => 'https://schema.org', '@type' => 'Product', 'name' => $title, 'url' => $url, 'description' => $metaD, 'category' => $catName];
-    if ($brand !== '') $ld['brand'] = ['@type' => 'Brand', 'name' => $brand];
-    if ($image !== '') $ld['image'] = [rocAbs($image)];
+    // No price, rating or review on the page: Google reports a Product without
+    // offers/review/aggregateRating as invalid, and we do not invent them. So the
+    // page is an ItemPage about the product (no Product type).
+    $ld = ['@context' => 'https://schema.org', '@type' => 'ItemPage', 'name' => $title, 'url' => $url, 'description' => $metaD,
+           'inLanguage' => 'en', 'isPartOf' => ['@type' => 'WebSite', 'name' => 'Run On Console', 'url' => ROC_PUBLIC_URL . '/'],
+           'about' => ['@type' => 'Thing', 'name' => $title, 'description' => $catName . ($brand !== '' ? ' by ' . $brand : '')]];
+    if ($image !== '') $ld['primaryImageOfPage'] = ['@type' => 'ImageObject', 'url' => rocAbs($image)];
+    if ($mod) $ld['dateModified'] = gmdate('c', $mod);
     $h .= rocJsonLd($ld);
     $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
 
@@ -480,7 +515,7 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
 
     $m .= '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-8">'
         . '<div class="lg:col-span-5 flex flex-col justify-center"><div class="transition-shadow duration-300 will-change-transform relative rounded-2xl overflow-hidden bg-slate-950 p-4 border border-slate-800 shadow-xl group">'
-        . ($image !== '' ? '<img src="' . rocH($image) . '" alt="' . rocH($alt) . '" class="w-full h-80 object-cover rounded-xl group-hover:scale-105 transition-transform duration-500" fetchpriority="high"/>' : '')
+        . ($image !== '' ? '<img width="800" height="480" src="' . rocH($image) . '" alt="' . rocH($alt) . '" class="w-full h-80 object-cover rounded-xl group-hover:scale-105 transition-transform duration-500" fetchpriority="high"/>' : '')
         . ($badge !== '' ? '<span class="absolute top-4 left-4 max-w-[85%] bg-emerald-600 text-white font-extrabold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider badge-glow">' . rocH($badge) . '</span>' : '')
         . '</div></div>'
         . '<div class="lg:col-span-7 space-y-5"><div>'
@@ -545,9 +580,14 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
         $name  = (string)$cat['name'];
         $url   = !empty($cat['group']) ? ROC_PUBLIC_URL . '/products/' . $cat['slug'] . '/' : rocCategoryUrl((string)$cat['slug']);
         $n     = count($inScope);
-        $title = trim((string)($cat['meta_title'] ?? '')) ?: ('Best ' . $name . ': ' . $n . ' Picks | Run On Console');
+        $title = trim((string)($cat['meta_title'] ?? '')) ?: rocFitTitle(['Best ' . $name . ': ' . $n . ' Picks | Run On Console', 'Best ' . $name . ' | Run On Console', 'Best ' . $name]);
         $desc  = trim((string)($cat['meta_description'] ?? ''))
-              ?: trim((trim((string)($cat['description'] ?? '')) ?: ('Our ' . $name . ' picks.')) . ' ' . $n . ' picks with what each is best for, key specs and a direct Amazon link.');
+              ?: (function () use ($cat, $name, $n) {
+                  // Description + count line when both fit in 155 characters, else the description alone.
+                  $base = trim((string)($cat['description'] ?? '')) ?: ('Our ' . $name . ' picks.');
+                  $full = $base . ' ' . $n . ' picks with what each is best for, key specs and a direct Amazon link.';
+                  return mb_strlen($full) <= 155 ? $full : rocCmsTruncatePlain($base, 155);
+              })();
         $heroTitle = 'Best ' . $name;
         $heroText  = trim((string)($cat['description'] ?? '')) ?: $desc;
         $heroBadge = count($inScope) . ' PICKS';
@@ -599,7 +639,7 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
         if (empty($counts[$s])) continue;
         $img = trim((string)($c['image'] ?? ''));
         $m .= '<a href="/products/' . rocH($s) . '/" class="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group no-underline' . (count($tiles) === 1 ? ' col-span-2' : '') . '">'
-            . ($img !== '' ? '<img src="' . rocH($img) . '" alt="' . rocH($c['name']) . '" class="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform"/>' : '')
+            . ($img !== '' ? '<img width="800" height="480" src="' . rocH($img) . '" alt="' . rocH($c['name']) . '" class="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform"/>' : '')
             . '<div class="text-xs font-display font-bold text-white">' . rocH($c['name']) . '</div>'
             . '<div class="text-[10px] text-emerald-300 font-medium">' . $counts[$s] . ' picks</div></a>';
     }

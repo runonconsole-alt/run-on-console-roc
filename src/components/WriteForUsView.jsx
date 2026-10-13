@@ -38,7 +38,7 @@ export const WriteForUsView = () => {
         "1000+ Words in-depth editorial article",
         '1 permanent backlink (rel="sponsored")',
         "Fast 24-hour editorial review",
-        "Permanent Google Indexing guarantee"
+        "Published on a page open to search engines"
       ]
     },
     {
@@ -48,7 +48,7 @@ export const WriteForUsView = () => {
       badge: "HIGH AUTHORITY",
       desc: "Ideal for peripheral manufacturers, gaming brands, and premium tech products.",
       features: [
-        "1500+ Words lab benchmark testing",
+        "1500+ words hands-on product article",
         '2 permanent backlinks (rel="sponsored")',
         "Featured on Run On Console Homepage",
         "Dedicated Product Gallery & Buy Box"
@@ -64,7 +64,7 @@ export const WriteForUsView = () => {
         "2500+ Words cornerstone buyer guide",
         '3 permanent backlinks (rel="sponsored")',
         "Pinned Category Hub placement",
-        "Included in 50K+ Subscriber Newsletter"
+        "Shared on our social channels"
       ]
     }
   ];

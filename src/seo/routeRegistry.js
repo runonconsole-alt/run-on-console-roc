@@ -145,8 +145,8 @@ export const STATIC_PUBLIC_ROUTES = [
   {
     path: '/',
     canonical: `${BASE_DOMAIN}/`,
-    title: 'Run On Console | Gaming Hardware, Compatibility & Peripherals Hub',
-    description: 'Run On Console is an independent gaming hardware, platform, and gear intelligence lab. Benchmark reviews, PC specs compatibility matrix, and esports guides.',
+    title: 'Gaming Gear Picks & Can I Run It Checker | Run On Console',
+    description: 'Independent gaming gear picks for PC and console, guides to 15 gaming platforms and a free checker for 500+ games. Find out if your PC can run it.',
     h1: 'Discover the Best',
     category: 'Home',
     lastmod: '2024-05-20T10:00:00+00:00'
@@ -155,7 +155,7 @@ export const STATIC_PUBLIC_ROUTES = [
     path: '/blogs/',
     canonical: `${BASE_DOMAIN}/blogs/`,
     title: 'Hardware Reviews & PC Build Guides | Run On Console',
-    description: 'Explore in-depth benchmark reviews, PC build guides, game performance analyses, and hardware buying advice from the Run On Console testing lab.',
+    description: 'Gaming hardware guides, PC build advice, game requirements and buying tips from Run On Console.',
     h1: 'Hardware Reviews & PC Build Guides',
     category: 'Blogs',
     lastmod: '2024-05-20T10:00:00+00:00'
@@ -172,7 +172,7 @@ export const STATIC_PUBLIC_ROUTES = [
   {
     path: '/products/',
     canonical: `${BASE_DOMAIN}/products/`,
-    title: 'Gaming Hardware & Esports Accessories Catalog | Run On Console',
+    title: 'Gaming Hardware & Accessories Catalog | Run On Console',
     description: `Browse ${ALL_PRODUCTS.length} gaming keyboards, mice, headsets, speakers, monitors and graphics cards picked by Run On Console, with key specs and Amazon links.`,
     h1: 'Gaming Hardware & Esports Accessories Catalog',
     category: 'Products',
@@ -181,8 +181,8 @@ export const STATIC_PUBLIC_ROUTES = [
   {
     path: '/compatibility/',
     canonical: `${BASE_DOMAIN}/compatibility/`,
-    title: 'Can I Run It? Custom PC Hardware Compatibility Matrix | Run On Console',
-    description: 'Test your custom PC hardware specs against Call of Duty Black Ops 6, Cyberpunk 2077, and Elden Ring with verified official hardware requirements.',
+    title: 'Can I Run It? PC Game Requirements Checker | Run On Console',
+    description: 'Check if your PC can run 500+ games. Pick a game and your graphics card, processor and RAM to compare them with the official minimum and recommended specs.',
     h1: 'Can I Run It',
     category: 'Compatibility',
     lastmod: '2024-05-12T10:00:00+00:00'
@@ -190,8 +190,8 @@ export const STATIC_PUBLIC_ROUTES = [
   {
     path: '/about/',
     canonical: `${BASE_DOMAIN}/about/`,
-    title: 'About Us - Independent Hardware Testing Lab | Run On Console',
-    description: 'Learn about Run On Console\'s independent hardware testing lab, testing methodologies, oscilloscope latency measurements, and editorial integrity.',
+    title: 'About Run On Console | Independent Gaming Gear Site',
+    description: 'Who runs Run On Console, how we pick gaming gear, how the free game checker works and how we earn money as an Amazon Associate.',
     h1: 'Honest Reviews',
     category: 'About',
     lastmod: '2024-05-10T10:00:00+00:00'
@@ -199,8 +199,8 @@ export const STATIC_PUBLIC_ROUTES = [
   {
     path: '/author/omar-abobakar/',
     canonical: `${BASE_DOMAIN}/author/omar-abobakar/`,
-    title: 'Omar Abobakar - Senior Hardware Columnist | Run On Console',
-    description: 'Biography, testing focus, and hardware reviews published by Omar Abobakar, Senior Hardware Columnist at Run On Console Testing Lab.',
+    title: 'Omar Abobakar, Founder & Editor | Run On Console',
+    description: 'Omar Abobakar is the founder and editor of Run On Console. Read his bio and his articles on gaming gear, PC hardware and game requirements.',
     h1: 'Omar Abobakar',
     category: 'Author',
     lastmod: '2024-05-20T10:00:00+00:00'
@@ -208,9 +208,9 @@ export const STATIC_PUBLIC_ROUTES = [
   {
     path: '/contact/',
     canonical: `${BASE_DOMAIN}/contact/`,
-    title: 'Contact Editorial Testing Lab | Run On Console',
-    description: 'Get in touch with the Run On Console hardware lab for review sample submissions, reader feedback, and general editorial inquiries.',
-    h1: 'Contact Editorial Testing Lab',
+    title: 'Contact Us | Run On Console',
+    description: 'Contact Run On Console: questions, corrections, review samples and partnerships. Email support@runonconsole.com or use the form.',
+    h1: 'Contact Run On Console',
     category: 'Contact',
     lastmod: '2024-05-10T10:00:00+00:00'
   },
@@ -236,7 +236,7 @@ export const STATIC_PUBLIC_ROUTES = [
     path: '/privacy-policy/',
     canonical: `${BASE_DOMAIN}/privacy-policy/`,
     title: 'Privacy Policy & Affiliate Disclosure | Run On Console',
-    description: 'How Run On Console handles your data, cookies and analytics, and our Amazon Associates affiliate disclosure: we earn from qualifying purchases at no extra cost to you.',
+    description: 'How Run On Console handles your data, cookies and analytics, plus our Amazon Associates disclosure: we earn from qualifying purchases.',
     h1: 'Privacy Policy',
     category: 'Privacy',
     lastmod: '2026-10-07T00:00:00+00:00'

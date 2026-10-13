@@ -64,7 +64,7 @@ export const HeroSection = () => {
 
           {/* Subtitle */}
           <p className="text-emerald-100 text-xs sm:text-sm sm:text-base leading-relaxed max-w-lg">
-            Independent laboratory testing, oscilloscope latency benchmarks, verified affiliate deals, and game compatibility matrices.
+            Independent gear picks for PC and console, guides for every gaming platform and a free checker for 500+ games.
           </p>
 
           {/* Floating Hardware Badges */}
@@ -121,8 +121,8 @@ export const HeroSection = () => {
                 <Gamepad2 className="w-5 h-5" />
               </div>
               <div>
-                <div className="font-display font-extrabold text-lg sm:text-xl text-white">50+</div>
-                <div className="text-[11px] text-emerald-200 font-medium">Tested Gear</div>
+                <div className="font-display font-extrabold text-lg sm:text-xl text-white">120+</div>
+                <div className="text-[11px] text-emerald-200 font-medium">Products</div>
               </div>
             </div>
 
@@ -131,8 +131,8 @@ export const HeroSection = () => {
                 <FileText className="w-5 h-5" />
               </div>
               <div>
-                <div className="font-display font-extrabold text-lg sm:text-xl text-white">100+</div>
-                <div className="text-[11px] text-emerald-200 font-medium">Guides</div>
+                <div className="font-display font-extrabold text-lg sm:text-xl text-white">500+</div>
+                <div className="text-[11px] text-emerald-200 font-medium">Games checked</div>
               </div>
             </div>
 
@@ -141,8 +141,8 @@ export const HeroSection = () => {
                 <Users className="w-5 h-5" />
               </div>
               <div>
-                <div className="font-display font-extrabold text-lg sm:text-xl text-white">5K+</div>
-                <div className="text-[11px] text-emerald-200 font-medium">Gamers</div>
+                <div className="font-display font-extrabold text-lg sm:text-xl text-white">15</div>
+                <div className="text-[11px] text-emerald-200 font-medium">Platforms</div>
               </div>
             </div>
           </div>

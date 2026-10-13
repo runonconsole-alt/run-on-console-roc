@@ -59,9 +59,9 @@ export const SubmissionSuccessCard = ({
   const formConfigs = {
     contact: {
       badge: "MESSAGE RECEIVED & LOGGED",
-      hook: "Your transmission has safely landed at the Run On Console Lab. Our benchmarking columnists are already warming up the oscilloscopes!",
+      hook: "Thanks for your message. It has reached our inbox and we reply by email, usually within 1-2 working days.",
       metaLabel: "Inquiry Channel",
-      metaValue: "Editorial Lab Desk (24-48h SLA)"
+      metaValue: "support@runonconsole.com"
     },
     'write-for-us': {
       badge: "GUEST PITCH QUEUED FOR REVIEW",
@@ -71,15 +71,15 @@ export const SubmissionSuccessCard = ({
     },
     partnership: {
       badge: "COMMERCIAL PROPOSAL REGISTERED",
-      hook: "Your commercial campaign proposal is on our desk. Get ready to amplify your gaming brand across 500,000+ active hardware buyers!",
+      hook: "Thanks, your proposal has reached us. We reply by email, usually within 1-2 working days.",
       metaLabel: "Partnership Desk",
       metaValue: "Commercial Advertising Director"
     },
     suggestion: {
       badge: "REVIEW SUGGESTION LOCKED IN",
-      hook: "Your hardware test suggestion is locked into our test queue. Time to push maximum FPS together and test real latency limits!",
-      metaLabel: "Queue Placement",
-      metaValue: "Hardware Lab Queue (Pending Admin)"
+      hook: "Thanks for the suggestion. Our editor reads every one and uses them to plan new articles.",
+      metaLabel: "Sent to",
+      metaValue: "Run On Console editor"
     },
     comment: {
       badge: "DISCUSSION POST DISPATCHED",

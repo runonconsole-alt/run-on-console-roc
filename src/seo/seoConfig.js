@@ -16,7 +16,7 @@ import {
 const SITE_NAME = 'Run On Console';
 const SITE_DOMAIN = BASE_DOMAIN;
 const DEFAULT_IMAGE = `${SITE_DOMAIN}/images/hero_cod.jpg`;
-const LOGO_URL = `${SITE_DOMAIN}/favicon.svg`;
+const LOGO_URL = `${SITE_DOMAIN}/images/logo-512.png`;
 
 /**
  * Generate full JSON-LD structured data for any route
@@ -31,14 +31,17 @@ export function generateJsonLd(routeData) {
     '@id': `${SITE_DOMAIN}/#organization`,
     'name': SITE_NAME,
     'url': SITE_DOMAIN,
-    'logo': LOGO_URL,
-    'description': 'Independent gaming hardware intelligence lab, benchmark testing facility, and platform reviews desk.',
+    'logo': { '@type': 'ImageObject', 'url': LOGO_URL, 'width': 512, 'height': 512 },
+    'description': 'Independent gaming site: gear picks for PC and console players, gaming platform guides and a free game requirements checker.',
+    'email': 'support@runonconsole.com',
+    'contactPoint': { '@type': 'ContactPoint', 'contactType': 'customer support', 'email': 'support@runonconsole.com', 'url': `${SITE_DOMAIN}/contact/`, 'availableLanguage': ['English'] },
     'sameAs': [
-      'https://www.facebook.com/profile.php?id=61594369295787',
+      'https://www.facebook.com/profile.php?id=61595168580625',
       'https://www.instagram.com/runonconsole/',
       'https://www.pinterest.com/runonconsole/',
       'https://x.com/RunOnConsole',
-      'https://www.linkedin.com/company/run-on-console/'
+      'https://www.linkedin.com/company/run-on-console/',
+      'https://www.reddit.com/user/runonconsole_roc/'
     ]
   };
 
@@ -122,7 +125,8 @@ export function generateJsonLd(routeData) {
       'author': {
         '@type': 'Person',
         'name': b.author || 'Omar Abobakar',
-        'jobTitle': 'Senior Hardware Columnist'
+        'jobTitle': 'Founder & Editor',
+        'url': `${SITE_DOMAIN}/author/omar-abobakar/`
       },
       'publisher': {
         '@type': 'Organization',

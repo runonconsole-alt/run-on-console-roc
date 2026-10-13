@@ -85,7 +85,7 @@ const InteractiveFAQItem = ({ faq, idx, isOpen, onToggle }) => {
 export const FAQSection = ({ 
   faqs = [], 
   title = "Frequently Asked Questions", 
-  subtitle = "Got questions? We've got answers from our hardware lab experts." 
+  subtitle = "Short answers to the questions we hear most." 
 }) => {
   const [openIdx, setOpenIdx] = useState(0);
   const containerRef = useRef(null);

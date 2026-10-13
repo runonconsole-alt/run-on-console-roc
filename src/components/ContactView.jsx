@@ -49,7 +49,7 @@ export const ContactView = () => {
             <BouncyText text="Contact Run On Console" />
           </h1>
           <p className="text-emerald-100 text-xs sm:text-sm leading-relaxed max-w-xl mx-auto">
-            Have a hardware question, review sample submission, or brand partnership proposal? Our editorial lab team is here to help.
+            Have a hardware question, review sample submission, or brand partnership proposal? We read every message.
           </p>
         </div>
       </div>

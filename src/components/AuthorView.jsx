@@ -57,7 +57,7 @@ export const AuthorView = () => {
           </h1>
           
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
-            Senior Hardware Columnist and Latency Benchmarker at Run On Console Testing Lab. Specializes in input delay analysis, 8000Hz polling rate measurements, custom PC spec optimization, and esports peripheral testing.
+            Founder and editor of Run On Console. Writes about gaming peripherals, PC hardware and what it takes to run new games, and keeps the product picks and the game requirements checker up to date.
           </p>
 
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2 text-xs text-slate-400 font-medium">
@@ -81,12 +81,12 @@ export const AuthorView = () => {
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           {[
-            "Input Latency & Oscilloscope Testing",
-            "8000Hz Polling Rate Mice",
+            "Gaming Mice & Polling Rates",
+            "PC Game Requirements",
             "Hall-Effect Magnetic Switches",
             "360Hz QD-OLED Motion Clarity",
-            "x86 Handheld Gaming Benchmarks",
-            "Custom PC Frame Pacing Analysis"
+            "Handheld Gaming PCs",
+            "Graphics Cards & PC Builds"
           ].map((topic, i) => (
             <div key={i} className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-2 text-xs font-bold text-slate-800">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />

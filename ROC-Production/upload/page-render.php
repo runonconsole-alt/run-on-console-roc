@@ -149,6 +149,7 @@ $h .= '    <meta property="og:description" content="' . rocH($metaD) . "\" />\n"
 if ($imageAbs) $h .= '    <meta property="og:image" content="' . rocH($imageAbs) . "\" />\n    <meta property=\"og:image:alt\" content=\"" . rocH($alt) . "\" />\n";
 $h .= "    <meta property=\"og:site_name\" content=\"Run On Console\" />\n";
 $h .= "    <meta name=\"twitter:card\" content=\"summary_large_image\" />\n";
+$h .= "    <meta name=\"twitter:site\" content=\"@RunOnConsole\" />\n";
 $h .= '    <meta name="twitter:title" content="' . rocH($metaT) . "\" />\n";
 $h .= '    <meta name="twitter:description" content="' . rocH($metaD) . "\" />\n";
 if ($imageAbs) $h .= '    <meta name="twitter:image" content="' . rocH($imageAbs) . "\" />\n";

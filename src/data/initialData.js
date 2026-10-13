@@ -608,16 +608,16 @@ export const COMMUNITY_TESTIMONIALS = [
 export const PAGE_FAQS = {
   home: [
     {
-      q: "What is Run On Console and how do you test gaming platforms?",
-      a: "Run On Console is an independent gaming hardware, platform, and gear intelligence lab. Every gaming platform (PC, Laptop, PS5, Xbox, Handhelds, VR, Retro) and peripheral undergoes weeks of testing with oscilloscope latency probes, acoustic analyzers, and frametime benchmarks."
+      q: "What is Run On Console and how do you choose products?",
+      a: "Run On Console is an independent gaming site. We pick gaming gear from its specs, official data and published reviews, explain who each product is for, cover 15 gaming platforms and run a free checker for 500+ PC games. Brands cannot pay for a place on our lists."
     },
     {
       q: "How do your affiliate links work and will it cost me extra?",
-      a: "No extra cost! When you click our affiliate links to Amazon, Best Buy, or manufacturer stores, we may receive a small referral commission that directly supports our independent lab testing equipment."
+      a: "No extra cost! When you click our affiliate links to Amazon, Best Buy, or manufacturer stores, we may receive a small referral commission. It helps us keep the site free and independent."
     },
     {
-      q: "How often do you update prices and deal discounts?",
-      a: "Our affiliate pricing and discount badges are verified daily so you always see accurate in-stock availability and verified lowest prices."
+      q: "Do you show prices?",
+      a: "No. Prices and stock change all the time, so we link straight to Amazon, where you always see the current price and availability."
     }
   ],
   categories: [
@@ -668,7 +668,7 @@ export const PAGE_FAQS = {
   ],
   contact: [
     {
-      q: "How can brands and manufacturers submit hardware for lab review?",
+      q: "How can brands send a product for review?",
       a: "Hardware manufacturers and PR agencies can reach out directly via our Contact form under the 'Hardware Review Submission' inquiry type."
     },
     {

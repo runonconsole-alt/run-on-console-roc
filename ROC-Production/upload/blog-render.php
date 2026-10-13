@@ -377,7 +377,8 @@ function rocRenderPost(string $root, array $p): void {
     $image    = trim((string)($p['image'] ?? ''));
     $imageAbs = rocAbs($image);
     $alt      = trim((string)($p['image_alt'] ?? '')) ?: $title;
-    $author   = trim((string)($p['author_name'] ?? '')) ?: 'Run On Console Editorial Team';
+    $author   = trim((string)($p['author_name'] ?? '')) ?: 'Omar Abobakar';
+    $authorUrl = in_array(strtolower($author), ['omar abobakar', 'omar'], true) ? '/author/omar-abobakar/' : '';
     $category = rocCategoryLabel($p['category'] ?? '');
     $pub      = rocPublished($p);
     $mod      = rocModified($p) ?? $pub;
@@ -401,6 +402,7 @@ function rocRenderPost(string $root, array $p): void {
     if ($pub) $h .= '    <meta property="article:published_time" content="' . gmdate('c', $pub) . "\" />\n";
     if ($mod) $h .= '    <meta property="article:modified_time" content="' . gmdate('c', $mod) . "\" />\n";
     $h .= "    <meta name=\"twitter:card\" content=\"summary_large_image\" />\n";
+    $h .= "    <meta name=\"twitter:site\" content=\"@RunOnConsole\" />\n";
     $h .= '    <meta name="twitter:title" content="' . rocH($metaT) . "\" />\n";
     $h .= '    <meta name="twitter:description" content="' . rocH($metaD) . "\" />\n";
     if ($imageAbs) $h .= '    <meta name="twitter:image" content="' . rocH($imageAbs) . "\" />\n";
@@ -426,11 +428,12 @@ function rocRenderPost(string $root, array $p): void {
     if ($pub) $article['datePublished'] = gmdate('c', $pub);
     if ($mod) $article['dateModified'] = gmdate('c', $mod);
     $article['author'] = ['@type' => 'Person', 'name' => $author];
+    if ($authorUrl !== '') $article['author']['url'] = ROC_PUBLIC_URL . $authorUrl;
     $article['publisher'] = [
         '@type' => 'Organization',
         'name' => 'Run On Console',
         'url' => ROC_PUBLIC_URL . '/',
-        'logo' => ['@type' => 'ImageObject', 'url' => ROC_PUBLIC_URL . '/favicon.svg'],
+        'logo' => ['@type' => 'ImageObject', 'url' => ROC_PUBLIC_URL . '/images/logo-512.png', 'width' => 512, 'height' => 512],
     ];
     $words = rocWordCount($body);
     if ($words) $article['wordCount'] = $words;
@@ -453,7 +456,7 @@ function rocRenderPost(string $root, array $p): void {
         . '<div class="flex flex-wrap items-center justify-between gap-4 py-3 border-y border-slate-200 text-xs text-slate-500 font-medium">'
         .   '<div class="flex items-center gap-3">'
         .     '<div class="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-bold flex items-center justify-center shadow-md">' . rocH(rocInitials($author)) . '</div>'
-        .     '<div><span class="font-bold text-slate-900 block">' . rocH($author) . '</span></div>'
+        .     '<div>' . ($authorUrl !== '' ? '<a href="' . $authorUrl . '" rel="author" class="font-bold text-slate-900 block no-underline hover:text-emerald-700">' . rocH($author) . '</a>' : '<span class="font-bold text-slate-900 block">' . rocH($author) . '</span>') . '</div>'
         .   '</div>'
         .   '<div class="flex items-center gap-3">'
         .     ($pub ? '<time datetime="' . gmdate('Y-m-d', $pub) . '">' . rocH(date('M j, Y', $pub)) . '</time><span>•</span>' : '')
@@ -463,7 +466,7 @@ function rocRenderPost(string $root, array $p): void {
 
     if ($image !== '') {
         $m .= '<div class="relative rounded-3xl overflow-hidden shadow-2xl max-h-[480px] bg-slate-900">'
-            . '<img src="' . rocH($image) . '" alt="' . rocH($alt) . '" class="w-full h-full object-cover max-h-[480px]" fetchpriority="high"/></div>';
+            . '<img width="1200" height="675" src="' . rocH($image) . '" alt="' . rocH($alt) . '" class="w-full h-full object-cover max-h-[480px]" fetchpriority="high"/></div>';
     }
     if ($excerpt !== '') {
         $m .= '<div class="bg-emerald-50/80 border-l-4 border-emerald-600 p-5 rounded-r-2xl shadow-sm">'
@@ -534,6 +537,7 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page): void {
     $h .= '    <meta property="og:image" content="' . rocH($ogImage) . "\" />\n";
     $h .= "    <meta property=\"og:site_name\" content=\"Run On Console\" />\n";
     $h .= "    <meta name=\"twitter:card\" content=\"summary_large_image\" />\n";
+    $h .= "    <meta name=\"twitter:site\" content=\"@RunOnConsole\" />\n";
     $h .= '    <meta name="twitter:title" content="' . rocH($title) . "\" />\n";
     $h .= '    <meta name="twitter:description" content="' . rocH($desc) . "\" />\n";
     $h .= '    <meta name="twitter:image" content="' . rocH($ogImage) . "\" />\n";
@@ -577,7 +581,7 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page): void {
         $cards .= '<a href="/blogs/' . rocH($slug) . '/" class="block no-underline">'
             . '<div class="game-card flex flex-col justify-between group cursor-pointer h-full">'
             . '<div class="relative h-60 bg-slate-900 overflow-hidden">'
-            . ($img !== '' ? '<img src="' . rocH($img) . '" alt="' . rocH($alt) . '" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>' : '')
+            . ($img !== '' ? '<img width="1200" height="675" src="' . rocH($img) . '" alt="' . rocH($alt) . '" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>' : '')
             . '<span class="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-md shadow-sm uppercase badge-glow">' . rocH(rocCategoryLabel($p['category'] ?? '')) . '</span>'
             . '<span class="absolute bottom-3 right-3 bg-slate-900/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 backdrop-blur-sm">' . rocH($rt) . '</span>'
             . '</div>'
