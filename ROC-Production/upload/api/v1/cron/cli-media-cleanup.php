@@ -88,6 +88,16 @@ foreach ($cands as $c) {
     if (isset($refs[$c])) continue;
     $unused[] = $c; $bytes += (int)filesize($ROOT . $c);
 }
+// Second check, asked again now: a cover that a post shows is never moved. If the database does not
+// answer, this stops with an error and nothing moves.
+$pdo->query('SELECT 1')->fetchColumn();
+$chk = $pdo->prepare('SELECT COUNT(*) FROM blogs WHERE image LIKE ?');
+foreach ($unused as $i => $u) {
+    if (strpos($u, '/uploads/blog-covers/') !== 0) continue;
+    $chk->execute(['%' . basename($u)]);
+    if ((int)$chk->fetchColumn() > 0) { echo "  =  kept (a post shows it): {$u}\n"; $bytes -= (int)filesize($ROOT . $u); unset($unused[$i]); }
+}
+$unused = array_values($unused);
 $groups = [];
 foreach ($unused as $u) { $g = dirname($u); $groups[$g] = ($groups[$g] ?? 0) + 1; }
 ksort($groups);

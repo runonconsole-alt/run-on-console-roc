@@ -50,7 +50,18 @@
       <tr><th>Sitemap</th><th>Address</th><th>Last updated</th></tr>
       <xsl:for-each select="sm:sitemap">
         <tr>
-          <td class="name"><xsl:value-of select="roc:title"/></td>
+          <td class="name">
+            <xsl:variable name="n" select="substring-before(substring-after(sm:loc, '/sitemaps/'), '-sitemap.xml')"/>
+            <xsl:choose>
+              <xsl:when test="$n = 'pages'">Main pages</xsl:when>
+              <xsl:when test="$n = 'products'">Products and product categories</xsl:when>
+              <xsl:when test="$n = 'categories'">Gaming platforms</xsl:when>
+              <xsl:when test="$n = 'blogs'">Blog posts</xsl:when>
+              <xsl:when test="$n = 'news'">News stories</xsl:when>
+              <xsl:when test="$n = 'cms-pages'">CMS pages</xsl:when>
+              <xsl:otherwise><xsl:value-of select="$n"/></xsl:otherwise>
+            </xsl:choose>
+          </td>
           <td><a href="{sm:loc}"><xsl:value-of select="sm:loc"/></a></td>
           <td class="date"><xsl:value-of select="substring(sm:lastmod,1,10)"/></td>
         </tr>
