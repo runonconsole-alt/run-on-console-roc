@@ -345,7 +345,8 @@ function rocProductFaq(string $title, string $catName, string $catSlug, string $
     $qa = [];
     $list = [];
     foreach ($specs as $k => $v) { if (is_array($v)) $v = implode(', ', $v); $v = trim((string)$v); if ($v !== '' && count($list) < 6) $list[] = $k . ': ' . $v; }
-    if ($list) $qa[] = ['What are the main specs of the ' . $title . '?', 'The ' . $title . ' comes with ' . implode('; ', $list) . '. The full list is in the specifications above.'];
+    // Only real specs (a brand alone is not a spec list worth a question).
+    if (count($list) >= 2) $qa[] = ['What are the main specs of the ' . $title . '?', 'The ' . $title . ' comes with ' . implode('; ', $list) . '. The full list is in the specifications above.'];
     $first = trim((string)preg_replace('/(?<=[.!?])\s.*$/s', '', $desc));
     if ($bestFor !== '' || $first !== '') {
         $qa[] = ['Who is the ' . $title . ' best for?', ($bestFor !== '' ? 'It is a good pick for ' . rtrim(lcfirst($bestFor), '.') . '. ' : '') . $first];
@@ -528,6 +529,90 @@ function rocProductCard(PDO $pdo, array $p, array $categories): string {
         . '</div></div>';
 }
 
+/** Words that name a category's products, to find blog posts about them (a function: constants
+    below the routing code do not exist yet when a page is drawn). */
+function rocCatWords(): array { return ['gpu' => ['graphics card', 'gpu'], 'cpu' => ['processor', 'cpu'], 'ram' => ['ram', 'memory'], 'cases' => ['pc case'],
+    'monitors' => ['monitor'], 'speakers' => ['speaker'], 'keyboards' => ['keyboard'], 'mice' => ['mouse', 'mice'],
+    'audio' => ['headset', 'headphone', 'microphone'], 'chairs' => ['chair'], 'handhelds' => ['handheld'], 'laptops' => ['laptop']]; }
+
+/** "About this product" text (## headings, - lists) as HTML; the first mention of the category links to its page. */
+function rocAboutHtml(string $text, string $catName, string $catSlug): string {
+    $out = ''; $linked = false;
+    $link = function (string $s) use (&$linked, $catName, $catSlug): string {
+        $s = rocH($s);
+        if ($linked || $catName === '') return $s;
+        $n = rocH($catName);
+        $pos = stripos($s, $n);
+        if ($pos === false) return $s;
+        $linked = true;
+        return substr($s, 0, $pos) . '<a href="' . rocH(rocCatPath($catSlug)) . '" class="text-emerald-700 font-bold underline">' . substr($s, $pos, strlen($n)) . '</a>' . substr($s, $pos + strlen($n));
+    };
+    foreach (preg_split('/\n\s*\n/', trim(str_replace("\r\n", "\n", $text))) as $block) {
+        $lines = array_values(array_filter(array_map('trim', explode("\n", $block)), 'strlen'));
+        if (!$lines) continue;
+        $items = [];
+        foreach ($lines as $l) {
+            if (strpos($l, '## ') === 0) { $out .= '<h3 class="font-display font-extrabold text-base text-slate-900 pt-2">' . rocH(substr($l, 3)) . '</h3>'; continue; }
+            if (preg_match('/^[-•]\s+(.*)$/u', $l, $mm)) { $items[] = $mm[1]; continue; }
+            if ($items) { $out .= '<ul class="list-disc pl-5 space-y-1">' . implode('', array_map(function ($x) use ($link) { return '<li>' . $link($x) . '</li>'; }, $items)) . '</ul>'; $items = []; }
+            $out .= '<p>' . $link($l) . '</p>';
+        }
+        if ($items) $out .= '<ul class="list-disc pl-5 space-y-1">' . implode('', array_map(function ($x) use ($link) { return '<li>' . $link($x) . '</li>'; }, $items)) . '</ul>';
+    }
+    return $out;
+}
+
+/**
+ * Below the product: About (long text from the CMS), pros and cons, the price box (no fixed price:
+ * Amazon shows the current one) and links to related pages on the site.
+ */
+function rocProductAbout(PDO $pdo, array $p, string $title, string $catName, string $catSlug, string $amazon): string {
+    $about = trim((string)($p['summary'] ?? ''));
+    if ($about === trim((string)($p['short_desc'] ?? '')) || mb_strlen($about) < 200) $about = '';
+    $pros = rocProductList($p, 'pros'); $cons = rocProductList($p, 'cons');
+    $h = '';
+    if ($about !== '') {
+        $h .= '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-3 text-sm text-slate-700 leading-relaxed">'
+            . '<h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">About the ' . rocH($title) . '</h2>'
+            . rocAboutHtml($about, $catName, $catSlug) . '</div>';
+    }
+    if ($pros || $cons) {
+        $col = function (array $l, string $head, string $tone, string $mark): string {
+            if (!$l) return '';
+            return '<div class="bg-' . $tone . '-50 border border-' . $tone . '-200 rounded-2xl p-5"><h3 class="font-display font-extrabold text-sm text-slate-900 mb-2">' . $head . '</h3><ul class="space-y-2 text-xs sm:text-sm text-slate-700">'
+                . implode('', array_map(function ($x) use ($mark) { return '<li class="flex gap-2"><span aria-hidden="true">' . $mark . '</span><span>' . rocH(is_array($x) ? implode(' ', $x) : (string)$x) . '</span></li>'; }, $l)) . '</ul></div>';
+        };
+        $h .= '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4"><h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">' . rocH($title) . ' pros and cons</h2>'
+            . '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">' . $col($pros, 'What we like', 'emerald', '✓') . $col($cons, 'Keep in mind', 'rose', '–') . '</div></div>';
+    }
+    // Price: never a fixed number on the page (Amazon prices change all the time).
+    $h .= '<div class="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">'
+        . '<div><h2 class="font-display font-extrabold text-base uppercase tracking-wider">' . rocH($title) . ' price</h2>'
+        . '<p class="text-xs sm:text-sm text-slate-300 mt-1">Prices and deals change every day, so we do not show a fixed price. Amazon shows today\'s price, stock and delivery.</p></div>'
+        . '<a href="' . rocH($amazon) . '" target="_blank" rel="sponsored nofollow noopener noreferrer" class="shrink-0 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-display font-extrabold text-sm py-3 px-5 rounded-xl flex items-center gap-2 no-underline">'
+        . ROC_ICON_CART . '<span>See today\'s price</span></a></div>';
+    // Related pages on the site.
+    $links = [];
+    $g = rocGroupOf($catSlug);
+    $links[] = [rocCatPath($catSlug), 'All ' . $catName, 'Compare every pick in this category'];
+    $links[] = [rocCatPath($g), rocGroups()[$g]['name'], 'The whole ' . rocGroups()[$g]['name'] . ' category'];
+    if (in_array($catSlug, ['gpu', 'cpu', 'ram', 'laptops', 'handhelds'], true))
+        $links[] = ['/compatibility/', 'Can I run it?', 'Check 500+ PC games against your hardware'];
+    $words = rocCatWords()[$catSlug] ?? [];
+    if ($words) {
+        try {
+            $w = implode(' OR ', array_fill(0, count($words), 'LOWER(title) LIKE ?'));
+            $st = $pdo->prepare("SELECT title, slug FROM blogs WHERE status = 'published' AND (category IS NULL OR category <> 'News') AND ({$w}) ORDER BY published_at DESC LIMIT 3");
+            $st->execute(array_map(function ($x) { return '%' . $x . '%'; }, $words));
+            foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $b) $links[] = ['/blogs/' . $b['slug'] . '/', (string)$b['title'], 'Guide'];
+        } catch (\Throwable $e) {}
+    }
+    $h .= '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-3"><h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">Related on Run On Console</h2>'
+        . '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">';
+    foreach ($links as [$u, $t, $s]) $h .= '<a href="' . rocH($u) . '" class="block border border-slate-200 hover:border-emerald-500 rounded-2xl p-4 no-underline group"><div class="font-bold text-sm text-slate-900 group-hover:text-emerald-700">' . rocH($t) . ' &rarr;</div><div class="text-[11px] text-slate-500 mt-0.5">' . rocH($s) . '</div></a>';
+    return $h . '</div></div>';
+}
+
 /** The Products-menu group a category belongs to. */
 function rocGroupOf(string $catSlug): string {
     return in_array($catSlug, rocGroups()['pc-hardware']['members'], true) ? 'pc-hardware' : 'gaming-hardware';
@@ -675,6 +760,8 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
         }
         $m .= '</div></div>';
     }
+
+    $m .= rocProductAbout($pdo, $p, $title, $catName, $catSlug, $amazon);
 
     $related = array_values(array_filter(rocFetchProducts($pdo, $cat), function ($r) use ($slug) { return $r['slug'] !== $slug; }));
     $m .= rocProductFaq($title, $catName, $catSlug, $bestFor, $desc, $specs ?: [], $related, $amazon);

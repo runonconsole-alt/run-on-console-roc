@@ -96,6 +96,11 @@ if ($action === 'save') {
     }
     if (array_key_exists('image', $in)) { $img = gcImage((string)$in['image'], $errors); if ($img !== null) $f['image'] = $img; }
     if (array_key_exists('focus', $in)) $f['focus_json'] = gcLines($in['focus'], 10, 80);
+    // About text (cli-content-writer.php adds the column); "## " lines are headings, "- " lines list items.
+    if (array_key_exists('about', $in)) {
+        try { $hasAbout = (bool)$pdo->query('SELECT about_text FROM gaming_categories LIMIT 0'); } catch (\Throwable $e) { $hasAbout = false; }
+        if ($hasAbout) $f['about_text'] = mb_substr(str_replace("\r\n", "\n", trim((string)$in['about'])), 0, 12000);
+    }
     if (array_key_exists('faqs', $in)) {
         $faqs = [];
         foreach ((array)$in['faqs'] as $q) {

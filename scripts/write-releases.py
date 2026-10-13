@@ -297,6 +297,14 @@ RELEASES = [
                   'cli-site-images.php also makes the new home page picture (used in the next deploy)'],
          checks=[dict(label='Catalog settings (catalog-admin.php)', type='file', path='api/v1/cms/catalog-admin.php')],
          pr=REPO + '46'),
+    dict(deploy=47, date='2026-10-13', title='Product and platform pages: About texts, pros and cons, price box and related links',
+         changes=['Product pages: About section (overview, design, where it fits, before you buy), pros and cons, a price box that sends to the current Amazon price, and Related on Run On Console links (category, main category, game checker, guides)',
+                  'Gaming platform pages: About section (overview, how to choose, gear, tips) and Gear for the platform links to the product categories',
+                  'The texts are written on the server with the writer key (cli-content-writer.php, then 2 per scheduler run, at most 40 a day), with rules for helpful, specific and honest writing: no prices, no hype words, no invented numbers, no claims of testing',
+                  'CMS: About this product, Pros and Cons in the product editor; About this platform in the platform editor',
+                  'Product FAQ: the specs question only when there are real specs'],
+         checks=[dict(label='Content writer (cli-content-writer.php)', type='file', path='api/v1/cron/cli-content-writer.php')],
+         pr=REPO + '47'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
