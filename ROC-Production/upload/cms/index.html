@@ -4702,8 +4702,11 @@ function renderPlatformEditor(m,c,devices){
        '<div style="flex:1;min-width:0">'+input('gp-img','Image',c.image,'https://… or choose from the Media library','')+
        '<button class="btn sm" id="gp-pick">Choose from Media library</button></div></div>'+
    '</div></div>'+
+   '<div class="card"><div class="chead"><h3>About this platform</h3></div><div class="cbody">'+
+     '<div class="field"><textarea id="gp-about" rows="12" placeholder="Overview paragraphs.&#10;&#10;## How to choose&#10;…&#10;&#10;## Gear that matters&#10;- …">'+esc(c.about_text||'')+'</textarea>'+
+     '<div class="hint">The long text on the platform page. A line starting with ## is a heading, a line starting with - is a list item.</div></div></div></div>'+
    '<div class="card"><div class="chead"><h3>FAQs</h3></div><div class="cbody"><div id="gp-faqs">'+faqs.map(faqRow).join('')+'</div>'+
-     '<button class="btn sm" id="gp-addfaq">＋ Add question</button><div class="hint">Shown at the bottom of the page and to Google as FAQ results.</div></div></div>'+
+     '<button class="btn sm" id="gp-addfaq">＋ Add question</button><div class="hint">Shown at the bottom of the page. Write real questions players ask; Google no longer shows FAQ results for most sites, so they help readers, not rankings.</div></div></div>'+
    '<div class="card"><div class="chead"><h3>Search engines</h3></div><div class="cbody">'+
      input('gp-mt','SEO title',c.meta_title,'Leave empty for an automatic title','',255)+
      '<div class="field"><label for="gp-md">SEO description</label><textarea id="gp-md" rows="2" maxlength="500">'+esc(c.meta_description||'')+'</textarea></div>'+
@@ -4737,7 +4740,7 @@ function renderPlatformEditor(m,c,devices){
   async function save(status){
     var faqOut=[]; m.querySelectorAll('.gp-faq').forEach(function(r){ faqOut.push({q:$('.gp-q',r).value,a:$('.gp-a',r).value}); });
     var body={action:'save',slug:c.slug||'',fields:{title:val('gp-title'),description:val('gp-desc'),badge:val('gp-badge'),era:val('gp-era'),
-      focus:val('gp-focus'),image:val('gp-img'),faqs:faqOut,meta_title:val('gp-mt'),meta_description:val('gp-md'),
+      focus:val('gp-focus'),about:val('gp-about'),image:val('gp-img'),faqs:faqOut,meta_title:val('gp-mt'),meta_description:val('gp-md'),
       sort_rank:val('gp-rank'),is_noindex:$('#gp-noidx',m).checked?1:0}};
     if(status) body.status=status; else if(!c.slug) body.status='draft';
     m.querySelectorAll('.cbody button').forEach(function(b){ b.disabled=true; });
@@ -5117,7 +5120,11 @@ function renderProductEditor(m,p,cats){
      input('pe-sub','Short line under the name',p.subtitle,'e.g. 60g wireless // HERO 2 sensor','Shown on product cards.',255)+
      input('pe-badge','Badge',p.badge,'e.g. BEST OVERALL','Shown on the product image.',120)+
      input('pe-best','Best for',p.best_for,'e.g. Competitive FPS','',255)+
-     '<div class="field"><label for="pe-desc">Description</label><textarea id="pe-desc" rows="4">'+esc(p.short_desc||'')+'</textarea></div>'+
+     '<div class="field"><label for="pe-desc">Description</label><textarea id="pe-desc" rows="4">'+esc(p.short_desc||'')+'</textarea><div class="hint">1–2 sentences at the top of the page; also the Google description.</div></div>'+
+     '<div class="field"><label for="pe-about">About this product</label><textarea id="pe-about" rows="12" placeholder="Overview paragraphs.&#10;&#10;## Design&#10;How it looks and is built.&#10;&#10;## Where it fits&#10;- Use one&#10;- Use two">'+esc(p.summary&&p.summary!==p.short_desc?p.summary:'')+'</textarea>'+
+       '<div class="hint">The long text on the product page. A line starting with ## is a heading, a line starting with - is a list item. No prices: Amazon shows the current price.</div></div>'+
+     '<div style="display:flex;gap:12px"><div class="field" style="flex:1"><label for="pe-pros">Pros</label><textarea id="pe-pros" rows="5" placeholder="One per line">'+esc(jsonList(p.pros).join('\n'))+'</textarea></div>'+
+       '<div class="field" style="flex:1"><label for="pe-cons">Cons</label><textarea id="pe-cons" rows="5" placeholder="One per line">'+esc(jsonList(p.cons).join('\n'))+'</textarea></div></div>'+
      '<div class="field"><label for="pe-feat">Key features</label><textarea id="pe-feat" rows="4" placeholder="One per line">'+esc(feats.join('\n'))+'</textarea><div class="hint">One per line, up to 12. Shown as tags.</div></div>'+
      '<div class="field"><label>Specifications</label><div id="pe-specs">'+specRows.map(function(r){
         return '<div style="display:flex;gap:8px;margin-bottom:6px"><input type="text" class="pe-sk" placeholder="Name, e.g. Weight" value="'+esc(r.key)+'" style="flex:1">'+
@@ -5195,7 +5202,7 @@ function renderProductEditor(m,p,cats){
     });
     var body={action:'save_product',id:p.id||'',version:p.version,fields:{
       title:val('pe-title'),category_slug:val('pe-cat'),brand:val('pe-brand'),subtitle:val('pe-sub'),badge:val('pe-badge'),
-      best_for:val('pe-best'),short_desc:val('pe-desc'),features:val('pe-feat'),specs:specsOut,
+      best_for:val('pe-best'),short_desc:val('pe-desc'),about:val('pe-about'),pros:val('pe-pros'),cons:val('pe-cons'),features:val('pe-feat'),specs:specsOut,
       affiliate_amazon:val('pe-amz'),image:val('pe-img'),image_alt:val('pe-alt'),
       meta_title:val('pe-mt'),meta_description:val('pe-md'),sort_rank:val('pe-rank'),is_noindex:$('#pe-noidx',m).checked?1:0}};
     if(status) body.status=status;

@@ -106,6 +106,57 @@ function rocCatModified(array $c, array $devices): ?int {
     return $t;
 }
 
+/** Product categories that matter on each platform (the gear links on its page). A function:
+    constants below the routing code do not exist yet when a page is drawn. */
+function rocPlatformGear(): array { return [
+    'pc-handheld-pc' => ['gpu', 'cpu', 'monitors', 'keyboards', 'mice', 'audio', 'handhelds', 'laptops'],
+    'sony-playstation' => ['audio', 'monitors', 'chairs'], 'microsoft-xbox' => ['audio', 'monitors', 'chairs'],
+    'nintendo-home' => ['audio', 'chairs'], 'nintendo-handhelds' => ['handhelds', 'audio'], 'sony-handhelds' => ['handhelds', 'audio'],
+    'cloud-gaming' => ['monitors', 'keyboards', 'mice', 'audio'], 'smart-tv-streaming' => ['audio', 'chairs'], 'mobile' => ['audio', 'handhelds'],
+    'vr-ar' => ['audio', 'gpu'], 'retro-handheld-brands' => ['handhelds'], 'retro-other' => ['monitors'], 'sega-consoles' => ['monitors'],
+    'arcade' => ['chairs'], 'misc-other' => ['audio'],
+]; }
+
+/** "About" text of a platform (## headings, - lists) as HTML. */
+function rocPlatAboutHtml(string $text): string {
+    $out = '';
+    foreach (preg_split('/\n\s*\n/', trim(str_replace("\r\n", "\n", $text))) as $block) {
+        $items = [];
+        foreach (array_values(array_filter(array_map('trim', explode("\n", $block)), 'strlen')) as $l) {
+            if (strpos($l, '## ') === 0) { $out .= '<h3 class="font-display font-extrabold text-base text-slate-900 pt-2">' . rocH(substr($l, 3)) . '</h3>'; continue; }
+            if (preg_match('/^[-•]\s+(.*)$/u', $l, $mm)) { $items[] = '<li>' . rocH($mm[1]) . '</li>'; continue; }
+            if ($items) { $out .= '<ul class="list-disc pl-5 space-y-1">' . implode('', $items) . '</ul>'; $items = []; }
+            $out .= '<p>' . rocH($l) . '</p>';
+        }
+        if ($items) $out .= '<ul class="list-disc pl-5 space-y-1">' . implode('', $items) . '</ul>';
+    }
+    return $out;
+}
+
+/** About this platform (CMS > Gaming platforms) and links to the gear for it. */
+function rocPlatformAbout(PDO $pdo, array $c): string {
+    $about = trim((string)($c['about_text'] ?? ''));
+    $gear = [];
+    $want = rocPlatformGear()[(string)$c['slug']] ?? [];
+    if ($want) {
+        try {
+            $st = $pdo->query("SELECT slug, name FROM product_categories WHERE status = 'published'");
+            $all = []; foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) $all[$r['slug']] = $r['name'];
+            foreach ($want as $s) if (isset($all[$s])) $gear[] = ['/category/' . $s . '/', $all[$s]];
+        } catch (\Throwable $e) {}
+    }
+    if ($about === '' && !$gear) return '';
+    $h = '<section class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">';
+    if ($about !== '') $h .= '<h2 class="font-display font-extrabold text-2xl text-slate-900">About ' . rocH((string)$c['title']) . '</h2>'
+        . '<div class="space-y-3 text-sm text-slate-700 leading-relaxed">' . rocPlatAboutHtml($about) . '</div>';
+    if ($gear) {
+        $h .= '<div class="pt-2"><h3 class="font-display font-extrabold text-base text-slate-900 mb-2">Gear for ' . rocH((string)$c['title']) . '</h3><div class="flex flex-wrap gap-2">';
+        foreach ($gear as [$u, $n]) $h .= '<a href="' . rocH($u) . '" class="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 hover:border-emerald-500 px-3 py-1.5 rounded-xl no-underline">' . rocH($n) . ' &rarr;</a>';
+        $h .= '</div></div>';
+    }
+    return $h . '</section>';
+}
+
 function rocPlatformUrl(string $slug): string { return ROC_PUBLIC_URL . '/gaming-platforms/' . $slug . '/'; }
 
 /** Published CMS category guides for a platform (served by page-render.php at /gaming-platforms/{cat}/{slug}/). */
@@ -231,6 +282,8 @@ function rocRenderHub(string $root, PDO $pdo, array $c, array $cats): void {
         . '<div class="pt-3 flex items-center justify-between text-xs"><span class="text-emerald-300 font-bold">&#10003; ' . rocH($badge) . '</span>'
         . '<span class="text-white font-extrabold bg-emerald-600 px-2.5 py-0.5 rounded-md">' . count($devices) . ' Hardware Models Listed</span></div>'
         . '</div></div></div></div>';
+
+    $m .= rocPlatformAbout($pdo, $c);
 
     if ($devices) {
         $m .= '<section class="bg-white border-2 border-emerald-500/20 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">'

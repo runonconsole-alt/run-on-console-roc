@@ -107,9 +107,14 @@ function rocProdFields(PDO $pdo, array $in, array $cols): array {
               'meta_title' => 255, 'meta_description' => 500] as $k => $max) {
         if (array_key_exists($k, $in)) $out[$k] = rocProdClip($in[$k], $max);
     }
-    if (array_key_exists('short_desc', $in)) {
-        $out['short_desc'] = rocProdClip($in['short_desc'], 2000);
-        $out['summary'] = $out['short_desc'];
+    if (array_key_exists('short_desc', $in)) $out['short_desc'] = rocProdClip($in['short_desc'], 2000);
+    // "About this product": the long text on the product page (## Heading lines, - list lines).
+    if (array_key_exists('about', $in)) $out['summary'] = rocProdClip(str_replace("\r\n", "\n", (string)$in['about']), 12000);
+    foreach (['pros', 'cons'] as $k) {
+        if (!array_key_exists($k, $in)) continue;
+        $l = is_array($in[$k]) ? $in[$k] : preg_split('/\r\n|\r|\n/', (string)$in[$k]);
+        $l = array_values(array_filter(array_map(function ($x) { return rocProdClip(ltrim((string)$x, "-• \t"), 200); }, $l ?: []), 'strlen'));
+        $out[$k] = json_encode(array_slice($l, 0, 8), JSON_UNESCAPED_UNICODE);
     }
 
     if (array_key_exists('features', $in)) {

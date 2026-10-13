@@ -19,6 +19,8 @@
  *     posts in the same topic cluster (internal links both ways);
  *   - when CMS > Blog agent > Writer is "Server", writes the next post with Google Gemini
  *     (free key) about 2 hours before the next free publishing time. No PC needed.
+ *   - when the writer and the news have nothing to do: writes the About text of 2 product or
+ *     platform pages that still have little text (content-writer-lib.php, at most 40 a day);
  *   - live news (CMS > Blog writer > News): reads the trusted news feeds every 20 minutes and
  *     publishes a story at /news/ when 2+ trusted sources (or an official one) report it;
  *   - emails the address in CMS > Blog writer > Email alerts when a post or a story goes live.
@@ -91,6 +93,16 @@ try {
     $n = rocNewsTick($pdo, $ROOT);
     if ($n !== null) echo date('c') . ' news: ' . $n . "\n";
 } catch (\Throwable $e) { echo date('c') . ' news error: ' . $e->getMessage() . "\n"; }
+
+// Product and platform About texts (cli-content-writer.php): 2 a run, at most 40 a day, only when
+// the writer and the news did nothing this run, so they always come first.
+try {
+    if ((!isset($w) || $w === null) && (!isset($n) || $n === null)) {
+        require_once $ROOT . '/api/v1/cms/content-writer-lib.php';
+        $ct = rocContentTick($pdo, 2);
+        if ($ct !== null) echo date('c') . ' ' . $ct . "\n";
+    }
+} catch (\Throwable $e) { echo date('c') . ' content error: ' . $e->getMessage() . "\n"; }
 
 // Something new went live (a post or a news story): /llms.txt lists it.
 try {
