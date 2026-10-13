@@ -171,6 +171,13 @@ RELEASES = [
                   'A blocked or blank Amazon picture anywhere is replaced by the website picture, even when it failed before the page script ran'],
          checks=[dict(label='Pictures back (run cli-product-asin.php --apply)', type='file', path='api/v1/cron/cli-product-asin.php')],
          pr=REPO + '30'),
+    dict(deploy=31, date='2026-10-09', title='CMS > Analytics: Google Analytics and Search Console data',
+         changes=['New Analytics page: visitors, visits, page views, average visit and engaged visits with the change from the period before',
+                  'Visitors per day, top pages, traffic sources, devices and countries (GA4)',
+                  'Google search: clicks, impressions, click rate, average position, clicks per day, top searches and top pages (Search Console)',
+                  'Read-only Google service account: the key file is uploaded once and kept on the server outside the website'],
+         checks=[dict(label='Analytics page', type='file', path='api/v1/cms/analytics.php')],
+         pr=REPO + '31'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

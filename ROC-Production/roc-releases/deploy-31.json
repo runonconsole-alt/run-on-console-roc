@@ -1,0 +1,29 @@
+{
+ "deploy": 31,
+ "date": "2026-10-09",
+ "title": "CMS > Analytics: Google Analytics and Search Console data",
+ "changes": [
+  "New Analytics page: visitors, visits, page views, average visit and engaged visits with the change from the period before",
+  "Visitors per day, top pages, traffic sources, devices and countries (GA4)",
+  "Google search: clicks, impressions, click rate, average position, clicks per day, top searches and top pages (Search Console)",
+  "Read-only Google service account: the key file is uploaded once and kept on the server outside the website"
+ ],
+ "checks": [
+  {
+   "label": "Analytics page",
+   "type": "file",
+   "path": "api/v1/cms/analytics.php"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-DhkaRrsp.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/31",
+ "build": "index-DhkaRrsp.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}
