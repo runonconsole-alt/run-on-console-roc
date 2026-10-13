@@ -259,6 +259,13 @@ RELEASES = [
                   'Email alerts: the CMS shows how the last email was handed over (mailbox or server) and any mailbox problem'],
          checks=[dict(label='Category pages (cli-category-urls.php --apply)', type='htaccess', marker='catpage=1')],
          pr=REPO + '40'),
+    dict(deploy=41, date='2026-10-13', title='PRODUCTS in the menu, products page with only products, news hero, clearer game checker',
+         changes=['Menu: CATEGORY holds the two categories (PC Hardware, Gaming Hardware); a separate PRODUCTS item opens /products/ with every product',
+                  'Products page: no category buttons, four product photos in the hero; the 213 products and Direct Amazon links badges are no longer links (also on category pages)',
+                  'News page: a green hero like the other pages, with the news picture (cli-site-images.php) or the newest story cover',
+                  'Can I run it: plain title (Can My PC Run This Game?), a 3 step how it works strip (choose a game, enter your PC, get your answer)'],
+         checks=[dict(label='Page templates refreshed (cli-refresh-templates.php)', type='file', path='api/v1/cron/cli-menu-products.php')],
+         pr=REPO + '41'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

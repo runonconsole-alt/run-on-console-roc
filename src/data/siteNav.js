@@ -25,6 +25,7 @@ export const DEFAULT_SITE_NAV = {
       ],
       button: { label: 'View all categories →', url: '/category/' },
     },
+    { label: 'PRODUCTS', url: '/products/' },
     { label: 'SYSTEMS', url: '/compatibility/' },
     { label: 'BLOGS', url: '/blogs/' },
     { label: 'NEWS', url: '/news/' },

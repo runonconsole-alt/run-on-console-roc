@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   Gamepad2, Search, Filter, Sparkles, CheckCircle, Flame, Zap,
-  Monitor, Laptop, Cpu, ShieldCheck, ArrowRight, RotateCcw, Volume2,
+  Monitor, Laptop, Cpu, ShieldCheck, ArrowRight, RotateCcw,
   HardDrive, Cloud, Smartphone, Disc, HelpCircle, CheckCircle2,
   AlertTriangle, RefreshCw, Layers, ExternalLink, ChevronRight, Play,
   Tv, Radio, ThumbsUp, DownloadCloud, Sliders, Check, AlertCircle, Wrench, Bot
@@ -273,22 +273,19 @@ export const GameCompatibilityView = () => {
           <div className="lg:col-span-8 space-y-4">
             <div className="flex flex-wrap items-center gap-3">
               <span className="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5 badge-glow">
-                <Gamepad2 className="w-3.5 h-3.5" /> CAN I RUN IT? & HARDWARE COMPATIBILITY ENGINE
-              </span>
-              <span className="bg-emerald-950/80 border border-emerald-400/30 text-emerald-300 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                <Volume2 className="w-3 h-3 text-emerald-400" /> Custom Specs Compatibility Analyzer
+                <Gamepad2 className="w-3.5 h-3.5" /> CAN I RUN IT? FREE PC GAME CHECKER
               </span>
             </div>
 
             <h1 className="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight">
-              Game Compatibility & <br />
+              Can My PC Run This Game? <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300">
-                Custom PC Specs Analyzer
+                Check in 3 Steps
               </span>
             </h1>
 
             <p className="text-emerald-100 text-xs sm:text-sm sm:text-base leading-relaxed max-w-xl">
-              Check exact performance compatibility for your specific PC model, CPU, GPU, and RAM. Discover your <strong>Compatibility % Score</strong>, bottleneck warnings, and recommended upgrade versions.
+              Pick a game, enter your graphics card, processor and RAM, and see right away whether your PC meets the game's <strong>minimum</strong> or <strong>recommended</strong> requirements. If it falls short, you see which part is too weak and what to upgrade.
             </p>
 
             <div className="flex flex-wrap gap-2.5 pt-2">
@@ -344,6 +341,23 @@ export const GameCompatibilityView = () => {
         </div>
       </div>
 
+      {/* How it works, in plain words */}
+      <section aria-label="How it works" className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {[
+          ['1', 'Choose a game', 'Search 500+ PC games, from GTA 6 and new releases to classics like San Andreas and CS 1.6.'],
+          ['2', 'Enter your PC', 'Pick your graphics card, processor and RAM (or a ready laptop or handheld) from the lists below.'],
+          ['3', 'Get your answer', 'See if it runs at minimum or recommended settings, your score, and which part to upgrade if needed.'],
+        ].map(([n, t, d]) => (
+          <div key={n} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex gap-3">
+            <span className="w-9 h-9 shrink-0 rounded-xl bg-emerald-600 text-white font-display font-extrabold flex items-center justify-center">{n}</span>
+            <div>
+              <h2 className="font-display font-extrabold text-sm text-slate-900">{t}</h2>
+              <p className="text-xs text-slate-500 leading-relaxed mt-1">{d}</p>
+            </div>
+          </div>
+        ))}
+      </section>
+
       {/* 2. "CUSTOM PC SPECS & HARDWARE COMPATIBILITY ANALYZER" */}
       <section className="bg-white border-2 border-emerald-500/30 rounded-3xl p-6 sm:p-8 shadow-md space-y-6 relative overflow-hidden">
 
@@ -354,7 +368,7 @@ export const GameCompatibilityView = () => {
             <div>
               <span className="font-display font-extrabold text-xs uppercase tracking-wider text-emerald-600">INTERACTIVE HARDWARE CHECKER TOOL</span>
               <h2 className="font-display font-extrabold text-xl sm:text-2xl text-slate-900">
-                <BouncyText text="Can My Device Run It? Custom PC Specs Analyzer" />
+                <BouncyText text="Can My PC Run It? Enter Your Specs" />
               </h2>
             </div>
           </div>
