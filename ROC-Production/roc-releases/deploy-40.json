@@ -1,0 +1,31 @@
+{
+ "deploy": 40,
+ "date": "2026-10-13",
+ "title": "Category pages at /category/, blog covers back, true media usage, Can I Run It in the footer",
+ "changes": [
+  "Category and group pages now live at /category/{name}/ (PC Hardware, Gaming Hardware, GPUs, Mice...); the old /products/{name}/ addresses send visitors there (301); products stay at /products/{product}/",
+  "PC Hardware and Gaming Hardware pages show only their own products with a search box, without the other group or category buttons",
+  "Blog covers that the Deploy 39 clean-up moved by mistake are put back; the clean-up reads the blogs table again",
+  "Media library: used or not used comes from the same full site scan as the clean-up; name cards and share cards of products with a real photo are cleared",
+  "Footer: Can I Run It? PC Game Checker link; the game checker badges are no longer links; About page buttons are all green",
+  "Email alerts: the CMS shows how the last email was handed over (mailbox or server) and any mailbox problem"
+ ],
+ "checks": [
+  {
+   "label": "Category pages (cli-category-urls.php --apply)",
+   "type": "htaccess",
+   "marker": "catpage=1"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-CPMpguML.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/40",
+ "build": "index-CPMpguML.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

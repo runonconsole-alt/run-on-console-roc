@@ -193,7 +193,7 @@ function ssSystemNoindex(PDO $pdo, string $ROOT, array $L): array {
         if (stripos($h, 'noindex') !== false) $out[] = ['path' => '/' . $d . '/*', 'why' => 'Folder rule (.htaccess)', 'lock' => 'Private folder: must stay out of Google.'];
     }
     // Database rows switched to noindex in their editors.
-    $tables = ['products' => ['Product', '/products/%s/'], 'product_categories' => ['Product category', '/products/%s/'],
+    $tables = ['products' => ['Product', '/products/%s/'], 'product_categories' => ['Product category', '/category/%s/'],
                'gaming_categories' => ['Gaming platform', '/gaming-platforms/%s/'], 'blogs' => ['Blog post', '/blogs/%s/'], 'pages' => ['CMS page', '/%s/']];
     foreach ($tables as $t => [$label, $fmt]) {
         try { $rows = $pdo->query("SELECT slug FROM {$t} WHERE is_noindex = 1")->fetchAll(PDO::FETCH_COLUMN); } catch (\Throwable $e) { continue; }

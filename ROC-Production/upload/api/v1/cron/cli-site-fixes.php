@@ -8,7 +8,7 @@
  *
  * What --apply does:
  *   1. .htaccess: /category/ (the menu link) shows every product category (product-render.php?hub=1);
- *      /category/{x}/ -> /products/{x}/ (301). An older block that sent /category/ to /products/ is replaced.
+ *      /category/{x}/ shows that category (Deploy 40; cli-category-urls.php moves live sites). An older block that sent /category/ to /products/ is replaced.
  *   2. Menu saved in the CMS: the CATEGORY item and its "View all" button open /category/.
  *   2b. .htaccess: a Content-Security-Policy header that blocks framing by other sites, plugins and
  *       mixed content (it does not limit scripts, so analytics and the site keep working).
@@ -30,7 +30,8 @@ const FIX_BLOCK = FIX_BEGIN . "\n"
     . "  # Product categories hub (the menu's CATEGORY link)\n"
     . "  RewriteRule ^category$ /category/ [R=301,L]\n"
     . "  RewriteRule ^category/$ product-render.php?hub=1 [L,QSA]\n"
-    . "  RewriteRule ^category/([a-z0-9-]+)/?$ /products/\$1/ [R=301,L]\n"
+    . "  RewriteRule ^category/([a-z0-9-]+)$ /category/\$1/ [R=301,L]\n"
+    . "  RewriteRule ^category/([a-z0-9-]+)/$ product-render.php?slug=\$1&catpage=1 [L,QSA]\n"
     . "  # Sitemaps submitted without /sitemaps/ (Search Console): send them to the real files\n"
     . "  RewriteRule ^(pages|products|categories|blogs|news|cms-pages)-sitemap\\.xml$ /sitemaps/\$1-sitemap.xml [R=301,L]\n"
     . "  # ROC fixes END\n";

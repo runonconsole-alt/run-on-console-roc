@@ -2318,6 +2318,8 @@ function prepMedia(list){
     if(x.usage && !x.usage.length){
       if(used[u]) x.usage=[{type:'blog',title:used[u]}];
       else if(/^\/uploads\/(platforms|site)\//.test(u)) x.usage=[{type:'page',title:/platforms/.test(u)?'Gaming platform page':'Page picture (site code)'}];
+      // The full site scan (media-usage.php, same rules as the clean-up) found it on a page, a product or in the site code.
+      else if(S.mediaUsed && (S.mediaUsed[u] || S.mediaUsed[(function(){ try{ return decodeURIComponent(u); }catch(e){ return u; } })()])) x.usage=[{type:'page',title:'Used on the website'}];
     }
   });
   (list||[]).forEach(function(x){
@@ -2363,7 +2365,11 @@ async function renderMedia(m){
     m.innerHTML = head('Media library','Scanning the website…')+
       '<div class="body"><div class="card"><div class="empty"><span class="spin"></span>'+
       '<div style="margin-top:10px">Finding every image and where it is used…</div></div></div></div>';
-    try{ var d=await api('media.php'); await loadProdNames(); S.media=prepMedia(d.media); S.mcan=d.can||{}; S.mediaLoaded=true; }
+    try{
+      var d=await api('media.php'); await loadProdNames();
+      try{ S.mediaUsed=(await api('media-usage.php')).used||null; }catch(e){ S.mediaUsed=null; }
+      S.media=prepMedia(d.media); S.mcan=d.can||{}; S.mediaLoaded=true;
+    }
     catch(e){ toast(e.message,'bad'); return; }
     if(S.view!=='media' || S.editing) return;
   }
@@ -3526,7 +3532,7 @@ async function renderNewsWriter(m){
       '<div class="hint" style="margin-bottom:8px">An email is sent to this address every time a blog post goes live or a news story is published (with its sources).</div>'+
       '<div style="display:flex;gap:8px;flex-wrap:wrap"><input type="email" id="nw-mail" value="'+esc(d.notify_email||'')+'" placeholder="you@example.com" style="flex:1;min-width:220px">'+
       '<button class="btn primary" id="nw-msave">Save</button>'+(d.notify_email?'<button class="btn" id="nw-mtest">Send a test email</button>':'')+'</div>'+
-      (st.last_email?'<div class="hint" style="margin-top:6px">Last email: '+esc(pkTime(String(st.last_email).replace(' (failed)','')))+(String(st.last_email).indexOf('failed')>0?' <span style="color:#b91c1c">(not sent)</span>':'')+'</div>':'')+
+      (st.last_email?'<div class="hint" style="margin-top:6px">Last email: '+esc(pkTime(String(st.last_email).replace(' (failed)','')))+(String(st.last_email).indexOf('failed')>0?' <span style="color:#b91c1c">(not sent)</span>':(st.last_email_via?' · handed over by the '+esc(st.last_email_via):''))+'</div>':'')+
       (st.last_email_error?'<div class="hint" style="margin-top:6px;color:#b91c1c">Last problem: '+esc(st.last_email_error)+'</div>':'')+
       '<details style="margin-top:10px"'+(st.last_email_error&&!(d.smtp&&d.smtp.set)?' open':'')+'><summary class="hint" style="cursor:pointer"><b>Send through a mailbox</b> (use this if the test email does not arrive) '+(d.smtp&&d.smtp.set?'<span class="tag published">on · '+esc(d.smtp.user)+'</span>':'')+'</summary>'+
         '<ol class="hint" style="margin:6px 0 8px 18px;line-height:1.7"><li>cPanel → <b>Email Accounts</b> → <b>Create</b>: alerts@runonconsole.com with a strong password.</li>'+
@@ -4793,7 +4799,7 @@ async function renderProductCategories(m){
       var live=c.status==='published', n=c.products||{live:0,hidden:0};
       return '<tr><td><div class="t-title">'+esc(c.name)+
           (can('products','edit')?' <button class="btn sm ghost" data-pc-edit="'+esc(c.slug)+'">Edit</button>':'')+'</div>'+
-        '<div class="t-slug"><a href="/products/'+esc(c.slug)+'/" target="_blank" rel="noopener">/products/'+esc(c.slug)+'/ ↗</a></div></td>'+
+        '<div class="t-slug"><a href="/category/'+esc(c.slug)+'/" target="_blank" rel="noopener">/category/'+esc(c.slug)+'/ ↗</a></div></td>'+
         '<td>'+n.live+' live'+(n.hidden?' · '+n.hidden+' hidden':'')+'</td>'+
         '<td><span class="tag '+(live?'published':'draft')+'">'+(live?'Live':'Hidden')+'</span></td></tr>';
     }).join('')||'<tr><td colspan="3" class="empty">No categories yet.</td></tr>')+'</tbody></table></div>';
@@ -4810,7 +4816,7 @@ function renderCategoryEditor(m,c){
       (ph?' placeholder="'+esc(ph)+'"':'')+(max?' maxlength="'+max+'"':'')+'>'+(note?'<div class="hint">'+note+'</div>':'')+'</div>';
   }
   m.innerHTML=head(c.slug?c.name:'New category',
-      c.slug?'/products/'+c.slug+'/ · '+(live?'Live on the website':'Hidden from the website'):'The address is created from the name and does not change later.',
+      c.slug?'/category/'+c.slug+'/ · '+(live?'Live on the website':'Hidden from the website'):'The address is created from the name and does not change later.',
       '<button class="btn ghost" id="pc-back">← All categories</button>')+
   '<div class="body narrow"><div class="card"><div class="cbody">'+
     input('pc-name','Name *',c.name,'e.g. Gaming Mice','',160)+

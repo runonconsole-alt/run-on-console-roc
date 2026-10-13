@@ -292,29 +292,17 @@ export const GameCompatibilityView = () => {
             </p>
 
             <div className="flex flex-wrap gap-2.5 pt-2">
-              <a
-                href="#game-list"
-                onClick={(e) => { e.preventDefault(); playPowerUpSound(); setSelectedEra('upcoming'); document.getElementById('game-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
-                className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 cursor-pointer no-underline"
-              >
+              <span className="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
                 <Flame className="w-3.5 h-3.5" /> <span>GTA 6 & upcoming games</span>
-              </a>
+              </span>
 
-              <a
-                href="#game-list"
-                onClick={(e) => { e.preventDefault(); playPowerUpSound(); setSelectedEra('modern'); document.getElementById('game-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
-                className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 cursor-pointer no-underline"
-              >
+              <span className="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
                 <Zap className="w-3.5 h-3.5" /> <span>Games from 2021 to today</span>
-              </a>
+              </span>
 
-              <a
-                href="#game-list"
-                onClick={(e) => { e.preventDefault(); playPowerUpSound(); setSelectedEra('classic'); document.getElementById('game-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
-                className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 cursor-pointer no-underline"
-              >
+              <span className="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
                 <Gamepad2 className="w-3.5 h-3.5" /> <span>Classics: San Andreas, CS 1.6, Skyrim</span>
-              </a>
+              </span>
             </div>
           </div>
 

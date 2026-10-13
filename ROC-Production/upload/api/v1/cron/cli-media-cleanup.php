@@ -50,43 +50,34 @@ if ($rollback !== null) {
     exit("Put back {$n} picture(s).\n");
 }
 
-/* ----------------------------------------------------- everything that can refer to a picture */
-$refs = [];
-$grab = function (string $text) use (&$refs) {
-    $text = str_replace('\/', '/', $text);                                  // JSON-escaped addresses
-    if (!preg_match_all('#(?:uploads|images)/[A-Za-z0-9_./%-]+?\.(?:jpe?g|png|webp|gif|svg|avif)#i', $text, $m)) return;
-    foreach ($m[0] as $u) $refs['/' . rawurldecode($u)] = 1;
-};
-@ini_set('memory_limit', '512M');
-$isSqlite = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
-$tables = $isSqlite ? $pdo->query("SELECT name FROM sqlite_master WHERE type = 'table'")->fetchAll(PDO::FETCH_COLUMN)
-                    : $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-foreach ($tables as $t) {
-    if (preg_match('/(_bak_|backup|audit|log$|logs$|sessions?$|cache|^cms_media$|^media)/i', (string)$t)) continue;   // the media library's own list does not count as use
-    try { $st = $pdo->query('SELECT * FROM ' . $t); } catch (\Throwable $e) { continue; }
-    while ($row = $st->fetch(PDO::FETCH_NUM)) foreach ($row as $v) if (is_string($v) && (stripos($v, 'uploads/') !== false || stripos($v, 'images/') !== false)) $grab($v);
+/* ------------------------------------------- what the site uses (shared with the CMS Media library) */
+require_once $ROOT . '/api/v1/cms/media-refs-lib.php';
+$refs = rocMediaRefs($pdo, $ROOT);
+
+/* Earlier clean-ups: put back any picture the site uses again (or that was moved by mistake). */
+$back = 0;
+foreach (glob($HOME . '/roc-media-trash/*/MANIFEST.json') ?: [] as $mf) {
+    $dir = dirname($mf);
+    $man = json_decode((string)file_get_contents($mf), true);
+    if (!is_array($man)) continue;
+    $keep = [];
+    foreach ((array)$man['files'] as $f) {
+        if (!isset($refs[$f]) || !is_file($dir . $f) || is_file($ROOT . $f)) { $keep[] = $f; continue; }
+        if (!$apply) { echo "  +  put back (in use): {$f}\n"; $back++; continue; }
+        if (!is_dir(dirname($ROOT . $f))) @mkdir(dirname($ROOT . $f), 0755, true);
+        if (!@rename($dir . $f, $ROOT . $f)) { $keep[] = $f; continue; }
+        $back++;
+        foreach ((array)($man['media_rows'] ?? []) as $row) {
+            if (($row['file_url'] ?? '') !== $f) continue;
+            try { $pdo->prepare('INSERT INTO cms_media (' . implode(', ', array_keys($row)) . ') VALUES (' . implode(', ', array_fill(0, count($row), '?')) . ')')->execute(array_values($row)); } catch (\Throwable $e) {}
+        }
+    }
+    if ($apply && count($keep) !== count((array)$man['files'])) { $man['files'] = $keep; file_put_contents($mf, json_encode($man, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); }
 }
-$it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($ROOT, FilesystemIterator::SKIP_DOTS));
-foreach ($it as $f) {
-    $p = $f->getPathname();
-    if (strpos($p, DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR) !== false || strpos($p, DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR) !== false) continue;
-    if (!preg_match('/\.(html|js|css|json|php|txt|xml)$/i', $p) || $f->getSize() > 20000000) continue;
-    if (preg_match('#cli-media-cleanup[.]php$#', $p)) continue;
-    $q = str_replace(DIRECTORY_SEPARATOR, '/', $p);
-    if (preg_match('#/cron/[^/]+[.]json$#i', $q) || stripos(basename($q), 'backup') !== false) continue;   // installer data and backups
-    $grab((string)file_get_contents($p));
-}
+echo $back ? "{$back} picture(s) in use " . ($apply ? 'put back' : 'to put back') . " from earlier clean-ups.\n\n" : '';
 
 /* ----------------------------------------------------------------------- candidates */
-$cands = [];
-$it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($ROOT . '/uploads', FilesystemIterator::SKIP_DOTS));
-foreach ($it as $f) if (preg_match('/\.(jpe?g|png|webp|gif|svg|avif)$/i', $f->getFilename())) $cands[] = '/uploads' . str_replace('\\', '/', substr($f->getPathname(), strlen($ROOT . '/uploads')));
-foreach (glob($ROOT . '/images/products/*.{webp,svg,jpg,png}', GLOB_BRACE) ?: [] as $f) $cands[] = '/images/products/' . basename($f);
-foreach (glob($ROOT . '/images/products/share/*.{jpg,png,webp}', GLOB_BRACE) ?: [] as $f) $cands[] = '/images/products/share/' . basename($f);
-foreach (glob($ROOT . '/images/*.{jpg,jpeg,png,webp}', GLOB_BRACE) ?: [] as $f) {
-    if (preg_match('/(logo|icon|favicon|apple-touch|og-|android|maskable|manifest)/i', basename($f))) continue;
-    $cands[] = '/images/' . basename($f);
-}
+$cands = rocMediaCandidates($ROOT);
 $unused = []; $bytes = 0;
 foreach ($cands as $c) {
     if (isset($refs[$c])) continue;

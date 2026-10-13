@@ -41,8 +41,8 @@ function rocLlmsBuild(PDO $pdo): string {
     $o .= $line('Gaming Platforms', '/gaming-platforms/', 'guides to every gaming platform, from PC and consoles to retro handhelds, VR and cloud gaming');
     $o .= $line('Product Categories', '/category/', 'every product category in one place');
     $o .= $line('All Products', '/products/', $nProducts . ' gaming and PC hardware picks');
-    $o .= $line('PC Hardware', '/products/pc-hardware/', 'graphics cards, processors, memory, PC cases, monitors and speakers');
-    $o .= $line('Gaming Hardware', '/products/gaming-hardware/', 'keyboards, mice, headsets, gaming chairs, handhelds and gaming laptops');
+    $o .= $line('PC Hardware', '/category/pc-hardware/', 'graphics cards, processors, memory, PC cases, monitors and speakers');
+    $o .= $line('Gaming Hardware', '/category/gaming-hardware/', 'keyboards, mice, headsets, gaming chairs, handhelds and gaming laptops');
     $o .= $line('Blogs', '/blogs/', 'buying guides, comparisons and how-to articles');
     $o .= $line('News', '/news/', 'gaming and hardware news, each story checked against trusted sources');
 
@@ -53,7 +53,7 @@ function rocLlmsBuild(PDO $pdo): string {
         foreach ($cats as $c) {
             $n = $counts[$c['slug']] ?? ($counts[$c['name']] ?? 0);
             if (!$n) continue;
-            $o .= $line((string)$c['name'], '/products/' . $c['slug'] . '/', rocLlmsText((string)$c['description']) . ' (' . $n . ' picks)');
+            $o .= $line((string)$c['name'], '/category/' . $c['slug'] . '/', rocLlmsText((string)$c['description']) . ' (' . $n . ' picks)');
         }
     }
     $plats = $q("SELECT title, slug, description FROM gaming_categories WHERE status = 'published' ORDER BY sort_rank, title");

@@ -132,7 +132,9 @@ if ($act === 'test_email') {
     $e = trim((string)rocBlogGet($pdo, 'notify_email', ''));
     if ($e === '') rocNaOut(422, ['success' => false, 'error' => 'Save an email address first.']);
     $ok = rocNotify($pdo, 'Test from Run On Console', '<p>This is a test. Alerts for new blog posts and news stories will come to this address.</p>');
-    rocNaOut($ok ? 200 : 422, ['success' => $ok, 'message' => 'Test email sent to ' . $e . '. If it is not in the inbox in 5 minutes, look in Spam and mark it "Not spam".',
+    $st = rocNewsState($pdo);
+    rocNaOut($ok ? 200 : 422, ['success' => $ok, 'message' => 'Test email handed over by the ' . ($st['last_email_via'] ?? 'server') . ' for ' . $e . '. If it is not in the inbox in 5 minutes, look in Spam and in All Mail.'
+        . (!empty($st['last_email_error']) ? ' Note: ' . $st['last_email_error'] : ''),
         'error' => $ok ? null : 'Not sent: ' . ((string)(rocNewsState($pdo)['last_email_error'] ?? '')) . '. Fill in "Send through a mailbox" below (a cPanel email account) and try again.']);
 }
 rocNaOut(400, ['success' => false, 'error' => 'Unknown request.']);

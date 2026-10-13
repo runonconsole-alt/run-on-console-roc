@@ -114,7 +114,7 @@ function rocBlogSite(PDO $pdo, bool $fresh = false): array {
     $cats = []; $byName = [];
     if (rocBlogCols($pdo, 'product_categories')) {
         foreach ($pdo->query("SELECT name, slug FROM product_categories WHERE status = 'published' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC) as $c) {
-            $cats[$c['slug']] = ['name' => $c['name'], 'slug' => $c['slug'], 'url' => '/products/' . $c['slug'] . '/'];
+            $cats[$c['slug']] = ['name' => $c['name'], 'slug' => $c['slug'], 'url' => '/category/' . $c['slug'] . '/'];
             $byName[strtolower($c['name'])] = $c['slug'];
         }
     }
@@ -244,8 +244,8 @@ function rocBlogPlanSeed(PDO $pdo, array $old = []): array {
 function rocBlogPlan(PDO $pdo): array {
     $p = rocBlogGet($pdo, 'blog_plan', null);
     if (!is_array($p) || empty($p['topics'])) { $p = rocBlogPlanSeed($pdo); rocBlogSet($pdo, 'blog_plan', $p); }
-    // Category hubs live at /products/{slug}/ (/products/category/{slug}/ only redirects there).
-    foreach ($p['pillars'] as &$pl) $pl['url'] = str_replace('/products/category/', '/products/', (string)$pl['url']);
+    // Category pages live at /category/{slug}/ (/products/{slug}/ and /products/category/{slug}/ only redirect there).
+    foreach ($p['pillars'] as &$pl) $pl['url'] = (string)preg_replace('#^/products/(?:category/)?(pc-hardware|gaming-hardware|' . implode('|', array_map('preg_quote', array_keys(rocBlogSite($pdo)['cats']))) . ')/$#', '/category/$1/', (string)$pl['url']);
     unset($pl);
     return $p;
 }
@@ -415,7 +415,7 @@ function rocBlogCreate(PDO $pdo, string $root, array $in, string $source): array
 function rocBlogCleanLinks(string $html, PDO $pdo): string {
     $S = rocBlogSite($pdo);
     $ok = ['/' => 1, '/products/' => 1, '/blogs/' => 1, '/news/' => 1, '/compatibility/' => 1, '/gaming-platforms/' => 1, '/about/' => 1, '/contact/' => 1,
-           '/products/pc-hardware/' => 1, '/products/gaming-hardware/' => 1];
+           '/category/' => 1, '/category/pc-hardware/' => 1, '/category/gaming-hardware/' => 1];
     foreach ($S['cats'] as $c) $ok[$c['url']] = 1;
     foreach ($S['products'] as $p) $ok[$p['url']] = 1;
     foreach ($S['platforms'] as $p) $ok[$p['url']] = 1;
