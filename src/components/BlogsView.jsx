@@ -364,7 +364,7 @@ export const BlogsView = () => {
                 className="game-card flex flex-col justify-between group cursor-pointer h-full"
               >
                 {/* Image Box */}
-                <div className="relative h-60 bg-slate-900 overflow-hidden">
+                <div className="relative bg-slate-900 overflow-hidden" style={{ aspectRatio: '1200 / 630' }}>
                   <img 
                     src={blog.image} 
                     alt={blog.title} 

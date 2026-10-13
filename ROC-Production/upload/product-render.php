@@ -43,10 +43,10 @@ const ROC_ICON_NEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height
 /* Product groups shown in the header's Products menu, at /products/{group}/.
    Categories not listed under a group belong to gaming-hardware. */
 const ROC_PRODUCT_GROUPS = [
-    'pc-hardware' => ['name' => 'PC Hardware', 'members' => ['gpu'],
-        'description' => 'Graphics cards and PC components we recommend, each with what it is best for, key specs and a direct Amazon link.'],
+    'pc-hardware' => ['name' => 'PC Hardware', 'members' => ['gpu', 'cpu', 'ram', 'cases', 'monitors', 'speakers'],
+        'description' => 'Graphics cards, processors, memory, PC cases, monitors and speakers for your gaming PC, each with key details and a direct Amazon link.'],
     'gaming-hardware' => ['name' => 'Gaming Hardware', 'members' => null,
-        'description' => 'Gaming monitors, mice, keyboards, headsets and speakers we recommend, each with what it is best for, key specs and a direct Amazon link.'],
+        'description' => 'Keyboards, mice, headsets, gaming chairs, handhelds and gaming laptops, each with key details and a direct Amazon link.'],
 ];
 
 /* ------------------------------------------------------------ request */
@@ -303,7 +303,7 @@ function rocCategoryUrl(string $slug): string { return ROC_PUBLIC_URL . '/produc
 
 /** Amazon product photo (SiteStripe link): white background, shown whole rather than cropped. */
 function rocIsAmazonImg(string $src): bool {
-    return (bool)preg_match('#^https://(ws-[a-z]+\.amazon-adsystem\.com|m\.media-amazon\.com)/#i', $src);
+    return (bool)preg_match('#^(https://(ws-[a-z]+\.amazon-adsystem\.com|m\.media-amazon\.com)/|/images/products/photos/)#i', $src);
 }
 
 /**
@@ -328,7 +328,7 @@ function rocProductImage(array $p, array $categories): string {
  * LinkedIn and Facebook do not all show WebP or SVG.
  */
 function rocShareImage(string $image, array $p, array $categories): string {
-    $isCard = strpos($image, '/images/products/') === 0 || rocIsAmazonImg($image);   // Amazon pictures are small squares: use the share card
+    $isCard = (strpos($image, '/images/products/') === 0 && strpos($image, '/images/products/photos/') !== 0) || preg_match('#^https://#', $image) && rocIsAmazonImg($image);   // Amazon pictures are small squares: use the share card
     if ($image !== '' && !$isCard && substr($image, -4) !== '.svg') return $image;
     $share = '/images/products/share/' . $p['slug'] . '.jpg';
     if (is_file(__DIR__ . $share)) return $share;

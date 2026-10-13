@@ -111,7 +111,7 @@ function rocBlogSite(PDO $pdo, bool $fresh = false): array {
     $cats = []; $byName = [];
     if (rocBlogCols($pdo, 'product_categories')) {
         foreach ($pdo->query("SELECT name, slug FROM product_categories WHERE status = 'published' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC) as $c) {
-            $cats[$c['slug']] = ['name' => $c['name'], 'slug' => $c['slug'], 'url' => '/products/category/' . $c['slug'] . '/'];
+            $cats[$c['slug']] = ['name' => $c['name'], 'slug' => $c['slug'], 'url' => '/products/' . $c['slug'] . '/'];
             $byName[strtolower($c['name'])] = $c['slug'];
         }
     }
@@ -141,7 +141,10 @@ function rocBlogSite(PDO $pdo, bool $fresh = false): array {
 function rocBlogNouns(string $slug, string $name): array {
     $m = ['gpu' => ['graphics card', 'graphics cards', 'GPU'], 'monitors' => ['gaming monitor', 'gaming monitors', 'monitor'],
           'mice' => ['gaming mouse', 'gaming mice', 'mouse'], 'keyboards' => ['gaming keyboard', 'gaming keyboards', 'keyboard'],
-          'audio' => ['gaming headset', 'gaming headsets', 'headset'], 'speakers' => ['PC speakers', 'PC speakers', 'speakers']];
+          'audio' => ['gaming headset', 'gaming headsets', 'headset'], 'speakers' => ['PC speakers', 'PC speakers', 'speakers'],
+          'cpu' => ['gaming CPU', 'gaming CPUs', 'CPU'], 'ram' => ['RAM kit', 'RAM kits for gaming', 'RAM'], 'cases' => ['PC case', 'PC cases', 'case'],
+          'chairs' => ['gaming chair', 'gaming chairs', 'chair'], 'handhelds' => ['gaming handheld', 'gaming handhelds', 'handheld'],
+          'laptops' => ['gaming laptop', 'gaming laptops', 'laptop']];
     if (isset($m[$slug])) return $m[$slug];
     $n = strtolower(preg_replace('/\s*\(.*\)$/', '', $name));
     return [rtrim($n, 's'), $n, rtrim($n, 's')];
@@ -237,6 +240,9 @@ function rocBlogPlanSeed(PDO $pdo, array $old = []): array {
 function rocBlogPlan(PDO $pdo): array {
     $p = rocBlogGet($pdo, 'blog_plan', null);
     if (!is_array($p) || empty($p['topics'])) { $p = rocBlogPlanSeed($pdo); rocBlogSet($pdo, 'blog_plan', $p); }
+    // Category hubs live at /products/{slug}/ (/products/category/{slug}/ only redirects there).
+    foreach ($p['pillars'] as &$pl) $pl['url'] = str_replace('/products/category/', '/products/', (string)$pl['url']);
+    unset($pl);
     return $p;
 }
 
@@ -358,8 +364,10 @@ function rocBlogCreate(PDO $pdo, string $root, array $in, string $source): array
     foreach ($plan['topics'] as $tp) if ($tp['id'] === $topicId) $topic = $tp;
     if ($topic) $content = rocBlogWithRelated($pdo, $plan, $topic, $content, '');
 
-    $image = rocBlogAiCover($pdo, $root, $slug, $title, (string)($in['image_prompt'] ?? ''))
-          ?? rocBlogCover($root, $slug, $title, $category, rocBlogCoverPhoto($pdo, $root, $topic));
+    // The product photo of the topic says best what the post is about; AI picture only without one.
+    $photo = rocBlogCoverPhoto($pdo, $root, $topic);
+    $image = $photo ? rocBlogCover($root, $slug, $title, $category, $photo)
+                    : (rocBlogAiCover($pdo, $root, $slug, $title, (string)($in['image_prompt'] ?? '')) ?? rocBlogCover($root, $slug, $title, $category));
     $cols = rocBlogCols($pdo, 'blogs');
     $id = 'blog-' . bin2hex(random_bytes(4));
     $now = gmdate('Y-m-d H:i:s');
@@ -450,7 +458,7 @@ function rocBlogRelink(PDO $pdo, string $postId): int {
 /** A product photo for a topic's cover: one of its products, else one from its cluster (site files only). */
 function rocBlogCoverPhoto(PDO $pdo, string $root, ?array $topic): ?string {
     // Off until the products have real photos (today most are name cards, which repeat the title).
-    if (!rocBlogGet($pdo, 'blog_cover_photos', false)) return null;
+    if ((string)rocBlogGet($pdo, 'blog_cover_photos', '1') === '0') return null;
     if (!$topic || !rocBlogCols($pdo, 'products')) return null;
     $slugs = (array)($topic['products'] ?? []);
     if (!$slugs && strpos((string)$topic['pillar'], 'cat-') === 0) {
@@ -497,18 +505,18 @@ function rocBlogCover(string $root, string $slug, string $title, string $categor
         elseif (in_array($ext, ['jpg', 'jpeg'], true)) $src = @imagecreatefromjpeg($photo);
     }
     if ($src) {
-        $px = 600; $pw = $W - $px; $sw = imagesx($src); $sh = imagesy($src);
-        $scale = max($pw / $sw, $H / $sh);
-        $cw = (int)($pw / $scale); $ch = (int)($H / $scale);
-        imagecopyresampled($im, $src, $px, 0, (int)(($sw - $cw) / 2), (int)(($sh - $ch) / 2), $pw, $H, $cw, $ch);
+        // Product photo on a white card on the right (the photos are on white).
+        $px = 640; $py = 70; $pw = 500; $ph = 490;
+        $wh = imagecolorallocate($im, 255, 255, 255);
+        imagefilledrectangle($im, $px + 24, $py, $px + $pw - 24, $py + $ph, $wh);
+        imagefilledrectangle($im, $px, $py + 24, $px + $pw, $py + $ph - 24, $wh);
+        foreach ([[$px + 24, $py + 24], [$px + $pw - 24, $py + 24], [$px + 24, $py + $ph - 24], [$px + $pw - 24, $py + $ph - 24]] as [$cx, $cy]) imagefilledellipse($im, $cx, $cy, 48, 48, $wh);
+        $sw = imagesx($src); $sh = imagesy($src);
+        $scale = min(($pw - 40) / $sw, ($ph - 40) / $sh);
+        $dw = (int)($sw * $scale); $dh = (int)($sh * $scale);
+        imagecopyresampled($im, $src, $px + (int)(($pw - $dw) / 2), $py + (int)(($ph - $dh) / 2), 0, 0, $dw, $dh, $sw, $sh);
         imagedestroy($src);
-        imagealphablending($im, true);
-        for ($x = 0; $x < 220; $x += 2) {
-            $alpha = (int)(127 * $x / 220);
-            $c = imagecolorallocatealpha($im, 6, 36, 30, $alpha);
-            imagefilledrectangle($im, $px + $x, 0, $px + $x + 1, $H, $c);
-        }
-        $textW = 560;
+        $textW = 500;
     }
     $green = imagecolorallocate($im, 52, 211, 153); $white = imagecolorallocate($im, 248, 250, 252); $soft = imagecolorallocate($im, 167, 243, 208);
     imagefilledrectangle($im, 70, 96, 76, 534, $green);
@@ -604,8 +612,9 @@ function rocBlogRecover(PDO $pdo, string $root, string $postId): ?string {
     if (!$b) return null;
     $topic = null;
     foreach (rocBlogPlan($pdo)['topics'] as $t) if (($t['post_id'] ?? '') === $postId) $topic = $t;
-    $img = rocBlogAiCover($pdo, $root, $b['slug'], $b['title'], '')
-        ?? rocBlogCover($root, $b['slug'], $b['title'], (string)$b['category'], rocBlogCoverPhoto($pdo, $root, $topic));
+    $photo = rocBlogCoverPhoto($pdo, $root, $topic);
+    $img = $photo ? rocBlogCover($root, $b['slug'], $b['title'], (string)$b['category'], $photo)
+                  : (rocBlogAiCover($pdo, $root, $b['slug'], $b['title'], '') ?? rocBlogCover($root, $b['slug'], $b['title'], (string)$b['category']));
     $cols = rocBlogCols($pdo, 'blogs');
     $set = array_values(array_intersect(['image', 'og_image', 'twitter_image'], $cols));
     $pdo->prepare('UPDATE blogs SET ' . implode(' = ?, ', $set) . ' = ?, updated_at = ? WHERE id = ?')

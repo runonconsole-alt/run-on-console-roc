@@ -178,6 +178,14 @@ RELEASES = [
                   'Read-only Google service account: the key file is uploaded once and kept on the server outside the website'],
          checks=[dict(label='Analytics page', type='file', path='api/v1/cms/analytics.php')],
          pr=REPO + '31'),
+    dict(deploy=32, date='2026-10-12', title='Real product photos, 6 new categories with 112 products, header Categories',
+         changes=['101 products get their real photo (1000x750 on white, shown whole); 21 keep their name card until a photo is added',
+                  'New categories: Processors (CPU), Memory (RAM), PC Cases, Gaming Chairs, Gaming Handhelds, Gaming Laptops, with 112 new products',
+                  'PC Hardware = graphics cards, CPUs, RAM, cases, monitors, speakers; Gaming Hardware = keyboards, mice, headsets, chairs, handhelds, laptops',
+                  'Header: PRODUCTS is now CATEGORIES',
+                  'Blog cards show the whole cover; new covers use the product photo next to the title'],
+         checks=[dict(label='New categories and products (cli-product-expand.php --apply)', type='file', path='api/v1/cron/cli-product-expand.php')],
+         pr=REPO + '32'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
