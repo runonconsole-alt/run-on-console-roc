@@ -866,8 +866,9 @@ function rocRenderCategoryHub(string $root, PDO $pdo, array $categories): void {
         $m .= '<div class="bg-slate-900/85 border-2 border-emerald-400/40 rounded-3xl p-3 shadow-2xl"><img width="1200" height="675" src="' . rocH($hero) . '" alt="' . rocH($heroAlt) . '" class="w-full rounded-2xl object-cover" style="aspect-ratio:16/9"/></div>';
     } else {
         $m .= '<div class="grid grid-cols-2 gap-3">';
-        foreach ($tiles as $s => [$img, $t]) $m .= '<div class="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 shadow-2xl"><div class="bg-white rounded-xl h-28 overflow-hidden"><img width="400" height="300" src="' . rocH($img) . '" alt="' . rocH($t) . '" class="w-full h-full object-contain p-2"/></div>'
-            . '<div class="text-[10px] text-emerald-300 font-bold mt-2">' . rocH((string)($categories[$s]['name'] ?? '')) . '</div></div>';
+        // Each photo opens its own category (a graphics card photo opens Graphics Cards, ...).
+        foreach ($tiles as $s => [$img, $t]) $m .= '<a href="' . rocH(rocCatPath($s)) . '" class="block bg-slate-900/85 border-2 border-emerald-400/40 hover:border-emerald-300 rounded-2xl p-3 shadow-2xl no-underline group"><div class="bg-white rounded-xl h-28 overflow-hidden"><img width="400" height="300" src="' . rocH($img) . '" alt="' . rocH($t) . '" class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform"/></div>'
+            . '<div class="text-[10px] text-emerald-300 font-bold mt-2">' . rocH((string)($categories[$s]['name'] ?? '')) . ' &rarr;</div></a>';
         $m .= '</div>';
     }
     $m .= '</div></div></div>';

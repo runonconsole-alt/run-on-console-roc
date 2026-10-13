@@ -1,0 +1,27 @@
+{
+ "deploy": 49,
+ "date": "2026-10-13",
+ "title": "Hero pictures that link to what they show",
+ "changes": [
+  "/category/: each of the four product photos opens its own category (graphics card to Graphics Cards, processor to Processors, headset to Gaming Headsets and Audio, chair to Gaming Chairs)",
+  "Can I run it: the gaming PC picture in the hero opens PC Hardware"
+ ],
+ "checks": [
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "file",
+   "path": "product-render.php"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-DjLFNGxE.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/49",
+ "build": "index-DjLFNGxE.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}
