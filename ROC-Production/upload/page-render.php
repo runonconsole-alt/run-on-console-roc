@@ -3,7 +3,7 @@
  * Run On Console — CMS pages at runonconsole.com/{slug}/
  *
  *   /{slug}/                        -> general, product and landing pages   (page-render.php?slug=...)
- *   /categories/{cat}/{slug}/       -> category guides                       (page-render.php?cat=...&slug=...)
+ *   /gaming-platforms/{cat}/{slug}/ -> category guides (old /categories/... redirects)                       (page-render.php?cat=...&slug=...)
  *   /sitemaps/cms-pages-sitemap.xml -> sitemap of CMS pages   (page-render.php?sitemap=1)
  *
  * .htaccess sends a one-segment URL here only when no real file or folder matched,
@@ -26,7 +26,7 @@ if ($reqCat !== '' && !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $reqCat)) rocN
 
 function rocPagePathOf(array $p): string {
     if (($p['page_type'] ?? '') === 'category' && !empty($p['category_slug'])) {
-        return '/categories/' . $p['category_slug'] . '/' . $p['slug'] . '/';
+        return '/gaming-platforms/' . $p['category_slug'] . '/' . $p['slug'] . '/';
     }
     return '/' . $p['slug'] . '/';
 }
@@ -77,7 +77,7 @@ if (!$p) rocNotFound($ROOT);
 
 // One URL per page: send visitors (and Google) to the canonical address.
 $canonicalPath = rocPagePathOf($p);
-$requested = $reqCat !== '' ? '/categories/' . $reqCat . '/' . $slug . '/' : '/' . $slug . '/';
+$requested = $reqCat !== '' ? '/gaming-platforms/' . $reqCat . '/' . $slug . '/' : '/' . $slug . '/';
 if ($requested !== $canonicalPath) {
     $keep = $_GET; unset($keep['slug'], $keep['cat']);   // keep e.g. utm_ parameters
     header('Location: ' . $canonicalPath . ($keep ? '?' . http_build_query($keep) : ''), true, 301);
@@ -153,7 +153,7 @@ $h .= '    <meta name="twitter:title" content="' . rocH($metaT) . "\" />\n";
 $h .= '    <meta name="twitter:description" content="' . rocH($metaD) . "\" />\n";
 if ($imageAbs) $h .= '    <meta name="twitter:image" content="' . rocH($imageAbs) . "\" />\n";
 $crumbs = [['Home', ROC_PUBLIC_URL . '/']];
-if ($type === 'category' && $catName) $crumbs[] = [$catName, ROC_PUBLIC_URL . '/categories/' . $p['category_slug'] . '/'];
+if ($type === 'category' && $catName) $crumbs[] = [$catName, ROC_PUBLIC_URL . '/gaming-platforms/' . $p['category_slug'] . '/'];
 $crumbs[] = [$title, $url];
 $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => array_map(function ($c, $i) {
     return ['@type' => 'ListItem', 'position' => $i + 1, 'name' => $c[0], 'item' => $c[1]];
@@ -242,7 +242,7 @@ if ($faqs) {
 if ($siblings || ($type === 'category' && $catName)) {
     $m .= '<section class="border-t border-slate-200 pt-8"><h2 class="font-display font-extrabold text-xl text-slate-900 mb-4">More in ' . rocH((string)$catName) . '</h2><ul class="rp-links">';
     foreach ($siblings as $sb) $m .= '<li><a href="' . rocH(rocPagePathOf($sb)) . '">' . rocH($sb['title']) . '</a></li>';
-    $m .= '<li><a href="/categories/' . rocH($p['category_slug']) . '/">All ' . rocH((string)$catName) . ' &rarr;</a></li></ul></section>';
+    $m .= '<li><a href="/gaming-platforms/' . rocH($p['category_slug']) . '/">All ' . rocH((string)$catName) . ' &rarr;</a></li></ul></section>';
 }
 $m .= '</article>';
 

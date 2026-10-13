@@ -353,6 +353,27 @@ export const WriteForUsView = () => {
         </Tilt3DCard>
       )}
 
+      {/* Advertising & partnerships (this page replaced /partnerships/) */}
+      <section className="bg-white border-2 border-emerald-500/20 rounded-3xl p-6 sm:p-8 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+        <div className="space-y-2">
+          <h2 className="font-display font-extrabold text-xl sm:text-2xl text-emerald-950">Advertising &amp; brand partnerships</h2>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            Want to send a product for review, sponsor an article or run a campaign on Run On Console? Email us with
+            your brand, the product or campaign and your timing. Sponsored content is always labelled as sponsored.
+          </p>
+        </div>
+        <div className="space-y-3">
+          <a href="mailto:comments@runonconsole.com" className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 no-underline hover:bg-emerald-100">
+            <Mail className="w-5 h-5 text-emerald-700 shrink-0" />
+            <span>
+              <span className="block text-xs font-bold text-emerald-950 uppercase tracking-wider">Partnerships &amp; articles</span>
+              <span className="block text-sm font-extrabold text-emerald-700">comments@runonconsole.com</span>
+            </span>
+          </a>
+          <a href="/contact/" className="block text-xs font-bold text-emerald-700 underline">Other questions? Use the contact page →</a>
+        </div>
+      </section>
+
       {/* Guest Posting FAQs with Mouse-tracking Spotlight and Green Header */}
       <FAQSection 
         faqs={guestFaqs}

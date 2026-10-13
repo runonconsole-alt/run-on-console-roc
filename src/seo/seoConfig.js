@@ -63,7 +63,7 @@ export function generateJsonLd(routeData) {
 
   // 2b. The page itself, typed by what it is, linked to the site and publisher.
   const PAGE_TYPES = { '/about/': 'AboutPage', '/contact/': 'ContactPage', '/compatibility/': 'WebPage',
-    '/privacy-policy/': 'WebPage', '/terms-and-conditions/': 'WebPage', '/write-for-us/': 'WebPage', '/partnerships/': 'WebPage' };
+    '/privacy-policy/': 'WebPage', '/terms-and-conditions/': 'WebPage', '/write-for-us/': 'WebPage' };
   if (PAGE_TYPES[routeData.path]) {
     schemas.push({
       '@context': 'https://schema.org',
@@ -276,7 +276,7 @@ export function getSeoMetadata(pathname) {
       const canonical = category.url;
       const breadcrumbs = [
         { name: 'Home', url: SITE_DOMAIN },
-        { name: 'Categories', url: `${SITE_DOMAIN}/categories/` },
+        { name: 'Gaming Platforms', url: `${SITE_DOMAIN}/gaming-platforms/` },
         { name: category.title, url: canonical }
       ];
       const data = {

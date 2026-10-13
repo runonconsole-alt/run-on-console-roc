@@ -926,11 +926,11 @@ function liveUrl(kind, slug){ return KINDS[kind].base+slug+'/'; }
 /* Public path of a post or page (category guides live under their category). */
 function itemPath(x, slug){
   if(slug==null) slug=x.slug||'…';
-  if(K(x)===KINDS.page && x.page_type==='category' && x.category_slug) return '/categories/'+x.category_slug+'/'+slug+'/';
+  if(K(x)===KINDS.page && x.page_type==='category' && x.category_slug) return '/gaming-platforms/'+x.category_slug+'/'+slug+'/';
   return K(x).base+slug+'/';
 }
 var PAGE_TYPES={general:{label:'General page',hint:'About, policy, info pages. URL: /your-page/'},
-  category:{label:'Category guide',hint:'Belongs to a category. URL: /categories/{category}/your-page/, with breadcrumb and “More in category”.'},
+  category:{label:'Category guide',hint:'Belongs to a category. URL: /gaming-platforms/{platform}/your-page/, with breadcrumb and “More in category”.'},
   product:{label:'Product page / comparison',hint:'Built around chosen products: shows their cards, prices and Buy buttons. URL: /your-page/'},
   landing:{label:'Landing page',hint:'For ads and campaigns. Not placed in menus. URL: /your-page/'}};
 var PLACEMENTS={header:'Header menu',footer:'Footer links',category_guides:'“Guides” box on the category page'};
@@ -2653,7 +2653,7 @@ function cmsEditTarget(url){
   var r;
   if((r=/^\/products\/category\/([a-z0-9-]+)\/$/.exec(url))) return {type:'pcat', id:r[1], label:'Product category'};
   if((r=/^\/products\/([a-z0-9-]+)\/$/.exec(url))) return {type:'product', id:r[1], label:'Product'};
-  if((r=/^\/categories\/([a-z0-9-]+)\/$/.exec(url))) return {type:'platform', id:r[1], label:'Gaming platform'};
+  if((r=/^\/(?:categories|gaming-platforms)\/([a-z0-9-]+)\/$/.exec(url))) return {type:'platform', id:r[1], label:'Gaming platform'};
   return null;
 }
 
@@ -2917,7 +2917,7 @@ async function renderProducts(m){
 
 async function renderPlatforms(m){
   var canEdit=can('pages','edit');
-  m.innerHTML=head('Gaming platforms','Platform hubs at /categories/…/',
+  m.innerHTML=head('Gaming platforms','Platform hubs at /gaming-platforms/…/',
       canEdit?'<button class="btn primary" id="gp-new">＋ New platform</button>':'')+
     '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
   var d; try{ d=await api('gaming-categories.php'); }catch(e){ $('.body',m).innerHTML='<div class="alert bad">'+esc(e.message)+'</div>'; return; }
@@ -2926,7 +2926,7 @@ async function renderPlatforms(m){
     (cats.map(function(c){
       var live=c.status==='published';
       return '<tr><td><div class="t-title">'+esc(c.title)+(canEdit?' <button class="btn sm ghost" data-gp-edit="'+esc(c.slug)+'">Edit</button>':'')+'</div>'+
-        '<div class="t-slug"><a href="/categories/'+esc(c.slug)+'/" target="_blank" rel="noopener">/categories/'+esc(c.slug)+'/ ↗</a></div></td>'+
+        '<div class="t-slug"><a href="/gaming-platforms/'+esc(c.slug)+'/" target="_blank" rel="noopener">/gaming-platforms/'+esc(c.slug)+'/ ↗</a></div></td>'+
         '<td>'+c.devices.live+' live'+(c.devices.hidden?' · '+c.devices.hidden+' hidden':'')+'</td>'+
         '<td><span class="tag '+(live?'published':'draft')+'">'+(live?'Live':'Hidden')+'</span></td></tr>';
     }).join('')||'<tr><td colspan="3" class="empty">No platforms yet.</td></tr>')+'</tbody></table></div>';
@@ -2953,8 +2953,8 @@ function renderPlatformEditor(m,c,devices){
       '<textarea class="gp-a" rows="2" placeholder="Answer">'+esc(f.a||'')+'</textarea></div>';
   }
   m.innerHTML=head(c.slug?c.title:'New platform',
-      c.slug?'/categories/'+c.slug+'/ · '+(live?'Live on the website':'Hidden from the website'):'The address is created from the name and does not change later.',
-      (c.slug&&live?'<a class="btn sm" target="_blank" rel="noopener" href="/categories/'+esc(c.slug)+'/">View live ↗</a> ':'')+
+      c.slug?'/gaming-platforms/'+c.slug+'/ · '+(live?'Live on the website':'Hidden from the website'):'The address is created from the name and does not change later.',
+      (c.slug&&live?'<a class="btn sm" target="_blank" rel="noopener" href="/gaming-platforms/'+esc(c.slug)+'/">View live ↗</a> ':'')+
       '<button class="btn ghost" id="gp-back">← All platforms</button>')+
   '<div class="body narrow">'+
    '<div class="card"><div class="chead"><h3>Platform</h3></div><div class="cbody">'+

@@ -256,7 +256,7 @@ export const ValuePropsFooter = () => {
                 </a>
               </li>
               <li>
-                <a href="/categories/" onClick={(e) => { e.preventDefault(); navigateToCategory('all'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
+                <a href="/gaming-platforms/" onClick={(e) => { e.preventDefault(); navigateToCategory('all'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
                   <LayoutGrid className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Gaming Platforms</span>
                 </a>
@@ -279,19 +279,13 @@ export const ValuePropsFooter = () => {
               <li>
                 <a href="/write-for-us/" onClick={(e) => { e.preventDefault(); navigateTo('write-for-us'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
                   <PenTool className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Write For Us</span>
+                  <span>Write For Us &amp; Advertising</span>
                 </a>
               </li>
               <li>
                 <a href="/contact/" onClick={(e) => { e.preventDefault(); navigateTo('contact'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <PackageCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Submit Review Sample</span>
-                </a>
-              </li>
-              <li>
-                <a href="/partnerships/" onClick={(e) => { e.preventDefault(); navigateTo('partnerships'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <Megaphone className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Advertising & Partnerships</span>
+                  <Mail className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Contact Us</span>
                 </a>
               </li>
             </ul>
@@ -313,12 +307,6 @@ export const ValuePropsFooter = () => {
                 <a href="/privacy-policy/" onClick={(e) => { e.preventDefault(); navigateTo('privacy-policy'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
                   <FileCheck className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Privacy Policy &amp; Affiliate Disclosure</span>
-                </a>
-              </li>
-              <li>
-                <a href="/contact/" onClick={(e) => { e.preventDefault(); navigateTo('contact'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <Mail className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Contact Us</span>
                 </a>
               </li>
             </ul>

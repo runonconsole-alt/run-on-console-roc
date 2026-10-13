@@ -58,6 +58,8 @@ function rocSmBuilt(string $root, ?string $dir): array {
         if ($first !== '' && in_array($first, ROC_SM_PRIVATE, true)) continue;
         $head = (string)file_get_contents($f->getPathname(), false, null, 0, 20000);
         if (preg_match('#<meta\s+name=["\']robots["\']\s+content=["\'][^"\']*noindex#i', $head)) continue;
+        if ($path === '/categories/') $path = '/gaming-platforms/';   // served by category-render.php
+        if (in_array($path, ['/partnerships/', '/policy/'], true)) continue;   // these redirect (cli-gaming-platforms-url.php, cli-privacy-policy.php)
         $out[$path] = $f->getMTime();
         if ($path === '/') $GLOBALS['ROC_SM_TITLES'][$path] = 'Home';
         elseif (preg_match('#<title>([^<]+)</title>#i', $head, $tm)) {
