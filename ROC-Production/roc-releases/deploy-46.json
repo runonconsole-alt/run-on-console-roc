@@ -1,0 +1,30 @@
+{
+ "deploy": 46,
+ "date": "2026-10-13",
+ "title": "Main categories in the CMS, 24 products per page with Load more, product versions and old addresses in the CMS",
+ "changes": [
+  "CMS > Product categories > Main categories: name, description and picture of PC Hardware and Gaming Hardware, and which category is in which",
+  "Products, PC Hardware, Gaming Hardware and every category page show 24 products, then Load more (the products page went from 668 KB to about 150 KB)",
+  "CMS > Product categories > Product versions: the Choose version sets (8GB / 16GB ...)",
+  "CMS > Product categories > Old addresses: deleted product addresses and the page each one opens",
+  "cli-site-images.php also makes the new home page picture (used in the next deploy)"
+ ],
+ "checks": [
+  {
+   "label": "Catalog settings (catalog-admin.php)",
+   "type": "file",
+   "path": "api/v1/cms/catalog-admin.php"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BWSHvK1-.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/46",
+ "build": "index-BWSHvK1-.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

@@ -42,14 +42,11 @@ const ROC_ICON_EXT  = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height
 const ROC_ICON_BACK = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left w-4 h-4"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>';
 const ROC_ICON_NEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3.5 h-3.5"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>';
 
-/* Product groups shown in the header's CATEGORY menu, at /category/{group}/.
-   Categories not listed under a group belong to gaming-hardware. */
-const ROC_PRODUCT_GROUPS = [
-    'pc-hardware' => ['name' => 'PC Hardware', 'members' => ['gpu', 'cpu', 'ram', 'cases', 'monitors', 'speakers'],
-        'description' => 'Graphics cards, processors, memory, PC cases, monitors and speakers for your gaming PC, each with key details and a direct Amazon link.'],
-    'gaming-hardware' => ['name' => 'Gaming Hardware', 'members' => null,
-        'description' => 'Keyboards, mice, headsets, gaming chairs, handhelds and gaming laptops, each with key details and a direct Amazon link.'],
-];
+/* The two main categories, at /category/{group}/. These are the defaults: CMS > Product categories >
+   "Main categories" saves names, descriptions, pictures and which category is in which group
+   (cms_settings product_groups); rocGroups() returns the saved version. Categories not listed under
+   pc-hardware belong to gaming-hardware. */
+require_once __DIR__ . '/api/v1/cms/product-groups-lib.php';   // ROC_PRODUCT_GROUPS (defaults)
 
 /* ------------------------------------------------------------ request */
 
@@ -104,6 +101,7 @@ if (!$pdo) {
 /* ------------------------------------------------------------ routing */
 
 $categories = rocProductCategories($pdo);
+$GLOBALS['ROC_GROUPS'] = rocLoadGroups($pdo);
 
 if ($isMap) rocProductSitemap($pdo, $categories);
 
@@ -118,10 +116,10 @@ if ($cat !== '') {
     exit;
 }
 
-if ($slug !== '' && (isset(ROC_PRODUCT_GROUPS[$slug]) || isset($categories[$slug]))) {
+if ($slug !== '' && (isset(rocGroups()[$slug]) || isset($categories[$slug]))) {
     // Categories and the two groups live at /category/{slug}/; the old /products/{slug}/ address moves there.
     if (!$catPage) { header('Location: ' . rocCategoryUrl($slug) . ($query !== '' ? '?q=' . rawurlencode($query) : ''), true, 301); exit; }
-    rocRenderProductList($ROOT, $pdo, $categories, isset(ROC_PRODUCT_GROUPS[$slug]) ? rocProductGroup($slug, $categories) : $categories[$slug], $query);
+    rocRenderProductList($ROOT, $pdo, $categories, isset(rocGroups()[$slug]) ? rocProductGroup($slug, $categories) : $categories[$slug], $query);
 }
 
 if ($slug !== '' && $catPage) {
@@ -249,13 +247,40 @@ function rocFuzzyMatch(string $hay, string $q): bool {
 }
 
 /** A Products-menu group as a category-like array; 'members' lists its category slugs. */
+/** A CMS setting (cms_settings), JSON-decoded; null when not set. */
+function rocPrSetting(PDO $pdo, string $key) {
+    try {
+        $st = $pdo->prepare('SELECT setting_value FROM cms_settings WHERE setting_key = ? LIMIT 1');
+        $st->execute([$key]);
+        $v = $st->fetchColumn();
+        return ($v === false || $v === null || $v === '') ? null : json_decode((string)$v, true);
+    } catch (\Throwable $e) { return null; }
+}
+
+/** The two main categories: the defaults above, with what is saved in the CMS on top. */
+function rocLoadGroups(PDO $pdo): array {
+    $g = ROC_PRODUCT_GROUPS;
+    $saved = rocPrSetting($pdo, 'product_groups');
+    if (!is_array($saved)) return $g;
+    foreach ($g as $k => &$def) {
+        $s = $saved[$k] ?? null;
+        if (!is_array($s)) continue;
+        foreach (['name', 'description', 'image'] as $f) if (isset($s[$f]) && trim((string)$s[$f]) !== '') $def[$f] = trim((string)$s[$f]);
+    }
+    unset($def);
+    if (isset($saved['pc-hardware']['members']) && is_array($saved['pc-hardware']['members']))
+        $g['pc-hardware']['members'] = array_values(array_filter(array_map('strval', $saved['pc-hardware']['members'])));
+    return $g;
+}
+function rocGroups(): array { return $GLOBALS['ROC_GROUPS'] ?? ROC_PRODUCT_GROUPS; }
+
 function rocProductGroup(string $slug, array $categories): array {
-    $g = ROC_PRODUCT_GROUPS[$slug];
-    $pcMembers = ROC_PRODUCT_GROUPS['pc-hardware']['members'];
+    $g = rocGroups()[$slug];
+    $pcMembers = rocGroups()['pc-hardware']['members'];
     $members = $g['members'] ?? array_values(array_filter(array_keys($categories), function ($c) use ($pcMembers) { return !in_array($c, $pcMembers, true); }));
     $first = $categories[$members[0] ?? ''] ?? null;
     return ['slug' => $slug, 'name' => $g['name'], 'description' => $g['description'], 'members' => $members,
-            'image' => $first ? ($first['image'] ?? '') : '', 'group' => true];
+            'image' => ($g['image'] ?? '') ?: ($first ? ($first['image'] ?? '') : ''), 'group' => true];
 }
 
 /** Published products as JSON for the header search box (/products/?json=1). */
@@ -364,12 +389,17 @@ function rocZoomScript(): string {
 
 /**
  * "Choose version" buttons for products that come in versions (8GB / 16GB, 512GB / 1TB, ...),
- * from api/v1/cms/product-variants.json. A click shows that version's photo at once and opens
+ * set in CMS > Products > Versions (or api/v1/cms/product-variants.json until then). A click shows that version's photo at once and opens
  * its own page (its own price link, details and address).
  */
 function rocVariantPicker(PDO $pdo, string $slug, array $categories): string {
     static $groups = null;
-    if ($groups === null) $groups = (array)(json_decode((string)@file_get_contents(__DIR__ . '/api/v1/cms/product-variants.json'), true)['groups'] ?? []);
+    // CMS > Products > Versions (cms_settings product_variants); the file is the starting list.
+    if ($groups === null) {
+        $saved = rocPrSetting($pdo, 'product_variants');
+        $groups = is_array($saved) && isset($saved['groups']) ? (array)$saved['groups']
+            : (array)(json_decode((string)@file_get_contents(__DIR__ . '/api/v1/cms/product-variants.json'), true)['groups'] ?? []);
+    }
     foreach ($groups as $vs) {
         if (!in_array($slug, array_column($vs, 'slug'), true)) continue;
         $h = ''; $n = 0;
@@ -500,7 +530,7 @@ function rocProductCard(PDO $pdo, array $p, array $categories): string {
 
 /** The Products-menu group a category belongs to. */
 function rocGroupOf(string $catSlug): string {
-    return in_array($catSlug, ROC_PRODUCT_GROUPS['pc-hardware']['members'], true) ? 'pc-hardware' : 'gaming-hardware';
+    return in_array($catSlug, rocGroups()['pc-hardware']['members'], true) ? 'pc-hardware' : 'gaming-hardware';
 }
 
 function rocBreadcrumbLd(array $items): string {
@@ -693,7 +723,7 @@ function rocRenderCategoryHub(string $root, PDO $pdo, array $categories): void {
     $h  = rocHeadMeta($title, rocCmsTruncatePlain($desc, 155), $url, $hero !== '' ? $hero : ($first ? $first[0] : ''), 'index, follow, max-image-preview:large', 'website', $hero !== '' ? $heroAlt : 'Product categories on Run On Console');
     $h .= rocBreadcrumbLd([['Home', ROC_PUBLIC_URL . '/'], ['Categories', $url]]);
     $items = []; $i = 0;
-    foreach (ROC_PRODUCT_GROUPS as $g => $def) {
+    foreach (rocGroups() as $g => $def) {
         $num = 0; foreach ($all as $p) if (rocGroupOf(rocProductCategorySlug($p)) === $g) $num++;
         $items[] = ['@type' => 'ListItem', 'position' => ++$i, 'url' => rocCategoryUrl($g), 'name' => $def['name'], 'description' => $def['description'] . ' ' . $num . ' products.'];
     }
@@ -725,7 +755,7 @@ function rocRenderCategoryHub(string $root, PDO $pdo, array $categories): void {
     $m .= '</div></div></div>';
     // The two categories, each a big card with four of its product photos.
     $m .= '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
-    foreach (ROC_PRODUCT_GROUPS as $g => $def) {
+    foreach (rocGroups() as $g => $def) {
         $num = 0; $pics = [];
         foreach ($all as $p) {
             if (rocGroupOf(rocProductCategorySlug($p)) !== $g) continue;
@@ -755,6 +785,20 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
     $inScope = $cat ? rocFetchProducts($pdo, $cat) : $all;
     $shown   = $query !== '' ? rocFetchProducts($pdo, $cat, $query) : $inScope;
 
+    // 24 products per page; "Load more" fetches the next 24 (?page=N&partial=1), and ?page=N works without JavaScript.
+    $per = 24;
+    $pages = max(1, (int)ceil(count($shown) / $per));
+    $page = $query === '' ? min($pages, max(1, (int)($_GET['page'] ?? 1))) : 1;
+    $pageItems = $query === '' ? array_slice($shown, ($page - 1) * $per, $per) : $shown;
+    if (isset($_GET['partial'])) {
+        $html = '';
+        foreach ($pageItems as $p) $html .= rocProductCard($pdo, $p, $categories);
+        header('Content-Type: application/json; charset=utf-8');
+        header('X-Robots-Tag: noindex');
+        echo json_encode(['html' => $html, 'next' => $page < $pages ? $page + 1 : null, 'left' => max(0, count($shown) - $page * $per)], JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+
     if ($cat) {
         $name  = (string)$cat['name'];
         $url   = rocCategoryUrl((string)$cat['slug']);
@@ -772,7 +816,7 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
         $heroBadge = count($inScope) . ' PICKS';
         $image = trim((string)($cat['image'] ?? ''));
         $crumbs = [['Home', ROC_PUBLIC_URL . '/'], ['Categories', ROC_PUBLIC_URL . '/category/']];
-        if (empty($cat['group'])) { $g = rocGroupOf((string)$cat['slug']); $crumbs[] = [ROC_PRODUCT_GROUPS[$g]['name'], rocCategoryUrl($g)]; }
+        if (empty($cat['group'])) { $g = rocGroupOf((string)$cat['slug']); $crumbs[] = [rocGroups()[$g]['name'], rocCategoryUrl($g)]; }
         $crumbs[] = [$name, $url];
         $noindex = !empty($cat['is_noindex']);
     } else {
@@ -788,14 +832,15 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
         $crumbs = [['Home', ROC_PUBLIC_URL . '/'], ['Products', $url]];
         $noindex = false;
     }
-    $robots = ($query !== '' || $noindex) ? 'noindex, follow' : 'index, follow, max-image-preview:large';
+    $robots = ($query !== '' || $noindex || $page > 1) ? 'noindex, follow' : 'index, follow, max-image-preview:large';
+    if ($page > 1) $url .= '?page=' . $page;
 
     /* ---------------- head */
     $h  = rocHeadMeta($title, $desc, $url, $image, $robots);
     $h .= rocBreadcrumbLd($crumbs);
     if ($shown && $query === '') {
         $items = [];
-        foreach ($shown as $i => $p) $items[] = ['@type' => 'ListItem', 'position' => $i + 1, 'url' => rocProductUrl((string)$p['slug'])];
+        foreach ($pageItems as $i => $p) $items[] = ['@type' => 'ListItem', 'position' => ($page - 1) * $per + $i + 1, 'url' => rocProductUrl((string)$p['slug'])];
         $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'ItemList', 'itemListElement' => $items]);
     }
     $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
@@ -851,11 +896,23 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
     $listH = $cat ? 'All ' . (string)$cat['name'] : 'All gaming gear';
     $m .= '<div id="all-products" class="space-y-4 scroll-mt-24"><div class="flex flex-wrap items-baseline justify-between gap-2">'
         . '<h2 class="font-display font-extrabold text-lg text-slate-900">' . rocH($listH) . '</h2>'
-        . '<div class="text-xs font-bold text-slate-600">Showing <span class="text-emerald-600 font-extrabold">' . count($shown) . '</span> of ' . count($inScope) . ' products</div></div>'
-        . '<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">';
-    foreach ($shown as $p) $m .= rocProductCard($pdo, $p, $categories);
+        . '<div class="text-xs font-bold text-slate-600">Showing <span id="roc-shown" class="text-emerald-600 font-extrabold">' . (($page - 1) * $per + count($pageItems)) . '</span> of ' . count($shown) . ' products</div></div>'
+        . '<div id="roc-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">';
+    foreach ($pageItems as $p) $m .= rocProductCard($pdo, $p, $categories);
     $m .= '</div>';
     if (!$shown) $m .= '<p class="text-center text-slate-500 text-sm py-10">No products match that search.</p>';
+    if ($page < $pages) {
+        $left = count($shown) - $page * $per;
+        $m .= '<div class="text-center pt-2"><a id="roc-more" href="' . rocH($action) . '?page=' . ($page + 1) . '" rel="next" data-roc-local data-base="' . rocH($action) . '" data-next="' . ($page + 1) . '"'
+            . ' class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-display font-extrabold text-sm py-3 px-6 rounded-xl shadow-md no-underline">'
+            . 'Load more products <span data-left>(' . $left . ' more)</span></a></div>'
+            . '<script>(function(){var a=document.getElementById("roc-more"),g=document.getElementById("roc-grid"),s=document.getElementById("roc-shown");if(!a||!g)return;'
+            . 'a.addEventListener("click",function(e){e.preventDefault();if(a.dataset.busy)return;a.dataset.busy=1;a.style.opacity=".6";'
+            . 'fetch(a.dataset.base+"?page="+a.dataset.next+"&partial=1",{headers:{Accept:"application/json"}}).then(function(r){return r.json();}).then(function(d){'
+            . 'g.insertAdjacentHTML("beforeend",d.html);if(s)s.textContent=g.children.length;'
+            . 'if(d.next){a.dataset.next=d.next;a.href=a.dataset.base+"?page="+d.next;a.querySelector("[data-left]").textContent="("+d.left+" more)";delete a.dataset.busy;a.style.opacity="";}'
+            . 'else a.parentNode.remove();}).catch(function(){location.href=a.href;});});})();</script>';
+    }
     $m .= '</div></div>';
 
     $latest = null;
@@ -891,9 +948,9 @@ function rocProductSitemap(PDO $pdo, array $categories): void {
         $own = rocDate($c['content_modified_at'] ?? null);
         $out .= $line(rocCategoryUrl($s), max($own ?? 0, $latestByCat[$s]) ?: null, (string)$c['name']);
     }
-    foreach (array_keys(ROC_PRODUCT_GROUPS) as $g) {
+    foreach (array_keys(rocGroups()) as $g) {
         $mods = array_intersect_key($latestByCat, array_flip(rocProductGroup($g, $categories)['members']));
-        if ($mods) $out .= $line(rocCategoryUrl($g), max($mods), ROC_PRODUCT_GROUPS[$g]['name']);
+        if ($mods) $out .= $line(rocCategoryUrl($g), max($mods), rocGroups()[$g]['name']);
     }
     foreach ($all as $p) $out .= $line(rocProductUrl((string)$p['slug']), rocProductModified($p), (string)$p['title']);
     $out .= "</urlset>\n";

@@ -23,7 +23,7 @@
   window.addEventListener('click', function (ev) {
     if (ev.defaultPrevented || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
     var a = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
-    if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download')) return;
+    if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download') || a.hasAttribute('data-roc-local')) return;   // data-roc-local: the page handles it (Load more)
     var u = blogPath(a.getAttribute('href'));
     if (!u) return;
     ev.preventDefault();

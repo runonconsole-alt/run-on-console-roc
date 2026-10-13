@@ -4789,8 +4789,9 @@ function renderPlatformEditor(m,c,devices){
 /* ------------------------------------------------------- product categories */
 
 async function renderProductCategories(m){
-  m.innerHTML=head('Product categories','Category pages at /products/…/',
-      can('products','edit')?'<button class="btn primary" id="pc-new">＋ New category</button>':'')+
+  m.innerHTML=head('Product categories','Category pages at /category/…/',
+      (S.user.role==='administrator'?'<button class="btn" id="pc-main">Main categories</button><button class="btn" id="pc-vers">Product versions</button><button class="btn" id="pc-redir">Old addresses</button>':'')+
+      (can('products','edit')?'<button class="btn primary" id="pc-new">＋ New category</button>':''))+
     '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
   var d; try{ d=await api('product-categories.php'); }catch(e){ $('.body',m).innerHTML='<div class="alert bad">'+esc(e.message)+'</div>'; return; }
   var cats=d.categories||[];
@@ -4808,6 +4809,104 @@ async function renderProductCategories(m){
     var b=e.target.closest('[data-pc-edit]'); if(b) renderCategoryEditor(m,cats.filter(function(c){return c.slug===b.dataset.pcEdit;})[0]);
   });
   var nb=$('#pc-new',m); if(nb) nb.addEventListener('click',function(){ renderCategoryEditor(m,{status:'draft'}); });
+  [['#pc-main',renderMainCats],['#pc-vers',renderVariants],['#pc-redir',renderRedirects]].forEach(function(x){
+    var b=$(x[0],m); if(b) b.addEventListener('click',function(){ x[1](m); });
+  });
+}
+
+/* Main categories (PC Hardware / Gaming Hardware), product versions and old product addresses:
+   api/v1/cms/catalog-admin.php. */
+async function catalogLoad(m,title,sub){
+  m.innerHTML=head(title,sub,'<button class="btn ghost" id="ca-back">← Product categories</button>')+
+    '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  $('#ca-back',m).addEventListener('click',function(){ renderProductCategories(m); });
+  try{ return await api('catalog-admin.php'); }catch(e){ $('.body',m).innerHTML='<div class="alert bad">'+esc(e.message)+'</div>'; return null; }
+}
+function catalogSave(btn,body){
+  btn.disabled=true; var t=btn.textContent; btn.textContent='Saving…';
+  api('catalog-admin.php',body).then(function(r){ toast(r.message||'Saved','good'); })
+    .catch(function(e){ toast(e.message,'bad'); }).then(function(){ btn.disabled=false; btn.textContent=t; });
+}
+async function renderMainCats(m){
+  var d=await catalogLoad(m,'Main categories','The two categories in the menu and on /category/: PC Hardware and Gaming Hardware'); if(!d) return;
+  var g=d.groups, pcm=(g['pc-hardware'].members||[]);
+  function box(k){
+    var x=g[k];
+    return '<div class="card"><div class="cbody"><h3 style="margin:0 0 10px">'+esc(x.name)+' <a class="hint" href="/category/'+k+'/" target="_blank" rel="noopener">/category/'+k+'/ ↗</a></h3>'+
+      '<div class="field"><label>Name *</label><input type="text" data-g="'+k+'" data-f="name" maxlength="60" value="'+esc(x.name)+'"></div>'+
+      '<div class="field"><label>Description</label><textarea rows="3" data-g="'+k+'" data-f="description" maxlength="300">'+esc(x.description||'')+'</textarea>'+
+        '<div class="hint">Shown at the top of its page and on its card on /category/; also its Google description.</div></div>'+
+      '<div class="field"><label>Picture (optional)</label><div style="display:flex;gap:8px"><input type="text" data-g="'+k+'" data-f="image" value="'+esc(x.image||'')+'" placeholder="Empty: product photos are used">'+
+        '<button class="btn sm" data-pick="'+k+'">Media library</button></div><div class="hint">Used when the page is shared (Facebook, WhatsApp).</div></div>'+
+    '</div></div>';
+  }
+  $('.body',m).innerHTML=box('pc-hardware')+box('gaming-hardware')+
+    '<div class="card"><div class="cbody"><h3 style="margin:0 0 6px">Which category is in which</h3><div class="hint" style="margin-bottom:10px">Each product category shows inside one main category.</div>'+
+    '<table class="list"><thead><tr><th>Category</th><th>Main category</th></tr></thead><tbody>'+
+    (d.categories||[]).map(function(c){
+      var pc=pcm.indexOf(c.slug)>=0;
+      return '<tr><td>'+esc(c.name)+'</td><td><select data-member="'+esc(c.slug)+'"><option value="pc"'+(pc?' selected':'')+'>'+esc(g['pc-hardware'].name)+'</option>'+
+        '<option value="gaming"'+(pc?'':' selected')+'>'+esc(g['gaming-hardware'].name)+'</option></select></td></tr>';
+    }).join('')+'</tbody></table>'+
+    '<div style="margin-top:14px"><button class="btn primary" id="mc-save">Save</button></div></div></div>';
+  $('.body',m).addEventListener('click',function(e){
+    var b=e.target.closest('[data-pick]'); if(!b) return;
+    pickMedia(function(x){ if(x) $('[data-g="'+b.dataset.pick+'"][data-f="image"]',m).value=x.url; });
+  });
+  $('#mc-save',m).addEventListener('click',function(){
+    var out={'pc-hardware':{},'gaming-hardware':{}};
+    m.querySelectorAll('[data-g]').forEach(function(i){ out[i.dataset.g][i.dataset.f]=i.value; });
+    out['pc-hardware'].members=[].slice.call(m.querySelectorAll('[data-member]')).filter(function(s){ return s.value==='pc'; }).map(function(s){ return s.dataset.member; });
+    catalogSave(this,{action:'groups',groups:out});
+  });
+}
+async function renderVariants(m){
+  var d=await catalogLoad(m,'Product versions','"Choose version" buttons on product pages (8GB / 16GB, 512GB / 1TB …)'); if(!d) return;
+  var P=d.products||{}, sets=d.variants||{};
+  var dl='<datalist id="va-prods">'+Object.keys(P).map(function(s){ return '<option value="'+esc(s)+'">'+esc(P[s].title)+'</option>'; }).join('')+'</datalist>';
+  function row(v){ return '<div class="va-row" style="display:flex;gap:8px;margin-bottom:6px"><input type="text" list="va-prods" class="va-slug" placeholder="product address, e.g. steam-deck-oled-1tb" value="'+esc(v.slug||'')+'" style="flex:2">'+
+    '<input type="text" class="va-label" placeholder="Button text, e.g. 1TB" maxlength="30" value="'+esc(v.label||'')+'" style="flex:1"><button class="btn sm ghost va-del" title="Remove">✕</button></div>'; }
+  function set(name,vs){ return '<div class="card va-set"><div class="cbody"><div class="field"><label>Set name</label><input type="text" class="va-name" value="'+esc(name)+'" placeholder="e.g. steam-deck-oled"></div>'+
+    '<div class="va-rows">'+(vs.length?vs:[{},{}]).map(row).join('')+'</div><button class="btn sm va-add">＋ Version</button> <button class="btn sm ghost va-drop">Remove set</button></div></div>'; }
+  $('.body',m).innerHTML=dl+'<div class="hint" style="margin-bottom:12px">A set needs at least 2 products. Each product keeps its own page, photo and Amazon link; the buttons switch between them.</div>'+
+    '<div id="va-sets">'+Object.keys(sets).map(function(k){ return set(k,sets[k]); }).join('')+'</div>'+
+    '<button class="btn" id="va-new">＋ New set</button> <button class="btn primary" id="va-save">Save</button>';
+  var box=$('#va-sets',m);
+  $('.body',m).addEventListener('click',function(e){
+    var t=e.target;
+    if(t.closest('.va-add')) t.closest('.va-set').querySelector('.va-rows').insertAdjacentHTML('beforeend',row({}));
+    else if(t.closest('.va-del')) t.closest('.va-row').remove();
+    else if(t.closest('.va-drop')) t.closest('.va-set').remove();
+    else if(t.closest('#va-new')) box.insertAdjacentHTML('beforeend',set('',[]));
+  });
+  $('#va-save',m).addEventListener('click',function(){
+    var out={};
+    box.querySelectorAll('.va-set').forEach(function(s){
+      var n=s.querySelector('.va-name').value.trim(); if(!n) return;
+      out[n]=[].slice.call(s.querySelectorAll('.va-row')).map(function(r){ return {slug:r.querySelector('.va-slug').value.trim(),label:r.querySelector('.va-label').value.trim()}; })
+        .filter(function(v){ return v.slug&&v.label; });
+    });
+    catalogSave(this,{action:'variants',groups:out});
+  });
+}
+async function renderRedirects(m){
+  var d=await catalogLoad(m,'Old addresses','Deleted product pages: their old address opens another page (301)'); if(!d) return;
+  var map=d.redirects||{};
+  function row(k,v){ return '<tr class="rd-row"><td>/products/<input type="text" class="rd-from" value="'+esc(k)+'" placeholder="old-product" style="width:60%">/</td>'+
+    '<td><input type="text" class="rd-to" value="'+esc(v)+'" placeholder="/category/mice/" style="width:100%"></td><td><button class="btn sm ghost rd-del">✕</button></td></tr>'; }
+  $('.body',m).innerHTML='<div class="hint" style="margin-bottom:12px">Google and old links keep working: the old product address sends visitors to the page you choose here.</div>'+
+    '<div class="card"><table class="list"><thead><tr><th>Old product address</th><th>Opens</th><th></th></tr></thead><tbody id="rd-body">'+
+    Object.keys(map).map(function(k){ return row(k,map[k]); }).join('')+'</tbody></table></div>'+
+    '<button class="btn" id="rd-new">＋ Add</button> <button class="btn primary" id="rd-save">Save</button>';
+  $('.body',m).addEventListener('click',function(e){
+    if(e.target.closest('.rd-del')) e.target.closest('.rd-row').remove();
+    else if(e.target.closest('#rd-new')) $('#rd-body',m).insertAdjacentHTML('beforeend',row('',''));
+  });
+  $('#rd-save',m).addEventListener('click',function(){
+    var out={};
+    m.querySelectorAll('.rd-row').forEach(function(r){ var k=r.querySelector('.rd-from').value.trim(); if(k) out[k]=r.querySelector('.rd-to').value.trim(); });
+    catalogSave(this,{action:'redirects',map:out});
+  });
 }
 
 function renderCategoryEditor(m,c){

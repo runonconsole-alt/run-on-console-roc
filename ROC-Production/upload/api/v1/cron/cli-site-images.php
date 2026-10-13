@@ -35,6 +35,8 @@ const ROC_SITE_IMAGES = [
                       'A gaming PC beside a monitor: check if your PC can run a game'],
     'category-hero' => [1200, 675, 'two neat groups of gaming gear on a dark desk: on the left a graphics card, a processor box and memory sticks, on the right a mechanical keyboard, a gaming mouse and a headset, soft green rim light, studio photo',
                       'PC hardware and gaming hardware side by side: product categories'],
+    'home-hero'   => [1200, 675, 'a stylish gaming setup at night: a glowing gaming PC, a curved monitor with abstract colorful light, a mechanical keyboard, a mouse, a headset on a stand and a game controller, green and teal ambient light, cinematic wide shot',
+                      'A gaming setup with a PC, monitor, keyboard, headset and controller: Run On Console'],
     'news-hero'   => [1200, 675, 'a modern gaming desk at night with a new graphics card box, a handheld gaming console and a game controller under a soft spotlight, monitor glowing with abstract colors, cinematic',
                       'New gaming hardware on a desk: gaming and PC hardware news'],
 ];
