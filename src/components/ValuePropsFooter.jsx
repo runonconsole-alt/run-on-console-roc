@@ -8,6 +8,7 @@ import { useApp } from '../context/AppContext';
 import { Tilt3DCard } from './Tilt3DCard';
 import { BouncyText } from './BouncyText';
 import { BrandLogo } from './BrandLogo';
+import { getSiteNav, iconSvg, footerSpan, currentYear } from '../data/siteNav';
 import { 
   SteamLogo, PlayStationLogo, XboxLogo, EpicGamesLogo, GooglePlayLogo, 
   AppleLogo, GOGLogo, BattleNetLogo, DiscordLogo, RedditLogo, 
@@ -16,6 +17,7 @@ import {
 
 export const ValuePropsFooter = () => {
   const { navigateTo, navigateToCategory } = useApp();
+  const siteNav = getSiteNav();
 
   const valueProps = [
     {
@@ -209,119 +211,47 @@ export const ValuePropsFooter = () => {
               <BrandLogo size="large" theme="dark" />
             </a>
 
-            <p className="text-xs text-emerald-100/90 leading-relaxed max-w-md">
-              <BouncyText text="ROC (Run On Console) is an independent gaming site: gear picks for PC and console players, guides for every gaming platform and a free &quot;Can I run it&quot; checker built on official game requirements." />
-            </p>
+            {/* Footer texts and columns: CMS > Menus & footer. The server draws the same
+                markup (rocNavFooter* in api/v1/cms/site-layer-lib.php): keep them in step. */}
+            <p data-roc-text="footer-about" className="text-xs text-emerald-100/90 leading-relaxed max-w-md">{siteNav.footer.about}</p>
 
-            <div className="pt-1 space-y-1.5">
-              <div className="flex items-center gap-2 text-xs text-emerald-300 font-semibold">
-                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Independent picks based on specs and published reviews</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-emerald-300/80 font-mono">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Sponsored content is always labelled</span>
-              </div>
+            <div data-roc-region="footer-points" className="pt-1 space-y-1.5">
+              {siteNav.footer.points.map((pt, i) => (
+                <div key={i} className={'flex items-center gap-2 text-xs font-semibold ' + (i === 0 ? 'text-emerald-300' : 'text-emerald-300/80')}>
+                  <span className="inline-flex" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg(pt.icon || 'check', 'w-4 h-4 text-emerald-400 shrink-0') }} />
+                  <span>{pt.text}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="lg:col-span-3 space-y-3">
-            <p className="m-0 tracking-tight font-display font-extrabold text-xs text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
-              <Compass className="w-3.5 h-3.5 text-emerald-400" />
-              <span>EXPLORE HUB</span>
-            </p>
-            <ul className="space-y-2 text-xs text-emerald-100/80 font-medium">
-              <li>
-                <a href="/" onClick={(e) => { e.preventDefault(); navigateTo('home'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <Home className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Home</span>
-                </a>
-              </li>
-              <li>
-                <a href="/products/" onClick={(e) => { e.preventDefault(); navigateTo('products'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <Cpu className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Products</span>
-                </a>
-              </li>
-              <li>
-                <a href="/compatibility/" onClick={(e) => { e.preventDefault(); navigateTo('compatibility'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <Gamepad2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Systems</span>
-                </a>
-              </li>
-              <li>
-                <a href="/blogs/" onClick={(e) => { e.preventDefault(); navigateTo('blogs'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Blogs</span>
-                </a>
-              </li>
-              <li>
-                <a href="/gaming-platforms/" onClick={(e) => { e.preventDefault(); navigateToCategory('all'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <LayoutGrid className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Gaming Platforms</span>
-                </a>
-              </li>
-              <li>
-                <a href="/about/" onClick={(e) => { e.preventDefault(); navigateTo('about'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <Info className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>About Run On Console</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div className="lg:col-span-2 space-y-3">
-            <p className="m-0 tracking-tight font-display font-extrabold text-xs text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
-              <Handshake className="w-3.5 h-3.5 text-emerald-400" />
-              <span>PARTNERS</span>
-            </p>
-            <ul className="space-y-2 text-xs text-emerald-100/80 font-medium">
-              <li>
-                <a href="/write-for-us/" onClick={(e) => { e.preventDefault(); navigateTo('write-for-us'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <PenTool className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Write For Us &amp; Advertising</span>
-                </a>
-              </li>
-              <li>
-                <a href="/contact/" onClick={(e) => { e.preventDefault(); navigateTo('contact'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <Mail className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Contact Us</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div className="lg:col-span-2 space-y-3">
-            <p className="m-0 tracking-tight font-display font-extrabold text-xs text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-emerald-400" />
-              <span>POLICIES</span>
-            </p>
-            <ul className="space-y-2 text-xs text-emerald-100/80 font-medium">
-              <li>
-                <a href="/terms-and-conditions/" onClick={(e) => { e.preventDefault(); navigateTo('terms-and-conditions'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <Scale className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Terms & Conditions</span>
-                </a>
-              </li>
-              <li>
-                <a href="/privacy-policy/" onClick={(e) => { e.preventDefault(); navigateTo('privacy-policy'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
-                  <FileCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Privacy Policy &amp; Affiliate Disclosure</span>
-                </a>
-              </li>
-            </ul>
+          <div data-roc-region="footer-cols" className="contents">
+            {siteNav.footer.columns.map((col, i) => (
+              <div key={i} className={footerSpan(siteNav.footer.columns.length, i) + ' space-y-3'}>
+                <p className="m-0 tracking-tight font-display font-extrabold text-xs text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="inline-flex" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg(col.icon || 'link', 'w-3.5 h-3.5 text-emerald-400') }} />
+                  <span>{col.title}</span>
+                </p>
+                <ul className="space-y-2 text-xs text-emerald-100/80 font-medium">
+                  {col.links.map((l, j) => (
+                    <li key={j}>
+                      <a href={l.url} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
+                        <span className="inline-flex" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg(l.icon || 'link', 'w-3.5 h-3.5 text-emerald-400') }} />
+                        <span>{l.label}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
 
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-emerald-200/80 relative z-10">
-        <div>
-          © {new Date().getFullYear()} ROC (Run On Console). All rights reserved. Built for gamers & console enthusiasts.
-        </div>
-        <div className="text-[11px] text-emerald-300/90 font-mono">
-          As an Amazon Associate we earn from qualifying purchases. Prices and stock are shown on Amazon.
-        </div>
+        <div data-roc-text="footer-copyright">{siteNav.footer.copyright.replace('{year}', currentYear())}</div>
+        <div data-roc-text="footer-disclaimer" className="text-[11px] text-emerald-300/90 font-mono">{siteNav.footer.disclaimer}</div>
       </div>
 
     </footer>

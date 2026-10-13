@@ -29,9 +29,9 @@ define('ROC_SITE_LAYER_LIB', 1);
 const ROC_LAYER_FILE = '/cms-templates/site-layer.json';
 /** Where each part is stored (cms_settings.setting_key). */
 const ROC_LAYER_KEYS = ['announcement' => 'site_announcement', 'code' => 'site_code', 'meta' => 'meta_overrides', 'code_pages' => 'site_code_pages',
-                        'tracking' => 'site_tracking', 'noindex' => 'noindex_rules', 'sitemap' => 'sitemap_rules'];
+                        'tracking' => 'site_tracking', 'noindex' => 'noindex_rules', 'sitemap' => 'sitemap_rules', 'nav' => 'site_nav'];
 /** Parts that are plain lists/maps (saved as they are, not merged with defaults). */
-const ROC_LAYER_LISTS = ['meta', 'code_pages', 'noindex'];
+const ROC_LAYER_LISTS = ['meta', 'code_pages', 'noindex', 'nav'];
 /** Built pages live in these folders; the others are served by PHP or are not pages. */
 const ROC_LAYER_SKIP_DIRS = ['api', 'cms', 'cms-templates', 'uploads', 'images', 'assets', 'fonts', 'products',
                              'categories', 'blogs', 'gaming-platforms', 'partnerships', 'policy', 'node_modules', 'cgi-bin', '.well-known'];
@@ -58,6 +58,7 @@ function rocLayerDefaults(): array {
                        'pinterest' => '', 'facebook' => '', 'yandex' => '', 'gmb_url' => '', 'gmb_place_id' => ''],
         'noindex' => [],                                   // ["/path/", "/old-section/*"]
         'sitemap' => ['exclude' => [], 'extra' => []],     // exclude: paths; extra: [{path, title}]
+        'nav' => [],                                       // CMS > Menus & footer ([] = the site's own menu)
         'updated' => '',
     ];
 }
@@ -77,6 +78,7 @@ function rocLayerLoad(string $root): array {
         if (is_array($j['tracking'] ?? null)) $d['tracking'] = array_merge($d['tracking'], $j['tracking']);
         $d['noindex'] = array_values(array_filter((array)($j['noindex'] ?? []), 'is_string'));
         if (is_array($j['sitemap'] ?? null)) $d['sitemap'] = array_merge($d['sitemap'], $j['sitemap']);
+        $d['nav'] = is_array($j['nav'] ?? null) ? $j['nav'] : [];
         $d['updated'] = (string)($j['updated'] ?? '');
     }
     return $cache[$root] = $d;
@@ -191,6 +193,134 @@ function rocLayerSitemapSkip(string $root, string $loc): bool {
     return rocLayerPathIn($path, (array)($L['sitemap']['exclude'] ?? [])) || rocLayerPathIn($path, (array)($L['noindex'] ?? []));
 }
 
+/* ---------------------------------------------------------- menus & footer */
+/* CMS > Menus & footer. The markup below mirrors src/components/Header.jsx,
+   ValuePropsFooter.jsx and BrandLogo.jsx (the parts marked data-roc-region /
+   data-roc-text / data-roc-logo) so React hydrates the same HTML. */
+
+function rocNavIcon(string $name, string $cls): string {
+    static $icons = null;
+    if ($icons === null) $icons = json_decode((string)@file_get_contents(__DIR__ . '/nav-icons.json'), true) ?: [];
+    $svg = (string)($icons[$name] ?? ($icons['link'] ?? ''));
+    return '<span class="inline-flex" aria-hidden="true">' . str_replace('__CLS__', $cls, $svg) . '</span>';
+}
+
+/** Same rule as navIsActive() in src/data/siteNav.js. */
+function rocNavActive(string $url, string $path): bool {
+    return $path === $url || ($url !== '/' && substr($url, -1) === '/' && strpos($path, $url) === 0);
+}
+
+function rocNavHeader(array $items, string $path): string {
+    $on = 'bg-emerald-600 text-white shadow-sm';
+    $off = 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50';
+    $h = ''; $n = count($items);
+    foreach (array_values($items) as $i => $it) {
+        $url = (string)($it['url'] ?? '/'); $label = rocLayerH((string)($it['label'] ?? ''));
+        $active = rocNavActive($url, $path);
+        $kids = array_values((array)($it['children'] ?? []));
+        if (!$kids) {
+            $h .= '<a href="' . rocLayerH($url) . '" class="px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap'
+                . ($i === $n - 1 ? ' mr-1 lg:mr-2' : '') . ' ' . ($active ? $on : $off) . '">' . $label . '</a>';
+            continue;
+        }
+        $h .= '<div class="relative roc-dd"><a href="' . rocLayerH($url) . '" class="px-1.5 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-tight rounded-xl flex items-center gap-0.5 transition-all whitespace-nowrap ' . ($active ? $on : $off) . '">'
+            . '<span>' . $label . '</span>' . rocNavIcon('chevron-down', 'w-3 h-3 transition-transform duration-300') . '</a>'
+            . '<div class="roc-dd-panel mega-dropdown-mirror absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[320px] rounded-3xl p-3 shadow-2xl space-y-1.5 animate-page-in z-[99999]">';
+        foreach ($kids as $c) {
+            $h .= '<a href="' . rocLayerH((string)($c['url'] ?? '/')) . '" class="dropdown-tile p-2.5 rounded-xl cursor-pointer flex items-center justify-between gap-2.5 group no-underline">'
+                . '<div class="flex items-center gap-2.5 min-w-0"><div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">'
+                . rocNavIcon((string)($c['icon'] ?? 'link') ?: 'link', 'w-4 h-4') . '</div>'
+                . '<div class="min-w-0"><span class="block font-display font-bold text-xs text-slate-900 group-hover:text-emerald-700 truncate">' . rocLayerH((string)($c['title'] ?? '')) . '</span>'
+                . '<span class="text-[10px] text-slate-500 block truncate">' . rocLayerH((string)($c['desc'] ?? '')) . '</span></div></div>'
+                . rocNavIcon('arrow-right', 'w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 shrink-0') . '</a>';
+        }
+        $b = (array)($it['button'] ?? []);
+        if (trim((string)($b['label'] ?? '')) !== '') {
+            $h .= '<a href="' . rocLayerH((string)($b['url'] ?? '/')) . '" class="block text-center text-xs font-display font-extrabold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl py-2 no-underline">' . rocLayerH((string)$b['label']) . '</a>';
+        }
+        $h .= '</div></div>';
+    }
+    return $h;
+}
+
+function rocNavFooterPoints(array $points): string {
+    $h = '';
+    foreach (array_values($points) as $i => $p) {
+        $h .= '<div class="flex items-center gap-2 text-xs font-semibold ' . ($i === 0 ? 'text-emerald-300' : 'text-emerald-300/80') . '">'
+            . rocNavIcon((string)($p['icon'] ?? 'check') ?: 'check', 'w-4 h-4 text-emerald-400 shrink-0') . '<span>' . rocLayerH((string)($p['text'] ?? '')) . '</span></div>';
+    }
+    return $h;
+}
+
+function rocNavFooterCols(array $cols): string {
+    $spans = [1 => [7], 2 => [4, 3], 3 => [3, 2, 2], 4 => [2, 2, 2, 1]];
+    $cols = array_values($cols); $n = count($cols); $h = '';
+    foreach ($cols as $i => $c) {
+        $h .= '<div class="lg:col-span-' . (($spans[$n] ?? [])[$i] ?? 2) . ' space-y-3">'
+            . '<p class="m-0 tracking-tight font-display font-extrabold text-xs text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">'
+            . rocNavIcon((string)($c['icon'] ?? 'link') ?: 'link', 'w-3.5 h-3.5 text-emerald-400') . '<span>' . rocLayerH((string)($c['title'] ?? '')) . '</span></p>'
+            . '<ul class="space-y-2 text-xs text-emerald-100/80 font-medium">';
+        foreach ((array)($c['links'] ?? []) as $l) {
+            $h .= '<li><a href="' . rocLayerH((string)($l['url'] ?? '/')) . '" class="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">'
+                . rocNavIcon((string)($l['icon'] ?? 'link') ?: 'link', 'w-3.5 h-3.5 text-emerald-400') . '<span>' . rocLayerH((string)($l['label'] ?? '')) . '</span></a></li>';
+        }
+        $h .= '</ul></div>';
+    }
+    return $h;
+}
+
+/** Replaces the inside of every element carrying $attr="$value" (nested same-name tags allowed). */
+function rocNavReplaceInner(string $html, string $attr, string $value, string $inner): string {
+    $needle = $attr . '="' . $value . '"';
+    $from = 0;
+    while (($p = strpos($html, $needle, $from)) !== false) {
+        $open = strrpos(substr($html, 0, $p), '<');
+        if ($open === false || !preg_match('/^<([a-z0-9]+)/i', substr($html, $open, 20), $m)) break;
+        $tag = strtolower($m[1]);
+        $start = strpos($html, '>', $p) + 1;
+        // Find the matching close tag.
+        $depth = 1; $i = $start;
+        while ($depth > 0 && preg_match('#<(/?)' . $tag . '\b[^>]*>#i', $html, $mm, PREG_OFFSET_CAPTURE, $i)) {
+            $isClose = $mm[1][0] === '/';
+            $selfClose = !$isClose && substr($mm[0][0], -2) === '/>';
+            if ($isClose) $depth--; elseif (!$selfClose) $depth++;
+            $i = $mm[0][1] + strlen($mm[0][0]);
+            if ($depth === 0) { $end = $mm[0][1]; break; }
+        }
+        if (!isset($end)) break;
+        $html = substr($html, 0, $start) . $inner . substr($html, $end);
+        $from = $start + strlen($inner);
+        unset($end);
+    }
+    return $html;
+}
+
+/** Applies the saved menu, footer and logo to a page (when the CMS has saved them). */
+function rocNavApply(string $html, string $path, array $nav): string {
+    if (!empty($nav['header']) && is_array($nav['header'])) $html = rocNavReplaceInner($html, 'data-roc-region', 'header-nav', rocNavHeader($nav['header'], $path));
+    $f = (array)($nav['footer'] ?? []);
+    if ($f) {
+        if (isset($f['points'])) $html = rocNavReplaceInner($html, 'data-roc-region', 'footer-points', rocNavFooterPoints((array)$f['points']));
+        if (isset($f['columns'])) $html = rocNavReplaceInner($html, 'data-roc-region', 'footer-cols', rocNavFooterCols((array)$f['columns']));
+        if (isset($f['about'])) $html = rocNavReplaceInner($html, 'data-roc-text', 'footer-about', rocLayerH((string)$f['about']));
+        if (isset($f['copyright'])) $html = rocNavReplaceInner($html, 'data-roc-text', 'footer-copyright', rocLayerH(str_replace('{year}', date('Y'), (string)$f['copyright'])));
+        if (isset($f['disclaimer'])) $html = rocNavReplaceInner($html, 'data-roc-text', 'footer-disclaimer', rocLayerH((string)$f['disclaimer']));
+    }
+    $lg = (array)($nav['logo'] ?? []);
+    foreach (['line1', 'line2', 'tagline'] as $k) if (isset($lg[$k])) $html = rocNavReplaceInner($html, 'data-roc-logo', $k, rocLayerH((string)$lg[$k]));
+    if (trim((string)($lg['image'] ?? '')) !== '') {
+        $html = rocNavReplaceInner($html, 'data-roc-logo', 'icon', '<img src="' . rocLayerH((string)$lg['image']) . '" alt="" class="w-full h-full object-cover rounded-[inherit]"/>');
+    }
+    return $html;
+}
+
+/** The site's own menu (src/data/siteNav.js, written by scripts/generate-nav-icons.mjs). */
+function rocNavDefault(): array {
+    static $d = null;
+    if ($d === null) $d = json_decode((string)@file_get_contents(__DIR__ . '/nav-default.json'), true) ?: [];
+    return $d;
+}
+
 /* ---------------------------------------------------------------- apply */
 
 /** Removes earlier additions; returns [html, originals|null]. */
@@ -247,7 +377,21 @@ function rocLayerSetMeta(string $html, string $title, string $desc): string {
  */
 function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true): string {
     if (stripos($html, '</head>') === false || !preg_match('#<body\b[^>]*>#i', $html)) return $html;
+    $hadNav = strpos($html, 'window.__ROC_NAV') !== false;     // this page shows a CMS menu now
     [$html, $orig] = rocLayerStrip($html);
+
+    // CMS > Menus & footer: draw the saved menu; after a reset, draw the default one again.
+    $nav = (array)($L['nav'] ?? []);
+    if ($nav || $hadNav) {
+        $use = $nav ?: rocNavDefault();
+        if ($use) {
+            $html = rocNavApply($html, $path, $use);
+            if (trim((string)($use['logo']['image'] ?? '')) === '' && strpos($html, 'object-cover rounded-[inherit]') !== false) {
+                $svg = (string)@file_get_contents(__DIR__ . '/nav-logo.svg');
+                if ($svg !== '') $html = rocNavReplaceInner($html, 'data-roc-logo', 'icon', $svg);
+            }
+        }
+    }
 
     $head = '';
     $ov = $metaOn ? ($L['meta'][$path] ?? null) : null;
@@ -263,6 +407,7 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
     }
     if ($noindex) $html = rocLayerSetRobots($html, 'noindex, follow');      // CMS > Settings > Noindex rules
     $head .= rocLayerTrackingHead((array)($L['tracking'] ?? []), $path);
+    if ($nav) $head .= '<script>window.__ROC_NAV=' . json_encode($nav, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) . ';</script>';
     $ann = rocLayerAnnouncementOn($L['announcement']);
     // Whole-site code first, then code for page groups (/products/*) and for this page.
     $codes = [$L['code']];

@@ -1,4 +1,5 @@
 import React from 'react';
+import { getSiteNav } from '../data/siteNav';
 
 export const BrandLogo = ({ 
   size = 'normal', 
@@ -9,6 +10,8 @@ export const BrandLogo = ({
   const isLarge = size === 'large';
   const isSmall = size === 'small';
   const isDark = theme === 'dark';
+  // Logo text and image from CMS > Menus & footer (the server swaps the marked parts the same way).
+  const logo = getSiteNav().logo;
 
   return (
     <div 
@@ -16,9 +19,12 @@ export const BrandLogo = ({
       className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0 select-none transition-transform duration-200 hover:scale-102"
     >
       {/* Official Emerald Squircle Game Remote Icon (Matching User Brand Spec) */}
-      <div className={`relative shrink-0 flex items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-all duration-300 ${
+      <div data-roc-logo="icon" className={`relative shrink-0 flex items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-all duration-300 ${
         isLarge ? 'w-12 h-12 sm:w-14 sm:h-14 rounded-3xl' : isSmall ? 'w-8 h-8 rounded-xl' : 'w-9 h-9 sm:w-10 sm:h-10 rounded-2xl'
       }`}>
+        {logo.image ? (
+          <img src={logo.image} alt="" className="w-full h-full object-cover rounded-[inherit]" />
+        ) : (
         <svg 
           viewBox="0 0 100 100" 
           className="w-3/5 h-3/5 drop-shadow-sm text-white"
@@ -42,6 +48,7 @@ export const BrandLogo = ({
           <circle cx="64" cy="58" r="4.5" fill="#FFFFFF" />
           <circle cx="74" cy="68" r="4.5" fill="#FFFFFF" />
         </svg>
+        )}
       </div>
 
       {/* Brand Text: RUN ON CONSOLE */}
@@ -49,21 +56,21 @@ export const BrandLogo = ({
         <div className="flex items-center gap-1.5 leading-none">
           <span className={`font-display font-black tracking-tight ${
             isLarge ? 'text-2xl sm:text-3xl' : isSmall ? 'text-base' : 'text-lg sm:text-xl'
-          } ${isDark ? 'text-white' : 'text-slate-900'} uppercase`}>
-            RUN ON
+          } ${isDark ? 'text-white' : 'text-slate-900'} uppercase`} data-roc-logo="line1">
+            {logo.line1}
           </span>
           <span className={`font-display font-black tracking-tight ${
             isLarge ? 'text-2xl sm:text-3xl' : isSmall ? 'text-base' : 'text-lg sm:text-xl'
-          } text-emerald-600 uppercase group-hover:text-emerald-500 transition-colors drop-shadow-xs`}>
-            CONSOLE
+          } text-emerald-600 uppercase group-hover:text-emerald-500 transition-colors drop-shadow-xs`} data-roc-logo="line2">
+            {logo.line2}
           </span>
         </div>
 
         {showSubtitle && (
           <span className={`text-[8px] sm:text-[9px] font-mono font-bold tracking-widest uppercase whitespace-nowrap mt-0.5 ${
             isDark ? 'text-emerald-300/90' : 'text-emerald-700'
-          }`}>
-            THE GAMING & HARDWARE HUB
+          }`} data-roc-logo="tagline">
+            {logo.tagline}
           </span>
         )}
       </div>

@@ -1263,7 +1263,7 @@ function renderShell(){
       item('games','Games','🎮')+
       (can('products','view')?item('products','Products','▣')+item('product-images','Product images','▨')+item('product-categories','Product categories','▤'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
-      item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Blog agent','✍')+item('announce','Announcement bar','📣')+item('sitecode','Template & code','⌨')+
+      item('nav','Menus & footer','☰')+item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Blog agent','✍')+item('announce','Announcement bar','📣')+item('sitecode','Template & code','⌨')+
       item('siteusers','Site users','👤')+item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+'</div>':'')+
     '<div class="sfoot"><div class="who"><div class="av">'+
       esc((S.user.username||'?').slice(0,2).toUpperCase())+'</div>'+
@@ -1310,6 +1310,7 @@ function renderView(){
   if(S.view==='announce' && S.user.role==='administrator') return renderAnnouncement(m);
   if(S.view==='blogagent' && S.user.role==='administrator') return renderBlogAgent(m);
   if(S.view==='settings' && S.user.role==='administrator') return renderSettings(m);
+  if(S.view==='nav' && S.user.role==='administrator') return renderNavEditor(m);
   if(S.view==='sitemap' && S.user.role==='administrator') return renderSitemapView(m);
   if(S.view==='sitecode' && S.user.role==='administrator') return renderSiteCode(m);
   if(S.view==='media') return renderMedia(m);
@@ -3592,6 +3593,98 @@ async function renderSitemapView(m){
     var extra=$('#st-extra',m).value.split('\n').map(function(l){ var p=l.split('|'); return {path:(p[0]||'').trim(), title:(p.slice(1).join('|')||'').trim()}; }).filter(function(x){ return x.path; });
     try{ var r=await api('site-settings.php',{part:'sitemap',value:{exclude:$('#st-exclude',m).value, extra:extra}}); toast(r.message,'good'); renderSitemapView(m); }catch(err){ toast(err.message,'bad'); }
   });
+}
+
+/* ------------------------------------------------------- menus & footer */
+/* Header menu, footer and logo (api/v1/cms/site-settings.php, part "nav"). */
+
+async function renderNavEditor(m){
+  m.innerHTML=head('Menus & footer','The header menu, the footer and the logo on every page','<a class="btn" href="/" target="_blank" rel="noopener">Open website ↗</a>')+
+    '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d; try{ d=await api('site-settings.php'); }catch(e){ toast(e.message,'bad'); return; }
+  if(S.view!=='nav') return;
+  var N=JSON.parse(JSON.stringify(d.nav)), icons=d.nav_icons||[];
+  var body=$('.body',m);
+  var icoSel=function(path,val){ return '<select data-p="'+path+'" style="width:110px">'+icons.map(function(i){ return '<option'+(i===val?' selected':'')+'>'+esc(i)+'</option>'; }).join('')+'</select>'; };
+  var inp=function(path,val,ph,w){ return '<input type="text" data-p="'+path+'" value="'+esc(val||'')+'" placeholder="'+esc(ph||'')+'"'+(w?' style="width:'+w+'"':'')+'>'; };
+  var tools=function(path,i,n){ return '<span style="white-space:nowrap"><button class="btn sm" type="button" data-mv="'+path+'|'+i+'|-1"'+(i===0?' disabled':'')+' title="Move up">▲</button>'+
+    '<button class="btn sm" type="button" data-mv="'+path+'|'+i+'|1"'+(i===n-1?' disabled':'')+' title="Move down">▼</button>'+
+    '<button class="btn sm" type="button" data-rm="'+path+'|'+i+'" title="Remove">✕</button></span>'; };
+  function get(path){ return path.split('.').reduce(function(o,k){ return o==null?o:o[k]; },N); }
+  function set(path,val){ var ks=path.split('.'), o=N; for(var i=0;i<ks.length-1;i++){ if(o[ks[i]]==null) o[ks[i]]={}; o=o[ks[i]]; } o[ks[ks.length-1]]=val; }
+
+  function draw(){
+    var H=N.header||[], F=N.footer||{}, L=N.logo||{};
+    body.innerHTML=
+      '<div class="alert info">Changes go live on <b>every page</b> when you press <b>Save</b>. Links can be a page on this site (<code>/products/</code>) or a full https:// address. '+
+      (d.nav_custom?'You are using your own menu. ':'This is the website\'s own menu: edit it and save to make it yours. ')+'Every earlier version is kept for 30 days.</div>'+
+      // logo
+      '<div class="card"><div class="chead"><h3>Logo</h3></div><div class="cbody">'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>First word(s)</label>'+inp('logo.line1',L.line1,'RUN ON')+'</div>'+
+        '<div class="field"><label>Coloured word(s)</label>'+inp('logo.line2',L.line2,'CONSOLE')+'</div></div>'+
+        '<div class="field"><label>Small line under the name</label>'+inp('logo.tagline',L.tagline,'THE GAMING & HARDWARE HUB')+'</div>'+
+        '<div class="field"><label>Logo picture (optional)</label>'+inp('logo.image',L.image,'/uploads/my-logo.png — copy the link from the Media library')+'<div class="hint">Square picture; leave empty to keep the green controller icon.</div></div>'+
+      '</div></div>'+
+      // header
+      '<div class="card"><div class="chead"><h3>Header menu</h3><span class="note">'+H.length+' items</span></div><div class="cbody">'+
+        H.map(function(it,i){
+          var P='header.'+i, kids=it.children||[];
+          return '<div style="border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px">'+
+            '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="min-width:20px">'+(i+1)+'</b>'+inp(P+'.label',it.label,'LABEL','160px')+inp(P+'.url',it.url,'/page/','220px')+
+              '<label style="display:flex;gap:6px;align-items:center;font-size:12.5px"><input type="checkbox" data-dd="'+i+'"'+(kids.length?' checked':'')+'> Dropdown</label>'+tools('header',i,H.length)+'</div>'+
+            (kids.length?'<div style="margin:10px 0 0 28px">'+kids.map(function(c,j){ var C=P+'.children.'+j;
+                return '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px">'+icoSel(C+'.icon',c.icon)+inp(C+'.title',c.title,'Title','150px')+inp(C+'.desc',c.desc,'Short description','230px')+inp(C+'.url',c.url,'/page/','170px')+tools(P+'.children',j,kids.length)+'</div>'; }).join('')+
+              '<button class="btn sm" type="button" data-add="'+P+'.children">＋ Dropdown link</button>'+
+              '<div style="display:flex;gap:6px;align-items:center;margin-top:8px"><span class="hint">Button at the bottom:</span>'+inp(P+'.button.label',(it.button||{}).label,'View all →','180px')+inp(P+'.button.url',(it.button||{}).url,'/page/','170px')+'</div></div>':'')+
+          '</div>';
+        }).join('')+
+        '<button class="btn" type="button" data-add="header">＋ Menu item</button></div></div>'+
+      // footer
+      '<div class="card"><div class="chead"><h3>Footer</h3></div><div class="cbody">'+
+        '<div class="field"><label>About text (under the logo)</label><textarea data-p="footer.about" rows="3">'+esc(F.about||'')+'</textarea></div>'+
+        '<div class="field"><label>Points under the text</label>'+(F.points||[]).map(function(pt,i){ var P='footer.points.'+i;
+            return '<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">'+icoSel(P+'.icon',pt.icon)+inp(P+'.text',pt.text,'Text')+tools('footer.points',i,(F.points||[]).length)+'</div>'; }).join('')+
+          '<button class="btn sm" type="button" data-add="footer.points">＋ Point</button></div>'+
+        '<h4 style="margin:16px 0 8px">Link columns</h4>'+(F.columns||[]).map(function(col,i){ var P='footer.columns.'+i, links=col.links||[];
+            return '<div style="border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px">'+
+              '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>Column '+(i+1)+'</b>'+icoSel(P+'.icon',col.icon)+inp(P+'.title',col.title,'TITLE','200px')+tools('footer.columns',i,(F.columns||[]).length)+'</div>'+
+              '<div style="margin:8px 0 0 28px">'+links.map(function(l,j){ var C=P+'.links.'+j;
+                return '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px">'+icoSel(C+'.icon',l.icon)+inp(C+'.label',l.label,'Link text','220px')+inp(C+'.url',l.url,'/page/','200px')+tools(P+'.links',j,links.length)+'</div>'; }).join('')+
+              '<button class="btn sm" type="button" data-add="'+P+'.links">＋ Link</button></div></div>'; }).join('')+
+        ((F.columns||[]).length<4?'<button class="btn" type="button" data-add="footer.columns">＋ Column</button>':'<div class="hint">4 columns at most.</div>')+
+        '<div class="field" style="margin-top:14px"><label>Copyright line ({year} = this year)</label>'+inp('footer.copyright',F.copyright,'© {year} …')+'</div>'+
+        '<div class="field"><label>Small print on the right</label>'+inp('footer.disclaimer',F.disclaimer,'As an Amazon Associate …')+'</div>'+
+      '</div></div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"><button class="btn primary" type="button" id="nav-save">Save to website</button>'+
+        (d.nav_custom?'<button class="btn" type="button" id="nav-reset">Back to the website\'s own menu</button>':'')+'</div>'+
+      '<div class="card"><div class="chead"><h3>Earlier versions</h3><span class="note">Kept 30 days</span></div><div class="cbody" id="set-hist"></div></div>';
+
+    body.querySelectorAll('[data-p]').forEach(function(el){ el.addEventListener('input',function(){ set(el.dataset.p, el.value); S.dirty=true; }); el.addEventListener('change',function(){ set(el.dataset.p, el.value); S.dirty=true; }); });
+    body.querySelectorAll('[data-add]').forEach(function(b){ b.addEventListener('click',function(){
+      var path=b.dataset.add, arr=get(path)||[];
+      var blank={'header':{label:'NEW',url:'/'}, 'footer.points':{icon:'check',text:''}, 'footer.columns':{title:'NEW COLUMN',icon:'link',links:[]}}[path] ||
+        (/\.children$/.test(path)?{title:'',desc:'',url:'/',icon:'link'}:{label:'',url:'/',icon:'link'});
+      arr.push(blank); set(path,arr); S.dirty=true; draw(); }); });
+    body.querySelectorAll('[data-rm]').forEach(function(b){ b.addEventListener('click',function(){
+      var x=b.dataset.rm.split('|'), arr=get(x[0]); arr.splice(+x[1],1); S.dirty=true; draw(); }); });
+    body.querySelectorAll('[data-mv]').forEach(function(b){ b.addEventListener('click',function(){
+      var x=b.dataset.mv.split('|'), arr=get(x[0]), i=+x[1], j=i+(+x[2]); var t=arr[i]; arr[i]=arr[j]; arr[j]=t; S.dirty=true; draw(); }); });
+    body.querySelectorAll('[data-dd]').forEach(function(c){ c.addEventListener('change',function(){
+      var it=N.header[+c.dataset.dd];
+      if(c.checked){ it.children=it.children&&it.children.length?it.children:[{title:'',desc:'',url:'/',icon:'link'}]; it.button=it.button||{label:'',url:it.url}; }
+      else { delete it.children; delete it.button; }
+      S.dirty=true; draw(); }); });
+    $('#nav-save',m).addEventListener('click',async function(){
+      try{ var r=await api('site-settings.php',{part:'nav',value:N}); S.dirty=false; toast(r.message,'good'); renderNavEditor(m); }catch(e){ toast(e.message,'bad'); }
+    });
+    var rs=$('#nav-reset',m);
+    if(rs) rs.addEventListener('click',async function(){
+      if(!confirm('Go back to the website\'s own menu, footer and logo? Your version stays in the history.')) return;
+      try{ var r=await api('site-settings.php',{part:'nav',value:[]}); S.dirty=false; toast(r.message,'good'); renderNavEditor(m); }catch(e){ toast(e.message,'bad'); }
+    });
+    settingsHistory($('#set-hist',m),'nav',function(){ renderNavEditor(m); });
+  }
+  draw();
 }
 
 /* ------------------------------------------------------------ live version */

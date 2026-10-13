@@ -14,6 +14,7 @@
  *   sitemap    {exclude: [paths], extra: [{path, title}]}
  *   robots     text of public_html/robots.txt
  *   llms       text of public_html/llms.txt
+ *   nav        header menu, footer and logo ([] = the site's own menu)  — CMS > Menus & footer
  *   redirects  [{from, to, type: 301|302|410}]  written to .htaccess between
  *              "# ROC cms-redirects BEGIN/END"; the home page is checked after saving and
  *              the previous .htaccess is put back if the site stops answering.
@@ -52,6 +53,7 @@ function ssGet(PDO $pdo, string $ROOT, string $part) {
         case 'robots':   return ssFile($ROOT, 'robots.txt');
         case 'llms':     return ssFile($ROOT, 'llms.txt');
         case 'redirects': return ssRedirects($pdo);
+        case 'nav':      return $L['nav'];
     }
     return null;
 }
@@ -279,6 +281,59 @@ function ssSave(PDO $pdo, string $ROOT, string $part, $v, array $session): array
             if (!ssWrite($ROOT . '/' . ($part === 'robots' ? 'robots.txt' : 'llms.txt'), rtrim($text) . "\n")) ssOut(500, ['success' => false, 'error' => 'Could not write the file.']);
             $v = rtrim($text) . "\n"; $msg = 'Saved. https://runonconsole.com/' . ($part === 'robots' ? 'robots.txt' : 'llms.txt') . ' is updated.';
             break;
+        case 'nav':
+            $v = is_array($v) ? $v : [];
+            if (!$v) {   // reset: the site's own menu again
+                rocLayerSave($pdo, $ROOT, 'nav', [], (int)$session['user_id']);
+                $msg = 'Back to the website\'s own menu, footer and logo.';
+                break;
+            }
+            $icons = array_keys(json_decode((string)@file_get_contents(__DIR__ . '/nav-icons.json'), true) ?: []);
+            $txt = function ($x, int $max) { return trim(mb_substr((string)preg_replace('/\s+/u', ' ', strip_tags((string)$x)), 0, $max)); };
+            $url = function ($x) use (&$err) {
+                $u = trim((string)$x);
+                if (!preg_match('#^(/[^\s"<>]*|https://[^\s"<>]+|mailto:[^\s"<>]+)$#i', $u)) { $err['nav'] = 'Not a valid link: "' . $u . '" (use /page/ or https://…).'; return '/'; }
+                return $u;
+            };
+            $icon = function ($x) use ($icons) { $x = (string)$x; return in_array($x, $icons, true) ? $x : 'link'; };
+            $header = [];
+            foreach (array_slice((array)($v['header'] ?? []), 0, 10) as $it) {
+                $label = $txt($it['label'] ?? '', 40); if ($label === '') continue;
+                $item = ['label' => $label, 'url' => $url($it['url'] ?? '')];
+                $kids = [];
+                foreach (array_slice((array)($it['children'] ?? []), 0, 8) as $c) {
+                    $t = $txt($c['title'] ?? '', 60); if ($t === '') continue;
+                    $kids[] = ['title' => $t, 'desc' => $txt($c['desc'] ?? '', 100), 'url' => $url($c['url'] ?? ''), 'icon' => $icon($c['icon'] ?? 'link')];
+                }
+                if ($kids) {
+                    $item['children'] = $kids;
+                    $bl = $txt($it['button']['label'] ?? '', 60);
+                    if ($bl !== '') $item['button'] = ['label' => $bl, 'url' => $url($it['button']['url'] ?? $item['url'])];
+                }
+                $header[] = $item;
+            }
+            if (!$header) $err['nav'] = 'The header menu needs at least one item.';
+            $f = (array)($v['footer'] ?? []);
+            $points = [];
+            foreach (array_slice((array)($f['points'] ?? []), 0, 4) as $pt) { $t = $txt($pt['text'] ?? '', 120); if ($t !== '') $points[] = ['icon' => $icon($pt['icon'] ?? 'check'), 'text' => $t]; }
+            $cols = [];
+            foreach (array_slice((array)($f['columns'] ?? []), 0, 4) as $c) {
+                $t = $txt($c['title'] ?? '', 40); if ($t === '') continue;
+                $links = [];
+                foreach (array_slice((array)($c['links'] ?? []), 0, 12) as $l) { $lb = $txt($l['label'] ?? '', 60); if ($lb !== '') $links[] = ['label' => $lb, 'url' => $url($l['url'] ?? ''), 'icon' => $icon($l['icon'] ?? 'link')]; }
+                $cols[] = ['title' => $t, 'icon' => $icon($c['icon'] ?? 'link'), 'links' => $links];
+            }
+            $lg = (array)($v['logo'] ?? []);
+            $img = trim((string)($lg['image'] ?? ''));
+            if ($img !== '' && !preg_match('#^(/(uploads|images)/[^\s"<>]+|https://[^\s"<>]+)\.(png|jpe?g|webp|svg|gif)(\?[^\s"<>]*)?$#i', $img)) $err['nav'] = 'The logo image must be a picture link (png, jpg, webp or svg) from the Media library.';
+            if ($err) ssOut(422, ['success' => false, 'error' => $err['nav'], 'errors' => $err]);
+            $v = ['logo' => ['line1' => $txt($lg['line1'] ?? '', 20), 'line2' => $txt($lg['line2'] ?? '', 20), 'tagline' => $txt($lg['tagline'] ?? '', 60), 'image' => $img],
+                  'header' => $header,
+                  'footer' => ['about' => $txt($f['about'] ?? '', 500), 'points' => $points, 'columns' => $cols,
+                               'copyright' => $txt($f['copyright'] ?? '', 200), 'disclaimer' => $txt($f['disclaimer'] ?? '', 300)]];
+            rocLayerSave($pdo, $ROOT, 'nav', $v, (int)$session['user_id']);
+            $msg = 'Saved. The menu, footer and logo are updated on every page.';
+            break;
         case 'redirects':
             $rules = [];
             foreach ((array)$v as $i => $r) {
@@ -309,7 +364,10 @@ function ssSave(PDO $pdo, string $ROOT, string $part, $v, array $session): array
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
     if (isset($_GET['history'])) ssOut(200, ['success' => true, 'days' => ROC_HISTORY_DAYS, 'history' => rocHistList($ROOT, 'settings', (string)$_GET['history'])]);
     $out = ['success' => true];
-    foreach (['tracking', 'noindex', 'sitemap', 'robots', 'llms', 'redirects'] as $p) $out[$p] = ssGet($pdo, $ROOT, $p);
+    foreach (['tracking', 'noindex', 'sitemap', 'robots', 'llms', 'redirects', 'nav'] as $p) $out[$p] = ssGet($pdo, $ROOT, $p);
+    $out['nav_custom'] = (bool)$out['nav'];
+    if (!$out['nav']) $out['nav'] = rocNavDefault();
+    $out['nav_icons'] = array_keys(json_decode((string)@file_get_contents(__DIR__ . '/nav-icons.json'), true) ?: []);
     $out['system'] = ['redirects' => ssSystemRedirects($ROOT), 'noindex' => ssSystemNoindex($pdo, $ROOT, rocLayerFromDb($pdo, $ROOT)), 'disallow' => ssDisallow($ROOT)];
     ssOut(200, $out);
 }
