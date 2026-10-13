@@ -7,6 +7,7 @@
  *   /sitemaps/products-sitemap.xml        every product page                 (?map=products)
  *   /sitemaps/categories-sitemap.xml      every category page                (?map=categories)
  *   /sitemaps/blogs-sitemap.xml           published blogs      -> blog-render.php
+ *   /sitemaps/news-sitemap.xml            news, last 2 days    -> blog-render.php?news=1
  *   /sitemaps/cms-pages-sitemap.xml       CMS pages (indexed)  -> page-render.php
  *
  * Pages, products and categories are read from the built website folders, so a new
@@ -121,6 +122,7 @@ $children = [
     'products'   => [$fromDb('product-render.php', 'products'), 'Products and product categories'],
     'categories' => [$fromDb('category-render.php', 'categories'), 'Gaming platforms'],
     'blogs'      => [time(), 'Blog posts'],
+    'news'       => [time(), 'News of the last 2 days (Google News)'],
 ];
 // CMS pages (About-style pages made in the CMS) are listed only once there is at least one.
 try {

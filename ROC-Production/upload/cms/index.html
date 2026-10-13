@@ -1295,8 +1295,8 @@ function renderShell(){
       item('games','Games','🎮')+
       (can('products','view')?item('products','Products','▣')+item('product-images','Product images','▨')+item('product-categories','Product categories','▤'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
-      item('builder','Site builder','✦')+item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Blog writer','✍')+item('announce','Announcement bar','📣')+
-      item('siteusers','Site users','👤')+item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+'</div>':'')+
+      item('builder','Site builder','✦')+item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Blog & news writer','✍')+item('announce','Announcement bar','📣')+
+      item('siteusers','Site users','👤')+item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+item('siteinfo','Website info','ℹ')+'</div>':'')+
     '<div class="sfoot"><div class="who"><div class="av">'+
       esc((S.user.username||'?').slice(0,2).toUpperCase())+'</div>'+
       '<div><div style="font-size:12.5px">'+esc(S.user.username)+'</div>'+
@@ -1342,6 +1342,7 @@ function renderView(){
   if(S.view==='metas' && can('pages','view')) return renderMetas(m);
   if(S.view==='announce' && S.user.role==='administrator') return renderAnnouncement(m);
   if(S.view==='blogagent' && S.user.role==='administrator') return renderBlogAgent(m);
+  if(S.view==='siteinfo' && S.user.role==='administrator') return renderSiteInfo(m);
   if(S.view==='settings' && S.user.role==='administrator') return renderSettings(m);
   if(S.view==='nav' && S.user.role==='administrator'){ S.view='builder'; return renderBuilder(m); }
   if(S.view==='builder' && S.user.role==='administrator') return renderBuilder(m);
@@ -3419,14 +3420,145 @@ function pkTime(utc){
   return isNaN(d)?esc(utc):d.toLocaleString('en-GB',{timeZone:'Asia/Karachi',weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 }
 
+/* ------------------------------------------------- Blog writer > News */
+async function renderNewsWriter(m){
+  m.innerHTML=head('News writer','Live gaming and hardware news, checked against trusted sources and published by itself',bmSwitch())+
+    '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  bmBind(m);
+  var d; try{ d=await api('news-admin.php'); }catch(e){ toast(e.message,'bad'); return; }
+  if(S.view!=='blogagent'||S.baMode!=='news') return;
+  var body=$('.body',m), st=d.state||{}, set=d.settings||{}, feeds=(d.feeds||[]).slice();
+  var waiting=d.waiting||[];
+
+  function storyRow(c){
+    return '<tr><td><div style="font-weight:600">'+esc(c.title)+'</div>'+
+      '<div class="hint" style="margin-top:4px">'+c.reports.map(function(r){ return '<a href="'+esc(r.link)+'" target="_blank" rel="noopener">'+esc(r.src)+' ↗</a>'; }).join(' · ')+'</div>'+
+      (c.links.length?'<div class="hint" style="margin-top:4px">Links to: '+c.links.map(function(l){ return '<a href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.title)+'</a>'+(l.amazon?' <span class="tag published">Amazon</span>':''); }).join(' · ')+'</div>':'')+'</td>'+
+      '<td style="white-space:nowrap"><b>'+c.sources+'</b> source'+(c.sources===1?'':'s')+(c.official?'<br><span class="tag published">official</span>':'')+'</td>'+
+      '<td style="white-space:nowrap">'+esc(pkTime(c.when))+'</td></tr>';
+  }
+  function waitingCard(){
+    return '<div class="card"><div class="chead"><h3>Stories that can be published</h3><span class="note">best first</span></div>'+
+      (waiting.length?'<table class="list"><thead><tr><th>Story (reports and where it links on our site)</th><th>Verified by</th><th>Latest report</th></tr></thead><tbody>'+waiting.map(storyRow).join('')+'</tbody></table>':
+        '<div class="empty"><div class="big">📰</div><div>No story is ready right now. A story needs '+set.min_sources+'+ trusted sources (or 1 official source) and must link to our products, categories or platform guides.</div><div class="hint" style="margin-top:6px">Press "See what is new" to read the sources now.</div></div>')+'</div>';
+  }
+  function logCard(){
+    var log=d.log||[];
+    return '<div class="card"><div class="chead"><h3>News published</h3><span class="note">last 100</span></div>'+
+      (log.length?'<table class="list"><thead><tr><th>Story</th><th>Verified by</th><th>Published</th><th>Status</th></tr></thead><tbody>'+log.map(function(p){
+        return '<tr><td><div style="font-weight:600">'+esc(p.title)+'</div><div class="t-slug"><a href="/news/'+esc(p.slug)+'/" target="_blank" rel="noopener">/news/'+esc(p.slug)+'/ ↗</a> · '+esc(p.words)+' words'+(p.by?' · by '+esc(p.by):'')+'</div>'+
+          '<div class="hint">'+(p.links||[]).map(function(r){ return '<a href="'+esc(r.link)+'" target="_blank" rel="noopener">'+esc(r.src)+' ↗</a>'; }).join(' · ')+'</div></td>'+
+          '<td>'+esc(p.sources)+(p.official?' <span class="tag published">official</span>':'')+'</td>'+
+          '<td style="white-space:nowrap">'+esc(pkTime(p.created))+'</td>'+
+          '<td><span class="tag '+(p.status==='published'?'published':'off')+'">'+esc(p.status)+'</span></td></tr>';
+      }).join('')+'</tbody></table>':'<div class="empty"><div class="big">📰</div><div>No news published yet.</div></div>')+'</div>';
+  }
+  function settingsCard(){
+    var errs=st.feed_errors||{}, nErr=Object.keys(errs).length;
+    return '<div class="card"><div class="chead"><h3>Live news</h3><span class="note">'+(set.on?'<b style="color:#059669">● On</b>':'<b style="color:#b45309">● Off</b>')+' · today '+d.today+' of '+set.per_day+'</span></div><div class="cbody">'+
+      '<div class="hint" style="margin-bottom:10px">The server reads '+feeds.length+' trusted sources every 20 minutes. A story is published only when <b>'+set.min_sources+' or more</b> of them report it (or the company itself announces it), and only when it links to our products, categories or guides. '+
+        'It is written in our own words with your Groq/Gemini key, and gets a "Sources: verified by N trusted sources" box and a "See it on Run On Console" box with the product pages and Amazon links. Your PC can be off.</div>'+
+      (d.writers&&d.writers.length?'':'<div class="alert" style="margin-bottom:10px">Save a free Groq or Gemini key in the <b>Blog</b> tab first: the news uses the same key.</div>')+
+      '<label style="display:flex;gap:10px;align-items:center;border:1px solid '+(set.on?'var(--brand)':'var(--line)')+';border-radius:12px;padding:10px 12px;cursor:pointer;margin-bottom:12px"><input type="checkbox" id="nw-on"'+(set.on?' checked':'')+'><span><b>Publish news by itself</b><br><span class="hint">Off: nothing is published (you can still look at what is new).</span></span></label>'+
+      '<div style="display:flex;gap:12px;flex-wrap:wrap">'+
+        '<div class="field" style="flex:1;min-width:140px"><label>Stories a day (max)</label><input type="number" id="nw-pd" min="1" max="12" value="'+esc(set.per_day)+'"></div>'+
+        '<div class="field" style="flex:1;min-width:140px"><label>Time between stories</label><select id="nw-gap">'+[[60,'1 hour'],[90,'1.5 hours'],[120,'2 hours'],[180,'3 hours'],[240,'4 hours']].map(function(x){ return '<option value="'+x[0]+'"'+(+set.gap_min===x[0]?' selected':'')+'>'+x[1]+'</option>'; }).join('')+'</select></div>'+
+        '<div class="field" style="flex:1;min-width:120px"><label>From (Pakistan time)</label><input type="time" id="nw-st" value="'+esc(set.start)+'"></div>'+
+        '<div class="field" style="flex:1;min-width:120px"><label>Until</label><input type="time" id="nw-en" value="'+esc(set.end)+'"></div>'+
+        '<div class="field" style="flex:1;min-width:160px"><label>Sources needed</label><select id="nw-ms">'+[[1,'1 trusted source'],[2,'2 sources (recommended)'],[3,'3 sources']].map(function(x){ return '<option value="'+x[0]+'"'+(+set.min_sources===x[0]?' selected':'')+'>'+x[1]+'</option>'; }).join('')+'</select></div>'+
+      '</div>'+
+      '<div class="hint" style="margin:4px 0 8px">'+(st.last_fetch?'Sources last read: '+esc(pkTime(st.last_fetch))+' ('+esc(st.items||0)+' reports'+(nErr?', '+nErr+' source'+(nErr===1?'':'s')+' not reachable':'')+'). ':'Sources not read yet. ')+
+        (st.last_ok?'Last story: '+esc(pkTime(st.last_ok))+'. ':'')+(st.last_error?'<span style="color:#b91c1c">Last problem: '+esc(st.last_error)+'</span>':'')+'</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="nw-save">Save</button><button class="btn" id="nw-prev">See what is new</button><button class="btn" id="nw-pub">Publish the best story now</button></div>'+
+    '</div></div>';
+  }
+  function emailCard(){
+    return '<div class="card"><div class="chead"><h3>Email alerts</h3><span class="note">blogs and news</span></div><div class="cbody">'+
+      '<div class="hint" style="margin-bottom:8px">An email is sent to this address every time a blog post goes live or a news story is published (with its sources).</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><input type="email" id="nw-mail" value="'+esc(d.notify_email||'')+'" placeholder="you@example.com" style="flex:1;min-width:220px">'+
+      '<button class="btn primary" id="nw-msave">Save</button>'+(d.notify_email?'<button class="btn" id="nw-mtest">Send a test email</button>':'')+'</div>'+
+      (st.last_email?'<div class="hint" style="margin-top:6px">Last email: '+esc(pkTime(String(st.last_email).replace(' (failed)','')))+(String(st.last_email).indexOf('failed')>0?' <span style="color:#b91c1c">(not sent)</span>':'')+'</div>':'')+
+      '<div class="hint" style="margin-top:6px">The first emails may land in Spam: mark them "Not spam" once.</div></div></div>';
+  }
+  function feedsCard(){
+    return '<details class="card" style="padding:0"><summary class="chead" style="cursor:pointer;list-style:none"><h3>Trusted sources ('+feeds.length+')</h3><span class="note">'+(d.custom_feeds?'your list':'built-in list')+'</span></summary><div class="cbody">'+
+      '<div class="hint" style="margin-bottom:8px">RSS addresses of the sites the news is checked against. "Official" = the company itself (one official source is enough).</div>'+
+      '<table class="list"><thead><tr><th>Name</th><th>RSS address</th><th>Official</th><th></th></tr></thead><tbody id="nw-feeds"></tbody></table>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn sm" type="button" id="nw-fadd">＋ Source</button><button class="btn sm primary" type="button" id="nw-fsave">Save sources</button>'+
+      (d.custom_feeds?'<button class="btn sm" type="button" id="nw-freset">Back to the built-in list</button>':'')+'</div></div></details>';
+  }
+  body.innerHTML=settingsCard()+emailCard()+waitingCard()+logCard()+feedsCard();
+
+  var call=async function(payload, btn, reload){
+    if(btn){ btn.disabled=true; var old=btn.textContent; btn.innerHTML='<span class="spin" style="width:10px;height:10px"></span> '+esc(old); }
+    try{ var r=await api('news-admin.php',payload); toast(r.message||'Done.','good'); if(reload!==false) renderNewsWriter(m); return r; }
+    catch(e){ toast(e.message,'bad'); if(btn){ btn.disabled=false; btn.textContent=old; } }
+  };
+  var settings=function(){ return {action:'settings',on:$('#nw-on',m).checked,per_day:+$('#nw-pd',m).value,gap_min:+$('#nw-gap',m).value,start:$('#nw-st',m).value,end:$('#nw-en',m).value,min_sources:+$('#nw-ms',m).value}; };
+  $('#nw-save',m).addEventListener('click',function(){ call(settings(),this); });
+  $('#nw-prev',m).addEventListener('click',function(){ var b=this; call({action:'preview'},b,false).then(function(r){
+    if(!r) return; waiting=r.waiting||[]; st.feed_errors=r.errors||{}; renderNewsWriter(m); }); });
+  $('#nw-pub',m).addEventListener('click',function(){
+    if(!confirm('Read the sources and publish the best story now? It takes 1-2 minutes and goes live at once.')) return;
+    call({action:'publish_now'},this);
+  });
+  $('#nw-msave',m).addEventListener('click',function(){ var p=settings(); p.notify_email=$('#nw-mail',m).value.trim(); call(p,this); });
+  var mt=$('#nw-mtest',m); if(mt) mt.addEventListener('click',function(){ call({action:'test_email'},this,false).then(function(){ mt.disabled=false; mt.textContent='Send a test email'; }); });
+  var readFeeds=function(){ return feeds.map(function(f,i){ return {name:$('[data-fn="'+i+'"]',m).value,url:$('[data-fu="'+i+'"]',m).value,official:$('[data-fo="'+i+'"]',m).checked}; }); };
+  function drawFeeds(){
+    var errs=st.feed_errors||{}, tb=$('#nw-feeds',m);
+    tb.innerHTML=feeds.map(function(f,i){
+      return '<tr><td><input type="text" data-fn="'+i+'" value="'+esc(f.name)+'" style="width:100%" placeholder="Name"></td><td><input type="text" data-fu="'+i+'" value="'+esc(f.url)+'" style="width:100%">'+
+        (errs[f.name]?'<div class="hint" style="color:#b45309">'+esc(errs[f.name])+'</div>':'')+'</td>'+
+        '<td style="text-align:center"><input type="checkbox" data-fo="'+i+'"'+(f.official?' checked':'')+'></td><td><button class="btn sm" type="button" data-frm="'+i+'" title="Remove">✕</button></td></tr>';
+    }).join('');
+    tb.querySelectorAll('[data-frm]').forEach(function(b){ b.addEventListener('click',function(){ feeds=readFeeds(); feeds.splice(+b.dataset.frm,1); drawFeeds(); }); });
+  }
+  drawFeeds();
+  $('#nw-fadd',m).addEventListener('click',function(){ feeds=readFeeds(); feeds.push({name:'',url:'https://',official:false}); drawFeeds(); });
+  $('#nw-fsave',m).addEventListener('click',function(){ var p=settings(); p.feeds=readFeeds(); call(p,this); });
+  var fr=$('#nw-freset',m); if(fr) fr.addEventListener('click',function(){ if(confirm('Use the built-in list of trusted sources again?')) call({action:'feeds_reset'},this); });
+}
+
+/* ------------------------------------------------------- Website info */
+async function renderSiteInfo(m){
+  m.innerHTML=head('Website info','What runonconsole.com is built with, what each part does and the tools connected to it')+
+    '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d; try{ d=await api('site-info.php'); }catch(e){ toast(e.message,'bad'); return; }
+  if(S.view!=='siteinfo') return;
+  var dot=function(s){ return s==='ok'?'<b style="color:#059669">● working</b>':s==='off'?'<b style="color:#b45309">● not set up</b>':s==='bad'?'<b style="color:#b91c1c">● problem</b>':'<span class="hint">—</span>'; };
+  $('.body',m).innerHTML=
+    '<div class="card"><div class="chead"><h3>The website</h3></div><div class="cbody">'+
+      '<table class="list"><tbody>'+(d.facts||[]).map(function(f){ return '<tr><td style="width:34%;font-weight:600">'+esc(f[0])+'</td><td>'+esc(f[1])+'</td></tr>'; }).join('')+'</tbody></table></div></div>'+
+    '<div class="card"><div class="chead"><h3>Built with</h3><span class="note">technology and what it is for</span></div>'+
+      '<table class="list"><thead><tr><th>Technology</th><th>Used for</th></tr></thead><tbody>'+(d.stack||[]).map(function(x){
+        return '<tr><td style="font-weight:600;white-space:nowrap">'+esc(x.name)+'</td><td>'+esc(x.purpose)+'</td></tr>'; }).join('')+'</tbody></table></div>'+
+    '<div class="card"><div class="chead"><h3>Connected tools</h3><span class="note">live status</span></div>'+
+      '<table class="list"><thead><tr><th>Tool</th><th>What it does</th><th>Status</th></tr></thead><tbody>'+(d.tools||[]).map(function(x){
+        return '<tr><td style="font-weight:600">'+(x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.name)+' ↗</a>':esc(x.name))+'</td><td>'+esc(x.purpose)+(x.detail?'<div class="hint">'+esc(x.detail)+'</div>':'')+'</td><td style="white-space:nowrap">'+dot(x.status)+'</td></tr>'; }).join('')+'</tbody></table></div>'+
+    '<div class="card"><div class="chead"><h3>History</h3><span class="note">every deploy</span></div>'+
+      '<table class="list"><thead><tr><th>Deploy</th><th>Date</th><th>What changed</th></tr></thead><tbody>'+(d.history||[]).map(function(r){
+        return '<tr><td style="white-space:nowrap">#'+esc(r.deploy)+'</td><td style="white-space:nowrap">'+esc(r.date)+'</td><td>'+esc(r.title)+'</td></tr>'; }).join('')+'</tbody></table></div>';
+}
+
 var STAGE_NAMES={tofu:['TOFU','Learn','#0ea5e9'],mofu:['MOFU','Compare','#a855f7'],bofu:['BOFU','Buy','#059669']};
 function stageTag(s){ var x=STAGE_NAMES[s]||[s,'','#64748b']; return '<span class="tag" style="background:'+x[2]+'1a;color:'+x[2]+';border-color:'+x[2]+'55" title="'+esc(x[1])+'">'+x[0]+' · '+x[1]+'</span>'; }
 
+function bmSwitch(){
+  var mode=S.baMode||'blog';
+  return '<div class="seg" id="ba-mode"><button type="button" data-bm="blog"'+(mode==='blog'?' class="on"':'')+'>✍ Blog</button><button type="button" data-bm="news"'+(mode==='news'?' class="on"':'')+'>📰 News</button></div>';
+}
+function bmBind(m){
+  m.querySelectorAll('[data-bm]').forEach(function(b){ b.addEventListener('click',function(){ if(S.baMode===b.dataset.bm) return; S.baMode=b.dataset.bm; renderBlogAgent(m); }); });
+}
+
 async function renderBlogAgent(m, fresh){
-  m.innerHTML=head('Blog writer','New posts every day from your content plan, published automatically')+
+  if(S.baMode==='news') return renderNewsWriter(m);
+  m.innerHTML=head('Blog writer','New posts every day from your content plan, published automatically',bmSwitch())+
     '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  bmBind(m);
   var d; try{ d=await api('blog-agent-admin.php'); }catch(e){ toast(e.message,'bad'); return; }
-  if(S.view!=='blogagent') return;
+  if(S.view!=='blogagent'||S.baMode==='news') return;
   var body=$('.body',m), P=d.plan||{pillars:[],topics:[]}, st=d.state||{};
   var engine=d.engine, times=(d.slots||['16:00','23:00']).slice();
   var pillarName={}; P.pillars.forEach(function(p){ pillarName[p.id]=p.name; });

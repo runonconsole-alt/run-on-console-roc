@@ -14,8 +14,8 @@
   function blogPath(href) {
     try {
       var u = new URL(href, location.href);
-      // Blogs, products and gaming platforms are rendered by the server from the CMS database.
-      return u.origin === location.origin && /^\/(blogs|products|categories|gaming-platforms)(\/|$)/.test(u.pathname) ? u : null;
+      // Blogs, news, products and gaming platforms are rendered by the server from the CMS database.
+      return u.origin === location.origin && /^\/(blogs|news|products|categories|gaming-platforms)(\/|$)/.test(u.pathname) ? u : null;
     } catch (e) { return null; }
   }
 
