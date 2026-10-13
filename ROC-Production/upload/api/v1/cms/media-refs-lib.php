@@ -13,7 +13,7 @@
  * Product name cards (/images/products/{slug}.webp) and share cards (/images/products/share/{slug}.jpg)
  * are only shown for a published product without a real photo, so that is the only time they count.
  * Blog and news covers (/uploads/blog-covers/) are only shown by their post, so only the blogs table
- * counts for them (old covers kept in a revision or history table are not in use).
+ * image and text count for them (old covers left in og_image, twitter_image or a history table are not in use).
  */
 if (defined('ROC_MEDIA_REFS_LIB')) return;
 define('ROC_MEDIA_REFS_LIB', 1);
@@ -50,7 +50,9 @@ function rocMediaRefs(PDO $pdo, string $root): array {
     // Covers: only what the posts use now.
     foreach (array_keys($refs) as $u) if (strpos($u, '/uploads/blog-covers/') === 0) unset($refs[$u]);
     try {
-        foreach ($pdo->query('SELECT * FROM blogs')->fetchAll(PDO::FETCH_ASSOC) as $b)
+        // Only the picture the page shows (image) and pictures inside the text count; og_image and
+        // twitter_image can still hold an older cover that no page shows.
+        foreach ($pdo->query('SELECT image, content FROM blogs')->fetchAll(PDO::FETCH_ASSOC) as $b)
             foreach ($b as $v) if (is_string($v) && stripos($v, 'blog-covers/') !== false && preg_match_all('#uploads/blog-covers/[A-Za-z0-9_.%-]+?\.(?:jpe?g|png|webp|gif|avif)#i', $v, $m))
                 foreach ($m[0] as $u) $refs['/' . rawurldecode($u)] = 1;
     } catch (\Throwable $e) {}
