@@ -11,16 +11,9 @@
    "label": "Page templates refreshed (cli-refresh-templates.php)",
    "type": "file",
    "path": "product-render.php"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-DjLFNGxE.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/49",
- "build": "index-DjLFNGxE.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]

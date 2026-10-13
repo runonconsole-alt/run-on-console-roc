@@ -15,7 +15,8 @@ import {
 
 const SITE_NAME = 'Run On Console';
 const SITE_DOMAIN = BASE_DOMAIN;
-const DEFAULT_IMAGE = `${SITE_DOMAIN}/images/hero_cod.jpg`;
+// Our own picture (cli-site-images.php); game key art is not ours to use as the share picture.
+const DEFAULT_IMAGE = `${SITE_DOMAIN}/uploads/site/home-hero.webp`;
 const LOGO_URL = `${SITE_DOMAIN}/images/logo-512.png`;
 
 /**
