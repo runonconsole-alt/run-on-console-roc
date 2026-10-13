@@ -15,16 +15,9 @@
    "label": "Category pages (cli-category-urls.php --apply)",
    "type": "htaccess",
    "marker": "catpage=1"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-CPMpguML.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/40",
- "build": "index-CPMpguML.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]

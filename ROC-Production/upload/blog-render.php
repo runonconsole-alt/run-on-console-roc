@@ -606,11 +606,25 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
     $hero = preg_replace('/\d+(<!-- -->)?\s*Hardware Reviews &amp; Guides/', $allPublished . ' Hardware Reviews &amp; Guides', $hero, 1);
     $hero = preg_replace('#<canvas\b[^>]*></canvas>#i', '', $hero);
     if ($news) {
-        $hero = '<div class="space-y-12 py-6"><div class="text-center space-y-3">'
-            . '<span class="inline-block bg-emerald-600 text-white text-[11px] font-extrabold uppercase px-3 py-1 rounded-md tracking-wider">Live</span>'
-            . '<h1 class="font-display font-extrabold text-3xl sm:text-5xl text-slate-900">Gaming &amp; PC Hardware News</h1>'
-            . '<p class="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto">New GPUs, CPUs, handhelds, consoles and games. Every story is checked against trusted sources (listed under it) and links to the products on Run On Console. '
-            . $allPublished . ' stor' . ($allPublished === 1 ? 'y' : 'ies') . ' so far.</p></div>';
+        // Same green hero as the other pages, with the news picture (cli-site-images.php) or the newest story's cover.
+        $pic = is_file(__DIR__ . '/uploads/site/news-hero.webp') ? '/uploads/site/news-hero.webp' : '';
+        $picAlt = 'Gaming and PC hardware news on Run On Console';
+        if ($pic === '' && $posts) { $pic = trim((string)($posts[0]['image'] ?? '')); $picAlt = trim((string)($posts[0]['image_alt'] ?? '')) ?: (string)$posts[0]['title']; }
+        $hero = '<div class="space-y-12 py-6">'
+            . '<div class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
+            . '<div class="absolute -top-20 -left-20 w-80 h-80 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>'
+            . '<div class="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl pointer-events-none"></div>'
+            . '<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10"><div class="lg:col-span-7 space-y-4">'
+            . '<span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5 badge-glow"><span class="w-2 h-2 rounded-full bg-rose-600 animate-pulse"></span>Live news</span>'
+            . '<h1 class="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight">Gaming &amp; PC Hardware News</h1>'
+            . '<p class="text-emerald-100 text-xs sm:text-sm leading-relaxed max-w-lg">New GPUs, CPUs, handhelds, consoles and games. Every story is checked against trusted sources (listed under it) and links to the products on Run On Console.</p>'
+            . '<div class="flex flex-wrap gap-2.5 pt-2">'
+            . '<span class="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl">' . $allPublished . ' stor' . ($allPublished === 1 ? 'y' : 'ies') . ' so far</span>'
+            . '<span class="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl">Checked against 2+ sources</span></div>'
+            . '</div>'
+            . ($pic !== '' ? '<div class="lg:col-span-5"><div class="bg-slate-900/85 border-2 border-emerald-400/40 rounded-3xl p-3 shadow-2xl">'
+                . '<img width="1200" height="675" src="' . rocH($pic) . '" alt="' . rocH($picAlt) . '" class="w-full rounded-2xl object-cover" style="aspect-ratio:16/9"/></div></div>' : '')
+            . '</div></div>';
     }
 
     $cards = '';
