@@ -7,6 +7,7 @@
  *   php cli-content-writer.php --apply --limit=N  writes N pages now (the writer key has a daily limit)
  *   php cli-content-writer.php --apply --slug=X   writes one product or platform again
  *   php cli-content-writer.php --auto=off|on      stops / restarts the automatic writing (2 a run, 40 a day)
+ *   php cli-content-writer.php --repair           texts written before Deploy 48: "32?bit" -> "32-bit\"
  *   php cli-content-writer.php --rollback=FILE    puts the old texts back
  *
  * The text is written with the blog writer key (CMS > Blog & news writer) and saved in the CMS:
@@ -40,6 +41,24 @@ require_once $ROOT . '/api/v1/cms/content-writer-lib.php';
 if ($auto !== null) {
     rocBlogSet($pdo, 'content_auto', $auto === 'off' ? 'off' : 'on');
     exit('Automatic writing is ' . ($auto === 'off' ? 'off' : 'on (2 pages a run, at most ' . ROC_CONTENT_DAILY . ' a day)') . ".\n");
+}
+
+// Texts written before Deploy 48: a non-breaking hyphen was stored as "?" ("32?bit", "120?fps").
+if (in_array('--repair', $args, true)) {
+    $fix = function (string $s): string { return (string)preg_replace('/(?<=[A-Za-z0-9])\?(?=[A-Za-z0-9])/', '-', $s); };
+    $n = 0; $done = rocContentDone($pdo);
+    foreach (array_keys($done['platform']) as $s) {
+        $st = $pdo->prepare('SELECT about_text FROM gaming_categories WHERE slug = ?'); $st->execute([$s]);
+        $t = (string)$st->fetchColumn(); $u = $fix($t);
+        if ($u !== $t) { $pdo->prepare('UPDATE gaming_categories SET about_text = ? WHERE slug = ?')->execute([$u, $s]); $n++; echo "  fixed platform {$s}\n"; }
+    }
+    foreach (array_keys($done['product']) as $s) {
+        $st = $pdo->prepare('SELECT summary, pros, cons, short_desc FROM products WHERE slug = ?'); $st->execute([$s]);
+        $r = $st->fetch(PDO::FETCH_ASSOC); if (!$r) continue;
+        $u = array_map(function ($v) use ($fix) { return $fix((string)$v); }, $r);
+        if ($u !== $r) { $pdo->prepare('UPDATE products SET summary = ?, pros = ?, cons = ?, short_desc = ? WHERE slug = ?')->execute([$u['summary'], $u['pros'], $u['cons'], $u['short_desc'], $s]); $n++; echo "  fixed product {$s}\n"; }
+    }
+    exit("Repaired {$n} page(s).\n");
 }
 
 if ($rollback !== null) {
@@ -92,7 +111,8 @@ foreach ($items as [$t, $row]) {
 file_put_contents($file, json_encode($backup, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
 $ok = 0;
-foreach ($items as [$t, $row]) {
+foreach ($items as $i => [$t, $row]) {
+    if ($i > 0) sleep(20);                  // the free writer key allows about 3 pages a minute
     if ($t === 'platform') $r = rocContentWritePlatform($pdo, $row);
     else { [$cn, $gn] = rocContentNames($pdo, $row); $r = rocContentWriteProduct($pdo, $row, $cn, $gn); }
     echo '  ' . ($r['ok'] ? 'ok ' : '!  ') . str_pad($t, 9) . $row['slug'] . ($r['ok'] ? '' : ' - ' . $r['error']) . "\n";

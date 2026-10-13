@@ -305,6 +305,13 @@ RELEASES = [
                   'Product FAQ: the specs question only when there are real specs'],
          checks=[dict(label='Content writer (cli-content-writer.php)', type='file', path='api/v1/cron/cli-content-writer.php')],
          pr=REPO + '47'),
+    dict(deploy=48, date='2026-10-13', title='Content writer pacing and clean characters, links between all main pages',
+         changes=['Content writer: waits between pages and when the free writer key reaches its limit per minute, then goes on by itself',
+                  'Written texts keep plain characters (no more 32?bit); cli-content-writer.php --repair fixes the texts written before',
+                  'Stricter writing rules: tips and gear advice never claim a feature, port or compatibility that is not in the data',
+                  'Links: product pages link to the gaming platforms they are used on; every category page links to its guides, gaming platforms and the game checker; the products page links to categories, platforms, the checker and the guides'],
+         checks=[dict(label='Content writer (cli-content-writer.php)', type='file', path='api/v1/cron/cli-content-writer.php')],
+         pr=REPO + '48'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
