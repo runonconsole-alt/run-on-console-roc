@@ -373,8 +373,14 @@ export function getSeoMetadata(pathname) {
   };
 }
 
+// A page whose title/description was changed in the CMS (Metas tab) carries
+// <meta name="roc-meta-override">: on that page keep the server's values.
+const ROC_OVERRIDE_PATH = typeof document !== 'undefined' && document.querySelector('meta[name="roc-meta-override"]')
+  ? window.location.pathname : null;
+
 export function applyClientSideSeo(seo) {
   if (typeof document === 'undefined') return;
+  if (ROC_OVERRIDE_PATH && window.location.pathname === ROC_OVERRIDE_PATH) return;
   if (seo.title) document.title = seo.title;
   let metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc && seo.description) metaDesc.setAttribute('content', seo.description);

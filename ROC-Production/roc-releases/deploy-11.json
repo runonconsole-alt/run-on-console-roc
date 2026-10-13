@@ -1,0 +1,21 @@
+{
+ "deploy": 11,
+ "date": "2026-10-08",
+ "title": "Profiles: own photo, required bio/city/country, CMS Site users",
+ "changes": [
+  "Members can upload their own profile photo",
+  "Bio, city and country are required after sign-up",
+  "CMS → Site users: members, filters, suspend / restore"
+ ],
+ "checks": [
+  {
+   "label": "Profile photos installer",
+   "type": "file",
+   "path": "uploads/avatars/.htaccess"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/20",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

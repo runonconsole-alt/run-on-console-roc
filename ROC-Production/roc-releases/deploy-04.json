@@ -1,0 +1,21 @@
+{
+ "deploy": 4,
+ "date": "2026-10-07",
+ "title": "Editor paste, header menus, media Replace, privacy page",
+ "changes": [
+  "Paste from Google Docs and ChatGPT keeps headings, lists and tables",
+  "Header dropdown menus work everywhere; Ctrl+click opens a new tab",
+  "Media library: Replace button, alt text explained, JPG/PNG/WebP only",
+  "Privacy Policy and Affiliate Disclosure merged into one page"
+ ],
+ "checks": [
+  {
+   "label": "Privacy page installer",
+   "type": "file",
+   "path": "privacy-policy/index.html"
+  }
+ ],
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

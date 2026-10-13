@@ -1,0 +1,20 @@
+{
+ "deploy": 7,
+ "date": "2026-10-07",
+ "title": "QA fixes",
+ "changes": [
+  "Chatbot in English with working buttons",
+  "Compatibility checker uses each game's own requirements",
+  "Recent games added; heavy animations removed; schema and robots fixes"
+ ],
+ "checks": [
+  {
+   "label": "SEO headers installer",
+   "type": "htaccess",
+   "marker": "# ROC headers BEGIN (cli-seo-headers.php)"
+  }
+ ],
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

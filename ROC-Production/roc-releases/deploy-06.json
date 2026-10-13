@@ -1,0 +1,19 @@
+{
+ "deploy": 6,
+ "date": "2026-10-07",
+ "title": "Messages inbox",
+ "changes": [
+  "Contact and Write for us forms arrive in CMS → Messages and by email",
+  "Reply to a message from the CMS"
+ ],
+ "checks": [
+  {
+   "label": "Messages installer",
+   "type": "file",
+   "path": "api/v1/messages.php"
+  }
+ ],
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}
