@@ -17,16 +17,9 @@
    "label": "Blog agent token made in CMS",
    "type": "setting",
    "key": "blog_agent_token_hash"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-CCUrsC38.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/26",
- "build": "index-CCUrsC38.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]

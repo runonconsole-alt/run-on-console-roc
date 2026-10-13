@@ -79,7 +79,10 @@ function rocSmBuilt(string $root, ?string $dir): array {
 function rocSmUrlset(array $urls): void {
     echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . ROC_SM_STYLE . "\n"
        . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:roc="https://runonconsole.com/ns/sitemap">' . "\n";
+    $lib = __DIR__ . '/api/v1/cms/site-layer-lib.php';
+    if (is_file($lib)) require_once $lib;
     foreach ($urls as $path => $mtime) {
+        if (function_exists('rocLayerSitemapSkip') && rocLayerSitemapSkip(__DIR__, $path)) continue;   // CMS > Sitemap
         $t = $GLOBALS['ROC_SM_TITLES'][$path] ?? '';
         echo '  <url><loc>' . rocSmEsc(ROC_SM_BASE . $path) . '</loc><lastmod>' . gmdate('c', $mtime) . '</lastmod>'
            . ($t !== '' ? '<roc:title>' . rocSmEsc($t) . '</roc:title>' : '') . "</url>\n";
@@ -88,7 +91,21 @@ function rocSmUrlset(array $urls): void {
     exit;
 }
 
-if ($map === 'pages')      rocSmUrlset(rocSmBuilt($root, null));
+if ($map === 'pages') {
+    $urls = rocSmBuilt($root, null);
+    // Extra addresses added in CMS > Sitemap (pages of this site that the scan cannot see).
+    $lib = $root . '/api/v1/cms/site-layer-lib.php';
+    if (is_file($lib)) {
+        require_once $lib;
+        foreach ((array)(rocLayerLoad($root)['sitemap']['extra'] ?? []) as $e) {
+            $p = (string)($e['path'] ?? '');
+            if (!preg_match('#^/[a-z0-9/_.\-]*$#i', $p) || isset($urls[$p])) continue;
+            $urls[$p] = time();
+            if (trim((string)($e['title'] ?? '')) !== '') $GLOBALS['ROC_SM_TITLES'][$p] = trim((string)$e['title']);
+        }
+    }
+    rocSmUrlset($urls);
+}
 if ($map === 'products')   rocSmUrlset(rocSmBuilt($root, 'products'));
 if ($map === 'categories') rocSmUrlset(rocSmBuilt($root, 'categories'));
 

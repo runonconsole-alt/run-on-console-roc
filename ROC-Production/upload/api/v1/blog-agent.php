@@ -25,7 +25,7 @@ header('Cache-Control: no-store');
 
 const AGENT_TZ = 'Asia/Karachi';
 const AGENT_SLOTS = ['12:00', '18:00'];
-const AGENT_AUTHOR = 'ROC Team';
+const AGENT_AUTHOR = 'ROC';
 
 function agentOut(int $code, array $d): void { http_response_code($code); echo json_encode($d, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); exit; }
 function agentSetting(PDO $pdo, string $key): ?string {

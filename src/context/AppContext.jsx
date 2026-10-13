@@ -40,12 +40,16 @@ export const AppProvider = ({ children, initialUrl = null }) => {
     if (path.includes('/policy')) return { page: 'privacy-policy', param: null, is404: false };
     if (path.includes('/contact')) return { page: 'contact', param: null, is404: false };
     
+    // Before the /auth checks: "/author/" also contains "/auth".
+    if (path.includes('/author/roc-team') || path.includes('/author/omar-abobakar')) {
+      return { page: 'author', param: 'roc-team', is404: false };
+    }
     if (path.includes('/auth/login')) return { page: 'auth', param: 'login', is404: false };
     if (path.includes('/auth/signup')) return { page: 'auth', param: 'signup', is404: false };
     if (path.includes('/auth/verify-email')) return { page: 'auth', param: 'verify-email', is404: false };
     if (path.includes('/auth/forgot-password')) return { page: 'auth', param: 'forgot-password', is404: false };
     if (path.includes('/auth/reset-password')) return { page: 'auth', param: 'reset-password', is404: false };
-    if (path.includes('/auth')) return { page: 'auth', param: 'login', is404: false };
+    if (/^\/auth(\/|$)/.test(path)) return { page: 'auth', param: 'login', is404: false };
     
     if (path.includes('/profile')) return { page: 'profile', param: null, is404: false };
 
