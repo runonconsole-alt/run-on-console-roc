@@ -1167,6 +1167,69 @@ async function renderGames(m){
   m.querySelectorAll('[data-gf]').forEach(function(b){ b.addEventListener('click',function(){ S.gameFilter=b.dataset.gf; renderGames(m); }); });
 }
 
+/* ----------------------------------------------------------- site users */
+/* People who signed up on runonconsole.com (api/v1/cms/site-users.php). Admins only. */
+
+async function renderSiteUsers(m){
+  if(!S.siteUsers){
+    m.innerHTML=head('Site users','Loading…')+'<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+    try{ var d=await api('site-users.php'); S.siteUsers=d.users||[]; S.siteUserCounts=d.counts||{}; }
+    catch(e){ toast(e.message,'bad'); S.siteUsers=[]; S.siteUserCounts={}; }
+    if(S.view!=='siteusers'||S.editing) return;
+  }
+  var f=S.suFilter||'all', q=(S.suQ||'').toLowerCase(), c=S.siteUserCounts||{};
+  var week=Date.now()-7*86400000;
+  var rows=S.siteUsers.filter(function(u){
+    if(f==='verified'&&!u.email_verified) return false;
+    if(f==='incomplete'&&u.complete) return false;
+    if(f==='new'&&new Date(String(u.created_at).replace(' ','T')).getTime()<week) return false;
+    if(f==='suspended'&&u.status!=='suspended') return false;
+    return !q||[u.name,u.username,u.email,u.city,u.country].join(' ').toLowerCase().indexOf(q)!==-1;
+  });
+  var chips={all:['All',c.all||0],new:['New this week',c.new_week||0],verified:['Email verified',c.verified||0],
+    incomplete:['Profile not complete',(c.all||0)-(c.complete||0)],suspended:['Suspended',c.suspended||0]};
+  var av=function(u){
+    return u.avatar_url?'<img src="'+esc(u.avatar_url)+'" alt="" width="36" height="36" style="width:36px;height:36px;border-radius:10px;object-fit:cover">'
+      :'<div class="av" style="width:36px;height:36px;border-radius:10px">'+esc((u.name||u.username||'?').slice(0,2).toUpperCase())+'</div>';
+  };
+  m.innerHTML=head('Site users','People who created an account on runonconsole.com')+
+    '<div class="body">'+
+    '<div class="dstats">'+
+      '<div class="dstat hero"><div class="l">Members</div><div class="n">'+(c.all||0)+'</div><div class="s">'+(c.new_week||0)+' joined this week</div></div>'+
+      '<div class="dstat"><div class="l">Email verified</div><div class="n">'+(c.verified||0)+'</div><div class="s">Can use every feature</div></div>'+
+      '<div class="dstat"><div class="l">Profile complete</div><div class="n">'+(c.complete||0)+'</div><div class="s">Bio, city and country filled in</div></div>'+
+      '<div class="dstat"><div class="l">Suspended</div><div class="n">'+(c.suspended||0)+'</div><div class="s">Cannot sign in</div></div>'+
+    '</div>'+
+    '<div class="card"><div class="chead" style="flex-wrap:wrap;gap:10px">'+
+      '<div class="search" style="max-width:280px;flex:1"><input type="text" id="suq" placeholder="Search name, username, email, city" value="'+esc(S.suQ||'')+'"></div>'+
+      '<div class="chips">'+Object.keys(chips).map(function(k){
+        return '<button class="chip'+(f===k?' on':'')+'" data-suf="'+k+'">'+esc(chips[k][0])+'<span class="n">'+chips[k][1]+'</span></button>';
+      }).join('')+'</div></div>'+
+    (rows.length?'<table class="list"><thead><tr><th>Member</th><th>Location</th><th>Bio</th><th>Status</th><th>Joined</th><th>Last sign-in</th><th></th></tr></thead><tbody>'+
+      rows.map(function(u){
+        return '<tr><td><div style="display:flex;gap:10px;align-items:center">'+av(u)+'<div style="min-width:0"><div style="font-weight:600">'+esc(u.name||'—')+
+            (u.is_admin?' <span class="tag admin">admin</span>':'')+'</div><div class="t-slug">@'+esc(u.username||'')+' · '+esc(u.email||'')+'</div></div></div></td>'+
+          '<td>'+esc([u.city,u.country].filter(Boolean).join(', ')||'—')+'</td>'+
+          '<td style="max-width:260px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-2)" title="'+esc(u.bio||'')+'">'+esc(u.bio||'—')+'</div></td>'+
+          '<td>'+(u.status==='suspended'?'<span class="tag off">suspended</span>':u.email_verified?'<span class="tag published">verified</span>':'<span class="tag draft">not verified</span>')+
+            (u.complete?'':' <span class="tag draft">profile incomplete</span>')+'</td>'+
+          '<td style="color:var(--ink-3);white-space:nowrap">'+when(u.created_at)+'</td>'+
+          '<td style="color:var(--ink-3);white-space:nowrap">'+(u.last_login?when(u.last_login):'—')+'</td>'+
+          '<td style="text-align:right">'+(u.is_admin?'':'<button class="btn sm'+(u.status==='suspended'?'':' danger')+'" data-sus="'+u.id+'" data-to="'+(u.status==='suspended'?'active':'suspended')+'">'+(u.status==='suspended'?'Restore':'Suspend')+'</button>')+'</td></tr>';
+      }).join('')+'</tbody></table>'
+      :'<div class="empty"><div class="big">👤</div><div>No members match.</div></div>')+
+    '</div></div>';
+  var sq=$('#suq',m);
+  sq.addEventListener('input',function(){ S.suQ=sq.value; var at=sq.selectionStart; renderSiteUsers(m); var x=$('#suq',m); if(x){ x.focus(); x.setSelectionRange(at,at); } });
+  m.querySelectorAll('[data-suf]').forEach(function(b){ b.addEventListener('click',function(){ S.suFilter=b.dataset.suf; renderSiteUsers(m); }); });
+  m.querySelectorAll('[data-sus]').forEach(function(b){ b.addEventListener('click',async function(){
+    var to=b.dataset.to;
+    if(to==='suspended' && !confirm('Suspend this member? They are signed out and cannot sign in until restored.')) return;
+    try{ await api('site-users.php',{action:'set_status',id:+b.dataset.sus,status:to}); toast(to==='suspended'?'Member suspended.':'Member restored.','good'); S.siteUsers=null; renderSiteUsers(m); }
+    catch(e){ toast(e.message,'bad'); }
+  }); });
+}
+
 /* --------------------------------------------------------------- shell */
 
 function renderShell(){
@@ -1192,7 +1255,7 @@ function renderShell(){
       item('games','Games','🎮')+
       (can('products','view')?item('products','Products','▣')+item('product-images','Product images','▨')+item('product-categories','Product categories','▤'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
-      item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+'</div>':'')+
+      item('siteusers','Site users','👤')+item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+'</div>':'')+
     '<div class="sfoot"><div class="who"><div class="av">'+
       esc((S.user.username||'?').slice(0,2).toUpperCase())+'</div>'+
       '<div><div style="font-size:12.5px">'+esc(S.user.username)+'</div>'+
@@ -1223,7 +1286,7 @@ function renderShell(){
 function go(v){
   if(S.dirty && !confirm('You have unsaved changes. Leave without saving?'))return;
   if(S.editing) releaseLock(S.editing.id);
-  S.dirty=false; S.editing=null; S.view=v; S.search=''; S.filter='all'; S.mediaLoaded=false; S.sitePages=null;
+  S.dirty=false; S.editing=null; S.view=v; S.search=''; S.filter='all'; S.mediaLoaded=false; S.sitePages=null; S.siteUsers=null;
   renderShell();
 }
 
@@ -1243,6 +1306,7 @@ function renderView(){
   if(S.view==='product-images' && can('products','edit')) return renderProductImages(m);
   if(S.view==='cmspages'){ if(!S.pageMeta){ loadPageMeta().then(function(){ if(S.view==='cmspages'&&!S.editing) renderCmsPages(m); }); } return renderCmsPages(m); }
   if(S.view==='users') return renderUsers(m);
+  if(S.view==='siteusers' && S.user.role==='administrator') return renderSiteUsers(m);
   if(S.view==='audit') return renderSimple(m,'audit-logs.php','logs','Audit log',['created_at','username','action','target_type','target_id']);
   if(S.view==='blogs' && can('blogs','view')) return renderBlogs(m);
   return renderDash(m);

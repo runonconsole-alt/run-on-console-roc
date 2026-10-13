@@ -6,6 +6,9 @@ import { AVATAR_LIST, getAvatarById, RenderAvatar, DEFAULT_AVATAR_ID } from '../
 export function GamingAvatar({ profile, className = 'w-16 h-16', size = 48 }) {
   const avatarId = profile?.avatarIcon || profile?.gaming?.avatarIcon || DEFAULT_AVATAR_ID;
   const name = profile?.name || profile?.username || profile?.email || '';
+  if (profile?.avatarUrl) {
+    return <img src={profile.avatarUrl} alt={name ? `${name}'s profile photo` : 'Profile photo'} width={size} height={size} className={`${className} object-cover rounded-2xl`} />;
+  }
   return <RenderAvatar avatarId={avatarId} name={name} className={className} size={size} />;
 }
 
@@ -24,6 +27,9 @@ export function GamingProfileEditor({ profile, csrfToken, onSaved }) {
   });
 
   const [busy, setBusy] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState(profile.avatarUrl || '');
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoError, setPhotoError] = useState('');
   const [showGallery, setShowGallery] = useState(false);
   const [tempAvatarIcon, setTempAvatarIcon] = useState(draft.avatarIcon || DEFAULT_AVATAR_ID);
   const [feedback, setFeedback] = useState({ status: 'idle', title: '', message: '' });
@@ -43,13 +49,40 @@ export function GamingProfileEditor({ profile, csrfToken, onSaved }) {
     setShowGallery(false);
   };
 
+  // Own photo: uploaded right away (JPG, PNG or WebP), cropped to a square on the server.
+  const uploadPhoto = async (file) => {
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { setPhotoError('Please choose a JPG, PNG or WebP photo.'); return; }
+    if (file.size > 8 * 1024 * 1024) { setPhotoError('The photo is larger than 8 MB.'); return; }
+    setPhotoBusy(true); setPhotoError('');
+    try {
+      const fd = new FormData(); fd.append('photo', file);
+      const resp = await fetch('/api/v1/profile-photo.php', { method: 'POST', headers: { 'X-CSRF-Token': csrfToken }, body: fd, credentials: 'same-origin' });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || !data.success) throw new Error(data.error || 'The photo could not be uploaded.');
+      setPhotoUrl(data.avatarUrl);
+      if (onSaved) onSaved(data);
+    } catch (err) { setPhotoError(err.message); } finally { setPhotoBusy(false); }
+  };
+  const removePhoto = async () => {
+    setPhotoBusy(true); setPhotoError('');
+    try {
+      const resp = await fetch('/api/v1/profile-photo.php', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken }, body: JSON.stringify({ action: 'remove' }), credentials: 'same-origin' });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || !data.success) throw new Error(data.error || 'The photo could not be removed.');
+      setPhotoUrl('');
+      if (onSaved) onSaved(data);
+    } catch (err) { setPhotoError(err.message); } finally { setPhotoBusy(false); }
+  };
+
   const save = async (e) => {
     e.preventDefault();
+    if ((draft.bio || '').trim().length < 20) { setFeedback({ status: 'failed', title: 'Bio is too short', message: 'Please write a short bio (at least 20 characters).' }); return; }
     setBusy(true);
     setFeedback({ status: 'submitting', title: 'Saving Profile', message: 'Updating gamer identity and avatar selection...' });
 
     try {
-      const resp = await fetch('/api/v1/profile.php?action=update-profile', {
+      const resp = await fetch('/api/v1/profile.php?action=update-gaming-profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,10 +142,17 @@ export function GamingProfileEditor({ profile, csrfToken, onSaved }) {
 
       {/* Esports Avatar Badge & Picker Launcher */}
       <div className="flex flex-wrap items-center gap-6 p-6 bg-slate-950/60 rounded-2xl border border-slate-800">
-        <GamingAvatar profile={draft} className="w-20 h-20 rounded-2xl" size={64} />
+        <GamingAvatar profile={{ ...draft, avatarUrl: photoUrl }} className="w-20 h-20 rounded-2xl" size={80} />
 
         <div className="space-y-2.5 flex-1 min-w-[240px]">
           <div className="flex flex-wrap items-center gap-3">
+            <label className={`bg-white hover:bg-emerald-50 text-slate-950 font-extrabold text-xs px-5 py-3 rounded-xl flex items-center gap-2 shadow-md cursor-pointer ${photoBusy ? 'opacity-60 pointer-events-none' : ''}`}>
+              <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => { uploadPhoto(e.target.files && e.target.files[0]); e.target.value = ''; }} />
+              <span>{photoBusy ? 'Uploading…' : photoUrl ? 'Change photo' : 'Upload your photo'}</span>
+            </label>
+            {photoUrl && (
+              <button type="button" onClick={removePhoto} disabled={photoBusy} className="text-xs font-bold text-slate-300 underline cursor-pointer">Remove photo</button>
+            )}
             <button
               type="button"
               onClick={openGalleryModal}
@@ -124,8 +164,9 @@ export function GamingProfileEditor({ profile, csrfToken, onSaved }) {
           </div>
 
           <p className="text-xs text-slate-300">
-            Badge colour: <strong className="text-emerald-400">{selectedAvatar.name}</strong>
+            {photoUrl ? 'Your photo is shown on your profile.' : <>No photo yet: your badge (colour <strong className="text-emerald-400">{selectedAvatar.name}</strong>) is shown instead.</>} JPG, PNG or WebP, up to 8 MB.
           </p>
+          {photoError && <p role="alert" className="text-xs font-bold text-rose-300">{photoError}</p>}
         </div>
       </div>
 
@@ -215,7 +256,7 @@ export function GamingProfileEditor({ profile, csrfToken, onSaved }) {
       {/* Form Text Inputs */}
       <div className="grid sm:grid-cols-2 gap-5">
         <label className="space-y-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Display Name</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Display Name *</span>
           <input className={inputClass} required maxLength={120} value={draft.name} onChange={e => set('name', e.target.value)} />
         </label>
 
@@ -225,13 +266,13 @@ export function GamingProfileEditor({ profile, csrfToken, onSaved }) {
         </label>
 
         <label className="space-y-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">City</span>
-          <input className={inputClass} maxLength={100} autoComplete="address-level2" value={draft.city} onChange={e => set('city', e.target.value)} />
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">City *</span>
+          <input className={inputClass} required maxLength={100} autoComplete="address-level2" value={draft.city} onChange={e => set('city', e.target.value)} />
         </label>
 
         <label className="space-y-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Country</span>
-          <input className={inputClass} maxLength={50} autoComplete="country-name" value={draft.country} onChange={e => set('country', e.target.value)} />
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Country *</span>
+          <input className={inputClass} required maxLength={50} autoComplete="country-name" value={draft.country} onChange={e => set('country', e.target.value)} />
         </label>
 
         <label className="space-y-2 sm:col-span-2">
@@ -241,8 +282,8 @@ export function GamingProfileEditor({ profile, csrfToken, onSaved }) {
       </div>
 
       <label className="block space-y-2">
-        <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Gamer Bio</span>
-        <textarea className={inputClass} rows={3} maxLength={2000} value={draft.bio} onChange={e => set('bio', e.target.value)} placeholder="Tell us what you play and your favorite hardware setup." />
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Gamer Bio * <span className="normal-case font-medium text-slate-400">(at least 20 characters)</span></span>
+        <textarea className={inputClass} required minLength={20} rows={3} maxLength={2000} value={draft.bio} onChange={e => set('bio', e.target.value)} placeholder="Tell us what you play and your favorite hardware setup." />
       </label>
 
       <label className="block space-y-2">
