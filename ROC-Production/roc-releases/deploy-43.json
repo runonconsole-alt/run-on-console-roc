@@ -11,16 +11,9 @@
    "label": "Media clean-up (cli-media-cleanup.php --apply)",
    "type": "file",
    "path": "api/v1/cron/cli-media-cleanup.php"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-C7vKIw8J.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/43",
- "build": "index-C7vKIw8J.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]

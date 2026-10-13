@@ -681,26 +681,48 @@ function rocRenderCategoryHub(string $root, PDO $pdo, array $categories): void {
     }
     $url = ROC_PUBLIC_URL . '/category/';
     $n = count(array_filter($counts));
-    $title = 'All Product Categories: ' . count($all) . ' Gaming Picks | ROC';
-    if (mb_strlen($title) > 55) $title = 'All Product Categories | Run On Console';
-    $desc = 'Two categories: PC Hardware (graphics cards, CPUs, RAM, cases, monitors, speakers) and Gaming Hardware (keyboards, mice, headsets, chairs, handhelds, laptops).';
-    $first = reset($photo);
-    $h  = rocHeadMeta($title, rocCmsTruncatePlain($desc, 155), $url, $first ? $first[0] : '', 'index, follow, max-image-preview:large');
+    $title = 'Gaming & PC Hardware Categories | Run On Console';
+    $desc = 'Shop gaming gear by category: PC Hardware (GPUs, CPUs, RAM, cases, monitors) and Gaming Hardware (keyboards, mice, headsets, chairs, laptops).';
+    // Hero picture: the page's own picture (cli-site-images.php) or four product photos.
+    $hero = is_file($root . '/uploads/site/category-hero.webp') ? '/uploads/site/category-hero.webp' : '';
+    $heroAlt = 'Gaming and PC hardware categories on Run On Console';
+    $tiles = [];
+    foreach (['gpu', 'cpu', 'audio', 'chairs', 'keyboards', 'monitors', 'mice', 'laptops'] as $s) if (isset($photo[$s]) && count($tiles) < 4) $tiles[$s] = $photo[$s];
+    foreach ($photo as $s => $ph) if (count($tiles) < 4 && !isset($tiles[$s])) $tiles[$s] = $ph;
+    $first = reset($tiles);
+    $h  = rocHeadMeta($title, rocCmsTruncatePlain($desc, 155), $url, $hero !== '' ? $hero : ($first ? $first[0] : ''), 'index, follow, max-image-preview:large', 'website', $hero !== '' ? $heroAlt : 'Product categories on Run On Console');
     $h .= rocBreadcrumbLd([['Home', ROC_PUBLIC_URL . '/'], ['Categories', $url]]);
     $items = []; $i = 0;
-    foreach (ROC_PRODUCT_GROUPS as $g => $def) $items[] = ['@type' => 'ListItem', 'position' => ++$i, 'url' => rocCategoryUrl($g), 'name' => $def['name']];
-    $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'CollectionPage', 'name' => 'Product categories', 'url' => $url,
-                     'mainEntity' => ['@type' => 'ItemList', 'itemListElement' => $items]]);
+    foreach (ROC_PRODUCT_GROUPS as $g => $def) {
+        $num = 0; foreach ($all as $p) if (rocGroupOf(rocProductCategorySlug($p)) === $g) $num++;
+        $items[] = ['@type' => 'ListItem', 'position' => ++$i, 'url' => rocCategoryUrl($g), 'name' => $def['name'], 'description' => $def['description'] . ' ' . $num . ' products.'];
+    }
+    $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'CollectionPage', 'name' => 'Gaming & PC Hardware Categories', 'description' => $desc, 'url' => $url,
+                     'inLanguage' => 'en', 'isPartOf' => ['@type' => 'WebSite', 'name' => 'Run On Console', 'url' => ROC_PUBLIC_URL . '/'],
+                     'primaryImageOfPage' => rocAbs($hero !== '' ? $hero : ($first ? $first[0] : '/images/logo.png')),
+                     'mainEntity' => ['@type' => 'ItemList', 'numberOfItems' => count($items), 'itemListElement' => $items]]);
     $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
 
     $m  = $mainOpen . '<div class="space-y-10 py-6 animate-page-in">';
     $m .= '<div class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
         . '<div class="absolute -top-20 -left-20 w-80 h-80 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>'
-        . '<div class="relative z-10 space-y-4 max-w-3xl">'
+        . '<div class="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl pointer-events-none"></div>'
+        . '<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10"><div class="lg:col-span-7 space-y-4">'
         . '<span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5">Categories</span>'
         . '<h1 class="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight">Gaming &amp; PC Hardware Categories</h1>'
-        . '<p class="text-emerald-100 text-xs sm:text-sm leading-relaxed">Two categories: PC Hardware for building or upgrading a gaming PC, and Gaming Hardware for the gear you play with. Pick one to see its products.</p>'
-        . '</div></div>';
+        . '<p class="text-emerald-100 text-xs sm:text-sm leading-relaxed max-w-lg">Two categories: PC Hardware for building or upgrading a gaming PC, and Gaming Hardware for the gear you play with. Pick one to see its products.</p>'
+        . '<div class="flex flex-wrap gap-2.5 pt-2"><span class="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl">2 categories</span>'
+        . '<span class="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl">' . count($all) . ' products</span></div>'
+        . '</div><div class="lg:col-span-5">';
+    if ($hero !== '') {
+        $m .= '<div class="bg-slate-900/85 border-2 border-emerald-400/40 rounded-3xl p-3 shadow-2xl"><img width="1200" height="675" src="' . rocH($hero) . '" alt="' . rocH($heroAlt) . '" class="w-full rounded-2xl object-cover" style="aspect-ratio:16/9"/></div>';
+    } else {
+        $m .= '<div class="grid grid-cols-2 gap-3">';
+        foreach ($tiles as $s => [$img, $t]) $m .= '<div class="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 shadow-2xl"><div class="bg-white rounded-xl h-28 overflow-hidden"><img width="400" height="300" src="' . rocH($img) . '" alt="' . rocH($t) . '" class="w-full h-full object-contain p-2"/></div>'
+            . '<div class="text-[10px] text-emerald-300 font-bold mt-2">' . rocH((string)($categories[$s]['name'] ?? '')) . '</div></div>';
+        $m .= '</div>';
+    }
+    $m .= '</div></div></div>';
     // The two categories, each a big card with four of its product photos.
     $m .= '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
     foreach (ROC_PRODUCT_GROUPS as $g => $def) {
@@ -861,7 +883,8 @@ function rocProductSitemap(PDO $pdo, array $categories): void {
     header('Cache-Control: public, max-age=300');
     $out  = rocSmOpen();
     $line = 'rocSmLine';
-    // /products/ itself is listed in pages-sitemap.xml by sitemap-render.php.
+    // /products/ itself is listed in pages-sitemap.xml by sitemap-render.php; the categories page is here.
+    if ($latest) $out .= $line(ROC_PUBLIC_URL . '/category/', $latest, 'Gaming & PC Hardware Categories');
     foreach ($categories as $s => $c) {
         if (!isset($latestByCat[$s]) || !empty($c['is_noindex'])) continue;
         // A category changes when it is edited or when any of its products changes.

@@ -278,6 +278,12 @@ RELEASES = [
                   'Media library entries whose file is gone (empty not used cards) are removed by cli-media-cleanup.php, with a backup'],
          checks=[dict(label='Media clean-up (cli-media-cleanup.php --apply)', type='file', path='api/v1/cron/cli-media-cleanup.php')],
          pr=REPO + '43'),
+    dict(deploy=44, date='2026-10-13', title='Categories page picture and SEO, CATEGORY without a dropdown',
+         changes=['/category/: green hero with product photos (or its own picture from cli-site-images.php), 2 categories and product count',
+                  '/category/ SEO: title and description, Open Graph picture, CollectionPage and ItemList structured data, listed in the products sitemap',
+                  'Header: CATEGORY is a plain link to /category/ (no dropdown, no View all categories button), on the site and in the CMS menu'],
+         checks=[dict(label='Menu (cli-menu-products.php --apply)', type='file', path='api/v1/cron/cli-menu-products.php')],
+         pr=REPO + '44'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
