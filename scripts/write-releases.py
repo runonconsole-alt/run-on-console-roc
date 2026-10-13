@@ -158,6 +158,19 @@ RELEASES = [
          changes=['CMS > Blog writer: key and token boxes are not filled in by the browser with a saved password'],
          checks=[dict(label='No autofill', type='contains', path='cms/index.html', text='id="ba-key" autocomplete="new-password"')],
          pr=REPO + '29'),
+    dict(deploy=29, date='2026-10-09', title='Products: real Amazon links (/dp/ASIN) and SiteStripe pictures',
+         changes=['103 products get their exact Amazon product link (amazon.com/dp/ASIN) instead of an Amazon search',
+                  'Their picture becomes the SiteStripe product image (served by Amazon); if a browser blocks it, the website picture shows instead',
+                  'Links or pictures already set by hand in the CMS are kept; graphics cards and products not sold on Amazon keep the search link',
+                  'Installer: cli-product-asin.php (dry run, --apply with backup, --rollback)'],
+         checks=[dict(label='ASIN installer', type='file', path='api/v1/cron/cli-product-asin.php')],
+         pr=REPO + '30'),
+    dict(deploy=30, date='2026-10-09', title='Products: product cards back (Amazon image widget is blank); /dp/ links stay',
+         changes=['Amazon SiteStripe image links now return a blank picture, so products show their own name cards again',
+                  'The exact Amazon links (amazon.com/dp/ASIN) stay',
+                  'A blocked or blank Amazon picture anywhere is replaced by the website picture, even when it failed before the page script ran'],
+         checks=[dict(label='Pictures back (run cli-product-asin.php --apply)', type='file', path='api/v1/cron/cli-product-asin.php')],
+         pr=REPO + '30'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

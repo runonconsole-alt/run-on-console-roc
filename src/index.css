@@ -308,3 +308,10 @@
 .animate-ping {
   animation: none !important;
 }
+
+/* Amazon product pictures (SiteStripe links): white background, shown whole. */
+img[src*="amazon-adsystem.com"], img[src*="media-amazon.com"] {
+  object-fit: contain !important;
+  background: #fff;
+  padding: 6px;
+}
