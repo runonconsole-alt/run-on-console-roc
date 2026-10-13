@@ -47,15 +47,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
     rocBlogPlanSync($pdo, $plan);
     $key = trim((string)rocBlogGet($pdo, 'blog_gemini_key', ''));
     $next = rocBlogNextTopic($pdo, $plan);
-    $slots = [];
-    foreach (rocBlogFreeSlots($pdo) as $utc => $label) $slots[] = $label;
+    $slots = []; $nextUtc = null;
+    foreach (rocBlogFreeSlots($pdo) as $utc => $label) { $slots[] = $label; if ($nextUtc === null) $nextUtc = $utc; }
     rocBaOut(200, ['success' => true, 'active' => (string)rocBaGet($pdo, 'blog_agent_token_hash') !== '',
         'created' => (string)rocBaGet($pdo, 'blog_agent_token_created'), 'posts' => $log,
         'engine' => rocBlogEngine($pdo), 'slots' => rocBlogSlots($pdo), 'free_slots' => $slots,
         'gemini' => ['set' => $key !== '', 'end' => $key !== '' ? substr($key, -4) : '', 'model' => (string)rocBlogGet($pdo, 'blog_gemini_model', ROC_GEMINI_MODEL)],
         'cf' => ['set' => (bool)rocBlogCf($pdo), 'account_end' => substr((string)rocBlogGet($pdo, 'blog_cf_account', ''), -4)],
         'groq' => (function () use ($pdo) { $k = trim((string)rocBlogGet($pdo, 'blog_groq_key', '')); return ['set' => $k !== '', 'end' => $k !== '' ? substr($k, -4) : '', 'model' => (string)rocBlogGet($pdo, 'blog_groq_model', '')]; })(),
-        'state' => rocBlogGet($pdo, 'blog_engine_state', []) ?: new stdClass(), 'plan' => $plan, 'next' => $next['id'] ?? null]);
+        'state' => rocBlogGet($pdo, 'blog_engine_state', []) ?: new stdClass(), 'plan' => $plan, 'next' => $next['id'] ?? null,
+        'next_slot' => $nextUtc ? gmdate('c', strtotime($nextUtc . ' UTC')) : null, 'writer_lead' => ROC_WRITER_LEAD,
+        'next_topic' => $next['title'] ?? null]);
 }
 
 $in = json_decode((string)file_get_contents('php://input'), true) ?: [];

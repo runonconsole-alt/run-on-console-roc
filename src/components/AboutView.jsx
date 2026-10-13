@@ -84,35 +84,35 @@ export const AboutView = () => {
           </div>
 
           <div className="lg:col-span-5 grid grid-cols-2 gap-3">
-            <a href="/products/" className="block no-underline">
-            <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
+            <a href="/products/" className="block no-underline h-full">
+            <Tilt3DCard className="h-full bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
               <img
-                src="/uploads/site/about-picks.webp"
+                src="/uploads/site/about-1.webp"
                 width="800"
                 height="450"
                 loading="lazy"
-                alt="Comparing gaming gear specs for our independent picks"
+                alt="Comparing two gaming mice side by side: how we pick"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform"
               />
               <div className="text-xs font-display font-bold text-white">How we pick</div>
-              <div className="text-[10px] text-emerald-300 font-medium">Official specs, published reviews, no paid spots</div>
+              <div className="text-[10px] text-emerald-300 font-medium">Specs first, no paid spots</div>
             </Tilt3DCard>
             </a>
 
-            <a href="/blogs/" className="block no-underline">
-            <Tilt3DCard className="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
+            <a href="/blogs/" className="block no-underline h-full">
+            <Tilt3DCard className="h-full bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group">
               <img
-                src="/uploads/site/about-gamers.webp"
+                src="/uploads/site/about-2.webp"
                 width="800"
                 height="450"
                 loading="lazy"
-                alt="A gaming room: Run On Console is made by gamers, for gamers"
+                alt="Two game controllers on a sofa: made by gamers, for gamers"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform"
               />
               <div className="text-xs font-display font-bold text-white">Gamers, for gamers</div>
-              <div className="text-[10px] text-emerald-300 font-medium">Guides we would want to read</div>
+              <div className="text-[10px] text-emerald-300 font-medium">Guides we want to read</div>
             </Tilt3DCard>
             </a>
           </div>

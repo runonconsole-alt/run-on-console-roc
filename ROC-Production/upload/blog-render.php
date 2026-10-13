@@ -630,7 +630,8 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
             . '<div class="game-card flex flex-col justify-between group cursor-pointer h-full">'
             . '<div class="relative bg-slate-900 overflow-hidden" style="aspect-ratio:1200 / 630">'
             . ($img !== '' ? '<img width="1200" height="675" src="' . rocH($img) . '" alt="' . rocH($alt) . '" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>' : '')
-            . '<span class="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-md shadow-sm uppercase badge-glow">' . rocH(rocCategoryLabel($p['category'] ?? '')) . '</span>'
+            // Our own covers already show the category; only other pictures get the label.
+            . (strpos($img, '/uploads/blog-covers/') === 0 ? '' : '<span class="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-md shadow-sm uppercase badge-glow">' . rocH(rocCategoryLabel($p['category'] ?? '')) . '</span>')
             . '<span class="absolute bottom-3 right-3 bg-slate-900/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 backdrop-blur-sm">' . rocH($rt) . '</span>'
             . '</div>'
             . '<div class="p-6 flex-1 flex flex-col justify-between space-y-4"><div>'

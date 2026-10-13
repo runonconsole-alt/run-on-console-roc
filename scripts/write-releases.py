@@ -231,7 +231,17 @@ RELEASES = [
                   'Email: labelled mailbox fields (server mail.runonconsole.com, port 465, mailbox, password)',
                   'Sitemaps submitted without /sitemaps/ now open the right file'],
          checks=[dict(label='Site pictures (cli-site-images.php --apply)', type='file', path='api/v1/cron/cli-site-images.php')],
-         pr=REPO + '37'),
+         pr=REPO + '37', build='index-B2hTnAma.js'),
+    dict(deploy=38, date='2026-10-13', title='Covers without text, new page pictures, media clean-up, llms.txt, writer timer',
+         changes=['AI covers never contain words: the title is not sent to the image model, only the subject, and each cover gets its own setting and light',
+                  'Blog list: no second category label on our covers; cover files get their own names, so the media library sees them as used',
+                  'New About and Blogs pictures (cli-site-images.php), both cards the same size',
+                  'Unused pictures (old name cards, share cards, old covers) move to a trash folder (cli-media-cleanup.php), with a way back',
+                  'llms.txt is written from the live site and updated after every new post or news story (cli-llms.php)',
+                  'The server writer starts exactly 2 hours before each publishing time; the dashboard counts down to the next automatic post',
+                  'CMS: opening a post no longer asks Close without saving when nothing was changed; dashboard counts only published products'],
+         checks=[dict(label='llms.txt writer (cli-llms.php --apply)', type='file', path='api/v1/cron/cli-llms.php')],
+         pr=REPO + '38'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
