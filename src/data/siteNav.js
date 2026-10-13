@@ -28,7 +28,6 @@ export const DEFAULT_SITE_NAV = {
     { label: 'PRODUCTS', url: '/products/' },
     { label: 'SYSTEMS', url: '/compatibility/' },
     { label: 'BLOGS', url: '/blogs/' },
-    { label: 'NEWS', url: '/news/' },
     { label: 'ABOUT US', url: '/about/' },
   ],
   footer: {
@@ -43,11 +42,11 @@ export const DEFAULT_SITE_NAV = {
         { label: 'Products', url: '/products/', icon: 'cpu' },
         { label: 'Can I Run It? PC Game Checker', url: '/compatibility/', icon: 'gamepad' },
         { label: 'Blogs', url: '/blogs/', icon: 'book' },
-        { label: 'News', url: '/news/', icon: 'newspaper' },
         { label: 'Gaming Platforms', url: '/gaming-platforms/', icon: 'grid' },
         { label: 'About Run On Console', url: '/about/', icon: 'info' },
       ] },
       { title: 'PARTNERS', icon: 'handshake', links: [
+        { label: 'News', url: '/news/', icon: 'newspaper' },
         { label: 'Write For Us & Advertising', url: '/write-for-us/', icon: 'pen' },
         { label: 'Contact Us', url: '/contact/', icon: 'mail' },
       ] },

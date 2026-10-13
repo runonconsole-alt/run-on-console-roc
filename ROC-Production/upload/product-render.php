@@ -683,12 +683,12 @@ function rocRenderCategoryHub(string $root, PDO $pdo, array $categories): void {
     $n = count(array_filter($counts));
     $title = 'All Product Categories: ' . count($all) . ' Gaming Picks | ROC';
     if (mb_strlen($title) > 55) $title = 'All Product Categories | Run On Console';
-    $desc = 'Browse all ' . $n . ' product categories: graphics cards, CPUs, RAM, cases, monitors, keyboards, mice, headsets, chairs, handhelds and laptops.';
+    $desc = 'Two categories: PC Hardware (graphics cards, CPUs, RAM, cases, monitors, speakers) and Gaming Hardware (keyboards, mice, headsets, chairs, handhelds, laptops).';
     $first = reset($photo);
     $h  = rocHeadMeta($title, rocCmsTruncatePlain($desc, 155), $url, $first ? $first[0] : '', 'index, follow, max-image-preview:large');
     $h .= rocBreadcrumbLd([['Home', ROC_PUBLIC_URL . '/'], ['Categories', $url]]);
     $items = []; $i = 0;
-    foreach ($categories as $s => $c) if (!empty($counts[$s])) $items[] = ['@type' => 'ListItem', 'position' => ++$i, 'url' => rocCategoryUrl($s), 'name' => (string)$c['name']];
+    foreach (ROC_PRODUCT_GROUPS as $g => $def) $items[] = ['@type' => 'ListItem', 'position' => ++$i, 'url' => rocCategoryUrl($g), 'name' => $def['name']];
     $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'CollectionPage', 'name' => 'Product categories', 'url' => $url,
                      'mainEntity' => ['@type' => 'ItemList', 'itemListElement' => $items]]);
     $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
@@ -697,32 +697,30 @@ function rocRenderCategoryHub(string $root, PDO $pdo, array $categories): void {
     $m .= '<div class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
         . '<div class="absolute -top-20 -left-20 w-80 h-80 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>'
         . '<div class="relative z-10 space-y-4 max-w-3xl">'
-        . '<span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5">All categories</span>'
+        . '<span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5">Categories</span>'
         . '<h1 class="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight">Gaming &amp; PC Hardware Categories</h1>'
-        . '<p class="text-emerald-100 text-xs sm:text-sm leading-relaxed">' . $n . ' categories and ' . count($all) . ' picks, each with what it is best for, key specs and a direct Amazon link. Pick a category to compare the products in it.</p>'
-        . '<div class="flex flex-wrap gap-2.5 pt-2"><a href="/category/pc-hardware/" class="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl no-underline">PC Hardware</a>'
-        . '<a href="/category/gaming-hardware/" class="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl no-underline">Gaming Hardware</a>'
-        . '<a href="/products/" class="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl no-underline">All ' . count($all) . ' products</a></div>'
+        . '<p class="text-emerald-100 text-xs sm:text-sm leading-relaxed">Two categories: PC Hardware for building or upgrading a gaming PC, and Gaming Hardware for the gear you play with. Pick one to see its products.</p>'
         . '</div></div>';
+    // The two categories, each a big card with four of its product photos.
+    $m .= '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
     foreach (ROC_PRODUCT_GROUPS as $g => $def) {
-        $members = [];
-        foreach ($categories as $s => $c) if (!empty($counts[$s]) && rocGroupOf($s) === $g) $members[$s] = $c;
-        if (!$members) continue;
-        $m .= '<section class="space-y-4"><div class="flex items-end justify-between gap-3"><div>'
-            . '<h2 class="font-display font-extrabold text-2xl text-slate-900">' . rocH($def['name']) . '</h2>'
-            . '<p class="text-xs sm:text-sm text-slate-500">' . rocH($def['description']) . '</p></div>'
-            . '<a href="' . rocCatPath($g) . '" class="text-xs font-bold text-emerald-700 hover:text-emerald-900 whitespace-nowrap no-underline">All ' . rocH($def['name']) . ' &rarr;</a></div>'
-            . '<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">';
-        foreach ($members as $s => $c) {
-            $ph = $photo[$s] ?? null;
-            $m .= '<a href="' . rocH(rocCatPath($s)) . '" class="group bg-white border border-slate-200 hover:border-emerald-500 rounded-2xl p-3 shadow-sm hover:shadow-lg transition-all no-underline flex flex-col">'
-                . ($ph ? '<div class="bg-white rounded-xl overflow-hidden mb-3" style="aspect-ratio:4/3"><img width="400" height="300" loading="lazy" src="' . rocH($ph[0]) . '" alt="' . rocH($c['name'] . ': ' . $ph[1]) . '" class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform"/></div>' : '')
-                . '<div class="font-display font-extrabold text-sm text-slate-900 group-hover:text-emerald-700">' . rocH($c['name']) . '</div>'
-                . '<div class="text-[11px] text-slate-500 mt-0.5">' . $counts[$s] . ' picks &middot; compare &rarr;</div></a>';
+        $num = 0; $pics = [];
+        foreach ($all as $p) {
+            if (rocGroupOf(rocProductCategorySlug($p)) !== $g) continue;
+            $num++;
+            $img = trim((string)($p['image'] ?? ''));
+            $cs = rocProductCategorySlug($p);
+            if (count($pics) < 4 && strpos($img, '/images/products/photos/') === 0 && !isset($pics[$cs])) $pics[$cs] = [$img, (string)$p['title']];
         }
-        $m .= '</div></section>';
+        if (!$num) continue;
+        $m .= '<a href="' . rocCatPath($g) . '" class="group bg-white border-2 border-slate-200 hover:border-emerald-500 rounded-3xl p-5 shadow-sm hover:shadow-xl transition-all no-underline flex flex-col gap-4">'
+            . '<div class="grid gap-2" style="grid-template-columns:repeat(4,minmax(0,1fr))">';
+        foreach ($pics as [$img, $t]) $m .= '<div class="bg-white border border-slate-100 rounded-xl overflow-hidden" style="aspect-ratio:1/1"><img width="200" height="200" loading="lazy" src="' . rocH($img) . '" alt="' . rocH($t) . '" class="w-full h-full object-contain p-1.5 group-hover:scale-105 transition-transform"/></div>';
+        $m .= '</div><div><h2 class="font-display font-extrabold text-2xl text-slate-900 group-hover:text-emerald-700">' . rocH($def['name']) . '</h2>'
+            . '<p class="text-xs sm:text-sm text-slate-500 mt-1">' . rocH($def['description']) . '</p></div>'
+            . '<span class="self-start bg-emerald-600 group-hover:bg-emerald-700 text-white font-display font-extrabold text-xs py-2.5 px-4 rounded-xl">See ' . $num . ' products &rarr;</span></a>';
     }
-    $m .= '</div>';
+    $m .= '</div></div>';
     rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, time());
 }
 

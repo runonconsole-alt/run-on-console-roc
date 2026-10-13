@@ -266,6 +266,13 @@ RELEASES = [
                   'Can I run it: plain title (Can My PC Run This Game?), a 3 step how it works strip (choose a game, enter your PC, get your answer)'],
          checks=[dict(label='Page templates refreshed (cli-refresh-templates.php)', type='file', path='api/v1/cron/cli-menu-products.php')],
          pr=REPO + '41'),
+    dict(deploy=42, date='2026-10-13', title='Two categories on /category/, NEWS moves to the footer, honest cover usage',
+         changes=['/category/ shows only the two categories, PC Hardware and Gaming Hardware, each a big card with product photos and a See products button',
+                  'Header: NEWS removed (the header was too wide); News is in the footer PARTNERS column',
+                  'Media: a blog or news cover counts as used only when a post uses it now, so old cover versions are cleared by cli-media-cleanup.php',
+                  'Media library: the clean-up saves its usage check for the CMS, and the CMS says so when the full check fails'],
+         checks=[dict(label='Menu and footer (cli-menu-products.php --apply)', type='file', path='api/v1/cron/cli-menu-products.php')],
+         pr=REPO + '42'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
