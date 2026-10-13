@@ -654,7 +654,10 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
         . ($query !== '' ? '<a href="' . rocH($action) . '" class="text-[11px] font-bold text-slate-400 hover:text-emerald-600 flex items-center gap-1 px-2 no-underline">Reset</a>' : '')
         . '</form>';
 
-    $m .= '<div id="all-products" class="space-y-4 scroll-mt-24"><div class="text-xs font-bold text-slate-600">Showing <span class="text-emerald-600 font-extrabold">' . count($shown) . '</span> of ' . count($inScope) . ' products</div>'
+    $listH = $cat ? 'All ' . (string)$cat['name'] : 'All gaming gear';
+    $m .= '<div id="all-products" class="space-y-4 scroll-mt-24"><div class="flex flex-wrap items-baseline justify-between gap-2">'
+        . '<h2 class="font-display font-extrabold text-lg text-slate-900">' . rocH($listH) . '</h2>'
+        . '<div class="text-xs font-bold text-slate-600">Showing <span class="text-emerald-600 font-extrabold">' . count($shown) . '</span> of ' . count($inScope) . ' products</div></div>'
         . '<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">';
     foreach ($shown as $p) $m .= rocProductCard($pdo, $p, $categories);
     $m .= '</div>';

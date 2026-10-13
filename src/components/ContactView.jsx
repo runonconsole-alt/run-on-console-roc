@@ -43,7 +43,7 @@ export const ContactView = () => {
 
         <div className="relative z-10 space-y-3">
           <span className="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5 badge-glow">
-            <Sparkles className="w-3.5 h-3.5" /> GET IN TOUCH WITH THE LAB
+            <Sparkles className="w-3.5 h-3.5" /> GET IN TOUCH
           </span>
           <h1 className="font-display font-extrabold text-3xl sm:text-5xl text-white my-3">
             <BouncyText text="Contact Run On Console" />
@@ -81,7 +81,7 @@ export const ContactView = () => {
                     <BouncyText text="Send an Editorial Message" />
                   </h2>
                   <p className="text-xs text-emerald-700 font-semibold">
-                    Direct inquiry line to senior testing columnists & hardware team
+                    We read every message and reply by email, usually within 1-2 working days.
                   </p>
                 </div>
               </div>
@@ -157,9 +157,9 @@ export const ContactView = () => {
         <div className="lg:col-span-5 space-y-6">
           
           <Tilt3DCard className="bg-white border-2 border-emerald-500/20 rounded-3xl p-7 sm:p-8 shadow-sm space-y-5">
-            <h3 className="font-display font-extrabold text-lg sm:text-xl text-emerald-950 border-b border-emerald-100 pb-3">
+            <h2 className="font-display font-extrabold text-lg sm:text-xl text-emerald-950 border-b border-emerald-100 pb-3">
               <BouncyText text="Contact Details" />
-            </h3>
+            </h2>
 
             <div className="space-y-4 pt-1">
               <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/60 flex items-start gap-4 transition-all hover:bg-emerald-100/60 shadow-xs">
@@ -181,9 +181,9 @@ export const ContactView = () => {
           {/* Shown by roc-nav.js once a Discord link is saved in CMS -> Social & Amazon tag. */}
           <div data-roc-social-box="discord" style={{ display: 'none' }}>
           <Tilt3DCard className="bg-gradient-to-tr from-[#064E3B] to-[#047857] text-white rounded-3xl p-7 sm:p-8 shadow-md space-y-3 border border-emerald-500/40">
-            <h4 className="font-display font-bold text-lg text-white">
+            <p className="m-0 tracking-tight font-display font-bold text-lg text-white">
               <BouncyText text="Join Our Discord Community" />
-            </h4>
+            </p>
             <p className="text-xs text-emerald-100 leading-relaxed">
               Connect with other PC builders and gamers, share your battlestation, and get advice on gear.
             </p>

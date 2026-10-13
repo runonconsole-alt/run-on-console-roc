@@ -149,7 +149,7 @@ function rocFaqBlock(string $heading, string $sub, array $faqs): array {
     if (!$faqs) return ['', ''];
     $html = '<section class="bg-white border-2 border-emerald-500/20 rounded-3xl p-6 sm:p-10 my-10 shadow-sm relative overflow-hidden">'
         . '<div class="relative z-10 flex items-center gap-3 mb-2 pb-4 border-b border-emerald-100"><div>'
-        . '<h3 class="font-display font-extrabold text-xl sm:text-2xl text-emerald-950 leading-tight">' . rocH($heading) . '</h3>'
+        . '<h2 class="font-display font-extrabold text-xl sm:text-2xl text-emerald-950 leading-tight">' . rocH($heading) . '</h2>'
         . '<p class="text-xs sm:text-sm text-emerald-700 font-semibold max-w-2xl mt-0.5">' . rocH($sub) . '</p></div></div>'
         . '<div class="relative z-10 space-y-3.5 mt-6">';
     $ld = [];

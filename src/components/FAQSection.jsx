@@ -133,9 +133,9 @@ export const FAQSection = ({
           <HelpCircle className="w-6 h-6 animate-pulse" />
         </div>
         <div>
-          <h3 className="font-display font-extrabold text-xl sm:text-2xl text-emerald-950 leading-tight">
+          <h2 className="font-display font-extrabold text-xl sm:text-2xl text-emerald-950 leading-tight">
             <BouncyText text={title} />
-          </h3>
+          </h2>
           <p className="text-xs sm:text-sm text-emerald-700 font-semibold max-w-2xl mt-0.5">
             {subtitle}
           </p>

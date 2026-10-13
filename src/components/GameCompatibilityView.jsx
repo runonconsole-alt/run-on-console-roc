@@ -823,6 +823,7 @@ export const GameCompatibilityView = () => {
 
       {/* 4. Filter Toolbar: Era Pills + Platform Pills + Search Box */}
       <section id="game-list" className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-5 scroll-mt-24">
+        <h2 className="font-display font-extrabold text-xl sm:text-2xl text-slate-900">Popular games and their requirements</h2>
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
           
           <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">

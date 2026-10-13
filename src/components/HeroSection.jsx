@@ -44,12 +44,12 @@ export const HeroSection = () => {
           <div className="flex flex-wrap items-center gap-3">
             <div className="inline-flex items-center gap-2 bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-4 py-1.5 rounded-full tracking-wider shadow-lg">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>LIVE BENCHMARK INTEL & REVIEWS</span>
+              <span>INDEPENDENT GAMING GEAR PICKS</span>
             </div>
 
             <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-emerald-400/40 text-[11px] text-emerald-300 font-mono shadow-sm">
               <Activity className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="font-bold">0.95ms LATENCY</span>
+              <span className="font-bold">FREE · NO SIGN-UP</span>
             </div>
           </div>
 
@@ -153,7 +153,7 @@ export const HeroSection = () => {
         <div className="lg:col-span-6">
           <Tilt3DCard 
             className="rounded-3xl shadow-2xl border-2 border-emerald-400/40 bg-slate-950 group"
-            onClick={() => navigateToBlog(slide.id)}
+            onClick={() => { window.location.href = slide.href; }}
             enableBurst={true}
           >
             <div className="relative h-72 sm:h-96 w-full overflow-hidden cursor-pointer">
@@ -179,21 +179,14 @@ export const HeroSection = () => {
               </div>
 
               <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 space-y-3">
-                <h3 className="font-display font-bold text-xl sm:text-2xl text-white leading-snug group-hover:text-emerald-300 transition-colors duration-200">
+                <p className="font-display font-bold text-xl sm:text-2xl text-white leading-snug group-hover:text-emerald-300 transition-colors duration-200">
                   {slide.title}
-                </h3>
+                </p>
 
-                <div className="flex items-center gap-4 text-xs text-slate-300 font-medium pt-1">
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-emerald-400" />
-                    {slide.date}
-                  </span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-emerald-400" />
-                    By {slide.author}
-                  </span>
-                </div>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">{slide.summary}</p>
+                <a href={slide.href} className="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-300 no-underline pt-1" onClick={(e) => e.stopPropagation()}>
+                  {slide.cta} →
+                </a>
               </div>
             </div>
 

@@ -84,9 +84,9 @@ export const ValuePropsFooter = () => {
                 <div className="w-10 h-10 rounded-xl bg-emerald-800 text-emerald-300 flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-emerald-700 transition-all shadow-md">
                   <Icon className="w-5 h-5" />
                 </div>
-                <h4 className="font-display font-extrabold text-xs sm:text-sm text-white uppercase tracking-wider mb-1 group-hover:text-emerald-300 transition-colors">
+                <p className="m-0 tracking-tight font-display font-extrabold text-xs sm:text-sm text-white uppercase tracking-wider mb-1 group-hover:text-emerald-300 transition-colors">
                   <BouncyText text={vp.title} />
-                </h4>
+                </p>
                 <p className="text-xs text-emerald-200/75 leading-relaxed font-medium">
                   {vp.desc}
                 </p>
@@ -104,9 +104,9 @@ export const ValuePropsFooter = () => {
               <span className="text-xs font-display font-extrabold uppercase text-emerald-300 tracking-wider flex items-center gap-1.5">
                 <Download className="w-3.5 h-3.5 animate-bounce" /> OFFICIAL DIRECT GAME LAUNCHERS & DOWNLOAD STORES
               </span>
-              <h3 className="font-display font-extrabold text-lg sm:text-xl text-white">
+              <p className="m-0 tracking-tight font-display font-extrabold text-lg sm:text-xl text-white">
                 <BouncyText text="Download Compatible Games & Official Launchers" />
-              </h3>
+              </p>
             </div>
             <span className="text-xs text-emerald-300/80 font-medium">
               Direct links to certified platform storefronts
@@ -129,9 +129,9 @@ export const ValuePropsFooter = () => {
                       <StoreLogo className="w-5 h-5" />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="font-display font-bold text-xs text-white group-hover:text-emerald-300 truncate">
+                      <p className="m-0 tracking-tight font-display font-bold text-xs text-white group-hover:text-emerald-300 truncate">
                         {store.name}
-                      </h4>
+                      </p>
                       <span className="text-[10px] text-emerald-300/70 block truncate">
                         {store.desc}
                       </span>
@@ -156,9 +156,9 @@ export const ValuePropsFooter = () => {
               <span className="text-xs font-display font-extrabold uppercase text-emerald-300 tracking-wider flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5" /> JOIN THE RUN ON CONSOLE GAMING COMMUNITY
               </span>
-              <h3 className="font-display font-extrabold text-lg sm:text-xl text-white">
+              <p className="m-0 tracking-tight font-display font-extrabold text-lg sm:text-xl text-white">
                 <BouncyText text="Follow Run On Console" />
-              </h3>
+              </p>
             </div>
             <span className="text-xs text-emerald-300/80 font-medium">
               Gear picks, setups and updates
@@ -183,9 +183,9 @@ export const ValuePropsFooter = () => {
                       <PlatformLogo className="w-5 h-5" />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="font-display font-bold text-xs text-white group-hover:text-emerald-300 truncate">
+                      <p className="m-0 tracking-tight font-display font-bold text-xs text-white group-hover:text-emerald-300 truncate">
                         {soc.name}
-                      </h4>
+                      </p>
                       <span className="text-[10px] text-emerald-300/70 block truncate">
                         {soc.desc}
                       </span>
@@ -226,10 +226,10 @@ export const ValuePropsFooter = () => {
           </div>
 
           <div className="lg:col-span-3 space-y-3">
-            <h5 className="font-display font-extrabold text-xs text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+            <p className="m-0 tracking-tight font-display font-extrabold text-xs text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
               <Compass className="w-3.5 h-3.5 text-emerald-400" />
               <span>EXPLORE HUB</span>
-            </h5>
+            </p>
             <ul className="space-y-2 text-xs text-emerald-100/80 font-medium">
               <li>
                 <a href="/" onClick={(e) => { e.preventDefault(); navigateTo('home'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
@@ -271,10 +271,10 @@ export const ValuePropsFooter = () => {
           </div>
 
           <div className="lg:col-span-2 space-y-3">
-            <h5 className="font-display font-extrabold text-xs text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+            <p className="m-0 tracking-tight font-display font-extrabold text-xs text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
               <Handshake className="w-3.5 h-3.5 text-emerald-400" />
               <span>PARTNERS</span>
-            </h5>
+            </p>
             <ul className="space-y-2 text-xs text-emerald-100/80 font-medium">
               <li>
                 <a href="/write-for-us/" onClick={(e) => { e.preventDefault(); navigateTo('write-for-us'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">
@@ -292,10 +292,10 @@ export const ValuePropsFooter = () => {
           </div>
 
           <div className="lg:col-span-2 space-y-3">
-            <h5 className="font-display font-extrabold text-xs text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+            <p className="m-0 tracking-tight font-display font-extrabold text-xs text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
               <FileText className="w-3.5 h-3.5 text-emerald-400" />
               <span>POLICIES</span>
-            </h5>
+            </p>
             <ul className="space-y-2 text-xs text-emerald-100/80 font-medium">
               <li>
                 <a href="/terms-and-conditions/" onClick={(e) => { e.preventDefault(); navigateTo('terms-and-conditions'); }} className="hover:text-emerald-300 transition-colors flex items-center gap-2 text-left no-underline">

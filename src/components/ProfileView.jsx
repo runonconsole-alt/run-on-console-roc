@@ -270,7 +270,8 @@ export const ProfileView = () => {
       <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
         <div className="text-center space-y-4">
           <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-slate-400 font-mono text-sm">Verifying Gamer Authentication Session...</p>
+          <h1 className="text-lg font-bold text-white">Your profile</h1>
+          <p className="text-slate-400 font-mono text-sm">Checking your sign-in…</p>
         </div>
       </div>
     );
