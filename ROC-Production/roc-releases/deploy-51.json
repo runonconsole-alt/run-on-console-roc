@@ -1,0 +1,26 @@
+{
+ "deploy": 51,
+ "date": "2026-10-14",
+ "title": "Home slide pictures shown whole",
+ "changes": [
+  "Home page slides: the picture box has the same 16:9 shape as the pictures on tablets and computers, so the whole picture shows instead of a cropped middle"
+ ],
+ "checks": [
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "file",
+   "path": "index.html"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BlXck71Z.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/51",
+ "build": "index-BlXck71Z.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

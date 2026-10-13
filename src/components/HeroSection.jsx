@@ -156,12 +156,13 @@ export const HeroSection = () => {
             onClick={() => { window.location.href = slide.href; }}
             enableBurst={true}
           >
-            <div className="relative h-72 sm:h-96 w-full overflow-hidden cursor-pointer">
+            {/* 16:9 like the pictures (1200x675) on wider screens, so the whole picture shows instead of a cropped middle. */}
+            <div className="relative h-72 sm:h-auto sm:aspect-video sm:min-h-[300px] w-full overflow-hidden cursor-pointer">
               <img 
                 src={slide.image} 
                 alt={slide.title}
-                width="800"
-                height="500"
+                width="1200"
+                height="675"
                 loading="eager"
                 fetchpriority="high"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"

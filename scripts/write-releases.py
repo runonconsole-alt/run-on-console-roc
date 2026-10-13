@@ -323,6 +323,10 @@ RELEASES = [
                   'Categories and News pages show their new hero pictures (made by cli-site-images.php)'],
          checks=[dict(label='Home picture (cli-site-images.php)', type='file', path='uploads/site/home-hero.webp')],
          pr=REPO + '50'),
+    dict(deploy=51, date='2026-10-14', title='Home slide pictures shown whole',
+         changes=['Home page slides: the picture box has the same 16:9 shape as the pictures on tablets and computers, so the whole picture shows instead of a cropped middle'],
+         checks=[dict(label='Page templates refreshed (cli-refresh-templates.php)', type='file', path='index.html')],
+         pr=REPO + '51'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
