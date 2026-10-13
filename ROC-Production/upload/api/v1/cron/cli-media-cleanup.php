@@ -53,6 +53,7 @@ if ($rollback !== null) {
 /* ------------------------------------------- what the site uses (shared with the CMS Media library) */
 require_once $ROOT . '/api/v1/cms/media-refs-lib.php';
 $refs = rocMediaRefs($pdo, $ROOT);
+rocMediaRefsCache($ROOT, $refs);                                   // the CMS Media library shows the same
 
 /* Earlier clean-ups: put back any picture the site uses again (or that was moved by mistake). */
 $back = 0;

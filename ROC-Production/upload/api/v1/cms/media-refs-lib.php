@@ -12,6 +12,8 @@
  *
  * Product name cards (/images/products/{slug}.webp) and share cards (/images/products/share/{slug}.jpg)
  * are only shown for a published product without a real photo, so that is the only time they count.
+ * Blog and news covers (/uploads/blog-covers/) are only shown by their post, so only the blogs table
+ * counts for them (old covers kept in a revision or history table are not in use).
  */
 if (defined('ROC_MEDIA_REFS_LIB')) return;
 define('ROC_MEDIA_REFS_LIB', 1);
@@ -45,6 +47,13 @@ function rocMediaRefs(PDO $pdo, string $root): array {
         if (preg_match('#/cron/[^/]+[.]json$#i', $q) || stripos(basename($q), 'backup') !== false) continue;   // installer data and backups
         $grab((string)file_get_contents($p));
     }
+    // Covers: only what the posts use now.
+    foreach (array_keys($refs) as $u) if (strpos($u, '/uploads/blog-covers/') === 0) unset($refs[$u]);
+    try {
+        foreach ($pdo->query('SELECT * FROM blogs')->fetchAll(PDO::FETCH_ASSOC) as $b)
+            foreach ($b as $v) if (is_string($v) && stripos($v, 'blog-covers/') !== false && preg_match_all('#uploads/blog-covers/[A-Za-z0-9_.%-]+?\.(?:jpe?g|png|webp|gif|avif)#i', $v, $m))
+                foreach ($m[0] as $u) $refs['/' . rawurldecode($u)] = 1;
+    } catch (\Throwable $e) {}
     // Name cards and share cards: used only by a published product that has no real photo.
     foreach (array_keys($refs) as $u) if (preg_match('#^/images/products/(share/)?[a-z0-9-]+\.(webp|svg|jpg|png)$#', $u)) unset($refs[$u]);
     try {
@@ -58,6 +67,13 @@ function rocMediaRefs(PDO $pdo, string $root): array {
         }
     } catch (\Throwable $e) {}
     return $refs;
+}
+
+/** Saves the scan for the CMS Media library (api/v1/cms/media-usage.php reads it). */
+function rocMediaRefsCache(string $root, array $refs): void {
+    $dir = dirname($root) . '/roc-cms-cache';
+    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+    @file_put_contents($dir . '/media-usage.json', json_encode(['t' => time(), 'used' => $refs], JSON_UNESCAPED_SLASHES));
 }
 
 /** Pictures the clean-up may move: /uploads/**, name and share cards, the old /images/*.jpg photos. */

@@ -2367,7 +2367,8 @@ async function renderMedia(m){
       '<div style="margin-top:10px">Finding every image and where it is used…</div></div></div></div>';
     try{
       var d=await api('media.php'); await loadProdNames();
-      try{ S.mediaUsed=(await api('media-usage.php')).used||null; }catch(e){ S.mediaUsed=null; }
+      try{ S.mediaUsed=(await api('media-usage.php')).used||null; }
+      catch(e){ S.mediaUsed=null; toast('Full usage check failed ('+e.message+'): "not used" may include pictures that are in use','bad'); }
       S.media=prepMedia(d.media); S.mcan=d.can||{}; S.mediaLoaded=true;
     }
     catch(e){ toast(e.message,'bad'); return; }
