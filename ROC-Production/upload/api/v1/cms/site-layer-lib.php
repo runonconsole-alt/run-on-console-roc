@@ -250,6 +250,52 @@ function rocLayerFromDb(PDO $pdo, string $root): array {
     return $L;
 }
 
+/* -------------------------------------------------------------- history */
+/*
+ * Every change made from the Metas, Announcement bar and Template & code tabs is
+ * kept for 30 days in /home2/runoncon/roc-cms-history/ (outside the website), one
+ * JSON file per change: {id, kind, key, label, before, after, user, at}. Nothing
+ * is ever lost: the CMS lists them and can put any earlier version back.
+ */
+const ROC_HISTORY_DAYS = 30;
+
+function rocHistDir(string $root): string { return dirname($root) . '/roc-cms-history'; }
+
+function rocHistAdd(string $root, string $kind, string $key, string $label, $before, $after, ?array $session): string {
+    if ($before === $after) return '';
+    $dir = rocHistDir($root);
+    if (!is_dir($dir)) @mkdir($dir, 0700, true);
+    $id = gmdate('Ymd-His') . '-' . bin2hex(random_bytes(4));
+    $row = ['id' => $id, 'kind' => $kind, 'key' => $key, 'label' => $label, 'before' => $before, 'after' => $after,
+            'user' => (string)($session['username'] ?? ($session['user_id'] ?? '')), 'at' => gmdate('c')];
+    @file_put_contents($dir . '/' . $id . '.json', json_encode($row, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+    // Older than 30 days: removed.
+    foreach (glob($dir . '/*.json') ?: [] as $f) if (filemtime($f) < time() - ROC_HISTORY_DAYS * 86400) @unlink($f);
+    return $id;
+}
+
+/** Newest first; optionally only one kind and/or key. */
+function rocHistList(string $root, ?string $kind = null, ?string $key = null, int $limit = 200): array {
+    $files = glob(rocHistDir($root) . '/*.json') ?: [];
+    rsort($files);
+    $out = [];
+    foreach ($files as $f) {
+        if (filemtime($f) < time() - ROC_HISTORY_DAYS * 86400) continue;
+        $r = json_decode((string)file_get_contents($f), true);
+        if (!is_array($r) || ($kind !== null && $r['kind'] !== $kind) || ($key !== null && $r['key'] !== $key)) continue;
+        $out[] = $r;
+        if (count($out) >= $limit) break;
+    }
+    return $out;
+}
+
+function rocHistGet(string $root, string $id): ?array {
+    if (!preg_match('/^\d{8}-\d{6}-[a-f0-9]{8}$/', $id)) return null;
+    $f = rocHistDir($root) . '/' . $id . '.json';
+    $r = is_file($f) ? json_decode((string)file_get_contents($f), true) : null;
+    return is_array($r) ? $r : null;
+}
+
 /** Saves one part, publishes site-layer.json and rewrites the built pages. Returns files changed. */
 function rocLayerSave(PDO $pdo, string $root, string $part, array $value, ?int $userId, ?array $onlyPaths = null): int {
     $keys = ['announcement' => 'site_announcement', 'code' => 'site_code', 'meta' => 'meta_overrides'];

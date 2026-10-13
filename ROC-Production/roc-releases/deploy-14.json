@@ -1,0 +1,25 @@
+{
+ "deploy": 14,
+ "date": "2026-10-08",
+ "title": "30-day history and undo for Metas, announcement and template",
+ "changes": [
+  "Every Metas, announcement and Template & code change is kept for 30 days and can be restored",
+  "Metas: History button on each page and an Archive of all changes",
+  "Template & code: one-click Undo for 30 minutes after saving",
+  "Template & code: after 1 minute without changes, a 5-second countdown returns to the previous page",
+  "About page: \"run by the ROC (Run On Console) team\""
+ ],
+ "checks": [
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BspKq6wF.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/23",
+ "build": "index-BspKq6wF.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

@@ -7,6 +7,8 @@
  *      title/description are the custom values ('' = automatic). The CMS reads the
  *      live page itself to show what is live now.
  * POST {key, title, description}
+ * GET  ?history=KEY|all                     earlier versions, kept 30 days
+ * POST {action:'restore', id, which:'before'|'after'}
  *
  * Where a change is stored:
  *   page:/about/ and the PHP list pages   -> cms_settings.meta_overrides (site-layer-lib.php),
@@ -48,6 +50,11 @@ $DB = [
 ];
 
 /* ------------------------------------------------------------------ list */
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && isset($_GET['history'])) {
+    // Earlier titles/descriptions (30 days): one page (?history=page:/about/) or all (?history=all).
+    $k = (string)$_GET['history'];
+    rocPmOut(200, ['success' => true, 'days' => ROC_HISTORY_DAYS, 'history' => rocHistList($ROOT, 'meta', $k === 'all' ? null : $k)]);
+}
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
     $L = rocLayerFromDb($pdo, $ROOT);
     $rows = [];
@@ -94,43 +101,69 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
 }
 
 /* ------------------------------------------------------------------ save */
+/**
+ * Saves a title and description for one page and keeps the previous ones in the
+ * 30-day history. Returns [before, after] (each {title, description}).
+ */
+function rocPmSave(PDO $pdo, string $ROOT, array $DB, array $session, string $key, string $title, string $desc, string $label): array {
+    if (strpos($key, 'page:') === 0) {
+        if (!rocCmsCan($session, 'pages', 'edit')) rocCmsDeny(403, 'You cannot edit pages.');
+        $path = substr($key, 5);
+        $known = array_key_exists($path, ROC_LAYER_PHP_PAGES) || array_key_exists($path, rocLayerStaticFiles($ROOT));
+        if (!$known || $path === '/404') rocPmOut(404, ['success' => false, 'error' => 'Unknown page.']);
+        $meta = rocLayerFromDb($pdo, $ROOT)['meta'];
+        $before = ['title' => (string)($meta[$path]['title'] ?? ''), 'description' => (string)($meta[$path]['description'] ?? '')];
+        if ($title === '' && $desc === '') unset($meta[$path]); else $meta[$path] = ['title' => $title, 'description' => $desc];
+        rocLayerSave($pdo, $ROOT, 'meta', $meta, (int)$session['user_id'], [$path]);
+        $after = ['title' => $title, 'description' => $desc];
+        rocHistAdd($ROOT, 'meta', $key, $label !== '' ? $label : $path, $before, $after, $session);
+        logCmsAudit('cms_page_meta_update', 'page', $path, $after);
+        return [$before, $after];
+    }
+
+    [$type, $id] = array_pad(explode(':', $key, 2), 2, '');
+    if (!isset($DB[$type]) || $id === '') rocPmOut(400, ['success' => false, 'error' => 'Unknown page.']);
+    $d = $DB[$type];
+    if (!rocCmsCan($session, $d['perm'], 'edit')) rocCmsDeny(403, 'You cannot edit these pages.');
+    $cols = rocPmCols($pdo, $d['table']);
+    $pk = in_array('id', $cols, true) ? 'id' : 'slug';
+    $st = $pdo->prepare("SELECT * FROM {$d['table']} WHERE {$pk} = ? LIMIT 1");
+    $st->execute([$id]);
+    $row = $st->fetch(PDO::FETCH_ASSOC);
+    if (!$row) rocPmOut(404, ['success' => false, 'error' => 'Page not found.']);
+    $before = ['title' => (string)($row['meta_title'] ?? ''), 'description' => (string)($row['meta_description'] ?? '')];
+    $set = ['meta_title = ?', 'meta_description = ?'];
+    $args = [$title, $desc];
+    if ($type === 'blog') {   // the blog editor keeps the sharing fields equal to the meta fields
+        foreach (['og_title' => $title, 'twitter_title' => $title, 'og_description' => $desc, 'twitter_description' => $desc] as $c => $val) {
+            if (in_array($c, $cols, true)) { $set[] = "{$c} = ?"; $args[] = $val; }
+        }
+    }
+    if (in_array('version', $cols, true)) $set[] = 'version = version + 1';
+    if (in_array('updated_at', $cols, true)) $set[] = 'updated_at = CURRENT_TIMESTAMP';
+    $args[] = $id;
+    $pdo->prepare("UPDATE {$d['table']} SET " . implode(', ', $set) . " WHERE {$pk} = ?")->execute($args);
+    $after = ['title' => $title, 'description' => $desc];
+    rocHistAdd($ROOT, 'meta', $key, $label !== '' ? $label : (string)($row[$d['label']] ?? $id), $before, $after, $session);
+    logCmsAudit('cms_page_meta_update', $type, (string)$id, $after);
+    return [$before, $after];
+}
+
 $in = json_decode((string)file_get_contents('php://input'), true) ?: [];
-$key = (string)($in['key'] ?? '');
 $clean = function ($s, $max) { return trim(mb_substr((string)preg_replace('/\s+/u', ' ', strip_tags((string)$s)), 0, $max)); };
+
+if (($in['action'] ?? '') === 'restore') {
+    $h = rocHistGet($ROOT, (string)($in['id'] ?? ''));
+    if (!$h || $h['kind'] !== 'meta') rocPmOut(404, ['success' => false, 'error' => 'That version is no longer in the archive.']);
+    $v = (array)$h[($in['which'] ?? 'before') === 'after' ? 'after' : 'before'];
+    [, $after] = rocPmSave($pdo, $ROOT, $DB, $session, (string)$h['key'], $clean($v['title'] ?? '', 255), $clean($v['description'] ?? '', 500), (string)$h['label']);
+    rocPmOut(200, ['success' => true, 'key' => $h['key'], 'title' => $after['title'], 'description' => $after['description'],
+                   'message' => 'Earlier version restored on the live page.']);
+}
+
+$key = (string)($in['key'] ?? '');
 $title = $clean($in['title'] ?? '', 255);
 $desc = $clean($in['description'] ?? '', 500);
-
-if (strpos($key, 'page:') === 0) {
-    if (!rocCmsCan($session, 'pages', 'edit')) rocCmsDeny(403, 'You cannot edit pages.');
-    $path = substr($key, 5);
-    $known = array_key_exists($path, ROC_LAYER_PHP_PAGES) || array_key_exists($path, rocLayerStaticFiles($ROOT));
-    if (!$known || $path === '/404') rocPmOut(404, ['success' => false, 'error' => 'Unknown page.']);
-    $L = rocLayerFromDb($pdo, $ROOT);
-    $meta = $L['meta'];
-    if ($title === '' && $desc === '') unset($meta[$path]); else $meta[$path] = ['title' => $title, 'description' => $desc];
-    rocLayerSave($pdo, $ROOT, 'meta', $meta, (int)$session['user_id'], [$path]);
-    logCmsAudit('cms_page_meta_update', 'page', $path, ['title' => $title, 'description' => $desc]);
-    rocPmOut(200, ['success' => true, 'message' => 'Saved. The live page now uses ' . ($title === '' && $desc === '' ? 'its automatic title and description.' : 'this title and description.')]);
-}
-
-[$type, $id] = array_pad(explode(':', $key, 2), 2, '');
-if (!isset($DB[$type]) || $id === '') rocPmOut(400, ['success' => false, 'error' => 'Unknown page.']);
-$d = $DB[$type];
-if (!rocCmsCan($session, $d['perm'], 'edit')) rocCmsDeny(403, 'You cannot edit these pages.');
-$cols = rocPmCols($pdo, $d['table']);
-$pk = in_array('id', $cols, true) ? 'id' : 'slug';
-$set = ['meta_title = ?', 'meta_description = ?'];
-$args = [$title, $desc];
-if ($type === 'blog') {   // the blog editor keeps the sharing fields equal to the meta fields
-    foreach (['og_title' => $title, 'twitter_title' => $title, 'og_description' => $desc, 'twitter_description' => $desc] as $c => $val) {
-        if (in_array($c, $cols, true)) { $set[] = "{$c} = ?"; $args[] = $val; }
-    }
-}
-if (in_array('version', $cols, true)) $set[] = 'version = version + 1';
-if (in_array('updated_at', $cols, true)) $set[] = 'updated_at = CURRENT_TIMESTAMP';
-$args[] = $id;
-$q = $pdo->prepare("UPDATE {$d['table']} SET " . implode(', ', $set) . " WHERE {$pk} = ?");
-$q->execute($args);
-if (!$q->rowCount()) rocPmOut(404, ['success' => false, 'error' => 'Page not found.']);
-logCmsAudit('cms_page_meta_update', $type, (string)$id, ['title' => $title, 'description' => $desc]);
-rocPmOut(200, ['success' => true, 'message' => 'Saved. The live page now uses ' . ($title === '' && $desc === '' ? 'its automatic title and description.' : 'this title and description.')]);
+rocPmSave($pdo, $ROOT, $DB, $session, $key, $title, $desc, $clean($in['label'] ?? '', 200));
+rocPmOut(200, ['success' => true, 'message' => 'Saved. The live page now uses ' . ($title === '' && $desc === '' ? 'its automatic title and description.' : 'this title and description.')
+    . ' The previous version is kept for ' . ROC_HISTORY_DAYS . ' days.']);

@@ -16,16 +16,9 @@
    "type": "contains",
    "path": "api/v1/config.php",
    "text": "session_name('ROCSESSID')"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-DfvNy2u9.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/22",
- "build": "index-DfvNy2u9.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]
