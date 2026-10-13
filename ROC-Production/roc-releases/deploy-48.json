@@ -1,0 +1,29 @@
+{
+ "deploy": 48,
+ "date": "2026-10-13",
+ "title": "Content writer pacing and clean characters, links between all main pages",
+ "changes": [
+  "Content writer: waits between pages and when the free writer key reaches its limit per minute, then goes on by itself",
+  "Written texts keep plain characters (no more 32?bit); cli-content-writer.php --repair fixes the texts written before",
+  "Stricter writing rules: tips and gear advice never claim a feature, port or compatibility that is not in the data",
+  "Links: product pages link to the gaming platforms they are used on; every category page links to its guides, gaming platforms and the game checker; the products page links to categories, platforms, the checker and the guides"
+ ],
+ "checks": [
+  {
+   "label": "Content writer (cli-content-writer.php)",
+   "type": "file",
+   "path": "api/v1/cron/cli-content-writer.php"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BWSHvK1-.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/48",
+ "build": "index-BWSHvK1-.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

@@ -53,6 +53,8 @@ const ROC_CONTENT_RULES = "Writing rules (follow all):\n"
     . "- Write for a gamer deciding whether to buy. Plain, specific English. No hype, no filler, no marketing words (never use: elevate, unleash, game-changer, delve, seamless, cutting-edge, unparalleled, revolutionary, look no further).\n"
     . "- Facts: use the DATA below. Add a fact about this exact model only if you are certain it is true for this exact model. If you are not sure about a detail, do not state it; describe what matters in this kind of product and what to check on the listing instead. Never invent numbers.\n"
     . "- Never say you or we tested, used or reviewed it hands-on. Never write a price, a discount or a currency amount.\n"
+    . "- Tips and gear advice stay general and safe. Do not claim a specific feature, port, mode, storage type or compatibility unless it is in DATA.
+"
     . "- Be honest: name real trade-offs and say who should pick something else.\n"
     . "- Original wording only. Do not copy text from Amazon or the maker's site.\n";
 
@@ -87,6 +89,13 @@ function rocContentPlatformPrompt(array $c, array $devices, array $cats): string
         . "- tips: 2-4 short practical tips for players on this platform.\n";
 }
 
+/** Plain characters: the live database stores Western text only (a non-breaking hyphen became "?"). */
+function rocContentClean(string $s): string {
+    $s = strtr($s, ["\u{2010}" => '-', "\u{2011}" => '-', "\u{2012}" => '-', "\u{2212}" => '-', "\u{00A0}" => ' ', "\u{202F}" => ' ', "\u{2009}" => ' ',
+        "\u{2007}" => ' ', "\u{200B}" => '', "\u{2248}" => '~', "\u{2264}" => '<=', "\u{2265}" => '>=', "\u{2192}" => '->', "\u{2026}" => '...']);
+    return (string)preg_replace('/[^\x{0009}\x{000A}\x{000D}\x{0020}-\x{00FF}\x{2013}\x{2014}\x{2018}\x{2019}\x{201C}\x{201D}\x{2022}\x{20AC}]/u', '', $s);
+}
+
 /** Checks a written text: no banned words, no prices. Returns an error or ''. */
 function rocContentCheck(string $all): string {
     $l = mb_strtolower($all);
@@ -103,9 +112,15 @@ function rocContentList($v, int $max, int $len = 160): array {
 
 /** Asks the writer twice at most (the second time with the reason the first answer was refused). */
 function rocContentAsk(PDO $pdo, string $prompt, array $keys): array {
-    $why = '';
+    $why = ''; $waits = 0;
     for ($try = 0; $try < 2; $try++) {
         $r = rocBlogWriteAny($pdo, $prompt . ($why !== '' ? "\nYour last answer was refused because it {$why}. Fix that." : ''));
+        // Free key: a limit per minute. On the command line, wait as long as the writer asks (at most a minute) and ask again.
+        if (!$r['ok'] && PHP_SAPI === 'cli' && $waits < 3 && preg_match('/rate limit|try again in/i', (string)$r['error'])) {
+            $s = 20;
+            if (preg_match('/try again in ([\d.]+)\s*(ms|s|m)/i', (string)$r['error'], $mm)) $s = (int)ceil((float)$mm[1] / ($mm[2] === 'ms' ? 1000 : 1) * ($mm[2] === 'm' ? 60 : 1)) + 2;
+            sleep(min(65, max(2, $s))); $waits++; $try--; continue;
+        }
         if (!$r['ok']) return $r;
         $a = $r['article'];
         foreach ($keys as $k) if (empty($a[$k])) { $why = "had no {$k}"; continue 2; }
@@ -125,14 +140,14 @@ function rocContentWriteProduct(PDO $pdo, array $p, string $catName, string $gro
     if ($uses) $about .= "\n\n## Where it fits\n- " . implode("\n- ", $uses);
     $skip = trim((string)($a['skip_if'] ?? '')); $tip = trim((string)($a['before_you_buy'] ?? ''));
     if ($skip !== '' || $tip !== '') $about .= "\n\n## Before you buy\n" . trim($tip . ($tip !== '' && $skip !== '' ? "\n\n" : '') . $skip);
-    $set = ['summary' => mb_substr($about, 0, 12000),
-            'pros' => json_encode(rocContentList($a['pros'], 5), JSON_UNESCAPED_UNICODE),
-            'cons' => json_encode(rocContentList($a['cons'], 3), JSON_UNESCAPED_UNICODE)];
-    $sd = trim((string)$a['short_desc']);
+    $set = ['summary' => rocContentClean(mb_substr($about, 0, 12000)),
+            'pros' => json_encode(array_map('rocContentClean', rocContentList($a['pros'], 5)), JSON_UNESCAPED_UNICODE),
+            'cons' => json_encode(array_map('rocContentClean', rocContentList($a['cons'], 3)), JSON_UNESCAPED_UNICODE)];
+    $sd = rocContentClean(trim((string)$a['short_desc']));
     $old = trim((string)($p['short_desc'] ?? ''));
     // Replace the old automatic sentence ("... See the full specifications ...") or an empty one only.
     if ($sd !== '' && ($old === '' || stripos($old, 'See the full specifications') !== false || mb_strlen($old) < 60)) $set['short_desc'] = mb_substr($sd, 0, 300);
-    if (trim((string)($p['best_for'] ?? '')) === '' && !empty($a['best_for'])) $set['best_for'] = mb_substr(trim((string)$a['best_for']), 0, 60);
+    if (trim((string)($p['best_for'] ?? '')) === '' && !empty($a['best_for'])) $set['best_for'] = rocContentClean(mb_substr(trim((string)$a['best_for']), 0, 60));
     $set['updated_at'] = gmdate('Y-m-d H:i:s');
     $set['content_modified_at'] = $set['updated_at'];
     $cols = rocBlogCols($pdo, 'products');
@@ -156,7 +171,7 @@ function rocContentWritePlatform(PDO $pdo, array $c): array {
     $gear = rocContentList($a['gear'] ?? [], 5); if ($gear) $t .= "\n\n## Gear that matters\n- " . implode("\n- ", $gear);
     $tips = rocContentList($a['tips'] ?? [], 4); if ($tips) $t .= "\n\n## Tips for players\n- " . implode("\n- ", $tips);
     $pdo->prepare('UPDATE gaming_categories SET about_text = ?, content_modified_at = ?, updated_at = ? WHERE slug = ?')
-        ->execute([mb_substr($t, 0, 12000), gmdate('Y-m-d H:i:s'), gmdate('Y-m-d H:i:s'), $c['slug']]);
+        ->execute([rocContentClean(mb_substr($t, 0, 12000)), gmdate('Y-m-d H:i:s'), gmdate('Y-m-d H:i:s'), $c['slug']]);
     rocContentDone($pdo, 'platform', (string)$c['slug']);
     return ['ok' => true];
 }

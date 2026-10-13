@@ -535,6 +535,50 @@ function rocCatWords(): array { return ['gpu' => ['graphics card', 'gpu'], 'cpu'
     'monitors' => ['monitor'], 'speakers' => ['speaker'], 'keyboards' => ['keyboard'], 'mice' => ['mouse', 'mice'],
     'audio' => ['headset', 'headphone', 'microphone'], 'chairs' => ['chair'], 'handhelds' => ['handheld'], 'laptops' => ['laptop']]; }
 
+/** Gaming platforms where a category's products are used (links both ways with the platform pages). */
+function rocCatPlatforms(): array { return [
+    'gpu' => ['pc-handheld-pc', 'vr-ar'], 'cpu' => ['pc-handheld-pc'], 'ram' => ['pc-handheld-pc'], 'cases' => ['pc-handheld-pc'],
+    'monitors' => ['pc-handheld-pc', 'sony-playstation', 'microsoft-xbox', 'cloud-gaming'], 'speakers' => ['pc-handheld-pc', 'smart-tv-streaming'],
+    'keyboards' => ['pc-handheld-pc', 'cloud-gaming'], 'mice' => ['pc-handheld-pc', 'cloud-gaming'],
+    'audio' => ['sony-playstation', 'microsoft-xbox', 'nintendo-home', 'pc-handheld-pc'], 'chairs' => ['sony-playstation', 'microsoft-xbox', 'pc-handheld-pc'],
+    'handhelds' => ['pc-handheld-pc', 'nintendo-handhelds', 'sony-handhelds', 'retro-handheld-brands'], 'laptops' => ['pc-handheld-pc'],
+]; }
+
+/** Links from a category to the rest of the site: guides about it, its gaming platforms, the game checker. */
+function rocCatLinks(PDO $pdo, string $catSlug): array {
+    $links = [];
+    $words = rocCatWords()[$catSlug] ?? [];
+    if ($words) {
+        try {
+            $w = implode(' OR ', array_fill(0, count($words), 'LOWER(title) LIKE ?'));
+            $st = $pdo->prepare("SELECT title, slug FROM blogs WHERE status = 'published' AND (category IS NULL OR category <> 'News') AND ({$w}) ORDER BY published_at DESC LIMIT 3");
+            $st->execute(array_map(function ($x) { return '%' . $x . '%'; }, $words));
+            foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $b) $links[] = ['/blogs/' . $b['slug'] . '/', (string)$b['title'], 'Guide'];
+        } catch (\Throwable $e) {}
+    }
+    $plats = rocCatPlatforms()[$catSlug] ?? [];
+    if ($plats) {
+        try {
+            $st = $pdo->prepare("SELECT slug, title FROM gaming_categories WHERE status = 'published' AND slug IN (" . implode(',', array_fill(0, count($plats), '?')) . ')');
+            $st->execute($plats);
+            $t = []; foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) $t[$r['slug']] = $r['title'];
+            foreach ($plats as $s) if (isset($t[$s])) $links[] = ['/gaming-platforms/' . $s . '/', $t[$s], 'Gaming platform guide'];
+        } catch (\Throwable $e) {}
+    }
+    if (in_array($catSlug, ['gpu', 'cpu', 'ram', 'laptops', 'handhelds'], true))
+        $links[] = ['/compatibility/', 'Can I run it?', 'Check 500+ PC games against your hardware'];
+    return $links;
+}
+
+/** A box of links (url, title, note). */
+function rocLinkBox(string $heading, array $links): string {
+    if (!$links) return '';
+    $h = '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-3"><h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">' . rocH($heading) . '</h2>'
+        . '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">';
+    foreach ($links as [$u, $t, $s]) $h .= '<a href="' . rocH($u) . '" class="block border border-slate-200 hover:border-emerald-500 rounded-2xl p-4 no-underline group"><div class="font-bold text-sm text-slate-900 group-hover:text-emerald-700">' . rocH($t) . ' &rarr;</div><div class="text-[11px] text-slate-500 mt-0.5">' . rocH($s) . '</div></a>';
+    return $h . '</div></div>';
+}
+
 /** "About this product" text (## headings, - lists) as HTML; the first mention of the category links to its page. */
 function rocAboutHtml(string $text, string $catName, string $catSlug): string {
     $out = ''; $linked = false;
@@ -596,21 +640,8 @@ function rocProductAbout(PDO $pdo, array $p, string $title, string $catName, str
     $g = rocGroupOf($catSlug);
     $links[] = [rocCatPath($catSlug), 'All ' . $catName, 'Compare every pick in this category'];
     $links[] = [rocCatPath($g), rocGroups()[$g]['name'], 'The whole ' . rocGroups()[$g]['name'] . ' category'];
-    if (in_array($catSlug, ['gpu', 'cpu', 'ram', 'laptops', 'handhelds'], true))
-        $links[] = ['/compatibility/', 'Can I run it?', 'Check 500+ PC games against your hardware'];
-    $words = rocCatWords()[$catSlug] ?? [];
-    if ($words) {
-        try {
-            $w = implode(' OR ', array_fill(0, count($words), 'LOWER(title) LIKE ?'));
-            $st = $pdo->prepare("SELECT title, slug FROM blogs WHERE status = 'published' AND (category IS NULL OR category <> 'News') AND ({$w}) ORDER BY published_at DESC LIMIT 3");
-            $st->execute(array_map(function ($x) { return '%' . $x . '%'; }, $words));
-            foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $b) $links[] = ['/blogs/' . $b['slug'] . '/', (string)$b['title'], 'Guide'];
-        } catch (\Throwable $e) {}
-    }
-    $h .= '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-3"><h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">Related on Run On Console</h2>'
-        . '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">';
-    foreach ($links as [$u, $t, $s]) $h .= '<a href="' . rocH($u) . '" class="block border border-slate-200 hover:border-emerald-500 rounded-2xl p-4 no-underline group"><div class="font-bold text-sm text-slate-900 group-hover:text-emerald-700">' . rocH($t) . ' &rarr;</div><div class="text-[11px] text-slate-500 mt-0.5">' . rocH($s) . '</div></a>';
-    return $h . '</div></div>';
+    $links = array_merge($links, rocCatLinks($pdo, $catSlug));
+    return $h . rocLinkBox('Related on Run On Console', $links);
 }
 
 /** The Products-menu group a category belongs to. */
@@ -1000,7 +1031,25 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
             . 'if(d.next){a.dataset.next=d.next;a.href=a.dataset.base+"?page="+d.next;a.querySelector("[data-left]").textContent="("+d.left+" more)";delete a.dataset.busy;a.style.opacity="";}'
             . 'else a.parentNode.remove();}).catch(function(){location.href=a.href;});});})();</script>';
     }
-    $m .= '</div></div>';
+    $m .= '</div>';
+    // Links to the rest of the site: guides, gaming platforms and the checker for this category (or every
+    // category of a main category), so every category page is linked with the content about it.
+    if ($cat && $query === '') {
+        $seen = []; $all = [];
+        foreach (!empty($cat['group']) ? (array)$cat['members'] : [(string)$cat['slug']] as $cs)
+            foreach (rocCatLinks($pdo, $cs) as $l) if (!isset($seen[$l[0]])) { $seen[$l[0]] = 1; $all[] = $l; }
+        $m .= rocLinkBox('Guides and more for ' . (string)$cat['name'], array_slice($all, 0, 8));
+    } elseif (!$cat && $query === '') {
+        $gs = [];
+        foreach (rocGroups() as $g => $def) $gs[] = [rocCatPath($g), $def['name'], 'Browse by category'];
+        $m .= rocLinkBox('Explore Run On Console', array_merge($gs, [
+            ['/category/', 'All categories', 'Every product category in one place'],
+            ['/compatibility/', 'Can I run it?', 'Check 500+ PC games against your hardware'],
+            ['/gaming-platforms/', 'Gaming platforms', 'Guides to PC, PlayStation, Xbox, Nintendo and more'],
+            ['/blogs/', 'Buying guides', 'Comparisons and how-to articles'],
+        ]));
+    }
+    $m .= '</div>';
 
     $latest = null;
     foreach ($inScope as $p) { $t = rocProductModified($p); if ($t && (!$latest || $t > $latest)) $latest = $t; }
