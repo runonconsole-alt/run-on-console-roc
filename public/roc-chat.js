@@ -129,7 +129,8 @@
     var b = document.createElement('div');
     b.id = 'roc-chat'; b.className = isInline ? 'on inline' : ''; b.setAttribute('role', isInline ? 'region' : 'dialog'); b.setAttribute('aria-label', 'ROC assistant');
     b.innerHTML = '<div class="rh"><div class="av">ROC</div><div><b>ROC</b><small>Your gaming assistant · English / Roman Urdu</small></div>' +
-      '<div class="tools">' + (Rec ? '<button type="button" class="lang" title="Microphone language">' + (state.voice === 'ur' ? 'اردو' : 'EN') + '</button>' : '') +
+      '<div class="tools"><button type="button" class="new" title="New chat (clears this conversation)" aria-label="New chat">🔄</button>' +
+      (Rec ? '<button type="button" class="lang" title="Microphone language: tap to switch between English and Urdu">' + (state.voice === 'ur' ? '🎤 UR' : '🎤 EN') + '</button>' : '') +
       ('speechSynthesis' in window ? '<button type="button" class="spk' + (state.speak ? ' on' : '') + '" title="Read answers aloud" aria-label="Read answers aloud">🔊</button>' : '') +
       (isInline ? '' : '<button type="button" class="rx" aria-label="Close" style="font-size:18px">&times;</button>') + '</div></div>' +
       '<div class="rb" aria-live="polite"></div>' +
@@ -150,7 +151,18 @@
     att.querySelector('button').addEventListener('click', function () { pic = null; att.classList.remove('on'); });
     if (micBtn) micBtn.addEventListener('click', listen);
     var lang = box.querySelector('.lang');
-    if (lang) lang.addEventListener('click', function () { state.voice = state.voice === 'ur' ? 'en' : 'ur'; lang.textContent = state.voice === 'ur' ? 'اردو' : 'EN'; save(); });
+    if (lang) lang.addEventListener('click', function () { state.voice = state.voice === 'ur' ? 'en' : 'ur'; lang.textContent = state.voice === 'ur' ? '🎤 UR' : '🎤 EN'; save(); });
+    var fresh = box.querySelector('.new');
+    if (fresh) fresh.addEventListener('click', function () {
+      if (busy) return;
+      try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {}
+      state.msgs = []; state.session = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-6);
+      save(); render(); input.focus();
+    });
+    // A click anywhere else on the page closes the floating box (the chat is kept).
+    if (btn) document.addEventListener('mousedown', function (e) {
+      if (state.open && box && !box.contains(e.target) && !btn.contains(e.target)) toggle(false);
+    });
     var spk = box.querySelector('.spk');
     if (spk) spk.addEventListener('click', function () { state.speak = !state.speak; spk.classList.toggle('on', state.speak); if (!state.speak) speechSynthesis.cancel(); save(); });
   }

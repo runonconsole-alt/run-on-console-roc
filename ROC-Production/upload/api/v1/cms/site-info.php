@@ -42,7 +42,7 @@ $plats = $count("SELECT COUNT(*) FROM gaming_categories WHERE status = 'publishe
 $facts = [
     ['Address', 'https://runonconsole.com'],
     ['What it is', 'ROC (Run On Console): an independent gaming and PC hardware site with product picks (Amazon affiliate), a "Can I run it" game checker, gaming platform guides, blogs and live news.'],
-    ['Built', 'October 2026 (first code: 6 October 2026); live since Deploy 1, updated with every deploy below.'],
+    ['Founded', '2026 (Lahore, Pakistan); updated with every deploy below.'],
     ['Latest deploy', $history ? '#' . $history[0]['deploy'] . ' on ' . $history[0]['date'] . ': ' . $history[0]['title'] : 'unknown'],
     ['Content now', "{$products} products in {$cats} categories · {$blogs} blog posts · {$news} news stories · {$plats} gaming platforms"],
     ['Hosting', 'cPanel shared hosting (LiteSpeed web server, PHP ' . PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . ', MySQL); files in /home2/runoncon/public_html'],

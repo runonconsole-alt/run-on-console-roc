@@ -396,6 +396,13 @@ RELEASES = [
                   'Footer: the Call for info / Email us / Address list is removed (the Get in touch boxes above show them)'],
          checks=[dict(label='Chat box script', type='contains', path='roc-chat.js', text='Type or speak, in English or Roman Urdu')],
          pr=REPO + '60'),
+    dict(deploy=61, date='2026-10-14', title='ROC learns gaming: games, consoles and esports results; 1,000+ Steam games; Founded in 2026',
+         changes=['ROC knowledge base (roc-kb.json from Wikidata and Wikipedia): 2,700 notable games (year, developer, publisher, genres, platforms, series), consoles and 200+ esports results (Valorant Champions, LoL Worlds and MSI, The International, PUBG Mobile, Free Fire, Esports World Cup ...); ROC gives winners only from this list instead of guessing',
+                  'The game checker and ROC know 1,000+ Steam games with official requirements, older popular games too (2,000 in the next update)',
+                  'Run On Console: Founded in 2026 on the About page, in the Organization schema, in CMS > Website info and in ROC (no month or day); ROC says the site is built with PHP, MySQL and React and is not ad-free',
+                  'Chat box: closes when you click elsewhere (the chat stays), a New chat button, and the microphone language button now reads 🎤 EN / 🎤 UR'],
+         checks=[dict(label='ROC knowledge base', type='file', path='roc-kb.json')],
+         pr=REPO + '61'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

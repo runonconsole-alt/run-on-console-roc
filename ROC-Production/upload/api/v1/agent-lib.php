@@ -54,6 +54,9 @@ function rocAgentSystem(string $lang, array $facts): string {
          . "- If the visitor asks to analyze or check their PC: use visitor_pc (detected_in_browser is what their browser reports, usually the graphics card; it can be wrong for laptops with two GPUs). Say what you see, ask for the missing parts (processor model, RAM) and which game they want to play.\n"
          . "- You answer EVERYTHING about gaming: games and their history, studios, consoles and PCs, PC hardware, esports teams, players and tournaments, game tips, settings and performance, gaming news. Use your own knowledge; when you are not sure, say so.\n"
          . "- Esports (teams, players, tournaments, who won, results) and questions about Run On Console / ROC itself (what it is, when it was made, where it is, how to contact it) are IN range: answer them, using about_run_on_console for the site. For results you are not sure about, give what you know and say it may have changed since.\n"
+         . "- Esports winners, finals and scores: give ONLY what reference.esports_results says (event, year, winner). If the event is not there, say you are not sure of that result instead of guessing. Never invent final scores or opponents.\n"
+         . "- Games and consoles in reference (year, developer, publisher, platforms, series) are checked data: use them. Gaming is not only hardware: talk about the games themselves, their stories, modes, history and platforms too.\n"
+         . "- Gaming schoolwork or assignments: help with ideas, an outline and facts, and encourage the visitor to write it in their own words.\n"
          . "- Use the refusal below ONLY for topics that are clearly not gaming and not about this website; when in doubt, answer.\n"
          . "- Anything that is not about gaming (politics, religion, medicine, money, homework, general chat, other topics): answer exactly: \"" . $no . "\"\n"
          . "- Never use or answer bad language, insults, sexual or adult content, violence against real people, hacking, cheats that break rules, piracy or anything illegal. For those answer exactly: \"" . $no . "\"\n"
@@ -248,13 +251,14 @@ function rocAgentAbout(): array {
         'name' => 'Run On Console (ROC), runonconsole.com',
         'what' => 'An independent gaming and PC hardware website for PC and console players: a free "Can I run it?" checker for 500+ PC games, gear picks (200+ products: graphics cards, processors, RAM, monitors, mice, keyboards, headsets, speakers, laptops, handhelds, chairs, cases), guides for 15 gaming platforms (PlayStation, Xbox, Nintendo, PC and handhelds, mobile, cloud, VR, retro, arcade), blogs and live gaming news checked against at least two trusted sources.',
         'history' => [
-            'October 2026: the website was built; the first code was written on 6 October 2026 and it went live soon after.',
-            'It grew in small weekly updates: the game checker with official Steam requirements, product pages with real photos, gaming platform guides, the blog writer, live news (each story checked against 2+ sources), the Geo style news page, and ROC the assistant (you) in October 2026.',
+            'Founded in 2026 (only the year is public: never give a month or a day).',
+            'It grew in small weekly updates: the game checker with official Steam requirements, product pages with real photos, gaming platform guides, the blog writer, live news (each story checked against 2+ sources), the Geo style news page, and ROC the assistant (you).',
         ],
         'based_in' => 'Lahore, Pakistan (470/16B Fort Villas, Lahore)',
         'contact' => ['email' => 'contact@runonconsole.com', 'phone' => '0317 4123457', 'page' => '/contact/'],
         'roc_assistant' => 'ROC is the site\'s gaming assistant for signed-in members: English and Roman Urdu, voice input, answers about games, PCs, consoles, esports and gear.',
-        'how_it_earns' => 'Amazon Associates affiliate links (no extra cost to readers) and, later, ads. Brands cannot pay for rankings; sponsored content is always labelled.',
+        'how_it_earns' => 'Amazon Associates affiliate links (no extra cost to readers) and ads (Google AdSense). Do not call the site ad-free. Brands cannot pay for rankings; sponsored content is always labelled.',
+        'built_with' => 'PHP and MySQL on the server, React (Vite) and Tailwind for the pages; ROC answers with Groq AI models and the site\'s own data. Do not name any other technology.',
         'pages' => ['about' => '/about/', 'checker' => '/compatibility/', 'products' => '/products/', 'platforms' => '/gaming-platforms/', 'blogs' => '/blogs/', 'news' => '/news/',
                     'write_for_us' => '/write-for-us/', 'privacy' => '/privacy-policy/', 'terms' => '/terms-and-conditions/'],
         'not_shared' => 'Do not invent or share anything not listed here (owner names, revenue, traffic, servers, passwords, keys, internal tools). Say it is not public.',
@@ -387,6 +391,63 @@ function rocAgentIpHash(): string {
     return substr(hash('sha256', gmdate('Y-m-d') . '|' . ($_SERVER['REMOTE_ADDR'] ?? '') . '|roc-agent'), 0, 16);
 }
 
+/* -------------------------------------------------- knowledge base (roc-kb.json) */
+
+/** ROC's gaming knowledge base (scripts/build-roc-kb.mjs: Wikidata and Wikipedia). */
+function rocAgentKbData(string $root): array {
+    static $kb = null;
+    if ($kb !== null) return $kb;
+    $kb = json_decode((string)@file_get_contents($root . '/roc-kb.json'), true);
+    return $kb = is_array($kb) ? $kb : ['games' => [], 'consoles' => [], 'esports' => []];
+}
+
+/**
+ * Reference facts for a question: esports results, games and consoles it names. Only these results
+ * may be given as winners, so ROC does not invent them.
+ */
+function rocAgentKb(string $root, string $q): ?array {
+    $kb = rocAgentKbData($root);
+    $t = ' ' . rocAgentNorm($q) . ' ';
+    // Short names people type for the full titles in the data.
+    foreach (['gta v' => 'grand theft auto v', 'gta 5' => 'grand theft auto v', 'gta5' => 'grand theft auto v', 'gta vi' => 'grand theft auto vi', 'gta 6' => 'grand theft auto vi',
+              'gta sa' => 'grand theft auto san andreas', 'gta san andreas' => 'grand theft auto san andreas', 'gta 4' => 'grand theft auto iv', 'gta iv' => 'grand theft auto iv',
+              'rdr2' => 'red dead redemption 2', 'rdr 2' => 'red dead redemption 2', 'cs2' => 'counter strike 2', 'csgo' => 'counter strike global offensive',
+              'cod' => 'call of duty', 'botw' => 'the legend of zelda breath of the wild', 'totk' => 'the legend of zelda tears of the kingdom',
+              'pubg' => 'pubg battlegrounds', 'lol' => 'league of legends', 'ps5' => 'playstation 5', 'ps4' => 'playstation 4', 'ps3' => 'playstation 3', 'ps2' => 'playstation 2',
+              'psp' => 'playstation portable', 'switch 2' => 'nintendo switch 2'] as $a => $full)
+        if (strpos($t, ' ' . $a . ' ') !== false) $t .= ' ' . $full . ' ';
+    $out = [];
+    // Esports: a question about a winner, a tournament or an esports game.
+    $series = ['valorant' => '/valorant/i', 'league of legends|\blol\b|worlds|\bmsi\b|lck|lpl' => '/league of legends|mid-season|\blck\b|\blpl\b|\blcp\b/i',
+               'dota|the international|\bti\b' => '/the international|dota/i', 'pubg' => '/pubg/i', 'free fire' => '/free fire/i',
+               'mobile legends|mlbb|\bm[0-9]\b' => '/^m\d|mobile legends|\bmsc\b/i', 'counter strike|\bcs ?2?\b|csgo|major' => '/major|counter-strike|pgl|blast|iem/i',
+               'fortnite' => '/fortnite/i', 'overwatch' => '/overwatch/i', 'rocket league' => '/rocket league/i', 'esports world cup|ewc' => '/esports world cup/i'];
+    $esQ = (bool)preg_match('/\b(won|win|winner|winners|champion|champions|jeet|jeeta|jeeti|jeete|tournament|final|finals|esports|world cup|masters|major)\b/i', $q);
+    $pick = [];
+    foreach ($series as $k => $re) if (preg_match('/' . $k . '/i', $t)) foreach ((array)$kb['esports'] as $e) if (preg_match($re, $e['t'] . ' ' . ($e['game'] ?? ''))) $pick[] = $e;
+    if (!$pick && $esQ) foreach ((array)$kb['esports'] as $e) if ($e['src'] === 'Wikipedia') $pick[] = $e;
+    if ($pick) {
+        if (preg_match('/\b(20[0-3]\d)\b/', $q, $ym)) { $f = array_values(array_filter($pick, function ($e) use ($ym) { return (int)$e['y'] === (int)$ym[1]; })); if ($f) $pick = $f; }
+        usort($pick, function ($a, $b) { return [(int)$b['y'], $a['src'] === 'Wikipedia' ? 0 : 1] <=> [(int)$a['y'], $b['src'] === 'Wikipedia' ? 0 : 1]; });
+        $out['esports_results'] = array_map(function ($e) { return array_filter(['event' => $e['t'], 'year' => $e['y'], 'winner' => $e['winner'], 'runner_up' => $e['runner_up'] ?? null, 'source' => $e['src']]); },
+                                            array_slice($pick, 0, 10));
+    }
+    // Games and consoles named in the question (the longest names first).
+    foreach (['games' => 2, 'consoles' => 2] as $key => $n) {
+        $found = [];
+        foreach ((array)$kb[$key] as $g) {
+            $name = rocAgentNorm((string)$g['n']);
+            if (strlen($name) < 4 || in_array($name, ['game', 'games', 'play', 'online', 'world', 'racing', 'tetris 99'], true)) continue;
+            if (strpos($t, ' ' . $name . ' ') !== false) $found[] = [$name, $g];
+        }
+        usort($found, function ($a, $b) { return strlen($b[0]) <=> strlen($a[0]); });
+        if ($found) $out[$key] = array_map(function ($x) { return array_filter($x[1]); }, array_slice($found, 0, $n));
+    }
+    if (!$out) return null;
+    $out['source'] = 'Wikidata and Wikipedia (' . ($kb['updated'] ?? '') . ')';
+    return $out;
+}
+
 /* ------------------------------------------------------------------ answer */
 
 /**
@@ -439,6 +500,7 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
 
     $facts = ['site' => 'Run On Console (runonconsole.com): gaming and PC hardware picks, a Can I run it checker for 500 PC games, gaming platform guides, blogs and news.',
               'about_run_on_console' => rocAgentAbout(),
+              'reference' => rocAgentKb($root, $q . ' ' . (count($history) > 1 ? (string)($history[count($history) - 3]['content'] ?? '') : '')),
               'visitor_pc' => ['graphics_card_score' => $gpu, 'processor_score' => $cpu, 'ram_gb' => $ram,
                                'on_phone' => (bool)preg_match('/android|ios/i', (string)($device['os'] ?? '')),
                                'detected_in_browser' => $detGpu !== '' ? ['graphics' => $detGpu, 'cpu_threads' => (int)($device['threads'] ?? 0) ?: null,

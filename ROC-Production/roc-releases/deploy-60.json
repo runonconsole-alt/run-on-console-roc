@@ -15,16 +15,9 @@
    "type": "contains",
    "path": "roc-chat.js",
    "text": "Type or speak, in English or Roman Urdu"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-U5Ogofvj.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/60",
- "build": "index-U5Ogofvj.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]
