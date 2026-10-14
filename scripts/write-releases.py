@@ -382,6 +382,12 @@ RELEASES = [
                   'Analyze my PC: ROC reads the graphics card the browser reports and asks for the processor and RAM'],
          checks=[dict(label='Microphone allowed (cli-mic-permission.php)', type='contains', path='.htaccess', text='microphone=(self)')],
          pr=REPO + '58'),
+    dict(deploy=59, date='2026-10-14', title='ROC: web search through gpt-oss, phone visitors, camera only with a picture model',
+         changes=['Questions about new things (results, releases, news) use the browser search of the gpt-oss models when the key has no web search model',
+                  'Visitors on a phone: ROC helps with mobile games or explains how to check a PC instead of asking for PC specs again and again',
+                  'The picture button shows only when the Groq key has a model that reads pictures (the current free key has none)'],
+         checks=[dict(label='Chat box script', type='contains', path='roc-chat.js', text='no picture model on the key yet')],
+         pr=REPO + '59'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

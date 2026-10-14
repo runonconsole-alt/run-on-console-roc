@@ -50,6 +50,7 @@ function rocAgentSystem(string $lang, array $facts): string {
          . ". If the visitor writes in Urdu script, reply in Roman Urdu. Keep it short: at most 120 words, no headings.\n"
          . "- Talk like a friendly gamer friend, the way ChatGPT or Claude chat: natural, warm, varied sentences, never the same reply twice, and follow the conversation. Answer the visitor's actual message first.\n"
          . "- Small talk is fine (hi, salam, how are you, kya haal hai, who are you, what can you do, thanks): reply naturally in one or two lines, and you may ask what they play or how you can help with gaming.\n"
+         . "- If the visitor is on a phone (detected_in_browser.system is Android or iOS, or they say mobile / phone / mob): the detected graphics is the phone's chip, not a PC. Do not ask for PC specs again and again: offer to help with mobile games (which games run well on their phone, settings, controllers), or say that to check a PC they can open the site on that PC or type its graphics card, processor and RAM.\n"
          . "- If the visitor asks to analyze or check their PC: use visitor_pc (detected_in_browser is what their browser reports, usually the graphics card; it can be wrong for laptops with two GPUs). Say what you see, ask for the missing parts (processor model, RAM) and which game they want to play.\n"
          . "- You answer EVERYTHING about gaming: games and their history, studios, consoles and PCs, PC hardware, esports teams, players and tournaments, game tips, settings and performance, gaming news. Use your own knowledge; when you are not sure, say so.\n"
          . "- Anything that is not about gaming (politics, religion, medicine, money, homework, general chat, other topics): answer exactly: \"" . $no . "\"\n"
@@ -435,14 +436,22 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
             $msgs[] = ['role' => 'user', 'content' => [['type' => 'text', 'text' => $last['content'] !== '' ? $last['content'] : 'What is in this picture? (gaming related)'],
                                                         ['type' => 'image_url', 'image_url' => ['url' => $image]]]];
             $models = $av['vision'] ?: [ROC_AGENT_VISION];
-        } elseif (rocAgentNeedsWeb($q) && !$check && !$products && $av['web']) {
-            $models = array_merge($av['web'], $models);
         }
+        // New things (releases, news, results): Groq's web search model, or else the browser search tool
+        // of the gpt-oss models (Groq runs the search); without either, the model's own knowledge.
+        $web = $image === null && rocAgentNeedsWeb($q) && !$check && !$products;
+        if ($web && $av['web']) $models = array_merge($av['web'], $models);
         $errs = [];
         foreach ($models as $model) {
-            $body = ['model' => $model, 'temperature' => 0.6, 'max_tokens' => 500, 'messages' => $msgs];
+            $body = ['model' => $model, 'temperature' => 0.6, 'max_tokens' => 700, 'messages' => $msgs];
             if (preg_match('/gpt-oss|qwen3/i', $model)) $body['reasoning_effort'] = preg_match('/gpt-oss/i', $model) ? 'low' : 'none';
-            $r = rocGroqCall($key, 'POST', '/chat/completions', $body, stripos($model, 'compound') !== false ? 40 : 25);
+            $search = $web && !$av['web'] && stripos($model, 'gpt-oss') !== false;
+            if ($search) $body['tools'] = [['type' => 'browser_search']];
+            $r = rocGroqCall($key, 'POST', '/chat/completions', $body, stripos($model, 'compound') !== false || $search ? 40 : 25);
+            if (!$r['ok'] && $search) {   // the search tool is not on this key: answer without it
+                unset($body['tools']);
+                $r = rocGroqCall($key, 'POST', '/chat/completions', $body, 25);
+            }
             if ($r['ok']) {
                 $reply = trim((string)preg_replace('#<think>.*?</think>#s', '', (string)($r['data']['choices'][0]['message']['content'] ?? '')));
                 if ($reply !== '') { $engine = $model; break; }
@@ -450,7 +459,7 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
             } else {
                 $errs[] = $model . ': ' . $r['error'];
                 // A retired model: ask Groq for the list again next time.
-                if (in_array($r['code'] ?? 0, [400, 404], true) && stripos($r['error'], 'model') !== false) rocBlogSet($pdo, 'agent_models', []);
+                if (in_array($r['code'] ?? 0, [400, 404], true) && preg_match('/does not exist|decommission|not found|no longer|deprecated/i', $r['error'])) rocBlogSet($pdo, 'agent_models', []);
             }
         }
         if ($errs && $engine === 'basic') rocBlogSet($pdo, 'agent_last_error', ['t' => gmdate('Y-m-d H:i') . ' UTC', 'errors' => array_slice($errs, 0, 4)]);

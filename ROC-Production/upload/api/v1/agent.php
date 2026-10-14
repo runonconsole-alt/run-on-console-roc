@@ -38,7 +38,10 @@ try {
 } catch (\Throwable $e) { $uid = 0; }
 if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
 
-if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') rocAgentOut(200, ['success' => true, 'on' => $S['on'], 'signed_in' => $uid > 0, 'name' => $first]);
+// Pictures only when the Groq key has a picture model (from the cached model list; unknown = yes).
+$am = rocBlogGet($pdo, 'agent_models', []);
+$vision = !is_array($am) || empty($am['t']) || !empty($am['vision']);
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') rocAgentOut(200, ['success' => true, 'on' => $S['on'], 'signed_in' => $uid > 0, 'name' => $first, 'vision' => $vision]);
 if ($uid <= 0) rocAgentOut(401, ['success' => false, 'login' => true, 'error' => 'Please sign in to chat with ROC. / ROC se baat karne ke liye login karein.']);
 if (!$S['on']) rocAgentOut(200, ['success' => true, 'off' => true, 'reply' => 'ROC is switched off for now.', 'products' => []]);
 
