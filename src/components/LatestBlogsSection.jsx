@@ -3,8 +3,8 @@ import { ArrowRight, Clock, Flame, BookOpen } from 'lucide-react';
 
 /**
  * Home page: the newest published blog posts, straight from the CMS (/blogs/?json=1).
- * Left: the four newest as cards. Right: the next ones as a list. Both boxes are the
- * same height. A new post shows up here as soon as it is published; with no posts
+ * Left: the six newest as cards (two rows). Right: the next six as a list that stretches
+ * to the same height, so both boxes are filled. A new post shows up here as soon as it is published; with no posts
  * the section is not shown at all.
  */
 const fmtDate = (d) => {
@@ -27,13 +27,13 @@ export const LatestBlogsSection = () => {
 
   if (!posts || posts.length === 0) return null;
 
-  const featured = posts.slice(0, 4);
-  const more = posts.slice(4, 9);
+  const featured = posts.slice(0, 6);
+  const more = posts.slice(6, 12);
 
   return (
     <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
       <div className={more.length ? 'lg:col-span-8' : 'lg:col-span-12'}>
-        <div className="h-full bg-white border-2 border-emerald-500/20 rounded-3xl p-6 shadow-sm space-y-5">
+        <div className="h-full bg-white border-2 border-emerald-500/20 rounded-3xl p-6 shadow-sm flex flex-col gap-5">
           <div className="flex items-center justify-between gap-3 pb-3 border-b border-emerald-100">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-emerald-800 text-emerald-300 flex items-center justify-center">
@@ -49,7 +49,7 @@ export const LatestBlogsSection = () => {
             </a>
           </div>
 
-          <div className={`grid grid-cols-1 sm:grid-cols-2 ${more.length ? 'xl:grid-cols-4' : 'lg:grid-cols-4'} gap-4`}>
+          <div className={`grid grid-cols-1 sm:grid-cols-2 ${more.length ? 'xl:grid-cols-3' : 'lg:grid-cols-3'} gap-4 flex-1`}>
             {featured.map((p) => (
               <a key={p.u} href={p.u} className="group no-underline flex flex-col rounded-2xl border border-slate-200 hover:border-emerald-400 overflow-hidden bg-white transition-colors">
                 <div className="relative bg-slate-100 overflow-hidden" style={{ aspectRatio: '1200 / 630' }}>
@@ -86,7 +86,7 @@ export const LatestBlogsSection = () => {
             </div>
             <div className="flex flex-col gap-3 flex-1">
               {more.map((p, i) => (
-                <a key={p.u} href={p.u} className="group no-underline p-3 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-2xl flex items-center gap-3 transition-colors">
+                <a key={p.u} href={p.u} className="group no-underline lg:flex-1 p-3 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-2xl flex items-center gap-3 transition-colors">
                   <div className="w-8 h-8 rounded-xl bg-emerald-700 text-white font-display font-extrabold text-xs flex items-center justify-center shrink-0">
                     {String(i + 1).padStart(2, '0')}
                   </div>

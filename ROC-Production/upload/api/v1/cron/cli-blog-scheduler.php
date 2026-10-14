@@ -94,6 +94,12 @@ try {
     if ($n !== null) echo date('c') . ' news: ' . $n . "\n";
 } catch (\Throwable $e) { echo date('c') . ' news error: ' . $e->getMessage() . "\n"; }
 
+// Covers made while the free picture quota was used up get their own AI picture (one a run).
+try {
+    $cv = rocBlogRetryCovers($pdo, $ROOT);
+    if ($cv !== null) echo date('c') . ' ' . $cv . "\n";
+} catch (\Throwable $e) { echo date('c') . ' cover error: ' . $e->getMessage() . "\n"; }
+
 // Product and platform About texts (cli-content-writer.php): 2 a run, at most 40 a day, only when
 // the writer and the news did nothing this run, so they always come first.
 try {

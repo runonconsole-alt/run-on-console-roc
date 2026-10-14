@@ -45,6 +45,16 @@ if ($slug !== '' && !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) {
     rocNotFound($ROOT);
 }
 
+// List pages live at /news/page/2/ and /blogs/page/2/ (cli-news-pages.php): old ?page=2 links move there.
+$reqPath = (string)(parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/');
+if ($slug === '' && !$isMap && !isset($_GET['json']) && isset($_GET['page'])) {
+    $pretty = strpos($reqPath, '/page/') !== false;
+    if (!$pretty || $page === 1) {
+        header('Location: ' . rocPageUrl($isNews ? '/news/' : '/blogs/', $page) . ($query !== '' ? '?q=' . rawurlencode($query) : ''), true, 301);
+        exit;
+    }
+}
+
 /* ----------------------------------------------------------- database */
 
 $pdo = null;
@@ -97,7 +107,7 @@ if ($slug !== '') {
         header('Location: ' . rocPostUrl($slug, rocIsNews($post)), true, 301);
         exit;
     }
-    rocRenderPost($ROOT, $post);
+    rocRenderPost($ROOT, $post, $pdo);
 }
 if (isset($_GET['json'])) {
     // Published posts for the header search box (/blogs/?json=1).
@@ -394,7 +404,7 @@ function rocNotFound(string $root): void {
 /*                             single post                              */
 /* ==================================================================== */
 
-function rocRenderPost(string $root, array $p): void {
+function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
     [$headTop, $bodyToMain, $mainOpen, , $afterMain] = rocTemplate($root, 'blog-post.html');
 
     $slug     = (string)$p['slug'];
@@ -475,11 +485,12 @@ function rocRenderPost(string $root, array $p): void {
     if ($words) $article['wordCount'] = $words;
     $h .= rocJsonLd($article);
     $h .= rocArticleStyles();
+    if ($news) $h .= rocNewsStyles();
     $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
 
-    /* ---------------- body */
+    /* ---------------- body (news: the story with the latest news and the ad on the right, Geo style) */
     $m  = $mainOpen;
-    $m .= '<article class="max-w-4xl mx-auto py-6 space-y-8">';
+    $m .= $news ? '<div class="rn-post"><article class="py-6 space-y-8 min-w-0">' : '<article class="max-w-4xl mx-auto py-6 space-y-8">';
     $m .= '<div class="flex items-center justify-between">'
         . '<a href="' . ($news ? '/news/' : '/blogs/') . '" class="bg-white border border-slate-300 hover:border-emerald-600 text-slate-700 font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2 transition-colors shadow-sm no-underline">'
         . '<span aria-hidden="true">&larr;</span><span>' . ($news ? 'Back to All News' : 'Back to All Blogs') . '</span></a>'
@@ -509,8 +520,13 @@ function rocRenderPost(string $root, array $p): void {
             . '<h2 class="font-display font-extrabold text-base text-emerald-950 mb-1">' . ($news ? 'The story in short' : 'Article Overview &amp; Key Takeaways') . '</h2>'
             . '<p class="text-xs sm:text-sm text-emerald-900 leading-relaxed">' . rocH($excerpt) . '</p></div>';
     }
+    if ($news) $m .= rocAdUnit('article');
     $m .= '<div class="roc-article">' . $body . '</div>';
     $m .= '</article>';
+    if ($news) {
+        $m .= '<aside class="rn-aside"><div class="rn-sticky">' . rocAdSide()
+            . ($pdo ? rocNewsSideList($pdo, true, 'Latest News', $slug, 6) : '') . '</div></aside></div>';
+    }
 
     rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $mod);
 }
@@ -559,7 +575,7 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
         $desc  = 'The latest gaming and PC hardware news: new GPUs, CPUs, handhelds, consoles and games, each story checked against trusted sources, with links to the products.';
     }
 
-    $canonical = ROC_PUBLIC_URL . $base . ($page > 1 ? '?page=' . $page : '');
+    $canonical = ROC_PUBLIC_URL . rocPageUrl($base, $page);
     if ($page > 1) $title = 'Page ' . $page . ' – ' . $title;
     $robots = $query !== '' ? 'noindex, follow' : 'index, follow, max-image-preview:large';
 
@@ -597,6 +613,7 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
         }
         $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'ItemList', 'itemListElement' => $items]);
     }
+    $h .= rocNewsStyles();
     $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
 
     /* ---------------- body: hero from the template, cards from the database */
@@ -606,28 +623,11 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
     $hero = preg_replace('/\d+(<!-- -->)?\s*Hardware Reviews &amp; Guides/', $allPublished . ' Hardware Reviews &amp; Guides', $hero, 1);
     $hero = preg_replace('#<canvas\b[^>]*></canvas>#i', '', $hero);
     if ($news) {
-        // Same green hero as the other pages, with the news picture (cli-site-images.php) or the newest story's cover.
-        $pic = is_file(__DIR__ . '/uploads/site/news-hero.webp') ? '/uploads/site/news-hero.webp' : '';
-        $picAlt = 'Gaming and PC hardware news on Run On Console';
-        if ($pic === '' && $posts) { $pic = trim((string)($posts[0]['image'] ?? '')); $picAlt = trim((string)($posts[0]['image_alt'] ?? '')) ?: (string)$posts[0]['title']; }
-        $hero = '<div class="space-y-12 py-6">'
-            . '<div class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
-            . '<div class="absolute -top-20 -left-20 w-80 h-80 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>'
-            . '<div class="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl pointer-events-none"></div>'
-            . '<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10"><div class="lg:col-span-7 space-y-4">'
-            . '<span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5 badge-glow"><span class="w-2 h-2 rounded-full bg-rose-600 animate-pulse"></span>Live news</span>'
-            . '<h1 class="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight">Gaming &amp; PC Hardware News</h1>'
-            . '<p class="text-emerald-100 text-xs sm:text-sm leading-relaxed max-w-lg">New GPUs, CPUs, handhelds, consoles and games. Every story is checked against trusted sources (listed under it) and links to the products on Run On Console.</p>'
-            . '<div class="flex flex-wrap gap-2.5 pt-2">'
-            . '<span class="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl">' . $allPublished . ' stor' . ($allPublished === 1 ? 'y' : 'ies') . ' so far</span>'
-            . '<span class="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl">Checked against 2+ sources</span></div>'
-            . '</div>'
-            // The picture opens the newest story.
-            . ($pic !== '' ? '<div class="lg:col-span-5"><a href="' . rocH($posts ? $base . $posts[0]['slug'] . '/' : $base) . '" class="block bg-slate-900/85 border-2 border-emerald-400/40 hover:border-emerald-300 rounded-3xl p-3 shadow-2xl no-underline group">'
-                . '<img width="1200" height="675" src="' . rocH($pic) . '" alt="' . rocH($picAlt) . '" class="w-full rounded-2xl object-cover group-hover:opacity-90" style="aspect-ratio:16/9"/></a></div>' : '')
-            . '</div></div>';
+        // News: Geo style list (lead story, two beside it, the list; ad and blogs on the right).
+        $latest = null;
+        foreach ($posts as $p) { $t = rocModified($p); if ($t && (!$latest || $t > $latest)) $latest = $t; }
+        rocSendHtml($headTop . $h . $bodyToMain . $mainOpen . rocNewsListMain($pdo, $posts, $page, $pages, $query, $total, $allPublished) . $afterMain, $latest);
     }
-
     $cards = '';
     if ($query !== '') {
         $cards .= '<div class="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-600">'
@@ -663,25 +663,195 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
             . ($query !== '' ? 'No articles match that search.' : ($news ? 'No news yet. New stories appear here as soon as they are checked.' : 'No articles published yet.')) . '</p>';
     }
 
-    if ($pages > 1) {
-        $cards .= '<nav class="flex items-center justify-center gap-2 text-sm font-bold" aria-label="Pagination">';
-        $qs = $query !== '' ? '&q=' . rawurlencode($query) : '';
-        if ($page > 1) {
-            $prev = $page - 1 === 1 ? $base . ($query !== '' ? '?q=' . rawurlencode($query) : '') : $base . '?page=' . ($page - 1) . $qs;
-            $cards .= '<a class="px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-700" href="' . rocH($prev) . '">&larr; Newer</a>';
-        }
-        $cards .= '<span class="px-3 text-slate-500">Page ' . $page . ' of ' . $pages . '</span>';
-        if ($page < $pages) {
-            $cards .= '<a class="px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-700" href="' . $base . '?page=' . ($page + 1) . rocH($qs) . '">Older &rarr;</a>';
-        }
-        $cards .= '</nav>';
-    }
+    $cards .= rocPager($base, $page, $pages, $query);
 
     $main = $mainOpen . $hero . $cards . '</div>';
 
     $latest = null;
     foreach ($posts as $p) { $t = rocModified($p); if ($t && (!$latest || $t > $latest)) $latest = $t; }
     rocSendHtml($headTop . $h . $bodyToMain . $main . $afterMain, $latest);
+}
+
+/* ==================================================================== */
+/*                news layout (Geo style), pages, ad places             */
+/* ==================================================================== */
+
+/** Address of list page $n: /news/, /news/page/2/ ... (rules from cli-news-pages.php). */
+function rocPageUrl(string $base, int $n): string {
+    return $n <= 1 ? $base : $base . 'page/' . $n . '/';
+}
+
+/** Page numbers with "Previous" and "Next": 1 ... 4 5 6 ... 12. */
+function rocPager(string $base, int $page, int $pages, string $query = ''): string {
+    if ($pages <= 1) return '';
+    $qs = $query !== '' ? '?q=' . rawurlencode($query) : '';
+    $u = function (int $n) use ($base, $qs) { return rocH(rocPageUrl($base, $n) . $qs); };
+    $o = '<nav class="rn-pg" aria-label="Pages">';
+    if ($page > 1) $o .= '<a href="' . $u($page - 1) . '" rel="prev">&larr; Previous</a>';
+    $last = 0;
+    for ($n = 1; $n <= $pages; $n++) {
+        if ($n !== 1 && $n !== $pages && abs($n - $page) > 1) continue;
+        if ($last && $n - $last > 1) $o .= '<span class="gap">&hellip;</span>';
+        $o .= $n === $page ? '<span class="on" aria-current="page">' . $n . '</span>' : '<a href="' . $u($n) . '">' . $n . '</a>';
+        $last = $n;
+    }
+    if ($page < $pages) $o .= '<a href="' . $u($page + 1) . '" rel="next">Next &rarr;</a>';
+    return $o . '</nav>';
+}
+
+/** The AdSense IDs saved in CMS > Settings > Tracking & verification. */
+function rocAdIds(): array {
+    static $t = null;
+    if ($t !== null) return $t;
+    $t = [];
+    $lib = __DIR__ . '/api/v1/cms/site-layer-lib.php';
+    if (is_file($lib)) { require_once $lib; $t = (array)(rocLayerLoad(__DIR__)['tracking'] ?? []); }
+    return $t;
+}
+
+/** One AdSense unit ($place: side, list or article), or '' while that place has no unit number. */
+function rocAdUnit(string $place): string {
+    $t = rocAdIds();
+    $pub = trim((string)($t['adsense'] ?? '')); $slot = trim((string)($t['ad_' . $place] ?? ''));
+    if (!preg_match('/^ca-pub-\d{10,20}$/', $pub) || !preg_match('/^\d{6,14}$/', $slot)) return '';
+    return '<div class="rn-ad rn-ad-' . $place . '"><span class="rn-ad-l">Advertisement</span>'
+        . '<ins class="adsbygoogle" style="display:block" data-ad-client="' . $pub . '" data-ad-slot="' . $slot . '" data-ad-format="auto" data-full-width-responsive="true"></ins>'
+        . '<script>(adsbygoogle=window.adsbygoogle||[]).push({});</script></div>';
+}
+
+/** Right side box: the ad, or our own box (checker and products) while there is no ad unit. */
+function rocAdSide(): string {
+    $ad = rocAdUnit('side');
+    if ($ad !== '') return $ad;
+    return '<a class="rn-house" href="/compatibility/"><span class="rn-house-k">Free tool</span>'
+        . '<strong>Can your PC run it?</strong><span class="rn-house-p">Check 500+ PC games against your graphics card, processor and memory.</span>'
+        . '<span class="rn-house-b">Check a game &rarr;</span></a>'
+        . '<a class="rn-house rn-house-2" href="/products/"><span class="rn-house-k">Gaming gear</span>'
+        . '<strong>Our product picks</strong><span class="rn-house-p">Mice, keyboards, headsets, monitors, GPUs and more.</span>'
+        . '<span class="rn-house-b">See the products &rarr;</span></a>';
+}
+
+/** Category line over a story: "News · Oct 13, 10:10 UTC". */
+function rocNewsMeta(array $p): string {
+    $pd = rocPublished($p);
+    return '<span class="rn-cat">' . rocH(rocCategoryLabel($p['category'] ?? '')) . ($pd ? ' &middot; ' . rocH(date('M j, H:i', $pd)) . ' UTC' : '') . '</span>';
+}
+
+/** One story: picture, category line, title (and the summary when $excerpt). */
+function rocNewsItem(array $p, string $cls, string $base, bool $excerpt = false, bool $lazy = true): string {
+    $img = trim((string)($p['image'] ?? ''));
+    $alt = trim((string)($p['image_alt'] ?? '')) ?: (string)$p['title'];
+    return '<a class="rn-a ' . $cls . '" href="' . $base . rocH((string)$p['slug']) . '/">'
+        . '<div class="rn-pic">' . ($img !== '' ? '<img width="1200" height="630" src="' . rocH($img) . '" alt="' . rocH($alt) . '"' . ($lazy ? ' loading="lazy"' : ' fetchpriority="high"') . '/>' : '') . '</div>'
+        . '<div class="rn-txt">' . rocNewsMeta($p) . '<h2 class="rn-t">' . rocH($p['title']) . '</h2>'
+        . ($excerpt && trim((string)($p['excerpt'] ?? '')) !== '' ? '<p class="rn-ex">' . rocH($p['excerpt']) . '</p>' : '') . '</div></a>';
+}
+
+/** Side list: the newest stories (news) or posts (blogs) with small pictures. */
+function rocNewsSideList(PDO $pdo, bool $news, string $title, string $skipSlug = '', int $n = 6): string {
+    $st = $pdo->prepare("SELECT title, slug, category, image, image_alt, published_at, created_at FROM blogs WHERE status = 'published' AND "
+        . ($news ? "category = 'News'" : "(category IS NULL OR category <> 'News')") . ' AND slug <> ? ' . rocOrderSql() . ' LIMIT ' . $n);
+    $st->execute([$skipSlug]);
+    $rows = $st->fetchAll(PDO::FETCH_ASSOC);
+    if (!$rows) return '';
+    $base = $news ? '/news/' : '/blogs/';
+    $o = '<div class="rn-box"><h2 class="rn-h2">' . rocH($title) . '</h2>';
+    foreach ($rows as $p) $o .= rocNewsItem($p, 'rn-side-item', $base);
+    return $o . '<a class="rn-more" href="' . $base . '">' . ($news ? 'All news' : 'All articles') . ' &rarr;</a></div>';
+}
+
+/** The news list page: lead story with two beside it, then the list; ad and blogs on the right. */
+function rocNewsListMain(PDO $pdo, array $posts, int $page, int $pages, string $query, int $total, int $allPublished): string {
+    $base = '/news/';
+    $o = '<div class="rn-wrap"><div class="rn-head"><h1>' . ($query !== '' ? 'News search' : 'Latest News') . '</h1>'
+        . '<span class="rn-live"><i></i>Live</span>'
+        . '<span class="rn-count">' . ($page > 1 ? 'Page ' . $page . ' of ' . $pages . ' &middot; ' : '') . $allPublished . ' stor' . ($allPublished === 1 ? 'y' : 'ies') . ', each checked against 2+ sources</span></div>'
+        . '<div class="rn-grid"><div class="rn-main">';
+    if ($query !== '') {
+        $o .= '<p class="rn-found">' . $total . ' result' . ($total === 1 ? '' : 's') . ' for <strong>&ldquo;' . rocH($query) . '&rdquo;</strong> &middot; <a href="' . $base . '">Clear search</a></p>';
+    }
+    $rest = $posts;
+    if ($page === 1 && $query === '' && count($posts) >= 3) {
+        $lead = array_shift($rest); $two = array_splice($rest, 0, 2);
+        $o .= '<div class="rn-top">' . rocNewsItem($lead, 'rn-lead', $base, true, false)
+            . '<div class="rn-two">' . rocNewsItem($two[0], 'rn-small', $base) . rocNewsItem($two[1], 'rn-small', $base) . '</div></div>';
+    }
+    $o .= '<div class="rn-list">';
+    foreach (array_values($rest) as $i => $p) {
+        $o .= rocNewsItem($p, 'rn-row', $base, true, $page > 1 || $query !== '' ? $i > 1 : true);
+        if ($i === 3) $o .= rocAdUnit('list');
+    }
+    $o .= '</div>';
+    if (!$posts) $o .= '<p class="rn-found">' . ($query !== '' ? 'No news matches that search.' : 'No news yet. New stories appear here as soon as they are checked.') . '</p>';
+    $o .= rocPager($base, $page, $pages, $query) . '</div>';
+    $o .= '<aside class="rn-aside"><div class="rn-sticky">' . rocAdSide() . rocNewsSideList($pdo, false, 'From our blogs', '', 5) . '</div></aside>';
+    return $o . '</div></div>';
+}
+
+/** Styles of the news pages and the page numbers (plain CSS: these pages have no React styles of their own). */
+function rocNewsStyles(): string {
+    return <<<CSS
+<style>
+.rn-wrap{padding:24px 0 8px}
+.rn-head{display:flex;align-items:flex-end;flex-wrap:wrap;gap:10px 14px;border-bottom:3px solid #047857;padding-bottom:10px;margin-bottom:22px}
+.rn-head h1{font-family:Outfit,Inter,sans-serif;font-weight:900;font-style:italic;text-transform:uppercase;font-size:1.7rem;line-height:1;color:#064e3b;margin:0}
+.rn-live{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#be123c;background:#fff1f2;border-radius:999px;padding:4px 10px}
+.rn-live i{width:7px;height:7px;border-radius:50%;background:#e11d48;animation:rnp 1.4s infinite}
+@keyframes rnp{50%{opacity:.25}}
+.rn-count{margin-left:auto;font-size:12px;color:#64748b;font-weight:600}
+.rn-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:32px}
+@media(min-width:1024px){.rn-grid{grid-template-columns:minmax(0,1fr) 300px}}
+.rn-main{min-width:0}
+a.rn-a{display:block;text-decoration:none;color:inherit}
+.rn-pic{position:relative;overflow:hidden;background:#0f172a;border-radius:12px;aspect-ratio:1200/630}
+.rn-pic img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .4s}
+a.rn-a:hover .rn-pic img{transform:scale(1.04)}
+.rn-cat{display:block;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#047857;margin:9px 0 4px}
+.rn-t{font-family:Outfit,Inter,sans-serif;font-weight:800;color:#0f172a;line-height:1.3;margin:0;font-size:1rem}
+a.rn-a:hover .rn-t{color:#047857}
+.rn-ex{font-size:.86rem;color:#475569;line-height:1.55;margin:6px 0 0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rn-top{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;padding-bottom:22px;border-bottom:1px solid #e2e8f0}
+.rn-lead .rn-t{font-size:1.45rem}
+.rn-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.rn-small .rn-t{font-size:.92rem}
+@media(min-width:768px){.rn-top{grid-template-columns:minmax(0,1fr) minmax(0,2.3fr)}.rn-top .rn-lead{order:2}.rn-top .rn-two{order:1;grid-template-columns:minmax(0,1fr);align-content:start}.rn-lead .rn-t{font-size:1.75rem}}
+a.rn-row{display:grid;grid-template-columns:128px minmax(0,1fr);gap:14px;align-items:start;padding:16px 0;border-bottom:1px solid #e2e8f0}
+.rn-row .rn-cat{margin-top:0}
+.rn-row .rn-ex{display:none}
+@media(min-width:640px){a.rn-row{grid-template-columns:240px minmax(0,1fr);gap:18px}.rn-row .rn-t{font-size:1.12rem}.rn-row .rn-ex{display:-webkit-box;-webkit-line-clamp:2}}
+.rn-found{font-size:.9rem;color:#475569;margin:0 0 12px}
+.rn-found a{color:#047857;font-weight:700}
+.rn-aside{min-width:0}
+.rn-sticky{display:flex;flex-direction:column;gap:22px}
+@media(min-width:1024px){.rn-sticky{position:sticky;top:96px}}
+.rn-ad{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:8px;min-height:100px;overflow:hidden}
+.rn-ad-l{display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#94a3b8;text-align:center;margin-bottom:4px}
+.rn-ad-list{margin:16px 0}
+a.rn-house{display:flex;flex-direction:column;gap:6px;border-radius:16px;padding:20px;background:linear-gradient(135deg,#064e3b,#047857);color:#fff;text-decoration:none;box-shadow:0 10px 24px -12px rgba(4,120,87,.6)}
+a.rn-house-2{background:linear-gradient(135deg,#0f172a,#134e4a)}
+.rn-house-k{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#6ee7b7}
+a.rn-house strong{font-family:Outfit,Inter,sans-serif;font-size:1.2rem;font-weight:800;line-height:1.2}
+.rn-house-p{font-size:.8rem;color:#d1fae5;line-height:1.5}
+.rn-house-b{align-self:flex-start;margin-top:6px;background:#34d399;color:#052e2b;font-weight:800;font-size:.78rem;padding:7px 12px;border-radius:10px}
+a.rn-house:hover .rn-house-b{background:#6ee7b7}
+.rn-box{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px}
+.rn-h2{font-family:Outfit,Inter,sans-serif;font-weight:900;font-style:italic;text-transform:uppercase;font-size:1rem;color:#064e3b;margin:0 0 4px;padding-bottom:8px;border-bottom:2px solid #047857}
+a.rn-side-item{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;align-items:start;padding:11px 0;border-bottom:1px solid #f1f5f9}
+.rn-side-item .rn-pic{border-radius:8px}
+.rn-side-item .rn-cat{margin:0 0 2px;font-size:9.5px}
+.rn-side-item .rn-t{font-size:.8rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rn-more{display:inline-block;margin-top:10px;font-size:.8rem;font-weight:800;color:#047857;text-decoration:none}
+.rn-pg{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;margin-top:28px}
+.rn-pg a,.rn-pg span{min-width:40px;text-align:center;padding:9px 14px;border-radius:12px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-weight:700;font-size:.85rem;text-decoration:none}
+.rn-pg a:hover{border-color:#059669;color:#047857}
+.rn-pg .on{background:#047857;border-color:#047857;color:#fff}
+.rn-pg .gap{border:0;background:none;min-width:0;padding:9px 2px}
+.rn-post{display:grid;grid-template-columns:minmax(0,1fr);gap:32px;max-width:1200px;margin:0 auto}
+@media(min-width:1024px){.rn-post{grid-template-columns:minmax(0,1fr) 320px}.rn-post .rn-aside{padding-top:24px}}
+.rn-ad-article{margin:0}
+</style>
+
+CSS;
 }
 
 /* ==================================================================== */

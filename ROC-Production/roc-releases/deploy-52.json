@@ -13,16 +13,9 @@
    "label": "Picture replacer (cli-copyright-images.php)",
    "type": "file",
    "path": "api/v1/cron/cli-copyright-images.php"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-k41BGXxc.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/52",
- "build": "index-k41BGXxc.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]

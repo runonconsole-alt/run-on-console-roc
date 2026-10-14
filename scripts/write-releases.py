@@ -334,6 +334,16 @@ RELEASES = [
                   'Media clean-up: covers of archived posts no longer count as used, so only the covers on the site stay'],
          checks=[dict(label='Picture replacer (cli-copyright-images.php)', type='file', path='api/v1/cron/cli-copyright-images.php')],
          pr=REPO + '52'),
+    dict(deploy=53, date='2026-10-14', title='News page in the Geo style, /news/page/2/ addresses, ad places, covers with pictures',
+         changes=['News page: the newest story big in the middle, two beside it, then the list with small pictures; on the right an ad place and the newest blog posts',
+                  'Every news story has the latest news and an ad place on the right',
+                  'Page addresses /news/page/2/ and /blogs/page/2/ with page numbers and Previous / Next (old ?page=2 links move there; cli-news-pages.php)',
+                  'CMS > Settings > Tracking: Google AdSense publisher ID and three ad places for the news pages; /ads.txt is written on save. Until then our own Can I run it and Products boxes show',
+                  'News and blog covers never show only the title: without an AI picture or a product photo they use one of our own pictures, and the cron job swaps in an AI picture once the free daily quota is back (cli-news-covers.php fixes the old ones)',
+                  'Home page: the latest articles box shows six cards in two rows and the list beside it fills the same height'],
+         checks=[dict(label='Page rules (cli-news-pages.php)', type='contains', path='.htaccess', text='ROC pages BEGIN'),
+                 dict(label='Cover fixer (cli-news-covers.php)', type='file', path='api/v1/cron/cli-news-covers.php')],
+         pr=REPO + '53'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

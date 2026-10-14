@@ -657,7 +657,9 @@ function rocBlogDropOldCovers(string $dir, string $slug, string $keep): void {
 
 /**
  * The cover of a post or a news story: a picture made for its title (Cloudflare AI, different for
- * every post) in the ROC pattern; without Cloudflare the product photo; else the title alone.
+ * every post) in the ROC pattern; without it the product photo; else one of the site's own pictures
+ * (never a cover with the title alone). When the AI picture failed (the free daily quota ran out),
+ * the post is listed in cover_retry and gets its own picture later (rocBlogRetryCovers).
  * The alt text goes to the media library too.
  */
 function rocBlogMakeCover(PDO $pdo, string $root, string $slug, string $title, string $category, ?array $topic, string $prompt = '', string $alt = ''): string {
@@ -679,10 +681,73 @@ function rocBlogMakeCover(PDO $pdo, string $root, string $slug, string $title, s
     }
     if ($img === null) {
         $photo = rocBlogCoverPhoto($pdo, $root, $topic);
-        $img = $photo ? rocBlogCover($root, $slug, $title, $category, $photo) : rocBlogCover($root, $slug, $title, $category);
+        if ($photo) $img = rocBlogCover($root, $slug, $title, $category, $photo);
+        else {
+            // No product photo (game news, for example): one of our own pictures for now.
+            $pic = rocBlogStockPhoto($root, $slug);
+            $img = $pic ? rocBlogCover($root, $slug, $title, $category, $pic, true) : rocBlogCover($root, $slug, $title, $category);
+            if ($cf) rocBlogCoverRetryAdd($pdo, $slug);
+        }
     }
     rocMediaAlt($pdo, $root, $img, $alt !== '' ? $alt : $title . ' - Run On Console');
     return $img;
+}
+
+/**
+ * The site's own pictures (no games, brands or people: see cli-copyright-images.php and
+ * cli-site-images.php), used behind a cover when there is no AI picture and no product photo.
+ * The same post always gets the same one.
+ */
+function rocBlogStockPhoto(string $root, string $slug): ?string {
+    $pool = [];
+    foreach (['/images/trending_spiderman.jpg', '/images/trending_elden.jpg', '/images/hero_cod.jpg', '/images/trending_forza.jpg',
+              '/images/trending_esports.jpg', '/uploads/site/news-hero.webp', '/uploads/site/home-hero.webp', '/uploads/site/compat-hero.webp'] as $p)
+        if (is_file($root . $p)) $pool[] = $root . $p;
+    return $pool ? $pool[abs(crc32($slug)) % count($pool)] : null;
+}
+
+/** Remembers a post whose cover still needs its own AI picture. */
+function rocBlogCoverRetryAdd(PDO $pdo, string $slug): void {
+    $list = rocBlogGet($pdo, 'cover_retry', []);
+    $list = is_array($list) ? array_values(array_diff($list, [$slug])) : [];
+    $list[] = $slug;
+    rocBlogSet($pdo, 'cover_retry', array_slice($list, -50));
+}
+
+/**
+ * Gives the next post in cover_retry its own AI picture (cron, one a run). After a failure (the free
+ * Cloudflare quota is back at 05:00 Pakistan time) it waits 3 hours. Returns a line for the log or null.
+ */
+function rocBlogRetryCovers(PDO $pdo, string $root): ?string {
+    $list = rocBlogGet($pdo, 'cover_retry', []);
+    if (!is_array($list) || !$list) return null;
+    $cf = rocBlogCf($pdo);
+    if (!$cf || !function_exists('imagecreatefromstring')) return null;
+    if (time() - (int)rocBlogGet($pdo, 'cover_retry_at', 0) < 3 * 3600) return null;
+    $slug = (string)$list[0];
+    $st = $pdo->prepare("SELECT id, slug, title, category, image_alt FROM blogs WHERE slug = ? AND status <> 'archived'");
+    $st->execute([$slug]);
+    $b = $st->fetch(PDO::FETCH_ASSOC);
+    $drop = function () use ($pdo, $slug) {
+        $l = rocBlogGet($pdo, 'cover_retry', []);
+        rocBlogSet($pdo, 'cover_retry', array_values(array_diff(is_array($l) ? $l : [], [$slug])));
+    };
+    if (!$b) { $drop(); return null; }
+    $r = rocCfImage($cf, rocBlogImagePrompt((string)$b['title'], ''));
+    if (!$r['ok']) { rocBlogSet($pdo, 'cover_retry_at', time()); return 'cover picture later (' . $r['error'] . '): ' . $b['title']; }
+    $probe = @imagecreatefromstring($r['bytes']);
+    if (!$probe) return null;
+    $tmp = tempnam(sys_get_temp_dir(), 'roccov') . '.jpg';
+    imagejpeg($probe, $tmp, 92); imagedestroy($probe);
+    $img = rocBlogCover($root, (string)$b['slug'], (string)$b['title'], (string)$b['category'], $tmp, true);
+    @unlink($tmp);
+    if (strpos($img, '/uploads/blog-covers/') !== 0) return null;
+    $set = array_values(array_intersect(['image', 'og_image', 'twitter_image'], rocBlogCols($pdo, 'blogs')));
+    $pdo->prepare('UPDATE blogs SET ' . implode(' = ?, ', $set) . ' = ?, updated_at = ? WHERE id = ?')
+        ->execute(array_merge(array_fill(0, count($set), $img), [gmdate('Y-m-d H:i:s'), $b['id']]));
+    rocMediaAlt($pdo, $root, $img, trim((string)$b['image_alt']) ?: $b['title'] . ' - Run On Console');
+    $drop();
+    return 'new cover picture: ' . $b['title'];
 }
 
 /** Puts a file of /uploads in the media library with its alt text (or updates the alt text). */
