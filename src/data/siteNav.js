@@ -38,10 +38,13 @@ export const DEFAULT_SITE_NAV = {
         { label: 'Gaming Platforms', url: '/gaming-platforms/', icon: 'grid' },
         { label: 'About Run On Console', url: '/about/', icon: 'info' },
       ] },
-      { title: 'PARTNERS', icon: 'handshake', links: [
+      { title: 'CONTACT US', icon: 'mail', links: [
+        { label: 'contact@runonconsole.com', url: 'mailto:contact@runonconsole.com', icon: 'mail' },
+        { label: '0317 4123457', url: 'tel:+923174123457', icon: 'phone' },
+        { label: '470/16B Fort Villas, Lahore', url: 'https://www.google.com/maps/search/?api=1&query=470%2F16B%20Fort%20Villas%2C%20Lahore%2C%20Pakistan', icon: 'map-pin' },
+        { label: 'Contact form', url: '/contact/', icon: 'pen' },
+        { label: 'Write For Us & Advertising', url: '/write-for-us/', icon: 'handshake' },
         { label: 'News', url: '/news/', icon: 'newspaper' },
-        { label: 'Write For Us & Advertising', url: '/write-for-us/', icon: 'pen' },
-        { label: 'Contact Us', url: '/contact/', icon: 'mail' },
       ] },
       { title: 'POLICIES', icon: 'file-text', links: [
         { label: 'Terms & Conditions', url: '/terms-and-conditions/', icon: 'scale' },

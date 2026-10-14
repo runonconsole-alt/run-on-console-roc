@@ -96,7 +96,7 @@ export const TermsAndConditionsView = () => {
         <Section icon={Mail} title="8. Contact">
           <p>
             Questions about these terms: email{' '}
-            <a href="mailto:support@runonconsole.com" className="text-emerald-700 font-semibold underline">support@runonconsole.com</a>{' '}
+            <a href="mailto:contact@runonconsole.com" className="text-emerald-700 font-semibold underline">contact@runonconsole.com</a>{' '}
             or use the <a href="/contact/" className="text-emerald-700 font-semibold underline">contact page</a>.
           </p>
         </Section>

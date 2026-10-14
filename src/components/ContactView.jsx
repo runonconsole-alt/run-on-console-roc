@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Mail, MapPin, Send, MessageSquare, ShieldCheck, Check, Sparkles, SendHorizontal } from 'lucide-react';
+import { Mail, MapPin, Phone, Send, MessageSquare, ShieldCheck, Check, Sparkles, SendHorizontal } from 'lucide-react';
+import { CONTACT } from '../data/siteContact';
 import { Tilt3DCard } from './Tilt3DCard';
 import { BouncyText } from './BouncyText';
 import { CyberMatrixHoloBackground } from './CyberMatrixHoloBackground';
@@ -168,12 +169,32 @@ export const ContactView = () => {
                 </div>
                 <div className="min-w-0">
                   <div className="font-bold text-xs text-emerald-950 uppercase tracking-wider">Direct Email</div>
-                  <a href="mailto:support@runonconsole.com" className="text-xs sm:text-sm text-emerald-700 font-extrabold hover:underline block mt-0.5 truncate">
-                    support@runonconsole.com
+                  <a href={'mailto:' + CONTACT.email} className="text-xs sm:text-sm text-emerald-700 font-extrabold hover:underline block mt-0.5 truncate">
+                    {CONTACT.email}
                   </a>
                   <span className="text-[10px] text-slate-500 block mt-0.5">We usually reply within 2 working days</span>
                 </div>
               </div>
+              <a href={CONTACT.tel} className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/60 flex items-start gap-4 transition-all hover:bg-emerald-100/60 shadow-xs no-underline">
+                <div className="p-3 rounded-xl bg-emerald-800 text-emerald-300 shrink-0 shadow-sm">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-bold text-xs text-emerald-950 uppercase tracking-wider">Phone</div>
+                  <span className="text-xs sm:text-sm text-emerald-700 font-extrabold hover:underline block mt-0.5">{CONTACT.phone}</span>
+                  <span className="text-[10px] text-slate-500 block mt-0.5">Tap to call</span>
+                </div>
+              </a>
+              <a href={CONTACT.map} target="_blank" rel="noopener" className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/60 flex items-start gap-4 transition-all hover:bg-emerald-100/60 shadow-xs no-underline">
+                <div className="p-3 rounded-xl bg-emerald-800 text-emerald-300 shrink-0 shadow-sm">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-bold text-xs text-emerald-950 uppercase tracking-wider">Address</div>
+                  <span className="text-xs sm:text-sm text-emerald-700 font-extrabold hover:underline block mt-0.5">{CONTACT.address}</span>
+                  <span className="text-[10px] text-slate-500 block mt-0.5">Open in Google Maps</span>
+                </div>
+              </a>
 
             </div>
           </Tilt3DCard>

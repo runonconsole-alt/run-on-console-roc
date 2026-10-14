@@ -328,7 +328,7 @@ function ssSave(PDO $pdo, string $ROOT, string $part, $v, array $session): array
             $txt = function ($x, int $max) { return trim(mb_substr((string)preg_replace('/\s+/u', ' ', strip_tags((string)$x)), 0, $max)); };
             $url = function ($x) use (&$err) {
                 $u = trim((string)$x);
-                if (!preg_match('#^(/[^\s"<>]*|https://[^\s"<>]+|mailto:[^\s"<>]+)$#i', $u)) { $err['nav'] = 'Not a valid link: "' . $u . '" (use /page/ or https://…).'; return '/'; }
+                if (!preg_match('#^(/[^\s"<>]*|https://[^\s"<>]+|mailto:[^\s"<>]+|tel:\+?[0-9 -]{6,20})$#i', $u)) { $err['nav'] = 'Not a valid link: "' . $u . '" (use /page/, https://…, mailto: or tel:).'; return '/'; }
                 return $u;
             };
             $icon = function ($x) use ($icons) { $x = (string)$x; return in_array($x, $icons, true) ? $x : 'link'; };

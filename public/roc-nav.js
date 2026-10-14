@@ -383,13 +383,6 @@
       });
     });
 
-    // Floating AI assistant button: open the compatibility checker.
-    var bot = document.querySelector('button[title="ROC AI Hardware Assistant"]');
-    if (bot) {
-      bot.addEventListener('click', function () { location.assign('/compatibility/'); });
-      var bubble = bot.previousElementSibling;
-      if (bubble) { bubble.style.cursor = 'pointer'; bubble.addEventListener('click', function () { location.assign('/compatibility/'); }); }
-    }
   });
 })();
 
@@ -416,4 +409,13 @@
   document.addEventListener('DOMContentLoaded', scan);
   window.addEventListener('load', function () { scan(); setTimeout(scan, 1500); });
   if (window.MutationObserver) new MutationObserver(function () { setTimeout(scan, 300); }).observe(document.documentElement, { childList: true, subtree: true });
+})();
+
+/* ROC, the site assistant: the chat box on every page (roc-chat.js, answers from /api/v1/agent.php). */
+(function () {
+  if (window.__rocChat || /^\/cms\//.test(location.pathname)) return;
+  var s = document.createElement('script');
+  s.src = '/roc-chat.js?v=55';
+  s.defer = true;
+  (document.head || document.documentElement).appendChild(s);
 })();
