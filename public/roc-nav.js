@@ -415,7 +415,7 @@
 (function () {
   if (window.__rocChat || /^\/cms\//.test(location.pathname)) return;
   var s = document.createElement('script');
-  s.src = '/roc-chat.js?v=58';
+  s.src = '/roc-chat.js?v=59';
   s.defer = true;
   (document.head || document.documentElement).appendChild(s);
 })();

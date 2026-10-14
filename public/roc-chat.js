@@ -149,6 +149,7 @@
     form.addEventListener('submit', function (e) { e.preventDefault(); send(input.value); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && state.open && btn) toggle(false); });
     var file = form.querySelector('input[type=file]');
+    if (!user.vision) form.querySelector('.cam').style.display = 'none';   // no picture model on the key yet
     form.querySelector('.cam').addEventListener('click', function () { file.click(); });
     file.addEventListener('change', function () { if (file.files && file.files[0]) addPicture(file.files[0]); file.value = ''; });
     att.querySelector('button').addEventListener('click', function () { pic = null; att.classList.remove('on'); });
@@ -315,7 +316,7 @@
     fetch('/api/v1/agent.php', { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (d) {
       try { ss && ss.setItem('roc-chat-off', d && d.on === false ? '1' : '0'); } catch (e) {}
       if (!d || d.on === false) return;
-      user = { signed_in: !!d.signed_in, name: d.name || '' };
+      user = { signed_in: !!d.signed_in, name: d.name || '', vision: d.vision !== false };
       if (!CHECKER) { floating(); return; }
       // The checker page: ROC inside the page. React gives its place after it has drawn the page
       // (GameCompatibilityView: window.__rocChatHost / window.rocChatMount), never before, so the

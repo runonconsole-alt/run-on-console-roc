@@ -1,0 +1,29 @@
+{
+ "deploy": 59,
+ "date": "2026-10-14",
+ "title": "ROC: web search through gpt-oss, phone visitors, camera only with a picture model",
+ "changes": [
+  "Questions about new things (results, releases, news) use the browser search of the gpt-oss models when the key has no web search model",
+  "Visitors on a phone: ROC helps with mobile games or explains how to check a PC instead of asking for PC specs again and again",
+  "The picture button shows only when the Groq key has a model that reads pictures (the current free key has none)"
+ ],
+ "checks": [
+  {
+   "label": "Chat box script",
+   "type": "contains",
+   "path": "roc-chat.js",
+   "text": "no picture model on the key yet"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-adUQ--RB.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/59",
+ "build": "index-adUQ--RB.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}
