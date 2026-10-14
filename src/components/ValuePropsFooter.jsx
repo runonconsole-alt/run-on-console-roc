@@ -13,7 +13,7 @@ import { useSiteNav, iconSvg, footerSpan, currentYear } from '../data/siteNav';
 import { 
   SteamLogo, PlayStationLogo, XboxLogo, EpicGamesLogo, GooglePlayLogo, 
   AppleLogo, GOGLogo, BattleNetLogo, DiscordLogo, RedditLogo, 
-  YouTubeLogo, TwitterXLogo, InstagramLogo, LinkedInLogo, QuoraLogo, FacebookLogo, PinterestLogo 
+  YouTubeLogo, TwitterXLogo, InstagramLogo, LinkedInLogo, QuoraLogo, FacebookLogo, PinterestLogo, TikTokLogo 
 } from './OfficialBrandLogos';
 
 export const ValuePropsFooter = () => {
@@ -61,6 +61,7 @@ export const ValuePropsFooter = () => {
     { key: "instagram", name: "Instagram", desc: "Setups, desks & gear photos", color: "hover:border-[#E4405F] hover:bg-[#E4405F]/20", url: "https://www.instagram.com/runonconsole/", Logo: InstagramLogo },
     { key: "pinterest", name: "Pinterest", desc: "Setup ideas & gear boards", color: "hover:border-[#E60023] hover:bg-[#E60023]/20", url: "https://www.pinterest.com/runonconsole/", Logo: PinterestLogo },
     { key: "twitter", name: "X (Twitter)", desc: "Updates & quick picks", color: "hover:border-slate-400 hover:bg-slate-800/40", url: "https://x.com/RunOnConsole", Logo: TwitterXLogo },
+    { key: "tiktok", name: "TikTok", desc: "Short gaming videos", color: "", url: "", Logo: TikTokLogo },
     { key: "youtube", name: "YouTube", desc: "Videos & guides", color: "hover:border-[#FF0000] hover:bg-[#FF0000]/20", url: "", Logo: YouTubeLogo },
     { key: "discord", name: "Discord", desc: "Community chat", color: "hover:border-[#5865F2] hover:bg-[#5865F2]/20", url: "", Logo: DiscordLogo },
     { key: "reddit", name: "Reddit", desc: "Community discussions", color: "hover:border-[#FF4500] hover:bg-[#FF4500]/20", url: "", Logo: RedditLogo },
@@ -151,55 +152,57 @@ export const ValuePropsFooter = () => {
         </div>
       </div>
 
-      {/* 3. GAMING SOCIAL MEDIA PLATFORMS HUB */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-b border-emerald-800/60 relative z-10">
-        <div className="space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <span className="text-xs font-display font-extrabold uppercase text-emerald-300 tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> JOIN THE RUN ON CONSOLE GAMING COMMUNITY
-              </span>
-              <p className="m-0 tracking-tight font-display font-extrabold text-lg sm:text-xl text-white">
-                <BouncyText text="Follow Run On Console" />
-              </p>
+      {/* 3. GET IN TOUCH: the map and the contact form (roc-nav.js sends it, so it also works on the PHP pages) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-b border-emerald-800/60 relative z-10">
+        <div className="mb-6">
+          <span className="text-xs font-display font-extrabold uppercase text-emerald-300 tracking-wider">Contact us</span>
+          <p className="m-0 tracking-tight font-display font-extrabold text-2xl sm:text-3xl text-white">Get in touch with Run On Console</p>
+          <p className="text-xs text-emerald-100/80 mt-1">Questions, corrections, review samples or partnerships: we read every message.</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          <iframe
+            title="Run On Console location on Google Maps"
+            src={CONTACT.embed}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="block w-full h-72 lg:h-full min-h-[18rem] rounded-3xl border border-emerald-600/50 bg-emerald-950/40"
+            style={{ border: 0 }}
+          />
+          <form data-roc-contact-form="" className="bg-white text-slate-800 rounded-3xl p-6 sm:p-7 shadow-xl space-y-3" noValidate>
+            <p className="m-0 font-display font-extrabold text-lg text-emerald-950">Send us a message</p>
+            <p className="m-0 text-[11px] text-slate-500">Please do not share sensitive personal details in this form.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input name="name" type="text" required maxLength={120} placeholder="Your name" aria-label="Your name" className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-600" />
+              <input name="email" type="email" required maxLength={150} placeholder="Your email" aria-label="Your email" className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-600" />
             </div>
-            <span className="text-xs text-emerald-300/80 font-medium">
-              Gear picks, setups and updates
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-            {socialPlatforms.map((soc) => {
-              const PlatformLogo = soc.Logo;
-              return (
-                <a
-                  key={soc.key}
-                  href={soc.url || undefined}
-                  hidden={!soc.url}
-                  data-roc-social={soc.key}
-                  target="_blank"
-                  rel="noopener me"
-                  className={`bg-emerald-950/80 border border-emerald-700/60 ${soc.color} p-3.5 rounded-2xl ${soc.url ? "flex" : "hidden"} items-center justify-between gap-3 shadow-md transition-all hover:scale-102 hover:-translate-y-0.5 group no-underline`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-slate-900 border border-emerald-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-inner p-1.5">
-                      <PlatformLogo className="w-5 h-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="m-0 tracking-tight font-display font-bold text-xs text-white group-hover:text-emerald-300 truncate">
-                        {soc.name}
-                      </p>
-                      <span className="text-[10px] text-emerald-300/70 block truncate">
-                        {soc.desc}
-                      </span>
-                    </div>
-                  </div>
-
-                  <ExternalLink className="w-3.5 h-3.5 text-emerald-400 group-hover:text-white shrink-0 transition-colors" />
-                </a>
-              );
-            })}
-          </div>
+            <select name="subject" aria-label="Topic" defaultValue="General question" className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-emerald-600">
+              <option>General question</option>
+              <option>Can I run it / game help</option>
+              <option>Product or gear question</option>
+              <option>Correction on a page</option>
+              <option>Partnership or advertising</option>
+            </select>
+            <textarea name="message" required maxLength={5000} rows={4} placeholder="How can we help?" aria-label="Your message" className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-600" />
+            <input name="website" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+            <label className="flex items-start gap-2 text-[11px] text-slate-600">
+              <input name="agree" type="checkbox" required className="mt-0.5" />
+              <span>I agree to the <a href="/terms-and-conditions/" className="text-emerald-700 underline">Terms</a> and <a href="/privacy-policy/" className="text-emerald-700 underline">Privacy Policy</a>.</span>
+            </label>
+            <button type="submit" className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm rounded-xl py-3">Send message</button>
+            <p data-roc-contact-note="" className="m-0 text-xs font-semibold" role="status" />
+          </form>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
+          {[
+            { Icon: MapPin, label: 'Location', text: CONTACT.address, href: CONTACT.map, ext: true },
+            { Icon: Mail, label: 'Email', text: CONTACT.email, href: 'mailto:' + CONTACT.email },
+            { Icon: Phone, label: 'Phone', text: CONTACT.phone, href: CONTACT.tel },
+          ].map(({ Icon, label, text, href, ext }) => (
+            <a key={label} href={href} {...(ext ? { target: '_blank', rel: 'noopener noreferrer' } : {})} className="flex items-center gap-3 bg-emerald-950/60 border border-emerald-700/60 hover:border-emerald-400 rounded-2xl p-4 no-underline">
+              <span className="w-10 h-10 rounded-full bg-emerald-400 text-emerald-950 flex items-center justify-center shrink-0"><Icon className="w-5 h-5" aria-hidden="true" /></span>
+              <span className="min-w-0"><span className="block text-sm font-extrabold text-white">{label}</span><span className="block text-xs text-emerald-100/90 break-words">{text}</span></span>
+            </a>
+          ))}
         </div>
       </div>
 
@@ -207,7 +210,7 @@ export const ValuePropsFooter = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-b border-emerald-800/60 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
           
-          <div className="lg:col-span-5 space-y-4">
+          <div className="lg:col-span-4 space-y-4">
             <a href="/" onClick={(e) => { e.preventDefault(); navigateTo('home'); }} className="no-underline block">
               <BrandLogo size="large" theme="dark" />
             </a>
@@ -225,25 +228,18 @@ export const ValuePropsFooter = () => {
               ))}
             </div>
 
-            {/* Contact details and the map (src/data/siteContact.js). */}
-            <div className="pt-2 space-y-2 text-xs font-semibold">
-              <a href={'mailto:' + CONTACT.email} className="flex items-center gap-2 text-emerald-100 hover:text-emerald-300 no-underline">
-                <Mail className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" /><span>{CONTACT.email}</span>
-              </a>
-              <a href={CONTACT.tel} className="flex items-center gap-2 text-emerald-100 hover:text-emerald-300 no-underline">
-                <Phone className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" /><span>{CONTACT.phone}</span>
-              </a>
-              <a href={CONTACT.map} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-emerald-100 hover:text-emerald-300 no-underline">
-                <MapPin className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" /><span>{CONTACT.address}</span>
-              </a>
-              <iframe
-                title="Run On Console location on Google Maps"
-                src={CONTACT.embed}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="block w-full max-w-md h-40 rounded-2xl border border-emerald-600/50 mt-2"
-                style={{ border: 0 }}
-              />
+            {/* Contact details (src/data/siteContact.js). */}
+            <div className="pt-2 space-y-3">
+              {[
+                { Icon: Phone, label: 'Call for info', text: CONTACT.phone, href: CONTACT.tel },
+                { Icon: Mail, label: 'Email us', text: CONTACT.email, href: 'mailto:' + CONTACT.email },
+                { Icon: MapPin, label: 'Address', text: CONTACT.address, href: CONTACT.map, ext: true },
+              ].map(({ Icon, label, text, href, ext }) => (
+                <a key={label} href={href} {...(ext ? { target: '_blank', rel: 'noopener noreferrer' } : {})} className="flex items-start gap-3 no-underline group">
+                  <span className="w-9 h-9 rounded-full border border-emerald-400/60 text-emerald-300 flex items-center justify-center shrink-0 group-hover:bg-emerald-400 group-hover:text-emerald-950 transition-colors"><Icon className="w-4 h-4" aria-hidden="true" /></span>
+                  <span className="min-w-0 text-xs"><span className="block font-extrabold text-white">{label}</span><span className="block text-emerald-100/90 group-hover:text-emerald-300">{text}</span></span>
+                </a>
+              ))}
             </div>
           </div>
 
@@ -266,6 +262,33 @@ export const ValuePropsFooter = () => {
                 </ul>
               </div>
             ))}
+          </div>
+
+          {/* FOLLOW US: the profiles saved in CMS > Social & Amazon tag (roc-nav.js shows the ones with a link). */}
+          <div className="lg:col-span-3 space-y-3">
+            <p className="m-0 tracking-tight font-display font-extrabold text-xs text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" /><span>Follow us</span>
+            </p>
+            <div className="grid grid-cols-4 gap-3 max-w-[13rem]">
+              {socialPlatforms.map((soc) => {
+                const PlatformLogo = soc.Logo;
+                return (
+                  <a
+                    key={soc.key}
+                    href={soc.url || undefined}
+                    hidden={!soc.url}
+                    data-roc-social={soc.key}
+                    target="_blank"
+                    rel="noopener me"
+                    title={soc.name}
+                    aria-label={'Run On Console on ' + soc.name}
+                    className={`w-11 h-11 rounded-full bg-white text-slate-900 border border-emerald-400/40 ${soc.url ? 'flex' : 'hidden'} items-center justify-center shadow-md hover:scale-110 hover:bg-emerald-50 transition-transform no-underline`}
+                  >
+                    <PlatformLogo className="w-5 h-5" />
+                  </a>
+                );
+              })}
+            </div>
           </div>
 
         </div>

@@ -419,3 +419,29 @@
   s.defer = true;
   (document.head || document.documentElement).appendChild(s);
 })();
+
+/* The contact form above the footer (data-roc-contact-form): sent to /api/v1/messages.php, the same as the
+   Contact page, so it lands in CMS > Messages and is emailed to contact@runonconsole.com. Works on every
+   page (the PHP pages have no React). */
+document.addEventListener('submit', function (e) {
+  var f = e.target;
+  if (!f || !f.hasAttribute || !f.hasAttribute('data-roc-contact-form')) return;
+  e.preventDefault();
+  var note = f.querySelector('[data-roc-contact-note]'), btn = f.querySelector('button[type=submit]');
+  var val = function (n) { var el = f.elements[n]; return el ? String(el.value || '').trim() : ''; };
+  var say = function (t, ok) { if (note) { note.textContent = t; note.style.color = ok ? '#047857' : '#b91c1c'; } };
+  if (!val('name') || !val('message')) return say('Please fill in your name and message.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('email'))) return say('Please enter a valid email address.');
+  if (f.elements.agree && !f.elements.agree.checked) return say('Please tick the box to agree to the Terms and Privacy Policy.');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+  fetch('/api/v1/messages.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin',
+    body: JSON.stringify({ kind: 'contact', name: val('name'), email: val('email'), subject: val('subject'), message: val('message'),
+                           website: val('website'), meta: { page: location.pathname, form: 'footer' } }) })
+    .then(function (r) { return r.json().catch(function () { return {}; }); })
+    .then(function (d) {
+      if (d && d.success) { f.reset(); say('Thank you! Your message was sent' + (d.reference ? ' (' + d.reference + ')' : '') + '. We usually reply within 2 working days.', true); }
+      else say((d && d.error) || 'Your message could not be sent. Please email contact@runonconsole.com.');
+    })
+    .catch(function () { say('No connection. Please try again or email contact@runonconsole.com.'); })
+    .then(function () { if (btn) { btn.disabled = false; btn.textContent = 'Send message'; } });
+});

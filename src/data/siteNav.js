@@ -85,7 +85,7 @@ export function navIsActive(url, path) {
 }
 
 /** Footer column widths on large screens (12-column grid; the logo column takes 5). */
-const SPANS = { 1: [7], 2: [4, 3], 3: [3, 2, 2], 4: [2, 2, 2, 1] };
+const SPANS = { 1: [5], 2: [3, 2], 3: [2, 2, 1], 4: [2, 1, 1, 1] };   // brand 4 + FOLLOW US 3 of 12
 export function footerSpan(count, i) {
   return 'lg:col-span-' + ((SPANS[count] || [])[i] || 2);
 }
