@@ -50,6 +50,8 @@
     '#roc-chat form .ic{flex:none;width:38px;height:40px;border:1px solid #cbd5e1;background:#f8fafc;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#047857}' +
     '#roc-chat form .ic svg{width:18px;height:18px}#roc-chat form .ic.rec{background:#fee2e2;border-color:#fca5a5;color:#b91c1c;animation:rocp 1s infinite}' +
     '#roc-chat form .go{flex:none;border:0;background:#047857;color:#fff;border-radius:12px;padding:0 14px;height:40px;font-weight:800;cursor:pointer}#roc-chat form .go:disabled{opacity:.5}' +
+    '#roc-chat .vt{align-self:flex-start;display:flex;gap:4px;margin-top:-6px}#roc-chat .vt button{border:1px solid #e2e8f0;background:#fff;border-radius:8px;padding:1px 6px;font-size:12px;cursor:pointer;opacity:.6}' +
+    '#roc-chat .vt button:hover,#roc-chat .vt button.on{opacity:1;border-color:#34d399;background:#ecfdf5}' +
     '#roc-chat .ft{font-size:10.5px;color:#94a3b8;text-align:center;padding:0 10px 8px;background:#fff}#roc-chat .ft a{color:#64748b}' +
     '#roc-chat .dots span{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:#94a3b8;animation:rocd 1s infinite}' +
     '#roc-chat .dots span:nth-child(2){animation-delay:.15s}#roc-chat .dots span:nth-child(3){animation-delay:.3s}@keyframes rocd{50%{opacity:.2}}@keyframes rocp{50%{opacity:.6}}' +
@@ -135,7 +137,8 @@
       (isInline ? '' : '<button type="button" class="rx" aria-label="Close" style="font-size:18px">&times;</button>') + '</div></div>' +
       '<div class="rb" aria-live="polite"></div>' +
       '<div class="att"><img alt=""><span style="font-size:12px;color:#475569;flex:1">Picture added</span><button type="button">Remove</button></div>' +
-      '<form>' +
+      '<form><button type="button" class="ic pcb" title="Read my PC: upload a dxdiag file (Win+R, type dxdiag, Save All Information)" aria-label="Upload a dxdiag file">🖥</button>' +
+      '<input type="file" class="pcf" accept=".txt,text/plain" hidden>' +
       (Rec ? '<button type="button" class="ic mic" title="Speak" aria-label="Speak your question">' + MIC + '</button>' : '') +
       '<input type="text" maxlength="500" placeholder="Ask anything about gaming..." aria-label="Your question"><button type="submit" class="go">Send</button></form>' +
       '<div class="ft">ROC answers gaming questions only and can make mistakes. Chats are saved with your account, without personal details. <a href="/privacy-policy/">Privacy</a></div>';
@@ -150,6 +153,13 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && state.open && btn) toggle(false); });
     att.querySelector('button').addEventListener('click', function () { pic = null; att.classList.remove('on'); });
     if (micBtn) micBtn.addEventListener('click', listen);
+    var pcf = form.querySelector('.pcf');
+    form.querySelector('.pcb').addEventListener('click', function () { pcf.click(); });
+    pcf.addEventListener('change', function () { if (pcf.files && pcf.files[0]) readDxdiag(pcf.files[0]); pcf.value = ''; });
+    body.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-vote]') : null;
+      if (b) vote(+b.getAttribute('data-i'), +b.getAttribute('data-vote'));
+    });
     var lang = box.querySelector('.lang');
     if (lang) lang.addEventListener('click', function () { state.voice = state.voice === 'ur' ? 'en' : 'ur'; lang.textContent = state.voice === 'ur' ? '🎤 UR' : '🎤 EN'; save(); });
     var fresh = box.querySelector('.new');
@@ -267,6 +277,33 @@
     var os = /Windows/i.test(ua) ? 'Windows' : /Mac OS/i.test(ua) ? 'macOS' : /Android/i.test(ua) ? 'Android' : /iPhone|iPad/i.test(ua) ? 'iOS' : /Linux/i.test(ua) ? 'Linux' : '';
     return deviceInfo = { gpu: gpu.slice(0, 120), threads: navigator.hardwareConcurrency || 0, ram: navigator.deviceMemory || 0, os: os };
   }
+  /* The PC report: Windows dxdiag (Win+R, dxdiag, "Save All Information"). Only the lines about the
+     processor, memory, graphics cards, system model and Windows are sent; nothing else of the file. */
+  function readDxdiag(f) {
+    if (f.size > 3000000) { state.msgs.push({ role: 'assistant', content: 'That file is too big. Please choose the DxDiag.txt file.' }); render(); return; }
+    var r = new FileReader();
+    r.onload = function () {
+      var b = new Uint8Array(r.result), text;
+      try { text = new TextDecoder(b[0] === 0xFF && b[1] === 0xFE ? 'utf-16le' : 'utf-8').decode(b); } catch (e) { text = ''; }
+      var keep = (text.match(/^\s*(Operating System|System Manufacturer|System Model|Processor|Memory|Card name|Dedicated Memory):.*$/gmi) || [])
+        .map(function (l) { return l.trim(); }).filter(function (l, i, a) { return a.indexOf(l) === i; }).slice(0, 12);
+      if (!/Processor:|Card name:/i.test(keep.join('\n'))) {
+        state.msgs.push({ role: 'assistant', content: 'This does not look like a dxdiag report. On Windows press Win + R, type dxdiag, press Enter, click "Save All Information" and choose that file here.' });
+        render(); save(); return;
+      }
+      send('My PC (from dxdiag):\n' + keep.join('\n') + '\n\nPlease analyze my PC.');
+    };
+    r.readAsArrayBuffer(f);
+  }
+  /* 👍 / 👎 on an answer: CMS > ROC assistant shows the 👎 ones, to make ROC better. */
+  function vote(i, v) {
+    var m = state.msgs[i];
+    if (!m || !m.id) return;
+    m.vote = m.vote === v ? 0 : v;
+    save(); render();
+    fetch('/api/v1/agent.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin',
+      body: JSON.stringify({ action: 'vote', id: m.id, vote: m.vote }) }).catch(function () {});
+  }
   function gameCard(g) {
     var p = +g.percent || 0, col = p >= 90 ? '#059669' : p >= 70 ? '#0d9488' : p > 40 ? '#d97706' : '#e11d48';
     return '<div class="gc"><b>' + esc(g.title) + '</b> · <span style="color:' + col + ';font-weight:800">' + p + '%</span>' +
@@ -284,9 +321,12 @@
       h += '<div style="margin:auto;text-align:center;opacity:.35"><div style="width:48px;height:48px;margin:0 auto;border-radius:16px;background:#047857;color:#fff;display:flex;align-items:center;justify-content:center">' +
         ICON.replace('<svg', '<svg width="26" height="26"') + '</div></div>';
     }
-    state.msgs.forEach(function (m) {
+    state.msgs.forEach(function (m, i) {
+      var shown = m.role === 'user' && /^My PC \(from dxdiag\)/.test(m.content) ? '🖥 ' + m.content.split('\n').slice(1).filter(function (l) { return /Processor|Card name|Memory/i.test(l); }).join('\n') : m.content;
       h += '<div class="m ' + (m.role === 'user' ? 'u' : 'a') + '">' + (m.pic ? '<img src="' + m.pic + '" alt="">' : m.hadPic ? '📷 ' : '') +
-        (m.role === 'user' ? esc(m.content) : fmt(m.content)) + '</div>';
+        (m.role === 'user' ? esc(shown) : fmt(m.content)) + '</div>';
+      if (m.role === 'assistant' && m.id) h += '<div class="vt"><button type="button" data-vote="1" data-i="' + i + '" class="' + (m.vote === 1 ? 'on' : '') + '" title="Good answer">👍</button>' +
+        '<button type="button" data-vote="-1" data-i="' + i + '" class="' + (m.vote === -1 ? 'on' : '') + '" title="Wrong or not helpful">👎</button></div>';
       if (m.game) h += gameCard(m.game);
       (m.products || []).forEach(function (p) { h += prodCard(p); });
     });
@@ -309,7 +349,7 @@
       body: JSON.stringify({ session: state.session, page: location.pathname, messages: hist, image: image || undefined, device: device() }) })
       .then(function (r) { return r.json().catch(function () { return { error: 'ROC could not answer. Please try again.' }; }); })
       .then(function (d) {
-        if (d && d.reply) { state.msgs.push({ role: 'assistant', content: d.reply, game: d.game || null, products: d.products || [] }); speak(d.reply, voiceTurn); }
+        if (d && d.reply) { state.msgs.push({ role: 'assistant', content: d.reply, id: d.id || 0, game: d.game || null, products: d.products || [] }); speak(d.reply, voiceTurn); }
         else if (d && d.login) { user.signed_in = false; state.msgs.pop(); }
         else state.msgs.push({ role: 'assistant', content: (d && d.error) || 'ROC could not answer. Please try again.' });
       })

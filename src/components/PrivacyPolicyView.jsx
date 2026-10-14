@@ -145,6 +145,11 @@ export const PrivacyPolicyView = () => {
             from the text. We do not save your IP address, only a code that changes every day. Pictures you send are
             read once and not saved. Chats are deleted after 90 days. Please do not type personal details in the chat.
           </p>
+          <p>
+            If you tell ROC your PC parts (or upload a dxdiag report, of which only the processor, memory, graphics card,
+            system model and Windows lines are sent), ROC keeps those PC specs with your account so you do not have to repeat
+            them. Say “forget my PC” in the chat to delete them. Your 👍 / 👎 on answers is saved to improve ROC.
+          </p>
         </Section>
 
         <Section icon={ShieldCheck} title="8. How long we keep data, and your rights">

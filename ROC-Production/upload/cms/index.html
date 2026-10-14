@@ -3594,14 +3594,14 @@ async function renderNewsWriter(m){
 async function renderAgent(m){
   m.innerHTML=head('ROC assistant','The chat box on every page: games and gear help in English and Roman Urdu')+
     '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
-  var q=S.agentQ||'', pg=S.agentPage||1, d;
-  try{ d=await api('agent-admin.php?page='+pg+(q?'&q='+encodeURIComponent(q):'')); }catch(e){ toast(e.message,'bad'); return; }
+  var q=S.agentQ||'', pg=S.agentPage||1, dn=!!S.agentDown, d;
+  try{ d=await api('agent-admin.php?page='+pg+(q?'&q='+encodeURIComponent(q):'')+(dn?'&down=1':'')); }catch(e){ toast(e.message,'bad'); return; }
   if(S.view!=='agent') return;
   var s=d.settings, st=d.stats;
   var num=function(id,label,val,help){ return '<div class="field"><label for="'+id+'">'+label+'</label><input type="number" id="'+id+'" value="'+esc(val)+'" min="0"><div class="hint">'+help+'</div></div>'; };
   $('.body',m).innerHTML=
-    '<div class="card"><div class="cbody" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center">'+
-      [['Chats today',st.today],['AI answers today',st.today_ai+' / '+s.daily],['Chats in 7 days',st.week],['Members in 7 days',st.week_visitors]].map(function(x){
+    '<div class="card"><div class="cbody" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;text-align:center">'+
+      [['Chats today',st.today],['AI answers today',st.today_ai+' / '+s.daily],['Chats in 7 days',st.week],['Members in 7 days',st.week_visitors],['👍 / 👎 in 7 days',(st.week_up||0)+' / '+(st.week_down||0)]].map(function(x){
         return '<div><div style="font-size:24px;font-weight:800">'+esc(x[1])+'</div><div class="hint">'+esc(x[0])+'</div></div>'; }).join('')+'</div></div>'+
     (d.groq?'':'<div class="alert info">No Groq key yet (CMS &gt; Blog &amp; news writer): ROC answers with its fixed sentences until one is added.</div>')+
     (d.last_error&&d.last_error.errors?'<div class="alert info"><b>Last time the AI did not answer</b> ('+esc(d.last_error.t)+'): '+esc(d.last_error.errors.join(' · '))+'<br>ROC then answers with its fixed sentences.</div>':'')+
@@ -3615,11 +3615,12 @@ async function renderAgent(m){
       '<button class="btn primary" type="submit">Save</button></form></div></div>'+
     '<div class="card"><div class="chead"><h3>Saved chats</h3><span class="note">'+d.total+' saved · names, emails and phone numbers are removed before saving</span></div><div class="cbody">'+
       '<form id="agq" style="display:flex;gap:8px;margin-bottom:12px"><input type="text" id="ag-q" value="'+esc(q)+'" placeholder="Search questions, answers, games, products" style="flex:1">'+
-      '<button class="btn" type="submit">Search</button>'+(d.total?'<button class="btn" type="button" id="ag-clear" style="color:#b91c1c">Delete all</button>':'')+'</form>'+
+      '<button class="btn" type="submit">Search</button>'+
+      '<button class="btn'+(dn?' primary':'')+'" type="button" id="ag-down" title="Answers members marked as wrong or not helpful">👎 only</button>'+(d.total?'<button class="btn" type="button" id="ag-clear" style="color:#b91c1c">Delete all</button>':'')+'</form>'+
       (d.chats.length?d.chats.map(function(c){
         return '<div style="border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px">'+
           '<div class="hint" style="margin-bottom:4px">'+esc(c.created_at)+' UTC · '+(c.user_username||c.user_name?'<b>'+esc(c.user_name||c.user_username)+'</b> (@'+esc(c.user_username||'')+')':'member #'+esc(c.user_id))+' · '+esc(c.page||'/')+' · '+esc(c.lang)+' · '+(c.engine==='basic'?'fixed answer':c.engine==='blocked'?'<b style="color:#b91c1c">blocked (bad words)</b>':'AI ('+esc(c.engine)+')')+'</div>'+
-          '<div style="font-weight:700">Q: '+esc(c.question)+'</div>'+
+          '<div style="font-weight:700">Q: '+esc(c.question)+(+c.vote===1?' <span title="Marked good">👍</span>':+c.vote===-1?' <span title="Marked wrong or not helpful" style="color:#b91c1c">👎</span>':'')+'</div>'+
           '<div style="white-space:pre-wrap;margin-top:4px;color:#334155">A: '+esc(c.answer)+'</div>'+
           (c.game||c.products?'<div class="hint" style="margin-top:4px">'+(c.game?'Game: '+esc(c.game)+' ':'')+(c.products?'Products: '+esc(c.products):'')+'</div>':'')+'</div>';
       }).join(''):'<div class="empty"><div>No chats yet.</div></div>')+
@@ -3630,6 +3631,7 @@ async function renderAgent(m){
     try{ var r=await api('agent-admin.php',{settings:{on:$('#ag-on',m).checked,daily:+$('#ag-daily',m).value,hourly_ip:+$('#ag-hour',m).value,keep_days:+$('#ag-keep',m).value}});
       toast(r.message,'good'); renderAgent(m); }catch(err){ toast(err.message,'bad'); } });
   $('#agq',m).addEventListener('submit',function(e){ e.preventDefault(); S.agentQ=$('#ag-q',m).value.trim(); S.agentPage=1; renderAgent(m); });
+  $('#ag-down',m).addEventListener('click',function(){ S.agentDown=!S.agentDown; S.agentPage=1; renderAgent(m); });
   var clr=$('#ag-clear',m); if(clr) clr.addEventListener('click',async function(){
     if(!confirm('Delete every saved chat? This cannot be undone.')) return;
     try{ var r=await api('agent-admin.php',{action:'clear'}); toast(r.message,'good'); renderAgent(m); }catch(err){ toast(err.message,'bad'); } });
