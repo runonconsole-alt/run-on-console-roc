@@ -16,6 +16,7 @@ const ROC_SOCIAL_PLATFORMS = [
     'instagram' => ['label' => 'Instagram',   'host' => 'instagram.com', 'match' => ['instagram.com']],
     'pinterest' => ['label' => 'Pinterest',   'host' => 'pinterest.com', 'match' => ['pinterest.com', 'pin.it']],
     'twitter'   => ['label' => 'X (Twitter)', 'host' => 'x.com',         'match' => ['x.com', 'twitter.com']],
+    'tiktok'    => ['label' => 'TikTok',      'host' => 'tiktok.com',    'match' => ['tiktok.com']],
     'youtube'   => ['label' => 'YouTube',     'host' => 'youtube.com',   'match' => ['youtube.com', 'youtu.be']],
     'discord'   => ['label' => 'Discord',     'host' => 'discord.com',   'match' => ['discord.gg', 'discord.com']],
     'reddit'    => ['label' => 'Reddit',      'host' => 'reddit.com',    'match' => ['reddit.com']],

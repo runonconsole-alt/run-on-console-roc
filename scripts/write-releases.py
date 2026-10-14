@@ -369,6 +369,12 @@ RELEASES = [
                   'Ask ROC without signing in: the chat box opens on the same page with For access, please sign in or sign up (and comes back to that page after signing in)'],
          checks=[dict(label='Footer installer (cli-footer-columns.php)', type='file', path='api/v1/cron/cli-footer-columns.php')],
          pr=REPO + '56'),
+    dict(deploy=57, date='2026-10-14', title='Get in touch section with map and form; footer with Follow us icons',
+         changes=['Above the footer on every page: Get in touch with the office map, a contact form (to CMS > Messages and contact@runonconsole.com) and Location, Email and Phone boxes; it replaces the Follow Run On Console cards',
+                  'Footer: Call for info, Email us and Address under the Run On Console text (clickable); three columns EXPLORE HUB, POLICIES and FOLLOW US with round social icons, four in a row',
+                  'TikTok added to CMS > Social & Amazon tag: its icon shows in the footer once the link is saved'],
+         checks=[dict(label='Page templates refreshed (cli-refresh-templates.php)', type='contains', path='cms-templates/product-page.html', text='data-roc-contact-form')],
+         pr=REPO + '57'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
