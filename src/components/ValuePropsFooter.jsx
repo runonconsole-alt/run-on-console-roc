@@ -2,8 +2,9 @@ import React from 'react';
 import { 
   ShieldCheck, Compass, FileText, Tag, Gamepad2, PenTool, 
   CheckCircle, Mail, ExternalLink, Download, Cpu, ShoppingBag, BookOpen, Info,
-  PackageCheck, Megaphone, FileCheck, Scale, Handshake, Home, LayoutGrid, Sparkles
+  PackageCheck, Megaphone, FileCheck, Scale, Handshake, Home, LayoutGrid, Sparkles, Phone, MapPin
 } from 'lucide-react';
+import { CONTACT } from '../data/siteContact';
 import { useApp } from '../context/AppContext';
 import { Tilt3DCard } from './Tilt3DCard';
 import { BouncyText } from './BouncyText';
@@ -222,6 +223,27 @@ export const ValuePropsFooter = () => {
                   <span>{pt.text}</span>
                 </div>
               ))}
+            </div>
+
+            {/* Contact details and the map (src/data/siteContact.js). */}
+            <div className="pt-2 space-y-2 text-xs font-semibold">
+              <a href={'mailto:' + CONTACT.email} className="flex items-center gap-2 text-emerald-100 hover:text-emerald-300 no-underline">
+                <Mail className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" /><span>{CONTACT.email}</span>
+              </a>
+              <a href={CONTACT.tel} className="flex items-center gap-2 text-emerald-100 hover:text-emerald-300 no-underline">
+                <Phone className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" /><span>{CONTACT.phone}</span>
+              </a>
+              <a href={CONTACT.map} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-emerald-100 hover:text-emerald-300 no-underline">
+                <MapPin className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" /><span>{CONTACT.address}</span>
+              </a>
+              <iframe
+                title="Run On Console location on Google Maps"
+                src={CONTACT.embed}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="block w-full max-w-md h-40 rounded-2xl border border-emerald-600/50 mt-2"
+                style={{ border: 0 }}
+              />
             </div>
           </div>
 

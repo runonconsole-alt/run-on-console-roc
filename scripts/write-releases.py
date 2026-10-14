@@ -363,6 +363,12 @@ RELEASES = [
          checks=[dict(label='ROC assistant (api/v1/agent.php)', type='file', path='api/v1/agent.php'),
                  dict(label='Chat box script', type='file', path='roc-chat.js')],
          pr=REPO + '55'),
+    dict(deploy=56, date='2026-10-14', title='Footer: contact details and map, two columns; ROC sign-in in the chat box',
+         changes=['Footer: email, phone, address and a Google map of the office in the Run On Console part, under the points',
+                  'Footer columns: EXPLORE HUB and POLICIES (Terms, Privacy, Contact Us, Write For Us, News); the CONTACT US column is gone (cli-footer-columns.php for the menu saved in the CMS)',
+                  'Ask ROC without signing in: the chat box opens on the same page with For access, please sign in or sign up (and comes back to that page after signing in)'],
+         checks=[dict(label='Footer installer (cli-footer-columns.php)', type='file', path='api/v1/cron/cli-footer-columns.php')],
+         pr=REPO + '56'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

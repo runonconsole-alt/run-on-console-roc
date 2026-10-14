@@ -23,16 +23,9 @@
    "label": "Chat box script",
    "type": "file",
    "path": "roc-chat.js"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-BlM43eDG.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/55",
- "build": "index-BlM43eDG.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]
