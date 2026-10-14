@@ -57,7 +57,9 @@ function rocLayerDefaults(): array {
         // codes that used to be written in index.html stay in use.
         'tracking' => ['gtm' => 'GTM-TT93MFWB', 'ga4' => 'G-X5LQFPMR0C', 'clarity' => 'ybw9tw3qju',
                        'gsc' => 'google0dcacebd57bb2c52', 'bing' => '9C2164D8729DA6CB7999A97B8756BC22',
-                       'pinterest' => '', 'facebook' => '', 'yandex' => '', 'gmb_url' => '', 'gmb_place_id' => ''],
+                       'pinterest' => '', 'facebook' => '', 'yandex' => '', 'gmb_url' => '', 'gmb_place_id' => '',
+                       // Google AdSense: publisher ID and the ad units of the news pages (blog-render.php).
+                       'adsense' => '', 'ad_side' => '', 'ad_list' => '', 'ad_article' => ''],
         'noindex' => [],                                   // ["/path/", "/old-section/*"]
         'sitemap' => ['exclude' => [], 'extra' => []],     // exclude: paths; extra: [{path, title}]
         'nav' => [],                                       // CMS > Menus & footer ([] = the site's own menu)
@@ -180,6 +182,11 @@ function rocLayerTrackingHead(array $t, string $path): string {
     if ($v = $id('ga4', '/^G-[A-Z0-9]{4,15}$/')) {
         $h .= '<script async src="https://www.googletagmanager.com/gtag/js?id=' . $v . '"></script>'
             . "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','" . $v . "');</script>";
+    }
+    // Google AdSense: the account tag on every page (approval and Auto ads); units only where a slot is set.
+    if ($v = $id('adsense', '/^ca-pub-\d{10,20}$/')) {
+        $h .= '<meta name="google-adsense-account" content="' . $v . '" />'
+            . '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' . $v . '" crossorigin="anonymous"></script>';
     }
     if ($v = $id('clarity', '/^[a-z0-9]{6,20}$/')) {
         $h .= '<script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","' . $v . '");</script>';

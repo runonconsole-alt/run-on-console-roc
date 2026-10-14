@@ -8,7 +8,8 @@
  * POST {action:'restore', id, which:'before'|'after'}     put an earlier version back
  *
  * Parts
- *   tracking   {gtm, ga4, clarity, gsc, bing, pinterest, facebook, yandex, gmb_url, gmb_place_id}
+ *   tracking   {gtm, ga4, clarity, gsc, bing, pinterest, facebook, yandex, gmb_url, gmb_place_id,
+ *               adsense, ad_side, ad_list, ad_article}   (AdSense also writes the google.com line of /ads.txt)
  *              added to every page on the server (site-layer-lib.php)
  *   noindex    ["/path/", "/section/*"]   pages get robots noindex and leave the sitemaps
  *   sitemap    {exclude: [paths], extra: [{path, title}]}
@@ -212,6 +213,19 @@ function ssDisallow(string $ROOT): array {
     return $out;
 }
 
+/**
+ * /ads.txt: the google.com line for the AdSense publisher ID ('' removes it). Other lines in the
+ * file (other ad networks) are kept.
+ */
+function ssAdsTxt(string $ROOT, string $pub): void {
+    $f = $ROOT . '/ads.txt';
+    $lines = is_file($f) ? preg_split('/\R/', (string)file_get_contents($f)) : [];
+    $lines = array_values(array_filter($lines, function ($l) { return trim($l) !== '' && !preg_match('/^\s*google\.com\s*,\s*pub-/i', $l); }));
+    if ($pub !== '') $lines[] = 'google.com, ' . substr($pub, 3) . ', DIRECT, f08c47fec0942fa0';
+    if ($lines) @file_put_contents($f, implode("\n", $lines) . "\n");
+    elseif (is_file($f)) @unlink($f);
+}
+
 /** Validates and saves one part. Returns [savedValue, message]. */
 function ssSave(PDO $pdo, string $ROOT, string $part, $v, array $session): array {
     $before = ssGet($pdo, $ROOT, $part);
@@ -229,6 +243,15 @@ function ssSave(PDO $pdo, string $ROOT, string $part, $v, array $session): array
             $t = ['gtm' => strtoupper($code('gtm')), 'ga4' => strtoupper($code('ga4')), 'clarity' => strtolower($code('clarity')),
                   'gsc' => $code('gsc'), 'bing' => $code('bing'), 'pinterest' => $code('pinterest'), 'facebook' => $code('facebook'),
                   'yandex' => $code('yandex'), 'gmb_url' => trim((string)($v['gmb_url'] ?? '')), 'gmb_place_id' => trim((string)($v['gmb_place_id'] ?? ''))];
+            // AdSense: the whole code may be pasted; keep the publisher ID (ca-pub-...) and the slot numbers.
+            $pub = trim((string)($v['adsense'] ?? ''));
+            if (preg_match('/(?:ca-)?pub-(\d{10,20})/', $pub, $m)) $pub = 'ca-pub-' . $m[1];
+            $t['adsense'] = $pub;
+            foreach (['ad_side', 'ad_list', 'ad_article'] as $k) {
+                $s = trim((string)($v[$k] ?? ''));
+                if (preg_match('/data-ad-slot=["\']?(\d+)/i', $s, $m)) $s = $m[1];
+                $t[$k] = $s;
+            }
             $rules = ['gtm' => ['/^GTM-[A-Z0-9]{4,12}$/', 'Use the container ID, like GTM-ABC1234.'],
                       'ga4' => ['/^G-[A-Z0-9]{4,15}$/', 'Use the measurement ID, like G-ABC123XYZ.'],
                       'clarity' => ['/^[a-z0-9]{6,20}$/', 'Use the Clarity project ID (letters and numbers).'],
@@ -238,10 +261,15 @@ function ssSave(PDO $pdo, string $ROOT, string $part, $v, array $session): array
                       'facebook' => ['/^[A-Za-z0-9]{10,64}$/', 'Paste the content value of the facebook-domain-verification tag.'],
                       'yandex' => ['/^[A-Za-z0-9]{10,64}$/', 'Paste the content value of the yandex-verification tag.'],
                       'gmb_url' => ['#^https://[^\s"<>]+$#', 'Use the full https:// link of your Google Business Profile.'],
-                      'gmb_place_id' => ['/^[A-Za-z0-9_-]{10,200}$/', 'Use the Place ID (starts with ChIJ…).']];
+                      'gmb_place_id' => ['/^[A-Za-z0-9_-]{10,200}$/', 'Use the Place ID (starts with ChIJ…).'],
+                      'adsense' => ['/^ca-pub-\d{10,20}$/', 'Use the publisher ID, like ca-pub-1234567890123456.'],
+                      'ad_side' => ['/^\d{6,14}$/', 'Use the ad unit number (data-ad-slot), digits only.'],
+                      'ad_list' => ['/^\d{6,14}$/', 'Use the ad unit number (data-ad-slot), digits only.'],
+                      'ad_article' => ['/^\d{6,14}$/', 'Use the ad unit number (data-ad-slot), digits only.']];
             foreach ($rules as $k => [$re, $msg]) if ($t[$k] !== '' && !preg_match($re, $t[$k])) $err[$k] = $msg;
             if ($err) ssOut(422, ['success' => false, 'error' => 'Check the highlighted codes.', 'errors' => $err]);
             rocLayerSave($pdo, $ROOT, 'tracking', $t, (int)$session['user_id']);
+            ssAdsTxt($ROOT, $t['adsense']);
             $v = $t; $msg = 'Saved. The codes are on every page now.';
             break;
         case 'noindex':

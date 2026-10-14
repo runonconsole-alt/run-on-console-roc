@@ -4322,10 +4322,17 @@ async function renderSettings(m){
       '<h3 style="margin:16px 0 10px">Google Business Profile</h3>'+
       f('gmb_url','Profile link','Your Google Business Profile / Maps link: added to the home page Organization schema.','https://maps.app.goo.gl/… or https://g.page/…')+
       f('gmb_place_id','Place ID','Optional, for showing Google reviews later. Find it with Google’s Place ID finder.','ChIJ…')+
+      '<h3 style="margin:16px 0 10px">Google AdSense (ads)</h3>'+
+      '<div class="hint" style="margin:-4px 0 10px">Paste the publisher ID (or the whole AdSense code): the AdSense tag goes on every page and <b>/ads.txt</b> is written for you. '+
+      'The news pages have three ad places; for each, make a <b>Display ad</b> unit in AdSense → Ads → By ad unit and paste its number (data-ad-slot). An empty place shows our own Products / Can I run it box.</div>'+
+      f('adsense','Publisher ID','AdSense → Account → Account information.','ca-pub-1234567890123456')+
+      f('ad_side','News: right side box','Next to the news list and next to every story (Geo style).','1234567890')+
+      f('ad_list','News: inside the list','Between the stories of the news list.','1234567890')+
+      f('ad_article','News: inside a story','Under the short summary of a story.','1234567890')+
       saveBtn()+'</form></div></div>'+histCard;
     $('#stf',m).addEventListener('input',function(){ S.dirty=true; });
     $('#stf',m).addEventListener('submit',function(e){ e.preventDefault(); var v={};
-      ['gtm','ga4','clarity','gsc','bing','pinterest','facebook','yandex','gmb_url','gmb_place_id'].forEach(function(k){ v[k]=$('#st-'+k,m).value.trim(); }); save('tracking',v); });
+      ['gtm','ga4','clarity','gsc','bing','pinterest','facebook','yandex','gmb_url','gmb_place_id','adsense','ad_side','ad_list','ad_article'].forEach(function(k){ v[k]=$('#st-'+k,m).value.trim(); }); save('tracking',v); });
   }
 
   if(tab==='redirects'){
