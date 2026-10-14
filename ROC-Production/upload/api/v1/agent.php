@@ -2,13 +2,14 @@
 /**
  * Run On Console — ROC, the site assistant (the chat box on every page, /roc-chat.js).
  *
- * GET  /api/v1/agent.php                 {on}: is the assistant switched on (CMS > ROC assistant)
+ * GET  /api/v1/agent.php                 {on, signed_in, name}: is ROC on (CMS > ROC assistant), is the visitor signed in
+ * Only signed-in members can chat (owner's rule); others are sent to /compatibility/ to sign in or sign up.
  * POST /api/v1/agent.php  {session, page, messages: [{role: 'user'|'assistant', content}, ...], image?: data URL}
  *      {reply, game?, products[]}: the answer to the last message (see api/v1/agent-lib.php).
  *
- * Limits: 30 messages an hour per visitor and a daily number of AI answers (CMS); after that ROC
- * still answers with its fixed sentences. Saved: the question and the answer without personal
- * details, the page, a daily salted visitor hash (never the IP), kept 90 days.
+ * Limits: 30 messages an hour per member and a daily number of AI answers (CMS); after that ROC
+ * still answers with its fixed sentences. Saved: the member's account ID, the question and the answer
+ * without personal details, the page and a daily salted visitor hash (never the IP), kept 90 days.
  */
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/cms/blog-engine-lib.php';
@@ -25,7 +26,20 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $ROOT = dirname(__DIR__, 2);
 $S = rocAgentSettings($pdo);
 
-if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') rocAgentOut(200, ['success' => true, 'on' => $S['on']]);
+// Signed-in member (the site's own account session, as /api/v1/auth.php?action=session).
+$uid = 0; $first = '';
+try {
+    if (function_exists('validateDatabaseSession') && validateDatabaseSession()) {
+        $uid = (int)($_SESSION['user_id'] ?? 0);
+        $q = $pdo->prepare('SELECT name, username FROM users WHERE id = ?'); $q->execute([$uid]);
+        $u = $q->fetch(PDO::FETCH_ASSOC) ?: [];
+        $first = trim(explode(' ', trim((string)($u['name'] ?? '')))[0] ?: (string)($u['username'] ?? ''));
+    }
+} catch (\Throwable $e) { $uid = 0; }
+if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') rocAgentOut(200, ['success' => true, 'on' => $S['on'], 'signed_in' => $uid > 0, 'name' => $first]);
+if ($uid <= 0) rocAgentOut(401, ['success' => false, 'login' => true, 'error' => 'Please sign in to chat with ROC. / ROC se baat karne ke liye login karein.']);
 if (!$S['on']) rocAgentOut(200, ['success' => true, 'off' => true, 'reply' => 'ROC is switched off for now.', 'products' => []]);
 
 $in = json_decode((string)file_get_contents('php://input', false, null, 0, 2500000), true);
@@ -46,8 +60,8 @@ $page = mb_substr((string)parse_url((string)($in['page'] ?? ''), PHP_URL_PATH), 
 rocAgentTable($pdo);
 $ip = rocAgentIpHash();
 $now = gmdate('Y-m-d H:i:s');
-$c = $pdo->prepare('SELECT COUNT(*) FROM roc_agent_chats WHERE ip_hash = ? AND created_at > ?');
-$c->execute([$ip, gmdate('Y-m-d H:i:s', time() - 3600)]);
+$c = $pdo->prepare('SELECT COUNT(*) FROM roc_agent_chats WHERE (user_id = ? OR ip_hash = ?) AND created_at > ?');
+$c->execute([$uid, $ip, gmdate('Y-m-d H:i:s', time() - 3600)]);
 if ((int)$c->fetchColumn() >= $S['hourly_ip'])
     rocAgentOut(429, ['success' => false, 'error' => 'That is a lot of questions! Please wait a little and ask again. / Thora sa intezar kar ke dobara poochein.']);
 $c = $pdo->prepare("SELECT COUNT(*) FROM roc_agent_chats WHERE created_at > ? AND engine <> 'basic'");
@@ -67,8 +81,8 @@ try {
 }
 
 try {
-    $pdo->prepare('INSERT INTO roc_agent_chats (created_at, session, ip_hash, page, question, answer, game, products, engine, lang) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-        ->execute([$now, $session, $ip, $page, mb_substr(trim(end($msgs)['content'] . ($image !== '' ? ' [picture]' : '')), 0, 600), mb_substr(rocAgentScrub($a['reply']), 0, 2000),
+    $pdo->prepare('INSERT INTO roc_agent_chats (created_at, user_id, session, ip_hash, page, question, answer, game, products, engine, lang) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        ->execute([$now, $uid, $session, $ip, $page, mb_substr(trim(end($msgs)['content'] . ($image !== '' ? ' [picture]' : '')), 0, 600), mb_substr(rocAgentScrub($a['reply']), 0, 2000),
                    mb_substr((string)($a['game']['title'] ?? ''), 0, 200), mb_substr(implode(', ', array_column($a['products'], 'title')), 0, 500),
                    $a['engine'], $a['lang']]);
     if (random_int(1, 50) === 1) $pdo->prepare('DELETE FROM roc_agent_chats WHERE created_at < ?')->execute([gmdate('Y-m-d H:i:s', time() - 86400 * $S['keep_days'])]);

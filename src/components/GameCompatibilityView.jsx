@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   Gamepad2, Search, Filter, Sparkles, CheckCircle, Flame, Zap,
@@ -24,6 +24,16 @@ const ERA_REQUIREMENTS = {
 const gameRequirements = (game) => game.req || ERA_REQUIREMENTS[game.era] || ERA_REQUIREMENTS.modern;
 
 export const GameCompatibilityView = () => {
+  // ROC, the site assistant, sits inside this page (public/roc-chat.js draws it in this box after
+  // React has drawn the page). Visitors who are not signed in see Sign in / Sign up there.
+  const rocHost = useRef(null);
+  useEffect(() => {
+    const el = rocHost.current;
+    window.__rocChatHost = el;
+    if (window.rocChatMount && el) window.rocChatMount(el);
+    if (window.location.hash === '#roc' && el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+    return () => { if (window.__rocChatHost === el) window.__rocChatHost = null; };
+  }, []);
   const { gameCompatibility = [], navigateToCategory, navigateToProduct, pageFaqs } = useApp();
 
   const [selectedEra, setSelectedEra] = useState('all');
@@ -744,6 +754,15 @@ export const GameCompatibilityView = () => {
           </div>
         )}
 
+      </section>
+
+      {/* ROC, the assistant: ask about any game, your PC or gear (members) */}
+      <section id="roc" aria-labelledby="roc-title" className="space-y-3 scroll-mt-24">
+        <div>
+          <h2 id="roc-title" className="font-display font-extrabold text-xl sm:text-2xl text-slate-900">Ask ROC, our gaming assistant</h2>
+          <p className="text-xs sm:text-sm text-slate-500">Not sure about the checker result? Ask ROC about any game, your PC, consoles, esports or gear, in English or Roman Urdu. Type, speak or send a screenshot of your PC specs.</p>
+        </div>
+        <div id="roc-chat-inline" ref={rocHost} />
       </section>
 
       {/* 3. FOUR STRATEGIES IF YOUR PC DOES NOT MEET MINIMUM SPECS */}

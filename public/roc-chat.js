@@ -23,6 +23,7 @@
     '#roc-chat{position:fixed;right:18px;bottom:18px;z-index:2147483001;width:380px;max-width:calc(100vw - 24px);height:580px;max-height:calc(100vh - 36px);' +
     'display:none;flex-direction:column;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 24px 60px -12px rgba(15,23,42,.45);' +
     'font:14px/1.5 Inter,system-ui,sans-serif;color:#0f172a;border:1px solid #d1fae5}' +
+    '#roc-chat.inline{position:relative;right:auto;bottom:auto;z-index:1;width:100%;max-width:100%;height:600px;max-height:80vh;box-shadow:0 10px 30px -14px rgba(4,120,87,.45);border:2px solid #a7f3d0}' +
     '#roc-chat.on{display:flex}#roc-chat .rh{display:flex;align-items:center;gap:10px;padding:12px 14px;background:linear-gradient(135deg,#064e3b,#047857);color:#fff}' +
     '#roc-chat .rh b{font:900 16px Outfit,Inter,sans-serif;display:block}#roc-chat .rh small{color:#a7f3d0;font-size:11px}' +
     '#roc-chat .rh .av{width:34px;height:34px;border-radius:12px;background:#34d399;color:#052e2b;display:flex;align-items:center;justify-content:center;font:900 13px Outfit,sans-serif;flex:none}' +
@@ -68,35 +69,73 @@
       .replace(/(^|\s)(\/(?:compatibility|products|blogs|news|category|contact|gaming-platforms)\/[a-z0-9\/?=&%-]*)/g, '$1<a href="$2">$2</a>');
   }
 
-  var btn, box, body, form, input, sendBtn, micBtn, att, pic = null, busy = false, rec = null;
-  function build() {
+  var btn, box, body, form, input, sendBtn, micBtn, att, pic = null, busy = false, rec = null, user = { signed_in: false, name: '' }, styled = false;
+  var CHECKER = /^\/compatibility\/?$/.test(location.pathname);
+  var RETURN = encodeURIComponent('/compatibility/#roc');
+  function style() {
+    if (styled) return; styled = true;
     var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
     // The old assistant button of the built pages: ROC replaces it.
     var old = document.querySelector('button[title="ROC AI Hardware Assistant"]');
     if (old && old.parentElement) old.parentElement.style.display = 'none';
+  }
+  /* The floating "Ask ROC" button: signed-in members get the chat, others go to the checker page
+     (where ROC sits next to the checker and they can sign in or sign up). */
+  function floating() {
+    style();
     btn = document.createElement('button');
     btn.id = 'roc-chat-btn'; btn.type = 'button'; btn.setAttribute('aria-label', 'Ask ROC, the Run On Console assistant');
     btn.innerHTML = ICON + '<span>Ask ROC</span>';
-    box = document.createElement('div');
-    box.id = 'roc-chat'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', 'ROC assistant');
-    box.innerHTML = '<div class="rh"><div class="av">ROC</div><div><b>ROC</b><small>Your gaming assistant · English / Roman Urdu</small></div>' +
+    document.body.appendChild(btn);
+    btn.addEventListener('click', function () {
+      if (!user.signed_in) { location.href = '/compatibility/#roc'; return; }
+      if (!box) { box = makeBox(false); document.body.appendChild(box); wire(); render(); }
+      toggle(true);
+    });
+    if (user.signed_in && state.open) btn.click();
+  }
+  /* On the checker page: ROC inside the page (React puts <div id="roc-chat-inline"> there). */
+  function inline(host) {
+    if (!host || host.getAttribute('data-roc-on')) return;
+    host.setAttribute('data-roc-on', '1');
+    style();
+    if (!user.signed_in) {
+      host.innerHTML = '<div style="border:2px solid #a7f3d0;border-radius:20px;background:#fff;padding:24px;text-align:center;font:14px/1.6 Inter,system-ui,sans-serif;color:#334155">' +
+        '<div style="width:52px;height:52px;margin:0 auto 10px;border-radius:16px;background:#047857;color:#fff;display:flex;align-items:center;justify-content:center">' + ICON.replace('<svg', '<svg width="28" height="28"') + '</div>' +
+        '<b style="display:block;font:900 20px Outfit,Inter,sans-serif;color:#064e3b">Chat with ROC, your gaming assistant</b>' +
+        '<p style="margin:6px auto 16px;max-width:460px">Ask anything about games, consoles, PC parts and esports, or if your PC can run a game. Type, speak or send a picture, in English or Roman Urdu. ' +
+        'ROC is free for members: sign in or create a free account.</p>' +
+        '<a href="/auth/login/?return=' + RETURN + '" style="display:inline-block;margin:4px;background:#047857;color:#fff;font-weight:800;padding:11px 20px;border-radius:12px;text-decoration:none">Sign in</a>' +
+        '<a href="/auth/signup/?return=' + RETURN + '" style="display:inline-block;margin:4px;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;font-weight:800;padding:11px 20px;border-radius:12px;text-decoration:none">Create a free account</a></div>';
+      return;
+    }
+    box = makeBox(true);
+    host.innerHTML = ''; host.appendChild(box);
+    wire(); render();
+  }
+  function makeBox(isInline) {
+    var b = document.createElement('div');
+    b.id = 'roc-chat'; b.className = isInline ? 'on inline' : ''; b.setAttribute('role', isInline ? 'region' : 'dialog'); b.setAttribute('aria-label', 'ROC assistant');
+    b.innerHTML = '<div class="rh"><div class="av">ROC</div><div><b>ROC</b><small>Your gaming assistant · English / Roman Urdu</small></div>' +
       '<div class="tools">' + (Rec ? '<button type="button" class="lang" title="Microphone language">' + (state.voice === 'ur' ? 'اردو' : 'EN') + '</button>' : '') +
       ('speechSynthesis' in window ? '<button type="button" class="spk' + (state.speak ? ' on' : '') + '" title="Read answers aloud" aria-label="Read answers aloud">🔊</button>' : '') +
-      '<button type="button" class="rx" aria-label="Close" style="font-size:18px">&times;</button></div></div>' +
+      (isInline ? '' : '<button type="button" class="rx" aria-label="Close" style="font-size:18px">&times;</button>') + '</div></div>' +
       '<div class="rb" aria-live="polite"></div>' +
       '<div class="att"><img alt=""><span style="font-size:12px;color:#475569;flex:1">Picture added</span><button type="button">Remove</button></div>' +
       '<form><button type="button" class="ic cam" title="Send a picture" aria-label="Send a picture">' + CAM + '</button>' +
       '<input type="file" accept="image/*" hidden>' +
       (Rec ? '<button type="button" class="ic mic" title="Speak" aria-label="Speak your question">' + MIC + '</button>' : '') +
       '<input type="text" maxlength="500" placeholder="Ask anything about gaming..." aria-label="Your question"><button type="submit" class="go">Send</button></form>' +
-      '<div class="ft">ROC answers gaming questions only and can make mistakes. Chats are saved without personal details. <a href="/privacy-policy/">Privacy</a></div>';
-    document.body.appendChild(btn); document.body.appendChild(box);
+      '<div class="ft">ROC answers gaming questions only and can make mistakes. Chats are saved with your account, without personal details. <a href="/privacy-policy/">Privacy</a></div>';
+    return b;
+  }
+  function wire() {
     body = box.querySelector('.rb'); form = box.querySelector('form'); input = form.querySelector('input[type=text]'); sendBtn = form.querySelector('.go');
     att = box.querySelector('.att'); micBtn = form.querySelector('.mic');
-    btn.addEventListener('click', function () { toggle(true); });
-    box.querySelector('.rx').addEventListener('click', function () { toggle(false); });
+    var x = box.querySelector('.rx');
+    if (x) x.addEventListener('click', function () { toggle(false); });
     form.addEventListener('submit', function (e) { e.preventDefault(); send(input.value); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && state.open) toggle(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && state.open && btn) toggle(false); });
     var file = form.querySelector('input[type=file]');
     form.querySelector('.cam').addEventListener('click', function () { file.click(); });
     file.addEventListener('change', function () { if (file.files && file.files[0]) addPicture(file.files[0]); file.value = ''; });
@@ -106,8 +145,6 @@
     if (lang) lang.addEventListener('click', function () { state.voice = state.voice === 'ur' ? 'en' : 'ur'; lang.textContent = state.voice === 'ur' ? 'اردو' : 'EN'; save(); });
     var spk = box.querySelector('.spk');
     if (spk) spk.addEventListener('click', function () { state.speak = !state.speak; spk.classList.toggle('on', state.speak); if (!state.speak) speechSynthesis.cancel(); save(); });
-    render();
-    if (state.open) toggle(true);
   }
   function toggle(on) {
     state.open = on; save();
@@ -163,7 +200,7 @@
   function render() {
     var h = '';
     if (!state.msgs.length) {
-      h += '<div class="m a">Salam! I am <b>ROC</b>, your gaming assistant. Ask me anything about games, gaming history, esports, consoles, PC parts, or if your PC can run a game. ' +
+      h += '<div class="m a">Salam' + (user.name ? ' ' + esc(user.name) : '') + '! I am <b>ROC</b>, your gaming assistant. Ask me anything about games, gaming history, esports, consoles, PC parts, or if your PC can run a game. ' +
         'You can type, speak 🎤 or send a picture 📷. Aap Roman Urdu mein bhi pooch sakte hain.</div>' +
         '<div class="chips">' + CHIPS.map(function (c) { return '<button type="button">' + esc(c) + '</button>'; }).join('') + '</div>';
     }
@@ -186,11 +223,12 @@
     state.msgs.push(image ? { role: 'user', content: text, pic: image, hadPic: true } : { role: 'user', content: text });
     busy = true; sendBtn.disabled = true; render(); save();
     var hist = state.msgs.slice(-8).map(function (m) { return { role: m.role, content: m.content }; });
-    fetch('/api/v1/agent.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'omit',
+    fetch('/api/v1/agent.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin',
       body: JSON.stringify({ session: state.session, page: location.pathname, messages: hist, image: image || undefined }) })
       .then(function (r) { return r.json().catch(function () { return { error: 'ROC could not answer. Please try again.' }; }); })
       .then(function (d) {
         if (d && d.reply) { state.msgs.push({ role: 'assistant', content: d.reply, game: d.game || null, products: d.products || [] }); speak(d.reply); }
+        else if (d && d.login) state.msgs.push({ role: 'assistant', content: 'Please [sign in](/auth/login/?return=' + RETURN + ') to chat with ROC. / ROC se baat karne ke liye login karein.' });
         else state.msgs.push({ role: 'assistant', content: (d && d.error) || 'ROC could not answer. Please try again.' });
       })
       .catch(function () { state.msgs.push({ role: 'assistant', content: 'No connection. Please try again.' }); })
@@ -198,13 +236,18 @@
   }
 
   function start() {
-    // Switched off in the CMS: no button (asked once per visit).
-    var off = ss && ss.getItem('roc-chat-off');
-    if (off === '1') return;
-    if (off === '0') { build(); return; }
-    fetch('/api/v1/agent.php', { credentials: 'omit' }).then(function (r) { return r.json(); }).then(function (d) {
+    // Switched off in the CMS: nothing (asked once per visit). Signed in or not: asked on every page.
+    if (ss && ss.getItem('roc-chat-off') === '1') return;
+    fetch('/api/v1/agent.php', { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (d) {
       try { ss && ss.setItem('roc-chat-off', d && d.on === false ? '1' : '0'); } catch (e) {}
-      if (!d || d.on !== false) build();
+      if (!d || d.on === false) return;
+      user = { signed_in: !!d.signed_in, name: d.name || '' };
+      if (!CHECKER) { floating(); return; }
+      // The checker page: ROC inside the page. React gives its place after it has drawn the page
+      // (GameCompatibilityView: window.__rocChatHost / window.rocChatMount), never before, so the
+      // page's own markup stays as React expects it.
+      window.rocChatMount = function (el) { inline(el); };
+      if (window.__rocChatHost) inline(window.__rocChatHost);
     }).catch(function () {});
   }
   if (document.readyState !== 'loading') start(); else document.addEventListener('DOMContentLoaded', start);

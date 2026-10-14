@@ -32,7 +32,8 @@ function rocAgentSystem(string $lang, array $facts): string {
          . "- Never use or answer bad language, insults, sexual or adult content, violence against real people, hacking, cheats that break rules, piracy or anything illegal. For those answer exactly: \"" . $no . "\"\n"
          . "- For games, scores and products of this website use the FACTS below. Never invent prices (prices are on Amazon through the product pages), FPS numbers, specs or products.\n"
          . "- 'Can I run it': if a check exists, give the percent and the verdict and what to upgrade. If the graphics card or processor is unknown, ask for the graphics card, processor and RAM (Windows: Task Manager > Performance, or dxdiag). If the game is not in our list, say our checker has 500+ games and suggest /compatibility/.\n"
-         . "- Products in products_shown_as_cards appear as cards under your answer: mention them by name in one line each.\n"
+         . "- Products in products_shown_as_cards appear as cards under your answer: mention them by name in one line each. Recommend gear or upgrades ONLY when the visitor asks for them; otherwise you may add one short line that they can ask you for picks.\n"
+         . "- game_found and platform in the FACTS are this website's data (requirements, devices, guide text): use them first and link the page (checker or /gaming-platforms/...).\n"
          . "- A picture from the visitor: describe what matters for gaming (for example read the PC specs from a screenshot, name the game or the hardware). If the picture is not about gaming or is not decent, answer exactly: \"" . $no . "\"\n"
          . "- Never ask for or repeat personal details (name, phone, email, address).\n"
          . "FACTS: " . json_encode($facts, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -210,6 +211,50 @@ function rocAgentCheck(array $game, ?float $gpu, ?float $cpu, ?float $ram): arra
                 $gpu === null ? 'graphics card' : '', $cpu === null ? 'processor' : '', $ram === null ? 'RAM' : '']))];
 }
 
+/** What the site knows about a game: its requirements and the checker link. */
+function rocAgentGameInfo(array $g): array {
+    $spec = function ($b) { return is_array($b) ? implode(' / ', array_filter([$b['gpu'] ?? '', $b['cpu'] ?? '', $b['ram'] ?? '', $b['storage'] ?? ''])) : ''; };
+    return ['title' => (string)$g['t'], 'year' => $g['y'] ?? null, 'genre' => $g['g'] ?? null,
+            'minimum' => $spec($g['min'] ?? null), 'recommended' => $spec($g['rec'] ?? null), 'checker' => (string)($g['u'] ?? '/compatibility/')];
+}
+
+/**
+ * A gaming platform or device named in the text, from CMS > Gaming platforms (gaming_categories,
+ * gaming_devices): its guide text, the device's year, type, specs and iconic games, and the page link.
+ */
+function rocAgentPlatform(PDO $pdo, string $q): ?array {
+    $t = ' ' . rocAgentNorm($q) . ' ';
+    try {
+        $plats = $pdo->query("SELECT * FROM gaming_categories WHERE status = 'published'")->fetchAll(PDO::FETCH_ASSOC);
+        $devs = $pdo->query('SELECT category_slug, name, year, type, specs, iconic_games_json FROM gaming_devices')->fetchAll(PDO::FETCH_ASSOC);
+    } catch (\Throwable $e) { return null; }
+    $bySlug = [];
+    foreach ($plats as $p) $bySlug[$p['slug']] = $p;
+    $device = null; $len = 0;
+    foreach ($devs as $d) {
+        $n = rocAgentNorm(preg_replace('/\(.*?\)/', '', (string)$d['name']));
+        if (strlen($n) >= 4 && strlen($n) > $len && strpos($t, ' ' . $n . ' ') !== false && isset($bySlug[$d['category_slug']])) { $device = $d; $len = strlen($n); }
+    }
+    $slug = $device['category_slug'] ?? null;
+    if (!$slug) {
+        $keys = ['sony-playstation' => 'playstation|ps5|ps4|ps3|ps2|ps1|psx', 'microsoft-xbox' => 'xbox', 'pc-handheld-pc' => 'steam deck|rog ally|legion go|handheld pc|gaming pc',
+                 'nintendo-home' => 'nintendo switch|switch 2|wii|gamecube|n64|snes|\bnes\b', 'sony-handhelds' => 'psp|ps vita|vita', 'nintendo-handhelds' => 'game boy|gameboy|3ds|nintendo ds',
+                 'sega-consoles' => 'sega|genesis|dreamcast|saturn|mega drive', 'mobile' => 'mobile gaming|android|iphone|ios gaming', 'cloud-gaming' => 'cloud gaming|geforce now|xcloud|boosteroid',
+                 'vr-ar' => '\bvr\b|meta quest|quest 3|vision pro|virtual reality', 'retro-handheld-brands' => 'anbernic|miyoo|retroid|ayn odin', 'arcade' => 'arcade|pinball',
+                 'smart-tv-streaming' => 'smart tv|fire tv|apple tv|android tv|chromecast', 'retro-other' => 'atari|neo geo|3do|turbografx'];
+        foreach ($keys as $sl => $re) if (isset($bySlug[$sl]) && preg_match('/' . $re . '/', $t)) { $slug = $sl; break; }
+    }
+    if (!$slug) return null;
+    $p = $bySlug[$slug];
+    $about = trim(strip_tags((string)($p['about_text'] ?? '') ?: (string)($p['description'] ?? '')));
+    $out = ['platform' => (string)$p['title'], 'page' => '/gaming-platforms/' . $slug . '/', 'about' => mb_substr(preg_replace('/\s+/', ' ', $about), 0, 700)];
+    if ($device) $out['device'] = ['name' => $device['name'], 'year' => $device['year'], 'type' => $device['type'], 'specs' => $device['specs'],
+                                   'iconic_games' => json_decode((string)$device['iconic_games_json'], true) ?: []];
+    else $out['devices'] = array_values(array_map(function ($d) { return $d['name'] . ($d['year'] ? ' (' . $d['year'] . ')' : ''); },
+                                    array_slice(array_filter($devs, function ($d) use ($slug) { return $d['category_slug'] === $slug; }), 0, 12)));
+    return $out;
+}
+
 /* ---------------------------------------------------------------- products */
 
 /** Category of the catalog a text asks about (slug), or ''. */
@@ -280,10 +325,10 @@ function rocAgentTable(PDO $pdo): void {
     if ($done) return;
     $sqlite = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
     $pdo->exec($sqlite
-        ? 'CREATE TABLE IF NOT EXISTS roc_agent_chats (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT, session TEXT, ip_hash TEXT, page TEXT, question TEXT, answer TEXT, game TEXT, products TEXT, engine TEXT, lang TEXT)'
-        : 'CREATE TABLE IF NOT EXISTS roc_agent_chats (id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, created_at DATETIME NOT NULL, session CHAR(16) NOT NULL, ip_hash CHAR(16) NOT NULL,
+        ? 'CREATE TABLE IF NOT EXISTS roc_agent_chats (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT, user_id INTEGER DEFAULT 0, session TEXT, ip_hash TEXT, page TEXT, question TEXT, answer TEXT, game TEXT, products TEXT, engine TEXT, lang TEXT)'
+        : 'CREATE TABLE IF NOT EXISTS roc_agent_chats (id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, created_at DATETIME NOT NULL, user_id INT UNSIGNED NOT NULL DEFAULT 0, session CHAR(16) NOT NULL, ip_hash CHAR(16) NOT NULL,
            page VARCHAR(200) NOT NULL DEFAULT \'\', question TEXT, answer TEXT, game VARCHAR(200) NOT NULL DEFAULT \'\', products VARCHAR(500) NOT NULL DEFAULT \'\',
-           engine VARCHAR(60) NOT NULL DEFAULT \'\', lang VARCHAR(20) NOT NULL DEFAULT \'\', KEY created_at (created_at), KEY ip_hash (ip_hash)) DEFAULT CHARSET=utf8mb4');
+           engine VARCHAR(60) NOT NULL DEFAULT \'\', lang VARCHAR(20) NOT NULL DEFAULT \'\', KEY created_at (created_at), KEY ip_hash (ip_hash), KEY user_id (user_id)) DEFAULT CHARSET=utf8mb4');
     $done = true;
 }
 
@@ -311,8 +356,11 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
     $cpu = rocAgentCpuScore($q) ?? rocAgentCpuScore($userText);
     $ram = rocAgentRam($q) ?? rocAgentRam($userText);
     $game = rocAgentFindGame($root, $q);
-    $askedRun = (bool)preg_match('/\brun\b|chal|play|khel|fps|requirement|spec/i', $q);
-    if (!$game && ($askedRun || $gpu !== null || $cpu !== null || $ram !== null)) {
+    $askedRun = (bool)preg_match('/\brun\b|\bchal|\bplay\b|\bplayable|\bkhel|\bfps\b|requirement|\bspecs?\b/i', $q);   // not "PlayStation"
+    // The game from earlier messages only when this message is about running it, the PC or an upgrade
+    // (not for a new topic such as a console).
+    $pcNow = rocAgentGpuScore($q) !== null || rocAgentCpuScore($q) !== null || rocAgentRam($q) !== null;
+    if (!$game && ($askedRun || $pcNow || preg_match('/upgrade/i', $q))) {
         // A follow-up with only the PC: the game from the last user messages.
         foreach (array_reverse($history) as $m) if ($m['role'] === 'user' && ($g = rocAgentFindGame($root, $m['content']))) { $game = $g; break; }
     }
@@ -320,7 +368,9 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
 
     $products = [];
     $cat = rocAgentCategory($q);
-    if ($check && $check['missing']) {
+    // Product picks only when the visitor asks for them (owner: recommendations on request).
+    $wants = (bool)preg_match('/suggest|recommend|best|konsa|kaunsa|kon sa|kaun sa|lena|lun\b|buy|kharid|upgrade|chahiye|which|option|pick/i', $q);
+    if ($check && $check['missing'] && $wants) {
         // Upgrades that reach the game's recommended specs.
         foreach ($check['missing'] as $mi) {
             if ($mi['part'] === 'gpu') $products = array_merge($products, rocAgentProducts($pdo, 'gpu', $q, 2, $mi['need']));
@@ -328,14 +378,16 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
             if ($mi['part'] === 'ram') $products = array_merge($products, rocAgentProducts($pdo, 'ram', $q, 1));
         }
         $products = array_slice($products, 0, 3);
-    } elseif ($cat !== '' && !$game && (!$askedRun || preg_match('/suggest|recommend|best|konsa|kaunsa|kon sa|lena|buy|kharid|upgrade|chahiye|which/i', $q))) {
+    } elseif ($cat !== '' && !$game && $wants) {
         $products = rocAgentProducts($pdo, $cat, $q, 3);
     }
 
     $facts = ['site' => 'Run On Console (runonconsole.com): gaming and PC hardware picks, a Can I run it checker for 500 PC games, gaming platform guides, blogs and news.',
               'visitor_pc' => ['graphics_card_score' => $gpu, 'processor_score' => $cpu, 'ram_gb' => $ram,
                                'scale' => '1.8 = integrated graphics, 4.5 = GTX 1650 / i5 8th gen, 7 = RTX 3060 / i5 12th gen, 8.5 = RTX 4070 / i7 12th gen, 10 = RTX 4080+ / i9'],
-              'game_found' => $game ? (string)$game['t'] : null, 'check' => $check, 'products_shown_as_cards' => $products,
+              'game_found' => $game ? rocAgentGameInfo($game) : null, 'check' => $check, 'products_shown_as_cards' => $products,
+              'platform' => rocAgentPlatform($pdo, $q),
+              'recommendations' => $products ? 'shown' : 'only when the visitor asks for gear or upgrades: then tell them to ask, for example "suggest a graphics card"',
               'catalog_categories' => 'mice, keyboards, headsets and audio, speakers, monitors, graphics cards, processors, RAM, PC cases, gaming chairs, handhelds, laptops',
               'links' => ['checker' => '/compatibility/', 'products' => '/products/', 'blogs' => '/blogs/', 'news' => '/news/', 'contact' => '/contact/']];
 
@@ -364,6 +416,10 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
     }
     if (($reply === null || $reply === '') && $image !== null)
         $reply = $lang === 'roman-urdu' ? 'Maaf kijiye, abhi picture nahi parh saka. Thori der baad dobara bhejein, ya likh kar poochein.' : 'Sorry, I could not read the picture right now. Please try again later or type your question.';
+    if (($reply === null || $reply === '') && !$check && !$products && ($pl = $facts['platform'])) {
+        $d = $pl['device'] ?? null;
+        $reply = ($d ? $d['name'] . ' (' . $d['year'] . ', ' . $d['type'] . '): ' . $d['specs'] . ".\n" : '') . $pl['about'] . "\n" . $pl['page'];
+    }
     if ($reply === null || $reply === '') $reply = rocAgentBasic($lang, $check, $game, $products, $gpu, $cpu, $cat);
     return ['reply' => $reply, 'game' => $check, 'products' => $products, 'engine' => $engine, 'lang' => $lang];
 }
@@ -379,7 +435,9 @@ function rocAgentBasic(string $lang, ?array $check, ?array $game, array $product
                    'playable on medium to high settings' => 'medium se high settings par chalega', 'playable on low settings only' => 'sirf low settings par chalega',
                    'below the minimum specs (not playable well)' => 'minimum se kam hai, theek nahi chalega'][$check['verdict']] . '.'
                  : "{$check['title']}: your PC scores {$check['percent']}%: " . $check['verdict'] . '.';
-        if ($check['missing']) $s .= $ur ? ' Behtar chalane ke liye neeche wale parts dekhein.' : ' The parts below would bring it to the recommended specs.';
+        $parts = implode(', ', array_map(function ($m) { return ['gpu' => 'graphics card', 'cpu' => 'processor', 'ram' => 'RAM'][$m['part']]; }, $check['missing']));
+        if ($check['missing']) $s .= $products ? ($ur ? ' Behtar chalane ke liye neeche wale parts dekhein.' : ' The parts below would bring it to the recommended specs.')
+                                               : ($ur ? " Upgrade ki zaroorat: {$parts}. Picks chahiye to poochein \"upgrade suggest karo\"." : " To reach the recommended specs, upgrade the {$parts}. Ask me \"suggest an upgrade\" for picks.");
         if ($check['unknown_parts']) $s .= $ur ? ' (' . implode(', ', $check['unknown_parts']) . ' nahi bataya, is liye wo hisaab mein nahi.)' : ' (Not counted: ' . implode(', ', $check['unknown_parts']) . '.)';
         return $s;
     }

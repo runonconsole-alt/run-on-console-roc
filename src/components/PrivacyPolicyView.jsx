@@ -140,9 +140,10 @@ export const PrivacyPolicyView = () => {
             website (our game list and products).
           </p>
           <p>
-            We save the questions and answers to improve the assistant. Before saving, email addresses, phone
-            and ID numbers and names are removed. We do not save your IP address, only a code that changes every
-            day and is used to stop abuse. Chats are deleted after 90 days. Please do not type personal details in the chat.
+            ROC is for signed-in members. We save the questions and answers with your account to improve the
+            assistant and to stop abuse. Before saving, email addresses, phone and ID numbers and names are removed
+            from the text. We do not save your IP address, only a code that changes every day. Pictures you send are
+            read once and not saved. Chats are deleted after 90 days. Please do not type personal details in the chat.
           </p>
         </Section>
 

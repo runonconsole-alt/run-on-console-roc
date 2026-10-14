@@ -35,9 +35,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 $q = trim(mb_substr((string)($_GET['q'] ?? ''), 0, 80));
 $page = max(1, (int)($_GET['page'] ?? 1));
 $where = ''; $args = [];
-if ($q !== '') { $where = 'WHERE question LIKE ? OR answer LIKE ? OR game LIKE ? OR products LIKE ?'; $like = '%' . $q . '%'; $args = [$like, $like, $like, $like]; }
-$c = $pdo->prepare("SELECT COUNT(*) FROM roc_agent_chats {$where}"); $c->execute($args); $total = (int)$c->fetchColumn();
-$st = $pdo->prepare("SELECT id, created_at, session, page, question, answer, game, products, engine, lang FROM roc_agent_chats {$where} ORDER BY id DESC LIMIT 50 OFFSET " . (($page - 1) * 50));
+if ($q !== '') { $where = 'WHERE c.question LIKE ? OR c.answer LIKE ? OR c.game LIKE ? OR c.products LIKE ? OR u.username LIKE ? OR u.name LIKE ?'; $like = '%' . $q . '%'; $args = [$like, $like, $like, $like, $like, $like]; }
+// Who chatted: the member's name and username (the chats themselves hold no personal details).
+$users = true;
+try { $pdo->query('SELECT id, name, username FROM users LIMIT 1'); } catch (\Throwable $e) { $users = false; }
+$from = $users ? 'roc_agent_chats c LEFT JOIN users u ON u.id = c.user_id' : 'roc_agent_chats c';
+if (!$users && $where !== '') { $where = str_replace(' OR u.username LIKE ? OR u.name LIKE ?', '', $where); $args = array_slice($args, 0, 4); }
+$c = $pdo->prepare("SELECT COUNT(*) FROM {$from} {$where}"); $c->execute($args); $total = (int)$c->fetchColumn();
+$st = $pdo->prepare('SELECT c.id, c.created_at, c.user_id, c.session, c.page, c.question, c.answer, c.game, c.products, c.engine, c.lang'
+    . ($users ? ', u.name AS user_name, u.username AS user_username' : '') . " FROM {$from} {$where} ORDER BY c.id DESC LIMIT 50 OFFSET " . (($page - 1) * 50));
 $st->execute($args);
 $count = function (string $sql, array $a) use ($pdo) { $x = $pdo->prepare($sql); $x->execute($a); return (int)$x->fetchColumn(); };
 $today = gmdate('Y-m-d') . ' 00:00:00'; $week = gmdate('Y-m-d H:i:s', time() - 7 * 86400);
@@ -48,7 +54,7 @@ echo json_encode([
     'stats' => ['today' => $count('SELECT COUNT(*) FROM roc_agent_chats WHERE created_at >= ?', [$today]),
                 'today_ai' => $count("SELECT COUNT(*) FROM roc_agent_chats WHERE created_at >= ? AND engine <> 'basic'", [$today]),
                 'week' => $count('SELECT COUNT(*) FROM roc_agent_chats WHERE created_at >= ?', [$week]),
-                'week_visitors' => $count('SELECT COUNT(DISTINCT session) FROM roc_agent_chats WHERE created_at >= ?', [$week])],
+                'week_visitors' => $count('SELECT COUNT(DISTINCT user_id) FROM roc_agent_chats WHERE created_at >= ?', [$week])],
     'total' => $total, 'page' => $page, 'pages' => max(1, (int)ceil($total / 50)),
     'chats' => $st->fetchAll(PDO::FETCH_ASSOC),
 ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

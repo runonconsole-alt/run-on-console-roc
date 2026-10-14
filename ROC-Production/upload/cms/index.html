@@ -3601,13 +3601,14 @@ async function renderAgent(m){
   var num=function(id,label,val,help){ return '<div class="field"><label for="'+id+'">'+label+'</label><input type="number" id="'+id+'" value="'+esc(val)+'" min="0"><div class="hint">'+help+'</div></div>'; };
   $('.body',m).innerHTML=
     '<div class="card"><div class="cbody" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center">'+
-      [['Chats today',st.today],['AI answers today',st.today_ai+' / '+s.daily],['Chats in 7 days',st.week],['Visitors in 7 days',st.week_visitors]].map(function(x){
+      [['Chats today',st.today],['AI answers today',st.today_ai+' / '+s.daily],['Chats in 7 days',st.week],['Members in 7 days',st.week_visitors]].map(function(x){
         return '<div><div style="font-size:24px;font-weight:800">'+esc(x[1])+'</div><div class="hint">'+esc(x[0])+'</div></div>'; }).join('')+'</div></div>'+
     (d.groq?'':'<div class="alert info">No Groq key yet (CMS &gt; Blog &amp; news writer): ROC answers with its fixed sentences until one is added.</div>')+
     '<div class="card"><div class="chead"><h3>Settings</h3></div><div class="cbody"><form id="agf">'+
       '<label style="display:flex;gap:10px;align-items:center;font-weight:700;margin-bottom:14px"><input type="checkbox" id="ag-on"'+(s.on?' checked':'')+'> Show the "Ask ROC" chat button on the website</label>'+
+      '<div class="hint" style="margin:-6px 0 14px">Only signed-in members can chat. Visitors who are not signed in are taken to the game checker page, where they can sign in or sign up.</div>'+
       num('ag-daily','AI answers a day',s.daily,'After this many, ROC answers with its fixed sentences until tomorrow (keeps the free Groq limit for the blog and news writers).')+
-      num('ag-hour','Messages an hour per visitor',s.hourly_ip,'Stops one visitor or a bot from using it all.')+
+      num('ag-hour','Messages an hour per member',s.hourly_ip,'Stops one member or a bot from using it all.')+
       num('ag-keep','Keep chats (days)',s.keep_days,'Older chats are deleted by themselves.')+
       '<button class="btn primary" type="submit">Save</button></form></div></div>'+
     '<div class="card"><div class="chead"><h3>Saved chats</h3><span class="note">'+d.total+' saved · names, emails and phone numbers are removed before saving</span></div><div class="cbody">'+
@@ -3615,7 +3616,7 @@ async function renderAgent(m){
       '<button class="btn" type="submit">Search</button>'+(d.total?'<button class="btn" type="button" id="ag-clear" style="color:#b91c1c">Delete all</button>':'')+'</form>'+
       (d.chats.length?d.chats.map(function(c){
         return '<div style="border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px">'+
-          '<div class="hint" style="margin-bottom:4px">'+esc(c.created_at)+' UTC · visitor '+esc(String(c.session||'').slice(0,6))+' · '+esc(c.page||'/')+' · '+esc(c.lang)+' · '+(c.engine==='basic'?'fixed answer':c.engine==='blocked'?'<b style="color:#b91c1c">blocked (bad words)</b>':'AI ('+esc(c.engine)+')')+'</div>'+
+          '<div class="hint" style="margin-bottom:4px">'+esc(c.created_at)+' UTC · '+(c.user_username||c.user_name?'<b>'+esc(c.user_name||c.user_username)+'</b> (@'+esc(c.user_username||'')+')':'member #'+esc(c.user_id))+' · '+esc(c.page||'/')+' · '+esc(c.lang)+' · '+(c.engine==='basic'?'fixed answer':c.engine==='blocked'?'<b style="color:#b91c1c">blocked (bad words)</b>':'AI ('+esc(c.engine)+')')+'</div>'+
           '<div style="font-weight:700">Q: '+esc(c.question)+'</div>'+
           '<div style="white-space:pre-wrap;margin-top:4px;color:#334155">A: '+esc(c.answer)+'</div>'+
           (c.game||c.products?'<div class="hint" style="margin-top:4px">'+(c.game?'Game: '+esc(c.game)+' ':'')+(c.products?'Products: '+esc(c.products):'')+'</div>':'')+'</div>';
