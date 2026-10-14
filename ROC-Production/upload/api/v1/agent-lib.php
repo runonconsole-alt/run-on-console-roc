@@ -50,9 +50,11 @@ function rocAgentSystem(string $lang, array $facts): string {
          . ". If the visitor writes in Urdu script, reply in Roman Urdu. Keep it short: at most 120 words, no headings.\n"
          . "- Talk like a friendly gamer friend, the way ChatGPT or Claude chat: natural, warm, varied sentences, never the same reply twice, and follow the conversation. Answer the visitor's actual message first.\n"
          . "- Small talk is fine (hi, salam, how are you, kya haal hai, who are you, what can you do, thanks): reply naturally in one or two lines, and you may ask what they play or how you can help with gaming.\n"
-         . "- If the visitor is on a phone (detected_in_browser.system is Android or iOS, or they say mobile / phone / mob): the detected graphics is the phone's chip, not a PC. Do not ask for PC specs again and again: offer to help with mobile games (which games run well on their phone, settings, controllers), or say that to check a PC they can open the site on that PC or type its graphics card, processor and RAM.\n"
+         . "- If the visitor is on a phone (detected_in_browser.system is Android or iOS, or they say mobile / phone / mob): tell them clearly that you cannot guess their PC from their mobile (in their language, e.g. \"Main aap ke mobile se aap ke PC ka andaza nahi laga sakta\"), then ask them to type the PC's graphics card, processor and RAM, or to open runonconsole.com on that PC and ask again. Never treat the phone's chip as their PC. You can also help with mobile games.\n"
          . "- If the visitor asks to analyze or check their PC: use visitor_pc (detected_in_browser is what their browser reports, usually the graphics card; it can be wrong for laptops with two GPUs). Say what you see, ask for the missing parts (processor model, RAM) and which game they want to play.\n"
          . "- You answer EVERYTHING about gaming: games and their history, studios, consoles and PCs, PC hardware, esports teams, players and tournaments, game tips, settings and performance, gaming news. Use your own knowledge; when you are not sure, say so.\n"
+         . "- Esports (teams, players, tournaments, who won, results) and questions about Run On Console / ROC itself (what it is, when it was made, where it is, how to contact it) are IN range: answer them, using about_run_on_console for the site. For results you are not sure about, give what you know and say it may have changed since.\n"
+         . "- Use the refusal below ONLY for topics that are clearly not gaming and not about this website; when in doubt, answer.\n"
          . "- Anything that is not about gaming (politics, religion, medicine, money, homework, general chat, other topics): answer exactly: \"" . $no . "\"\n"
          . "- Never use or answer bad language, insults, sexual or adult content, violence against real people, hacking, cheats that break rules, piracy or anything illegal. For those answer exactly: \"" . $no . "\"\n"
          . "- Never repeat your introduction once the chat has started.\n"
@@ -237,6 +239,28 @@ function rocAgentCheck(array $game, ?float $gpu, ?float $cpu, ?float $ram): arra
                 $gpu === null ? 'graphics card' : '', $cpu === null ? 'processor' : '', $ram === null ? 'RAM' : '']))];
 }
 
+/**
+ * Run On Console's own story for ROC (public facts only: nothing about servers, keys, accounts,
+ * earnings or the people behind it beyond what the About and Contact pages say).
+ */
+function rocAgentAbout(): array {
+    return [
+        'name' => 'Run On Console (ROC), runonconsole.com',
+        'what' => 'An independent gaming and PC hardware website for PC and console players: a free "Can I run it?" checker for 500+ PC games, gear picks (200+ products: graphics cards, processors, RAM, monitors, mice, keyboards, headsets, speakers, laptops, handhelds, chairs, cases), guides for 15 gaming platforms (PlayStation, Xbox, Nintendo, PC and handhelds, mobile, cloud, VR, retro, arcade), blogs and live gaming news checked against at least two trusted sources.',
+        'history' => [
+            'October 2026: the website was built; the first code was written on 6 October 2026 and it went live soon after.',
+            'It grew in small weekly updates: the game checker with official Steam requirements, product pages with real photos, gaming platform guides, the blog writer, live news (each story checked against 2+ sources), the Geo style news page, and ROC the assistant (you) in October 2026.',
+        ],
+        'based_in' => 'Lahore, Pakistan (470/16B Fort Villas, Lahore)',
+        'contact' => ['email' => 'contact@runonconsole.com', 'phone' => '0317 4123457', 'page' => '/contact/'],
+        'roc_assistant' => 'ROC is the site\'s gaming assistant for signed-in members: English and Roman Urdu, voice input, answers about games, PCs, consoles, esports and gear.',
+        'how_it_earns' => 'Amazon Associates affiliate links (no extra cost to readers) and, later, ads. Brands cannot pay for rankings; sponsored content is always labelled.',
+        'pages' => ['about' => '/about/', 'checker' => '/compatibility/', 'products' => '/products/', 'platforms' => '/gaming-platforms/', 'blogs' => '/blogs/', 'news' => '/news/',
+                    'write_for_us' => '/write-for-us/', 'privacy' => '/privacy-policy/', 'terms' => '/terms-and-conditions/'],
+        'not_shared' => 'Do not invent or share anything not listed here (owner names, revenue, traffic, servers, passwords, keys, internal tools). Say it is not public.',
+    ];
+}
+
 /** What the site knows about a game: its requirements and the checker link. */
 function rocAgentGameInfo(array $g): array {
     $spec = function ($b) { return is_array($b) ? implode(' / ', array_filter([$b['gpu'] ?? '', $b['cpu'] ?? '', $b['ram'] ?? '', $b['storage'] ?? ''])) : ''; };
@@ -382,6 +406,7 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
     // "Analyze my PC": the graphics card the browser reports, when the visitor has not named one.
     $detGpu = trim(mb_substr((string)($device['gpu'] ?? ''), 0, 120));
     $askPc = (bool)preg_match('/analy[sz]|check (my|mera)|my pc|mera pc|meri pc|my laptop|mera laptop|system|specs?/i', $q);
+    if (preg_match('/android|ios/i', (string)($device['os'] ?? ''))) $detGpu = '';   // a phone says nothing about the PC
     if ($gpu === null && $detGpu !== '' && ($askPc || preg_match('/\brun\b|\bchal|\bplay\b|\bkhel|\bfps\b/i', $q))) $gpu = rocAgentGpuScore($detGpu);
     $cpu = rocAgentCpuScore($q) ?? rocAgentCpuScore($userText);
     $ram = rocAgentRam($q) ?? rocAgentRam($userText);
@@ -413,7 +438,9 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
     }
 
     $facts = ['site' => 'Run On Console (runonconsole.com): gaming and PC hardware picks, a Can I run it checker for 500 PC games, gaming platform guides, blogs and news.',
+              'about_run_on_console' => rocAgentAbout(),
               'visitor_pc' => ['graphics_card_score' => $gpu, 'processor_score' => $cpu, 'ram_gb' => $ram,
+                               'on_phone' => (bool)preg_match('/android|ios/i', (string)($device['os'] ?? '')),
                                'detected_in_browser' => $detGpu !== '' ? ['graphics' => $detGpu, 'cpu_threads' => (int)($device['threads'] ?? 0) ?: null,
                                                                          'memory_gb_at_least' => (float)($device['ram'] ?? 0) ?: null, 'system' => mb_substr((string)($device['os'] ?? ''), 0, 40)] : null,
                                'scale' => '1.8 = integrated graphics, 4.5 = GTX 1650 / i5 8th gen, 7 = RTX 3060 / i5 12th gen, 8.5 = RTX 4070 / i7 12th gen, 10 = RTX 4080+ / i9'],

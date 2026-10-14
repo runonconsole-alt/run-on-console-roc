@@ -101,7 +101,7 @@
       '<div style="width:52px;height:52px;margin:0 auto 10px;border-radius:16px;background:#047857;color:#fff;display:flex;align-items:center;justify-content:center">' + ICON.replace('<svg', '<svg width="28" height="28"') + '</div>' +
       '<b style="display:block;font:900 18px Outfit,Inter,sans-serif;color:#064e3b">For access, please sign in or sign up</b>' +
       '<p style="margin:6px auto 14px;max-width:420px">ROC, our gaming assistant, is free for members. Ask anything about games, consoles, PC parts and esports, or if your PC can run a game. ' +
-      'Type, speak or send a picture, in English or Roman Urdu.<br><span style="color:#64748b">Access ke liye login ya sign up karein.</span></p>' +
+      'Type or speak, in English or Roman Urdu.<br><span style="color:#64748b">Access ke liye login ya sign up karein.</span></p>' +
       '<a href="/auth/login/?return=' + back + '" style="display:inline-block;margin:4px;background:#047857;color:#fff;font-weight:800;padding:11px 20px;border-radius:12px;text-decoration:none">Sign in</a>' +
       '<a href="/auth/signup/?return=' + back + '" style="display:inline-block;margin:4px;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;font-weight:800;padding:11px 20px;border-radius:12px;text-decoration:none">Sign up free</a></div>';
   }
@@ -134,8 +134,7 @@
       (isInline ? '' : '<button type="button" class="rx" aria-label="Close" style="font-size:18px">&times;</button>') + '</div></div>' +
       '<div class="rb" aria-live="polite"></div>' +
       '<div class="att"><img alt=""><span style="font-size:12px;color:#475569;flex:1">Picture added</span><button type="button">Remove</button></div>' +
-      '<form><button type="button" class="ic cam" title="Send a picture" aria-label="Send a picture">' + CAM + '</button>' +
-      '<input type="file" accept="image/*" hidden>' +
+      '<form>' +
       (Rec ? '<button type="button" class="ic mic" title="Speak" aria-label="Speak your question">' + MIC + '</button>' : '') +
       '<input type="text" maxlength="500" placeholder="Ask anything about gaming..." aria-label="Your question"><button type="submit" class="go">Send</button></form>' +
       '<div class="ft">ROC answers gaming questions only and can make mistakes. Chats are saved with your account, without personal details. <a href="/privacy-policy/">Privacy</a></div>';
@@ -148,10 +147,6 @@
     if (x) x.addEventListener('click', function () { toggle(false); });
     form.addEventListener('submit', function (e) { e.preventDefault(); send(input.value); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && state.open && btn) toggle(false); });
-    var file = form.querySelector('input[type=file]');
-    if (!user.vision) form.querySelector('.cam').style.display = 'none';   // no picture model on the key yet
-    form.querySelector('.cam').addEventListener('click', function () { file.click(); });
-    file.addEventListener('change', function () { if (file.files && file.files[0]) addPicture(file.files[0]); file.value = ''; });
     att.querySelector('button').addEventListener('click', function () { pic = null; att.classList.remove('on'); });
     if (micBtn) micBtn.addEventListener('click', listen);
     var lang = box.querySelector('.lang');

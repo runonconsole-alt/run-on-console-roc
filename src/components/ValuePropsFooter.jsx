@@ -227,20 +227,6 @@ export const ValuePropsFooter = () => {
                 </div>
               ))}
             </div>
-
-            {/* Contact details (src/data/siteContact.js). */}
-            <div className="pt-2 space-y-3">
-              {[
-                { Icon: Phone, label: 'Call for info', text: CONTACT.phone, href: CONTACT.tel },
-                { Icon: Mail, label: 'Email us', text: CONTACT.email, href: 'mailto:' + CONTACT.email },
-                { Icon: MapPin, label: 'Address', text: CONTACT.address, href: CONTACT.map, ext: true },
-              ].map(({ Icon, label, text, href, ext }) => (
-                <a key={label} href={href} {...(ext ? { target: '_blank', rel: 'noopener noreferrer' } : {})} className="flex items-start gap-3 no-underline group">
-                  <span className="w-9 h-9 rounded-full border border-emerald-400/60 text-emerald-300 flex items-center justify-center shrink-0 group-hover:bg-emerald-400 group-hover:text-emerald-950 transition-colors"><Icon className="w-4 h-4" aria-hidden="true" /></span>
-                  <span className="min-w-0 text-xs"><span className="block font-extrabold text-white">{label}</span><span className="block text-emerald-100/90 group-hover:text-emerald-300">{text}</span></span>
-                </a>
-              ))}
-            </div>
           </div>
 
           <div data-roc-region="footer-cols" className="contents">

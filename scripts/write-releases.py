@@ -388,6 +388,14 @@ RELEASES = [
                   'The picture button shows only when the Groq key has a model that reads pictures (the current free key has none)'],
          checks=[dict(label='Chat box script', type='contains', path='roc-chat.js', text='no picture model on the key yet')],
          pr=REPO + '59'),
+    dict(deploy=60, date='2026-10-14', title='ROC knows Run On Console, answers esports, phone visitors; footer list and picture option removed',
+         changes=['ROC knows Run On Console itself (what it is, when it was built, Lahore, contact, how it earns) and answers it instead of saying out of range; only public facts',
+                  'Esports results and tournaments count as gaming; the out of range answer is only for clearly non-gaming questions',
+                  'On a phone ROC says it cannot judge the PC from the mobile and asks for the PC specs (or to open the site on the PC)',
+                  'The picture option is removed from the chat box',
+                  'Footer: the Call for info / Email us / Address list is removed (the Get in touch boxes above show them)'],
+         checks=[dict(label='Chat box script', type='contains', path='roc-chat.js', text='Type or speak, in English or Roman Urdu')],
+         pr=REPO + '60'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
