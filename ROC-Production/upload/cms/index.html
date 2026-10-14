@@ -2316,10 +2316,10 @@ function prepMedia(list){
   (list||[]).forEach(function(x){
     var u=String(x.file_url||'').split('?')[0];
     if(x.usage && !x.usage.length){
-      if(used[u]) x.usage=[{type:'blog',title:used[u]}];
-      else if(/^\/uploads\/(platforms|site)\//.test(u)) x.usage=[{type:'page',title:/platforms/.test(u)?'Gaming platform page':'Page picture (site code)'}];
+      if(used[u]) x.usage=[{type:'blog',label:'Post',title:used[u],fields:['cover picture']}];
+      else if(/^\/uploads\/(platforms|site)\//.test(u)) x.usage=[{type:'page',label:'Page',title:/platforms/.test(u)?'Gaming platform page':'Page picture (site code)',fields:[]}];
       // The full site scan (media-usage.php, same rules as the clean-up) found it on a page, a product or in the site code.
-      else if(S.mediaUsed && (S.mediaUsed[u] || S.mediaUsed[(function(){ try{ return decodeURIComponent(u); }catch(e){ return u; } })()])) x.usage=[{type:'page',title:'Used on the website'}];
+      else if(S.mediaUsed && (S.mediaUsed[u] || S.mediaUsed[(function(){ try{ return decodeURIComponent(u); }catch(e){ return u; } })()])) x.usage=[{type:'page',label:'Page',title:'Used on the website',fields:[]}];
     }
   });
   (list||[]).forEach(function(x){
@@ -2450,7 +2450,7 @@ function usageHtml(list){
     var edit=u.editable&&u.type==='blogs'&&can('blogs','view')?' <button class="btn sm" data-editblog="'+esc(u.id)+'">Open in editor</button>':'';
     return '<div class="uitem"><div class="k">'+esc(u.label)+'</div><div style="flex:1;min-width:0">'+
       '<div style="font-weight:560">'+esc(u.title)+(u.status&&u.type==='blogs'?' <span class="tag '+(u.status==='published'?'published':'draft')+'">'+esc(u.status)+'</span>':'')+'</div>'+
-      '<div class="hint" style="margin-top:2px">'+esc(u.fields.join(', '))+(link?' · '+link:'')+'</div></div>'+edit+'</div>';
+      '<div class="hint" style="margin-top:2px">'+esc((u.fields||[]).join(', '))+(link?' · '+link:'')+'</div></div>'+edit+'</div>';
   }).join('')+'</div>';
 }
 

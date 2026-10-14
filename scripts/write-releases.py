@@ -344,6 +344,12 @@ RELEASES = [
          checks=[dict(label='Page rules (cli-news-pages.php)', type='contains', path='.htaccess', text='ROC pages BEGIN'),
                  dict(label='Cover fixer (cli-news-covers.php)', type='file', path='api/v1/cron/cli-news-covers.php')],
          pr=REPO + '53'),
+    dict(deploy=54, date='2026-10-14', title='Media library: platform pictures open again, old cover entries cleaned up',
+         changes=['CMS > Media library: gaming platform pictures and page pictures open their details again (the "where it is used" list stopped the window from opening)',
+                  'A new cover also removes the library entries of the older covers of the post, so no "not used" cards stay behind that cannot be opened or deleted',
+                  'Cloudflare refusing a harmless picture prompt ("NSFW") is tried again with another prompt; a post whose picture keeps failing moves to the end of the queue and keeps the site picture after 5 tries'],
+         checks=[dict(label='Media library fix (CMS)', type='contains', path='cms/index.html', text="label:'Page',title:/platforms/")],
+         pr=REPO + '54'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

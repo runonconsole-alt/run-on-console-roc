@@ -734,7 +734,20 @@ function rocBlogRetryCovers(PDO $pdo, string $root): ?string {
     };
     if (!$b) { $drop(); return null; }
     $r = rocCfImage($cf, rocBlogImagePrompt((string)$b['title'], ''));
-    if (!$r['ok']) { rocBlogSet($pdo, 'cover_retry_at', time()); return 'cover picture later (' . $r['error'] . '): ' . $b['title']; }
+    // Cloudflare's filter sometimes refuses a harmless prompt: another random one usually passes.
+    if (!$r['ok'] && stripos($r['error'], 'NSFW') !== false) $r = rocCfImage($cf, rocBlogImagePrompt('', ''));
+    if (!$r['ok']) {
+        // To the end of the list, so one post that keeps failing does not hold up the others; after 5 tries
+        // it keeps the site picture.
+        $tries = rocBlogGet($pdo, 'cover_retry_tries', []); $tries = is_array($tries) ? $tries : [];
+        $tries[$slug] = (int)($tries[$slug] ?? 0) + 1;
+        $l = rocBlogGet($pdo, 'cover_retry', []); $l = array_values(array_diff(is_array($l) ? $l : [], [$slug]));
+        if ($tries[$slug] < 5) $l[] = $slug; else unset($tries[$slug]);
+        rocBlogSet($pdo, 'cover_retry', $l);
+        rocBlogSet($pdo, 'cover_retry_tries', $tries);
+        if (stripos($r['error'], 'NSFW') === false) rocBlogSet($pdo, 'cover_retry_at', time());
+        return 'cover picture later (' . $r['error'] . '): ' . $b['title'];
+    }
     $probe = @imagecreatefromstring($r['bytes']);
     if (!$probe) return null;
     $tmp = tempnam(sys_get_temp_dir(), 'roccov') . '.jpg';
@@ -764,6 +777,18 @@ function rocMediaAlt(PDO $pdo, string $root, string $url, string $alt): void {
         else $pdo->prepare('INSERT INTO cms_media (filename, original_name, filepath, file_url, mime_type, file_size, width, height, alt_text, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
                  ->execute([basename($path), basename($path), $root . $path, $path, $mime, $size, $dim[0], $dim[1], mb_substr($alt, 0, 250), gmdate('Y-m-d H:i:s')]);
     } catch (\Throwable $e) { /* the media library is optional */ }
+    try {
+        // A new cover removes the post's older cover files (rocBlogDropOldCovers): their library rows go too,
+        // so the Media library shows no "not used" cards that cannot be opened or deleted.
+        if (preg_match('#^/uploads/blog-covers/(.+)-\d{9,}\.(webp|jpg)$#', $path, $cm)) {
+            $old = $pdo->prepare('SELECT id, file_url FROM cms_media WHERE file_url LIKE ? AND file_url <> ?');
+            $old->execute(['/uploads/blog-covers/' . $cm[1] . '%', $path]);
+            foreach ($old->fetchAll(PDO::FETCH_ASSOC) as $o) {
+                if (preg_match('#^/uploads/blog-covers/' . preg_quote($cm[1], '#') . '(-\d{9,})?\.(webp|jpg)$#', (string)$o['file_url']) && !is_file($root . $o['file_url']))
+                    $pdo->prepare('DELETE FROM cms_media WHERE id = ?')->execute([$o['id']]);
+            }
+        }
+    } catch (\Throwable $e) {}
 }
 
 /* ------------------------------------------- AI cover (Cloudflare Workers AI) */

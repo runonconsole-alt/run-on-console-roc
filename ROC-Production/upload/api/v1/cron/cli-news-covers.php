@@ -100,12 +100,16 @@ foreach ($todo as $r) {
     $img = null;
     if ($cf && function_exists('imagecreatefromstring')) {
         $res = rocCfImage($cf, rocBlogImagePrompt((string)$r['title'], ''));
+        // Cloudflare's filter sometimes refuses a harmless prompt: another random one usually passes.
+        for ($t = 0; $t < 2 && !$res['ok'] && stripos($res['error'], 'NSFW') !== false; $t++) $res = rocCfImage($cf, rocBlogImagePrompt('', ''));
         if ($res['ok'] && ($probe = @imagecreatefromstring($res['bytes']))) {
             $tmp = tempnam(sys_get_temp_dir(), 'roccov') . '.jpg';
             imagejpeg($probe, $tmp, 92); imagedestroy($probe);
             $img = rocBlogCover($ROOT, (string)$r['slug'], (string)$r['title'], (string)$r['category'], $tmp, true);
             @unlink($tmp);
             $ai++;
+        } elseif (!$res['ok'] && stripos($res['error'], 'NSFW') !== false) {
+            echo "  !  AI picture refused by Cloudflare's filter: a site picture for now, the cron job tries again\n"; $quota = true;
         } elseif (!$res['ok']) { echo "  !  AI picture: {$res['error']} (the others get a site picture for now)\n"; $cf = null; $quota = true; }
     }
     if ($img === null) {
