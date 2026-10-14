@@ -74,7 +74,11 @@ unset($m);
 
 $t0 = microtime(true);
 try {
-    $a = rocAgentAnswer($pdo, $ROOT, $msgs, $useAi, $image !== '' ? $image : null);
+    // What the visitor's browser reports (graphics card, CPU threads, memory class), for "analyze my PC".
+    $dev = is_array($in['device'] ?? null) ? $in['device'] : [];
+    $dev = ['gpu' => mb_substr(strip_tags((string)($dev['gpu'] ?? '')), 0, 120), 'threads' => (int)($dev['threads'] ?? 0), 'ram' => (float)($dev['ram'] ?? 0),
+            'os' => mb_substr(strip_tags((string)($dev['os'] ?? '')), 0, 40)];
+    $a = rocAgentAnswer($pdo, $ROOT, $msgs, $useAi, $image !== '' ? $image : null, $dev);
 } catch (\Throwable $e) {
     error_log('agent: ' . $e->getMessage());
     rocAgentOut(500, ['success' => false, 'error' => 'ROC could not answer this one. Please try again.']);

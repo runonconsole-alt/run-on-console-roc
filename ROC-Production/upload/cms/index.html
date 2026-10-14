@@ -3604,6 +3604,8 @@ async function renderAgent(m){
       [['Chats today',st.today],['AI answers today',st.today_ai+' / '+s.daily],['Chats in 7 days',st.week],['Members in 7 days',st.week_visitors]].map(function(x){
         return '<div><div style="font-size:24px;font-weight:800">'+esc(x[1])+'</div><div class="hint">'+esc(x[0])+'</div></div>'; }).join('')+'</div></div>'+
     (d.groq?'':'<div class="alert info">No Groq key yet (CMS &gt; Blog &amp; news writer): ROC answers with its fixed sentences until one is added.</div>')+
+    (d.last_error&&d.last_error.errors?'<div class="alert info"><b>Last time the AI did not answer</b> ('+esc(d.last_error.t)+'): '+esc(d.last_error.errors.join(' · '))+'<br>ROC then answers with its fixed sentences.</div>':'')+
+    (d.models&&d.models.chat?'<div class="hint" style="margin-bottom:10px">AI models in use: '+esc(d.models.chat.join(', '))+(d.models.web&&d.models.web.length?' · web search: '+esc(d.models.web.join(', ')):'')+(d.models.vision&&d.models.vision.length?' · pictures: '+esc(d.models.vision.join(', ')):'')+'</div>':'')+
     '<div class="card"><div class="chead"><h3>Settings</h3></div><div class="cbody"><form id="agf">'+
       '<label style="display:flex;gap:10px;align-items:center;font-weight:700;margin-bottom:14px"><input type="checkbox" id="ag-on"'+(s.on?' checked':'')+'> Show the "Ask ROC" chat button on the website</label>'+
       '<div class="hint" style="margin:-6px 0 14px">Only signed-in members can chat. Visitors who are not signed in are taken to the game checker page, where they can sign in or sign up.</div>'+

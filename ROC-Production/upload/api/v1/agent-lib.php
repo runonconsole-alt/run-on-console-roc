@@ -15,9 +15,31 @@
 if (defined('ROC_AGENT_LIB')) return;
 define('ROC_AGENT_LIB', 1);
 
-const ROC_AGENT_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
+// Preferred models, best first; only the ones the Groq key can use now are tried (rocAgentModels).
+const ROC_AGENT_MODELS = ['llama-3.3-70b-versatile', 'openai/gpt-oss-120b', 'moonshotai/kimi-k2-instruct', 'qwen/qwen3-32b', 'openai/gpt-oss-20b', 'llama-3.1-8b-instant'];
 const ROC_AGENT_WEB = 'groq/compound-mini';                                  // Groq model with web search
 const ROC_AGENT_VISION = 'meta-llama/llama-4-scout-17b-16e-instruct';      // reads pictures
+
+/**
+ * The chat, web search and picture models this key can use, from Groq's model list (kept 12 hours in
+ * agent_models). Groq retires models now and then; a fixed name would make ROC fall back to its fixed
+ * sentences.
+ */
+function rocAgentModels(PDO $pdo, string $key, bool $fresh = false): array {
+    $c = rocBlogGet($pdo, 'agent_models', []);
+    if (!$fresh && is_array($c) && !empty($c['chat']) && time() - (int)($c['t'] ?? 0) < 43200) return $c;
+    $r = rocGroqCall($key, 'GET', '/models', null, 20);
+    $have = $r['ok'] ? array_values(array_filter(array_map('strval', array_column((array)($r['data']['data'] ?? []), 'id')))) : [];
+    if (!$have) return ['chat' => ROC_AGENT_MODELS, 'web' => [ROC_AGENT_WEB], 'vision' => [ROC_AGENT_VISION], 't' => 0, 'error' => $r['error'] ?? 'no models'];
+    $chat = array_values(array_intersect(ROC_AGENT_MODELS, $have));
+    foreach ($have as $m) if (!in_array($m, $chat, true) && preg_match('/llama|gpt-oss|qwen|kimi|gemma|mistral|deepseek/i', $m) && !preg_match('/guard|whisper|tts|vision|scout|maverick|compound|prompt/i', $m)) $chat[] = $m;
+    $web = array_values(array_filter($have, function ($m) { return stripos($m, 'compound') !== false; }));
+    usort($web, function ($a, $b) { return (stripos($b, 'mini') !== false) <=> (stripos($a, 'mini') !== false); });
+    $vision = array_values(array_filter($have, function ($m) { return preg_match('/scout|maverick|vision/i', $m); }));
+    $out = ['chat' => array_slice($chat, 0, 4), 'web' => array_slice($web, 0, 1), 'vision' => array_slice($vision, 0, 1), 't' => time()];
+    rocBlogSet($pdo, 'agent_models', $out);
+    return $out;
+}
 
 /** What ROC may talk about and how (the owner's rules: gaming only, nothing rude or adult). */
 function rocAgentSystem(string $lang, array $facts): string {
@@ -26,10 +48,13 @@ function rocAgentSystem(string $lang, array $facts): string {
     return "You are ROC, the friendly gaming assistant of the website Run On Console (runonconsole.com). Rules:\n"
          . "- Reply in the visitor's language: " . ($lang === 'roman-urdu' ? 'Roman Urdu (Urdu written in English letters), simple words' : 'simple English')
          . ". If the visitor writes in Urdu script, reply in Roman Urdu. Keep it short: at most 120 words, no headings.\n"
-         . "- Greetings (hi, hello, salam): greet back warmly in one line and say what you can help with.\n"
+         . "- Talk like a friendly gamer friend, the way ChatGPT or Claude chat: natural, warm, varied sentences, never the same reply twice, and follow the conversation. Answer the visitor's actual message first.\n"
+         . "- Small talk is fine (hi, salam, how are you, kya haal hai, who are you, what can you do, thanks): reply naturally in one or two lines, and you may ask what they play or how you can help with gaming.\n"
+         . "- If the visitor asks to analyze or check their PC: use visitor_pc (detected_in_browser is what their browser reports, usually the graphics card; it can be wrong for laptops with two GPUs). Say what you see, ask for the missing parts (processor model, RAM) and which game they want to play.\n"
          . "- You answer EVERYTHING about gaming: games and their history, studios, consoles and PCs, PC hardware, esports teams, players and tournaments, game tips, settings and performance, gaming news. Use your own knowledge; when you are not sure, say so.\n"
          . "- Anything that is not about gaming (politics, religion, medicine, money, homework, general chat, other topics): answer exactly: \"" . $no . "\"\n"
          . "- Never use or answer bad language, insults, sexual or adult content, violence against real people, hacking, cheats that break rules, piracy or anything illegal. For those answer exactly: \"" . $no . "\"\n"
+         . "- Never repeat your introduction once the chat has started.\n"
          . "- For games, scores and products of this website use the FACTS below. Never invent prices (prices are on Amazon through the product pages), FPS numbers, specs or products.\n"
          . "- 'Can I run it': if a check exists, give the percent and the verdict and what to upgrade. If the graphics card or processor is unknown, ask for the graphics card, processor and RAM (Windows: Task Manager > Performance, or dxdiag). If the game is not in our list, say our checker has 500+ games and suggest /compatibility/.\n"
          . "- Products in products_shown_as_cards appear as cards under your answer: mention them by name in one line each. Recommend gear or upgrades ONLY when the visitor asks for them; otherwise you may add one short line that they can ask you for picks.\n"
@@ -343,7 +368,7 @@ function rocAgentIpHash(): string {
  * One answer. $history: [['role' => 'user'|'assistant', 'content' => '...'], ...], the last one the question.
  * Returns ['reply' => text, 'game' => check|null, 'products' => [...], 'engine' => model|'basic', 'lang' => ...].
  */
-function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = true, ?string $image = null): array {
+function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = true, ?string $image = null, array $device = []): array {
     $q = (string)end($history)['content'];
     $lang0 = rocAgentLang($q);
     if (rocAgentBlocked($q)) return ['reply' => $lang0 === 'roman-urdu' ? 'Maaf kijiye, main is qisam ki baat ka jawab nahi deta. Aap gaming se related kuch bhi pooch sakte hain!'
@@ -353,6 +378,10 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
     $lang = rocAgentLang($q);
     // Hardware and game: the newest mention wins, so earlier messages still count ("RTX 3060 hai" then "GTA 5?").
     $gpu = rocAgentGpuScore($q) ?? rocAgentGpuScore($userText);
+    // "Analyze my PC": the graphics card the browser reports, when the visitor has not named one.
+    $detGpu = trim(mb_substr((string)($device['gpu'] ?? ''), 0, 120));
+    $askPc = (bool)preg_match('/analy[sz]|check (my|mera)|my pc|mera pc|meri pc|my laptop|mera laptop|system|specs?/i', $q);
+    if ($gpu === null && $detGpu !== '' && ($askPc || preg_match('/\brun\b|\bchal|\bplay\b|\bkhel|\bfps\b/i', $q))) $gpu = rocAgentGpuScore($detGpu);
     $cpu = rocAgentCpuScore($q) ?? rocAgentCpuScore($userText);
     $ram = rocAgentRam($q) ?? rocAgentRam($userText);
     $game = rocAgentFindGame($root, $q);
@@ -384,6 +413,8 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
 
     $facts = ['site' => 'Run On Console (runonconsole.com): gaming and PC hardware picks, a Can I run it checker for 500 PC games, gaming platform guides, blogs and news.',
               'visitor_pc' => ['graphics_card_score' => $gpu, 'processor_score' => $cpu, 'ram_gb' => $ram,
+                               'detected_in_browser' => $detGpu !== '' ? ['graphics' => $detGpu, 'cpu_threads' => (int)($device['threads'] ?? 0) ?: null,
+                                                                         'memory_gb_at_least' => (float)($device['ram'] ?? 0) ?: null, 'system' => mb_substr((string)($device['os'] ?? ''), 0, 40)] : null,
                                'scale' => '1.8 = integrated graphics, 4.5 = GTX 1650 / i5 8th gen, 7 = RTX 3060 / i5 12th gen, 8.5 = RTX 4070 / i7 12th gen, 10 = RTX 4080+ / i9'],
               'game_found' => $game ? rocAgentGameInfo($game) : null, 'check' => $check, 'products_shown_as_cards' => $products,
               'platform' => rocAgentPlatform($pdo, $q),
@@ -397,22 +428,32 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
         foreach (array_slice($history, -6) as $m) $msgs[] = ['role' => $m['role'] === 'assistant' ? 'assistant' : 'user', 'content' => mb_substr((string)$m['content'], 0, 600)];
         // Models: a picture goes to the vision model; questions about new things (releases, news, results)
         // first to Groq's model with web search; the rest to the chat models.
-        $models = ROC_AGENT_MODELS;
+        $av = rocAgentModels($pdo, $key);
+        $models = $av['chat'];
         if ($image !== null) {
             $last = array_pop($msgs);
             $msgs[] = ['role' => 'user', 'content' => [['type' => 'text', 'text' => $last['content'] !== '' ? $last['content'] : 'What is in this picture? (gaming related)'],
                                                         ['type' => 'image_url', 'image_url' => ['url' => $image]]]];
-            $models = [ROC_AGENT_VISION];
-        } elseif (rocAgentNeedsWeb($q) && !$check && !$products) {
-            array_unshift($models, ROC_AGENT_WEB);
+            $models = $av['vision'] ?: [ROC_AGENT_VISION];
+        } elseif (rocAgentNeedsWeb($q) && !$check && !$products && $av['web']) {
+            $models = array_merge($av['web'], $models);
         }
+        $errs = [];
         foreach ($models as $model) {
-            $r = rocGroqCall($key, 'POST', '/chat/completions', ['model' => $model, 'temperature' => 0.4, 'max_tokens' => 400, 'messages' => $msgs], $model === ROC_AGENT_WEB ? 40 : 25);
+            $body = ['model' => $model, 'temperature' => 0.6, 'max_tokens' => 500, 'messages' => $msgs];
+            if (preg_match('/gpt-oss|qwen3/i', $model)) $body['reasoning_effort'] = preg_match('/gpt-oss/i', $model) ? 'low' : 'none';
+            $r = rocGroqCall($key, 'POST', '/chat/completions', $body, stripos($model, 'compound') !== false ? 40 : 25);
             if ($r['ok']) {
                 $reply = trim((string)preg_replace('#<think>.*?</think>#s', '', (string)($r['data']['choices'][0]['message']['content'] ?? '')));
                 if ($reply !== '') { $engine = $model; break; }
+                $errs[] = $model . ': empty answer';
+            } else {
+                $errs[] = $model . ': ' . $r['error'];
+                // A retired model: ask Groq for the list again next time.
+                if (in_array($r['code'] ?? 0, [400, 404], true) && stripos($r['error'], 'model') !== false) rocBlogSet($pdo, 'agent_models', []);
             }
         }
+        if ($errs && $engine === 'basic') rocBlogSet($pdo, 'agent_last_error', ['t' => gmdate('Y-m-d H:i') . ' UTC', 'errors' => array_slice($errs, 0, 4)]);
     }
     if (($reply === null || $reply === '') && $image !== null)
         $reply = $lang === 'roman-urdu' ? 'Maaf kijiye, abhi picture nahi parh saka. Thori der baad dobara bhejein, ya likh kar poochein.' : 'Sorry, I could not read the picture right now. Please try again later or type your question.';
@@ -428,8 +469,8 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
 function rocAgentBasic(string $lang, ?array $check, ?array $game, array $products, ?float $gpu, ?float $cpu, string $cat): string {
     $ur = $lang === 'roman-urdu';
     if (!$check && !$game && !$products && $gpu === null && $cpu === null)
-        return $ur ? 'Salam! Main ROC hoon, aap ka gaming assistant. Game ka naam aur apna PC (graphics card, processor, RAM) batayein, ya gaming gear ke baare mein poochein.'
-                   : 'Hi! I am ROC, your gaming assistant. Tell me a game and your PC (graphics card, processor, RAM), or ask about gaming gear.';
+        return $ur ? 'Maaf kijiye, main abhi thora busy hoon aur poora jawab nahi de pa raha. Thori der baad dobara poochein, ya game ka naam aur apna PC (graphics card, processor, RAM) likh dein, wo main abhi bhi check kar sakta hoon.'
+                   : 'Sorry, I am a bit busy right now and cannot give a full answer. Please try again in a moment, or tell me a game and your PC (graphics card, processor, RAM): I can still check that.';
     if ($check) {
         $s = $ur ? "{$check['title']}: aap ka PC {$check['percent']}% score karta hai, yani " . ['meets the recommended specs (high settings)' => 'high settings par chalega',
                    'playable on medium to high settings' => 'medium se high settings par chalega', 'playable on low settings only' => 'sirf low settings par chalega',

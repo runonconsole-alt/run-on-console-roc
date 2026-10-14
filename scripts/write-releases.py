@@ -375,6 +375,13 @@ RELEASES = [
                   'TikTok added to CMS > Social & Amazon tag: its icon shows in the footer once the link is saved'],
          checks=[dict(label='Page templates refreshed (cli-refresh-templates.php)', type='contains', path='cms-templates/product-page.html', text='data-roc-contact-form')],
          pr=REPO + '57'),
+    dict(deploy=58, date='2026-10-14', title='ROC talks like a chat assistant, voice in and out, analyze my PC',
+         changes=['ROC uses the Groq models the key can use now (asked from Groq, kept 12 hours), so it no longer falls back to the same fixed sentence; the reason is shown in CMS > ROC assistant when the AI does not answer (and cli-agent-test.php tests it)',
+                  'ROC chats naturally (hi, kya haal hai, who are you) and never repeats its introduction; the chat box no longer writes anything before the visitor does',
+                  'Microphone: the site header that blocked it is changed to allow this site only (cli-mic-permission.php); a question asked by voice is answered out loud with the most natural voice of the browser (a Hindi or Indian English voice for Roman Urdu)',
+                  'Analyze my PC: ROC reads the graphics card the browser reports and asks for the processor and RAM'],
+         checks=[dict(label='Microphone allowed (cli-mic-permission.php)', type='contains', path='.htaccess', text='microphone=(self)')],
+         pr=REPO + '58'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

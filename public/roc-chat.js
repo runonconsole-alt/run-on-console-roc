@@ -59,7 +59,6 @@
   var ICON = SVG('<rect x="3" y="7" width="18" height="13" rx="4"/><path d="M12 3v4M8 13h.01M16 13h.01M9 17h6"/>');
   var MIC = SVG('<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/>');
   var CAM = SVG('<rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="12" cy="12.5" r="3.5"/><path d="M8 5l1.5-2h5L16 5"/>');
-  var CHIPS = ['Hi ROC!', 'Can my PC run GTA 5?', 'Mera PC Valorant chala lega?', 'Suggest a light gaming mouse', 'Who won the last Valorant Champions?', 'History of PlayStation'];
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   /* **bold**, [text](/link) and plain /paths from ROC's answer; everything else stays text. */
@@ -178,27 +177,87 @@
     };
     img.src = url;
   }
-  /* Speaking: the browser turns speech into text (English or Urdu), then it is sent. */
+  /* Speaking: the browser turns speech into text (English or Urdu), then it is sent and ROC answers
+     out loud (a voice conversation). */
+  var viaVoice = false;
   function listen() {
     if (rec) { rec.stop(); return; }
+    try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {}
     rec = new Rec();
     rec.lang = state.voice === 'ur' ? 'ur-PK' : 'en-US';
     rec.interimResults = true;
     micBtn.classList.add('rec');
-    var said = '';
+    input.placeholder = state.voice === 'ur' ? 'Bolein, main sun raha hoon...' : 'Listening... speak now';
+    var said = '', failed = '';
     rec.onresult = function (e) { said = ''; for (var i = 0; i < e.results.length; i++) said += e.results[i][0].transcript; input.value = said; };
-    rec.onerror = function () {};
-    rec.onend = function () { micBtn.classList.remove('rec'); rec = null; if (said.trim()) send(said); };
-    try { rec.start(); } catch (e) { micBtn.classList.remove('rec'); rec = null; }
+    rec.onerror = function (e) {
+      failed = e.error === 'not-allowed' || e.error === 'service-not-allowed'
+        ? 'The microphone is blocked. Click the lock icon next to the address bar, allow the Microphone and try again. / Mic ki ijazat dein.'
+        : e.error === 'no-speech' ? 'I did not hear anything. Tap the microphone and speak again.'
+        : e.error === 'audio-capture' ? 'No microphone was found on this device.'
+        : e.error === 'network' ? 'Voice input needs an internet connection. Please try again.' : '';
+    };
+    rec.onend = function () {
+      micBtn.classList.remove('rec'); rec = null;
+      input.placeholder = 'Ask anything about gaming...';
+      if (said.trim()) { viaVoice = true; send(said); }
+      else if (failed) { state.msgs.push({ role: 'assistant', content: failed }); render(); save(); }
+    };
+    try { rec.start(); } catch (e) { micBtn.classList.remove('rec'); rec = null; input.placeholder = 'Ask anything about gaming...'; }
   }
-  function speak(text) {
-    if (!state.speak || !('speechSynthesis' in window)) return;
+  /* Reading answers aloud with the most natural voice the browser has: "Natural", "Online" and Google
+     voices sound the most human. Roman Urdu is read by a Hindi or Indian English voice, which says the
+     words the way they are meant. */
+  var voices = [];
+  function loadVoices() { try { voices = speechSynthesis.getVoices() || []; } catch (e) { voices = []; } }
+  if ('speechSynthesis' in window) { loadVoices(); try { speechSynthesis.addEventListener('voiceschanged', loadVoices); } catch (e) {} }
+  function pickVoice(urdu) {
+    var score = function (v) {
+      var n = (v.name || '') + ' ' + (v.lang || ''), x = 0;
+      if (/natural|neural|online/i.test(n)) x += 6;
+      if (/google/i.test(n)) x += 4;
+      if (/female|aria|jenny|zira|samantha|swara|neerja|heera/i.test(n)) x += 1;
+      if (urdu) { if (/^(hi|ur)/i.test(v.lang)) x += 10; else if (/en-IN/i.test(v.lang)) x += 8; else if (/^en/i.test(v.lang)) x += 2; else x -= 20; }
+      else { if (/en-US|en-GB/i.test(v.lang)) x += 8; else if (/^en/i.test(v.lang)) x += 5; else x -= 20; }
+      return x;
+    };
+    var best = null, top = -99;
+    voices.forEach(function (v) { var x = score(v); if (x > top) { top = x; best = v; } });
+    return best;
+  }
+  function speak(text, force) {
+    if ((!state.speak && !force) || !('speechSynthesis' in window)) return;
     try {
+      if (!voices.length) loadVoices();
       speechSynthesis.cancel();
-      var u = new SpeechSynthesisUtterance(String(text).replace(/\*\*|\[|\]\([^)]*\)/g, ''));
-      u.lang = 'en-US'; u.rate = 1;
-      speechSynthesis.speak(u);
+      var clean = String(text).replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/\*\*|__|`/g, '').replace(/https?:\/\/\S+/g, '').replace(/\/[a-z0-9\-\/?=&%]+\//gi, '').replace(/[•#>]/g, ' ');
+      var urdu = /\b(hai|hain|kya|aap|mein|nahi|chalega|kar|karein|ke|ki|ka|bhi|yeh|ye)\b/i.test(clean) || /[\u0600-\u06FF]/.test(clean);
+      // Shorter pieces sound smoother and avoid the cut-off some browsers have on long text.
+      var parts = clean.match(/[^.!?\n]+[.!?]?/g) || [clean];
+      var v = pickVoice(urdu);
+      parts.forEach(function (t) {
+        t = t.trim(); if (!t) return;
+        var u = new SpeechSynthesisUtterance(t);
+        if (v) { u.voice = v; u.lang = v.lang; } else u.lang = urdu ? 'hi-IN' : 'en-US';
+        u.rate = 1; u.pitch = 1;
+        speechSynthesis.speak(u);
+      });
     } catch (e) {}
+  }
+  /* What this browser says about the PC, for "analyze my PC": the graphics card (WebGL), processor
+     threads and a memory class. Nothing else is read. */
+  var deviceInfo = null;
+  function device() {
+    if (deviceInfo) return deviceInfo;
+    var gpu = '';
+    try {
+      var c = document.createElement('canvas'), gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+      if (gl) { var ext = gl.getExtension('WEBGL_debug_renderer_info'); gpu = String(ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER) || ''); }
+    } catch (e) {}
+    gpu = gpu.replace(/^ANGLE \((.*)\)$/, '$1').replace(/,? ?(Direct3D|D3D)\S*.*$/i, '').replace(/\s*\(0x[0-9a-f]+\)/ig, '').trim();
+    var ua = navigator.userAgent || '';
+    var os = /Windows/i.test(ua) ? 'Windows' : /Mac OS/i.test(ua) ? 'macOS' : /Android/i.test(ua) ? 'Android' : /iPhone|iPad/i.test(ua) ? 'iOS' : /Linux/i.test(ua) ? 'Linux' : '';
+    return deviceInfo = { gpu: gpu.slice(0, 120), threads: navigator.hardwareConcurrency || 0, ram: navigator.deviceMemory || 0, os: os };
   }
   function gameCard(g) {
     var p = +g.percent || 0, col = p >= 90 ? '#059669' : p >= 70 ? '#0d9488' : p > 40 ? '#d97706' : '#e11d48';
@@ -213,9 +272,9 @@
   function render() {
     var h = '';
     if (!state.msgs.length) {
-      h += '<div class="m a">Salam' + (user.name ? ' ' + esc(user.name) : '') + '! I am <b>ROC</b>, your gaming assistant. Ask me anything about games, gaming history, esports, consoles, PC parts, or if your PC can run a game. ' +
-        'You can type, speak 🎤 or send a picture 📷. Aap Roman Urdu mein bhi pooch sakte hain.</div>' +
-        '<div class="chips">' + CHIPS.map(function (c) { return '<button type="button">' + esc(c) + '</button>'; }).join('') + '</div>';
+      // Nothing written by ROC before the visitor speaks: only its mark, like an empty chat.
+      h += '<div style="margin:auto;text-align:center;opacity:.35"><div style="width:48px;height:48px;margin:0 auto;border-radius:16px;background:#047857;color:#fff;display:flex;align-items:center;justify-content:center">' +
+        ICON.replace('<svg', '<svg width="26" height="26"') + '</div></div>';
     }
     state.msgs.forEach(function (m) {
       h += '<div class="m ' + (m.role === 'user' ? 'u' : 'a') + '">' + (m.pic ? '<img src="' + m.pic + '" alt="">' : m.hadPic ? '📷 ' : '') +
@@ -232,15 +291,17 @@
     text = String(text || '').trim();
     if ((!text && !pic) || busy) return;
     input.value = '';
+    try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {}
     var image = pic; pic = null; att.classList.remove('on');
+    var voiceTurn = viaVoice; viaVoice = false;   // asked by voice: the answer is spoken too
     state.msgs.push(image ? { role: 'user', content: text, pic: image, hadPic: true } : { role: 'user', content: text });
     busy = true; sendBtn.disabled = true; render(); save();
     var hist = state.msgs.slice(-8).map(function (m) { return { role: m.role, content: m.content }; });
     fetch('/api/v1/agent.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin',
-      body: JSON.stringify({ session: state.session, page: location.pathname, messages: hist, image: image || undefined }) })
+      body: JSON.stringify({ session: state.session, page: location.pathname, messages: hist, image: image || undefined, device: device() }) })
       .then(function (r) { return r.json().catch(function () { return { error: 'ROC could not answer. Please try again.' }; }); })
       .then(function (d) {
-        if (d && d.reply) { state.msgs.push({ role: 'assistant', content: d.reply, game: d.game || null, products: d.products || [] }); speak(d.reply); }
+        if (d && d.reply) { state.msgs.push({ role: 'assistant', content: d.reply, game: d.game || null, products: d.products || [] }); speak(d.reply, voiceTurn); }
         else if (d && d.login) { user.signed_in = false; state.msgs.pop(); }
         else state.msgs.push({ role: 'assistant', content: (d && d.error) || 'ROC could not answer. Please try again.' });
       })
