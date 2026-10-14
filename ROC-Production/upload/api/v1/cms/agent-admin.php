@@ -51,6 +51,8 @@ echo json_encode([
     'success' => true,
     'settings' => rocAgentSettings($pdo),
     'groq' => trim((string)rocBlogGet($pdo, 'blog_groq_key', '')) !== '',
+    'last_error' => rocBlogGet($pdo, 'agent_last_error', null),
+    'models' => rocBlogGet($pdo, 'agent_models', null),
     'stats' => ['today' => $count('SELECT COUNT(*) FROM roc_agent_chats WHERE created_at >= ?', [$today]),
                 'today_ai' => $count("SELECT COUNT(*) FROM roc_agent_chats WHERE created_at >= ? AND engine <> 'basic'", [$today]),
                 'week' => $count('SELECT COUNT(*) FROM roc_agent_chats WHERE created_at >= ?', [$week]),

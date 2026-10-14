@@ -12,7 +12,7 @@
  *   2. Security headers on every response:
  *        Strict-Transport-Security: max-age=31536000   (HTTPS only, this host only)
  *        Referrer-Policy: strict-origin-when-cross-origin
- *        Permissions-Policy: camera, microphone, geolocation, payment, usb off
+ *        Permissions-Policy: camera, geolocation, payment, usb off; microphone only for this site (ROC voice input)
  *   Images keep their current 7-day cache (the CMS can replace an image in place).
  */
 
@@ -33,7 +33,7 @@ const SPEED_BLOCK = "\n" . SPEED_BEGIN . "\n"
     . "  </FilesMatch>\n"
     . '  Header always set Strict-Transport-Security "max-age=31536000"' . "\n"
     . '  Header always set Referrer-Policy "strict-origin-when-cross-origin"' . "\n"
-    . '  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"' . "\n"
+    . '  Header always set Permissions-Policy "camera=(), microphone=(self), geolocation=(), payment=(), usb=()"' . "\n"
     . "</IfModule>\n"
     . "# ROC speed END\n";
 
