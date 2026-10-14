@@ -9,13 +9,13 @@
  *   website   must stay empty (hidden field that only bots fill in)
  *
  * The message is stored in roc_messages (CMS -> Messages, where it can be answered)
- * and a notification email goes to support@ (contact) or comments@ (write for us)
+ * and a notification email goes to contact@runonconsole.com (both forms)
  * through the site's existing email queue. Tables: api/v1/cron/cli-messages.php.
  */
 
 require_once __DIR__ . '/account-runtime.php';   // config, database, email queue (rocQueue / rocRespond)
 
-const ROC_MSG_INBOX = ['contact' => 'support@runonconsole.com', 'write_for_us' => 'comments@runonconsole.com'];
+const ROC_MSG_INBOX = ['contact' => 'contact@runonconsole.com', 'write_for_us' => 'contact@runonconsole.com'];
 const ROC_MSG_LABEL = ['contact' => 'Contact form', 'write_for_us' => 'Write for us'];
 
 header('Content-Type: application/json; charset=utf-8');

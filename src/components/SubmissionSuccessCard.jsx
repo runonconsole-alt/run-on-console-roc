@@ -61,7 +61,7 @@ export const SubmissionSuccessCard = ({
       badge: "MESSAGE RECEIVED & LOGGED",
       hook: "Thanks for your message. It has reached our inbox and we reply by email, usually within 1-2 working days.",
       metaLabel: "Inquiry Channel",
-      metaValue: "support@runonconsole.com"
+      metaValue: "contact@runonconsole.com"
     },
     'write-for-us': {
       badge: "GUEST PITCH QUEUED FOR REVIEW",

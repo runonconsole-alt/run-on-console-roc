@@ -34,8 +34,10 @@ export function generateJsonLd(routeData) {
     'url': SITE_DOMAIN,
     'logo': { '@type': 'ImageObject', 'url': LOGO_URL, 'width': 512, 'height': 512 },
     'description': 'Independent gaming site: gear picks for PC and console players, gaming platform guides and a free game requirements checker.',
-    'email': 'support@runonconsole.com',
-    'contactPoint': { '@type': 'ContactPoint', 'contactType': 'customer support', 'email': 'support@runonconsole.com', 'url': `${SITE_DOMAIN}/contact/`, 'availableLanguage': ['English'] },
+    'email': 'contact@runonconsole.com',
+    'telephone': '+92-317-4123457',
+    'address': { '@type': 'PostalAddress', 'streetAddress': '470/16B Fort Villas', 'addressLocality': 'Lahore', 'addressCountry': 'PK' },
+    'contactPoint': { '@type': 'ContactPoint', 'contactType': 'customer support', 'email': 'contact@runonconsole.com', 'telephone': '+92-317-4123457', 'url': `${SITE_DOMAIN}/contact/`, 'availableLanguage': ['English', 'Urdu'] },
     'sameAs': [
       'https://www.facebook.com/profile.php?id=61595168580625',
       'https://www.instagram.com/runonconsole/',

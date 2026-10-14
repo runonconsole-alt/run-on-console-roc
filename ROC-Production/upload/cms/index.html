@@ -1297,7 +1297,7 @@ function renderShell(){
       item('games','Games','🎮')+
       (can('products','view')?item('products','Products','▣')+item('product-categories','Product categories','▤'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
-      item('builder','Site builder','✦')+item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Blog & news writer','✍')+item('announce','Announcement bar','📣')+
+      item('builder','Site builder','✦')+item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Blog & news writer','✍')+item('agent','ROC assistant','🤖')+item('announce','Announcement bar','📣')+
       item('siteusers','Site users','👤')+item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+item('siteinfo','Website info','ℹ')+'</div>':'')+
     '<div class="sfoot"><div class="who"><div class="av">'+
       esc((S.user.username||'?').slice(0,2).toUpperCase())+'</div>'+
@@ -1345,6 +1345,7 @@ function renderView(){
   if(S.view==='announce' && S.user.role==='administrator') return renderAnnouncement(m);
   if(S.view==='blogagent' && S.user.role==='administrator') return renderBlogAgent(m);
   if(S.view==='siteinfo' && S.user.role==='administrator') return renderSiteInfo(m);
+  if(S.view==='agent' && S.user.role==='administrator') return renderAgent(m);
   if(S.view==='settings' && S.user.role==='administrator') return renderSettings(m);
   if(S.view==='nav' && S.user.role==='administrator'){ S.view='builder'; return renderBuilder(m); }
   if(S.view==='builder' && S.user.role==='administrator') return renderBuilder(m);
@@ -3589,6 +3590,49 @@ async function renderNewsWriter(m){
 }
 
 /* ------------------------------------------------------- Website info */
+/* CMS > ROC assistant: the chat box on the website (api/v1/agent.php), its limits and the saved chats. */
+async function renderAgent(m){
+  m.innerHTML=head('ROC assistant','The chat box on every page: games and gear help in English and Roman Urdu')+
+    '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var q=S.agentQ||'', pg=S.agentPage||1, d;
+  try{ d=await api('agent-admin.php?page='+pg+(q?'&q='+encodeURIComponent(q):'')); }catch(e){ toast(e.message,'bad'); return; }
+  if(S.view!=='agent') return;
+  var s=d.settings, st=d.stats;
+  var num=function(id,label,val,help){ return '<div class="field"><label for="'+id+'">'+label+'</label><input type="number" id="'+id+'" value="'+esc(val)+'" min="0"><div class="hint">'+help+'</div></div>'; };
+  $('.body',m).innerHTML=
+    '<div class="card"><div class="cbody" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center">'+
+      [['Chats today',st.today],['AI answers today',st.today_ai+' / '+s.daily],['Chats in 7 days',st.week],['Visitors in 7 days',st.week_visitors]].map(function(x){
+        return '<div><div style="font-size:24px;font-weight:800">'+esc(x[1])+'</div><div class="hint">'+esc(x[0])+'</div></div>'; }).join('')+'</div></div>'+
+    (d.groq?'':'<div class="alert info">No Groq key yet (CMS &gt; Blog &amp; news writer): ROC answers with its fixed sentences until one is added.</div>')+
+    '<div class="card"><div class="chead"><h3>Settings</h3></div><div class="cbody"><form id="agf">'+
+      '<label style="display:flex;gap:10px;align-items:center;font-weight:700;margin-bottom:14px"><input type="checkbox" id="ag-on"'+(s.on?' checked':'')+'> Show the "Ask ROC" chat button on the website</label>'+
+      num('ag-daily','AI answers a day',s.daily,'After this many, ROC answers with its fixed sentences until tomorrow (keeps the free Groq limit for the blog and news writers).')+
+      num('ag-hour','Messages an hour per visitor',s.hourly_ip,'Stops one visitor or a bot from using it all.')+
+      num('ag-keep','Keep chats (days)',s.keep_days,'Older chats are deleted by themselves.')+
+      '<button class="btn primary" type="submit">Save</button></form></div></div>'+
+    '<div class="card"><div class="chead"><h3>Saved chats</h3><span class="note">'+d.total+' saved · names, emails and phone numbers are removed before saving</span></div><div class="cbody">'+
+      '<form id="agq" style="display:flex;gap:8px;margin-bottom:12px"><input type="text" id="ag-q" value="'+esc(q)+'" placeholder="Search questions, answers, games, products" style="flex:1">'+
+      '<button class="btn" type="submit">Search</button>'+(d.total?'<button class="btn" type="button" id="ag-clear" style="color:#b91c1c">Delete all</button>':'')+'</form>'+
+      (d.chats.length?d.chats.map(function(c){
+        return '<div style="border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px">'+
+          '<div class="hint" style="margin-bottom:4px">'+esc(c.created_at)+' UTC · visitor '+esc(String(c.session||'').slice(0,6))+' · '+esc(c.page||'/')+' · '+esc(c.lang)+' · '+(c.engine==='basic'?'fixed answer':c.engine==='blocked'?'<b style="color:#b91c1c">blocked (bad words)</b>':'AI ('+esc(c.engine)+')')+'</div>'+
+          '<div style="font-weight:700">Q: '+esc(c.question)+'</div>'+
+          '<div style="white-space:pre-wrap;margin-top:4px;color:#334155">A: '+esc(c.answer)+'</div>'+
+          (c.game||c.products?'<div class="hint" style="margin-top:4px">'+(c.game?'Game: '+esc(c.game)+' ':'')+(c.products?'Products: '+esc(c.products):'')+'</div>':'')+'</div>';
+      }).join(''):'<div class="empty"><div>No chats yet.</div></div>')+
+      (d.pages>1?'<div style="display:flex;gap:8px;justify-content:center;margin-top:10px">'+(pg>1?'<button class="btn" data-agp="'+(pg-1)+'">&larr; Newer</button>':'')+
+        '<span class="hint" style="align-self:center">Page '+pg+' of '+d.pages+'</span>'+(pg<d.pages?'<button class="btn" data-agp="'+(pg+1)+'">Older &rarr;</button>':'')+'</div>':'')+
+    '</div></div>';
+  $('#agf',m).addEventListener('submit',async function(e){ e.preventDefault();
+    try{ var r=await api('agent-admin.php',{settings:{on:$('#ag-on',m).checked,daily:+$('#ag-daily',m).value,hourly_ip:+$('#ag-hour',m).value,keep_days:+$('#ag-keep',m).value}});
+      toast(r.message,'good'); renderAgent(m); }catch(err){ toast(err.message,'bad'); } });
+  $('#agq',m).addEventListener('submit',function(e){ e.preventDefault(); S.agentQ=$('#ag-q',m).value.trim(); S.agentPage=1; renderAgent(m); });
+  var clr=$('#ag-clear',m); if(clr) clr.addEventListener('click',async function(){
+    if(!confirm('Delete every saved chat? This cannot be undone.')) return;
+    try{ var r=await api('agent-admin.php',{action:'clear'}); toast(r.message,'good'); renderAgent(m); }catch(err){ toast(err.message,'bad'); } });
+  m.querySelectorAll('[data-agp]').forEach(function(b){ b.addEventListener('click',function(){ S.agentPage=+b.dataset.agp; renderAgent(m); }); });
+}
+
 async function renderSiteInfo(m){
   m.innerHTML=head('Website info','What runonconsole.com is built with, what each part does and the tools connected to it')+
     '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';

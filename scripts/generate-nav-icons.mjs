@@ -20,7 +20,7 @@ const ICONS = {
   check: 'CheckCircle', shield: 'ShieldCheck', star: 'Star', tag: 'Tag', monitor: 'Monitor', headphones: 'Headphones',
   mouse: 'Mouse', keyboard: 'Keyboard', laptop: 'Laptop', tv: 'Tv', zap: 'Zap', bag: 'ShoppingBag', users: 'Users',
   globe: 'Globe', link: 'Link', heart: 'Heart', flame: 'Flame', trophy: 'Trophy', gift: 'Gift', newspaper: 'Newspaper',
-  'arrow-right': 'ArrowRight', 'chevron-down': 'ChevronDown',
+  'arrow-right': 'ArrowRight', 'chevron-down': 'ChevronDown', 'map-pin': 'MapPin', phone: 'Phone',
 };
 
 const out = {};

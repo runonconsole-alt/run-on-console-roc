@@ -17,7 +17,7 @@ export async function sendMessage({ kind, name, email, subject = '', message, me
   }
   const data = await resp.json().catch(() => ({}));
   if (!resp.ok || !data.success) {
-    throw new Error(data.error || 'Your message could not be sent. Please email support@runonconsole.com instead.');
+    throw new Error(data.error || 'Your message could not be sent. Please email contact@runonconsole.com instead.');
   }
   return data;
 }

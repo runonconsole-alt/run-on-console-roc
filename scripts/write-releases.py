@@ -350,6 +350,17 @@ RELEASES = [
                   'Cloudflare refusing a harmless picture prompt ("NSFW") is tried again with another prompt; a post whose picture keeps failing moves to the end of the queue and keeps the site picture after 5 tries'],
          checks=[dict(label='Media library fix (CMS)', type='contains', path='cms/index.html', text="label:'Page',title:/platforms/")],
          pr=REPO + '54'),
+    dict(deploy=55, date='2026-10-14', title='ROC assistant chat, AdSense-ready privacy policy, contact details',
+         changes=['ROC, the new assistant: an Ask ROC chat on every page (also the PHP pages) for any gaming question in English or Roman Urdu: the Can I run it check with the checker list (GTA 5, Valorant, Cyberpunk and 500 Steam games), gear picks from our products, gaming history, esports, consoles and news (web search for new things)',
+                  'ROC can hear (microphone, English or Urdu), read pictures (for example a screenshot of the PC specs) and read its answers aloud',
+                  'ROC answers gaming only: other topics get a polite no, bad words and adult messages are blocked',
+                  'Chats are saved without names, emails or phone numbers and shown in CMS > ROC assistant (on/off, daily AI limit, search, delete)',
+                  'The old assistant button (a fixed script) is gone',
+                  'Privacy policy: Google AdSense and cookie opt-out, the ROC chat, contact details',
+                  'Contact details on the website: contact@runonconsole.com, phone and address in the footer (clickable), on the Contact page and in the Organization schema; form messages go to contact@runonconsole.com (cli-contact-info.php for the saved menu)'],
+         checks=[dict(label='ROC assistant (api/v1/agent.php)', type='file', path='api/v1/agent.php'),
+                 dict(label='Chat box script', type='file', path='roc-chat.js')],
+         pr=REPO + '55'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

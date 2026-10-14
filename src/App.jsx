@@ -18,7 +18,6 @@ import { AuthView } from './components/AuthView';
 import { ProfileView } from './components/ProfileView';
 import { ValuePropsFooter } from './components/ValuePropsFooter';
 import { CompareDrawer } from './components/CompareDrawer';
-import { FragAIAssistantModal } from './components/FragAIAssistantModal';
 // ROC Agent (server chat) is not enabled yet; the built-in assistant is used, as on the live site.
 
 const MainRouter = () => {
@@ -82,7 +81,6 @@ const MainRouter = () => {
       <CompareDrawer />
 
       {/* Global ROC Gaming, Product & Hardware Assistant Agent */}
-      <FragAIAssistantModal />
 
     </div>
   );

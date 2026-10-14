@@ -1,5 +1,6 @@
 import React from 'react';
-import { ShieldCheck, Lock, Cookie, ShoppingCart, FileText, UserCheck, Mail } from 'lucide-react';
+import { ShieldCheck, Lock, Cookie, ShoppingCart, FileText, UserCheck, Mail, Megaphone, Bot } from 'lucide-react';
+import { CONTACT } from '../data/siteContact';
 
 /* One page for everything legal about how the site works: privacy, cookies and analytics,
    and the Amazon Associates / affiliate disclosure. /policy/ redirects here. */
@@ -26,9 +27,9 @@ export const PrivacyPolicyView = () => {
         </h1>
         <p className="text-emerald-100 text-xs sm:text-sm leading-relaxed max-w-xl mx-auto">
           How Run On Console handles your data, which cookies and tools the website uses, and how we
-          earn money through affiliate links, including the Amazon Associates Program.
+          earn money through affiliate links (Amazon Associates) and advertising (Google AdSense).
         </p>
-        <p className="text-emerald-200/80 text-[11px] mt-3">Last updated: October 7, 2026</p>
+        <p className="text-emerald-200/80 text-[11px] mt-3">Last updated: October 14, 2026</p>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm space-y-8 text-xs sm:text-sm leading-relaxed">
@@ -41,8 +42,14 @@ export const PrivacyPolicyView = () => {
         <Section icon={FileText} title="1. Who we are">
           <p>
             Run On Console (“ROC”, “we”, “us”) publishes gaming and PC hardware guides, product
-            recommendations and platform compatibility information at runonconsole.com. This policy
-            covers the whole website, including our blog, product pages and gaming platform pages.
+            recommendations, news and platform compatibility information at runonconsole.com. This policy
+            covers the whole website, including our blog, news, product pages, gaming platform pages and
+            the ROC assistant chat.
+          </p>
+          <p>
+            Run On Console, {CONTACT.address}. Email{' '}
+            <a href={'mailto:' + CONTACT.email} className="text-emerald-700 font-semibold underline">{CONTACT.email}</a>, phone{' '}
+            <a href={CONTACT.tel} className="text-emerald-700 font-semibold underline">{CONTACT.phone}</a>.
           </p>
         </Section>
 
@@ -61,10 +68,9 @@ export const PrivacyPolicyView = () => {
             we never see your payment or delivery details.
           </p>
           <p>
-            Product prices and availability are accurate as of the date and time indicated and are subject
-            to change. Any price and availability information shown on Amazon at the time of purchase will
-            apply to the purchase of the product. Product images shown on this website come from Amazon
-            or from the manufacturer.
+            We do not show prices on this website. The price and availability shown on Amazon at the time
+            of purchase apply to the purchase of the product. Product images on this website come from
+            Amazon, from the manufacturer or are our own.
           </p>
           <p>
             We may also join other affiliate programs in the future; the same rules apply to them.
@@ -84,6 +90,7 @@ export const PrivacyPolicyView = () => {
             <li><strong>Messages you send us</strong>: when you use the contact or “Write for us” forms we receive your name, email address and the message, and use them only to reply.</li>
             <li><strong>Accounts</strong>: if you create an account we store your display name, username, email address and a securely hashed password. If you sign in with Google we receive your verified email address and Google account ID, never your Google password.</li>
             <li><strong>Affiliate link clicks</strong>: when you click a shop link we record which link and which page it was on, so we can see which recommendations are useful. This record does not contain your name or email address.</li>
+            <li><strong>ROC assistant chats</strong>: see section 7.</li>
             <li><strong>Security logs</strong>: our server keeps IP addresses and browser details for a limited time to stop spam, brute-force login attempts and other abuse.</li>
           </ul>
           <p>We do not sell or rent your personal data to anyone.</p>
@@ -96,14 +103,50 @@ export const PrivacyPolicyView = () => {
             <li><strong>Microsoft Clarity</strong>: shows how visitors use pages (clicks, scrolling) so we can improve the layout.</li>
             <li><strong>Cloudflare Turnstile</strong>: checks that sign-up and contact forms are used by people, not bots.</li>
             <li><strong>Amazon</strong>: sets its own cookies when you follow an affiliate link (see section 2).</li>
+            <li><strong>Google AdSense</strong>: shows advertisements (see section 6).</li>
           </ul>
           <p>
             You can block or delete cookies in your browser settings. The website still works without
-            analytics cookies, although signing in needs the essential cookie.
+            analytics and advertising cookies, although signing in needs the essential cookie.
           </p>
         </Section>
 
-        <Section icon={ShieldCheck} title="6. How long we keep data, and your rights">
+        <Section icon={Megaphone} title="6. Advertising (Google AdSense)">
+          <p>
+            We use Google AdSense to show advertisements on this website. Third-party vendors, including
+            Google, use cookies to serve ads based on your prior visits to this website or other websites.
+            Google’s use of advertising cookies enables it and its partners to serve ads to you based on your
+            visits to this and/or other sites on the Internet.
+          </p>
+          <p>
+            You can opt out of personalised advertising in{' '}
+            <a className="text-emerald-700 font-semibold underline" href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer">Google Ads Settings</a>,
+            or opt out of some third-party vendors’ use of cookies for personalised advertising at{' '}
+            <a className="text-emerald-700 font-semibold underline" href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer">www.aboutads.info</a>{' '}
+            (<a className="text-emerald-700 font-semibold underline" href="https://www.youronlinechoices.eu/" target="_blank" rel="noopener noreferrer">youronlinechoices.eu</a> in Europe).
+            How Google uses this data:{' '}
+            <a className="text-emerald-700 font-semibold underline" href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">How Google uses information from sites that use its services</a>.
+          </p>
+          <p>
+            Visitors in the European Economic Area, the United Kingdom and Switzerland are asked for consent
+            before personalised ads are shown; without consent, Google shows non-personalised ads.
+          </p>
+        </Section>
+
+        <Section icon={Bot} title="7. The ROC assistant (chat)">
+          <p>
+            The “Ask ROC” chat answers questions about games and gaming gear. Your question is sent to our
+            server and to Groq, the AI service that writes the wording of the answer; the facts come from this
+            website (our game list and products).
+          </p>
+          <p>
+            We save the questions and answers to improve the assistant. Before saving, email addresses, phone
+            and ID numbers and names are removed. We do not save your IP address, only a code that changes every
+            day and is used to stop abuse. Chats are deleted after 90 days. Please do not type personal details in the chat.
+          </p>
+        </Section>
+
+        <Section icon={ShieldCheck} title="8. How long we keep data, and your rights">
           <p>
             We keep messages and account data only as long as needed for the purpose they were given for,
             and security logs for a limited period. You can ask us to show, correct or delete the personal
@@ -115,11 +158,13 @@ export const PrivacyPolicyView = () => {
           </p>
         </Section>
 
-        <Section icon={Mail} title="7. Changes and contact">
+        <Section icon={Mail} title="9. Changes and contact">
           <p>
             We will update this page when the way the website works changes; the date at the top shows the
             latest version. Questions or requests about your data: email{' '}
-            <a href="mailto:support@runonconsole.com" className="text-emerald-700 font-semibold underline">support@runonconsole.com</a>.
+            <a href={'mailto:' + CONTACT.email} className="text-emerald-700 font-semibold underline">{CONTACT.email}</a>,
+            call <a href={CONTACT.tel} className="text-emerald-700 font-semibold underline">{CONTACT.phone}</a> or
+            write to Run On Console, {CONTACT.address}.
           </p>
         </Section>
 
