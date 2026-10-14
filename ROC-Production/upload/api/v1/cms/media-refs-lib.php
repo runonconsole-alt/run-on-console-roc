@@ -42,7 +42,8 @@ function rocMediaRefs(PDO $pdo, string $root): array {
     // Covers: only the picture a post shows (image) and pictures inside its text count; og_image and
     // twitter_image can still hold an older cover that no page shows.
     $covers = [];
-    $rows = $pdo->query('SELECT image, content FROM blogs')->fetchAll(PDO::FETCH_ASSOC);   // fails loudly: no guessing
+    // Archived posts are not on the site: their covers do not count (owner: keep only the covers in use).
+    $rows = $pdo->query("SELECT image, content FROM blogs WHERE status <> 'archived'")->fetchAll(PDO::FETCH_ASSOC);   // fails loudly: no guessing
     foreach ($rows as $b)
         foreach ($b as $v) if (is_string($v) && stripos($v, 'blog-covers/') !== false && preg_match_all('#uploads/blog-covers/[A-Za-z0-9_.%-]+?\.(?:jpe?g|png|webp|gif|avif)#i', $v, $m))
             foreach ($m[0] as $u) $covers['/' . rawurldecode($u)] = 1;

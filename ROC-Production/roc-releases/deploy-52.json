@@ -1,0 +1,29 @@
+{
+ "deploy": 52,
+ "date": "2026-10-14",
+ "title": "New pictures instead of game-like ones, 10 posts a page, clickable hero pictures",
+ "changes": [
+  "Five site pictures that looked like real games or brands (a Spider-Man-like hero, an Elden Ring-like knight, a Call of Duty-like soldier, a car with a tyre brand, an esports arena with a real game) are replaced by new ones under the same names (cli-copyright-images.php, old ones kept for rollback)",
+  "Blogs and News show 10 per page, with Newer and Older links",
+  "Hero pictures open a page: Categories opens all products, News opens the newest story; the home slide picture has round corners",
+  "Media clean-up: covers of archived posts no longer count as used, so only the covers on the site stay"
+ ],
+ "checks": [
+  {
+   "label": "Picture replacer (cli-copyright-images.php)",
+   "type": "file",
+   "path": "api/v1/cron/cli-copyright-images.php"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-k41BGXxc.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/52",
+ "build": "index-k41BGXxc.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}
