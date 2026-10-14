@@ -4,6 +4,7 @@
  *
  *   node scripts/fetch-steam-games.mjs            fetch (resumes from the cache)
  *   node scripts/fetch-steam-games.mjs --parse    only rebuild the output from the cache
+ *   --target=2000 --from=2013 --pages=12            more games, older ones too, more SteamSpy pages
  *
  * 1. Candidates: SteamSpy's list of Steam games by owners (steamspy.com/api.php?request=all),
  *    most-reviewed first.
@@ -23,12 +24,13 @@ import { buildGame } from './steam-requirements.mjs';
 
 const CACHE = path.resolve('scripts/data/steam-cache.json');
 const OUT = path.resolve('public/roc-steam-games.json');
-const TARGET = 500;
-const FROM_YEAR = 2021;
-const SPY_PAGES = 5;
+const arg = (k, d) => { const a = process.argv.find((x) => x.startsWith('--' + k + '=')); return a ? +a.split('=')[1] : d; };
+const TARGET = arg('target', 500);
+const FROM_YEAR = arg('from', 2021);
+const SPY_PAGES = arg('pages', 5);
 // Steam numbers apps in the order they were created: below this number they are
 // almost all released before 2021 (Helldivers 2, 553850, is one of the lowest recent ones).
-const MIN_APPID = 500000;
+const MIN_APPID = FROM_YEAR >= 2021 ? 500000 : 0;
 const ADULT_DESCRIPTORS = [3, 4];   // Steam: adult-only sexual content, frequent nudity or sexual content
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -58,7 +60,6 @@ function yearOf(app) {
 function keep(app) {
   if (!app || app.type !== 'game') return false;
   if (app.release_date?.coming_soon) return false;
-  if (yearOf(app) < FROM_YEAR) return false;
   const req = app.pc_requirements;
   if (!req || Array.isArray(req) || !req.minimum) return false;
   if ((app.content_descriptors?.ids || []).some((id) => ADULT_DESCRIPTORS.includes(id))) return false;
@@ -66,7 +67,7 @@ function keep(app) {
 }
 
 function writeOutput() {
-  const kept = Object.values(cache.apps).filter((a) => a && a._keep).sort((a, b) => b._positive - a._positive).slice(0, TARGET);
+  const kept = Object.values(cache.apps).filter((a) => a && a._keep && yearOf(a) >= FROM_YEAR).sort((a, b) => b._positive - a._positive).slice(0, TARGET);
   const games = kept.map((a) => buildGame(a, yearOf(a)));
   fs.writeFileSync(OUT, JSON.stringify({ source: 'Steam store system requirements (store.steampowered.com), list by SteamSpy popularity', updated: new Date().toISOString().slice(0, 10), games }));
   const rated = games.filter((g) => g.req && g.req.min.gpu && g.req.min.cpu).length;
@@ -92,7 +93,8 @@ const candidates = Object.values(cache.spy).flat()
 console.log(`${candidates.length} candidates`);
 
 // 2. store data, most-reviewed first, until there are enough recent games
-let kept = Object.values(cache.apps).filter((a) => a && a._keep).length;
+const isKept = (a) => a && a._keep && yearOf(a) >= FROM_YEAR;   // the year is checked here, so a later run can use older games
+let kept = Object.values(cache.apps).filter(isKept).length;
 for (const c of candidates) {
   if (kept >= TARGET) break;
   if (cache.apps[c.appid] !== undefined) continue;
@@ -103,7 +105,7 @@ for (const c of candidates) {
       _keep: true, _positive: c.positive, steam_appid: app.steam_appid, name: app.name, release_date: app.release_date,
       genres: app.genres, pc_requirements: app.pc_requirements, platforms: app.platforms,
     };
-    kept++;
+    if (yearOf(app) >= FROM_YEAR) kept++;
     console.log(`  + ${app.name} (${yearOf(app)})  [${kept}/${TARGET}]`);
   } else {
     cache.apps[c.appid] = null;   // checked, not kept

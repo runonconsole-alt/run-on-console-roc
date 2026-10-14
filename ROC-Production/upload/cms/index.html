@@ -3608,7 +3608,7 @@ async function renderAgent(m){
     (d.models&&d.models.chat?'<div class="hint" style="margin-bottom:10px">AI models in use: '+esc(d.models.chat.join(', '))+(d.models.web&&d.models.web.length?' · web search: '+esc(d.models.web.join(', ')):'')+(d.models.vision&&d.models.vision.length?' · pictures: '+esc(d.models.vision.join(', ')):'')+'</div>':'')+
     '<div class="card"><div class="chead"><h3>Settings</h3></div><div class="cbody"><form id="agf">'+
       '<label style="display:flex;gap:10px;align-items:center;font-weight:700;margin-bottom:14px"><input type="checkbox" id="ag-on"'+(s.on?' checked':'')+'> Show the "Ask ROC" chat button on the website</label>'+
-      '<div class="hint" style="margin:-6px 0 14px">Only signed-in members can chat. Visitors who are not signed in are taken to the game checker page, where they can sign in or sign up.</div>'+
+      '<div class="hint" style="margin:-6px 0 14px">Only signed-in members can chat. Visitors who are not signed in see a Sign in / Sign up card in the chat box.</div>'+
       num('ag-daily','AI answers a day',s.daily,'After this many, ROC answers with its fixed sentences until tomorrow (keeps the free Groq limit for the blog and news writers).')+
       num('ag-hour','Messages an hour per member',s.hourly_ip,'Stops one member or a bot from using it all.')+
       num('ag-keep','Keep chats (days)',s.keep_days,'Older chats are deleted by themselves.')+

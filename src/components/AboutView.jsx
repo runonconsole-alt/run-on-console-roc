@@ -67,7 +67,7 @@ export const AboutView = () => {
               </span>
             </h1>
             <p className="text-emerald-100 text-xs sm:text-sm leading-relaxed max-w-lg">
-              Run On Console is an independent gaming site built by gamers, for gamers. We help you choose the right console and PC gear, check whether your PC can run a game, and find your way around every gaming platform.
+              Run On Console is an independent gaming site built by gamers, for gamers, founded in 2026 in Lahore, Pakistan. We help you choose the right console and PC gear, check whether your PC can run a game, and find your way around every gaming platform.
             </p>
 
             <div className="flex flex-wrap gap-2.5 pt-2">
