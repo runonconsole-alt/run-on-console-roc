@@ -6,4 +6,6 @@ export const CONTACT = {
   tel: 'tel:+923174123457',
   address: '470/16B Fort Villas, Lahore, Pakistan',
   map: 'https://www.google.com/maps/search/?api=1&query=470%2F16B%20Fort%20Villas%2C%20Lahore%2C%20Pakistan',
+  // The map in the footer (Google Maps embed, no key needed).
+  embed: 'https://maps.google.com/maps?q=470%2F16B%20Fort%20Villas%2C%20Lahore%2C%20Pakistan&z=15&output=embed',
 };

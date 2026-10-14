@@ -79,8 +79,8 @@
     var old = document.querySelector('button[title="ROC AI Hardware Assistant"]');
     if (old && old.parentElement) old.parentElement.style.display = 'none';
   }
-  /* The floating "Ask ROC" button: signed-in members get the chat, others go to the checker page
-     (where ROC sits next to the checker and they can sign in or sign up). */
+  /* The floating "Ask ROC" button opens ROC on every page. Members chat; visitors who are not
+     signed in see "please sign in or sign up" in the same box (owner: stay on the page). */
   function floating() {
     style();
     btn = document.createElement('button');
@@ -88,11 +88,30 @@
     btn.innerHTML = ICON + '<span>Ask ROC</span>';
     document.body.appendChild(btn);
     btn.addEventListener('click', function () {
-      if (!user.signed_in) { location.href = '/compatibility/#roc'; return; }
-      if (!box) { box = makeBox(false); document.body.appendChild(box); wire(); render(); }
+      if (!box) {
+        box = makeBox(false); document.body.appendChild(box); wire();
+        if (user.signed_in) render(); else gate();
+      }
       toggle(true);
     });
     if (user.signed_in && state.open) btn.click();
+  }
+  function loginCard() {
+    var back = encodeURIComponent(location.pathname + location.search);
+    return '<div style="text-align:center;padding:18px 10px;font:14px/1.6 Inter,system-ui,sans-serif;color:#334155">' +
+      '<div style="width:52px;height:52px;margin:0 auto 10px;border-radius:16px;background:#047857;color:#fff;display:flex;align-items:center;justify-content:center">' + ICON.replace('<svg', '<svg width="28" height="28"') + '</div>' +
+      '<b style="display:block;font:900 18px Outfit,Inter,sans-serif;color:#064e3b">For access, please sign in or sign up</b>' +
+      '<p style="margin:6px auto 14px;max-width:420px">ROC, our gaming assistant, is free for members. Ask anything about games, consoles, PC parts and esports, or if your PC can run a game. ' +
+      'Type, speak or send a picture, in English or Roman Urdu.<br><span style="color:#64748b">Access ke liye login ya sign up karein.</span></p>' +
+      '<a href="/auth/login/?return=' + back + '" style="display:inline-block;margin:4px;background:#047857;color:#fff;font-weight:800;padding:11px 20px;border-radius:12px;text-decoration:none">Sign in</a>' +
+      '<a href="/auth/signup/?return=' + back + '" style="display:inline-block;margin:4px;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;font-weight:800;padding:11px 20px;border-radius:12px;text-decoration:none">Sign up free</a></div>';
+  }
+  /* Not signed in: the box shows the sign-in card instead of the chat. */
+  function gate() {
+    body.innerHTML = loginCard();
+    form.style.display = 'none'; att.style.display = 'none';
+    var tools = box.querySelector('.tools');
+    [].forEach.call(tools.querySelectorAll('.lang,.spk'), function (b) { b.style.display = 'none'; });
   }
   /* On the checker page: ROC inside the page (React puts <div id="roc-chat-inline"> there). */
   function inline(host) {
@@ -100,13 +119,7 @@
     host.setAttribute('data-roc-on', '1');
     style();
     if (!user.signed_in) {
-      host.innerHTML = '<div style="border:2px solid #a7f3d0;border-radius:20px;background:#fff;padding:24px;text-align:center;font:14px/1.6 Inter,system-ui,sans-serif;color:#334155">' +
-        '<div style="width:52px;height:52px;margin:0 auto 10px;border-radius:16px;background:#047857;color:#fff;display:flex;align-items:center;justify-content:center">' + ICON.replace('<svg', '<svg width="28" height="28"') + '</div>' +
-        '<b style="display:block;font:900 20px Outfit,Inter,sans-serif;color:#064e3b">Chat with ROC, your gaming assistant</b>' +
-        '<p style="margin:6px auto 16px;max-width:460px">Ask anything about games, consoles, PC parts and esports, or if your PC can run a game. Type, speak or send a picture, in English or Roman Urdu. ' +
-        'ROC is free for members: sign in or create a free account.</p>' +
-        '<a href="/auth/login/?return=' + RETURN + '" style="display:inline-block;margin:4px;background:#047857;color:#fff;font-weight:800;padding:11px 20px;border-radius:12px;text-decoration:none">Sign in</a>' +
-        '<a href="/auth/signup/?return=' + RETURN + '" style="display:inline-block;margin:4px;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;font-weight:800;padding:11px 20px;border-radius:12px;text-decoration:none">Create a free account</a></div>';
+      host.innerHTML = '<div style="border:2px solid #a7f3d0;border-radius:20px;background:#fff;padding:10px">' + loginCard() + '</div>';
       return;
     }
     box = makeBox(true);
@@ -228,11 +241,11 @@
       .then(function (r) { return r.json().catch(function () { return { error: 'ROC could not answer. Please try again.' }; }); })
       .then(function (d) {
         if (d && d.reply) { state.msgs.push({ role: 'assistant', content: d.reply, game: d.game || null, products: d.products || [] }); speak(d.reply); }
-        else if (d && d.login) state.msgs.push({ role: 'assistant', content: 'Please [sign in](/auth/login/?return=' + RETURN + ') to chat with ROC. / ROC se baat karne ke liye login karein.' });
+        else if (d && d.login) { user.signed_in = false; state.msgs.pop(); }
         else state.msgs.push({ role: 'assistant', content: (d && d.error) || 'ROC could not answer. Please try again.' });
       })
       .catch(function () { state.msgs.push({ role: 'assistant', content: 'No connection. Please try again.' }); })
-      .then(function () { busy = false; sendBtn.disabled = false; render(); save(); input.focus(); });
+      .then(function () { busy = false; sendBtn.disabled = false; save(); if (!user.signed_in) { gate(); return; } render(); input.focus(); });
   }
 
   function start() {
