@@ -51,6 +51,8 @@ function rocAgentSystem(string $lang, array $facts): string {
          . "- Talk like a friendly gamer friend, the way ChatGPT or Claude chat: natural, warm, varied sentences, never the same reply twice, and follow the conversation. Answer the visitor's actual message first.\n"
          . "- Small talk is fine (hi, salam, how are you, kya haal hai, who are you, what can you do, thanks): reply naturally in one or two lines, and you may ask what they play or how you can help with gaming.\n"
          . "- If the visitor is on a phone (detected_in_browser.system is Android or iOS, or they say mobile / phone / mob): tell them clearly that you cannot guess their PC from their mobile (in their language, e.g. \"Main aap ke mobile se aap ke PC ka andaza nahi laga sakta\"), then ask them to type the PC's graphics card, processor and RAM, or to open runonconsole.com on that PC and ask again. Never treat the phone's chip as their PC. You can also help with mobile games.\n"
+         . "- Analyze my PC, step by step: ask for what is missing, one or two things at a time. Show where to find them: Windows: Settings > System > About (processor and RAM), Task Manager > Performance > GPU (graphics card), or Win+R and type dxdiag; Mac: Apple menu > About This Mac; a laptop: the model name on the sticker underneath. Laptop chips: U = low power, H/HX = gaming. When graphics card and processor are known and no game is named, use pc_summary: say which games run well, which only on low settings and which are too heavy, and suggest one sensible upgrade only if they ask.\n"
+         . "- Questions about this website (what products or categories it has, how many, a product's page, the newest blogs or news): use this_website and link the pages.\n"
          . "- If the visitor asks to analyze or check their PC: use visitor_pc (detected_in_browser is what their browser reports, usually the graphics card; it can be wrong for laptops with two GPUs). Say what you see, ask for the missing parts (processor model, RAM) and which game they want to play.\n"
          . "- You answer EVERYTHING about gaming: games and their history, studios, consoles and PCs, PC hardware, esports teams, players and tournaments, game tips, settings and performance, gaming news. Use your own knowledge; when you are not sure, say so.\n"
          . "- Esports (teams, players, tournaments, who won, results) and questions about Run On Console / ROC itself (what it is, when it was made, where it is, how to contact it) are IN range: answer them, using about_run_on_console for the site. For results you are not sure about, give what you know and say it may have changed since.\n"
@@ -258,6 +260,7 @@ function rocAgentAbout(): array {
         'contact' => ['email' => 'contact@runonconsole.com', 'phone' => '0317 4123457', 'page' => '/contact/'],
         'roc_assistant' => 'ROC is the site\'s gaming assistant for signed-in members: English and Roman Urdu, voice input, answers about games, PCs, consoles, esports and gear.',
         'how_it_earns' => 'Amazon Associates affiliate links (no extra cost to readers) and ads (Google AdSense). Do not call the site ad-free. Brands cannot pay for rankings; sponsored content is always labelled.',
+        'checker_how_it_works' => 'The Can I run it checker (/compatibility/) compares the PC with each game\'s official requirements (Steam store and the game makers). Graphics card and processor get a tier score (1.8 integrated graphics ... 10 the fastest cards and CPUs), RAM is in GB. The result: graphics card 50%, processor 30%, RAM 20% of the recommended specs; under the minimum on any part = at most 40%. 90%+ = recommended specs (high settings), 70-89% = medium to high, 41-69% = low settings, 40% or less = below the minimum. A hard disk instead of an SSD lowers it. There are ready presets for consoles, handhelds, phones and cloud gaming. ROC uses the same rules.',
         'built_with' => 'PHP and MySQL on the server, React (Vite) and Tailwind for the pages; ROC answers with Groq AI models and the site\'s own data. Do not name any other technology.',
         'pages' => ['about' => '/about/', 'checker' => '/compatibility/', 'products' => '/products/', 'platforms' => '/gaming-platforms/', 'blogs' => '/blogs/', 'news' => '/news/',
                     'write_for_us' => '/write-for-us/', 'privacy' => '/privacy-policy/', 'terms' => '/terms-and-conditions/'],
@@ -391,6 +394,71 @@ function rocAgentIpHash(): string {
     return substr(hash('sha256', gmdate('Y-m-d') . '|' . ($_SERVER['REMOTE_ADDR'] ?? '') . '|roc-agent'), 0, 16);
 }
 
+/* ------------------------------------------------------ the website's own data */
+
+/**
+ * What Run On Console has, for questions about the site: the product categories with their
+ * number of products, a product the question names (its page, what it is for), and the newest
+ * blog posts and news when asked.
+ */
+function rocAgentSite(PDO $pdo, string $q): array {
+    $out = [];
+    $t = ' ' . rocAgentNorm($q) . ' ';
+    try {
+        $cats = $pdo->query("SELECT c.slug, c.name, (SELECT COUNT(*) FROM products p WHERE p.category_slug = c.slug AND p.status = 'published') AS n
+                               FROM product_categories c WHERE c.status = 'published' ORDER BY c.sort_rank, c.name")->fetchAll(PDO::FETCH_ASSOC);
+        $out['product_categories'] = array_map(function ($c) { return ['name' => $c['name'], 'products' => (int)$c['n'], 'page' => '/category/' . $c['slug'] . '/']; }, $cats);
+        $out['products_total'] = array_sum(array_column($out['product_categories'], 'products'));
+    } catch (\Throwable $e) {}
+    // A product named in the question (its own page on the site; never a price).
+    try {
+        $rows = $pdo->query("SELECT slug, title, brand, category, short_desc, best_for, summary FROM products WHERE status = 'published'")->fetchAll(PDO::FETCH_ASSOC);
+        $hit = [];
+        foreach ($rows as $r) {
+            $n = rocAgentNorm((string)$r['title']);
+            $short = rocAgentNorm(preg_replace('/\(.*?\)/', '', (string)$r['title']));
+            foreach (array_unique([$n, $short]) as $k) if (strlen($k) >= 6 && strpos($t, ' ' . $k . ' ') !== false) { $hit[$r['slug']] = [strlen($k), $r]; }
+        }
+        uasort($hit, function ($a, $b) { return $b[0] <=> $a[0]; });
+        foreach (array_slice($hit, 0, 2) as $h) {
+            $r = $h[1];
+            $out['products_named'][] = array_filter(['name' => $r['title'], 'brand' => $r['brand'], 'category' => $r['category'], 'page' => '/products/' . $r['slug'] . '/',
+                'best_for' => mb_substr((string)$r['best_for'], 0, 120), 'about' => mb_substr(trim(strip_tags((string)($r['summary'] ?: $r['short_desc']))), 0, 400)]);
+        }
+    } catch (\Throwable $e) {}
+    // Newest posts when the visitor asks about blogs, news or articles.
+    if (preg_match('/\b(blog|blogs|news|khabar|article|articles|post|posts|guide|guides|latest|naya|nayi)\b/i', $q)) {
+        try {
+            foreach (['news' => "category = 'News'", 'blogs' => "(category IS NULL OR category <> 'News')"] as $k => $w) {
+                $st = $pdo->query("SELECT title, slug FROM blogs WHERE status = 'published' AND {$w} ORDER BY published_at DESC LIMIT 5");
+                $out['latest_' . $k] = array_map(function ($b) use ($k) { return ['title' => $b['title'], 'page' => '/' . $k . '/' . $b['slug'] . '/']; }, $st->fetchAll(PDO::FETCH_ASSOC));
+            }
+        } catch (\Throwable $e) {}
+    }
+    return $out;
+}
+
+/**
+ * "Analyze my PC" without a game: the checker run on the best known games, so ROC can say what
+ * runs well, what runs on low settings and what is too heavy.
+ */
+function rocAgentPcSummary(string $root, ?float $gpu, ?float $cpu, ?float $ram): ?array {
+    if ($gpu === null || $cpu === null) return null;
+    $games = array_slice(rocAgentGames($root), 0, 90);   // the checker's own list first, then the most popular Steam games
+    $res = ['runs_well' => [], 'medium' => [], 'low_settings' => [], 'too_heavy' => []];
+    $seen = [];
+    foreach ($games as $g) {
+        if (array_key_exists('pc', $g) && !$g['pc']) continue;   // console-only games (Zelda ...)
+        $key = implode(' ', array_slice(explode(' ', rocAgentNorm((string)$g['t'])), 0, 2));
+        if (isset($seen[$key])) continue;                          // the same game twice (Helldivers 2)
+        $seen[$key] = 1;
+        $c = rocAgentCheck($g, $gpu, $cpu, $ram);
+        $k = $c['percent'] >= 90 ? 'runs_well' : ($c['percent'] >= 70 ? 'medium' : ($c['percent'] > 40 ? 'low_settings' : 'too_heavy'));
+        if (count($res[$k]) < 6) $res[$k][] = preg_replace('/\s*\(.*$/', '', (string)$g['t']) . ' (' . $c['percent'] . '%)';
+    }
+    return $res;
+}
+
 /* -------------------------------------------------- knowledge base (roc-kb.json) */
 
 /** ROC's gaming knowledge base (scripts/build-roc-kb.mjs: Wikidata and Wikipedia). */
@@ -500,6 +568,8 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
 
     $facts = ['site' => 'Run On Console (runonconsole.com): gaming and PC hardware picks, a Can I run it checker for 500 PC games, gaming platform guides, blogs and news.',
               'about_run_on_console' => rocAgentAbout(),
+              'this_website' => rocAgentSite($pdo, $q),
+              'pc_summary' => !$game ? rocAgentPcSummary($root, $gpu, $cpu, $ram) : null,
               'reference' => rocAgentKb($root, $q . ' ' . (count($history) > 1 ? (string)($history[count($history) - 3]['content'] ?? '') : '')),
               'visitor_pc' => ['graphics_card_score' => $gpu, 'processor_score' => $cpu, 'ram_gb' => $ram,
                                'on_phone' => (bool)preg_match('/android|ios/i', (string)($device['os'] ?? '')),

@@ -19,6 +19,7 @@ const games = GAME_COMPATIBILITY_DATA.filter((g) => g.gameTitle).map((g) => {
   for (const part of g.gameTitle.split(/\s*(?:&|\(|\)|:|,)\s*/)) { const k = norm(part); if (k.length >= 4 && !STOP.has(k)) keys.add(k); }
   return {
     t: g.gameTitle, keys: [...keys], req: g.req || ERA[g.era] || ERA.modern,
+    pc: (g.platforms || []).some((x) => /PC|Windows|Steam/i.test(x)),
     min: { gpu: g.minSpecs || '' }, rec: { gpu: g.recommendedSpecs || '' },
     u: '/compatibility/?q=' + encodeURIComponent(g.gameTitle),
   };

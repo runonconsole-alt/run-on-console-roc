@@ -814,7 +814,7 @@ a.rn-a:hover .rn-t{color:#047857}
 .rn-lead .rn-t{font-size:1.45rem}
 .rn-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
 .rn-small .rn-t{font-size:.92rem}
-@media(min-width:768px){.rn-top{grid-template-columns:minmax(0,1fr) minmax(0,2.3fr)}.rn-top .rn-lead{order:2}.rn-top .rn-two{order:1;grid-template-columns:minmax(0,1fr);align-content:start}.rn-lead .rn-t{font-size:1.75rem}}
+@media(min-width:768px){.rn-top{grid-template-columns:minmax(0,2.3fr) minmax(0,1fr)}.rn-top .rn-lead{order:1}.rn-top .rn-two{order:2;grid-template-columns:minmax(0,1fr);align-content:start}.rn-lead .rn-t{font-size:1.75rem}}
 a.rn-row{display:grid;grid-template-columns:128px minmax(0,1fr);gap:14px;align-items:start;padding:16px 0;border-bottom:1px solid #e2e8f0}
 .rn-row .rn-cat{margin-top:0}
 .rn-row .rn-ex{display:none}

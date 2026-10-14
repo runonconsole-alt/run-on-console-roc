@@ -1,0 +1,31 @@
+{
+ "deploy": 62,
+ "date": "2026-10-14",
+ "title": "ROC knows the website, the checker and analyzes a PC; 1,380 Steam games",
+ "changes": [
+  "ROC knows the website: product categories and how many products each has, a product named in the question (its page and what it is best for, never a price), and the newest blog posts and news",
+  "ROC explains how the Can I run it checker scores a PC (the same rules as the checker page)",
+  "Analyze my PC: ROC asks for the parts step by step, shows where to find them (Windows, Mac, laptop sticker) and, once graphics card and processor are known, says which popular PC games run well, on medium, on low settings or are too heavy",
+  "The game checker and ROC: 1,380 Steam games with official requirements",
+  "News page: the newest story first and big on the left, the next two beside it, older ones below"
+ ],
+ "checks": [
+  {
+   "label": "ROC assistant",
+   "type": "contains",
+   "path": "api/v1/agent-lib.php",
+   "text": "rocAgentPcSummary"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-C3GNaBWn.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/62",
+ "build": "index-C3GNaBWn.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}
