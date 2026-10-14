@@ -506,7 +506,7 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
         .     '<div>' . ($authorUrl !== '' ? '<a href="' . $authorUrl . '" rel="author" class="font-bold text-slate-900 block no-underline hover:text-emerald-700">' . rocH($author) . '</a>' : '<span class="font-bold text-slate-900 block">' . rocH($author) . '</span>') . '</div>'
         .   '</div>'
         .   '<div class="flex items-center gap-3">'
-        .     ($pub ? '<time datetime="' . gmdate('c', $pub) . '">' . rocH(date($news ? 'M j, Y, H:i' : 'M j, Y', $pub)) . ($news ? ' UTC' : '') . '</time><span>•</span>' : '')
+        .     ($pub ? '<time datetime="' . gmdate('c', $pub) . '">' . rocH($news ? rocPkt($pub, 'M j, Y, H:i') : date('M j, Y', $pub)) . '</time><span>•</span>' : '')
         .     '<span class="text-emerald-600 font-bold">' . rocH($readTime) . '</span>'
         .   '</div>'
         . '</div></header>';
@@ -654,7 +654,7 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
             . '<p class="text-xs text-slate-500 line-clamp-3 leading-relaxed">' . rocH($p['excerpt'] ?? '') . '</p></div>'
             . '<div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">'
             . '<div class="flex items-center gap-2 text-slate-600 font-medium"><span>By ' . rocH($by) . '</span></div>'
-            . '<span class="text-emerald-600 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">' . ($news ? rocH(($pd = rocPublished($p)) ? date('M j, H:i', $pd) . ' UTC' : 'Read') . ' &rarr;' : 'Read Article &rarr;') . '</span>'
+            . '<span class="text-emerald-600 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">' . ($news ? rocH(($pd = rocPublished($p)) ? rocPkt($pd) : 'Read') . ' &rarr;' : 'Read Article &rarr;') . '</span>'
             . '</div></div></div></a>';
     }
     $cards .= '</div>';
@@ -731,10 +731,17 @@ function rocAdSide(): string {
         . '<span class="rn-house-b">See the products &rarr;</span></a>';
 }
 
-/** Category line over a story: "News · Oct 13, 10:10 UTC". */
+/** A time in Pakistan time (the owner's readers): "Oct 13, 15:10 PKT". */
+function rocPkt(int $ts, string $fmt = 'M j, H:i'): string {
+    $d = new DateTime('@' . $ts);
+    $d->setTimezone(new DateTimeZone('Asia/Karachi'));
+    return $d->format($fmt) . ' PKT';
+}
+
+/** Category line over a story: "News · Oct 13, 15:10 PKT". */
 function rocNewsMeta(array $p): string {
     $pd = rocPublished($p);
-    return '<span class="rn-cat">' . rocH(rocCategoryLabel($p['category'] ?? '')) . ($pd ? ' &middot; ' . rocH(date('M j, H:i', $pd)) . ' UTC' : '') . '</span>';
+    return '<span class="rn-cat">' . rocH(rocCategoryLabel($p['category'] ?? '')) . ($pd ? ' &middot; ' . rocH(rocPkt($pd)) : '') . '</span>';
 }
 
 /** One story: picture, category line, title (and the summary when $excerpt). */
@@ -771,10 +778,10 @@ function rocNewsListMain(PDO $pdo, array $posts, int $page, int $pages, string $
         $o .= '<p class="rn-found">' . $total . ' result' . ($total === 1 ? '' : 's') . ' for <strong>&ldquo;' . rocH($query) . '&rdquo;</strong> &middot; <a href="' . $base . '">Clear search</a></p>';
     }
     $rest = $posts;
-    if ($page === 1 && $query === '' && count($posts) >= 3) {
-        $lead = array_shift($rest); $two = array_splice($rest, 0, 2);
-        $o .= '<div class="rn-top">' . rocNewsItem($lead, 'rn-lead', $base, true, false)
-            . '<div class="rn-two">' . rocNewsItem($two[0], 'rn-small', $base) . rocNewsItem($two[1], 'rn-small', $base) . '</div></div>';
+    if ($page === 1 && $query === '' && count($posts) >= 1) {
+        // The newest story on its own, full width; the ones before it below, newest first.
+        $lead = array_shift($rest);
+        $o .= '<div class="rn-top">' . rocNewsItem($lead, 'rn-lead', $base, true, false) . '</div>';
     }
     $o .= '<div class="rn-list">';
     foreach (array_values($rest) as $i => $p) {
@@ -814,7 +821,7 @@ a.rn-a:hover .rn-t{color:#047857}
 .rn-lead .rn-t{font-size:1.45rem}
 .rn-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
 .rn-small .rn-t{font-size:.92rem}
-@media(min-width:768px){.rn-top{grid-template-columns:minmax(0,2.3fr) minmax(0,1fr)}.rn-top .rn-lead{order:1}.rn-top .rn-two{order:2;grid-template-columns:minmax(0,1fr);align-content:start}.rn-lead .rn-t{font-size:1.75rem}}
+@media(min-width:768px){.rn-lead .rn-t{font-size:1.9rem}}
 a.rn-row{display:grid;grid-template-columns:128px minmax(0,1fr);gap:14px;align-items:start;padding:16px 0;border-bottom:1px solid #e2e8f0}
 .rn-row .rn-cat{margin-top:0}
 .rn-row .rn-ex{display:none}

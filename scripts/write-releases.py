@@ -411,6 +411,12 @@ RELEASES = [
                   'News page: the newest story first and big on the left, the next two beside it, older ones below'],
          checks=[dict(label='ROC assistant', type='contains', path='api/v1/agent-lib.php', text='rocAgentPcSummary')],
          pr=REPO + '62'),
+    dict(deploy=63, date='2026-10-14', title='News: newest story full width, times in Pakistan time; 1605 Steam games',
+         changes=['News page: the newest story is shown on its own, full width; every story before it follows below, newest first',
+                  'News times are in Pakistan time (PKT) instead of UTC, on the list and on each story',
+                  'The game checker and ROC: 1605 Steam games with official requirements'],
+         checks=[dict(label='News renderer', type='contains', path='blog-render.php', text='Asia/Karachi')],
+         pr=REPO + '63'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
