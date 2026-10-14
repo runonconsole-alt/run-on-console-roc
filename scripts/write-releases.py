@@ -327,6 +327,13 @@ RELEASES = [
          changes=['Home page slides: the picture box has the same 16:9 shape as the pictures on tablets and computers, so the whole picture shows instead of a cropped middle'],
          checks=[dict(label='Page templates refreshed (cli-refresh-templates.php)', type='file', path='index.html')],
          pr=REPO + '51'),
+    dict(deploy=52, date='2026-10-14', title='New pictures instead of game-like ones, 10 posts a page, clickable hero pictures',
+         changes=['Five site pictures that looked like real games or brands (a Spider-Man-like hero, an Elden Ring-like knight, a Call of Duty-like soldier, a car with a tyre brand, an esports arena with a real game) are replaced by new ones under the same names (cli-copyright-images.php, old ones kept for rollback)',
+                  'Blogs and News show 10 per page, with Newer and Older links',
+                  'Hero pictures open a page: Categories opens all products, News opens the newest story; the home slide picture has round corners',
+                  'Media clean-up: covers of archived posts no longer count as used, so only the covers on the site stay'],
+         checks=[dict(label='Picture replacer (cli-copyright-images.php)', type='file', path='api/v1/cron/cli-copyright-images.php')],
+         pr=REPO + '52'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

@@ -27,7 +27,7 @@
 declare(strict_types=1);
 
 const ROC_PUBLIC_URL = 'https://runonconsole.com';
-const ROC_PER_PAGE   = 24;
+const ROC_PER_PAGE   = 10;   // posts or news stories per page (owner: at most 10)
 
 $ROOT = __DIR__;
 
@@ -622,8 +622,9 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
             . '<span class="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl">' . $allPublished . ' stor' . ($allPublished === 1 ? 'y' : 'ies') . ' so far</span>'
             . '<span class="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl">Checked against 2+ sources</span></div>'
             . '</div>'
-            . ($pic !== '' ? '<div class="lg:col-span-5"><div class="bg-slate-900/85 border-2 border-emerald-400/40 rounded-3xl p-3 shadow-2xl">'
-                . '<img width="1200" height="675" src="' . rocH($pic) . '" alt="' . rocH($picAlt) . '" class="w-full rounded-2xl object-cover" style="aspect-ratio:16/9"/></div></div>' : '')
+            // The picture opens the newest story.
+            . ($pic !== '' ? '<div class="lg:col-span-5"><a href="' . rocH($posts ? $base . $posts[0]['slug'] . '/' : $base) . '" class="block bg-slate-900/85 border-2 border-emerald-400/40 hover:border-emerald-300 rounded-3xl p-3 shadow-2xl no-underline group">'
+                . '<img width="1200" height="675" src="' . rocH($pic) . '" alt="' . rocH($picAlt) . '" class="w-full rounded-2xl object-cover group-hover:opacity-90" style="aspect-ratio:16/9"/></a></div>' : '')
             . '</div></div>';
     }
 

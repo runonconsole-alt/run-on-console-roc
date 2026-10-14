@@ -863,7 +863,8 @@ function rocRenderCategoryHub(string $root, PDO $pdo, array $categories): void {
         . '<span class="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl">' . count($all) . ' products</span></div>'
         . '</div><div class="lg:col-span-5">';
     if ($hero !== '') {
-        $m .= '<div class="bg-slate-900/85 border-2 border-emerald-400/40 rounded-3xl p-3 shadow-2xl"><img width="1200" height="675" src="' . rocH($hero) . '" alt="' . rocH($heroAlt) . '" class="w-full rounded-2xl object-cover" style="aspect-ratio:16/9"/></div>';
+        // The picture shows PC parts and gaming gear together: it opens every product.
+        $m .= '<a href="/products/" class="block bg-slate-900/85 border-2 border-emerald-400/40 hover:border-emerald-300 rounded-3xl p-3 shadow-2xl no-underline group"><img width="1200" height="675" src="' . rocH($hero) . '" alt="' . rocH($heroAlt) . '" class="w-full rounded-2xl object-cover group-hover:opacity-90" style="aspect-ratio:16/9"/></a>';
     } else {
         $m .= '<div class="grid grid-cols-2 gap-3">';
         // Each photo opens its own category (a graphics card photo opens Graphics Cards, ...).

@@ -157,7 +157,7 @@ export const HeroSection = () => {
             enableBurst={true}
           >
             {/* 16:9 like the pictures (1200x675) on wider screens, so the whole picture shows instead of a cropped middle. */}
-            <div className="relative h-72 sm:h-auto sm:aspect-video sm:min-h-[300px] w-full overflow-hidden cursor-pointer">
+            <div className="relative h-72 sm:h-auto sm:aspect-video sm:min-h-[300px] w-full overflow-hidden rounded-3xl cursor-pointer">
               <img 
                 src={slide.image} 
                 alt={slide.title}

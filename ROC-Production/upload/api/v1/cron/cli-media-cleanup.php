@@ -91,7 +91,7 @@ foreach ($cands as $c) {
 // Second check, asked again now: a cover that a post shows is never moved. If the database does not
 // answer, this stops with an error and nothing moves.
 $pdo->query('SELECT 1')->fetchColumn();
-$chk = $pdo->prepare('SELECT COUNT(*) FROM blogs WHERE image LIKE ?');
+$chk = $pdo->prepare("SELECT COUNT(*) FROM blogs WHERE status <> 'archived' AND image LIKE ?");
 foreach ($unused as $i => $u) {
     if (strpos($u, '/uploads/blog-covers/') !== 0) continue;
     $chk->execute(['%' . basename($u)]);

@@ -10,16 +10,9 @@
    "label": "Page templates refreshed (cli-refresh-templates.php)",
    "type": "file",
    "path": "index.html"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-BlXck71Z.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/51",
- "build": "index-BlXck71Z.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]
