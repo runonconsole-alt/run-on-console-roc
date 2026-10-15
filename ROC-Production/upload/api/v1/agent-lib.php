@@ -51,6 +51,8 @@ function rocAgentSystem(string $lang, array $facts): string {
          . "- Talk like a friendly gamer friend, the way ChatGPT or Claude chat: natural, warm, varied sentences, never the same reply twice, and follow the conversation. Answer the visitor's actual message first.\n"
          . "- Small talk is fine (hi, salam, how are you, kya haal hai, who are you, what can you do, thanks): reply naturally in one or two lines, and you may ask what they play or how you can help with gaming.\n"
          . "- If the visitor is on a phone (detected_in_browser.system is Android or iOS, or they say mobile / phone / mob): tell them clearly that you cannot guess their PC from their mobile (in their language, e.g. \"Main aap ke mobile se aap ke PC ka andaza nahi laga sakta\"), then ask them to type the PC's graphics card, processor and RAM, or to open runonconsole.com on that PC and ask again. Never treat the phone's chip as their PC. You can also help with mobile games.\n"
+         . "- visitor_pc.saved_from_earlier is the PC this member told you before (kept with their account): use it without asking again, say briefly which PC you used, and tell them they can say 'forget my PC' to remove it.\n"
+         . "- The best way to read a PC exactly: the 🖥 button in this chat box reads a dxdiag file (Win+R, type dxdiag, Save All Information). Suggest it when specs are missing or unclear.\n"
          . "- Analyze my PC, step by step: ask for what is missing, one or two things at a time. Show where to find them: Windows: Settings > System > About (processor and RAM), Task Manager > Performance > GPU (graphics card), or Win+R and type dxdiag; Mac: Apple menu > About This Mac; a laptop: the model name on the sticker underneath. Laptop chips: U = low power, H/HX = gaming. When graphics card and processor are known and no game is named, use pc_summary: say which games run well, which only on low settings and which are too heavy, and suggest one sensible upgrade only if they ask.\n"
          . "- Questions about this website (what products or categories it has, how many, a product's page, the newest blogs or news): use this_website and link the pages.\n"
          . "- If the visitor asks to analyze or check their PC: use visitor_pc (detected_in_browser is what their browser reports, usually the graphics card; it can be wrong for laptops with two GPUs). Say what you see, ask for the missing parts (processor model, RAM) and which game they want to play.\n"
@@ -172,7 +174,57 @@ function rocAgentRam(string $s): ?float {
     $s = strtolower($s);
     if (preg_match('/(\d{1,3})\s*gb\s*(?:of\s*)?(?:ddr\d\s*)?(?:ram|memory)/', $s, $m)) return (float)$m[1];
     if (preg_match('/(?:ram|memory)\s*(?:is|hai|:)?\s*(\d{1,3})\s*gb/', $s, $m)) return (float)$m[1];
+    if (preg_match('/(\d{3,6})\s*mb\s*ram/', $s, $m)) return (float)round((int)$m[1] / 1024);   // dxdiag
     return null;
+}
+
+/**
+ * PC parts from a dxdiag report or pasted system text: processor, graphics cards, RAM, system model
+ * and Windows. Null when the text has none of them.
+ */
+function rocAgentSpecsFromText(string $t): ?array {
+    $one = function (string $re) use ($t) { return preg_match($re, $t, $m) ? trim(preg_replace('/\s+/', ' ', $m[1])) : ''; };
+    $cpu = $one('/^\s*Processor:\s*(.+)$/mi');
+    $cpu = trim(preg_replace('/\(R\)|\(TM\)|CPU|@.*$|\(\d+ CPUs\).*$/i', ' ', $cpu));
+    $cpu = trim(preg_replace('/\s+/', ' ', $cpu));
+    preg_match_all('/^\s*(?:Card name|Name|GPU):\s*(.+)$/mi', $t, $gm);
+    $gpus = array_values(array_unique(array_filter(array_map(function ($g) { return trim(preg_replace('/\(R\)|\(TM\)/i', '', $g)); }, $gm[1] ?? []),
+        function ($g) { return preg_match('/nvidia|geforce|radeon|amd|intel|arc|uhd|iris|graphics/i', $g); })));
+    $ramMb = (int)$one('/^\s*Memory:\s*(\d+)\s*MB/mi');
+    $ram = $ramMb ? (int)round($ramMb / 1024) : null;
+    $maker = $one('/^\s*System Manufacturer:\s*(.+)$/mi'); $sys = $one('/^\s*System Model:\s*(.+)$/mi');
+    $model = trim(stripos($sys, $maker) === 0 ? $sys : $maker . ' ' . $sys);
+    $os = $one('/^\s*Operating System:\s*([^(\r\n]+)/mi');
+    if ($cpu === '' && !$gpus && !$ram) return null;
+    // Of two cards (laptops: Intel + NVIDIA), the one that games use: the fastest.
+    usort($gpus, function ($a, $b) { return (rocAgentGpuScore($b) ?? 0) <=> (rocAgentGpuScore($a) ?? 0); });
+    return ['cpu' => mb_substr($cpu, 0, 80), 'gpu' => mb_substr($gpus[0] ?? '', 0, 80), 'gpus' => array_slice($gpus, 0, 3), 'ram' => $ram,
+            'model' => mb_substr($model, 0, 80), 'os' => mb_substr(trim($os), 0, 60)];
+}
+
+/* -------------------------------------------------------------- saved PC */
+
+/** The PC a member told ROC about (kept until they say "forget my PC"). */
+function rocAgentPcGet(PDO $pdo, int $uid): ?array {
+    if ($uid <= 0) return null;
+    try {
+        $st = $pdo->prepare('SELECT gpu_score, cpu_score, ram_gb, label FROM roc_agent_pcs WHERE user_id = ?');
+        $st->execute([$uid]);
+        $r = $st->fetch(PDO::FETCH_ASSOC);
+    } catch (\Throwable $e) { return null; }
+    if (!$r) return null;
+    return ['gpu' => $r['gpu_score'] !== null ? (float)$r['gpu_score'] : null, 'cpu' => $r['cpu_score'] !== null ? (float)$r['cpu_score'] : null,
+            'ram' => $r['ram_gb'] !== null ? (float)$r['ram_gb'] : null, 'label' => (string)$r['label']];
+}
+
+function rocAgentPcSave(PDO $pdo, int $uid, ?float $gpu, ?float $cpu, ?float $ram, string $label): void {
+    if ($uid <= 0) return;
+    $old = rocAgentPcGet($pdo, $uid) ?? ['gpu' => null, 'cpu' => null, 'ram' => null, 'label' => ''];
+    $row = [$gpu ?? $old['gpu'], $cpu ?? $old['cpu'], $ram ?? $old['ram'], mb_substr($label !== '' ? $label : $old['label'], 0, 300), gmdate('Y-m-d H:i:s')];
+    try {
+        $pdo->prepare('DELETE FROM roc_agent_pcs WHERE user_id = ?')->execute([$uid]);
+        $pdo->prepare('INSERT INTO roc_agent_pcs (user_id, gpu_score, cpu_score, ram_gb, label, updated_at) VALUES (?, ?, ?, ?, ?, ?)')->execute(array_merge([$uid], $row));
+    } catch (\Throwable $e) {}
 }
 
 /* ------------------------------------------------------------------- games */
@@ -386,6 +438,13 @@ function rocAgentTable(PDO $pdo): void {
         : 'CREATE TABLE IF NOT EXISTS roc_agent_chats (id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, created_at DATETIME NOT NULL, user_id INT UNSIGNED NOT NULL DEFAULT 0, session CHAR(16) NOT NULL, ip_hash CHAR(16) NOT NULL,
            page VARCHAR(200) NOT NULL DEFAULT \'\', question TEXT, answer TEXT, game VARCHAR(200) NOT NULL DEFAULT \'\', products VARCHAR(500) NOT NULL DEFAULT \'\',
            engine VARCHAR(60) NOT NULL DEFAULT \'\', lang VARCHAR(20) NOT NULL DEFAULT \'\', KEY created_at (created_at), KEY ip_hash (ip_hash), KEY user_id (user_id)) DEFAULT CHARSET=utf8mb4');
+    // 👍 / 👎 on each answer (Deploy 64): the column is added once to the table made by Deploy 55.
+    try { $pdo->query('SELECT vote FROM roc_agent_chats LIMIT 1'); }
+    catch (\Throwable $e) { try { $pdo->exec('ALTER TABLE roc_agent_chats ADD COLUMN vote ' . ($sqlite ? 'INTEGER DEFAULT 0' : 'TINYINT NOT NULL DEFAULT 0')); } catch (\Throwable $e2) {} }
+    $pdo->exec($sqlite
+        ? 'CREATE TABLE IF NOT EXISTS roc_agent_pcs (user_id INTEGER PRIMARY KEY, gpu_score REAL, cpu_score REAL, ram_gb REAL, label TEXT, updated_at TEXT)'
+        : 'CREATE TABLE IF NOT EXISTS roc_agent_pcs (user_id INT UNSIGNED NOT NULL PRIMARY KEY, gpu_score DECIMAL(4,1) NULL, cpu_score DECIMAL(4,1) NULL, ram_gb DECIMAL(5,1) NULL,
+           label VARCHAR(300) NOT NULL DEFAULT \'\', updated_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
     $done = true;
 }
 
@@ -522,8 +581,21 @@ function rocAgentKb(string $root, string $q): ?array {
  * One answer. $history: [['role' => 'user'|'assistant', 'content' => '...'], ...], the last one the question.
  * Returns ['reply' => text, 'game' => check|null, 'products' => [...], 'engine' => model|'basic', 'lang' => ...].
  */
-function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = true, ?string $image = null, array $device = []): array {
+function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = true, ?string $image = null, array $device = [], int $uid = 0): array {
     $q = (string)end($history)['content'];
+    if ($uid > 0 && preg_match('/forget my pc|delete my pc|mera pc (bhool|bhul|delete|hata)|pc (bhool|bhul) ja/i', $q)) {
+        try { $pdo->prepare('DELETE FROM roc_agent_pcs WHERE user_id = ?')->execute([$uid]); } catch (\Throwable $e) {}
+        $ur = rocAgentLang($q) === 'roman-urdu';
+        return ['reply' => $ur ? 'Theek hai, aap ka saved PC delete kar diya. Jab chahein dobara specs bata dein.' : 'Done, I forgot your saved PC. Tell me the specs again any time.',
+                'game' => null, 'products' => [], 'engine' => 'basic', 'lang' => $ur ? 'roman-urdu' : 'english'];
+    }
+    // A dxdiag report (the chat box reads the file): its parts become a clear line for the rest.
+    $specs = rocAgentSpecsFromText($q);
+    if ($specs && preg_match('/dxdiag|Processor:|Card name:/i', $q)) {
+        $q = 'My PC: graphics card ' . ($specs['gpu'] ?: 'unknown') . ', processor ' . ($specs['cpu'] ?: 'unknown') . ', ' . ($specs['ram'] ? $specs['ram'] . ' GB RAM' : 'RAM unknown')
+           . ($specs['model'] ? ', ' . $specs['model'] : '') . ($specs['os'] ? ', ' . $specs['os'] : '') . '. ' . trim(preg_replace('/^.*?\n\n/s', '', (string)preg_replace('/(^|\n)\s*(Processor|Memory|Card name|Operating System|System Model|System Manufacturer|Name|GPU):.*$/mi', '', $q)));
+        $history[count($history) - 1]['content'] = $q;
+    }
     $lang0 = rocAgentLang($q);
     if (rocAgentBlocked($q)) return ['reply' => $lang0 === 'roman-urdu' ? 'Maaf kijiye, main is qisam ki baat ka jawab nahi deta. Aap gaming se related kuch bhi pooch sakte hain!'
                                                                           : 'Sorry, I do not answer that kind of message. Ask me anything about gaming!',
@@ -539,6 +611,11 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
     if ($gpu === null && $detGpu !== '' && ($askPc || preg_match('/\brun\b|\bchal|\bplay\b|\bkhel|\bfps\b/i', $q))) $gpu = rocAgentGpuScore($detGpu);
     $cpu = rocAgentCpuScore($q) ?? rocAgentCpuScore($userText);
     $ram = rocAgentRam($q) ?? rocAgentRam($userText);
+    // Remember the PC for this member; use the saved one when nothing new is said.
+    $pcNowMsg = rocAgentGpuScore($q) !== null || rocAgentCpuScore($q) !== null || rocAgentRam($q) !== null;
+    if ($uid > 0 && $pcNowMsg) rocAgentPcSave($pdo, $uid, rocAgentGpuScore($q), rocAgentCpuScore($q), rocAgentRam($q), mb_substr(trim(preg_replace('/\s+/', ' ', $q)), 0, 200));
+    $saved = $uid > 0 ? rocAgentPcGet($pdo, $uid) : null;
+    if ($saved) { $gpu = $gpu ?? $saved['gpu']; $cpu = $cpu ?? $saved['cpu']; $ram = $ram ?? $saved['ram']; }
     $game = rocAgentFindGame($root, $q);
     $askedRun = (bool)preg_match('/\brun\b|\bchal|\bplay\b|\bplayable|\bkhel|\bfps\b|requirement|\bspecs?\b/i', $q);   // not "PlayStation"
     // The game from earlier messages only when this message is about running it, the PC or an upgrade
@@ -572,6 +649,7 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
               'pc_summary' => !$game ? rocAgentPcSummary($root, $gpu, $cpu, $ram) : null,
               'reference' => rocAgentKb($root, $q . ' ' . (count($history) > 1 ? (string)($history[count($history) - 3]['content'] ?? '') : '')),
               'visitor_pc' => ['graphics_card_score' => $gpu, 'processor_score' => $cpu, 'ram_gb' => $ram,
+                               'saved_from_earlier' => $saved ? $saved['label'] : null,
                                'on_phone' => (bool)preg_match('/android|ios/i', (string)($device['os'] ?? '')),
                                'detected_in_browser' => $detGpu !== '' ? ['graphics' => $detGpu, 'cpu_threads' => (int)($device['threads'] ?? 0) ?: null,
                                                                          'memory_gb_at_least' => (float)($device['ram'] ?? 0) ?: null, 'system' => mb_substr((string)($device['os'] ?? ''), 0, 40)] : null,

@@ -417,6 +417,13 @@ RELEASES = [
                   'The game checker and ROC: 1605 Steam games with official requirements'],
          checks=[dict(label='News renderer', type='contains', path='blog-render.php', text='Asia/Karachi')],
          pr=REPO + '63'),
+    dict(deploy=64, date='2026-10-14', title='ROC reads a dxdiag report, remembers your PC, 👍 / 👎 on answers',
+         changes=['🖥 button in the chat box: upload a Windows dxdiag report (Win+R, dxdiag, Save All Information); ROC reads the exact processor, graphics card (the gaming one on laptops with two), RAM, laptop model and Windows; only those lines are sent',
+                  'ROC remembers the PC of each member: the next question (for example: GTA 5 chalega?) is answered without asking again; say forget my PC to delete it',
+                  '👍 / 👎 under every answer; CMS > ROC assistant counts them and has a 👎 only filter to see and fix wrong answers',
+                  'Privacy policy: saved PC specs and answer votes'],
+         checks=[dict(label='ROC assistant', type='contains', path='api/v1/agent-lib.php', text='rocAgentSpecsFromText')],
+         pr=REPO + '64'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

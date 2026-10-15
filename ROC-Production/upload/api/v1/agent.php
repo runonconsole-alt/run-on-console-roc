@@ -46,6 +46,13 @@ if ($uid <= 0) rocAgentOut(401, ['success' => false, 'login' => true, 'error' =>
 if (!$S['on']) rocAgentOut(200, ['success' => true, 'off' => true, 'reply' => 'ROC is switched off for now.', 'products' => []]);
 
 $in = json_decode((string)file_get_contents('php://input', false, null, 0, 2500000), true);
+// 👍 / 👎 on an answer of this member (CMS > ROC assistant lists the 👎 ones).
+if (($in['action'] ?? '') === 'vote') {
+    rocAgentTable($pdo);
+    $v = (int)($in['vote'] ?? 0); $v = $v > 0 ? 1 : ($v < 0 ? -1 : 0);
+    $pdo->prepare('UPDATE roc_agent_chats SET vote = ? WHERE id = ? AND user_id = ?')->execute([$v, (int)($in['id'] ?? 0), $uid]);
+    rocAgentOut(200, ['success' => true]);
+}
 // A picture (resized in the browser): read by the vision model, never saved.
 $image = (string)($in['image'] ?? '');
 if ($image !== '' && (strlen($image) > 2200000 || !preg_match('#^data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$#', $image)))
@@ -53,7 +60,7 @@ if ($image !== '' && (strlen($image) > 2200000 || !preg_match('#^data:image/(jpe
 $msgs = [];
 foreach (array_slice((array)($in['messages'] ?? []), -8) as $i => $m) {
     if (!is_array($m)) continue;
-    $c = trim(mb_substr(strip_tags((string)($m['content'] ?? '')), 0, 600));
+    $c = trim(mb_substr(strip_tags((string)($m['content'] ?? '')), 0, 1200));   // a dxdiag report is longer than a question
     if ($c !== '' || ($image !== '' && $i === count(array_slice((array)$in['messages'], -8)) - 1)) $msgs[] = ['role' => ($m['role'] ?? '') === 'assistant' ? 'assistant' : 'user', 'content' => $c];
 }
 if (!$msgs || end($msgs)['role'] !== 'user') rocAgentOut(422, ['success' => false, 'error' => 'Type a question first.']);
@@ -81,7 +88,7 @@ try {
     $dev = is_array($in['device'] ?? null) ? $in['device'] : [];
     $dev = ['gpu' => mb_substr(strip_tags((string)($dev['gpu'] ?? '')), 0, 120), 'threads' => (int)($dev['threads'] ?? 0), 'ram' => (float)($dev['ram'] ?? 0),
             'os' => mb_substr(strip_tags((string)($dev['os'] ?? '')), 0, 40)];
-    $a = rocAgentAnswer($pdo, $ROOT, $msgs, $useAi, $image !== '' ? $image : null, $dev);
+    $a = rocAgentAnswer($pdo, $ROOT, $msgs, $useAi, $image !== '' ? $image : null, $dev, $uid);
 } catch (\Throwable $e) {
     error_log('agent: ' . $e->getMessage());
     rocAgentOut(500, ['success' => false, 'error' => 'ROC could not answer this one. Please try again.']);
@@ -92,7 +99,8 @@ try {
         ->execute([$now, $uid, $session, $ip, $page, mb_substr(trim(end($msgs)['content'] . ($image !== '' ? ' [picture]' : '')), 0, 600), mb_substr(rocAgentScrub($a['reply']), 0, 2000),
                    mb_substr((string)($a['game']['title'] ?? ''), 0, 200), mb_substr(implode(', ', array_column($a['products'], 'title')), 0, 500),
                    $a['engine'], $a['lang']]);
+    $chatId = (int)$pdo->lastInsertId();
     if (random_int(1, 50) === 1) $pdo->prepare('DELETE FROM roc_agent_chats WHERE created_at < ?')->execute([gmdate('Y-m-d H:i:s', time() - 86400 * $S['keep_days'])]);
 } catch (\Throwable $e) { error_log('agent log: ' . $e->getMessage()); }
 
-rocAgentOut(200, ['success' => true, 'reply' => $a['reply'], 'game' => $a['game'], 'products' => $a['products'], 'ms' => (int)((microtime(true) - $t0) * 1000)]);
+rocAgentOut(200, ['success' => true, 'id' => $chatId ?? 0, 'reply' => $a['reply'], 'game' => $a['game'], 'products' => $a['products'], 'ms' => (int)((microtime(true) - $t0) * 1000)]);
