@@ -445,6 +445,11 @@ RELEASES = [
          checks=[dict(label='Daraz settings', type='contains', path='api/v1/cms/social-lib.php', text='rocDarazLoad'),
                  dict(label='ROC upgrades', type='contains', path='api/v1/agent-lib.php', text='rocAgentUpgrades')],
          pr=REPO + '66'),
+    dict(deploy=67, date='2026-10-15', title='Disk space: see what fills the hosting and clean it safely',
+         changes=['api/v1/cron/cli-disk-usage.php: shows the biggest folders and files of the hosting account, and with --apply removes only safe items: old deploy zips (the newest is kept), installer backups older than 14 days (the newest of each kind is kept), CMS media trash older than 30 days, and empties PHP error logs over 5 MB',
+                  'Never touched: the website (public_html, assets included), e-mail, the database, cPanel full backups (only listed)'],
+         checks=[dict(label='Disk tool', type='file', path='api/v1/cron/cli-disk-usage.php')],
+         pr=REPO + '67'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
