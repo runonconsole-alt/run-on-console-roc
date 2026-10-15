@@ -117,3 +117,10 @@ try {
         if (rocLlmsWrite($pdo, $ROOT)) echo date('c') . " llms.txt updated\n";
     }
 } catch (\Throwable $e) { echo date('c') . ' llms.txt error: ' . $e->getMessage() . "\n"; }
+
+// Daily database backup (api/v1/cms/backup-lib.php): the first run of each Pakistan day makes it, 7 kept.
+try {
+    require_once $ROOT . '/api/v1/cms/backup-lib.php';
+    $bk = rocBackupDaily($pdo, $ROOT);
+    if ($bk !== null) echo date('c') . ' ' . $bk . "\n";
+} catch (\Throwable $e) { echo date('c') . ' backup error: ' . $e->getMessage() . "\n"; }

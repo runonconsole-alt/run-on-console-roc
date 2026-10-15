@@ -195,6 +195,7 @@ table.list tbody tr:hover{background:var(--panel-2)}
 .alert.bad{background:#fff1f2;color:#be123c}
 .alert.warn{background:#fffbeb;color:#b45309}
 .alert.info{background:#eff6ff;color:#1d4ed8}
+.alert.good{background:#ecfdf5;color:#047857}
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0;padding:0 8px}
 .tab{padding:9px 12px;border:0;background:none;cursor:pointer;font-size:12.5px;color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:520}
 .tab:hover{color:var(--ink)}
@@ -1032,14 +1033,38 @@ function renderLogin(error){
     e.preventDefault();
     var b=$('button',e.target), f=new FormData(e.target);
     b.disabled=true; b.innerHTML='<span class="spin"></span>';
+    var who=f.get('username'), pw=f.get('password');
     try{
-      var d=await api('auth.php',{action:'login',username:f.get('username'),password:f.get('password')});
+      var d=await api('auth.php',{action:'login',username:who,password:pw});
       S.user=d.user; S.csrf=d.csrf_token; S.sections=d.sections||[];
       if(S.user.must_change_password) return renderChangePassword(true);
       await load();
     }catch(err){
+      if(err.data&&err.data.need_2fa) return renderLoginCode(who,pw,'');
       renderLogin(err.message);
     }
+  });
+}
+
+/* Sign-in, step 2: the code from the authenticator app (or a backup code). The password stays only in memory. */
+function renderLoginCode(who, pw, error){
+  app.innerHTML='<div class="gate"><div class="gcard">'+
+    '<h2 style="font-size:19px;margin-bottom:5px">2-step verification</h2>'+
+    '<p style="color:var(--ink-3);font-size:13px;margin:0 0 18px">Open your authenticator app and type the 6-digit code for Run On Console. Lost your phone? Use one of your backup codes.</p>'+
+    (error?'<div class="alert bad">'+esc(error)+'</div>':'')+
+    '<form id="lcf"><div class="field"><label>Code</label><input type="text" name="otp" required inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="9" autofocus></div>'+
+    '<button class="btn primary" style="width:100%;justify-content:center;margin-top:6px" type="submit">Verify</button></form>'+
+    '<button class="btn ghost" id="lcback" style="width:100%;justify-content:center;margin-top:8px">Back</button></div></div>';
+  $('#lcback').addEventListener('click',function(){ renderLogin(''); });
+  $('#lcf').addEventListener('submit',async function(e){
+    e.preventDefault();
+    var b=$('button',e.target); b.disabled=true; b.innerHTML='<span class="spin"></span>';
+    try{
+      var d=await api('auth.php',{action:'login',username:who,password:pw,otp:new FormData(e.target).get('otp')});
+      S.user=d.user; S.csrf=d.csrf_token; S.sections=d.sections||[];
+      if(S.user.must_change_password) return renderChangePassword(true);
+      await load();
+    }catch(err){ if(err.data&&err.data.need_2fa) return renderLoginCode(who,pw,err.message); renderLogin(err.message); }
   });
 }
 
@@ -1305,6 +1330,8 @@ function renderShell(){
       '<div style="font-size:11px;color:var(--ink-3)">'+(admin?'Full access':'Limited access')+'</div></div></div>'+
       accentPicker()+
       '<button class="sitem" id="chpw"><span class="ic">⚿</span><span>Change password</span></button>'+
+      '<button class="sitem" id="tfa"><span class="ic">🔐</span><span>2-step verification</span></button>'+
+      (admin?'<button class="sitem" id="bkp"><span class="ic">💾</span><span>Backups</span></button>':'')+
       '<button class="sitem" id="out"><span class="ic">⏻</span><span>Sign out</span></button>'+
     '</div></aside><main class="main" id="main"></main></div>';
 
@@ -1319,6 +1346,8 @@ function renderShell(){
     });
   });
   $('#chpw').addEventListener('click', function(){ renderChangePassword(false); });
+  $('#tfa').addEventListener('click', function(){ renderTwofa(); });
+  var bkp=$('#bkp'); if(bkp) bkp.addEventListener('click', function(){ renderBackups(); });
   $('#out').addEventListener('click', async function(){
     if(S.dirty && !confirm('You have unsaved changes. Sign out anyway?'))return;
     try{ await api('auth.php',{action:'logout'}); }catch(e){}
@@ -2655,6 +2684,59 @@ function renderChangePassword(forced){
     modal('Change your password', form, '<button class="btn" data-a="close">Cancel</button>', function(a,close){ close(); });
     $('#cpf').addEventListener('submit',submit);
   }
+}
+
+/* ---------------------------------------------------- 2-step verification */
+/* api/v1/cms/twofa.php: a 6-digit code from an authenticator app after the password (own account). */
+async function renderTwofa(){
+  var d; try{ d=await api('twofa.php'); }catch(e){ toast(e.message,'bad'); return; }
+  var close='<button class="btn" data-a="close">Close</button>';
+  if(!d.installed){ modal('2-step verification','<div class="alert info">Not installed on the server yet. Run <b>cli-cms-2fa.php --apply</b> (see the deploy message).</div>',close,function(a,c){c();}); return; }
+  if(d.enabled){
+    modal('2-step verification','<div class="alert good" style="margin-bottom:12px"><b>On.</b> Signing in asks for the code from your authenticator app. Backup codes left: <b>'+d.backup_left+'</b>.</div>'+
+      '<form id="tfoff"><div class="hint" style="margin-bottom:8px">To turn it off, type your password and a current code (or a backup code).</div>'+
+      '<div class="field"><label>Password</label><input type="password" name="pw" required autocomplete="current-password"></div>'+
+      '<div class="field"><label>Code</label><input type="text" name="code" required inputmode="numeric" autocomplete="one-time-code" placeholder="123456"></div><div id="tferr"></div>'+
+      '<button class="btn danger" type="submit">Turn off</button></form>',close,function(a,c){c();});
+    $('#tfoff').addEventListener('submit',async function(e){ e.preventDefault(); var f=new FormData(e.target);
+      try{ var r=await api('twofa.php',{action:'disable',password:f.get('pw'),code:f.get('code')}); toast(r.message,'good'); closeModal(); }
+      catch(err){ $('#tferr').innerHTML='<div class="alert bad">'+esc(err.message)+'</div>'; } });
+    return;
+  }
+  modal('2-step verification','<p style="margin-top:0">Protects the CMS even if someone learns your password: signing in also asks for a 6-digit code from your phone.</p>'+
+    '<ol class="hint" style="line-height:1.8;margin:0 0 12px 18px"><li>Install <b>Google Authenticator</b> (or Microsoft Authenticator) on your phone.</li>'+
+    '<li>Press <b>Start</b> below, then in the app choose <b>+ → Enter a setup key</b> and type the key shown.</li><li>Type the 6-digit code the app shows to finish.</li></ol>'+
+    '<div id="tfbox"><button class="btn primary" id="tfstart">Start</button></div>',close,function(a,c){c();});
+  $('#tfstart').addEventListener('click',async function(){
+    try{ var s=await api('twofa.php',{action:'start'}); }catch(e){ toast(e.message,'bad'); return; }
+    $('#tfbox').innerHTML='<div class="field"><label>Setup key (type it in the app: account name Run On Console)</label>'+
+      '<div style="font-family:monospace;font-size:17px;font-weight:700;letter-spacing:.06em;background:var(--bg-2,#f1f5f9);padding:10px 12px;border-radius:10px;word-break:break-all">'+esc(s.secret)+'</div>'+
+      '<div class="hint" style="margin-top:6px">On the phone itself you can also <a href="'+esc(s.uri)+'">open it in the authenticator app</a>. Key type: time based.</div></div>'+
+      '<form id="tfon"><div class="field"><label>Code from the app</label><input type="text" name="code" required inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="7"></div><div id="tferr"></div>'+
+      '<button class="btn primary" type="submit">Turn on</button></form>';
+    $('#tfon').addEventListener('submit',async function(e){ e.preventDefault();
+      try{ var r=await api('twofa.php',{action:'enable',code:new FormData(e.target).get('code')});
+        $('#tfbox').innerHTML='<div class="alert good"><b>2-step verification is on.</b></div>'+
+          '<p><b>Backup codes</b>: each works once if you lose your phone. Write them down or save them somewhere safe now; they are not shown again.</p>'+
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-family:monospace;font-size:16px;font-weight:700">'+r.backup_codes.map(function(c){ return '<div style="background:var(--bg-2,#f1f5f9);padding:6px 10px;border-radius:8px">'+esc(c)+'</div>'; }).join('')+'</div>';
+      }catch(err){ $('#tferr').innerHTML='<div class="alert bad">'+esc(err.message)+'</div>'; } });
+  });
+}
+
+/* --------------------------------------------------------------- backups */
+/* api/v1/cms/backups.php: the daily database backups (~/roc-db-backups, 7 kept). Administrators. */
+async function renderBackups(){
+  var d; try{ d=await api('backups.php'); }catch(e){ toast(e.message,'bad'); return; }
+  function list(b){ return b.length?'<table class="list"><tbody>'+b.map(function(x){
+      return '<tr><td><b>'+esc(x.file)+'</b><div class="hint">'+esc(new Date(x.time*1000).toLocaleString())+' · '+Math.max(1,Math.round(x.size/1024))+' KB</div></td>'+
+        '<td style="text-align:right"><a class="btn sm" href="'+API+'backups.php?download='+encodeURIComponent(x.file)+'">Download</a></td></tr>'; }).join('')+'</tbody></table>'
+      :'<div class="hint">No backup yet. The first one is made automatically within 10 minutes, or press the button.</div>'; }
+  modal('Backups','<p style="margin-top:0">The whole database (posts, products, pages, settings, users) is saved every day by itself. The last '+(d.keep||7)+' days are kept on the server.</p>'+
+    '<div class="alert info" style="margin-bottom:12px">Once a week, <b>download</b> the newest one and keep it on your PC or Google Drive: a copy on the server does not help if the hosting itself has a problem.</div>'+
+    '<div id="bklist">'+list(d.backups||[])+'</div>',
+    '<button class="btn" data-a="run">Make a backup now</button><button class="btn" data-a="close">Close</button>',
+    async function(a,c){ if(a==='close') return c();
+      if(a==='run'){ try{ var r=await api('backups.php',{action:'run'}); toast(r.message,'good'); $('#bklist').innerHTML=list(r.backups||[]); }catch(e){ toast(e.message,'bad'); } } }, true);
 }
 
 /* ---------------------------------------------------------------- users */
