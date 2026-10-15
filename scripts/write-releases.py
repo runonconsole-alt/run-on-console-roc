@@ -450,6 +450,12 @@ RELEASES = [
                   'Never touched: the website (public_html, assets included), e-mail, the database, cPanel full backups (only listed)'],
          checks=[dict(label='Disk tool', type='file', path='api/v1/cron/cli-disk-usage.php')],
          pr=REPO + '67'),
+    dict(deploy=68, date='2026-10-15', title='Review AI blog posts before they go live',
+         changes=['CMS > Blog writer > Waiting for your review: every post the AI writes waits at least 24 hours; Read / edit, Approve (keeps its time), Publish now, or Reject (becomes a draft, the topic is skipped)',
+                  'Without a decision a post goes live at its time, so the site keeps getting posts; news is not held (it gets old)',
+                  'The writer now writes each post a day ahead of its publishing time; the switch "Hold new AI posts 24 hours for review" turns this off'],
+         checks=[dict(label='Blog review', type='contains', path='api/v1/cms/blog-engine-lib.php', text='rocBlogPending')],
+         pr=REPO + '68'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

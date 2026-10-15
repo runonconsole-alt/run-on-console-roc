@@ -3812,6 +3812,25 @@ async function renderBlogAgent(m, fresh){
   var next=P.topics.filter(function(t){ return t.id===d.next; })[0];
   S.baCluster=S.baCluster||'all'; S.baStage=S.baStage||'all'; S.baStatus=S.baStatus||'planned';
 
+  function reviewCard(){
+    var R=d.review||{on:true,hours:24,pending:[]};
+    var left=function(iso){ var h=Math.round((new Date(iso)-Date.now())/36e5); return h>=1?'in about '+h+' hour'+(h===1?'':'s'):'in under an hour'; };
+    return '<div class="card"'+(R.pending.length?' style="border-color:var(--amber)"':'')+'><div class="chead"><h3>Waiting for your review'+(R.pending.length?' ('+R.pending.length+')':'')+'</h3>'+
+      '<label class="note" style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" id="rv-mode"'+(R.on?' checked':'')+'> Hold new AI posts '+R.hours+' hours for review</label></div><div class="cbody">'+
+      (R.pending.length?R.pending.map(function(p){
+        return '<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)">'+
+          (p.image?'<img src="'+esc(p.image)+'" alt="" style="width:96px;height:60px;object-fit:cover;border-radius:8px;flex-shrink:0">':'')+
+          '<div style="flex:1;min-width:0"><b>'+esc(p.title)+'</b><div class="hint">'+esc(p.excerpt||'')+'</div>'+
+          '<div class="hint" style="margin-top:4px">'+p.words+' words · goes live '+esc(pkTime(p.publish_at))+' ('+left(p.publish_at)+') unless you reject it</div>'+
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+
+            '<button class="btn sm" data-rv="edit" data-id="'+esc(p.id)+'">Read / edit</button>'+
+            '<button class="btn sm primary" data-rv="approve" data-id="'+esc(p.id)+'" title="Keep its time">✓ Approve</button>'+
+            '<button class="btn sm" data-rv="publish_now" data-id="'+esc(p.id)+'">Publish now</button>'+
+            '<button class="btn sm danger" data-rv="reject" data-id="'+esc(p.id)+'">✕ Reject</button></div></div></div>';
+      }).join(''):'<div class="hint">Nothing waiting. '+(R.on?'New posts written by the AI show up here and wait '+R.hours+' hours for you; without a decision they go live at their time. News is not held.':'Review is off: AI posts go live at their time.')+'</div>')+
+    '</div></div>';
+  }
+
   function writerCard(){
     var opt=function(v,title,txt){ return '<label style="display:flex;gap:10px;align-items:flex-start;border:1px solid '+(engine===v?'var(--brand)':'var(--line)')+';border-radius:12px;padding:10px 12px;cursor:pointer;margin-bottom:8px">'+
       '<input type="radio" name="ba-eng" value="'+v+'"'+(engine===v?' checked':'')+' style="margin-top:3px"><span><b>'+title+'</b><br><span class="hint">'+txt+'</span></span></label>'; };
@@ -3920,7 +3939,20 @@ async function renderBlogAgent(m, fresh){
     var ta=$('#ba-tadd',m); if(ta) ta.addEventListener('click',function(){ times.push('12:00'); drawTimes(); });
   }
 
-  body.innerHTML=writerCard()+planCard()+postsCard()+pcCard();
+  body.innerHTML=reviewCard()+writerCard()+planCard()+postsCard()+pcCard();
+  // Review of AI posts: approve, edit, publish now or reject (api: blog-agent-admin.php action review).
+  m.querySelectorAll('[data-rv]').forEach(function(b){ b.addEventListener('click',async function(){
+    var op=b.dataset.rv, id=b.dataset.id;
+    if(op==='edit'){ S.view='blogs'; openBlog(id); return; }
+    if(op==='reject' && !confirm('Reject this post? It becomes a draft and will not go live.')) return;
+    b.disabled=true;
+    try{ var r=await api('blog-agent-admin.php',{action:'review',id:id,op:op}); toast(r.message,'good'); renderBlogAgent(m); }
+    catch(e){ toast(e.message,'bad'); b.disabled=false; }
+  }); });
+  var rvm=$('#rv-mode',m); if(rvm) rvm.addEventListener('change',async function(){
+    try{ var r=await api('blog-agent-admin.php',{action:'review_mode',on:rvm.checked}); toast(r.message,'good'); renderBlogAgent(m); }
+    catch(e){ toast(e.message,'bad'); }
+  });
   drawTimes();
   m.querySelectorAll('input[name=ba-eng]').forEach(function(r){ r.addEventListener('change',function(){ engine=r.value; }); });
   var call=async function(payload, btn, reload){
