@@ -2994,6 +2994,52 @@ function paintActivity(m){
     var ct=document.querySelector('.sitem[data-go=activity] .ct'); if(ct) ct.remove(); }
 }
 
+/* ------------------------------------------------------ Daraz (Pakistan) */
+/* Visitors in Pakistan (clock on Pakistan time) get a "Check on Daraz" button next to each Amazon
+   button (roc-nav.js reads /roc-site.json). A product's own Daraz link when saved here, else a
+   Daraz search for it; the link template from the Daraz affiliate dashboard credits the sales. */
+function darazCard(d){
+  var z=d.daraz||{}, L=d.daraz_links||{}, P=d.products||[], n=Object.keys(L).length;
+  return '<div class="card"><div class="chead"><h3>Daraz for Pakistan</h3><span class="note">Amazon does not deliver to most of Pakistan: show Daraz to visitors there</span></div>'+
+    '<div class="cbody"><form id="dzf">'+
+    '<label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-bottom:12px"><input type="checkbox" id="dz-on"'+(z.on?' checked':'')+'> Show a "Check on Daraz" button next to Amazon</label>'+
+    '<div class="field"><label for="dz-who">Who sees it</label><select id="dz-who">'+
+      '<option value="pk"'+(z.who!=='all'?' selected':'')+'>Visitors in Pakistan only (recommended)</option>'+
+      '<option value="all"'+(z.who==='all'?' selected':'')+'>Every visitor</option></select></div>'+
+    '<div class="field"><label for="dz-tpl">Affiliate link template</label>'+
+      '<input type="text" id="dz-tpl" value="'+esc(z.template||'')+'" placeholder="https://…{url}…" autocomplete="off"></div>'+
+    '<div class="hint" style="margin:-4px 0 12px">From your Daraz affiliate dashboard: a deep link with <b>{url}</b> where the Daraz page address goes. '+
+      (z.template?'Now active: every Daraz button goes through it.':'<b style="color:#b45309">Empty: Daraz buttons work but earn no commission until you add it.</b>')+'</div>'+
+    '<details'+(n?'':' open')+' style="margin-bottom:12px"><summary style="cursor:pointer;font-weight:700">Product links on Daraz ('+n+' of '+P.length+' saved)</summary>'+
+      '<div class="hint" style="margin:8px 0">Optional. Paste the Daraz page of a product (the same model). Products without one open a Daraz search for their name.</div>'+
+      '<input type="search" id="dz-q" placeholder="Filter products…" style="margin-bottom:8px">'+
+      '<div style="max-height:420px;overflow:auto">'+P.map(function(p){
+        return '<div class="field" data-dzrow="'+esc((p.title+' '+p.category).toLowerCase())+'" style="margin-bottom:8px"><label for="dz-'+esc(p.slug)+'">'+esc(p.title)+
+          ' <span style="font-weight:500;color:#64748b">· '+esc(p.category||'')+'</span>'+
+          ' <a href="https://www.daraz.pk/catalog/?q='+encodeURIComponent(p.title)+'" target="_blank" rel="noopener" style="font-weight:600;font-size:12px;margin-left:6px">find on Daraz ↗</a></label>'+
+          '<input type="text" id="dz-'+esc(p.slug)+'" data-dz="'+esc(p.slug)+'" value="'+esc(L[p.slug]||'')+'" placeholder="https://www.daraz.pk/products/…"></div>';
+      }).join('')+'</div></details>'+
+    '<button class="btn primary" type="submit">Save Daraz settings</button></form></div></div>';
+}
+function darazWire(m){
+  var f=$('#dzf',m); if(!f) return;
+  $('#dz-q',m).addEventListener('input',function(){ var v=this.value.trim().toLowerCase();
+    m.querySelectorAll('[data-dzrow]').forEach(function(r){ r.style.display=!v||r.dataset.dzrow.indexOf(v)>-1?'':'none'; }); });
+  f.addEventListener('submit',async function(e){
+    e.preventDefault();
+    m.querySelectorAll('.publish-error').forEach(function(n){n.remove();});
+    var links={}; m.querySelectorAll('[data-dz]').forEach(function(i){ if(i.value.trim()) links[i.dataset.dz]=i.value.trim(); });
+    try{ var r=await api('social.php',{daraz:{on:$('#dz-on',m).checked,who:$('#dz-who',m).value,template:$('#dz-tpl',m).value.trim()},daraz_links:links});
+      toast(r.message,'good'); renderSocial(m); }
+    catch(err){
+      toast(err.message,'bad');
+      var errs=(err.data&&err.data.errors)||{};
+      Object.keys(errs).forEach(function(k){ var i=$(k==='daraz_template'?'#dz-tpl':'#'+k,m); if(!i)return;
+        var n=document.createElement('div'); n.className='hint publish-error'; n.style.color='#e11d48'; n.textContent=errs[k]; i.parentNode.appendChild(n); });
+    }
+  });
+}
+
 /* -------------------------------------------------------- social profiles */
 
 async function renderSocial(m){
@@ -3007,6 +3053,7 @@ async function renderSocial(m){
       '<div class="hint" style="margin:-4px 0 12px">Find it in Amazon Associates → Account settings → Manage tracking IDs. '+
       (d.amazon_tag?'Now active: every Amazon link opens with <b>tag='+esc(d.amazon_tag)+'</b>.':'<b style="color:#b45309">Not set: Amazon links currently earn no commission.</b>')+'</div>'+
       '<button class="btn primary" type="submit">Save tag</button></form></div></div>'+
+    darazCard(d)+
     '<div class="card"><div class="chead"><h3>Your profiles</h3><span class="note">Leave a box empty to hide that card on the website</span></div>'+
     '<div class="cbody"><form id="socf">'+d.platforms.map(function(p){
       var v=d.links[p.key]||'';
@@ -3015,6 +3062,7 @@ async function renderSocial(m){
         '<input type="text" id="so-'+p.key+'" data-so="'+p.key+'" value="'+esc(v)+'" placeholder="'+esc(p.example)+'"></div>';
     }).join('')+'<button class="btn primary" type="submit">Save to website</button></form></div></div>'+
     '<div class="hint">The website footer updates as soon as you save.</div>';
+  darazWire(m);
   $('#amzf',m).addEventListener('submit',async function(e){
     e.preventDefault();
     m.querySelectorAll('.publish-error').forEach(function(n){n.remove();});

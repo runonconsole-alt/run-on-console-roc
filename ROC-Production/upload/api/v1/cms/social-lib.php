@@ -3,12 +3,17 @@
  * Run On Console — website settings managed in the CMS:
  *   - social profile links  (cms_settings.social_links)
  *   - Amazon affiliate tag  (cms_settings.amazon_tag)
+ *   - Daraz for Pakistan    (cms_settings.daraz: on, who, template; daraz_links: product slug => Daraz link)
  *
  * Both are published to /roc-site.json. /roc-nav.js reads that file on every page:
  *   - footer cards marked data-roc-social="facebook" (…) get the saved URL, or are
  *     hidden when that platform has no URL. Until at least one URL is saved, the
  *     footer keeps the links it was built with.
  *   - every Amazon link on the page gets ?tag=<amazon_tag>.
+ *   - Daraz on: visitors in Pakistan (their clock is on Pakistan time) also get a "Check on Daraz"
+ *     button next to each Amazon button: the product's own Daraz link when one is saved, else a Daraz
+ *     search for the product. With a link template (from the Daraz affiliate dashboard, {url} is the
+ *     Daraz page) every Daraz link goes through it, so sales are credited.
  */
 
 const ROC_SOCIAL_PLATFORMS = [
@@ -96,6 +101,52 @@ function rocAmazonTagSave(PDO $pdo, string $tag, ?int $userId): void {
     rocSitePublish($pdo);
 }
 
+/** Daraz settings: ['on' => bool, 'who' => 'pk'|'all', 'template' => ''|'https://…{url}…']. */
+function rocDarazLoad(PDO $pdo): array {
+    $d = json_decode((string)(rocSettingGet($pdo, 'daraz') ?? ''), true);
+    $d = is_array($d) ? $d : [];
+    return ['on' => !empty($d['on']), 'who' => ($d['who'] ?? 'pk') === 'all' ? 'all' : 'pk', 'template' => (string)($d['template'] ?? '')];
+}
+
+/** Product slug => Daraz link. */
+function rocDarazLinksLoad(PDO $pdo): array {
+    $d = json_decode((string)(rocSettingGet($pdo, 'daraz_links') ?? ''), true);
+    return is_array($d) ? array_filter(array_map('strval', $d)) : [];
+}
+
+/** A Daraz product link, or ''; null when it is not a Daraz address. */
+function rocDarazUrlClean(string $u): ?string {
+    $u = trim($u);
+    if ($u === '') return '';
+    if (!preg_match('#^https?://#i', $u)) $u = 'https://' . $u;
+    $host = strtolower((string)parse_url($u, PHP_URL_HOST));
+    if (!preg_match('/(^|\.)daraz\.(pk|com\.bd|lk|com\.np)$/', $host) || strlen($u) > 600 || preg_match('/[\s"<>]/', $u)) return null;
+    return preg_replace('#^http://#i', 'https://', $u);
+}
+
+/** Validates settings and links. Returns [settings, links, errors]. */
+function rocDarazClean(array $in, array $links, array $slugs): array {
+    $err = [];
+    $t = trim((string)($in['template'] ?? ''));
+    if ($t !== '' && (strpos($t, '{url}') === false || !preg_match('#^https://[^\s"<>]+$#i', $t) || strlen($t) > 400))
+        $err['daraz_template'] = 'The link template must start with https:// and contain {url} where the Daraz page goes.';
+    $set = ['on' => !empty($in['on']), 'who' => ($in['who'] ?? 'pk') === 'all' ? 'all' : 'pk', 'template' => $t];
+    $out = [];
+    foreach ($links as $slug => $u) {
+        if (!in_array($slug, $slugs, true)) continue;
+        $c = rocDarazUrlClean((string)$u);
+        if ($c === null) { $err['dz-' . $slug] = 'Enter a daraz.pk link.'; continue; }
+        if ($c !== '') $out[$slug] = $c;
+    }
+    return [$set, $out, $err];
+}
+
+function rocDarazSave(PDO $pdo, array $set, array $links, ?int $userId): void {
+    rocSettingSet($pdo, 'daraz', json_encode($set, JSON_UNESCAPED_SLASHES), $userId);
+    rocSettingSet($pdo, 'daraz_links', json_encode($links, JSON_UNESCAPED_SLASHES), $userId);
+    rocSitePublish($pdo);
+}
+
 /** Public file the website reads. Contains only what the pages show. */
 function rocSitePublish(PDO $pdo): void {
     $links = rocSocialLoad($pdo) ?? [];
@@ -103,7 +154,9 @@ function rocSitePublish(PDO $pdo): void {
     foreach (ROC_SOCIAL_PLATFORMS as $k => $def) {
         $social[] = ['platform' => $k, 'label' => $def['label'], 'match' => ROC_SOCIAL_LEGACY_HOST[$k] ?? $def['host'], 'url' => $links[$k] ?? ''];
     }
-    $data = ['social' => $social, 'amazon_tag' => rocAmazonTagLoad($pdo), 'updated' => gmdate('c')];
+    $dz = rocDarazLoad($pdo);
+    $data = ['social' => $social, 'amazon_tag' => rocAmazonTagLoad($pdo),
+             'daraz' => $dz['on'] ? $dz + ['links' => (object)rocDarazLinksLoad($pdo)] : ['on' => false], 'updated' => gmdate('c')];
     $file = rocSocialRoot() . '/roc-site.json';
     $tmp = $file . '.tmp' . getmypid();
     file_put_contents($tmp, json_encode($data, JSON_UNESCAPED_SLASHES));

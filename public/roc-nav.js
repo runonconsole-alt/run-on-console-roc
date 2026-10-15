@@ -80,7 +80,7 @@
 
   /* ---------- Buy / affiliate link clicks -> CMS Live activity */
   (function () {
-    var AFF = /(^|\.)(amazon\.[a-z.]+|amzn\.to|a\.co|bestbuy\.com|newegg\.com|walmart\.com|ebay\.[a-z.]+)$/i;
+    var AFF = /(^|\.)(amazon\.[a-z.]+|amzn\.to|a\.co|daraz\.pk|bestbuy\.com|newegg\.com|walmart\.com|ebay\.[a-z.]+)$/i;
     function send(a) {
       try {
         var u = new URL(a.href, location.href);
@@ -150,7 +150,69 @@
         var t = tagUrl(a.getAttribute('href')); if (t) a.setAttribute('href', t);
       });
     }
-    function apply() { applySocial(); applyTag(); }
+    /* Daraz for Pakistan (CMS > Social profiles & Amazon tag): Amazon does not deliver to most of
+       Pakistan, so visitors there (their clock is on Pakistan time) get a "Check on Daraz" button
+       before each Amazon buy button: the product's own Daraz page when the CMS has one, else a Daraz
+       search for it, through the affiliate link template when one is saved. ?country=pk / ?country=off
+       tries it from anywhere (remembered in this browser). */
+    function inPakistan() {
+      try {
+        var q = new URLSearchParams(location.search).get('country');
+        if (q) localStorage.setItem('roc_country', q.toLowerCase());
+        var f = localStorage.getItem('roc_country');
+        if (f === 'pk') return true;
+        if (f === 'off') return false;
+      } catch (e) {}
+      try { return /^Asia\/Karachi$/.test(Intl.DateTimeFormat().resolvedOptions().timeZone || ''); } catch (e) { return false; }
+    }
+    function productOf(a) {
+      // The product page itself, or the product card the button sits in.
+      var m = /^\/products\/([a-z0-9-]+)\/$/.exec(location.pathname);
+      var el = a, link = null, box = null, name = '';
+      // The smallest box around the button that links exactly one product (a card); stop at a box with several.
+      for (var i = 0; i < 7; i++) {
+        el = el.parentElement;
+        if (!el || el === document.body) break;
+        var seen = {}, n = 0, first = null;
+        el.querySelectorAll('a[href^="/products/"]').forEach(function (x) {
+          var s = (/^\/products\/([a-z0-9-]+)\/?$/.exec(x.getAttribute('href')) || [])[1];
+          if (s && s !== 'category' && !seen[s]) { seen[s] = 1; n++; if (!first) first = x; }
+        });
+        if (n > 1) break;
+        if (n === 1) { if (!link) link = first; box = el; if (el.querySelector('h2, h3, h4, .rp-title, a.t')) break; }   // up to the card's title
+      }
+      var slug = link ? (/^\/products\/([a-z0-9-]+)/.exec(link.getAttribute('href')) || [])[1] : (m ? m[1] : null);
+      var h = box ? box.querySelector('h2, h3, h4, .rp-title, a.t') : document.querySelector('h1');
+      name = h ? (h.textContent || '').trim() : '';
+      if (!name && link) { var img = link.querySelector('img'); name = (img && img.getAttribute('alt')) || (link.textContent || '').trim(); }
+      try { var k = new URL(a.href).searchParams.get('k'); if (!name && k) name = k; } catch (e) {}
+      return { slug: slug, name: name.replace(/\s+/g, ' ').slice(0, 90) };
+    }
+    function applyDaraz() {
+      var z = cfg && cfg.daraz;
+      if (!z || !z.on || (z.who !== 'all' && !inPakistan())) return;
+      document.querySelectorAll('a[href*="amazon."]:not([data-roc-dz])').forEach(function (a) {
+        if (!/\/dp\/|\/gp\/product\/|\/s\?|amzn\.to|a\.co\//.test(a.href)) return;   // buy buttons only, not help pages
+        a.setAttribute('data-roc-dz', '1');
+        var p = productOf(a);
+        if (!p.slug && !p.name) return;
+        var url = (p.slug && z.links && z.links[p.slug]) || ('https://www.daraz.pk/catalog/?q=' + encodeURIComponent(p.name));
+        if (z.template) url = z.template.replace('{url}', encodeURIComponent(url));
+        var b = a.cloneNode(false);
+        b.removeAttribute('data-roc-dz');
+        b.setAttribute('data-roc-daraz', '1');
+        b.setAttribute('href', url);
+        b.setAttribute('target', '_blank');
+        b.setAttribute('rel', 'sponsored nofollow noopener');
+        b.style.background = '#f85606'; b.style.color = '#fff'; b.style.borderColor = '#f85606';
+        var t = (a.textContent || '').trim();
+        b.textContent = /amazon/i.test(t) ? t.replace(/amazon/i, 'Daraz') : 'Check on Daraz';
+        b.setAttribute('aria-label', (p.name ? p.name + ': ' : '') + 'check on Daraz (Pakistan)');
+        a.parentNode.insertBefore(b, a);
+        if (a.parentNode && getComputedStyle(a.parentNode).display.indexOf('flex') < 0 && getComputedStyle(b).display === 'inline') b.style.marginRight = '8px';
+      });
+    }
+    function apply() { applySocial(); applyTag(); applyDaraz(); }
     // A click can come before the page finished loading the settings: tag it right then.
     document.addEventListener('click', function (ev) {
       var a = ev.target && ev.target.closest ? ev.target.closest('a[href*="amazon."]') : null;

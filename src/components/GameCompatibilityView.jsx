@@ -5,14 +5,14 @@ import {
   Monitor, Laptop, Cpu, ShieldCheck, ArrowRight, RotateCcw,
   HardDrive, Cloud, Smartphone, Disc, HelpCircle, CheckCircle2,
   AlertTriangle, RefreshCw, Layers, ExternalLink, ChevronRight, Play,
-  Tv, Radio, ThumbsUp, DownloadCloud, Sliders, Check, AlertCircle, Wrench, Bot
+  Tv, Radio, ThumbsUp, DownloadCloud, Sliders, Check, AlertCircle, Wrench
 } from 'lucide-react';
 import { FAQSection } from './FAQSection';
 import { GAMING_CATEGORIES } from '../data/initialData';
 import { Tilt3DCard } from './Tilt3DCard';
 import { CyberMatrixHoloBackground } from './CyberMatrixHoloBackground';
 import { BouncyText } from './BouncyText';
-import { playClickSound, playPowerUpSound, playHoverSound } from '../utils/audioEffects';
+import { playClickSound, playHoverSound } from '../utils/audioEffects';
 
 /* Requirement tier scores (same scale as the CPU / GPU options below; RAM in GB).
    Games list their own in gameCompatibilityData.js (req); older entries use their era. */
@@ -417,16 +417,6 @@ export const GameCompatibilityView = () => {
               }`}
             >
               Device Presets
-            </button>
-            <button
-              onClick={() => {
-                playPowerUpSound();
-                window.dispatchEvent(new CustomEvent('open-ai-bot', { detail: { query: "start_pc_check" } }));
-              }}
-              className="bg-slate-900 hover:bg-emerald-950 text-emerald-300 border border-emerald-400/40 px-3.5 py-1.5 rounded-xl text-xs font-display font-extrabold transition-all hover:scale-105 flex items-center gap-1.5 shadow-sm"
-            >
-              <Bot className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-              <span>🤖 Auto-Detect by PC Model Name (AI Bot)</span>
             </button>
           </div>
         </div>
