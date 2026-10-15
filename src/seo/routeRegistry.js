@@ -145,7 +145,7 @@ export const STATIC_PUBLIC_ROUTES = [
     path: '/',
     canonical: `${BASE_DOMAIN}/`,
     title: 'Gaming Gear Picks & Can I Run It Checker | Run On Console',
-    description: 'Independent gaming gear picks for PC and console, guides to 15 gaming platforms and a free checker for 500+ games. Find out if your PC can run it.',
+    description: 'Independent gaming gear picks for PC and console, guides to 15 gaming platforms and a free checker for 2,000+ games. Find out if your PC can run it.',
     h1: 'Discover the Best',
     category: 'Home',
     lastmod: '2024-05-20T10:00:00+00:00'
@@ -181,7 +181,7 @@ export const STATIC_PUBLIC_ROUTES = [
     path: '/compatibility/',
     canonical: `${BASE_DOMAIN}/compatibility/`,
     title: 'Can I Run It? PC Game Requirements Checker | ROC',
-    description: 'Check if your PC can run 500+ games: pick a game, your graphics card, CPU and RAM, and compare them with the official minimum and recommended specs.',
+    description: 'Check if your PC can run 2,000+ games: pick a game, your graphics card, CPU and RAM, and compare them with the official minimum and recommended specs.',
     h1: 'Can I Run It',
     category: 'Compatibility',
     lastmod: '2024-05-12T10:00:00+00:00'

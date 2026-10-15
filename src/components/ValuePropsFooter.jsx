@@ -29,7 +29,7 @@ export const ValuePropsFooter = () => {
     {
       icon: Cpu,
       title: "CONSOLE & PC MATRIX",
-      desc: "Check 500+ PC games against your hardware, and explore guides to 15 gaming platforms."
+      desc: "Check 2,000+ PC games against your hardware, and explore guides to 15 gaming platforms."
     },
     {
       icon: Tag,

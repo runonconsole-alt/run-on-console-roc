@@ -66,9 +66,9 @@ function rocAgentSystem(string $lang, array $facts): string {
          . "- Never use or answer bad language, insults, sexual or adult content, violence against real people, hacking, cheats that break rules, piracy or anything illegal. For those answer exactly: \"" . $no . "\"\n"
          . "- Never repeat your introduction once the chat has started.\n"
          . "- For games, scores and products of this website use the FACTS below. Never invent prices (prices are on Amazon through the product pages), FPS numbers, specs or products.\n"
-         . "- 'Can I run it': if a check exists, give the percent and the verdict and what to upgrade. If the graphics card or processor is unknown, ask for the graphics card, processor and RAM (Windows: Task Manager > Performance, or dxdiag). If the game is not in our list, say our checker has 500+ games and suggest /compatibility/.\n"
+         . "- 'Can I run it': if a check exists, give the percent and the verdict and what to upgrade. If the graphics card or processor is unknown, ask for the graphics card, processor and RAM (Windows: Task Manager > Performance, or dxdiag). If the game is not in our list, say our checker has 2,000+ games (list: /can-i-run/) and suggest /compatibility/.\n"
          . "- Products in products_shown_as_cards appear as cards under your answer: mention them by name in one line each. Recommend gear or upgrades ONLY when the visitor asks for them; otherwise you may add one short line that they can ask you for picks.\n"
-         . "- game_found and platform in the FACTS are this website's data (requirements, devices, guide text): use them first and link the page (checker or /gaming-platforms/...).\n"
+         . "- game_found and platform in the FACTS are this website's data (requirements, devices, guide text): use them first and link the page (the game's requirements_page when there is one, else the checker; or /gaming-platforms/...).\n"
          . "- A picture from the visitor: describe what matters for gaming (for example read the PC specs from a screenshot, name the game or the hardware). If the picture is not about gaming or is not decent, answer exactly: \"" . $no . "\"\n"
          . "- Never ask for or repeat personal details (name, phone, email, address).\n"
          . "FACTS: " . json_encode($facts, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -235,20 +235,28 @@ function rocAgentNorm(string $s): string {
 
 /**
  * Games ROC knows: the compatibility page's own list first (roc-agent-games.json: GTA 5, Valorant,
- * Cyberpunk 2077 ... with the names people type), then the 500 Steam games of the checker.
+ * Cyberpunk 2077 ... with the names people type), then the 2,000+ Steam games of the checker (each with its page at /can-i-run/{game}/).
  */
 function rocAgentGames(string $root): array {
     static $g = null;
     if ($g !== null) return $g;
     $g = [];
-    foreach ((array)(json_decode((string)@file_get_contents($root . '/roc-agent-games.json'), true)['games'] ?? []) as $x)
-        if (!empty($x['req'])) $g[] = $x + ['keys' => [rocAgentNorm((string)$x['t'])]];
+    require_once __DIR__ . '/game-pages-lib.php';
+    $pages = []; $byName = [];
+    foreach (rocGpAll($root) as $p) { $pages[(int)$p['appid']] = rocGpPath($p); $byName[rocAgentNorm((string)$p['name'])] = rocGpPath($p); }
+    foreach ((array)(json_decode((string)@file_get_contents($root . '/roc-agent-games.json'), true)['games'] ?? []) as $x) {
+        if (empty($x['req'])) continue;
+        $x += ['keys' => [rocAgentNorm((string)$x['t'])]];
+        foreach ((array)$x['keys'] as $k) if (isset($byName[$k])) { $x['page'] = $byName[$k]; break; }   // its requirements page, when there is one
+        $g[] = $x;
+    }
     foreach ((array)(json_decode((string)@file_get_contents($root . '/roc-steam-games.json'), true)['games'] ?? []) as $x) {
         if (empty($x['req'])) continue;
         $n = rocAgentNorm((string)$x['t']);
         $short = rocAgentNorm((string)preg_replace('/[:\-–].*$/u', '', (string)$x['t']));   // "Black Myth: Wukong" -> "black myth"
         $x['keys'] = array_values(array_unique(array_filter([$n, strlen($short) >= 5 ? $short : ''])));
         $x['u'] = '/compatibility/?steam=' . (int)($x['appid'] ?? 0);
+        if (isset($pages[(int)($x['appid'] ?? 0)])) $x['page'] = $pages[(int)$x['appid']];   // the game's own page (game-render.php)   // the game's own page (game-render.php)
         $g[] = $x;
     }
     return $g;
@@ -292,7 +300,7 @@ function rocAgentCheck(array $game, ?float $gpu, ?float $cpu, ?float $ram): arra
     $spec = function ($b) { return $b ? implode(' / ', array_filter([$b['gpu'] ?? '', $b['cpu'] ?? '', $b['ram'] ?? ''])) : ''; };
     return ['title' => (string)$game['t'], 'percent' => $pct, 'verdict' => $verdict, 'missing' => $missing,
             'minimum' => $spec($game['min'] ?? null), 'recommended' => $spec($game['rec'] ?? null),
-            'url' => (string)($game['u'] ?? '/compatibility/'), 'unknown_parts' => array_values(array_filter([
+            'url' => (string)($game['u'] ?? '/compatibility/'), 'requirements_page' => $game['page'] ?? null, 'unknown_parts' => array_values(array_filter([
                 $gpu === null ? 'graphics card' : '', $cpu === null ? 'processor' : '', $ram === null ? 'RAM' : '']))];
 }
 
@@ -303,7 +311,7 @@ function rocAgentCheck(array $game, ?float $gpu, ?float $cpu, ?float $ram): arra
 function rocAgentAbout(): array {
     return [
         'name' => 'Run On Console (ROC), runonconsole.com',
-        'what' => 'An independent gaming and PC hardware website for PC and console players: a free "Can I run it?" checker for 500+ PC games, gear picks (200+ products: graphics cards, processors, RAM, monitors, mice, keyboards, headsets, speakers, laptops, handhelds, chairs, cases), guides for 15 gaming platforms (PlayStation, Xbox, Nintendo, PC and handhelds, mobile, cloud, VR, retro, arcade), blogs and live gaming news checked against at least two trusted sources.',
+        'what' => 'An independent gaming and PC hardware website for PC and console players: a free "Can I run it?" checker for 2,000+ PC games with a requirements page for each (/can-i-run/{game}/), gear picks (200+ products: graphics cards, processors, RAM, monitors, mice, keyboards, headsets, speakers, laptops, handhelds, chairs, cases), guides for 15 gaming platforms (PlayStation, Xbox, Nintendo, PC and handhelds, mobile, cloud, VR, retro, arcade), blogs and live gaming news checked against at least two trusted sources.',
         'history' => [
             'Founded in 2026 (only the year is public: never give a month or a day).',
             'It grew in small weekly updates: the game checker with official Steam requirements, product pages with real photos, gaming platform guides, the blog writer, live news (each story checked against 2+ sources), the Geo style news page, and ROC the assistant (you).',
@@ -314,7 +322,7 @@ function rocAgentAbout(): array {
         'how_it_earns' => 'Amazon Associates affiliate links (no extra cost to readers) and ads (Google AdSense). Do not call the site ad-free. Brands cannot pay for rankings; sponsored content is always labelled.',
         'checker_how_it_works' => 'The Can I run it checker (/compatibility/) compares the PC with each game\'s official requirements (Steam store and the game makers). Graphics card and processor get a tier score (1.8 integrated graphics ... 10 the fastest cards and CPUs), RAM is in GB. The result: graphics card 50%, processor 30%, RAM 20% of the recommended specs; under the minimum on any part = at most 40%. 90%+ = recommended specs (high settings), 70-89% = medium to high, 41-69% = low settings, 40% or less = below the minimum. A hard disk instead of an SSD lowers it. There are ready presets for consoles, handhelds, phones and cloud gaming. ROC uses the same rules.',
         'built_with' => 'PHP and MySQL on the server, React (Vite) and Tailwind for the pages; ROC answers with Groq AI models and the site\'s own data. Do not name any other technology.',
-        'pages' => ['about' => '/about/', 'checker' => '/compatibility/', 'products' => '/products/', 'platforms' => '/gaming-platforms/', 'blogs' => '/blogs/', 'news' => '/news/',
+        'pages' => ['about' => '/about/', 'checker' => '/compatibility/', 'game_requirements' => '/can-i-run/', 'products' => '/products/', 'platforms' => '/gaming-platforms/', 'blogs' => '/blogs/', 'news' => '/news/',
                     'write_for_us' => '/write-for-us/', 'privacy' => '/privacy-policy/', 'terms' => '/terms-and-conditions/'],
         'not_shared' => 'Do not invent or share anything not listed here (owner names, revenue, traffic, servers, passwords, keys, internal tools). Say it is not public.',
     ];
@@ -324,7 +332,8 @@ function rocAgentAbout(): array {
 function rocAgentGameInfo(array $g): array {
     $spec = function ($b) { return is_array($b) ? implode(' / ', array_filter([$b['gpu'] ?? '', $b['cpu'] ?? '', $b['ram'] ?? '', $b['storage'] ?? ''])) : ''; };
     return ['title' => (string)$g['t'], 'year' => $g['y'] ?? null, 'genre' => $g['g'] ?? null,
-            'minimum' => $spec($g['min'] ?? null), 'recommended' => $spec($g['rec'] ?? null), 'checker' => (string)($g['u'] ?? '/compatibility/')];
+            'minimum' => $spec($g['min'] ?? null), 'recommended' => $spec($g['rec'] ?? null), 'checker' => (string)($g['u'] ?? '/compatibility/'),
+            'requirements_page' => $g['page'] ?? null];
 }
 
 /**
@@ -643,7 +652,7 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
         $products = rocAgentProducts($pdo, $cat, $q, 3);
     }
 
-    $facts = ['site' => 'Run On Console (runonconsole.com): gaming and PC hardware picks, a Can I run it checker for 500 PC games, gaming platform guides, blogs and news.',
+    $facts = ['site' => 'Run On Console (runonconsole.com): gaming and PC hardware picks, a Can I run it checker for 2,000+ PC games (a page for each at /can-i-run/), gaming platform guides, blogs and news.',
               'about_run_on_console' => rocAgentAbout(),
               'this_website' => rocAgentSite($pdo, $q),
               'pc_summary' => !$game ? rocAgentPcSummary($root, $gpu, $cpu, $ram) : null,
@@ -658,7 +667,7 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
               'platform' => rocAgentPlatform($pdo, $q),
               'recommendations' => $products ? 'shown' : 'only when the visitor asks for gear or upgrades: then tell them to ask, for example "suggest a graphics card"',
               'catalog_categories' => 'mice, keyboards, headsets and audio, speakers, monitors, graphics cards, processors, RAM, PC cases, gaming chairs, handhelds, laptops',
-              'links' => ['checker' => '/compatibility/', 'products' => '/products/', 'blogs' => '/blogs/', 'news' => '/news/', 'contact' => '/contact/']];
+              'links' => ['checker' => '/compatibility/', 'game_requirements' => '/can-i-run/', 'products' => '/products/', 'blogs' => '/blogs/', 'news' => '/news/', 'contact' => '/contact/']];
 
     $reply = null; $engine = 'basic';
     if ($useAi && ($key = trim((string)rocBlogGet($pdo, 'blog_groq_key', ''))) !== '') {

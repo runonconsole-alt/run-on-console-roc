@@ -566,7 +566,7 @@ function rocCatLinks(PDO $pdo, string $catSlug): array {
         } catch (\Throwable $e) {}
     }
     if (in_array($catSlug, ['gpu', 'cpu', 'ram', 'laptops', 'handhelds'], true))
-        $links[] = ['/compatibility/', 'Can I run it?', 'Check 500+ PC games against your hardware'];
+        $links[] = ['/compatibility/', 'Can I run it?', 'Check 2,000+ PC games against your hardware'];
     return $links;
 }
 
@@ -1046,7 +1046,7 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
         foreach (rocGroups() as $g => $def) $gs[] = [rocCatPath($g), $def['name'], 'Browse by category'];
         $m .= rocLinkBox('Explore Run On Console', array_merge($gs, [
             ['/category/', 'All categories', 'Every product category in one place'],
-            ['/compatibility/', 'Can I run it?', 'Check 500+ PC games against your hardware'],
+            ['/compatibility/', 'Can I run it?', 'Check 2,000+ PC games against your hardware'],
             ['/gaming-platforms/', 'Gaming platforms', 'Guides to PC, PlayStation, Xbox, Nintendo and more'],
             ['/blogs/', 'Buying guides', 'Comparisons and how-to articles'],
         ]));
