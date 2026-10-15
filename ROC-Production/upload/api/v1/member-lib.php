@@ -149,11 +149,12 @@ function rocDigestEmail(array $content, array $wishlist, string $name, string $u
     return ['This week in gaming: ' . mb_substr($top, 0, 90), $html];
 }
 
-/** Puts one email in the site's email queue (sent by the email worker). */
-function rocDigestQueue(PDO $pdo, string $to, string $subject, string $html): bool {
+/** Puts one email in the queue. The worker sends the highest priority first: 1 for the weekly email (after sign-up
+ * and password emails), 9 for a test from the CMS (right away). */
+function rocDigestQueue(PDO $pdo, string $to, string $subject, string $html, int $priority = 1): bool {
     try {
-        $pdo->prepare("INSERT INTO email_queue (to_email, subject, html_body, status, attempts, next_attempt_at, priority) VALUES (?, ?, ?, 'pending', 0, NOW(), 1)")
-            ->execute([$to, mb_substr($subject, 0, 250), $html]);
+        $pdo->prepare("INSERT INTO email_queue (to_email, subject, html_body, status, attempts, next_attempt_at, priority) VALUES (?, ?, ?, 'pending', 0, NOW(), ?)")
+            ->execute([$to, mb_substr($subject, 0, 250), $html, $priority]);
         return true;
     } catch (\Throwable $e) {
         try { $pdo->prepare("INSERT INTO email_queue (to_email, subject, html_body, status) VALUES (?, ?, ?, 'pending')")->execute([$to, mb_substr($subject, 0, 250), $html]); return true; }
