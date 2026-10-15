@@ -968,6 +968,7 @@ function isNewsPost(x){ return K(x)===KINDS.blog && String(x.category||'').trim(
 function itemPath(x, slug){
   if(slug==null) slug=x.slug||'…';
   if(isNewsPost(x)) return '/news/'+slug+'/';
+  if(K(x)===KINDS.blog && /^guides?\s*(:.*)?$/i.test(String(x.category||'').trim())) return '/guides/'+slug+'/';
   if(K(x)===KINDS.page && x.page_type==='category' && x.category_slug) return '/gaming-platforms/'+x.category_slug+'/'+slug+'/';
   return K(x).base+slug+'/';
 }
@@ -1258,7 +1259,7 @@ async function renderSiteUsers(m){
     return u.avatar_url?'<img src="'+esc(u.avatar_url)+'" alt="" width="36" height="36" style="width:36px;height:36px;border-radius:10px;object-fit:cover">'
       :'<div class="av" style="width:36px;height:36px;border-radius:10px">'+esc((u.name||u.username||'?').slice(0,2).toUpperCase())+'</div>';
   };
-  m.innerHTML=head('Site users','People who created an account on runonconsole.com')+
+  m.innerHTML=head('Site users','People who created an account on runonconsole.com','<button class="btn" id="su-digest">✉ Weekly email</button>')+
     '<div class="body">'+
     '<div class="dstats">'+
       '<div class="dstat hero"><div class="l">Members</div><div class="n">'+(c.all||0)+'</div><div class="s">'+(c.new_week||0)+' joined this week</div></div>'+
@@ -1288,6 +1289,7 @@ async function renderSiteUsers(m){
   var sq=$('#suq',m);
   sq.addEventListener('input',function(){ S.suQ=sq.value; var at=sq.selectionStart; renderSiteUsers(m); var x=$('#suq',m); if(x){ x.focus(); x.setSelectionRange(at,at); } });
   m.querySelectorAll('[data-suf]').forEach(function(b){ b.addEventListener('click',function(){ S.suFilter=b.dataset.suf; renderSiteUsers(m); }); });
+  var sdg=$('#su-digest',m); if(sdg) sdg.addEventListener('click',function(){ renderDigest(); });
   m.querySelectorAll('[data-sus]').forEach(function(b){ b.addEventListener('click',async function(){
     var to=b.dataset.to;
     if(to==='suspended' && !confirm('Suspend this member? They are signed out and cannot sign in until restored.')) return;
@@ -1808,7 +1810,8 @@ function fieldHtml(key,label,opts){
       return '<option value="'+esc(o)+'"'+(v===o?' selected':'')+'>'+esc(o||'— default —')+'</option>';}).join('')+'</select>';
   else
     input='<input type="text" id="'+id+'" data-k="'+key+'" value="'+esc(v)+'"'+
-      (opts.placeholder?' placeholder="'+esc(opts.placeholder)+'"':'')+'>';
+      (opts.placeholder?' placeholder="'+esc(opts.placeholder)+'"':'')+(opts.list?' list="'+id+'-list"':'')+'>'+
+      (opts.list?'<datalist id="'+id+'-list">'+opts.list.map(function(o){ return '<option value="'+esc(o)+'">'; }).join('')+'</datalist>':'');
   var extra='';
   if(opts.max){
     var pct=Math.min(100,Math.round(v.length/opts.max*100));
@@ -1885,7 +1888,8 @@ function panelBody(){
   if(S.tab==='image'){
     return imageField('image','Cover image *','Required before publishing.')+
       fieldHtml('image_alt','Alt text',{note:'Describe the image. Required before publishing.'})+
-      fieldHtml('category','Category')+
+      fieldHtml('category','Category',{list:['Guides: Buying','Guides: How to use','Guides: Setup','Guides: Game setup','Buying Guides','How To','Comparisons','Can I Run It','Platforms','News'],
+        note:'A guide for the Guides page (/guides/): choose "Guides: Buying", "Guides: How to use", "Guides: Setup" or "Guides: Game setup" (or type "Guides: your type"). News goes to /news/, everything else to /blogs/.'})+
       fieldHtml('author_name','Author');
   }
   if(S.tab==='seo'){
@@ -2684,6 +2688,21 @@ function renderChangePassword(forced){
     modal('Change your password', form, '<button class="btn" data-a="close">Cancel</button>', function(a,close){ close(); });
     $('#cpf').addEventListener('submit',submit);
   }
+}
+
+/* ----------------------------------------------------------- weekly email */
+/* api/v1/cms/digest-admin.php: members who turned on the weekly email, on/off, a test email. */
+async function renderDigest(){
+  var d; try{ d=await api('digest-admin.php'); }catch(e){ toast(e.message,'bad'); return; }
+  var last=d.last&&d.last.at?'Last sent '+esc(pkTime(d.last.at))+' to '+d.last.sent+' member(s).':'Not sent yet.';
+  modal('Weekly email','<p style="margin-top:0">Every Friday from 18:00 Pakistan time, members who turned it on (Profile &gt; Wishlist) get the top news of the week, new guides and their wishlist. Every email has a one-click unsubscribe link.</p>'+
+    '<div class="dstats" style="margin-bottom:12px"><div class="stat"><b>'+d.subscribers+'</b><span>subscribers</span></div><div class="stat"><b>'+d.wishlists+'</b><span>members with a wishlist</span></div><div class="stat"><b>'+d.saved_items+'</b><span>saved items</span></div></div>'+
+    '<div class="hint" style="margin-bottom:12px">'+last+'</div>'+
+    '<label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-bottom:14px"><input type="checkbox" id="dg-on"'+(d.on?' checked':'')+'> Send the weekly email</label>'+
+    '<div class="field"><label>Send this week&#39;s email as a test to</label><div style="display:flex;gap:8px"><input type="email" id="dg-to" value="'+esc(d.email||'')+'" style="flex:1"><button class="btn" id="dg-test" type="button">Send test</button></div></div>',
+    '<button class="btn" data-a="close">Close</button>',function(a,c){c();});
+  $('#dg-on').addEventListener('change',async function(){ try{ var r=await api('digest-admin.php',{action:'settings',on:this.checked}); toast(r.message,'good'); }catch(e){ toast(e.message,'bad'); } });
+  $('#dg-test').addEventListener('click',async function(){ try{ var r=await api('digest-admin.php',{action:'test',email:$('#dg-to').value.trim()}); toast(r.message,'good'); }catch(e){ toast(e.message,'bad'); } });
 }
 
 /* ---------------------------------------------------- 2-step verification */

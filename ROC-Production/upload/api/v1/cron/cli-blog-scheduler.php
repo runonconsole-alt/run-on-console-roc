@@ -124,3 +124,10 @@ try {
     $bk = rocBackupDaily($pdo, $ROOT);
     if ($bk !== null) echo date('c') . ' ' . $bk . "\n";
 } catch (\Throwable $e) { echo date('c') . ' backup error: ' . $e->getMessage() . "\n"; }
+
+// Weekly email to members who turned it on (api/v1/member-lib.php): Friday from 18:00 Pakistan time, once a week.
+try {
+    require_once $ROOT . '/api/v1/member-lib.php';
+    $dg = rocDigestTick($pdo, $ROOT);
+    if ($dg !== null) echo date('c') . ' ' . $dg . "\n";
+} catch (\Throwable $e) { echo date('c') . ' weekly email error: ' . $e->getMessage() . "\n"; }

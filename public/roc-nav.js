@@ -507,3 +507,67 @@ document.addEventListener('submit', function (e) {
     .catch(function () { say('No connection. Please try again or email contact@runonconsole.com.'); })
     .then(function () { if (btn) { btn.disabled = false; btn.textContent = 'Send message'; } });
 });
+
+/* ---------- Wishlist (Deploy 70): a "Save" button on product pages (/products/{slug}/) and game pages
+   (/can-i-run/{slug}/). Signed-in members save them (api/v1/member.php); the list is in Profile > Wishlist.
+   Visitors who are not signed in go to the sign-in page and come back here. */
+(function () {
+  var state = null, busy = false;
+  function item() {
+    var m = /^\/products\/([a-z0-9-]+)\/$/.exec(location.pathname);
+    if (m && m[1] !== 'category') return { type: 'product', key: m[1] };
+    m = /^\/can-i-run\/([a-z0-9-]+)\/$/.exec(location.pathname);
+    return m ? { type: 'game', key: m[1] } : null;
+  }
+  function load(cb) {
+    if (state) return cb();
+    fetch('/api/v1/member.php', { credentials: 'same-origin' }).then(function (r) { return r.json(); })
+      .then(function (d) { state = d && d.success ? d : { signed_in: false, keys: [] }; cb(); })
+      .catch(function () { state = { signed_in: false, keys: [] }; cb(); });
+  }
+  function paint(b, it) {
+    var on = state.keys.indexOf(it.type + ':' + it.key) > -1;
+    b.innerHTML = (on ? '♥ Saved' : '♡ Save') + '<span class="roc-wl-s">' + (on ? ' · in your wishlist' : ' to wishlist') + '</span>';
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.style.background = on ? '#fff1f2' : '#fff'; b.style.borderColor = on ? '#fda4af' : '#cbd5e1'; b.style.color = on ? '#be123c' : '#334155';
+  }
+  function add() {
+    var it = item();
+    if (!it || document.querySelector('[data-roc-wl]')) return;
+    var h1 = document.querySelector('main h1') || document.querySelector('h1');
+    if (!h1) return;
+    var b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('data-roc-wl', '1');
+    b.style.cssText = 'display:inline-flex;align-items:center;gap:4px;margin-top:10px;padding:7px 14px;border:1px solid #cbd5e1;border-radius:999px;font:700 13px Inter,Arial,sans-serif;cursor:pointer;background:#fff;color:#334155';
+    h1.insertAdjacentElement('afterend', b);
+    b.textContent = '♡ Save';
+    load(function () { paint(b, it); });
+    b.addEventListener('click', function () {
+      if (!state || busy) return;
+      if (!state.signed_in) { location.href = '/auth/login/?return=' + encodeURIComponent(location.pathname); return; }
+      busy = true;
+      fetch('/api/v1/member.php', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'toggle', type: it.type, key: it.key }) })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d && d.success) {
+            var k = it.type + ':' + it.key, i = state.keys.indexOf(k);
+            if (d.saved && i < 0) state.keys.push(k); if (!d.saved && i > -1) state.keys.splice(i, 1);
+            paint(b, it);
+            if (d.saved && !document.querySelector('[data-roc-wl-tip]')) {
+              var t = document.createElement('a'); t.setAttribute('data-roc-wl-tip', '1'); t.href = '/profile/?tab=wishlist';
+              t.textContent = 'See your wishlist →'; t.style.cssText = 'margin-left:10px;font:700 13px Inter,Arial,sans-serif;color:#047857;text-decoration:underline';
+              b.insertAdjacentElement('afterend', t);
+            }
+          } else if (d && d.login) location.href = '/auth/login/?return=' + encodeURIComponent(location.pathname);
+        })
+        .catch(function () {})
+        .then(function () { busy = false; });
+    });
+  }
+  function start() {
+    add();
+    if (window.MutationObserver) { var t = null; new MutationObserver(function () { clearTimeout(t); t = setTimeout(add, 200); }).observe(document.body, { childList: true, subtree: true }); }
+  }
+  if (document.readyState !== 'loading') start(); else document.addEventListener('DOMContentLoaded', start);
+})();

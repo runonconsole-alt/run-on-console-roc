@@ -93,6 +93,8 @@ export const PrivacyPolicyView = () => {
             <li><strong>Messages you send us</strong>: when you use the contact or “Write for us” forms we receive your name, email address and the message, and use them only to reply.</li>
             <li><strong>Accounts</strong>: if you create an account we store your display name, username, email address and a securely hashed password. If you sign in with Google we receive your verified email address and Google account ID, never your Google password.</li>
             <li><strong>Affiliate link clicks</strong>: when you click a shop link we record which link and which page it was on, so we can see which recommendations are useful. This record does not contain your name or email address.</li>
+            <li><strong>Wishlist</strong>: the products and games you save with the ♡ Save button are kept with your account until you remove them.</li>
+            <li><strong>Weekly email</strong>: only if you turn it on in your profile, we use your email address to send one email a week (news, guides and your wishlist). Every email has a one-click unsubscribe link, and you can turn it off in your profile at any time.</li>
             <li><strong>ROC assistant chats</strong>: see section 7.</li>
             <li><strong>Security logs</strong>: our server keeps IP addresses and browser details for a limited time to stop spam, brute-force login attempts and other abuse.</li>
           </ul>
