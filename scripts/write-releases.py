@@ -456,6 +456,14 @@ RELEASES = [
                   'The writer now writes each post a day ahead of its publishing time; the switch "Hold new AI posts 24 hours for review" turns this off'],
          checks=[dict(label='Blog review', type='contains', path='api/v1/cms/blog-engine-lib.php', text='rocBlogPending')],
          pr=REPO + '68'),
+    dict(deploy=69, date='2026-10-15', title='CMS 2-step verification and daily database backups',
+         changes=['CMS menu > 2-step verification: after the password, sign-in asks for the 6-digit code from Google Authenticator (or Microsoft Authenticator); 8 one-time backup codes for a lost phone; 5 wrong codes lock the account for 15 minutes',
+                  'Lost phone and backup codes: php api/v1/cron/cli-cms-2fa.php --disable=USERNAME in cPanel Terminal',
+                  'Daily database backup (posts, products, pages, settings, users) made by the scheduler cron, the last 7 days kept in ~/roc-db-backups (outside the website)',
+                  'CMS menu > Backups: download a backup or make one now; keep a weekly copy on your PC or Google Drive'],
+         checks=[dict(label='2-step verification installed', type='contains', path='api/v1/cms/auth.php', text='rocTwofaLoginGate'),
+                 dict(label='Backups', type='file', path='api/v1/cms/backup-lib.php')],
+         pr=REPO + '69'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
