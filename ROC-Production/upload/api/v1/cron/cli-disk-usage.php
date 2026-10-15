@@ -92,9 +92,11 @@ echo '  => frees about ' . duMb($free) . "\n\n";
 
 echo "Only for you to decide (not removed here):\n";
 $any = false;
-foreach (array_merge(glob($HOME . '/backup-*.tar.gz') ?: [], glob($HOME . '/*.tar.gz') ?: []) as $b) {
+foreach (glob($HOME . '/*.tar.gz') ?: [] as $b) {
     $any = true; printf("  %10s  %s  (cPanel full backup: download it to your PC, then delete it in File Manager)\n", duMb((int)filesize($b)), basename($b));
 }
+if (is_dir($HOME . '/.trash') && ($tb = $top['.trash'] ?? 0) > 1048576) { $any = true; printf("  %10s  .trash  (cPanel File Manager trash: open File Manager > View Trash > Empty Trash)
+", duMb($tb)); }
 if (is_dir($HOME . '/mail')) { $any = true; printf("  %10s  mail  (e-mails: empty Trash/Spam in Webmail)\n", duMb($top['mail'] ?? duSize($HOME . '/mail'))); }
 if (!$any) echo "  (nothing)\n";
 
