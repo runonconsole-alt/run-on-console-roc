@@ -124,6 +124,8 @@ $children = [
     'blogs'      => [time(), 'Blog posts'],
     'news'       => [time(), 'News stories'],
 ];
+// "Can I run it?" game pages (game-render.php, switched on by cli-game-pages.php).
+if (is_file($root . '/game-render.php') && is_file($root . '/roc-steam-games.json')) $children['games'] = [(int)filemtime($root . '/roc-steam-games.json'), 'Can I run it? game pages'];
 // CMS pages (About-style pages made in the CMS) are listed only once there is at least one.
 try {
     ob_start();

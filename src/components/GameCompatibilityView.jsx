@@ -23,6 +23,10 @@ const ERA_REQUIREMENTS = {
 };
 const gameRequirements = (game) => game.req || ERA_REQUIREMENTS[game.era] || ERA_REQUIREMENTS.modern;
 
+/* The address of a game's own requirements page (game-render.php, api/v1/game-pages-lib.php rocGpSlug). */
+const gamePageSlug = (t) => t.replace(/[™®©'’‘`]/g, '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
 export const GameCompatibilityView = () => {
   // ROC, the site assistant, sits inside this page (public/roc-chat.js draws it in this box after
   // React has drawn the page). Visitors who are not signed in see Sign in / Sign up there.
@@ -331,7 +335,7 @@ export const GameCompatibilityView = () => {
                 <span>Compatibility Index</span>
               </span>
               <span className="bg-emerald-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded badge-glow">
-                500+ Games
+                2,000+ Games
               </span>
             </div>
 
@@ -357,7 +361,7 @@ export const GameCompatibilityView = () => {
       {/* How it works, in plain words */}
       <section aria-label="How it works" className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          ['1', 'Choose a game', 'Search 500+ PC games, from GTA 6 and new releases to classics like San Andreas and CS 1.6.'],
+          ['1', 'Choose a game', 'Search 2,000+ PC games, from GTA 6 and new releases to classics like San Andreas and CS 1.6.'],
           ['2', 'Enter your PC', 'Pick your graphics card, processor and RAM (or a ready laptop or handheld) from the lists below.'],
           ['3', 'Get your answer', 'See if it runs at minimum or recommended settings, your score, and which part to upgrade if needed.'],
         ].map(([n, t, d]) => (
@@ -456,7 +460,7 @@ export const GameCompatibilityView = () => {
                 type="search"
                 value={steamQuery}
                 onChange={(e) => setSteamQuery(e.target.value)}
-                placeholder={`Or search ${steamGames.length} popular PC games (2021 to today)…`}
+                placeholder={`Or search ${steamGames.length} popular PC games…`}
                 aria-label="Search PC games"
                 className="w-full bg-white border-2 border-slate-200 focus:border-emerald-500 rounded-2xl px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none"
               />
@@ -472,9 +476,15 @@ export const GameCompatibilityView = () => {
                   ))}
                 </div>
               )}
+              {!steamPick && (
+                <p className="mt-2 text-xs text-slate-500">
+                  Or <a href="/can-i-run/" className="font-bold text-emerald-700 underline">browse all {steamGames.length.toLocaleString()} games A to Z</a>, each with its own requirements page.
+                </p>
+              )}
               {steamPick && (
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                   <span className="text-slate-600">Checking <b>{steamPick.t}</b> with its official Steam requirements.</span>
+                  <a href={`/can-i-run/${gamePageSlug(steamPick.t)}/`} className="font-bold text-emerald-700 underline">Full requirements page</a>
                   <a href={steamPick.u} target="_blank" rel="noopener noreferrer" className="font-bold text-emerald-700 underline">See them on Steam ↗</a>
                   <button type="button" onClick={() => setSteamPick(null)} className="font-bold text-slate-500 underline">Back to the list above</button>
                 </div>

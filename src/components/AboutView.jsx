@@ -24,7 +24,7 @@ export const AboutView = () => {
     {
       icon: Gamepad2,
       title: "Game & Platform Compatibility Engine",
-      desc: "Confused about whether GTA 6, Black Ops 6, or Elden Ring will run smoothly on your PC, PS5, Xbox, or Handheld? Our free checker compares your hardware with the official minimum and recommended requirements of 500+ games."
+      desc: "Confused about whether GTA 6, Black Ops 6, or Elden Ring will run smoothly on your PC, PS5, Xbox, or Handheld? Our free checker compares your hardware with the official minimum and recommended requirements of 2,000+ games."
     }
   ];
 

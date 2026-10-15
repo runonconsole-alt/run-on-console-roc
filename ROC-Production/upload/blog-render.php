@@ -724,7 +724,7 @@ function rocAdSide(): string {
     $ad = rocAdUnit('side');
     if ($ad !== '') return $ad;
     return '<a class="rn-house" href="/compatibility/"><span class="rn-house-k">Free tool</span>'
-        . '<strong>Can your PC run it?</strong><span class="rn-house-p">Check 500+ PC games against your graphics card, processor and memory.</span>'
+        . '<strong>Can your PC run it?</strong><span class="rn-house-p">Check 2,000+ PC games against your graphics card, processor and memory.</span>'
         . '<span class="rn-house-b">Check a game &rarr;</span></a>'
         . '<a class="rn-house rn-house-2" href="/products/"><span class="rn-house-k">Gaming gear</span>'
         . '<strong>Our product picks</strong><span class="rn-house-p">Mice, keyboards, headsets, monitors, GPUs and more.</span>'

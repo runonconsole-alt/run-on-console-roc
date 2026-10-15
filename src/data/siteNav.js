@@ -34,6 +34,7 @@ export const DEFAULT_SITE_NAV = {
         { label: 'Home', url: '/', icon: 'home' },
         { label: 'Products', url: '/products/', icon: 'cpu' },
         { label: 'Can I Run It? PC Game Checker', url: '/compatibility/', icon: 'gamepad' },
+        { label: 'PC Game Requirements A to Z', url: '/can-i-run/', icon: 'monitor' },
         { label: 'Blogs', url: '/blogs/', icon: 'book' },
         { label: 'Gaming Platforms', url: '/gaming-platforms/', icon: 'grid' },
         { label: 'About Run On Console', url: '/about/', icon: 'info' },

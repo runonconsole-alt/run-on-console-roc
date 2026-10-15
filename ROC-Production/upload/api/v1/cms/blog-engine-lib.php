@@ -167,11 +167,25 @@ function rocBlogCatExtras(string $slug): array {
                         ['Keyboard sizes explained: full, TKL, 75% and 60%', 'keyboard sizes explained'], ['Linear vs tactile vs clicky switches for gaming', 'linear vs tactile switches']],
         'audio' => [['Open-back vs closed-back headphones for gaming', 'open back vs closed back gaming'], ['Gaming headset or headphones plus a mic?', 'gaming headset vs headphones'],
                     ['Spatial audio for games explained', 'spatial audio gaming'], ['Wireless gaming headsets: latency and battery explained', 'wireless gaming headset latency']],
+        'cpu' => [['How many CPU cores do you need for gaming?', 'how many cores for gaming'], ['Intel vs AMD CPUs for gaming: what is the difference?', 'intel vs amd for gaming'],
+                  ['What is a CPU bottleneck and how to avoid it', 'cpu bottleneck explained'], ['X3D CPUs explained: why extra cache helps games', 'x3d cpu gaming']],
+        'ram' => [['How much RAM do you need for gaming?', 'how much ram for gaming'], ['DDR4 vs DDR5 RAM for gaming', 'ddr4 vs ddr5 gaming'],
+                  ['RAM speed and latency explained for gamers', 'ram speed vs latency'], ['How to enable XMP or EXPO for faster RAM', 'how to enable xmp']],
+        'cases' => [['PC case sizes explained: ATX, mATX and ITX', 'pc case sizes explained'], ['PC case airflow: how to set up your fans', 'pc case airflow guide'],
+                    ['Glass panel vs mesh front cases for gaming PCs', 'mesh vs glass pc case'], ['How to pick a case that fits your graphics card', 'gpu clearance pc case']],
+        'chairs' => [['How to set up a gaming chair for good posture', 'gaming chair posture'], ['Gaming chair vs office chair: which is better?', 'gaming chair vs office chair'],
+                     ['Fabric vs leather gaming chairs', 'fabric vs leather gaming chair'], ['What size gaming chair do you need?', 'gaming chair size guide']],
+        'handhelds' => [['Handheld gaming PCs explained: what can they play?', 'what can handheld gaming pcs play'], ['Battery life on gaming handhelds: how to get more', 'gaming handheld battery life'],
+                        ['Windows vs SteamOS on gaming handhelds', 'windows vs steamos handheld'], ['Best settings for games on a handheld PC', 'handheld pc game settings']],
+        'laptops' => [['Gaming laptop vs gaming PC: which should you buy?', 'gaming laptop vs desktop'], ['Laptop GPU wattage (TGP) explained', 'laptop gpu tgp explained'],
+                      ['How to keep a gaming laptop cool', 'gaming laptop cooling tips'], ['Do you need a 240Hz screen on a gaming laptop?', 'gaming laptop refresh rate']],
         'speakers' => [['2.0 vs 2.1 speakers for a gaming desk', '2.1 vs 2.0 speakers'], ['Bookshelf speakers vs computer speakers', 'bookshelf vs computer speakers'],
                        ['Soundbar or desktop speakers for a gaming setup?', 'soundbar vs pc speakers'], ['How to place desktop speakers for the best sound', 'desktop speaker placement']],
     ];
     return $x[$slug] ?? [];
 }
+
+const ROC_BLOG_SEED_V = 2;
 
 const ROC_BLOG_GAMES = ['Cyberpunk 2077', 'Elden Ring', 'GTA V', 'Red Dead Redemption 2', 'Baldur\'s Gate 3', 'Call of Duty: Black Ops 6', 'Fortnite',
                         'Valorant', 'Counter-Strike 2', 'Minecraft', 'Apex Legends', 'Black Myth: Wukong', 'Starfield', 'Hogwarts Legacy', 'Forza Horizon 5'];
@@ -238,12 +252,15 @@ function rocBlogPlanSeed(PDO $pdo, array $old = []): array {
         if (isset($topics[$id])) $topics[$id] = array_merge($topics[$id], array_intersect_key($t, array_flip(['status', 'post_id', 'slug', 'title', 'keyword', 'secondary', 'stage'])));
         elseif (($t['status'] ?? '') !== 'planned' || !empty($t['manual'])) $topics[$id] = $t;
     }
-    return ['pillars' => $pillars, 'topics' => array_values($topics), 'built' => gmdate('c')];
+    return ['pillars' => $pillars, 'topics' => array_values($topics), 'built' => gmdate('c'), 'seed_v' => ROC_BLOG_SEED_V,
+            'last_pillar' => $old['last_pillar'] ?? null, 'round' => $old['round'] ?? null];
 }
 
 function rocBlogPlan(PDO $pdo): array {
     $p = rocBlogGet($pdo, 'blog_plan', null);
     if (!is_array($p) || empty($p['topics'])) { $p = rocBlogPlanSeed($pdo); rocBlogSet($pdo, 'blog_plan', $p); }
+    // New learn topics for every category (Deploy 65): added to the plan once, written posts kept.
+    elseif ((int)($p['seed_v'] ?? 1) < ROC_BLOG_SEED_V) { $p = rocBlogPlanSeed($pdo, $p); rocBlogSet($pdo, 'blog_plan', $p); }
     // Category pages live at /category/{slug}/ (/products/{slug}/ and /products/category/{slug}/ only redirect there).
     foreach ($p['pillars'] as &$pl) $pl['url'] = (string)preg_replace('#^/products/(?:category/)?(pc-hardware|gaming-hardware|' . implode('|', array_map('preg_quote', array_keys(rocBlogSite($pdo)['cats']))) . ')/$#', '/category/$1/', (string)$pl['url']);
     unset($pl);
@@ -262,6 +279,112 @@ function rocBlogPlanSync(PDO $pdo, array &$plan): void {
 const ROC_CLUSTER_ROUND = 6;   // posts per cluster before moving to the next one (2 learn, 2 compare, 2 buy)
 
 /**
+ * The owner's pattern (from ROC_BLOG_PATTERN_FROM, Pakistan date; CMS setting blog_pattern_from can move it):
+ * one product category at a time, 2-3 learn posts (TOFU), then a buying post (BOFU), then a comparison
+ * (MOFU); then the next category (monitors, keyboards, RAM, CPUs, graphics cards, mice ...), the one with
+ * the fewest posts first, so every category gets posts. Posts are at least 1,000 words, and each product
+ * section gets a "Want to buy? 3 similar picks" box linking to our product pages (rocBlogBuyBoxes).
+ */
+const ROC_BLOG_PATTERN_FROM = '2026-10-16';
+const ROC_BLOG_ROUND = ['tofu', 'tofu', 'tofu', 'bofu', 'mofu'];
+const ROC_BLOG_MIN_WORDS = 1000;
+
+function rocBlogNewPattern(PDO $pdo): bool {
+    $from = (string)rocBlogGet($pdo, 'blog_pattern_from', ROC_BLOG_PATTERN_FROM);
+    if ($from === 'off') return false;
+    return (new DateTime('now', new DateTimeZone(ROC_BLOG_TZ)))->format('Y-m-d') >= $from;
+}
+
+/** The next topic of the round under way (plan.round = {pillar, step}), or the first of a new round. */
+function rocBlogNextInRound(array $plan, array $open): ?array {
+    $openBy = [];
+    foreach ($open as $t) if (strpos((string)$t['pillar'], 'cat-') === 0) $openBy[$t['pillar']][$t['stage']][] = $t;
+    if (!$openBy) return null;
+    $pick = function (string $pillar, int $from) use ($openBy): ?array {
+        for ($i = $from; $i < count(ROC_BLOG_ROUND); $i++) {
+            // A third learn post only when the category still has one; otherwise go on to the buying post.
+            if (!empty($openBy[$pillar][ROC_BLOG_ROUND[$i]])) return $openBy[$pillar][ROC_BLOG_ROUND[$i]][0];
+        }
+        return null;
+    };
+    $round = (array)($plan['round'] ?? []);
+    $cur = (string)($round['pillar'] ?? '');
+    if ($cur !== '' && isset($openBy[$cur]) && ($t = $pick($cur, (int)($round['step'] ?? 0)))) return $t;
+    // A new round: the category with the fewest posts (not the one just finished), then by name.
+    $written = [];
+    foreach ($plan['topics'] as $t) if (($t['status'] ?? '') === 'written') $written[$t['pillar']] = ($written[$t['pillar']] ?? 0) + 1;
+    $ids = array_keys($openBy);
+    usort($ids, function ($a, $b) use ($written, $cur) {
+        return [$a === $cur ? 1 : 0, $written[$a] ?? 0, $a] <=> [$b === $cur ? 1 : 0, $written[$b] ?? 0, $b];
+    });
+    foreach ($ids as $id) if ($t = $pick($id, 0)) return $t;
+    return null;
+}
+
+/** After a post is written: where the round stands (called by rocBlogCreate). */
+function rocBlogRoundAfter(array $plan, array $topic): array {
+    $round = (array)($plan['round'] ?? []);
+    $step = ($round['pillar'] ?? '') === $topic['pillar'] ? (int)($round['step'] ?? 0) : 0;
+    for ($i = $step; $i < count(ROC_BLOG_ROUND); $i++) if (ROC_BLOG_ROUND[$i] === $topic['stage']) { $step = $i + 1; break; }
+    return $step >= count(ROC_BLOG_ROUND) ? ['pillar' => $topic['pillar'], 'step' => count(ROC_BLOG_ROUND), 'done' => gmdate('c')]
+                                          : ['pillar' => $topic['pillar'], 'step' => $step];
+}
+
+/**
+ * "Want to buy?" boxes: after each section that is about a product (links one of our product pages), a box
+ * with 3 similar products of the same category, linking to our product pages (where the Amazon button is).
+ * At most 3 boxes; a post about a category with no product section gets one box after its second section.
+ */
+function rocBlogBuyBoxes(PDO $pdo, string $content, ?array $topic): string {
+    $S = rocBlogSite($pdo);
+    preg_match_all('#href="/products/([a-z0-9-]+)/"#', $content, $m);
+    $inPost = array_flip($m[1]);
+    try {
+        $info = [];
+        foreach ($pdo->query("SELECT slug, best_for, short_desc FROM products WHERE status = 'published'")->fetchAll(PDO::FETCH_ASSOC) as $r)
+            $info[$r['slug']] = trim((string)($r['best_for'] ?: '')) ?: rocCmsTruncate(strip_tags((string)$r['short_desc']), 90);
+    } catch (\Throwable $e) { $info = []; }
+    $used = [];
+    $box = function (string $cat, string $skip) use ($S, $inPost, $info, &$used): string {
+        $list = [];
+        foreach ($S['products'] as $slug => $p) {
+            if ($p['cat'] !== $cat || $slug === $skip || isset($inPost[$slug]) || isset($used[$slug])) continue;
+            $list[] = [$p['dp'] ? 0 : 1, $slug, $p];
+        }
+        usort($list, function ($a, $b) { return [$a[0], $a[1]] <=> [$b[0], $b[1]]; });   // with a direct Amazon page first
+        $list = array_slice($list, 0, 3);
+        if (count($list) < 2) return '';
+        [$one] = rocBlogNouns($cat, $S['cats'][$cat]['name'] ?? $cat);
+        $li = '';
+        foreach ($list as [, $slug, $p]) {
+            $used[$slug] = 1;
+            $li .= '<li><a href="' . rocLayerH($p['url']) . '">' . rocLayerH($p['title']) . '</a>' . (($info[$slug] ?? '') !== '' ? ': ' . rocLayerH($info[$slug]) : '') . '</li>';
+        }
+        return "\n<blockquote><p><strong>Want to buy " . (preg_match('/^[aeiou]/i', $one) ? 'an ' : 'a ') . rocLayerH($one) . "? Here are " . count($list) . " similar picks:</strong></p><ul>{$li}</ul>"
+             . "<p>Open a product to see its full details, then use the Amazon button there.</p></blockquote>\n";
+    };
+    $parts = preg_split('#(?=<h2[\s>])#i', $content);
+    $n = 0; $out = '';
+    foreach ($parts as $i => $sec) {
+        $out .= $sec;
+        if ($n >= 3 || !preg_match('#^<h2[^>]*>(.*?)</h2>#is', $sec, $hm) || preg_match('/\b(faq|conclusion|verdict|final|keep reading|questions)\b/i', strip_tags($hm[1]))) continue;
+        if (preg_match('#href="/products/([a-z0-9-]+)/"#', $sec, $pm) && isset($S['products'][$pm[1]])) {
+            $b = $box($S['products'][$pm[1]]['cat'], $pm[1]);
+            if ($b !== '') { $out .= $b; $n++; }
+        }
+    }
+    if ($n === 0 && $topic && strpos((string)$topic['pillar'], 'cat-') === 0) {
+        $b = $box(substr((string)$topic['pillar'], 4), '');
+        if ($b !== '') {
+            $out = ''; $h2 = 0;
+            foreach ($parts as $sec) { $out .= $sec; if (preg_match('#^<h2[\s>]#i', $sec) && ++$h2 === 2) $out .= $b; }
+            if ($h2 < 2) $out .= $b;
+        }
+    }
+    return $out;
+}
+
+/**
  * Next topic. One cluster at a time: keep writing in the cluster that is under way until it has
  * ROC_CLUSTER_ROUND more posts, so its posts can link to each other quickly; then the cluster with
  * the fewest posts. Inside the cluster, the funnel stage that is furthest behind
@@ -271,6 +394,7 @@ function rocBlogNextTopic(PDO $pdo, array $plan): ?array {
     $open = array_values(array_filter($plan['topics'], function ($t) { return ($t['status'] ?? '') === 'planned'; }));
     if (!$open) return null;
     foreach ($open as $t) if (!empty($t['manual'])) return $t;
+    if (rocBlogNewPattern($pdo)) { $t = rocBlogNextInRound($plan, $open); if ($t) return $t; }
     $written = []; $byStage = [];
     foreach ($plan['topics'] as $t) {
         if (($t['status'] ?? '') !== 'written') continue;
@@ -360,7 +484,8 @@ function rocBlogCreate(PDO $pdo, string $root, array $in, string $source): array
     if ($metaT === '' || mb_strlen($metaT) > 60) $errors['meta_title'] = 'Meta title must be 1-60 characters.';
     if (mb_strlen($metaD) < 70 || mb_strlen($metaD) > 160) $errors['meta_description'] = 'Meta description must be 70-160 characters.';
     if ($excerpt === '') $errors['excerpt'] = 'Excerpt is required.';
-    if ($words < 600) $errors['content_html'] = "Content has {$words} words; at least 600 are needed.";
+    $minWords = rocBlogNewPattern($pdo) ? ROC_BLOG_MIN_WORDS : 600;
+    if ($words < $minWords) $errors['content_html'] = "Content has {$words} words; at least {$minWords} are needed. Write more useful detail in every section.";
 
     $slug = rocBlogSlug((string)($in['slug'] ?? '') ?: $title);
     if ($slug === '') $errors['slug'] = 'Slug needs letters or numbers.';
@@ -380,6 +505,7 @@ function rocBlogCreate(PDO $pdo, string $root, array $in, string $source): array
     $topicId = (string)($in['topic_id'] ?? '');
     $topic = null;
     foreach ($plan['topics'] as $tp) if ($tp['id'] === $topicId) $topic = $tp;
+    if (rocBlogNewPattern($pdo)) $content = rocBlogBuyBoxes($pdo, $content, $topic);   // "Want to buy?" boxes to our product pages
     if ($topic) $content = rocBlogWithRelated($pdo, $plan, $topic, $content, '');
 
     // The product photo of the topic says best what the post is about; AI picture only without one.
@@ -401,6 +527,7 @@ function rocBlogCreate(PDO $pdo, string $root, array $in, string $source): array
         foreach ($plan['topics'] as &$tp) if ($tp['id'] === $topicId) { $tp['status'] = 'written'; $tp['post_id'] = $id; $tp['slug'] = $slug; unset($tp['manual']); }
         unset($tp);
         $plan['last_pillar'] = $topic['pillar'];
+        if (rocBlogNewPattern($pdo)) $plan['round'] = rocBlogRoundAfter($plan, $topic);
         rocBlogSet($pdo, 'blog_plan', $plan);
     }
     rocBlogLog($pdo, ['id' => $id, 'title' => $title, 'slug' => $slug, 'publish_at' => $at, 'words' => $words, 'by' => $source,
@@ -967,7 +1094,8 @@ function rocBlogPrompt(array $brief, string $publishAt): string {
         . "\n\nINTERNAL LINKS YOU MAY USE (1-3 of them, only where they really help):\n" . $links($brief['links']['may'])
         . "\nUse NO other internal addresses. External links only to official sources (game publishers, manufacturers) and only if essential.\n\n"
         . "RULES\n"
-        . "- 1100-1600 words of genuinely useful, accurate content in clear natural English. No filler, no keyword stuffing.\n"
+        . "- At least 1,000 words (aim for 1,200-1,600) of genuinely useful, accurate content in clear natural English. No filler, no keyword stuffing.\n"
+        . "- When the post covers products, give each product its own <h2> or <h3> section that links its product page once (from the links above): who it is for, key features, pros and cons. The site adds a short \"similar products\" box after such sections, so do not write one yourself.\n"
         . "- Focus keyword in the title, in the first 100 words, in one <h2> and in the meta description.\n"
         . "- Start with a 2-3 sentence intro that answers the search intent straight away. Link the hub page in the first two paragraphs.\n"
         . "- Sections with <h2>; <h3> only inside an <h2> section. Never <h1>. Every <h2> text must be different.\n"

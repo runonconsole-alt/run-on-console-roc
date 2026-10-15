@@ -424,6 +424,18 @@ RELEASES = [
                   'Privacy policy: saved PC specs and answer votes'],
          checks=[dict(label='ROC assistant', type='contains', path='api/v1/agent-lib.php', text='rocAgentSpecsFromText')],
          pr=REPO + '64'),
+    dict(deploy=65, date='2026-10-15', title='A "Can I run it?" page for every PC game (2,363 pages)',
+         changes=['/can-i-run/: every PC game of the checker, the most popular first, then A to Z, with a search box',
+                  '/can-i-run/{game}/ for each game: the official minimum and recommended requirements from Steam, a quick check of your PC, which graphics cards and processors run it, how common PCs do, upgrade picks from our products, questions and answers (FAQ for Google) and similar games',
+                  'Games sitemap (/sitemaps/games-sitemap.xml) listed in /sitemap.xml',
+                  'The game list grew to 2,400 games and now has the biggest ones that were missing: Counter-Strike 2, Cyberpunk 2077, Red Dead Redemption 2, PUBG, Apex Legends, Dota 2, GTA V, Rust, Rainbow Six Siege, Terraria and older classics',
+                  'ROC links each game to its own requirements page; the checker page links to it too',
+                  'Footer: PC Game Requirements A to Z; "500+ games" is now "2,000+ games" across the site',
+                  'Blog writer, from 16 October (Pakistan time): one product category at a time, 3 learn posts (TOFU), then a buying post (BOFU), then a comparison (MOFU), then the next category (monitors, keyboards, RAM, CPUs, graphics cards, mice, cases, chairs, laptops ...); every post at least 1,000 words; after each product section a "Want to buy? 3 similar picks" box linking to our product pages (the Amazon button is there); new learn topics for CPUs, RAM, cases, chairs, handhelds and laptops'],
+         checks=[dict(label='Game pages', type='file', path='game-render.php'),
+                 dict(label='Game pages switched on (cli-game-pages.php)', type='contains', path='.htaccess', text='ROC game pages BEGIN'),
+                 dict(label='Blog writer pattern', type='contains', path='api/v1/cms/blog-engine-lib.php', text='rocBlogBuyBoxes')],
+         pr=REPO + '65'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

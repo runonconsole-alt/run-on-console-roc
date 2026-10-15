@@ -64,7 +64,7 @@ export const HeroSection = () => {
 
           {/* Subtitle */}
           <p className="text-emerald-100 text-xs sm:text-sm sm:text-base leading-relaxed max-w-lg">
-            Independent gear picks for PC and console, guides for every gaming platform and a free checker for 500+ games.
+            Independent gear picks for PC and console, guides for every gaming platform and a free checker for 2,000+ games.
           </p>
 
           {/* Floating Hardware Badges */}
@@ -131,7 +131,7 @@ export const HeroSection = () => {
                 <FileText className="w-5 h-5" />
               </div>
               <div>
-                <div className="font-display font-extrabold text-lg sm:text-xl text-white">500+</div>
+                <div className="font-display font-extrabold text-lg sm:text-xl text-white">2,000+</div>
                 <div className="text-[11px] text-emerald-200 font-medium">Games checked</div>
               </div>
             </div>

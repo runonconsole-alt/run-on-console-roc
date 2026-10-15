@@ -76,6 +76,15 @@ DirectoryIndex index.html index.php
   RewriteRule ^signup/?$ /auth/signup/ [R=301,L]
   RewriteRule ^register/?$ /auth/signup/ [R=301,L]
 
+  # ROC game pages BEGIN (cli-game-pages.php)
+  # One "Can I run it?" page per PC game (game-render.php, data: roc-steam-games.json)
+  RewriteRule ^can-i-run$ /can-i-run/ [R=301,L]
+  RewriteRule ^can-i-run/([a-z0-9-]+)$ /can-i-run/$1/ [R=301,L]
+  RewriteRule ^can-i-run/$ game-render.php [L,QSA]
+  RewriteRule ^can-i-run/([a-z0-9-]+)/$ game-render.php?slug=$1 [L,QSA]
+  RewriteRule ^sitemaps/games-sitemap\.xml$ game-render.php?sitemap=1 [L]
+  # ROC game pages END
+
   # Blogs come from the CMS database (blog-render.php), not the old static folders
   RewriteRule ^blogs$ /blogs/ [R=301,L]
   RewriteRule ^blogs/index\.html$ /blogs/ [R=301,L,NC]

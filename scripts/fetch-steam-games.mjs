@@ -91,6 +91,14 @@ const candidates = Object.values(cache.spy).flat()
   .filter((a) => a && a.appid >= MIN_APPID && !seen.has(a.appid) && seen.add(a.appid))
   .sort((a, b) => b.positive - a.positive);
 console.log(`${candidates.length} candidates`);
+// --retry=N: ask Steam again about the N most popular candidates that an earlier run skipped
+// (a failed or rate-limited request is cached as "not kept": CS2, Cyberpunk 2077, PUBG ... were lost that way).
+const RETRY = arg('retry', 0);
+if (RETRY) {
+  let n = 0;
+  for (const c of candidates.slice(0, RETRY)) if (cache.apps[c.appid] === null) { delete cache.apps[c.appid]; n++; }
+  console.log(`retrying ${n} skipped games`);
+}
 
 // 2. store data, most-reviewed first, until there are enough recent games
 const isKept = (a) => a && a._keep && yearOf(a) >= FROM_YEAR;   // the year is checked here, so a later run can use older games
@@ -109,6 +117,7 @@ for (const c of candidates) {
     console.log(`  + ${app.name} (${yearOf(app)})  [${kept}/${TARGET}]`);
   } else {
     cache.apps[c.appid] = null;   // checked, not kept
+    console.log(`  - ${c.name}: ${app ? 'not kept (' + (app.type !== 'game' ? app.type : 'no PC requirements or adult') + ')' : 'no answer'}`);
   }
   if (Object.keys(cache.apps).length % 10 === 0) save();
   await sleep(1600);
