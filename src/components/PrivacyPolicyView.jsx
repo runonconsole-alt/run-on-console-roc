@@ -29,7 +29,7 @@ export const PrivacyPolicyView = () => {
           How Run On Console handles your data, which cookies and tools the website uses, and how we
           earn money through affiliate links (Amazon Associates) and advertising (Google AdSense).
         </p>
-        <p className="text-emerald-200/80 text-[11px] mt-3">Last updated: October 14, 2026</p>
+        <p className="text-emerald-200/80 text-[11px] mt-3">Last updated: October 15, 2026</p>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm space-y-8 text-xs sm:text-sm leading-relaxed">
@@ -73,7 +73,10 @@ export const PrivacyPolicyView = () => {
             Amazon, from the manufacturer or are our own.
           </p>
           <p>
-            We may also join other affiliate programs in the future; the same rules apply to them.
+            Visitors in Pakistan, where Amazon does not deliver to most addresses, may also see “Check on Daraz”
+            buttons. These can be Daraz affiliate links: if you buy through them we may earn a commission, at no
+            extra cost to you, and Daraz may place its own cookies. Purchases on Daraz are covered by Daraz’s own
+            privacy policy. We may join other affiliate programs in the future; the same rules apply to them.
           </p>
         </Section>
 
@@ -103,6 +106,7 @@ export const PrivacyPolicyView = () => {
             <li><strong>Microsoft Clarity</strong>: shows how visitors use pages (clicks, scrolling) so we can improve the layout.</li>
             <li><strong>Cloudflare Turnstile</strong>: checks that sign-up and contact forms are used by people, not bots.</li>
             <li><strong>Amazon</strong>: sets its own cookies when you follow an affiliate link (see section 2).</li>
+            <li><strong>Daraz</strong>: sets its own cookies when you follow a Daraz link (see section 2).</li>
             <li><strong>Google AdSense</strong>: shows advertisements (see section 6).</li>
           </ul>
           <p>

@@ -436,6 +436,15 @@ RELEASES = [
                  dict(label='Game pages switched on (cli-game-pages.php)', type='contains', path='.htaccess', text='ROC game pages BEGIN'),
                  dict(label='Blog writer pattern', type='contains', path='api/v1/cms/blog-engine-lib.php', text='rocBlogBuyBoxes')],
          pr=REPO + '65'),
+    dict(deploy=66, date='2026-10-15', title='Daraz for Pakistan; ROC asks for your PC and names the upgrade',
+         changes=['CMS > Social profiles & Amazon tag > Daraz for Pakistan: switch on a "Check on Daraz" button that visitors in Pakistan see next to every Amazon button (product pages, product lists, game pages, blogs); paste your Daraz affiliate link template so sales are credited; optional Daraz link per product (the rest open a Daraz search for the product)',
+                  'Daraz clicks are counted in CMS > Live activity like Amazon clicks; privacy policy mentions Daraz',
+                  'ROC no longer guesses your PC from the browser: it asks for the graphics card, processor and RAM, shows where to find them (dxdiag, Task Manager, the 🖥 button) when you do not know, then says if the game runs and names the exact upgrade (for example: RTX 3060 or RX 6600, 16 GB RAM)',
+                  'ROC writes Roman Urdu with Urdu words, never Hindi (meharbani, shukriya, sawal ...)',
+                  'Game checker page: the "Auto-Detect by PC Model Name (AI Bot)" button is removed'],
+         checks=[dict(label='Daraz settings', type='contains', path='api/v1/cms/social-lib.php', text='rocDarazLoad'),
+                 dict(label='ROC upgrades', type='contains', path='api/v1/agent-lib.php', text='rocAgentUpgrades')],
+         pr=REPO + '66'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

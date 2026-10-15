@@ -48,14 +48,15 @@ function rocAgentSystem(string $lang, array $facts): string {
     return "You are ROC, the friendly gaming assistant of the website Run On Console (runonconsole.com). Rules:\n"
          . "- Reply in the visitor's language: " . ($lang === 'roman-urdu' ? 'Roman Urdu (Urdu written in English letters), simple words' : 'simple English')
          . ". If the visitor writes in Urdu script, reply in Roman Urdu. Keep it short: at most 120 words, no headings.\n"
+         . "- Roman Urdu means URDU, never Hindi: no Hindi words such as kripya, dhanyavaad, prashn, uttar, sahayata, uplabdh, avashyak, vishay, samasya. Use Urdu: meharbani kar ke, shukriya, sawal, jawab, madad, mojood, zaroori, masla.\n"
          . "- Talk like a friendly gamer friend, the way ChatGPT or Claude chat: natural, warm, varied sentences, never the same reply twice, and follow the conversation. Answer the visitor's actual message first.\n"
          . "- Small talk is fine (hi, salam, how are you, kya haal hai, who are you, what can you do, thanks): reply naturally in one or two lines, and you may ask what they play or how you can help with gaming.\n"
-         . "- If the visitor is on a phone (detected_in_browser.system is Android or iOS, or they say mobile / phone / mob): tell them clearly that you cannot guess their PC from their mobile (in their language, e.g. \"Main aap ke mobile se aap ke PC ka andaza nahi laga sakta\"), then ask them to type the PC's graphics card, processor and RAM, or to open runonconsole.com on that PC and ask again. Never treat the phone's chip as their PC. You can also help with mobile games.\n"
+         . "- You CANNOT see or detect the visitor's PC. Never say what their PC has (graphics card, processor, RAM) unless they told you in this chat, uploaded a dxdiag report, or visitor_pc.saved_from_earlier has it.\n"
          . "- visitor_pc.saved_from_earlier is the PC this member told you before (kept with their account): use it without asking again, say briefly which PC you used, and tell them they can say 'forget my PC' to remove it.\n"
          . "- The best way to read a PC exactly: the 🖥 button in this chat box reads a dxdiag file (Win+R, type dxdiag, Save All Information). Suggest it when specs are missing or unclear.\n"
          . "- Analyze my PC, step by step: ask for what is missing, one or two things at a time. Show where to find them: Windows: Settings > System > About (processor and RAM), Task Manager > Performance > GPU (graphics card), or Win+R and type dxdiag; Mac: Apple menu > About This Mac; a laptop: the model name on the sticker underneath. Laptop chips: U = low power, H/HX = gaming. When graphics card and processor are known and no game is named, use pc_summary: say which games run well, which only on low settings and which are too heavy, and suggest one sensible upgrade only if they ask.\n"
          . "- Questions about this website (what products or categories it has, how many, a product's page, the newest blogs or news): use this_website and link the pages.\n"
-         . "- If the visitor asks to analyze or check their PC: use visitor_pc (detected_in_browser is what their browser reports, usually the graphics card; it can be wrong for laptops with two GPUs). Say what you see, ask for the missing parts (processor model, RAM) and which game they want to play.\n"
+         . "- 'Can I run <game>' or analyze my PC, in this order: (1) If visitor_pc.known lacks the graphics card, processor or RAM, do NOT guess and give no percent: ask them to tell you their graphics card, processor and RAM in one short message. (2) If they say they do not know where to see them (pata nahi, kahan se dekhun, where do I find): tell them exactly where: Windows: press Win + R, type dxdiag, Enter; the System tab shows Processor and Memory (RAM), the Display tab shows the graphics card name; or Task Manager (Ctrl + Shift + Esc) > Performance; or the 🖥 button in this chat to upload the dxdiag file; a laptop: the model name on the sticker underneath. Then ask them to type what they see. (3) Once known, use check: say clearly if the game runs and how (high, medium, low settings or not playable well) with the percent. (4) If it is below the recommended specs, name the exact upgrade from upgrade_options, for example \"Agar aap apna graphics card GeForce RTX 3060 (ya Radeon RX 6600) kar lein to ye game high settings par chalega\"; for RAM say the exact size. Name only the parts that are short.\n"
          . "- You answer EVERYTHING about gaming: games and their history, studios, consoles and PCs, PC hardware, esports teams, players and tournaments, game tips, settings and performance, gaming news. Use your own knowledge; when you are not sure, say so.\n"
          . "- Esports (teams, players, tournaments, who won, results) and questions about Run On Console / ROC itself (what it is, when it was made, where it is, how to contact it) are IN range: answer them, using about_run_on_console for the site. For results you are not sure about, give what you know and say it may have changed since.\n"
          . "- Esports winners, finals and scores: give ONLY what reference.esports_results says (event, year, winner). If the event is not there, say you are not sure of that result instead of guessing. Never invent final scores or opponents.\n"
@@ -66,7 +67,7 @@ function rocAgentSystem(string $lang, array $facts): string {
          . "- Never use or answer bad language, insults, sexual or adult content, violence against real people, hacking, cheats that break rules, piracy or anything illegal. For those answer exactly: \"" . $no . "\"\n"
          . "- Never repeat your introduction once the chat has started.\n"
          . "- For games, scores and products of this website use the FACTS below. Never invent prices (prices are on Amazon through the product pages), FPS numbers, specs or products.\n"
-         . "- 'Can I run it': if a check exists, give the percent and the verdict and what to upgrade. If the graphics card or processor is unknown, ask for the graphics card, processor and RAM (Windows: Task Manager > Performance, or dxdiag). If the game is not in our list, say our checker has 2,000+ games (list: /can-i-run/) and suggest /compatibility/.\n"
+         . "- If the game is not in our list, say our checker has 2,000+ games (list: /can-i-run/) and suggest /compatibility/.\n"
          . "- Products in products_shown_as_cards appear as cards under your answer: mention them by name in one line each. Recommend gear or upgrades ONLY when the visitor asks for them; otherwise you may add one short line that they can ask you for picks.\n"
          . "- game_found and platform in the FACTS are this website's data (requirements, devices, guide text): use them first and link the page (the game's requirements_page when there is one, else the checker; or /gaming-platforms/...).\n"
          . "- A picture from the visitor: describe what matters for gaming (for example read the PC specs from a screenshot, name the game or the hardware). If the picture is not about gaming or is not decent, answer exactly: \"" . $no . "\"\n"
@@ -326,6 +327,20 @@ function rocAgentAbout(): array {
                     'write_for_us' => '/write-for-us/', 'privacy' => '/privacy-policy/', 'terms' => '/terms-and-conditions/'],
         'not_shared' => 'Do not invent or share anything not listed here (owner names, revenue, traffic, servers, passwords, keys, internal tools). Say it is not public.',
     ];
+}
+
+/**
+ * Named parts for what a check found short: the weakest common graphics cards / processors that reach
+ * the game's recommended level (game-pages-lib.php reference lists), and the RAM size.
+ */
+function rocAgentUpgrades(array $check): array {
+    require_once __DIR__ . '/game-pages-lib.php';
+    $out = [];
+    foreach ($check['missing'] as $mi) {
+        if ($mi['part'] === 'ram') { $out['ram'] = rtrim(rtrim(number_format((float)$mi['need'], 1), '0'), '.') . ' GB'; continue; }
+        $out[$mi['part'] === 'gpu' ? 'graphics_card' : 'processor'] = rocGpPartsFor($mi['part'], (float)$mi['need'], 3, true);
+    }
+    return $out;
 }
 
 /** What the site knows about a game: its requirements and the checker link. */
@@ -613,11 +628,8 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
     $lang = rocAgentLang($q);
     // Hardware and game: the newest mention wins, so earlier messages still count ("RTX 3060 hai" then "GTA 5?").
     $gpu = rocAgentGpuScore($q) ?? rocAgentGpuScore($userText);
-    // "Analyze my PC": the graphics card the browser reports, when the visitor has not named one.
-    $detGpu = trim(mb_substr((string)($device['gpu'] ?? ''), 0, 120));
-    $askPc = (bool)preg_match('/analy[sz]|check (my|mera)|my pc|mera pc|meri pc|my laptop|mera laptop|system|specs?/i', $q);
-    if (preg_match('/android|ios/i', (string)($device['os'] ?? ''))) $detGpu = '';   // a phone says nothing about the PC
-    if ($gpu === null && $detGpu !== '' && ($askPc || preg_match('/\brun\b|\bchal|\bplay\b|\bkhel|\bfps\b/i', $q))) $gpu = rocAgentGpuScore($detGpu);
+    // What the browser reports (WebGL) is not used for the PC: it is often wrong (laptops with two cards,
+    // phones), so ROC asks for the parts instead (owner, 2026-10-15).
     $cpu = rocAgentCpuScore($q) ?? rocAgentCpuScore($userText);
     $ram = rocAgentRam($q) ?? rocAgentRam($userText);
     // Remember the PC for this member; use the saved one when nothing new is said.
@@ -659,11 +671,10 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
               'reference' => rocAgentKb($root, $q . ' ' . (count($history) > 1 ? (string)($history[count($history) - 3]['content'] ?? '') : '')),
               'visitor_pc' => ['graphics_card_score' => $gpu, 'processor_score' => $cpu, 'ram_gb' => $ram,
                                'saved_from_earlier' => $saved ? $saved['label'] : null,
-                               'on_phone' => (bool)preg_match('/android|ios/i', (string)($device['os'] ?? '')),
-                               'detected_in_browser' => $detGpu !== '' ? ['graphics' => $detGpu, 'cpu_threads' => (int)($device['threads'] ?? 0) ?: null,
-                                                                         'memory_gb_at_least' => (float)($device['ram'] ?? 0) ?: null, 'system' => mb_substr((string)($device['os'] ?? ''), 0, 40)] : null,
+                               'known' => array_values(array_filter([$gpu !== null ? 'graphics card' : '', $cpu !== null ? 'processor' : '', $ram !== null ? 'RAM' : ''])),
                                'scale' => '1.8 = integrated graphics, 4.5 = GTX 1650 / i5 8th gen, 7 = RTX 3060 / i5 12th gen, 8.5 = RTX 4070 / i7 12th gen, 10 = RTX 4080+ / i9'],
-              'game_found' => $game ? rocAgentGameInfo($game) : null, 'check' => $check, 'products_shown_as_cards' => $products,
+              'game_found' => $game ? rocAgentGameInfo($game) : null, 'check' => $check, 'upgrade_options' => $check ? rocAgentUpgrades($check) : null,
+              'products_shown_as_cards' => $products,
               'platform' => rocAgentPlatform($pdo, $q),
               'recommendations' => $products ? 'shown' : 'only when the visitor asks for gear or upgrades: then tell them to ask, for example "suggest a graphics card"',
               'catalog_categories' => 'mice, keyboards, headsets and audio, speakers, monitors, graphics cards, processors, RAM, PC cases, gaming chairs, handhelds, laptops',
@@ -731,14 +742,20 @@ function rocAgentBasic(string $lang, ?array $check, ?array $game, array $product
                    'playable on medium to high settings' => 'medium se high settings par chalega', 'playable on low settings only' => 'sirf low settings par chalega',
                    'below the minimum specs (not playable well)' => 'minimum se kam hai, theek nahi chalega'][$check['verdict']] . '.'
                  : "{$check['title']}: your PC scores {$check['percent']}%: " . $check['verdict'] . '.';
-        $parts = implode(', ', array_map(function ($m) { return ['gpu' => 'graphics card', 'cpu' => 'processor', 'ram' => 'RAM'][$m['part']]; }, $check['missing']));
-        if ($check['missing']) $s .= $products ? ($ur ? ' Behtar chalane ke liye neeche wale parts dekhein.' : ' The parts below would bring it to the recommended specs.')
-                                               : ($ur ? " Upgrade ki zaroorat: {$parts}. Picks chahiye to poochein \"upgrade suggest karo\"." : " To reach the recommended specs, upgrade the {$parts}. Ask me \"suggest an upgrade\" for picks.");
+        // The named upgrade: "graphics card GeForce RTX 2060 (ya Radeon RX 5600 XT)", "RAM 16 GB".
+        $up = rocAgentUpgrades($check); $named = [];
+        foreach (['graphics_card' => 'graphics card', 'processor' => 'processor', 'ram' => 'RAM'] as $k => $label) {
+            if (!isset($up[$k])) continue;
+            $v = $up[$k];
+            $named[] = $label . ' ' . (is_array($v) ? $v[0] . (isset($v[1]) ? ($ur ? ' (ya ' : ' (or ') . $v[1] . ')' : '') : $v);
+        }
+        if ($named) $s .= $ur ? ' Agar aap ' . implode(', ', $named) . ' kar lein to ye game recommended (high) settings par chalega.'
+                              : ' With ' . implode(', ', $named) . ' it reaches the recommended (high) settings.';
         if ($check['unknown_parts']) $s .= $ur ? ' (' . implode(', ', $check['unknown_parts']) . ' nahi bataya, is liye wo hisaab mein nahi.)' : ' (Not counted: ' . implode(', ', $check['unknown_parts']) . '.)';
         return $s;
     }
-    if ($game) return $ur ? "{$game['t']} check karne ke liye apna graphics card, processor aur RAM batayein (Windows: Task Manager > Performance)."
-                          : "To check {$game['t']}, tell me your graphics card, processor and RAM (Windows: Task Manager > Performance).";
+    if ($game) return $ur ? "{$game['t']} check karne ke liye apna graphics card, processor aur RAM batayein. Pata nahi? Win + R dabayein, dxdiag likh kar Enter: System tab mein Processor aur Memory (RAM), Display tab mein graphics card ka naam hai. Ya chat ka 🖥 button dabakar dxdiag file upload kar dein."
+                          : "To check {$game['t']}, tell me your graphics card, processor and RAM. Not sure? Press Win + R, type dxdiag, Enter: the System tab shows Processor and Memory (RAM), the Display tab the graphics card. Or upload the dxdiag file with the 🖥 button in this chat.";
     if ($products) return $ur ? 'Ye hamari site ke kuch achhe options hain:' : 'Here are some good picks from our site:';
     if ($gpu !== null || $cpu !== null) return $ur ? 'Shukriya! Ab game ka naam batayein, main check kar deta hoon. Agar game hamari list mein na ho to /compatibility/ par official requirements dekh sakte hain.'
                                                     : 'Thanks! Now tell me the game and I will check it. If it is not in our list, compare the official requirements on /compatibility/.';

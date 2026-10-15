@@ -29,6 +29,12 @@ const ROC_GP_CPUS = ['Intel Core 2 Quad Q6600', 'AMD FX-8350', 'Intel Core i3-61
     'AMD Ryzen 5 5600', 'Intel Core i5-12400', 'AMD Ryzen 7 3700X', 'Intel Core i7-10700', 'AMD Ryzen 5 7600', 'AMD Ryzen 7 5800X',
     'Intel Core i7-12700', 'Intel Core i9-12900K', 'AMD Ryzen 7 7800X3D'];
 
+/** Parts of the lists above that are still sold new, for upgrade advice. */
+const ROC_GP_IN_SHOPS = ['GeForce RTX 3050', 'GeForce RTX 3060', 'GeForce RTX 4060', 'GeForce RTX 5060', 'GeForce RTX 4070', 'GeForce RTX 5070',
+    'GeForce RTX 5080', 'Radeon RX 6600', 'Radeon RX 7600', 'Radeon RX 6700 XT', 'Radeon RX 7800 XT', 'Radeon RX 9070 XT', 'Intel Arc B580',
+    'Intel Core i3-10100', 'AMD Ryzen 5 5600', 'Intel Core i5-12400', 'AMD Ryzen 5 7600', 'AMD Ryzen 7 5800X', 'Intel Core i7-12700',
+    'Intel Core i9-12900K', 'AMD Ryzen 7 7800X3D'];
+
 /** "Baldur's Gate 3" -> "baldurs-gate-3", "Sid Meier’s Civilization® VI" -> "sid-meiers-civilization-vi". */
 function rocGpSlug(string $t): string {
     $t = str_replace(['™', '®', '©', "'", '’', '‘', '`'], '', $t);
@@ -97,9 +103,11 @@ function rocGpRefs(string $kind): array {
 }
 
 /** The weakest reference parts that reach $need (up to $n, at most one per brand while possible). */
-function rocGpPartsFor(string $kind, ?float $need, int $n = 3): array {
+function rocGpPartsFor(string $kind, ?float $need, int $n = 3, bool $inShops = false): array {
     if (!$need) return [];
     $ok = array_filter(rocGpRefs($kind), function ($s) use ($need) { return $s >= $need; });
+    // Upgrades: only parts still sold new (not a GTX 1080 or a Core i7-8700).
+    if ($inShops) $ok = array_intersect_key($ok, array_flip(ROC_GP_IN_SHOPS));
     // The weakest of each big brand first (NVIDIA and AMD cards, Intel and AMD processors), then the next weakest;
     // a brand only when its weakest part is near the need (not an RX 570 for a game that runs on integrated graphics).
     $pick = [];
