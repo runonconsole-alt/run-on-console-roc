@@ -44,6 +44,35 @@ const ROC_BLOG_STAGES = ['tofu', 'mofu', 'bofu'];
 const ROC_RELATED_H2 = 'Keep reading';
 /** The server writer starts this many seconds before each publishing time (2 hours). */
 const ROC_WRITER_LEAD = 7200;
+/**
+ * Review (owner, 2026-10-15): posts written by AI wait at least this long before they go live, so the
+ * owner can approve, edit or reject them in CMS > Blog writer; without a decision they go live at their
+ * time. News is not held (it gets old). CMS setting blog_review: 'on' (default) or 'off'.
+ */
+const ROC_BLOG_REVIEW_HOURS = 24;
+
+function rocBlogReviewOn(PDO $pdo): bool { return (string)rocBlogGet($pdo, 'blog_review', 'on') !== 'off'; }
+
+/** Posts waiting for review: [post id => time it was written], only the ones still scheduled. */
+function rocBlogPending(PDO $pdo): array {
+    $p = rocBlogGet($pdo, 'blog_review_pending', []);
+    $p = is_array($p) ? $p : [];
+    if (!$p) return [];
+    $in = implode(',', array_fill(0, count($p), '?'));
+    $st = $pdo->prepare("SELECT id FROM blogs WHERE status = 'scheduled' AND id IN ({$in})");
+    $st->execute(array_keys($p));
+    $live = array_flip($st->fetchAll(PDO::FETCH_COLUMN));
+    $keep = array_intersect_key($p, $live);
+    if (count($keep) !== count($p)) rocBlogSet($pdo, 'blog_review_pending', $keep);
+    return $keep;
+}
+
+function rocBlogPendingSet(PDO $pdo, string $id, bool $on): void {
+    $p = rocBlogGet($pdo, 'blog_review_pending', []);
+    $p = is_array($p) ? $p : [];
+    if ($on) $p[$id] = gmdate('Y-m-d H:i:s'); else unset($p[$id]);
+    rocBlogSet($pdo, 'blog_review_pending', $p);
+}
 
 /* -------------------------------------------------------------- settings */
 
@@ -530,6 +559,7 @@ function rocBlogCreate(PDO $pdo, string $root, array $in, string $source): array
         if (rocBlogNewPattern($pdo)) $plan['round'] = rocBlogRoundAfter($plan, $topic);
         rocBlogSet($pdo, 'blog_plan', $plan);
     }
+    if (rocBlogReviewOn($pdo)) rocBlogPendingSet($pdo, $id, true);   // waits for the owner's review (CMS > Blog writer)
     rocBlogLog($pdo, ['id' => $id, 'title' => $title, 'slug' => $slug, 'publish_at' => $at, 'words' => $words, 'by' => $source,
                       'stage' => $topic['stage'] ?? '', 'cluster' => $topic['pillar'] ?? '']);
     $local = (new DateTime($at . ' UTC'))->setTimezone(new DateTimeZone(ROC_BLOG_TZ));
@@ -1256,10 +1286,12 @@ function rocBlogServerTick(PDO $pdo, string $root, bool $force = false): ?string
     $state = rocBlogGet($pdo, 'blog_engine_state', []);
     $state = is_array($state) ? $state : [];
     if (!$force && !empty($state['last_try']) && time() - strtotime($state['last_try'] . ' UTC') < 1800) return null;
-    $free = rocBlogFreeSlots($pdo, 2);
+    // With review on, the post goes to a time at least 24 hours away, so the owner has a day to look at it.
+    $hold = rocBlogReviewOn($pdo) ? ROC_BLOG_REVIEW_HOURS * 3600 : 0;
+    $free = array_filter(rocBlogFreeSlots($pdo, $hold ? 3 : 2), function ($k) use ($hold) { return strtotime($k . ' UTC') - time() >= $hold; }, ARRAY_FILTER_USE_KEY);
     if (!$free) return null;
     $slot = array_key_first($free);
-    if (!$force && strtotime($slot . ' UTC') - time() > ROC_WRITER_LEAD) return null;     // not yet: 2 hours before the time
+    if (!$force && strtotime($slot . ' UTC') - time() > ROC_WRITER_LEAD + $hold) return null;     // not yet: 2 hours (+ the review day) before the time
     $brief = rocBlogBrief($pdo);
     if (!$brief) return 'The content plan has no topics left. Add topics or press "Refresh plan" in CMS > Blog agent.';
     $state['last_try'] = gmdate('Y-m-d H:i:s');

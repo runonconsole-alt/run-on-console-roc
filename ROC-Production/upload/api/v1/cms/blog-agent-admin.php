@@ -35,6 +35,23 @@ function rocBaSet(PDO $pdo, string $k, string $v, int $uid): void {
     else $pdo->prepare('INSERT INTO cms_settings (setting_key, setting_value, updated_by, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)')->execute([$k, $v, $uid]);
 }
 
+/** Posts written by AI that wait for the owner (approve, edit, publish now or reject). */
+function rocBaReview(PDO $pdo): array {
+    $p = rocBlogPending($pdo);
+    $rows = [];
+    if ($p) {
+        $in = implode(',', array_fill(0, count($p), '?'));
+        $st = $pdo->prepare("SELECT id, title, slug, excerpt, image, published_at, content FROM blogs WHERE id IN ({$in}) ORDER BY published_at");
+        $st->execute(array_keys($p));
+        foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $rows[] = ['id' => $r['id'], 'title' => $r['title'], 'slug' => $r['slug'], 'excerpt' => $r['excerpt'], 'image' => $r['image'],
+                       'publish_at' => gmdate('c', strtotime($r['published_at'] . ' UTC')), 'written' => gmdate('c', strtotime($p[$r['id']] . ' UTC')),
+                       'words' => count(preg_split('/\s+/u', trim(strip_tags((string)$r['content']))) ?: [])];
+        }
+    }
+    return ['on' => rocBlogReviewOn($pdo), 'hours' => ROC_BLOG_REVIEW_HOURS, 'pending' => $rows];
+}
+
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
     $log = json_decode((string)rocBaGet($pdo, 'blog_agent_log'), true) ?: [];
     // Current status of each logged post.
@@ -57,7 +74,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
         'groq' => (function () use ($pdo) { $k = trim((string)rocBlogGet($pdo, 'blog_groq_key', '')); return ['set' => $k !== '', 'end' => $k !== '' ? substr($k, -4) : '', 'model' => (string)rocBlogGet($pdo, 'blog_groq_model', '')]; })(),
         'state' => rocBlogGet($pdo, 'blog_engine_state', []) ?: new stdClass(), 'plan' => $plan, 'next' => $next['id'] ?? null,
         'next_slot' => $nextUtc ? gmdate('c', strtotime($nextUtc . ' UTC')) : null, 'writer_lead' => ROC_WRITER_LEAD,
-        'next_topic' => $next['title'] ?? null]);
+        'next_topic' => $next['title'] ?? null, 'review' => rocBaReview($pdo)]);
 }
 
 $in = json_decode((string)file_get_contents('php://input'), true) ?: [];
@@ -126,6 +143,38 @@ if ($act === 'test_key') {
     foreach ($t as $n => $r) { $any = $any || $r['ok']; $parts[] = $names[$n] . ': ' . ($r['ok'] ? 'works (' . $r['model'] . ')' : 'NOT working: ' . $r['error']); }
     if ($cf = rocBlogCf($pdo)) { $ri = rocCfImage($cf, 'A gaming headset on a desk, soft green light. No text.'); $parts[] = 'Cloudflare pictures: ' . ($ri['ok'] ? 'works' : 'NOT working: ' . $ri['error']); }
     rocBaOut($any ? 200 : 422, ['success' => $any, 'message' => implode(' · ', $parts), 'error' => $any ? null : implode(' · ', $parts)]);
+}
+// Review of AI posts: {action:'review', id, op: approve|publish_now|reject} or {action:'review_mode', on}.
+if ($act === 'review_mode') {
+    rocBlogSet($pdo, 'blog_review', !empty($in['on']) ? 'on' : 'off', $uid);
+    logCmsAudit('cms_blog_review_mode', 'settings', 'blog_review', ['on' => !empty($in['on'])]);
+    rocBaOut(200, ['success' => true, 'message' => !empty($in['on'])
+        ? 'Review is on: new AI posts wait ' . ROC_BLOG_REVIEW_HOURS . ' hours for you, then go live by themselves.' : 'Review is off: new AI posts go live at their time.']);
+}
+if ($act === 'review') {
+    $id = (string)($in['id'] ?? ''); $op = (string)($in['op'] ?? '');
+    $st = $pdo->prepare("SELECT id, title, status FROM blogs WHERE id = ?"); $st->execute([$id]); $b = $st->fetch(PDO::FETCH_ASSOC);
+    if (!$b || $b['status'] !== 'scheduled') rocBaOut(404, ['success' => false, 'error' => 'This post is no longer waiting (it is live, deleted or a draft).']);
+    $now = gmdate('Y-m-d H:i:s');
+    if ($op === 'approve') {
+        rocBlogPendingSet($pdo, $id, false);
+        $msg = 'Approved. It goes live at its time.';
+    } elseif ($op === 'publish_now') {
+        rocBlogPendingSet($pdo, $id, false);
+        $pdo->prepare('UPDATE blogs SET published_at = ?, updated_at = ? WHERE id = ?')->execute([$now, $now, $id]);
+        $msg = 'Approved. It goes live within 10 minutes.';
+    } elseif ($op === 'reject') {
+        rocBlogPendingSet($pdo, $id, false);
+        $pdo->prepare("UPDATE blogs SET status = 'draft', updated_at = ? WHERE id = ?")->execute([$now, $id]);
+        // The topic is not written again by itself (it can be put back in the content plan).
+        $plan = rocBlogPlan($pdo);
+        foreach ($plan['topics'] as &$t) if (($t['post_id'] ?? '') === $id) { $t['status'] = 'skipped'; unset($t['post_id'], $t['slug']); }
+        unset($t);
+        rocBlogSet($pdo, 'blog_plan', $plan);
+        $msg = 'Rejected: the post is now a draft (Blogs) and will not go live. Its time is free for the next post.';
+    } else rocBaOut(422, ['success' => false, 'error' => 'Unknown choice.']);
+    logCmsAudit('cms_blog_review_' . $op, 'blog', $id, ['title' => $b['title']]);
+    rocBaOut(200, ['success' => true, 'message' => $msg]);
 }
 if ($act === 'write_now') {
     @set_time_limit(400);
