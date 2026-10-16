@@ -7,6 +7,7 @@
  *   php cli-content-writer.php --apply --limit=N  writes N pages now (the writer key has a daily limit)
  *   php cli-content-writer.php --apply --slug=X   writes one product or platform again
  *   php cli-content-writer.php --apply --deepen=X adds the buyer questions to one written product (Deploy 78)
+ *   php cli-content-writer.php --reset-fails      clears the failure counts (pages put last after failing)
  *   php cli-content-writer.php --auto=off|on      stops / restarts the automatic writing (2 a run, 40 a day)
  *   php cli-content-writer.php --repair           texts written before Deploy 48: "32?bit" -> "32-bit\"
  *   php cli-content-writer.php --rollback=FILE    puts the old texts back
@@ -89,6 +90,9 @@ $q = rocContentQueue($pdo);
 echo '  Product pages with little text: ' . count($q['products']) . "\n";
 echo '  Platform pages with little text: ' . ($hasCol ? count($q['platforms']) : 'all') . "\n";
 echo '  Written product pages still without buyer questions (Deploy 78): ' . count($q['deepen']) . "\n";
+$gk = trim((string)rocBlogGet($pdo, 'blog_groq_key', ''));
+if ($gk !== '') echo '  Groq models for these texts: ' . (implode(', ', rocContentModels($pdo, $gk, true)) ?: 'none found') . ' (blogs and news keep ' . ((string)rocBlogGet($pdo, 'blog_groq_model', '') ?: 'their model') . ")\n";
+if (in_array('--reset-fails', $args, true)) { rocBlogSet($pdo, 'content_fail', []); echo "  Failure counts cleared.\n"; }
 $fails = array_filter(rocContentFails($pdo), function ($n) { return $n >= 2; });
 if ($fails) echo '  Pages the writer failed on twice or more (written last; 4 times = skipped): ' . implode(', ', array_map(function ($s, $n) { return "{$s} ({$n})"; }, array_keys($fails), $fails)) . "\n";
 echo '  Automatic writing: ' . ((string)rocBlogGet($pdo, 'content_auto', 'on') === 'off' ? 'off' : 'on (2 a run, at most ' . ROC_CONTENT_DAILY . ' a day)') . "\n\n";

@@ -231,19 +231,42 @@
   })();
 
   /* ---------- Header search (every page): <form data-roc-search> with a scope select.
-     Products and blogs come live from the server, games from the website build.
-     Matching forgives small typos ("logitec", "deathader"). */
+     Products, blogs, guides, news and platforms come live from the server, games from the website build.
+     Matching forgives small typos ("logitec", "deathader"). Deploy 81: no "All" any more; Products is the
+     default, then Blogs, Games, Guides, News and Platforms (the select is rewritten on every page). */
   (function () {
     var data = null, loading = null;
-    var PAGES = { products: '/products/', blogs: '/blogs/', games: '/compatibility/' };
-    var LABELS = { products: 'Products', blogs: 'Blogs', games: 'Games & compatibility' };
+    var PAGES = { products: '/products/', blogs: '/blogs/', games: '/compatibility/', guides: '/guides/', news: '/news/', platforms: '/gaming-platforms/' };
+    var LABELS = { products: 'Products', blogs: 'Blogs', games: 'Games & compatibility', guides: 'Guides', news: 'News', platforms: 'Gaming platforms' };
+    var OPTIONS = '<option value="products">Products</option><option value="blogs">Blogs</option><option value="games">Games</option><option value="guides">Guides</option><option value="news">News</option><option value="platforms">Platforms</option>';
+    function scopeOf(f) { var v = f['in'] ? f['in'].value : 'products'; return PAGES[v] ? v : 'products'; }
+    function pageScope() {
+      var p = location.pathname;
+      return /^\/blogs\//.test(p) ? 'blogs' : /^\/guides\//.test(p) ? 'guides' : /^\/news\//.test(p) ? 'news'
+        : /^\/(compatibility|can-i-run)\//.test(p) ? 'games' : /^\/gaming-platforms\//.test(p) ? 'platforms' : 'products';
+    }
+    function fixSelects() {
+      document.querySelectorAll('form[data-roc-search] select[name="in"]').forEach(function (s) {
+        if (s.getAttribute('data-roc-scopes') === '2') return;
+        s.innerHTML = OPTIONS;
+        s.value = pageScope();
+        s.setAttribute('data-roc-scopes', '2');
+      });
+    }
+    fixSelects();
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fixSelects);
+    window.addEventListener('load', fixSelects);
+    if (window.MutationObserver) new MutationObserver(function () { if (document.querySelector('form[data-roc-search] select[name="in"]:not([data-roc-scopes="2"])')) fixSelects(); })
+      .observe(document.documentElement, { childList: true, subtree: true });
 
     function load() {
       if (data) return Promise.resolve(data);
       if (loading) return loading;
       function get(u) { return fetch(u, { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; }); }
-      loading = Promise.all([get('/products/?json=1'), get('/blogs/?json=1'), get('/roc-games.json')]).then(function (r) {
-        data = { products: r[0] || [], blogs: r[1] || [], games: r[2] || [] };
+      loading = Promise.all([get('/products/?json=1'), get('/blogs/?json=1'), get('/roc-games.json'), get('/gaming-platforms/?json=1')]).then(function (r) {
+        // /blogs/?json=1 has every post: blogs, guides and news (their address says which).
+        var posts = r[1] || [], kind = function (k) { return posts.filter(function (p) { return String(p.u || '').indexOf('/' + k + '/') === 0; }); };
+        data = { products: r[0] || [], blogs: kind('blogs'), guides: kind('guides'), news: kind('news'), games: r[2] || [], platforms: Array.isArray(r[3]) ? r[3] : [] };
         return data;
       });
       return loading;
@@ -312,27 +335,25 @@
     }
 
     function targetUrl(scope, q) {
-      if (scope === 'all') {
-        // "All": open the page of the best kind of result.
-        scope = find('products', q, 1).length ? 'products' : find('blogs', q, 1).length ? 'blogs' : find('games', q, 1).length ? 'games' : 'products';
-      }
-      return PAGES[scope] + (q ? '?q=' + encodeURIComponent(q) : '');
+      if (!PAGES[scope]) scope = 'products';
+      // Guides and platforms have no search page: the list itself.
+      return PAGES[scope] + (q && scope !== 'guides' && scope !== 'platforms' ? '?q=' + encodeURIComponent(q) : '');
     }
 
     function render(form) {
-      var q = form.q.value.trim(), scope = form['in'] ? form['in'].value : 'all';
+      var q = form.q.value.trim(), scope = scopeOf(form);
       var box = form.querySelector('.roc-sr');
       if (!q) { if (box) box.remove(); return; }
       css();
       if (!box) { box = document.createElement('div'); box.className = 'roc-sr'; box.setAttribute('role', 'listbox'); form.appendChild(box); }
       if (!data) { box.innerHTML = '<p>Searching…</p>'; return; }
-      var scopes = scope === 'all' ? ['products', 'blogs', 'games'] : [scope], html = '', any = false;
+      var scopes = [scope], html = '', any = false;
       scopes.forEach(function (s) {
-        var list = find(s, q, scope === 'all' ? 4 : 10);
+        var list = find(s, q, 10);
         if (!list.length) return;
         any = true;
         html += '<h6>' + LABELS[s] + '</h6>' + list.map(function (it) {
-          var sub = s === 'products' ? [it.b, it.c].filter(Boolean).join(' · ') : s === 'blogs' ? (it.c || it.e || '') : (it.g ? it.g + ' · check if it runs' : 'Check if it runs');
+          var sub = s === 'products' ? [it.b, it.c].filter(Boolean).join(' · ') : s === 'games' ? (it.g ? it.g + ' · check if it runs' : 'Check if it runs') : (it.c || it.e || '');
           return '<a href="' + esc(it.u) + '"><b>' + esc(it.t) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</a>';
         }).join('');
       });
@@ -350,7 +371,7 @@
       if (!f) return;
       e.preventDefault();
       e.stopPropagation();
-      var q = f.q.value.trim(), scope = f['in'] ? f['in'].value : 'all';
+      var q = f.q.value.trim(), scope = scopeOf(f);
       load().then(function () { location.assign(targetUrl(scope, q)); });
     }, true);
     document.addEventListener('keydown', function (e) {
@@ -374,7 +395,8 @@
     function fill() {
       var p = new URLSearchParams(location.search), q = p.get('q');
       if (!q) return;
-      var scope = /^\/products\//.test(location.pathname) ? 'products' : /^\/blogs\//.test(location.pathname) ? 'blogs' : /^\/compatibility\//.test(location.pathname) ? 'games' : 'all';
+      fixSelects();
+      var scope = pageScope();
       document.querySelectorAll('form[data-roc-search]').forEach(function (f) { if (!f.q.value) f.q.value = q; if (f['in']) f['in'].value = scope; });
     }
     if (document.readyState !== 'loading') setTimeout(fill, 0); else document.addEventListener('DOMContentLoaded', fill);
@@ -417,8 +439,8 @@
           s.setAttribute('role', 'search');
           s.style.cssText = 'margin-top:8px;position:relative;display:flex;gap:6px';
           s.innerHTML = '<select name="in" aria-label="Search in" style="padding:10px 6px;border:1px solid #cbd5e1;border-radius:12px;font-size:13px;background:#f8fafc">' +
-            '<option value="all">All</option><option value="products">Products</option><option value="blogs">Blogs</option><option value="games">Games</option></select>' +
-            '<input name="q" type="search" placeholder="Search products, blogs, games..." aria-label="Search" ' +
+            '<option value="products">Products</option><option value="blogs">Blogs</option><option value="games">Games</option><option value="guides">Guides</option><option value="news">News</option><option value="platforms">Platforms</option></select>' +
+            '<input name="q" type="search" placeholder="Search products, games, guides..." aria-label="Search" ' +
             'style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid #cbd5e1;border-radius:12px;font-size:14px">';
           panel.appendChild(s);
           header.appendChild(panel);

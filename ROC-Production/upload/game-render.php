@@ -239,7 +239,7 @@ $metaT = 'Can I Run ' . $name . '? Minimum & Recommended PC Requirements | Run O
 $metaD = 'Can your PC run ' . $name . '? Official minimum and recommended specs'
     . ($gpuMin ? ' (from ' . (strpos($gpuMin[0], 'integrated') !== false ? 'integrated graphics' : $an($gpuMin[0])) . ($ramGb($rMin['ram'] ?? null) ? ' and ' . $ramGb($rMin['ram'] ?? null) . ' RAM' : '') . ')' : '')
     . '. Free check for your graphics card, CPU and RAM.';
-if (mb_strlen($metaD) > 160) $metaD = mb_substr($metaD, 0, 157) . '…';
+if (mb_strlen($metaD) > 155) $metaD = mb_substr($metaD, 0, 152) . '…';   // 155: what Google and SEO tools show in full
 
 /* FAQ (each answer from the data) */
 $faqs = [];

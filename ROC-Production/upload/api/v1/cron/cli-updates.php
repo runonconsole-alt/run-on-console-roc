@@ -10,7 +10,7 @@
  *   1. blogs table: columns topic_group, topic_cat, tags (topic and tags of blogs, guides and news, set in the editor).
  *   2. .htaccess: /updates/ goes to blog-render.php (blogs, guides and news together, with filters).
  *   3. Menu saved in CMS > Menus & footer:
- *      - header: BLOGS, GUIDES and NEWS become one UPDATES menu (Blogs, Guides, News, All updates);
+ *      - header: BLOGS, GUIDES and NEWS become one UPDATES menu (Blogs, Guides, News);
  *      - footer: the POLICIES column becomes "UPDATES & TERMS" with Blogs, News and Guides first,
  *        and they leave the other columns.
  */
@@ -36,7 +36,6 @@ const UP_MENU = ['label' => 'UPDATES', 'url' => '/updates/', 'children' => [
     ['title' => 'Blogs', 'desc' => 'Reviews, comparisons and buying advice', 'url' => '/blogs/', 'icon' => 'book'],
     ['title' => 'Guides', 'desc' => 'Step by step: buying, setup, game settings', 'url' => '/guides/', 'icon' => 'file-text'],
     ['title' => 'News', 'desc' => 'Gaming and hardware news, checked daily', 'url' => '/news/', 'icon' => 'newspaper'],
-    ['title' => 'All updates', 'desc' => 'Everything new, with filters', 'url' => '/updates/', 'icon' => 'zap'],
 ]];
 
 echo "Run On Console - Updates hub (/updates/)\npublic_html: {$ROOT}\n\n";

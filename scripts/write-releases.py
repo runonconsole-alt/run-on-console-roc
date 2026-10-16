@@ -538,6 +538,14 @@ RELEASES = [
                   'A model at its daily limit is skipped until Groq says it is free again; a stop because of a limit no longer counts against the page'],
          checks=[dict(label='Content models', type='contains', path='api/v1/cms/content-writer-lib.php', text='ROC_CONTENT_MODELS')],
          pr=REPO + '80'),
+    dict(deploy=81, date='2026-10-16', title='Search, UPDATES menu and ROC links',
+         changes=['Header search: no All; Products first, then Blogs, Games, Guides, News and Platforms',
+                  'UPDATES menu: Blogs, Guides, News (A to Z), All updates taken out (cli-menu-updates.php --apply)',
+                  'ROC knows every main page (contact, privacy, terms, guides, updates, categories, profile) and the newest blogs, guides and news with their real addresses',
+                  'Product writer reads the Groq model list itself (the fixed names did not exist on the key)',
+                  'Game page descriptions stay under 155 characters'],
+         checks=[dict(label='Search', type='contains', path='roc-nav.js', text='data-roc-scopes')],
+         pr=REPO + '81'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

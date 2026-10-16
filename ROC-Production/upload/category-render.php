@@ -41,6 +41,18 @@ try {
     error_log('category-render bootstrap: ' . $e->getMessage());
     $pdo = null;
 }
+// Gaming platforms for the header search box (/gaming-platforms/?json=1, Deploy 81).
+if ($pdo && $slug === '' && isset($_GET['json'])) {
+    $rows = [];
+    try { $rows = $pdo->query("SELECT slug, title, description FROM gaming_categories WHERE status = 'published' ORDER BY sort_rank, title")->fetchAll(PDO::FETCH_ASSOC); } catch (\Throwable $e) {}
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: public, max-age=600');
+    header('X-Robots-Tag: noindex');
+    echo json_encode(array_map(function ($r) {
+        return ['t' => (string)$r['title'], 'c' => 'Gaming platform', 'e' => mb_substr(trim(strip_tags((string)($r['description'] ?? ''))), 0, 160), 'u' => '/gaming-platforms/' . $r['slug'] . '/'];
+    }, $rows), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
 if (!headers_sent()) {
     header_remove('X-Robots-Tag');
     header_remove('Content-Type');
