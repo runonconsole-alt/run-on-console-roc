@@ -520,6 +520,12 @@ RELEASES = [
                   'The sitemap table in the browser still shows the page names'],
          checks=[dict(label='Sitemap', type='contains', path='sitemap-render.php', text='<!--t:')],
          pr=REPO + '77'),
+    dict(deploy=78, date='2026-10-16', title='Deeper product pages',
+         changes=['Product pages get Who it is for, Setup tips and 3-4 buyer questions written for that product (also in the Google FAQ data)',
+                  'Pages written before get these parts added (same writer, 2 a run, at most 40 a day); new pages get everything in one go',
+                  'A page the writer fails on twice goes to the end of the line, so the rest keep being written'],
+         checks=[dict(label='Product depth', type='contains', path='api/v1/cms/content-writer-lib.php', text='ROC_CONTENT_FAQ_HEAD')],
+         pr=REPO + '78'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
