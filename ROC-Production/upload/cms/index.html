@@ -1182,6 +1182,8 @@ async function renderGames(m){
     m.innerHTML=head('Games','Loading…')+'<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
     var get=function(u){ return fetch(u+'?ts='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }); };
     var res=await Promise.all([get('/roc-steam-games.json'),get('/roc-games.json')]);
+    // Game page addresses and the CMS changes (Deploy 85).
+    try{ var ge=await api('games.php'); S.gameEdits=ge.edits||{}; S.gameSlugs=ge.slugs||{}; }catch(e){ S.gameEdits={}; S.gameSlugs={}; }
     var steam=(res[0]&&res[0].games)||[];
     var steamUrls={}; steam.forEach(function(g){ steamUrls['/compatibility/?steam='+g.appid]=1; });
     var ours=(res[1]||[]).filter(function(g){ return !steamUrls[g.u]; });
@@ -1190,7 +1192,8 @@ async function renderGames(m){
       rows:ours.map(function(g){ return {t:g.t,y:'',g:g.g,src:'ours',auto:true,page:g.u,store:''}; })
         .concat(steam.map(function(g){
           var r=g.req&&g.req.min;
-          return {t:g.t,y:g.y,g:g.g,src:'steam',auto:!!(r&&r.cpu&&r.gpu),page:'/compatibility/?steam='+g.appid,store:g.u,min:g.min};
+          var sl=S.gameSlugs[g.appid];
+          return {t:g.t,y:g.y,g:g.g,src:'steam',auto:!!(r&&r.cpu&&r.gpu),page:sl?'/can-i-run/'+sl+'/':'/compatibility/?steam='+g.appid,store:g.u,min:g.min,slug:sl||''};
         }))
     };
     if(S.view!=='games'||S.editing) return;
@@ -1221,17 +1224,45 @@ async function renderGames(m){
           '<td>'+esc(r.y||'—')+'</td><td style="color:var(--ink-3)">'+esc(r.g||'')+'</td>'+
           '<td><span class="tag '+(r.src==='steam'?'admin':'published')+'">'+(r.src==='steam'?'Steam':'Our pick')+'</span></td>'+
           '<td>'+(r.auto?'<span class="tag published">Automatic</span>':'<span class="tag draft" title="The official text could not be read for an automatic score: visitors see the requirements and compare themselves">Requirements only</span>')+'</td>'+
-          '<td style="text-align:right;white-space:nowrap"><a class="btn sm" href="'+esc(r.page)+'" target="_blank" rel="noopener">Check page ↗</a>'+
+          '<td style="text-align:right;white-space:nowrap">'+(r.slug&&can('pages','edit')?'<button class="btn sm" data-ge="'+esc(r.slug)+'">'+(S.gameEdits[r.slug]?(S.gameEdits[r.slug].hidden?'🚫 Hidden':'✎ Edited'):'Edit')+'</button> ':'')+
+          '<a class="btn sm" href="'+esc(r.page)+'" target="_blank" rel="noopener">Page ↗</a>'+
           (r.store?' <a class="btn sm" href="'+esc(r.store)+'" target="_blank" rel="noopener">Steam ↗</a>':'')+'</td></tr>';
       }).join('')+'</tbody></table>'
       :'<div class="empty"><div class="big">🎮</div><div>No games match.</div></div>')+
     '</div>'+
     '<div class="hint">Steam games and their requirements come from each game\'s Steam store page'+(d.updated?' (list made '+esc(d.updated)+')':'')+
-      '. To refresh the list, run <code>node scripts/fetch-steam-games.mjs</code> and deploy <code>roc-steam-games.json</code>. Our picks are edited in the website code.</div>'+
+      '. To refresh the list, run <code>node scripts/fetch-steam-games.mjs</code> and deploy <code>roc-steam-games.json</code>. Our picks are edited in the website code. '+
+      '<b>Edit</b> changes a game page (title, description, intro, your own text, picture) or hides it.</div>'+
     '</div>';
   var gq=$('#gq',m);
   gq.addEventListener('input',function(){ S.gameQ=gq.value; var at=gq.selectionStart; renderGames(m); var x=$('#gq',m); if(x){ x.focus(); x.setSelectionRange(at,at); } });
   m.querySelectorAll('[data-gf]').forEach(function(b){ b.addEventListener('click',function(){ S.gameFilter=b.dataset.gf; renderGames(m); }); });
+  m.querySelectorAll('[data-ge]').forEach(function(b){ b.addEventListener('click',function(){
+    var r=d.rows.filter(function(x){return x.slug===b.dataset.ge;})[0]; if(r) gameEditModal(r, function(){ renderGames(m); });
+  }); });
+}
+
+/* One game page in CMS > Games (Deploy 85): empty fields keep the automatic text. */
+function gameEditModal(r, after){
+  var e=S.gameEdits[r.slug]||{};
+  var cnt=function(id,max){ var x=$('#'+id); var c=$('#'+id+'-n'); if(x&&c) c.textContent=x.value.length+' / '+max; };
+  modal('Edit: '+r.t,
+    '<div class="hint" style="margin-bottom:10px">Page: <a href="/can-i-run/'+esc(r.slug)+'/" target="_blank" rel="noopener">/can-i-run/'+esc(r.slug)+'/ ↗</a>. Leave a field empty to keep the automatic text.</div>'+
+    '<div class="field"><label>Page title (Google) <span class="hint" id="ge-title-n"></span></label><input type="text" id="ge-title" maxlength="120" value="'+esc(e.title||'')+'" placeholder="Can I Run '+esc(r.t)+'? Minimum &amp; Recommended PC Requirements | Run On Console"></div>'+
+    '<div class="field"><label>Description (Google) <span class="hint" id="ge-desc-n"></span></label><textarea id="ge-desc" rows="2" maxlength="300" placeholder="Automatic: the official specs and the free check">'+esc(e.description||'')+'</textarea></div>'+
+    '<div class="field"><label>Intro under the heading</label><textarea id="ge-intro" rows="2" maxlength="800" placeholder="Automatic: genre, how heavy it is and what card plays it">'+esc(e.intro||'')+'</textarea></div>'+
+    '<div class="field"><label>Your own text (an "About '+esc(r.t)+'" box; a blank line starts a new paragraph)</label><textarea id="ge-text" rows="6" maxlength="8000">'+esc(e.text||'')+'</textarea></div>'+
+    '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="ge-nopic"'+(e.no_picture?' checked':'')+'> Hide the game picture (Steam) on this page</label>'+
+    '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="ge-hidden"'+(e.hidden?' checked':'')+'> Hide this game: the page gives 404 and leaves the sitemap and the lists</label>',
+    (S.gameEdits[r.slug]?'<button class="btn" data-a="reset" style="margin-right:auto">Back to automatic</button>':'')+'<button class="btn" data-a="close">Cancel</button><button class="btn primary" data-a="save">Save</button>',
+    async function(a, close){
+      if(a!=='save' && a!=='reset'){ close(); return; }
+      var body=a==='reset'?{slug:r.slug,reset:true}:{slug:r.slug,title:$('#ge-title').value,description:$('#ge-desc').value,intro:$('#ge-intro').value,text:$('#ge-text').value,
+        no_picture:$('#ge-nopic').checked,hidden:$('#ge-hidden').checked};
+      try{ var x=await api('games.php',body); if(x.edit) S.gameEdits[r.slug]=x.edit; else delete S.gameEdits[r.slug]; toast(x.message,'ok'); close(); if(after) after(); }
+      catch(err){ toast(err.message,'bad'); }
+    }, true);
+  ['ge-title:120','ge-desc:300'].forEach(function(k){ var p=k.split(':'), x=$('#'+p[0]); if(x){ cnt(p[0],+p[1]); x.addEventListener('input',function(){ cnt(p[0],+p[1]); }); } });
 }
 
 /* ----------------------------------------------------------- site users */
@@ -1369,7 +1400,7 @@ function go(v){
 function renderView(){
   var m=$('#main');
   if(S.editing) return renderEditor(m);
-  if(S.view==='dashboard'){ renderDash(m); liveVersionCard(m); return; }
+  if(S.view==='dashboard'){ renderDash(m); liveVersionCard(m); if(S.user.role==='administrator') cacheCard(m); return; }
   if(S.view==='analytics' && S.user.role==='administrator') return renderAnalytics(m);
   if(S.view==='releases') return renderReleases(m);
   if(S.view==='metas' && can('pages','view')) return renderMetas(m);
@@ -4261,11 +4292,13 @@ async function renderBuilder(m){
       '<span style="flex:1"></span><span id="bp-dirty" class="hint"></span>'+
       '<button class="btn sm" type="button" id="bp-code" title="Your own CSS and HTML for the whole site or one page">‹/› Code</button>'+
       '<button class="btn sm" type="button" id="bp-hist">History</button>'+
+      '<button class="btn sm" type="button" id="bp-cache" title="Clear the website cache (Cloudflare and the server) after saving">🧹 Clear cache</button>'+
       '<button class="btn sm" type="button" id="bp-discard" disabled>Discard</button>'+
       '<button class="btn primary sm" type="button" id="bp-save" disabled>Save to website</button></div>'+
     '<div class="bld-main"><div class="bld-stage" id="bp-stage"><div class="bld-wrap" id="bp-wrap"><iframe id="bp-frame" title="Page preview"></iframe></div>'+
       '<div class="bld-loading" id="bp-loading"><span class="spin"></span></div></div>'+
     '<aside class="bld-panel" id="bp-panel"></aside></div></div>';
+  (function(b){ if(b) b.addEventListener('click',function(){ clearCache(b); }); })($('#bp-cache',m));
   var d; try{ d=await api('site-settings.php'); }catch(e){ toast(e.message,'bad'); return; }
   if(S.view!=='builder') return;
   B={ edits:bDeep(d.edits||[]), saved:JSON.stringify(d.edits||[]), nav:bDeep(d.nav), navSaved:JSON.stringify(d.nav), navCustom:d.nav_custom, navReset:false,
@@ -4950,6 +4983,49 @@ function relChecks(r){
     return '<li style="font-size:13px;margin:3px 0">'+(c.ok===true?'<b style="color:#059669">✓</b>':c.ok===false?'<b style="color:#e11d48">✗</b>':'<b style="color:var(--ink-3)">?</b>')+' '+esc(c.label)+
       (c.ok===false?' <span class="hint">(installer not run yet)</span>':'')+'</li>';
   }).join('')+'</ul>';
+}
+
+/* Clear cache (Deploy 85): Cloudflare + the server's code cache + the CMS cache folder in one click.
+   The card lights up after a deploy or a Site builder change, so "Purge everything" in Cloudflare is not needed. */
+async function cacheCard(m){
+  var d; try{ d=await api('cache-clear.php'); }catch(e){ return; }
+  if(S.view!=='dashboard' || S.editing) return;
+  var body=$('.body',m); if(!body) return;
+  var old=$('#cache-card',body); if(old) old.remove();
+  var el=document.createElement('div'); el.className='card'; el.id='cache-card';
+  if(d.needed) el.style.cssText='border:2px solid #f59e0b;background:#fffbeb';
+  var when=d.cleared_at?new Date(d.cleared_at*1000).toLocaleString():'never';
+  el.innerHTML='<div class="cbody" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">'+
+    '<div style="font-size:26px">🧹</div><div style="flex:1;min-width:220px"><div class="hint">Website cache</div>'+
+    '<div style="font-weight:700;font-size:15px">'+(d.needed?(d.reason==='deploy'?'New deploy ('+d.latest_deploy+'): clear the cache so visitors get the new files':'Site builder changes: clear the cache so every page shows them'):'Cache is up to date')+'</div>'+
+    '<div class="hint">Last cleared: '+esc(when)+' · Cloudflare: '+(d.cloudflare?'<b style="color:#059669">connected</b>':'<b style="color:#b45309">not connected</b>')+
+      ' · <a href="#" id="cc-set">'+(d.cloudflare?'Change':'Connect Cloudflare')+'</a></div></div>'+
+    '<button class="btn '+(d.needed?'primary':'')+' sm" id="cc-go">Clear cache</button></div>';
+  body.insertBefore(el, body.firstChild);
+  $('#cc-go',el).addEventListener('click',function(){ clearCache($('#cc-go',el), function(){ cacheCard(m); }); });
+  $('#cc-set',el).addEventListener('click',function(e){ e.preventDefault(); cloudflareModal(d, function(){ cacheCard(m); }); });
+}
+async function clearCache(btn, after){
+  if(btn){ btn.disabled=true; btn.textContent='Clearing…'; }
+  try{ var r=await api('cache-clear.php',{action:'clear'}); toast(r.message, r.warnings&&r.warnings.length?'':'ok'); }
+  catch(e){ toast(e.message,'bad'); }
+  if(btn){ btn.disabled=false; btn.textContent='Clear cache'; }
+  if(after) after();
+}
+function cloudflareModal(d, after){
+  modal('Connect Cloudflare',
+    '<div class="alert info" style="font-size:13px"><b>One time only.</b> Then the Clear cache button purges Cloudflare too.<br>'+
+      '1. Cloudflare → <b>runonconsole.com</b> → Overview: copy the <b>Zone ID</b> (right side).<br>'+
+      '2. Cloudflare → My Profile → <b>API Tokens</b> → Create Token → Custom token: permission <b>Zone · Cache Purge · Purge</b>, zone <b>runonconsole.com</b> → Create, copy the token.<br>'+
+      'Paste both here yourself. The token is kept on the server and never shown again.</div>'+
+    '<div class="field"><label>Zone ID</label><input type="text" id="cf-zone" value="'+esc(d.zone_id||'')+'" placeholder="32 letters and numbers"></div>'+
+    '<div class="field"><label>API token'+(d.cloudflare?' (leave empty to keep the saved one)':'')+'</label><input type="password" id="cf-token" autocomplete="off"></div>',
+    '<button class="btn" data-a="close">Cancel</button><button class="btn primary" data-a="save">Save</button>',
+    async function(a, close){
+      if(a!=='save'){ close(); return; }
+      try{ var r=await api('cache-clear.php',{action:'cloudflare',zone_id:$('#cf-zone').value.trim(),token:$('#cf-token').value.trim()}); toast(r.message,'ok'); close(); if(after) after(); }
+      catch(e){ toast(e.message,'bad'); }
+    });
 }
 
 async function liveVersionCard(m){

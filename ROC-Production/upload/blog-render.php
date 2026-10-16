@@ -223,6 +223,77 @@ function rocInitials(string $name): string {
     return $out !== '' ? $out : 'RC';
 }
 
+/**
+ * Game names in a post link to their "Can I run" page (Deploy 85): the first mention of each, at most 6
+ * a post, never inside a link, a heading, code or a caption. Names of two or more words match in any
+ * case ("Elden Ring" = "ELDEN RING"); one-word names only as written and when they are not everyday
+ * words ("Control", "Portal" ...), so ordinary text is never linked by mistake.
+ */
+const ROC_GAMELINK_SKIP = ['control', 'portal', 'inside', 'journey', 'grounded', 'rust', 'prey', 'stray', 'limbo', 'raft', 'dredge', 'outlast', 'hades',
+    'tunic', 'abzu', 'gris', 'sifu', 'celeste', 'firewatch', 'brotato', 'spiritfarer', 'unpacking', 'rise', 'rematch', 'squad', 'enlisted', 'warframe',
+    'paladins', 'smite', 'deceit', 'turbo', 'the', 'game', 'games', 'steam', 'windows', 'battlefield', 'minecraft', 'roblox', 'valorant', 'overwatch'];
+function rocGameLinks(string $root, string $html, ?PDO $pdo = null): string {
+    if ($html === '' || !is_file($root . '/api/v1/game-pages-lib.php')) return $html;
+    // The linked text is kept in ~/roc-cms-cache/gamelinks/ (the same post, game list and CMS changes = the same result).
+    $edits = '';
+    if ($pdo) try { $st = $pdo->prepare("SELECT setting_value FROM cms_settings WHERE setting_key = 'game_edits' LIMIT 1"); $st->execute(); $edits = (string)$st->fetchColumn(); } catch (\Throwable $e) {}
+    $cdir = dirname($root) . '/roc-cms-cache/gamelinks';
+    $cfile = $cdir . '/' . md5($html . '|' . @filemtime($root . '/roc-steam-games.json') . '|' . md5($edits)) . '.html';
+    if (is_file($cfile)) return (string)file_get_contents($cfile);
+    static $sets = null;
+    if ($sets === null) {
+        $sets = [[], []];
+        try {
+            if (!isset($GLOBALS['ROC_GP_HIDDEN']))
+                $GLOBALS['ROC_GP_HIDDEN'] = array_keys(array_filter((array)(json_decode($edits, true) ?: []), function ($e) { return !empty($e['hidden']); }));
+            require_once $root . '/api/v1/game-pages-lib.php';
+            $multi = []; $single = [];
+            foreach (rocGpAll($root) as $g) {
+                $n = trim((string)$g['name']);
+                if (mb_strlen($n) < 4 || !preg_match('/[A-Za-z]/', $n)) continue;
+                if (preg_match('/\s/', $n)) $multi[mb_strtolower($n)] = [$n, rocGpPath($g)];
+                elseif (mb_strlen($n) >= 6 && !in_array(mb_strtolower($n), ROC_GAMELINK_SKIP, true)) $single[$n] = [$n, rocGpPath($g)];
+            }
+            // Longest first, so "Counter-Strike 2" wins over a shorter name inside it; in groups (regex size).
+            foreach ([[$multi, 'iu'], [$single, 'u']] as $i => [$list, $flags]) {
+                uksort($list, function ($a, $b) { return mb_strlen($b) <=> mb_strlen($a); });
+                foreach (array_chunk($list, 250, true) as $chunk) {
+                    $alt = implode('|', array_map(function ($x) { return preg_quote($x[0], '/'); }, $chunk));
+                    $sets[$i][] = ['/(?<![\w\-])(' . $alt . ')(?![\w\-])/' . $flags, $chunk];
+                }
+            }
+        } catch (\Throwable $e) { $sets = [[], []]; }
+    }
+    if (!$sets[0] && !$sets[1]) return $html;
+    $parts = preg_split('/(<[^>]+>)/', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $skip = 0; $used = []; $count = 0; $links = [];
+    foreach ($parts as $k => $part) {
+        if ($part === '' ) continue;
+        if ($part[0] === '<') {
+            if (preg_match('#^<(/?)(a|h[1-6]|code|pre|figcaption|button|script|style)\b#i', $part, $m)) $skip += $m[1] === '/' ? -1 : 1;
+            $skip = max(0, $skip);
+            continue;
+        }
+        if ($skip > 0 || $count >= 6) continue;
+        foreach ([[0, true], [1, false]] as [$i, $ci]) foreach ($sets[$i] as [$re, $chunk]) {
+            if ($count >= 6) break 2;
+            $part = preg_replace_callback($re, function ($m) use ($chunk, $ci, &$used, &$count, &$links) {
+                $key = $ci ? mb_strtolower($m[1]) : $m[1];
+                if ($count >= 6 || !isset($chunk[$key]) || isset($used[$key])) return $m[0];
+                $used[$key] = 1; $count++;
+                // A placeholder first: the next names must not match inside a link already made.
+                $links[] = '<a href="' . rocH($chunk[$key][1]) . '" title="Can I run ' . rocH($chunk[$key][0]) . '? System requirements">' . $m[1] . '</a>';
+                return "" . (count($links) - 1) . "";
+            }, $part);
+        }
+        $parts[$k] = $part;
+    }
+    $out = (string)preg_replace_callback('/(\d+)/', function ($m) use ($links) { return $links[(int)$m[1]]; }, implode('', $parts));
+    if (!is_dir($cdir)) @mkdir($cdir, 0700, true);
+    @file_put_contents($cfile, $out);
+    return $out;
+}
+
 /** Body as safe HTML. CMS posts are HTML; older seeded posts are Markdown-style text. */
 function rocBodyHtml(string $content): string {
     $content = trim($content);
@@ -439,7 +510,7 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
     $title    = trim((string)$p['title']);
     $metaT    = trim((string)($p['meta_title'] ?? '')) ?: ($title . ' | Run On Console');
     $excerpt  = trim((string)($p['excerpt'] ?? ''));
-    $body     = rocBodyHtml((string)($p['content'] ?? ''));
+    $body     = rocGameLinks($root, rocBodyHtml((string)($p['content'] ?? '')), $pdo);
     $metaD    = trim((string)($p['meta_description'] ?? ''))
                 ?: rocCmsTruncate($excerpt !== '' ? $excerpt : rocCmsTextFromHtml($body), 155);
     $image    = trim((string)($p['image'] ?? ''));
