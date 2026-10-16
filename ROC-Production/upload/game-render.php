@@ -53,8 +53,64 @@ if ($slug !== '') {
 }
 
 /* ---------------------------------------------------------- shared bits */
-function rocGpHead(string $title, string $desc, string $url, array $ld, string $robots = 'index, follow, max-image-preview:large'): string {
-    $img = ROC_PUBLIC_URL . '/social-logo.svg';
+/**
+ * The share picture of a game page (Deploy 82): a 1200x630 card with the game's name and what it needs,
+ * drawn once with GD into /uploads/og-games/{slug}.png (no game art: those pictures belong to the
+ * publishers). Facebook, WhatsApp and X do not show SVG, so the old logo never appeared.
+ * Returns the address, or '' when GD or a font is missing.
+ */
+function rocGpOgCard(string $root, string $slug, string $title, string $line, int $updated): string {
+    $rel = '/uploads/og-games/' . $slug . '.png';
+    $file = $root . $rel;
+    if (is_file($file) && filemtime($file) >= $updated) return $rel;
+    if (!function_exists('imagettftext') || !function_exists('imagepng')) return '';
+    $font = null;
+    foreach (array_merge([$root . '/api/v1/cms/fonts/Montserrat-ExtraBold.ttf', '/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+                          'C:/Windows/Fonts/segoeuib.ttf'], glob('/usr/share/fonts/*/*Bold.ttf') ?: []) as $f) if (is_file($f)) { $font = $f; break; }
+    if (!$font) return '';
+    $W = 1200; $H = 630;
+    $im = imagecreatetruecolor($W, $H);
+    // Dark green with a teal band, like the page header (flat colours keep the file small).
+    imagefilledrectangle($im, 0, 0, $W, $H, imagecolorallocate($im, 2, 44, 34));
+    imagefilledrectangle($im, 0, $H - 120, $W, $H, imagecolorallocate($im, 6, 95, 70));
+    $white = imagecolorallocate($im, 255, 255, 255); $mint = imagecolorallocate($im, 167, 243, 208); $green = imagecolorallocate($im, 52, 211, 153);
+    imagefilledrectangle($im, 0, 0, 14, $H, $green);
+    $pad = 72;
+    imagettftext($im, 26, 0, $pad, 112, $green, $font, 'CAN I RUN IT?');
+    // The title, as big as fits in three lines.
+    $size = 64; $lines = [];
+    for (; $size >= 34; $size -= 4) {
+        $lines = []; $cur = '';
+        foreach (preg_split('/\s+/u', $title) as $w) {
+            $try = $cur === '' ? $w : $cur . ' ' . $w;
+            $b = imagettfbbox($size, 0, $font, $try);
+            if ($b[2] - $b[0] > $W - 2 * $pad && $cur !== '') { $lines[] = $cur; $cur = $w; } else $cur = $try;
+        }
+        if ($cur !== '') $lines[] = $cur;
+        if (count($lines) <= 3) break;
+    }
+    $y = 200;
+    foreach (array_slice($lines, 0, 3) as $l) { $y += (int)($size * 1.25); imagettftext($im, $size, 0, $pad, $y, $white, $font, $l); }
+    if ($line !== '') imagettftext($im, 24, 0, $pad, min($H - 130, $y + 70), $mint, $font, $line);
+    imagettftext($im, 22, 0, $pad, $H - 56, $green, $font, 'RUN ON CONSOLE');
+    $site = 'runonconsole.com/can-i-run';
+    $b = imagettfbbox(20, 0, $font, $site);
+    imagettftext($im, 20, 0, $W - $pad - ($b[2] - $b[0]), $H - 56, $white, $font, $site);
+    $dir = dirname($file);
+    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+    $data = '';
+    // A 32-colour PNG: about 15 KB each (2,000+ games, so small for the disk), drawn only when a page is first opened.
+    imagetruecolortopalette($im, false, 32);
+    ob_start(); imagepng($im, null, 9); $data = (string)ob_get_clean();
+    imagedestroy($im);
+    $tmp = $file . '.roc-tmp';
+    if (@file_put_contents($tmp, $data) === false || !@rename($tmp, $file)) { @unlink($tmp); return ''; }
+    return $rel;
+}
+
+function rocGpHead(string $title, string $desc, string $url, array $ld, string $robots = 'index, follow, max-image-preview:large', string $img = '', string $imgAlt = ''): string {
+    // Share picture: the game's card, else the site picture (the SVG logo does not show on social sites).
+    $img = ROC_PUBLIC_URL . ($img !== '' ? $img : '/uploads/site/home-hero.webp');
     $h  = '<title>' . rocH($title) . "</title>\n";
     $h .= '    <meta name="title" content="' . rocH($title) . "\" />\n";
     $h .= '    <meta name="description" content="' . rocH($desc) . "\" />\n";
@@ -65,10 +121,18 @@ function rocGpHead(string $title, string $desc, string $url, array $ld, string $
     $h .= '    <meta property="og:title" content="' . rocH($title) . "\" />\n";
     $h .= '    <meta property="og:description" content="' . rocH($desc) . "\" />\n";
     $h .= "    <meta property=\"og:site_name\" content=\"Run On Console\" />\n";
-    $h .= "    <meta name=\"twitter:card\" content=\"summary\" />\n";
+    $h .= "    <meta property=\"og:locale\" content=\"en_US\" />\n";
+    $h .= '    <meta property="og:image" content="' . rocH($img) . "\" />\n";
+    if (strpos($img, '/uploads/og-games/') !== false) $h .= "    <meta property=\"og:image:type\" content=\"image/png\" />
+    <meta property=\"og:image:width\" content=\"1200\" />
+    <meta property=\"og:image:height\" content=\"630\" />
+";
+    $h .= '    <meta property="og:image:alt" content="' . rocH($imgAlt !== '' ? $imgAlt : $title) . "\" />\n";
+    $h .= "    <meta name=\"twitter:card\" content=\"summary_large_image\" />\n";
     $h .= "    <meta name=\"twitter:site\" content=\"@RunOnConsole\" />\n";
     $h .= '    <meta name="twitter:title" content="' . rocH($title) . "\" />\n";
     $h .= '    <meta name="twitter:description" content="' . rocH($desc) . "\" />\n";
+    $h .= '    <meta name="twitter:image" content="' . rocH($img) . "\" />\n";
     foreach ($ld as $node) $h .= rocJsonLd($node);
     return $h . rocGpStyles() . "    <script src=\"/roc-nav.js\" defer></script>\n  ";
 }
@@ -150,7 +214,8 @@ if ($slug === '') {
         'mainEntity' => ['@type' => 'ItemList', 'numberOfItems' => $n, 'itemListElement' => array_map(function ($g, $i) {
             return ['@type' => 'ListItem', 'position' => $i + 1, 'url' => ROC_PUBLIC_URL . rocGpPath($g), 'name' => $g['name']];
         }, array_slice(array_values($games), 0, 30), range(0, min(29, $n - 1)))]]];
-    $h = rocGpHead($title, $desc, $url, $ld);
+    $og = rocGpOgCard($ROOT, '_all', 'System requirements for ' . number_format($n) . ' PC games', 'Free check for your graphics card, processor and RAM', $updated);
+    $h = rocGpHead($title, $desc, $url, $ld, 'index, follow, max-image-preview:large', $og, 'Can I run it? PC game system requirements on Run On Console');
 
     $byLetter = [];
     $sorted = array_values($games);
@@ -282,11 +347,19 @@ $ld = [rocGpCrumbs($crumbs),
     ['@context' => 'https://schema.org', '@type' => 'WebPage', '@id' => $url, 'url' => $url, 'name' => 'Can I run ' . $name . '?', 'description' => $metaD,
      'dateModified' => gmdate('c', $updated), 'isPartOf' => ['@type' => 'WebSite', 'name' => 'Run On Console', 'url' => ROC_PUBLIC_URL . '/'],
      'about' => array_filter(['@type' => 'VideoGame', 'name' => $name, 'gamePlatform' => 'PC', 'genre' => $genre !== '' ? array_map('trim', explode(',', $genre)) : null,
-                              'datePublished' => $year ? (string)$year : null, 'sameAs' => (string)($g['u'] ?? '') ?: null])],
+                              'datePublished' => $year ? (string)$year : null, 'sameAs' => (string)($g['u'] ?? '') ?: null,
+                              // Its official minimum requirements (VideoGame is a SoftwareApplication).
+                              'applicationCategory' => 'Game', 'operatingSystem' => $clean($min['os'] ?? '') ?: null,
+                              'processorRequirements' => $clean($min['cpu'] ?? '') ?: null, 'memoryRequirements' => $clean($min['ram'] ?? '') ?: null,
+                              'storageRequirements' => $clean($min['storage'] ?? '') ?: null])],
     ['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => array_map(function ($f) {
         return ['@type' => 'Question', 'name' => $f[0], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f[1]]];
     }, $faqs)]];
-$h = rocGpHead($metaT, $metaD, $url, $ld);
+$ogLine = implode(' · ', array_filter(['Minimum: ' . ($gpuMin ? (strpos($gpuMin[0], 'integrated') !== false ? 'integrated graphics' : $gpuMin[0]) : 'see the list'),
+    $ramGb($rMin['ram'] ?? null) ? $ramGb($rMin['ram'] ?? null) . ' RAM' : '']));
+$og = rocGpOgCard($ROOT, (string)$g['slug'], $name, $ogLine, $updated);
+if ($og !== '') $ld[1]['primaryImageOfPage'] = ['@type' => 'ImageObject', 'url' => ROC_PUBLIC_URL . $og, 'width' => 1200, 'height' => 630];
+$h = rocGpHead($metaT, $metaD, $url, $ld, 'index, follow, max-image-preview:large', $og, 'Can I run ' . $name . '? System requirements card');
 
 /* body */
 $row = function ($label, $a, $b) use ($clean, $rec) {
@@ -362,6 +435,13 @@ if ($sim) {
     foreach ($sim as $s) { [$sw] = rocGpWeight($s); $m .= '<a href="' . rocGpPath($s) . '"><strong>' . rocH($s['name']) . '</strong><span>' . (int)$s['y'] . ' · ' . rocH($sw) . '</span></a>'; }
     $m .= '</div><div class="gp-btns"><a class="gp-btn s" href="/can-i-run/">All ' . number_format(count($games)) . ' games &rarr;</a></div></section>';
 }
+// More on the site (Deploy 82): the pages a player checking requirements needs next.
+$more = [['/compatibility/?steam=' . (int)$g['appid'], 'Full PC check', 'Laptops, consoles, handhelds and more parts'],
+         ['/category/gpu/', 'Graphics cards', 'Picks for every budget'], ['/category/cpu/', 'Processors', 'Gaming CPUs from entry to high end'],
+         ['/category/ram/', 'Memory (RAM)', 'DDR4 and DDR5 kits'], ['/gaming-platforms/pc-handheld-pc/', 'PC and handheld PC guide', 'Gaming platform guide'],
+         ['/guides/', 'Gaming guides', 'Buying, setup and game settings, step by step'], ['/can-i-run/', 'All PC games', number_format(count($games)) . ' games with their requirements']];
+$m .= '<section class="gp-card"><h2>More for PC players</h2><div class="gp-sim">'
+    . implode('', array_map(function ($l) { return '<a href="' . rocH($l[0]) . '"><strong>' . rocH($l[1]) . '</strong><span>' . rocH($l[2]) . '</span></a>'; }, $more)) . '</div></section>';
 $m .= '<p class="gp-src">Ask <b>ROC</b>, our gaming assistant (the chat button), "can my PC run ' . rocH($name) . '?" and tell it your parts, or upload your dxdiag file.</p>';
 $m .= '</article>';
 

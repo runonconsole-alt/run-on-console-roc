@@ -1414,7 +1414,7 @@ function renderDash(m){
   var sched=S.blogs.filter(function(b){return b.status==='scheduled';}).sort(function(a,b){
     return new Date(a.published_at_iso||0)-new Date(b.published_at_iso||0); });
   var drafts=S.blogs.filter(function(b){return b.status!=='published'&&b.status!=='scheduled';});
-  var heavy=S.media.filter(function(x){return +x.file_size>102400;});
+  var heavy=S.media.filter(isHeavy);
   var noAlt=S.media.filter(function(x){return !hasAlt(x);});
   var gaps=[];
   pub.forEach(function(b){
@@ -2370,6 +2370,7 @@ function prepMedia(list){
     }
   });
   (list||[]).forEach(function(x){
+    if(!x.alt_text && isSocial(x)){ x.alt_auto='Social media picture: downloaded for posting, not shown on the website'; return; }
     if(x.alt_text || x.folder==='uploads') return;
     var m=/^\/images\/products\/([a-z0-9-]+)\.(webp|svg)$/.exec(x.file_url||'');
     if(m){
@@ -2380,6 +2381,9 @@ function prepMedia(list){
   return list||[];
 }
 function hasAlt(x){ return !!(x.alt_text||x.alt_auto); }
+/* Social kit pictures (/uploads/social/) are downloaded for posting and never shown on the website (Deploy 82). */
+function isSocial(x){ return /^\/uploads\/social\//.test(String(x.file_url||'')); }
+function isHeavy(x){ return +x.file_size>102400 && !isSocial(x); }
 async function loadProdNames(){
   if(S.prodNames || !can('products','view')) return;
   try{
@@ -2391,7 +2395,7 @@ async function loadProdNames(){
 var REPLACE_TYPES='image/jpeg,image/png,image/webp';
 
 function mediaBadge(x){
-  var big=+x.file_size>102400;
+  var big=isHeavy(x);
   return (big?'<span class="flag">'+bytes(x.file_size)+'</span>':'')+
     (x.usage? (x.usage.length?'<span class="flag used">used · '+x.usage.length+'</span>':'<span class="flag unused">not used</span>'):'')+
     (x.card?'<span class="flag lock">name card</span>':x.locked?'<span class="flag lock">site build</span>':'');
@@ -2400,7 +2404,7 @@ function mediaMatches(x){
   var f=S.mfilter;
   if(f==='uploads' && x.folder!=='uploads') return false;
   if(f==='site' && x.folder!=='site') return false;
-  if(f==='heavy' && !(+x.file_size>102400)) return false;
+  if(f==='heavy' && !isHeavy(x)) return false;
   if(f==='noalt' && hasAlt(x)) return false;
   if(f==='unused' && !(x.usage && !x.usage.length)) return false;
   if(S.mq && (x.filename+' '+x.file_url+' '+(x.alt_text||x.alt_auto||'')).toLowerCase().indexOf(S.mq.toLowerCase())===-1) return false;
@@ -2422,7 +2426,7 @@ async function renderMedia(m){
     if(S.view!=='media' || S.editing) return;
   }
   var all=S.media, rows=all.filter(mediaMatches);
-  var heavy=all.filter(function(x){return +x.file_size>102400;});
+  var heavy=all.filter(isHeavy);
   var noAlt=all.filter(function(x){return !hasAlt(x);});
   var counts={all:all.length,
     uploads:all.filter(function(x){return x.folder==='uploads';}).length,
@@ -2504,7 +2508,7 @@ function usageHtml(list){
 function mediaDetail(id){
   var x=S.media.filter(function(v){return String(v.id)===String(id);})[0];
   if(!x)return;
-  var big=+x.file_size>102400, canEdit=can('media','edit'), canDel=can('media','delete');
+  var big=isHeavy(x), canEdit=can('media','edit'), canDel=can('media','delete');
   var used=x.usage?x.usage.length:0;
   var canReplace=can('media','upload') && /^\/(images|uploads)\//.test(x.file_url||'') && (x.card || /\.(jpe?g|png|webp)$/i.test(x.file_url||''));
   var prod=x.card&&S.prodNames?S.prodNames[x.card]:null;

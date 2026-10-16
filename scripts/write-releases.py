@@ -546,6 +546,13 @@ RELEASES = [
                   'Game page descriptions stay under 155 characters'],
          checks=[dict(label='Search', type='contains', path='roc-nav.js', text='data-roc-scopes')],
          pr=REPO + '81'),
+    dict(deploy=82, date='2026-10-16', title='Game page SEO, schema and light social pictures',
+         changes=['Game pages: their own 1200x630 share picture (name and minimum specs), large Twitter card, requirements in the VideoGame schema, a More for PC players link box',
+                  'Can I run list page: its own share picture; game descriptions under 155 characters',
+                  'Author page: ProfilePage schema; Updates page: CollectionPage with the posts; Updates and Guides: Twitter cards',
+                  'Social kit pictures saved under 100 KB with alt text (cli-social-images.php --apply); the Media library no longer counts them as heavy website images'],
+         checks=[dict(label='Game share picture', type='contains', path='game-render.php', text='rocGpOgCard')],
+         pr=REPO + '82'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
