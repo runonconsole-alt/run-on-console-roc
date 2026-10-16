@@ -127,6 +127,7 @@ foreach ($items as $i => [$t, $row]) {
     if ($i > 0) sleep(20);                  // the free writer key allows about 3 pages a minute
     $r = rocContentRun($pdo, $t, $row);   // opens the database again when the server closed it (Deploy 79)
     echo '  ' . ($r['ok'] ? 'ok ' : '!  ') . str_pad($t, 9) . $row['slug'] . ($r['ok'] ? '' : ' - ' . $r['error']) . "\n";
+    if (!$r['ok'] && isset($r['limit'])) { echo "Stopped: the free key is at its limit for now (about " . (int)ceil($r['limit'] / 60) . " min). The scheduler goes on by itself later.\n"; break; }
     if (!$r['ok']) { rocContentFails($pdo, (string)$row['slug'], true); echo "Stopped: the writer did not answer well. Try again later (the free key has a limit per minute and per day).\n"; break; }
     $ok++;
 }

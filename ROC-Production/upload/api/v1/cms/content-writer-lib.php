@@ -205,18 +205,66 @@ function rocContentDb(PDO $pdo): PDO {
     } catch (\Throwable $e) { return $pdo; }
 }
 
+/**
+ * Groq models for the product and platform texts (Deploy 80). Groq counts the daily tokens of each
+ * model on its own, so these texts no longer use up the blog and news model (openai/gpt-oss-120b,
+ * 200k tokens a day). A model that is not on the key is skipped; one at its limit waits until Groq
+ * says it is free again (content_model_wait).
+ */
+const ROC_CONTENT_MODELS = ['llama-3.3-70b-versatile', 'moonshotai/kimi-k2-instruct-0905', 'moonshotai/kimi-k2-instruct', 'meta-llama/llama-4-maverick-17b-128e-instruct'];
+
+/** Seconds Groq asks to wait ("try again in 20m41.5s" -> 1242). */
+function rocContentRetryIn(string $err): int {
+    if (!preg_match('/try again in\s*((?:[\d.]+h)?(?:[\d.]+m(?!s))?(?:[\d.]+s)?(?:[\d.]+ms)?)/i', $err, $m) || $m[1] === '') return 60;
+    $s = 0.0;
+    if (preg_match('/([\d.]+)h/', $m[1], $x)) $s += (float)$x[1] * 3600;
+    if (preg_match('/([\d.]+)m(?!s)/', $m[1], $x)) $s += (float)$x[1] * 60;
+    if (preg_match('/([\d.]+)s/', (string)preg_replace('/[\d.]+ms/', '', $m[1]), $x)) $s += (float)$x[1];
+    if (preg_match('/([\d.]+)ms/', $m[1], $x)) $s += (float)$x[1] / 1000;
+    return (int)ceil($s) + 2;
+}
+
+/** One answer from the content models: ['ok' => true, 'article' => [...]] or an error ('limit' => seconds when all wait). */
+function rocContentWrite(PDO $pdo, string $prompt): array {
+    $key = trim((string)rocBlogGet($pdo, 'blog_groq_key', ''));
+    if ($key === '') return rocBlogWriteAny($pdo, $prompt);   // Gemini only
+    $wait = rocBlogGet($pdo, 'content_model_wait', []); $wait = is_array($wait) ? $wait : [];
+    $now = time(); $soonest = null; $errors = [];
+    foreach (ROC_CONTENT_MODELS as $model) {
+        if ((int)($wait[$model] ?? 0) > $now) { $soonest = min($soonest ?? PHP_INT_MAX, (int)$wait[$model] - $now); continue; }
+        $r = rocGroqCall($key, 'POST', '/chat/completions', ['model' => $model, 'temperature' => 0.6, 'max_tokens' => 4000, 'response_format' => ['type' => 'json_object'],
+            'messages' => [['role' => 'system', 'content' => 'You are an expert gaming hardware writer. Answer with one JSON object only.'], ['role' => 'user', 'content' => $prompt]]]);
+        if ($r['ok']) {
+            $text = trim((string)preg_replace('/^```(?:json)?\s*|\s*```$/', '', trim((string)($r['data']['choices'][0]['message']['content'] ?? ''))));
+            $a = json_decode($text, true);
+            if (is_array($a)) return ['ok' => true, 'article' => $a, 'model' => $model];
+            $errors[] = "{$model}: no JSON"; continue;
+        }
+        $e = (string)$r['error'];
+        if ($r['code'] === 429 || stripos($e, 'rate limit') !== false) {
+            $s = rocContentRetryIn($e);
+            if ($s > 90) { $wait[$model] = $now + $s; rocBlogSet($pdo, 'content_model_wait', $wait); }   // a daily limit: skip this model until then
+            $soonest = min($soonest ?? PHP_INT_MAX, $s);
+            $errors[] = "{$model}: rate limit"; continue;
+        }
+        $errors[] = "{$model}: {$e}";   // not on this key (404/400) or another error: the next model
+    }
+    $out = ['ok' => false, 'error' => 'Groq: ' . ($errors ? implode(' | ', $errors) : 'every content model is at its limit')];
+    if ($soonest !== null) $out['limit'] = $soonest;
+    return $out;
+}
+
 /** Asks the writer twice at most (the second time with the reason the first answer was refused). */
 function rocContentAsk(PDO &$pdo, string $prompt, array $keys): array {
     $why = ''; $waits = 0;
     for ($try = 0; $try < 2; $try++) {
         $pdo = rocContentDb($pdo);
-        $r = rocBlogWriteAny($pdo, $prompt . ($why !== '' ? "\nYour last answer was refused because it {$why}. Fix that." : ''));
+        $r = rocContentWrite($pdo, $prompt . ($why !== '' ? "\nYour last answer was refused because it {$why}. Fix that." : ''));
         $pdo = rocContentDb($pdo);   // the answer can take a minute: save with a live connection
         // Free key: a limit per minute. On the command line, wait as long as the writer asks (at most a minute) and ask again.
-        if (!$r['ok'] && PHP_SAPI === 'cli' && $waits < 3 && preg_match('/rate limit|try again in/i', (string)$r['error'])) {
-            $s = 20;
-            if (preg_match('/try again in ([\d.]+)\s*(ms|s|m)/i', (string)$r['error'], $mm)) $s = (int)ceil((float)$mm[1] / ($mm[2] === 'ms' ? 1000 : 1) * ($mm[2] === 'm' ? 60 : 1)) + 2;
-            sleep(min(65, max(2, $s))); $waits++; $try--; continue;
+        // A limit per minute: wait (at most a minute) and ask again. A daily limit: stop, the scheduler goes on later.
+        if (!$r['ok'] && PHP_SAPI === 'cli' && $waits < 3 && isset($r['limit']) && $r['limit'] <= 65) {
+            sleep(max(2, (int)$r['limit'])); $waits++; $try--; continue;
         }
         if (!$r['ok']) return $r;
         $a = $r['article'];
@@ -314,7 +362,7 @@ function rocContentTick(PDO $pdo, int $n): ?string {
     foreach (array_slice($items, 0, min($n, ROC_CONTENT_DAILY - $c['n'])) as [$type, $row]) {
         $r = rocContentRun($pdo, $type, $row);
         $c['n']++;
-        if (!$r['ok']) { rocBlogSet($pdo, 'content_daily', $c); rocContentFails($pdo, (string)$row['slug'], true); return "content: {$row['slug']} failed ({$r['error']}); stopped for now"; }
+        if (!$r['ok']) { rocBlogSet($pdo, 'content_daily', $c); if (!isset($r['limit'])) rocContentFails($pdo, (string)$row['slug'], true); return "content: {$row['slug']} failed ({$r['error']}); stopped for now"; }
         $done[] = $row['slug'];
     }
     rocBlogSet($pdo, 'content_daily', $c);

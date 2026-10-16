@@ -533,6 +533,11 @@ RELEASES = [
                   '/guides-sitemap.xml and /games-sitemap.xml redirect to /sitemaps/ like the others (cli-sitemap-aliases.php --apply)'],
          checks=[dict(label='Writer', type='contains', path='api/v1/cms/content-writer-lib.php', text='function rocContentDb')],
          pr=REPO + '79'),
+    dict(deploy=80, date='2026-10-16', title='Product texts use their own Groq models',
+         changes=['Product and platform texts use Llama 3.3 70B, then Kimi or Llama 4: Groq counts each model on its own, so blogs and news keep the full gpt-oss-120b day',
+                  'A model at its daily limit is skipped until Groq says it is free again; a stop because of a limit no longer counts against the page'],
+         checks=[dict(label='Content models', type='contains', path='api/v1/cms/content-writer-lib.php', text='ROC_CONTENT_MODELS')],
+         pr=REPO + '80'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
