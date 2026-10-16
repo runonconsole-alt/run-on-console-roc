@@ -515,6 +515,11 @@ RELEASES = [
                   'Without Cloudflare nothing changes'],
          checks=[dict(label='Client IP', type='file', path='api/v1/client-ip.php')],
          pr=REPO + '76'),
+    dict(deploy=77, date='2026-10-16', title='Sitemaps without errors in Search Console',
+         changes=['Page names in the sitemaps moved from the roc:title tag (an error on every address in Search Console) to a comment',
+                  'The sitemap table in the browser still shows the page names'],
+         checks=[dict(label='Sitemap', type='contains', path='sitemap-render.php', text='<!--t:')],
+         pr=REPO + '77'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

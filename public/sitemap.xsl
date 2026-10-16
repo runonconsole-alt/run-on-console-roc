@@ -77,6 +77,7 @@
         <tr>
           <td class="name">
             <xsl:choose>
+              <xsl:when test="comment()[starts-with(., 't:')]"><xsl:value-of select="substring-after(comment()[starts-with(., 't:')], 't:')"/></xsl:when>
               <xsl:when test="roc:title"><xsl:value-of select="roc:title"/></xsl:when>
               <xsl:otherwise>—</xsl:otherwise>
             </xsl:choose>
