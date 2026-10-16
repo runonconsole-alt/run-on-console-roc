@@ -1324,7 +1324,7 @@ function renderShell(){
       item('games','Games','🎮')+
       (can('products','view')?item('products','Products','▣')+item('product-categories','Product categories','▤'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
-      item('builder','Site builder','✦')+item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Blog & news writer','✍')+item('agent','ROC assistant','🤖')+item('announce','Announcement bar','📣')+
+      item('builder','Site builder','✦')+item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Updates writer','✍')+item('agent','ROC assistant','🤖')+item('announce','Announcement bar','📣')+
       item('siteusers','Site users','👤')+item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+item('siteinfo','Website info','ℹ')+'</div>':'')+
     '<div class="sfoot"><div class="who"><div class="av">'+
       esc((S.user.username||'?').slice(0,2).toUpperCase())+'</div>'+
@@ -3889,9 +3889,42 @@ async function renderSiteInfo(m){
 var STAGE_NAMES={tofu:['TOFU','Learn','#0ea5e9'],mofu:['MOFU','Compare','#a855f7'],bofu:['BOFU','Buy','#059669']};
 function stageTag(s){ var x=STAGE_NAMES[s]||[s,'','#64748b']; return '<span class="tag" style="background:'+x[2]+'1a;color:'+x[2]+';border-color:'+x[2]+'55" title="'+esc(x[1])+'">'+x[0]+' · '+x[1]+'</span>'; }
 
+/* Updates writer > Guides (api/v1/cms/guide-writer.php): helpful step by step guides, a few a day until an end date. */
+async function renderGuideWriter(m){
+  m.innerHTML=head('Guide writer','Step by step guides, published by themselves',bmSwitch())+'<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  bmBind(m);
+  var d; try{ d=await api('guide-writer.php'); }catch(e){ toast(e.message,'bad'); return; }
+  if(S.view!=='blogagent'||S.baMode!=='guides') return;
+  var s=d.settings||{}, st=d.state||{};
+  var waitTxt={'off':'Off','ended':'Ended: the end date has passed','done today':'All guides for today are written','outside 10:00-23:30':'Waits for 10:00 Pakistan time','next one later':'Next guide about 2 hours after the last one'}[d.wait]||'Writes the next guide within 10 minutes';
+  $('.body',m).innerHTML=
+    (!d.ai?'<div class="alert warn">No AI key saved: add the free Groq or Gemini key in the Blogs tab.</div>':'')+
+    '<div class="card"><div class="chead"><h3>Guide writer</h3><span class="note"><b style="color:'+(s.on&&d.wait!=='ended'?'#059669':'#b45309')+'">● '+esc(waitTxt)+'</b></span></div><div class="cbody">'+
+      '<div class="hint" style="margin-bottom:10px">Writes helpful step by step guides (buying, setup, how to use, game settings) and publishes them at /guides/ with a cover made by AI, a topic and tags. Between 10:00 and 23:30 Pakistan time, at least 2 hours apart.</div>'+
+      '<label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-bottom:10px"><input type="checkbox" id="gw-on"'+(s.on?' checked':'')+'> Write guides by themselves</label>'+
+      '<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">'+
+        '<div class="field" style="margin:0"><label for="gw-per">Guides a day</label><input type="number" id="gw-per" min="0" max="6" value="'+(s.per_day||0)+'" style="width:90px"></div>'+
+        '<div class="field" style="margin:0"><label for="gw-until">Until (not on this day)</label><input type="date" id="gw-until" value="'+esc(s.until||'')+'"></div>'+
+        '<button class="btn primary" id="gw-save">Save</button>'+(d.ai&&d.next?'<button class="btn" id="gw-now">Write the next guide now</button>':'')+'</div>'+
+      (d.next?'<div class="alert info" style="margin-top:12px"><b>Next guide:</b> '+esc(d.next.title)+' <span class="hint">('+esc(d.next.type)+')</span></div>':'<div class="hint" style="margin-top:12px">All planned topics are written.</div>')+
+      (st.last_error?'<div class="hint" style="color:#b91c1c;margin-top:6px">Last problem: '+esc(st.last_error)+'</div>':'')+
+    '</div></div>'+
+    '<div class="card"><div class="chead"><h3>Written guides</h3><span class="note">'+(d.log||[]).length+'</span></div><div class="cbody">'+
+      ((d.log||[]).length?(d.log||[]).map(function(l){ return '<div style="padding:6px 0;border-bottom:1px solid var(--line)"><a href="/guides/'+esc(l.slug)+'/" target="_blank" rel="noopener" style="font-weight:600">'+esc(l.title)+' ↗</a>'+
+        '<div class="hint">'+esc(l.type)+' · '+l.words+' words · '+esc(pkTime(l.at))+'</div></div>'; }).join(''):'<div class="hint">None yet.</div>')+
+    '</div></div>'+
+    '<div class="card"><div class="chead"><h3>Planned topics</h3></div><div class="cbody">'+(d.topics||[]).map(function(t){
+        return '<div style="padding:4px 0">'+(t.done?'✅ ':'⬜ ')+esc(t.title)+' <span class="hint">· '+esc(t.type)+'</span></div>'; }).join('')+'</div></div>';
+  $('#gw-save',m).addEventListener('click',async function(){
+    try{ var r=await api('guide-writer.php',{action:'settings',on:$('#gw-on',m).checked,per_day:+$('#gw-per',m).value,until:$('#gw-until',m).value}); toast(r.message,'good'); renderGuideWriter(m); }catch(e){ toast(e.message,'bad'); } });
+  var now=$('#gw-now',m); if(now) now.addEventListener('click',async function(){
+    now.disabled=true; now.innerHTML='<span class="spin"></span> Writing (1-2 minutes)…';
+    try{ var r=await api('guide-writer.php',{action:'write_now'}); toast(r.message,'good'); renderGuideWriter(m); }catch(e){ toast(e.message,'bad'); now.disabled=false; now.textContent='Try again'; } });
+}
+
 function bmSwitch(){
   var mode=S.baMode||'blog';
-  return '<div class="seg" id="ba-mode"><button type="button" data-bm="blog"'+(mode==='blog'?' class="on"':'')+'>✍ Blog</button><button type="button" data-bm="news"'+(mode==='news'?' class="on"':'')+'>📰 News</button></div>';
+  return '<div class="seg" id="ba-mode"><button type="button" data-bm="blog"'+(mode==='blog'?' class="on"':'')+'>✍ Blogs</button><button type="button" data-bm="news"'+(mode==='news'?' class="on"':'')+'>📰 News</button><button type="button" data-bm="guides"'+(mode==='guides'?' class="on"':'')+'>📘 Guides</button></div>';
 }
 function bmBind(m){
   m.querySelectorAll('[data-bm]').forEach(function(b){ b.addEventListener('click',function(){ if(S.baMode===b.dataset.bm) return; S.baMode=b.dataset.bm; renderBlogAgent(m); }); });
@@ -3899,6 +3932,7 @@ function bmBind(m){
 
 async function renderBlogAgent(m, fresh){
   if(S.baMode==='news') return renderNewsWriter(m);
+  if(S.baMode==='guides') return renderGuideWriter(m);
   m.innerHTML=head('Blog writer','New posts every day from your content plan, published automatically',bmSwitch())+
     '<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
   bmBind(m);

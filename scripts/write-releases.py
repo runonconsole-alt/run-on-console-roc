@@ -490,6 +490,14 @@ RELEASES = [
                   'Written with the free AI key of the blog writer (Groq or Gemini); a switch turns the automatic kits off'],
          checks=[dict(label='Social kits', type='file', path='api/v1/cms/social-kit-lib.php')],
          pr=REPO + '72'),
+    dict(deploy=73, date='2026-10-16', title='Simple Updates page, guide writer, brighter hover light',
+         changes=['/updates/ is simple now: a hero with pictures and buttons to News, Blogs and Guides, then three columns with the 5 newest of each and an Explore more button; no filters, no search, one clean address (old /updates/?... links go to /updates/)',
+                  'Under a post, the topic links to its product category page; tags are shown as words',
+                  'CMS: Blog & news writer is now Updates writer with three tabs: Blogs, News, Guides',
+                  'Guide writer: helpful step by step guides (buying, setup, how to use, game settings), 2 a day on 16, 17 and 18 October between 10:00 and 23:30, each with an AI cover, topic, tags and links to our products; from Monday only news is written by itself',
+                  'The green light that follows the mouse is brighter'],
+         checks=[dict(label='Guide writer', type='file', path='api/v1/cms/guide-writer-lib.php')],
+         pr=REPO + '73'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

@@ -68,7 +68,7 @@
 .roc-spot { position: relative; isolation: isolate; }
 .roc-spot::before {
   content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
-  background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgba(16, 185, 129, 0.22), transparent 65%);
+  background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), rgba(16, 185, 129, 0.40), rgba(52, 211, 153, 0.12) 45%, transparent 70%);
   opacity: 0; transition: opacity 0.2s ease;
 }
 .roc-spot:hover::before { opacity: 1; }

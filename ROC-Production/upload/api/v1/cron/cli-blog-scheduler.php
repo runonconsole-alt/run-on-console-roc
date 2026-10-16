@@ -132,6 +132,13 @@ try {
     if ($dg !== null) echo date('c') . ' ' . $dg . "\n";
 } catch (\Throwable $e) { echo date('c') . ' weekly email error: ' . $e->getMessage() . "\n"; }
 
+// Guides (api/v1/cms/guide-writer-lib.php): 2 a day until the end date, at least 2 hours apart.
+try {
+    require_once $ROOT . '/api/v1/cms/guide-writer-lib.php';
+    $gw = rocGuideTick($pdo, $ROOT);
+    if ($gw !== null) echo date('c') . ' ' . $gw . "\n";
+} catch (\Throwable $e) { echo date('c') . ' guide writer error: ' . $e->getMessage() . "\n"; }
+
 // Social media kit (api/v1/cms/social-kit-lib.php): script, captions and two pictures for one new post a run,
 // only when the writer and the news did nothing this run.
 try {
