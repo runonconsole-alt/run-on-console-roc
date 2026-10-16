@@ -25,7 +25,6 @@ export const DEFAULT_SITE_NAV = {
       { title: 'Blogs', desc: 'Reviews, comparisons and buying advice', url: '/blogs/', icon: 'book' },
       { title: 'Guides', desc: 'Step by step: buying, setup, game settings', url: '/guides/', icon: 'file-text' },
       { title: 'News', desc: 'Gaming and hardware news, checked daily', url: '/news/', icon: 'newspaper' },
-      { title: 'All updates', desc: 'Everything new, with filters', url: '/updates/', icon: 'zap' },
     ] },
     { label: 'ABOUT US', url: '/about/' },
   ],

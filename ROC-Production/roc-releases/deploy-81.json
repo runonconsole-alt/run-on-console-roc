@@ -1,0 +1,24 @@
+{
+ "deploy": 81,
+ "date": "2026-10-16",
+ "title": "Search, UPDATES menu and ROC links",
+ "changes": [
+  "Header search: no All; Products first, then Blogs, Games, Guides, News and Platforms",
+  "UPDATES menu: Blogs, Guides, News (A to Z), All updates taken out (cli-menu-updates.php --apply)",
+  "ROC knows every main page (contact, privacy, terms, guides, updates, categories, profile) and the newest blogs, guides and news with their real addresses",
+  "Product writer reads the Groq model list itself (the fixed names did not exist on the key)",
+  "Game page descriptions stay under 155 characters"
+ ],
+ "checks": [
+  {
+   "label": "Search",
+   "type": "contains",
+   "path": "roc-nav.js",
+   "text": "data-roc-scopes"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/81",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

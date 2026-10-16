@@ -323,8 +323,14 @@ function rocAgentAbout(): array {
         'how_it_earns' => 'Amazon Associates affiliate links (no extra cost to readers) and ads (Google AdSense). Do not call the site ad-free. Brands cannot pay for rankings; sponsored content is always labelled.',
         'checker_how_it_works' => 'The Can I run it checker (/compatibility/) compares the PC with each game\'s official requirements (Steam store and the game makers). Graphics card and processor get a tier score (1.8 integrated graphics ... 10 the fastest cards and CPUs), RAM is in GB. The result: graphics card 50%, processor 30%, RAM 20% of the recommended specs; under the minimum on any part = at most 40%. 90%+ = recommended specs (high settings), 70-89% = medium to high, 41-69% = low settings, 40% or less = below the minimum. A hard disk instead of an SSD lowers it. There are ready presets for consoles, handhelds, phones and cloud gaming. ROC uses the same rules.',
         'built_with' => 'PHP and MySQL on the server, React (Vite) and Tailwind for the pages; ROC answers with Groq AI models and the site\'s own data. Do not name any other technology.',
-        'pages' => ['about' => '/about/', 'checker' => '/compatibility/', 'game_requirements' => '/can-i-run/', 'products' => '/products/', 'platforms' => '/gaming-platforms/', 'blogs' => '/blogs/', 'news' => '/news/',
-                    'write_for_us' => '/write-for-us/', 'privacy' => '/privacy-policy/', 'terms' => '/terms-and-conditions/'],
+        // Every main page, so ROC links the right one (Deploy 81). Product categories, products, guides,
+        // blogs and news with their own pages come from the database (this_website).
+        'pages' => ['home' => '/', 'about' => '/about/', 'contact' => '/contact/', 'checker' => '/compatibility/', 'game_requirements' => '/can-i-run/ (one page per game: /can-i-run/{game}/)',
+                    'products' => '/products/', 'pc_hardware' => '/category/pc-hardware/', 'gaming_hardware' => '/category/gaming-hardware/',
+                    'platforms' => '/gaming-platforms/', 'updates' => '/updates/ (blogs, guides and news together)', 'blogs' => '/blogs/', 'guides' => '/guides/', 'news' => '/news/',
+                    'write_for_us' => '/write-for-us/', 'privacy_policy_and_affiliate_disclosure' => '/privacy-policy/', 'terms' => '/terms-and-conditions/',
+                    'author' => '/author/roc-team/', 'sign_up' => '/auth/signup/', 'sign_in' => '/auth/login/', 'profile_and_wishlist' => '/profile/'],
+        'link_rule' => 'Only link pages listed here or in this_website (never make up an address). Questions about privacy, cookies, affiliate links or data: /privacy-policy/. Rules of use: /terms-and-conditions/. Help, feedback, partnerships: /contact/ or /write-for-us/.',
         'not_shared' => 'Do not invent or share anything not listed here (owner names, revenue, traffic, servers, passwords, keys, internal tools). Say it is not public.',
     ];
 }
@@ -510,12 +516,16 @@ function rocAgentSite(PDO $pdo, string $q): array {
                 'best_for' => mb_substr((string)$r['best_for'], 0, 120), 'about' => mb_substr(trim(strip_tags((string)($r['summary'] ?: $r['short_desc']))), 0, 400)]);
         }
     } catch (\Throwable $e) {}
-    // Newest posts when the visitor asks about blogs, news or articles.
-    if (preg_match('/\b(blog|blogs|news|khabar|article|articles|post|posts|guide|guides|latest|naya|nayi)\b/i', $q)) {
+    // Newest posts when the visitor asks about blogs, guides, news or articles (each with its real address).
+    if (preg_match('/\b(blog|blogs|news|khabar|article|articles|post|posts|guide|guides|tutorial|how to|kaise|latest|naya|nayi|update|updates)\b/i', $q)) {
         try {
-            foreach (['news' => "category = 'News'", 'blogs' => "(category IS NULL OR category <> 'News')"] as $k => $w) {
-                $st = $pdo->query("SELECT title, slug FROM blogs WHERE status = 'published' AND {$w} ORDER BY published_at DESC LIMIT 5");
-                $out['latest_' . $k] = array_map(function ($b) use ($k) { return ['title' => $b['title'], 'page' => '/' . $k . '/' . $b['slug'] . '/']; }, $st->fetchAll(PDO::FETCH_ASSOC));
+            // The same sections as blog-render.php (rocSectionOf): category "News" = news, "Guides" / "Guides: ..." = guides.
+            $st = $pdo->query("SELECT title, slug, category FROM blogs WHERE status = 'published' ORDER BY published_at DESC LIMIT 80");
+            $seen = ['blogs' => 0, 'guides' => 0, 'news' => 0];
+            foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $b) {
+                $c = trim((string)($b['category'] ?? ''));
+                $k = strcasecmp($c, 'News') === 0 ? 'news' : (preg_match('/^guides?\s*(:.*)?$/i', $c) ? 'guides' : 'blogs');
+                if ($seen[$k]++ < 5) $out['latest_' . $k][] = ['title' => $b['title'], 'page' => '/' . $k . '/' . $b['slug'] . '/'];
             }
         } catch (\Throwable $e) {}
     }
@@ -679,7 +689,8 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
               'platform' => rocAgentPlatform($pdo, $q),
               'recommendations' => $products ? 'shown' : 'only when the visitor asks for gear or upgrades: then tell them to ask, for example "suggest a graphics card"',
               'catalog_categories' => 'mice, keyboards, headsets and audio, speakers, monitors, graphics cards, processors, RAM, PC cases, gaming chairs, handhelds, laptops',
-              'links' => ['checker' => '/compatibility/', 'game_requirements' => '/can-i-run/', 'products' => '/products/', 'blogs' => '/blogs/', 'news' => '/news/', 'contact' => '/contact/']];
+              'links' => ['checker' => '/compatibility/', 'game_requirements' => '/can-i-run/', 'products' => '/products/', 'platforms' => '/gaming-platforms/', 'blogs' => '/blogs/', 'guides' => '/guides/',
+                          'news' => '/news/', 'contact' => '/contact/', 'privacy_policy' => '/privacy-policy/', 'terms' => '/terms-and-conditions/']];
 
     $reply = null; $engine = 'basic';
     if ($useAi && ($key = trim((string)rocBlogGet($pdo, 'blog_groq_key', ''))) !== '') {

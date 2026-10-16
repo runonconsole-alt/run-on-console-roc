@@ -206,12 +206,32 @@ function rocContentDb(PDO $pdo): PDO {
 }
 
 /**
- * Groq models for the product and platform texts (Deploy 80). Groq counts the daily tokens of each
- * model on its own, so these texts no longer use up the blog and news model (openai/gpt-oss-120b,
- * 200k tokens a day). A model that is not on the key is skipped; one at its limit waits until Groq
- * says it is free again (content_model_wait).
+ * Groq models for the product and platform texts (Deploy 80/81). Groq counts the daily tokens of each
+ * model on its own, so these texts use the key's other models and leave the blog and news model
+ * (blog_groq_model) its whole day. The names come from Groq's own model list (kept 12 hours in
+ * content_models): Groq retires models, so fixed names stopped working ("does not exist").
+ * A model at its limit waits until Groq says it is free again (content_model_wait).
  */
-const ROC_CONTENT_MODELS = ['llama-3.3-70b-versatile', 'moonshotai/kimi-k2-instruct-0905', 'moonshotai/kimi-k2-instruct', 'meta-llama/llama-4-maverick-17b-128e-instruct'];
+function rocContentModels(PDO $pdo, string $key, bool $fresh = false): array {
+    $c = rocBlogGet($pdo, 'content_models', []);
+    if (!$fresh && is_array($c) && !empty($c['list']) && time() - (int)($c['t'] ?? 0) < 43200) return $c['list'];
+    $r = rocGroqCall($key, 'GET', '/models', null, 20);
+    $have = $r['ok'] ? array_values(array_filter(array_map('strval', array_column((array)($r['data']['data'] ?? []), 'id')))) : [];
+    $blog = (string)rocBlogGet($pdo, 'blog_groq_model', '');
+    $chat = array_values(array_filter($have, function ($m) {
+        return !preg_match('/guard|whisper|tts|playai|orpheus|compound|prompt|embed|distil|allam/i', $m);
+    }));
+    // Bigger, stronger models first; the small 8b ones last.
+    $rank = function ($m) {
+        foreach (['/120b/i', '/kimi|k2/i', '/70b/i', '/qwen/i', '/maverick/i', '/gpt-oss-20b|20b/i', '/scout/i', '/gemma|mistral|deepseek/i'] as $i => $re) if (preg_match($re, $m)) return $i;
+        return preg_match('/8b|instant/i', $m) ? 20 : 10;
+    };
+    usort($chat, function ($a, $b) use ($rank) { return $rank($a) <=> $rank($b); });
+    $list = array_values(array_filter($chat, function ($m) use ($blog) { return $m !== $blog; }));
+    if (!$list && $blog !== '') $list = [$blog];   // the key has no other model: share the blog model
+    if ($list) rocBlogSet($pdo, 'content_models', ['list' => array_slice($list, 0, 5), 't' => time()]);
+    return array_slice($list, 0, 5);
+}
 
 /** Seconds Groq asks to wait ("try again in 20m41.5s" -> 1242). */
 function rocContentRetryIn(string $err): int {
@@ -230,7 +250,10 @@ function rocContentWrite(PDO $pdo, string $prompt): array {
     if ($key === '') return rocBlogWriteAny($pdo, $prompt);   // Gemini only
     $wait = rocBlogGet($pdo, 'content_model_wait', []); $wait = is_array($wait) ? $wait : [];
     $now = time(); $soonest = null; $errors = [];
-    foreach (ROC_CONTENT_MODELS as $model) {
+    $models = rocContentModels($pdo, $key);
+    if (!$models) return ['ok' => false, 'error' => 'Groq: the model list could not be read'];
+    $gone = false;
+    foreach ($models as $model) {
         if ((int)($wait[$model] ?? 0) > $now) { $soonest = min($soonest ?? PHP_INT_MAX, (int)$wait[$model] - $now); continue; }
         $r = rocGroqCall($key, 'POST', '/chat/completions', ['model' => $model, 'temperature' => 0.6, 'max_tokens' => 4000, 'response_format' => ['type' => 'json_object'],
             'messages' => [['role' => 'system', 'content' => 'You are an expert gaming hardware writer. Answer with one JSON object only.'], ['role' => 'user', 'content' => $prompt]]]);
@@ -247,8 +270,10 @@ function rocContentWrite(PDO $pdo, string $prompt): array {
             $soonest = min($soonest ?? PHP_INT_MAX, $s);
             $errors[] = "{$model}: rate limit"; continue;
         }
+        if (stripos($e, 'does not exist') !== false || stripos($e, 'decommissioned') !== false) $gone = true;
         $errors[] = "{$model}: {$e}";   // not on this key (404/400) or another error: the next model
     }
+    if ($gone) rocBlogSet($pdo, 'content_models', []);   // a model was retired: read Groq's list again next time
     $out = ['ok' => false, 'error' => 'Groq: ' . ($errors ? implode(' | ', $errors) : 'every content model is at its limit')];
     if ($soonest !== null) $out['limit'] = $soonest;
     return $out;

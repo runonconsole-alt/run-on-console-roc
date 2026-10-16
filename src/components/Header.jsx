@@ -209,13 +209,15 @@ export const Header = () => {
                 <select
                   name="in"
                   aria-label="Search in"
-                  defaultValue="all"
+                  defaultValue="products"
                   className="lg:hidden xl:block bg-transparent border-0 border-r border-slate-200 text-[11px] font-bold text-slate-700 pl-2 pr-1 py-1.5 rounded-l-xl focus:outline-none cursor-pointer"
                 >
-                  <option value="all">All</option>
                   <option value="products">Products</option>
                   <option value="blogs">Blogs</option>
                   <option value="games">Games</option>
+                  <option value="guides">Guides</option>
+                  <option value="news">News</option>
+                  <option value="platforms">Platforms</option>
                 </select>
                 <input
                   type="search"
@@ -344,11 +346,13 @@ export const Header = () => {
           <div className="lg:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-xl animate-page-in max-h-[calc(100vh-4rem)] overflow-y-auto">
             {/* Search (the header search bar is hidden below md) */}
             <form data-roc-search="" role="search" action="/products/" className="relative md:hidden flex gap-1.5">
-              <select name="in" aria-label="Search in" defaultValue="all" className="bg-slate-100 border border-slate-200 rounded-xl px-2 text-xs font-bold text-slate-700">
-                <option value="all">All</option>
+              <select name="in" aria-label="Search in" defaultValue="products" className="bg-slate-100 border border-slate-200 rounded-xl px-2 text-xs font-bold text-slate-700">
                 <option value="products">Products</option>
                 <option value="blogs">Blogs</option>
                 <option value="games">Games</option>
+                <option value="guides">Guides</option>
+                <option value="news">News</option>
+                <option value="platforms">Platforms</option>
               </select>
               <input
                 type="search"
