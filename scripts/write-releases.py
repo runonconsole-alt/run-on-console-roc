@@ -570,6 +570,12 @@ RELEASES = [
                   'Game pages: Ask ROC about my PC opens ROC with the question ready'],
          checks=[dict(label='Games editor', type='file', path='api/v1/cms/games.php'), dict(label='Clear cache', type='file', path='api/v1/cms/cache-clear.php')],
          pr=REPO + '85'),
+    dict(deploy=86, date='2026-10-16', title='IndexNow and new Steam games by themselves',
+         changes=['IndexNow: every new or changed post, product and game page goes to Bing, Yandex, Seznam and Naver at once (cli-indexnow.php --apply, then --all once)',
+                  'Every month the most played and best selling Steam games that are not on the site yet get their Can I run page by themselves (6 a scheduler run)',
+                  'roc-steam-games.json is now kept up to date on the server: deploys no longer carry it'],
+         checks=[dict(label='IndexNow', type='setting', key='indexnow_key'), dict(label='Steam update', type='file', path='api/v1/steam-update-lib.php')],
+         pr=REPO + '86'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

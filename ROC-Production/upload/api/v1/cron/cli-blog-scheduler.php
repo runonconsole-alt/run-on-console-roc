@@ -118,6 +118,24 @@ try {
     }
 } catch (\Throwable $e) { echo date('c') . ' llms.txt error: ' . $e->getMessage() . "\n"; }
 
+// IndexNow (Deploy 86): pages published or changed since the last run go to Bing, Yandex, Seznam and Naver.
+try {
+    require_once $ROOT . '/api/v1/cms/indexnow-lib.php';
+    $ix = rocIndexNowTick($pdo, $ROOT);
+    if ($ix !== null) echo date('c') . ' ' . $ix . "
+";
+} catch (\Throwable $e) { echo date('c') . ' IndexNow error: ' . $e->getMessage() . "
+"; }
+
+// New popular Steam games for the Can I run pages (Deploy 87): a few store requests a run, once a month.
+try {
+    require_once $ROOT . '/api/v1/steam-update-lib.php';
+    $su = rocSteamUpdateTick($pdo, $ROOT, 6);
+    if ($su !== null) echo date('c') . ' ' . $su . "
+";
+} catch (\Throwable $e) { echo date('c') . ' Steam update error: ' . $e->getMessage() . "
+"; }
+
 // Daily database backup (api/v1/cms/backup-lib.php): the first run of each Pakistan day makes it, 7 kept.
 try {
     require_once $ROOT . '/api/v1/cms/backup-lib.php';
