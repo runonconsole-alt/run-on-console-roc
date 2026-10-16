@@ -2369,6 +2369,8 @@ function prepMedia(list){
       else if(S.mediaUsed && (S.mediaUsed[u] || S.mediaUsed[(function(){ try{ return decodeURIComponent(u); }catch(e){ return u; } })()])) x.usage=[{type:'page',label:'Page',title:'Used on the website',fields:[]}];
     }
   });
+  // Game share cards (/uploads/og-games/, one per game page, made by the site): not listed (Deploy 84).
+  list=(list||[]).filter(function(x){ return !/^\/uploads\/og-games\//.test(String(x.file_url||'')); });
   (list||[]).forEach(function(x){
     if(!x.alt_text && isSocial(x)){ x.alt_auto='Social media picture: downloaded for posting, not shown on the website'; return; }
     if(x.alt_text || x.folder==='uploads') return;

@@ -1,0 +1,22 @@
+{
+ "deploy": 84,
+ "date": "2026-10-16",
+ "title": "Game pictures on the Can I run pages",
+ "changes": [
+  "Every game page shows its own Steam store picture in its header (from Steam, credited)",
+  "The Can I run list page shows the 6 most popular games",
+  "Game share cards and social pictures are never moved by the media clean-up; the Media library no longer lists the 2,000+ game cards"
+ ],
+ "checks": [
+  {
+   "label": "Game pictures",
+   "type": "contains",
+   "path": "game-render.php",
+   "text": "rocGpSteamImg"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/84",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

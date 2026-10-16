@@ -557,6 +557,12 @@ RELEASES = [
          changes=['Social kit Story pictures (1080x1920) also get under 100 KB: the quality steps go lower (cli-social-images.php --apply again)'],
          checks=[dict(label='Social pictures', type='contains', path='api/v1/cms/social-kit-lib.php', text='$q >= 40')],
          pr=REPO + '83'),
+    dict(deploy=84, date='2026-10-16', title='Game pictures on the Can I run pages',
+         changes=['Every game page shows its own Steam store picture in its header (from Steam, credited)',
+                  'The Can I run list page shows the 6 most popular games',
+                  'Game share cards and social pictures are never moved by the media clean-up; the Media library no longer lists the 2,000+ game cards'],
+         checks=[dict(label='Game pictures', type='contains', path='game-render.php', text='rocGpSteamImg')],
+         pr=REPO + '84'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
