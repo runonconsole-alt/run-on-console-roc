@@ -84,7 +84,12 @@ function rocMediaCandidates(string $root): array {
     $cands = [];
     if (is_dir($root . '/uploads')) {
         $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root . '/uploads', FilesystemIterator::SKIP_DOTS));
-        foreach ($it as $f) if (preg_match('/\.(jpe?g|png|webp|gif|svg|avif)$/i', $f->getFilename())) $cands[] = '/uploads' . str_replace('\\', '/', substr($f->getPathname(), strlen($root . '/uploads')));
+        foreach ($it as $f) if (preg_match('/\.(jpe?g|png|webp|gif|svg|avif)$/i', $f->getFilename())) {
+            $u = '/uploads' . str_replace('\\', '/', substr($f->getPathname(), strlen($root . '/uploads')));
+            // Game share cards (drawn by game-render.php) and social kit pictures: made by the site, never moved (Deploy 84).
+            if (strpos($u, '/uploads/og-games/') === 0 || strpos($u, '/uploads/social/') === 0) continue;
+            $cands[] = $u;
+        }
     }
     foreach (glob($root . '/images/products/*.{webp,svg,jpg,png}', GLOB_BRACE) ?: [] as $f) $cands[] = '/images/products/' . basename($f);
     foreach (glob($root . '/images/products/share/*.{jpg,png,webp}', GLOB_BRACE) ?: [] as $f) $cands[] = '/images/products/share/' . basename($f);

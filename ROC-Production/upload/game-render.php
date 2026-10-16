@@ -108,6 +108,15 @@ function rocGpOgCard(string $root, string $slug, string $title, string $line, in
     return $rel;
 }
 
+/**
+ * The game's own picture for the page header (Deploy 84, owner's request): its Steam store header
+ * (460x215), shown from Steam's own server and credited, never copied to this site. The share
+ * picture (og:image) stays the site's own card.
+ */
+function rocGpSteamImg(int $appid): string {
+    return $appid > 0 ? 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/' . $appid . '/header.jpg' : '';
+}
+
 function rocGpHead(string $title, string $desc, string $url, array $ld, string $robots = 'index, follow, max-image-preview:large', string $img = '', string $imgAlt = ''): string {
     // Share picture: the game's card, else the site picture (the SVG logo does not show on social sites).
     $img = ROC_PUBLIC_URL . ($img !== '' ? $img : '/uploads/site/home-hero.webp');
@@ -195,6 +204,11 @@ function rocGpStyles(): string {
         . ".gp-az a:hover{border-color:#10b981;color:#047857}"
         . ".gp-list{columns:1;column-gap:1.5rem}.gp-list li{break-inside:avoid;padding:.22rem 0;font-size:.9rem}.gp-list a{color:#0f172a;font-weight:600}.gp-list a:hover{color:#047857;text-decoration:underline}"
         . ".gp-list small{color:#94a3b8;font-size:.72rem;margin-left:.3rem}.gp-letter{font-family:Outfit,Inter,sans-serif;font-weight:800;font-size:1.3rem;color:#047857;margin:1.2rem 0 .4rem;scroll-margin-top:90px}"
+        . ".gp-hero.pic{display:grid;gap:1.2rem;align-items:center}.gp-pic{margin:0;border-radius:1rem;overflow:hidden;background:#022c22;box-shadow:0 18px 40px -18px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15)}"
+        . ".gp-pic img{display:block;width:100%;height:auto;aspect-ratio:460/215;object-fit:cover}.gp-pic figcaption{font-size:.62rem;color:#a7f3d0;padding:.3rem .6rem;background:rgba(2,44,34,.85)}"
+        . ".gp-wall{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}.gp-wall a{display:block;border-radius:.7rem;overflow:hidden;border:1px solid rgba(255,255,255,.15);transition:transform .25s}.gp-wall a:hover{transform:translateY(-3px)}"
+        . ".gp-wall img{display:block;width:100%;height:auto;aspect-ratio:460/215;object-fit:cover;background:#022c22}.gp-wall small{grid-column:1/-1;font-size:.62rem;color:#a7f3d0}"
+        . "@media(min-width:900px){.gp-hero.pic{grid-template-columns:minmax(0,1fr) 380px}}"
         . "@media(min-width:640px){.gp-hero{padding:2.2rem 2.2rem}.gp-hero h1{font-size:2.6rem}.gp-check{grid-template-columns:repeat(3,1fr)}.gp-parts{grid-template-columns:1fr 1fr}.gp-list{columns:2}}"
         . "@media(min-width:1024px){.gp-list{columns:3}}"
         . "</style>\n";
@@ -229,10 +243,16 @@ if ($slug === '') {
     $item = function ($g) { return '<li data-n="' . rocH(strtolower($g['name'])) . '"><a href="' . rocGpPath($g) . '">' . rocH($g['name']) . '</a><small>' . (int)$g['y'] . '</small></li>'; };
 
     $m  = $mainOpen . '<div class="max-w-6xl mx-auto py-6 space-y-6">' . rocGpCrumbHtml($crumbs);
-    $m .= '<header class="gp-hero"><h1>Can I run it? ' . number_format($n) . ' PC games</h1>'
+    $wall = '';
+    foreach (array_slice(array_values($games), 0, 6) as $i => $wg) {
+        $wall .= '<a href="' . rocGpPath($wg) . '" title="Can I run ' . rocH($wg['name']) . '?"><img src="' . rocH(rocGpSteamImg((int)$wg['appid'])) . '" alt="' . rocH($wg['name']) . ' (Steam store picture)" width="460" height="215"'
+            . ($i < 3 ? ' fetchpriority="high"' : '') . ' onerror="this.parentNode.style.display=\'none\'"></a>';
+    }
+    $m .= '<header class="gp-hero pic"><div><h1>Can I run it? ' . number_format($n) . ' PC games</h1>'
         . '<p>Pick a game to see its official minimum and recommended requirements from Steam, which graphics cards and processors run it, '
         . 'and check your own PC in a few seconds. The full checker also covers consoles, handhelds and phones.</p>'
-        . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Open the full checker &rarr;</a></div></header>';
+        . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Open the full checker &rarr;</a></div></div>'
+        . '<div class="gp-wall">' . $wall . '<small>Most popular games. Pictures: Steam store, © their publishers.</small></div></header>';
     $m .= '<section class="gp-card"><label for="gp-q" class="sr-only">Search a game</label>'
         . '<input id="gp-q" class="gp-search" type="search" placeholder="Search ' . number_format($n) . ' games, e.g. GTA, Elden Ring, Valorant…" autocomplete="off">'
         . '<p id="gp-none" class="gp-src" style="display:none;margin-top:.6rem">No game found. Try another name, or ask ROC in the chat.</p></section>';
@@ -369,10 +389,14 @@ $row = function ($label, $a, $b) use ($clean, $rec) {
         . ($rec ? '<td>' . ($b !== '' ? rocH($b) : '<span class="text-slate-400">Not listed</span>') . '</td>' : '') . '</tr>';
 };
 $m  = $mainOpen . '<article class="max-w-4xl mx-auto py-6 space-y-6">' . rocGpCrumbHtml($crumbs);
-$m .= '<header class="gp-hero"><h1>Can I run ' . rocH($name) . '?</h1><p>' . rocH($intro) . '</p>'
+$pic = rocGpSteamImg((int)$g['appid']);
+$m .= '<header class="gp-hero' . ($pic !== '' ? ' pic' : '') . '"><div><h1>Can I run ' . rocH($name) . '?</h1><p>' . rocH($intro) . '</p>'
     . '<div class="gp-tags"><span class="gp-tag w">' . rocH(ucfirst($weight)) . '</span>' . ($year ? '<span class="gp-tag">' . $year . '</span>' : '')
     . implode('', array_map(function ($x) { return '<span class="gp-tag">' . rocH(trim($x)) . '</span>'; }, array_slice(array_filter(explode(',', $genre)), 0, 3)))
-    . '<span class="gp-tag">PC (Windows)</span></div></header>';
+    . '<span class="gp-tag">PC (Windows)</span></div></div>'
+    . ($pic !== '' ? '<figure class="gp-pic"><img src="' . rocH($pic) . '" alt="' . rocH($name) . ' (Steam store picture)" width="460" height="215" fetchpriority="high"'
+        . ' onerror="this.closest(\'figure\').remove()"><figcaption>Picture: <a href="' . rocH((string)($g['u'] ?? '')) . '" target="_blank" rel="noopener" style="color:inherit">Steam store</a>, © ' . rocH($name) . ' publisher</figcaption></figure>' : '')
+    . '</header>';
 
 // Quick check
 $opt = function (array $refs, string $pick) { $o = ''; foreach ($refs as $n => $s) $o .= '<option value="' . $s . '"' . ($n === $pick ? ' selected' : '') . '>' . rocH($n) . '</option>'; return $o; };
