@@ -2745,17 +2745,14 @@ async function renderSocialKits(m){
   var trafficCard='<div class="card"><div class="chead"><h3>Social traffic</h3><span class="note">visits from social media, last 30 days: <b>'+totalSoc+'</b></span></div><div class="cbody">'+
     (T.by_source.length?'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">'+T.by_source.map(function(r){ return '<div class="stat" style="min-width:110px"><b style="font-size:20px">'+(+r.v)+'</b><div class="hint">'+esc(SN[r.source]||r.source)+'</div></div>'; }).join('')+'</div>'+
       '<table class="list"><thead><tr><th>Page</th><th>From</th><th>Visits</th></tr></thead><tbody>'+T.pages.map(function(r){ return '<tr><td><a href="'+esc(r.path)+'" target="_blank" rel="noopener">'+esc(r.path)+'</a></td><td>'+esc(SN[r.source]||r.source)+'</td><td>'+(+r.v)+'</td></tr>'; }).join('')+'</tbody></table>'
-     :'<div class="hint">No visits from social media yet. Use the caption and link buttons below: their links carry the platform, so every visit is counted here (only numbers, nothing about the person).</div>')+'</div></div>';
-  var feedCard='<div class="card"><div class="chead"><h3>Post everywhere with one tool</h3></div><div class="cbody"><div class="hint" style="margin-bottom:8px">'+
-    'Connect your accounts in a scheduler such as <b>Publer</b> or <b>Buffer</b> and give it this RSS feed: every new news story, blog and guide is posted by itself. Reddit and Quora: never automatic (use the answer helper below).</div>'+
-    ['/feed.xml','/news/feed.xml','/blogs/feed.xml','/guides/feed.xml'].map(function(f){ var u='https://runonconsole.com'+f; return '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><code style="flex:1">'+esc(u)+'</code>'+copyBtn(u,'Copy')+'</div>'; }).join('')+'</div></div>';
+     :'<div class="hint">No visits from social media yet. Post with the caption and link buttons below: their links carry the platform, so every visit is counted here (only numbers, nothing about the person).</div>')+'</div></div>';
   var answerCard='<div class="card"><div class="chead"><h3>Reddit &amp; Quora answer helper</h3><span class="note">a draft to read, edit and post by hand</span></div><div class="cbody">'+
     '<div class="hint" style="margin-bottom:8px">Both sites ban bots and copy-paste promotion. Answer real questions helpfully; link your site only when it really helps, and say it is yours. Keep most of your answers without links.</div>'+
     '<div class="field"><label for="ah-q">The question (and the post text)</label><textarea id="ah-q" rows="3" placeholder="e.g. Is an RTX 3060 still good for 1440p gaming in 2026?"></textarea></div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id="ah-w"><option value="reddit">Reddit</option><option value="quora">Quora</option></select><button class="btn primary" id="ah-go" type="button">Draft an answer</button></div>'+
     '<div id="ah-out" style="margin-top:10px"></div></div></div>';
   $('.body',m).innerHTML=
-    (!d.ai?'<div class="alert warn">No AI key saved: add the free Groq or Gemini key in CMS &gt; Updates writer, then kits are made.</div>':'')+trafficCard+feedCard+answerCard+
+    (!d.ai?'<div class="alert warn">No AI key saved: add the free Groq or Gemini key in CMS &gt; Updates writer, then kits are made.</div>':'')+trafficCard+answerCard+
     '<div class="card"><div class="cbody" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">'+
       '<div class="hint">A kit is made for every new news story, guide and blog post (one every 10 minutes). Post the picture with the caption, or film the script for TikTok, YouTube Shorts and Reels.</div>'+
       '<label style="display:flex;gap:6px;align-items:center;font-weight:700;cursor:pointer"><input type="checkbox" id="sk-on"'+(d.on?' checked':'')+'> Make kits by themselves</label></div></div>'+

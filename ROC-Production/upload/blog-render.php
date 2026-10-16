@@ -120,7 +120,7 @@ if ($slug !== '') {
     rocRenderPost($ROOT, $post, $pdo);
 }
 if (isset($_GET['updates'])) rocRenderUpdates($ROOT, $pdo, $page);   // /updates/ (cli-updates.php)
-if (isset($_GET['feed'])) rocFeed($pdo, (string)$_GET['feed']);       // /feed.xml, /news/feed.xml ... (cli-social-feed.php)
+if (isset($_GET['feed'])) rocNotFound($ROOT);   // the RSS feeds were taken out again (owner, 2026-10-16)
 if (isset($_GET['json'])) {
     // Published posts for the header search box (/blogs/?json=1).
     // Also used by the home page's latest-articles section (image, date).
@@ -404,10 +404,6 @@ function rocSendHtml(string $html, ?int $modified = null): void {
         $lu = $L['updated'] !== '' ? strtotime($L['updated']) : false;
         if ($modified && $lu && $lu > $modified) $modified = $lu;
     }
-    // RSS feed link for feed readers and social media tools (/feed.xml, cli-social-feed.php).
-    if (stripos($html, 'application/rss+xml') === false && stripos($html, '</head>') !== false)
-        $html = preg_replace('#</head>#i', '<link rel="alternate" type="application/rss+xml" title="Run On Console: blogs, news and guides" href="/feed.xml" />' . "
-</head>", $html, 1);
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: public, max-age=0, must-revalidate');
     header('X-Content-Type-Options: nosniff');
@@ -814,47 +810,6 @@ function rocRenderUpdates(string $root, PDO $pdo, int $page): void {
     }
     $m .= '</div></div>';
     rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $latest);
-}
-
-/**
- * RSS feed of the newest posts (Deploy 74): /feed.xml (all), /news/feed.xml, /blogs/feed.xml, /guides/feed.xml.
- * Social media tools (Publer, Buffer ...) read it and post every new item by themselves; links carry
- * utm_source=feed&utm_medium=social so the visits show in CMS > Social posts > Social traffic.
- */
-function rocFeed(PDO $pdo, string $which): void {
-    $which = in_array($which, ['news', 'blogs', 'guides'], true) ? $which : 'all';
-    $where = ['news' => "category = 'News'", 'guides' => rocGuideSql(), 'blogs' => "(category IS NULL OR (category <> 'News' AND " . rocNotGuideSql() . '))', 'all' => '1 = 1'][$which];
-    $rows = $pdo->query("SELECT title, slug, category, excerpt, image, image_alt, published_at, created_at, updated_at, content_modified_at FROM blogs
-                          WHERE status = 'published' AND {$where} " . rocOrderSql() . ' LIMIT 30')->fetchAll(PDO::FETCH_ASSOC);
-    $x = function ($s) { return htmlspecialchars((string)$s, ENT_XML1 | ENT_QUOTES, 'UTF-8'); };
-    $self = ROC_PUBLIC_URL . ($which === 'all' ? '' : '/' . $which) . '/feed.xml';
-    $names = ['all' => 'Run On Console: blogs, news and guides', 'news' => 'Run On Console: gaming news', 'blogs' => 'Run On Console: blogs', 'guides' => 'Run On Console: guides'];
-    $latest = 0;
-    $items = '';
-    foreach ($rows as $r) {
-        $t = rocPublished($r) ?: time(); if ($t > $latest) $latest = $t;
-        $link = rocPostUrlOf($r);
-        $tracked = $link . '?utm_source=feed&utm_medium=social&utm_campaign=rss';
-        $img = trim((string)($r['image'] ?? ''));
-        $items .= "  <item>\n    <title>" . $x($r['title']) . "</title>\n    <link>" . $x($tracked) . "</link>\n    <guid isPermaLink=\"true\">" . $x($link) . "</guid>\n"
-            . '    <pubDate>' . gmdate('D, d M Y H:i:s', $t) . " +0000</pubDate>\n    <category>" . $x(rocSectionOf($r) === 'news' ? 'News' : (rocSectionOf($r) === 'guides' ? 'Guides' : 'Blogs')) . "</category>\n"
-            . '    <description>' . $x(trim((string)($r['excerpt'] ?? ''))) . "</description>\n"
-            . ($img !== '' ? '    <enclosure url="' . $x(rocAbs($img)) . '" type="' . (preg_match('/\.webp$/i', $img) ? 'image/webp' : (preg_match('/\.png$/i', $img) ? 'image/png' : 'image/jpeg')) . "\" length=\"0\" />\n"
-                . '    <media:content url="' . $x(rocAbs($img)) . "\" medium=\"image\" />\n" : '')
-            . "  </item>\n";
-    }
-    header('Content-Type: application/rss+xml; charset=utf-8');
-    header('Cache-Control: public, max-age=600');
-    header('X-Robots-Tag: noindex');
-    echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
-       . '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">' . "\n<channel>\n"
-       . '  <title>' . $x($names[$which]) . "</title>\n  <link>" . ROC_PUBLIC_URL . ($which === 'all' ? '/updates/' : '/' . $which . '/') . "</link>\n"
-       . '  <description>' . $x('The newest from Run On Console (runonconsole.com): gaming and PC hardware news, blogs and step by step guides.') . "</description>\n"
-       . "  <language>en</language>\n  <lastBuildDate>" . gmdate('D, d M Y H:i:s', $latest ?: time()) . " +0000</lastBuildDate>\n"
-       . '  <atom:link href="' . $x($self) . "\" rel=\"self\" type=\"application/rss+xml\" />\n"
-       . "  <image><url>" . ROC_PUBLIC_URL . "/images/logo-512.png</url><title>" . $x($names[$which]) . "</title><link>" . ROC_PUBLIC_URL . "/</link></image>\n"
-       . $items . "</channel>\n</rss>\n";
-    exit;
 }
 
 /* ==================================================================== */

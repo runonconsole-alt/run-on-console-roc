@@ -1,20 +1,19 @@
 {
  "deploy": 74,
  "date": "2026-10-16",
- "title": "RSS feeds for one-click posting, social traffic, Reddit/Quora answer helper",
+ "title": "Social traffic, copy buttons per platform, Reddit/Quora answer helper",
  "changes": [
-  "RSS feeds: /feed.xml (everything), /news/feed.xml, /blogs/feed.xml, /guides/feed.xml; give one to Publer or Buffer and every new post is shared on your connected accounts by itself",
   "CMS > Social posts > Social traffic: visits from Facebook, Instagram, X, LinkedIn, Pinterest, TikTok, YouTube, Reddit, Quora in the last 30 days, and which pages they opened (only numbers, nothing about the person)",
-  "Copy buttons per platform (Facebook, Instagram, LinkedIn, X, Pinterest, TikTok bio, YouTube): their links carry the platform so the visits are counted",
+  "Copy buttons per platform (Facebook, Instagram, LinkedIn, X, Pinterest, TikTok bio, YouTube) for posting by hand: their links carry the platform so the visits are counted",
   "Reddit & Quora answer helper: paste a question, get a helpful draft to read, edit and post by hand (no bots: both sites ban them)",
-  "Alert email when the guide writer publishes a guide, like news and blog posts"
+  "Alert email when the guide writer publishes a guide, like news and blog posts",
+  "No RSS feed / Publer (taken out again): cli-social-feed.php --apply removes the feed rules if they were added"
  ],
  "checks": [
   {
-   "label": "Feeds switched on (cli-social-feed.php)",
-   "type": "contains",
-   "path": ".htaccess",
-   "text": "ROC feeds BEGIN"
+   "label": "Social traffic",
+   "type": "file",
+   "path": "api/v1/social-visit.php"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/74",
