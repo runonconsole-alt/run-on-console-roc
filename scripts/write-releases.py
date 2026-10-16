@@ -506,6 +506,10 @@ RELEASES = [
                   'No RSS feed / Publer (taken out again): cli-social-feed.php --apply removes the feed rules if they were added'],
          checks=[dict(label='Social traffic', type='file', path='api/v1/social-visit.php')],
          pr=REPO + '74'),
+    dict(deploy=75, date='2026-10-16', title='The Updates page is in the sitemap',
+         changes=['/updates/ (blogs, news and guides) is listed in the pages sitemap, so Google finds it'],
+         checks=[dict(label='Sitemap', type='contains', path='sitemap-render.php', text='ROC updates BEGIN')],
+         pr=REPO + '75'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

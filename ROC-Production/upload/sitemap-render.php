@@ -105,6 +105,9 @@ if ($map === 'pages') {
             if (trim((string)($e['title'] ?? '')) !== '') $GLOBALS['ROC_SM_TITLES'][$p] = trim((string)$e['title']);
         }
     }
+    // Pages served from the CMS database by blog-render.php (no built folder to scan).
+    $ht = (string)@file_get_contents($root . '/.htaccess');
+    if (strpos($ht, 'ROC updates BEGIN') !== false && !isset($urls['/updates/'])) { $urls['/updates/'] = time(); $GLOBALS['ROC_SM_TITLES']['/updates/'] = 'Updates: blogs, news and guides'; }
     rocSmUrlset($urls);
 }
 if ($map === 'products')   rocSmUrlset(rocSmBuilt($root, 'products'));
