@@ -1242,6 +1242,77 @@ async function renderGames(m){
   }); });
 }
 
+/* ---------------------------------------------------------- comparisons */
+/* "X vs Y" pages at /compare/ (Deploy 88): the top 4 products of each category against each other.
+   The writer writes each verdict (1 a scheduler run); here it can be changed, written again or hidden. */
+async function renderCompare(m){
+  if(!S.cmpData){
+    m.innerHTML=head('Comparisons','Loading…')+'<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+    try{ S.cmpData=await api('compare-admin.php'); }catch(e){ m.innerHTML=head('Comparisons','')+'<div class="body"><div class="alert bad">'+esc(e.message)+'</div></div>'; return; }
+    if(S.view!=='compare'||S.editing) return;
+  }
+  var d=S.cmpData, f=S.cmpFilter||'all', q=(S.cmpQ||'').toLowerCase();
+  var rows=d.pairs.filter(function(r){
+    if(f==='written'&&!(r.written&&!r.hidden)) return false;
+    if(f==='waiting'&&r.written) return false;
+    if(f==='hidden'&&!r.hidden) return false;
+    return !q || (r.a+' '+r.b+' '+r.category).toLowerCase().indexOf(q)!==-1;
+  });
+  var n=function(fn){ return d.pairs.filter(fn).length; };
+  var chips={all:['All',d.pairs.length],written:['Live',n(function(r){return r.written&&!r.hidden;})],waiting:['Waiting for the writer',n(function(r){return !r.written;})],hidden:['Hidden',n(function(r){return r.hidden;})]};
+  m.innerHTML=head('Comparisons','"X vs Y" pages: the top 4 products of every category ('+d.pairs.length+')',
+      '<a class="btn" href="/compare/" target="_blank" rel="noopener">Open /compare/ ↗</a>')+
+    '<div class="body"><div class="card"><div class="chead" style="flex-wrap:wrap;gap:10px">'+
+      '<div class="search" style="max-width:280px;flex:1"><input type="text" id="cq" placeholder="Search a product or category" value="'+esc(S.cmpQ||'')+'"></div>'+
+      '<div class="chips">'+Object.keys(chips).map(function(k){ return '<button class="chip'+(f===k?' on':'')+'" data-cf="'+k+'">'+esc(chips[k][0])+'<span class="n">'+chips[k][1]+'</span></button>'; }).join('')+'</div></div>'+
+    (rows.length?'<table class="list"><thead><tr><th>Comparison</th><th>Category</th><th>State</th><th></th></tr></thead><tbody>'+rows.map(function(r){
+      return '<tr><td><div style="font-weight:600">'+esc(r.a)+' <span style="color:var(--ink-3)">vs</span> '+esc(r.b)+'</div>'+
+        (r.text&&r.text.summary?'<div class="t-slug" style="max-width:520px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.text.summary)+'</div>':'')+'</td>'+
+        '<td style="color:var(--ink-3)">'+esc(r.category)+'</td>'+
+        '<td>'+(r.hidden?'<span class="tag draft">Hidden</span>':r.written?'<span class="tag published">Live</span>':'<span class="tag draft" title="The writer writes 1 a scheduler run, at most '+d.daily+' a day">Waiting</span>')+'</td>'+
+        '<td style="text-align:right;white-space:nowrap">'+(can('products','edit')?'<button class="btn sm" data-ce="'+esc(r.slug)+'">'+(r.written?'Edit':'Write now')+'</button> ':'')+
+        (r.written&&!r.hidden?'<a class="btn sm" href="/compare/'+esc(r.slug)+'/" target="_blank" rel="noopener">Page ↗</a>':'')+'</td></tr>';
+    }).join('')+'</tbody></table>':'<div class="empty"><div class="big">🆚</div><div>No comparisons match.</div></div>')+
+    '</div><div class="hint">The pairs follow the order of the products in each category (CMS > Products): change the order and the pairs change too. '+
+    'A page goes live once its text is written; Google gets it through the products sitemap and Bing through IndexNow.</div></div>';
+  var cq=$('#cq',m);
+  cq.addEventListener('input',function(){ S.cmpQ=cq.value; var at=cq.selectionStart; renderCompare(m); var x=$('#cq',m); if(x){ x.focus(); x.setSelectionRange(at,at); } });
+  m.querySelectorAll('[data-cf]').forEach(function(b){ b.addEventListener('click',function(){ S.cmpFilter=b.dataset.cf; renderCompare(m); }); });
+  m.querySelectorAll('[data-ce]').forEach(function(b){ b.addEventListener('click',function(){
+    var r=d.pairs.filter(function(x){return x.slug===b.dataset.ce;})[0]; if(!r) return;
+    if(!r.written) return compareRewrite(r, b, function(){ renderCompare(m); });
+    compareModal(r, function(){ renderCompare(m); });
+  }); });
+}
+async function compareRewrite(r, btn, after){
+  if(btn){ btn.disabled=true; btn.textContent='Writing… (about 20 s)'; }
+  try{ var x=await api('compare-admin.php',{slug:r.slug,rewrite:true}); r.text=x.text; r.written=true; r.t=Date.now()/1000|0; toast(x.message,'ok'); }
+  catch(e){ toast(e.message,'bad'); }
+  if(btn){ btn.disabled=false; }
+  if(after) after();
+}
+function compareModal(r, after){
+  var t=r.text||{};
+  var faq=(t.faq||[]).map(function(f){ return 'Q: '+f.q+'\nA: '+f.a; }).join('\n\n');
+  modal(r.a+' vs '+r.b,
+    '<div class="hint" style="margin-bottom:10px">Page: <a href="/compare/'+esc(r.slug)+'/" target="_blank" rel="noopener">/compare/'+esc(r.slug)+'/ ↗</a></div>'+
+    '<div class="field"><label>Short answer (top of the page, also the Google description)</label><textarea id="ce-sum" rows="3" maxlength="800">'+esc(t.summary||'')+'</textarea></div>'+
+    '<div class="field"><label>The differences that matter (one a line)</label><textarea id="ce-dif" rows="5">'+esc((t.differences||[]).join('\n'))+'</textarea></div>'+
+    '<div class="field"><label>Who should buy '+esc(r.a)+'</label><textarea id="ce-pa" rows="2" maxlength="400">'+esc(t.pick_a||'')+'</textarea></div>'+
+    '<div class="field"><label>Who should buy '+esc(r.b)+'</label><textarea id="ce-pb" rows="2" maxlength="400">'+esc(t.pick_b||'')+'</textarea></div>'+
+    '<div class="field"><label>Questions (Q: … then A: …, a blank line between questions)</label><textarea id="ce-faq" rows="6">'+esc(faq)+'</textarea></div>'+
+    '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="ce-hid"'+(r.hidden?' checked':'')+'> Hide this page (404, out of the sitemap and the lists)</label>',
+    '<button class="btn" data-a="rewrite" style="margin-right:auto">Write again with the writer</button><button class="btn" data-a="close">Cancel</button><button class="btn primary" data-a="save">Save</button>',
+    async function(a, close){
+      if(a==='rewrite'){ close(); return compareRewrite(r, null, after); }
+      if(a!=='save'){ close(); return; }
+      var qa=[]; $('#ce-faq').value.split(/\n\s*\n/).forEach(function(b){ var m=/Q:\s*([\s\S]*?)\n\s*A:\s*([\s\S]*)/.exec(b.trim()); if(m) qa.push({q:m[1].trim(),a:m[2].trim()}); });
+      var body={slug:r.slug,summary:$('#ce-sum').value,differences:$('#ce-dif').value.split('\n'),pick_a:$('#ce-pa').value,pick_b:$('#ce-pb').value,faq:qa,hidden:$('#ce-hid').checked};
+      try{ var x=await api('compare-admin.php',body); r.text=x.text; r.hidden=!!x.text.hidden; toast(x.message,'ok'); close(); if(after) after(); }
+      catch(e){ toast(e.message,'bad'); }
+    }, true);
+}
+
 /* One game page in CMS > Games (Deploy 85): empty fields keep the automatic text. */
 function gameEditModal(r, after){
   var e=S.gameEdits[r.slug]||{};
@@ -1353,7 +1424,7 @@ function renderShell(){
       (can('pages','view')?item('cmspages','Pages','▦',S.pages.length+(S.sitePagesN||0))+item('metas','Metas','🏷'):'')+
       (can('pages','view')?item('platforms','Gaming platforms','◈'):'')+
       item('games','Games','🎮')+
-      (can('products','view')?item('products','Products','▣')+item('product-categories','Product categories','▤'):'')+'</div>'+
+      (can('products','view')?item('products','Products','▣')+item('product-categories','Product categories','▤')+item('compare','Comparisons','🆚'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
       item('builder','Site builder','✦')+item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Updates writer','✍')+item('agent','ROC assistant','🤖')+item('announce','Announcement bar','📣')+
       item('siteusers','Site users','👤')+item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+item('siteinfo','Website info','ℹ')+'</div>':'')+
@@ -1418,6 +1489,7 @@ function renderView(){
   if(S.view==='pages') return renderPages(m);
   if(S.view==='platforms' && can('pages','view')) return renderPlatforms(m);
   if(S.view==='games') return renderGames(m);
+  if(S.view==='compare') return renderCompare(m);
   if(S.view==='activity') return renderActivity(m);
   if(S.view==='messages' && S.user.role==='administrator') return renderMessages(m);
   if(S.view==='social') return renderSocial(m);
