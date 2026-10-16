@@ -24,7 +24,9 @@ require_once __DIR__ . '/blog-engine-lib.php';
 const ROC_CONTENT_DAILY = 40;   // a day, so the blog and news writers keep their share of the writer key
 const ROC_CONTENT_BANNED = ['elevate', 'unleash', 'game-changer', 'game changer', 'in today\'s', 'fast-paced world', 'look no further',
     'take your gaming to the next level', 'whether you\'re a casual', 'delve', 'seamless', 'cutting-edge', 'unparalleled', 'revolutionary',
-    'we tested', 'in our testing', 'our tests', 'hands-on', 'we used it'];
+    'we tested', 'in our testing', 'our tests', 'hands-on', 'we used it', 'in real-world use', 'in real world use',
+    // the writer talking about its instructions (Deploy 79: "isn't listed in the provided data")
+    'provided data', 'the data provided', 'in the data', 'data does not', "data doesn't", 'the given data', 'information provided', 'provided information'];
 
 /** A product page is thin when it has no About text of its own yet. */
 function rocContentThin(array $p): bool {
@@ -83,7 +85,8 @@ const ROC_CONTENT_RULES = "Writing rules (follow all):\n"
     . "- Tips and gear advice stay general and safe. Do not claim a specific feature, port, mode, storage type or compatibility unless it is in DATA.
 "
     . "- Be honest: name real trade-offs and say who should pick something else.\n"
-    . "- Original wording only. Do not copy text from Amazon or the maker's site.\n";
+    . "- Original wording only. Do not copy text from Amazon or the maker's site.\n"
+    . "- Write to the reader. Never mention DATA, \"the data\", \"the information provided\" or these rules; when a detail is unknown, tell the reader to check the listing for it.\n";
 
 function rocContentProductPrompt(array $p, string $catName, string $groupName): string {
     $data = ['name' => $p['title'], 'brand' => $p['brand'] ?? '', 'category' => $catName, 'group' => $groupName,
@@ -186,11 +189,29 @@ function rocContentList($v, int $max, int $len = 160): array {
     return array_slice($l, 0, $max);
 }
 
+/**
+ * The database connection, opened again when the server closed it. The live MySQL closes an idle
+ * connection while the writer waits for the free key's limit; reading the key then failed quietly
+ * ("No writer key saved", Deploy 79).
+ */
+function rocContentDb(PDO $pdo): PDO {
+    try { $pdo->query('SELECT 1'); return $pdo; } catch (\Throwable $e) {}
+    if (!defined('DB_HOST') || !defined('DB_NAME') || !defined('DB_USER') || !defined('DB_PASS')) return $pdo;
+    try {
+        $n = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4', DB_USER, DB_PASS,
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, PDO::ATTR_EMULATE_PREPARES => false]);
+        $n->exec("SET time_zone = '+00:00'");
+        return $n;
+    } catch (\Throwable $e) { return $pdo; }
+}
+
 /** Asks the writer twice at most (the second time with the reason the first answer was refused). */
-function rocContentAsk(PDO $pdo, string $prompt, array $keys): array {
+function rocContentAsk(PDO &$pdo, string $prompt, array $keys): array {
     $why = ''; $waits = 0;
     for ($try = 0; $try < 2; $try++) {
+        $pdo = rocContentDb($pdo);
         $r = rocBlogWriteAny($pdo, $prompt . ($why !== '' ? "\nYour last answer was refused because it {$why}. Fix that." : ''));
+        $pdo = rocContentDb($pdo);   // the answer can take a minute: save with a live connection
         // Free key: a limit per minute. On the command line, wait as long as the writer asks (at most a minute) and ask again.
         if (!$r['ok'] && PHP_SAPI === 'cli' && $waits < 3 && preg_match('/rate limit|try again in/i', (string)$r['error'])) {
             $s = 20;
@@ -272,7 +293,8 @@ function rocContentItems(array $q): array {
         array_map(function ($x) { return ['product', $x]; }, $q['products']), array_map(function ($x) { return ['deepen', $x]; }, $q['deepen'] ?? []));
 }
 
-function rocContentRun(PDO $pdo, string $type, array $row): array {
+function rocContentRun(PDO &$pdo, string $type, array $row): array {
+    $pdo = rocContentDb($pdo);
     if ($type === 'platform') return rocContentWritePlatform($pdo, $row);
     [$cn, $gn] = rocContentNames($pdo, $row);
     return $type === 'deepen' ? rocContentDeepenProduct($pdo, $row, $cn, $gn) : rocContentWriteProduct($pdo, $row, $cn, $gn);

@@ -1,0 +1,22 @@
+{
+ "deploy": 79,
+ "date": "2026-10-16",
+ "title": "Product writer keeps going",
+ "changes": [
+  "The writer opens the database again when the server closed it during a long wait (it stopped with No writer key saved)",
+  "Texts that talk about the writer instructions (the provided data) are refused and written again",
+  "--deepen on a page that already has its questions stops instead of adding them twice"
+ ],
+ "checks": [
+  {
+   "label": "Writer",
+   "type": "contains",
+   "path": "api/v1/cms/content-writer-lib.php",
+   "text": "function rocContentDb"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/79",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

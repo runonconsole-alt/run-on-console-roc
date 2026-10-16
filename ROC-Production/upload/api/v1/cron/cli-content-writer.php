@@ -101,6 +101,7 @@ if ($deepen !== null) {
     $st = $pdo->prepare('SELECT * FROM products WHERE slug = ?'); $st->execute([$deepen]);
     $r = $st->fetch(PDO::FETCH_ASSOC);
     if (!$r) exit("No product with the address {$deepen}.\n");
+    if (strpos((string)$r['summary'], ROC_CONTENT_FAQ_HEAD) !== false) exit("{$deepen} already has its buyer questions. To write the whole page again: --slug={$deepen}\n");
     $items = [[rocContentThin($r) ? 'product' : 'deepen', $r]];
 }
 if ($slug !== null) {
@@ -124,7 +125,7 @@ file_put_contents($file, json_encode($backup, JSON_PRETTY_PRINT | JSON_UNESCAPED
 $ok = 0;
 foreach ($items as $i => [$t, $row]) {
     if ($i > 0) sleep(20);                  // the free writer key allows about 3 pages a minute
-    $r = rocContentRun($pdo, $t, $row);
+    $r = rocContentRun($pdo, $t, $row);   // opens the database again when the server closed it (Deploy 79)
     echo '  ' . ($r['ok'] ? 'ok ' : '!  ') . str_pad($t, 9) . $row['slug'] . ($r['ok'] ? '' : ' - ' . $r['error']) . "\n";
     if (!$r['ok']) { rocContentFails($pdo, (string)$row['slug'], true); echo "Stopped: the writer did not answer well. Try again later (the free key has a limit per minute and per day).\n"; break; }
     $ok++;
