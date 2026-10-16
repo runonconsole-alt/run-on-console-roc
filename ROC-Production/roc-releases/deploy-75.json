@@ -1,0 +1,20 @@
+{
+ "deploy": 75,
+ "date": "2026-10-16",
+ "title": "The Updates page is in the sitemap",
+ "changes": [
+  "/updates/ (blogs, news and guides) is listed in the pages sitemap, so Google finds it"
+ ],
+ "checks": [
+  {
+   "label": "Sitemap",
+   "type": "contains",
+   "path": "sitemap-render.php",
+   "text": "ROC updates BEGIN"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/75",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}
