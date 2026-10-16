@@ -576,6 +576,12 @@ RELEASES = [
                   'roc-steam-games.json is now kept up to date on the server: deploys no longer carry it'],
          checks=[dict(label='IndexNow', type='setting', key='indexnow_key'), dict(label='Steam update', type='file', path='api/v1/steam-update-lib.php')],
          pr=REPO + '86'),
+    dict(deploy=87, date='2026-10-16', title='X vs Y comparison pages',
+         changes=['Comparison pages at /compare/: the top 4 products of every category against each other (about 70 pages), with specs side by side, the differences, who should pick which, pros and cons and questions',
+                  'A page shows once its verdict is written (1 a scheduler run, at most 20 a day); product pages link their comparisons; the products sitemap lists them',
+                  'IndexNow keeps the addresses while Bing checks the new key (SiteVerificationNotCompleted)'],
+         checks=[dict(label='Compare rules', type='htaccess', marker='# ROC compare BEGIN')],
+         pr=REPO + '87'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
