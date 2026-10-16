@@ -474,7 +474,8 @@ function rocAgentTable(PDO $pdo): void {
 
 /** Visitor key for the limits: a daily salted hash, the IP itself is never stored. */
 function rocAgentIpHash(): string {
-    return substr(hash('sha256', gmdate('Y-m-d') . '|' . ($_SERVER['REMOTE_ADDR'] ?? '') . '|roc-agent'), 0, 16);
+    require_once __DIR__ . '/client-ip.php';
+    return substr(hash('sha256', gmdate('Y-m-d') . '|' . rocClientIp() . '|roc-agent'), 0, 16);
 }
 
 /* ------------------------------------------------------ the website's own data */

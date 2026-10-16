@@ -1,0 +1,20 @@
+{
+ "deploy": 76,
+ "date": "2026-10-16",
+ "title": "Ready for Cloudflare",
+ "changes": [
+  "The contact form and ROC limits use the real visitor address behind Cloudflare (CF-Connecting-IP, only believed from Cloudflare servers)",
+  "Without Cloudflare nothing changes"
+ ],
+ "checks": [
+  {
+   "label": "Client IP",
+   "type": "file",
+   "path": "api/v1/client-ip.php"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/76",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

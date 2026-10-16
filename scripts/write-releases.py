@@ -510,6 +510,11 @@ RELEASES = [
          changes=['/updates/ (blogs, news and guides) is listed in the pages sitemap, so Google finds it'],
          checks=[dict(label='Sitemap', type='contains', path='sitemap-render.php', text='ROC updates BEGIN')],
          pr=REPO + '75'),
+    dict(deploy=76, date='2026-10-16', title='Ready for Cloudflare',
+         changes=['The contact form and ROC limits use the real visitor address behind Cloudflare (CF-Connecting-IP, only believed from Cloudflare servers)',
+                  'Without Cloudflare nothing changes'],
+         checks=[dict(label='Client IP', type='file', path='api/v1/client-ip.php')],
+         pr=REPO + '76'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
