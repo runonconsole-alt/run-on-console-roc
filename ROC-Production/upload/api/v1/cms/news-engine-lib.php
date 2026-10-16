@@ -103,7 +103,9 @@ function rocNewsSaveState(PDO $pdo, array $s): void { rocBlogSet($pdo, 'news_sta
 
 /** The address of a post: news at /news/, everything else at /blogs/. */
 function rocNewsIsNews(?string $category): bool { return strcasecmp(trim((string)$category), ROC_NEWS_CATEGORY) === 0; }
-function rocPostPath(string $slug, ?string $category): string { return (rocNewsIsNews($category) ? '/news/' : '/blogs/') . $slug . '/'; }
+function rocPostPath(string $slug, ?string $category): string {
+    return (rocNewsIsNews($category) ? '/news/' : (preg_match('/^guides?\s*(:.*)?$/i', trim((string)$category)) ? '/guides/' : '/blogs/')) . $slug . '/';
+}
 
 /* ----------------------------------------------------------- reading feeds */
 

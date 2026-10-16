@@ -21,6 +21,7 @@ export const DEFAULT_SITE_NAV = {
     { label: 'PRODUCTS', url: '/products/' },
     { label: 'SYSTEMS', url: '/compatibility/' },
     { label: 'BLOGS', url: '/blogs/' },
+    { label: 'GUIDES', url: '/guides/' },
     { label: 'ABOUT US', url: '/about/' },
   ],
   footer: {
@@ -45,6 +46,7 @@ export const DEFAULT_SITE_NAV = {
         { label: 'Contact Us', url: '/contact/', icon: 'mail' },
         { label: 'Write For Us & Advertising', url: '/write-for-us/', icon: 'pen' },
         { label: 'News', url: '/news/', icon: 'newspaper' },
+        { label: 'Guides', url: '/guides/', icon: 'book' },
       ] },
     ],
     copyright: '© {year} ROC (Run On Console). All rights reserved. Built for gamers & console enthusiasts.',

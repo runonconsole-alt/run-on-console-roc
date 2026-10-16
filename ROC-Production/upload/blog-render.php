@@ -10,6 +10,12 @@
  *   /news/                       -> news listing     (blog-render.php?news=1)
  *   /news/{slug}/                -> news story       (blog-render.php?news=1&slug=...)
  *   /sitemaps/news-sitemap.xml   -> Google News sitemap, last 2 days (blog-render.php?news=1&sitemap=1)
+ *   /guides/                     -> guides, by type  (blog-render.php?guides=1, ?type=buying ...)
+ *   /guides/{slug}/              -> one guide        (blog-render.php?guides=1&slug=...)
+ *   /sitemaps/guides-sitemap.xml -> guides sitemap   (blog-render.php?guides=1&sitemap=1)
+ *
+ * Guides (Deploy 70) are posts the owner writes in the CMS with the category "Guides" or "Guides: <type>"
+ * (Guides: Buying, Guides: How to use, Guides: Setup, Guides: Game setup ...). Routes: cli-guides.php.
  *
  * News stories are posts with the category "News" (written by api/v1/cms/news-engine-lib.php
  * or in the CMS). They live at /news/{slug}/; a /blogs/ address of a story (or a /news/
@@ -40,6 +46,8 @@ $isMap    = isset($_GET['sitemap']);
 $query    = isset($_GET['q']) ? trim(mb_substr((string)$_GET['q'], 0, 80)) : '';
 $page     = max(1, (int)($_GET['page'] ?? 1));
 $isNews   = isset($_GET['news']);
+$isGuide  = isset($_GET['guides']);
+$section  = $isNews ? 'news' : ($isGuide ? 'guides' : 'blogs');
 
 if ($slug !== '' && !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) {
     rocNotFound($ROOT);
@@ -50,7 +58,7 @@ $reqPath = (string)(parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_
 if ($slug === '' && !$isMap && !isset($_GET['json']) && isset($_GET['page'])) {
     $pretty = strpos($reqPath, '/page/') !== false;
     if (!$pretty || $page === 1) {
-        header('Location: ' . rocPageUrl($isNews ? '/news/' : '/blogs/', $page) . ($query !== '' ? '?q=' . rawurlencode($query) : ''), true, 301);
+        header('Location: ' . rocPageUrl('/' . $section . '/', $page) . ($query !== '' ? '?q=' . rawurlencode($query) : ''), true, 301);
         exit;
     }
 }
@@ -98,13 +106,14 @@ if (!$pdo) {
 
 if ($isMap) {
     if ($isNews) rocNewsSitemap($pdo);
+    if ($isGuide) rocGuidesSitemap($pdo);
     rocSitemap($pdo);
 }
 if ($slug !== '') {
     $post = rocFetchPost($pdo, $slug);
     if (!$post) rocNotFound($ROOT);
-    if (rocIsNews($post) !== $isNews) {
-        header('Location: ' . rocPostUrl($slug, rocIsNews($post)), true, 301);
+    if (rocSectionOf($post) !== $section) {
+        header('Location: ' . rocPostUrlOf($post), true, 301);
         exit;
     }
     rocRenderPost($ROOT, $post, $pdo);
@@ -118,11 +127,12 @@ if (isset($_GET['json'])) {
     echo json_encode(array_map(function ($r) {
         $pub = rocDate($r['published_at'] ?? null);
         return ['t' => (string)$r['title'], 'c' => rocCategoryLabel((string)($r['category'] ?? '')), 'e' => mb_substr((string)($r['excerpt'] ?? ''), 0, 160),
-                'u' => (rocIsNews($r) ? '/news/' : '/blogs/') . $r['slug'] . '/', 'i' => (string)($r['image'] ?? ''), 'a' => (string)($r['image_alt'] ?? ''),
+                'u' => '/' . rocSectionOf($r) . '/' . $r['slug'] . '/', 'i' => (string)($r['image'] ?? ''), 'a' => (string)($r['image_alt'] ?? ''),
                 'd' => $pub ? gmdate('Y-m-d', $pub) : ''];
     }, $rows), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
+if ($isGuide) rocRenderGuides($ROOT, $pdo, $page, (string)($_GET['type'] ?? ''));
 rocRenderList($ROOT, $pdo, $query, $page, $isNews);
 }
 
@@ -161,6 +171,16 @@ function rocAbs(string $url): string {
 function rocPostUrl(string $slug, bool $news = false): string {
     return ROC_PUBLIC_URL . ($news ? '/news/' : '/blogs/') . $slug . '/';
 }
+
+/** Guides: the category "Guides" or "Guides: <type>" (written by the owner in the CMS). */
+function rocGuideSql(): string { return "(LOWER(category) IN ('guides', 'guide') OR LOWER(category) LIKE 'guides:%' OR LOWER(category) LIKE 'guide:%')"; }
+function rocNotGuideSql(): string { return "NOT (LOWER(COALESCE(category, '')) IN ('guides', 'guide') OR LOWER(COALESCE(category, '')) LIKE 'guides:%' OR LOWER(COALESCE(category, '')) LIKE 'guide:%')"; }
+function rocIsGuide(array $p): bool { return (bool)preg_match('/^guides?\s*(:.*)?$/i', trim((string)($p['category'] ?? ''))); }
+/** The guide's type ("Buying", "Game setup" ...) from "Guides: Buying"; '' when none. */
+function rocGuideType(array $p): string { return preg_match('/^guides?\s*:\s*(.+)$/i', trim((string)($p['category'] ?? '')), $m) ? ucfirst(trim($m[1])) : ''; }
+/** Where a post lives: news, guides or blogs. */
+function rocSectionOf(array $p): string { return rocIsNews($p) ? 'news' : (rocIsGuide($p) ? 'guides' : 'blogs'); }
+function rocPostUrlOf(array $p): string { return ROC_PUBLIC_URL . '/' . rocSectionOf($p) . '/' . $p['slug'] . '/'; }
 
 /** News stories are posts with the category "News". */
 function rocIsNews(array $p): bool {
@@ -409,7 +429,10 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
 
     $slug     = (string)$p['slug'];
     $news     = rocIsNews($p);
-    $url      = rocPostUrl($slug, $news);
+    $guide    = rocIsGuide($p);
+    $url      = rocPostUrlOf($p);
+    $secBase  = $news ? '/news/' : ($guide ? '/guides/' : '/blogs/');
+    $secName  = $news ? 'News' : ($guide ? 'Guides' : 'Blogs');
     $title    = trim((string)$p['title']);
     $metaT    = trim((string)($p['meta_title'] ?? '')) ?: ($title . ' | Run On Console');
     $excerpt  = trim((string)($p['excerpt'] ?? ''));
@@ -458,7 +481,7 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
         '@type' => 'BreadcrumbList',
         'itemListElement' => [
             ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home',  'item' => ROC_PUBLIC_URL . '/'],
-            ['@type' => 'ListItem', 'position' => 2, 'name' => $news ? 'News' : 'Blogs', 'item' => ROC_PUBLIC_URL . ($news ? '/news/' : '/blogs/')],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => $secName, 'item' => ROC_PUBLIC_URL . $secBase],
             ['@type' => 'ListItem', 'position' => 3, 'name' => $title, 'item' => $url],
         ],
     ]);
@@ -492,8 +515,8 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
     $m  = $mainOpen;
     $m .= $news ? '<div class="rn-post"><article class="py-6 space-y-8 min-w-0">' : '<article class="max-w-4xl mx-auto py-6 space-y-8">';
     $m .= '<div class="flex items-center justify-between">'
-        . '<a href="' . ($news ? '/news/' : '/blogs/') . '" class="bg-white border border-slate-300 hover:border-emerald-600 text-slate-700 font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2 transition-colors shadow-sm no-underline">'
-        . '<span aria-hidden="true">&larr;</span><span>' . ($news ? 'Back to All News' : 'Back to All Blogs') . '</span></a>'
+        . '<a href="' . $secBase . '" class="bg-white border border-slate-300 hover:border-emerald-600 text-slate-700 font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2 transition-colors shadow-sm no-underline">'
+        . '<span aria-hidden="true">&larr;</span><span>Back to All ' . $secName . '</span></a>'
         . '<button type="button" data-roc-share class="p-2 bg-white border border-slate-300 rounded-xl text-slate-600 hover:text-emerald-600 text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors">'
         . '<span>Share Article</span></button></div>';
 
@@ -539,7 +562,7 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
     [$headTop, $bodyToMain, $mainOpen, $mainInner, $afterMain] = rocTemplate($root, 'blog-list.html');
     $base = $news ? '/news/' : '/blogs/';
 
-    $where = "status = 'published' AND " . ($news ? "category = 'News'" : "(category IS NULL OR category <> 'News')");
+    $where = "status = 'published' AND " . ($news ? "category = 'News'" : "(category IS NULL OR (category <> 'News' AND " . rocNotGuideSql() . "))");
     $args = [];
     if ($query !== '') {
         $where .= ' AND (title LIKE ? OR excerpt LIKE ? OR category LIKE ?)';
@@ -561,7 +584,7 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
     $stmt->execute($args);
     $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $allPublished = (int)$pdo->query("SELECT COUNT(*) FROM blogs WHERE status = 'published' AND " . ($news ? "category = 'News'" : "(category IS NULL OR category <> 'News')"))->fetchColumn();
+    $allPublished = (int)$pdo->query("SELECT COUNT(*) FROM blogs WHERE status = 'published' AND " . ($news ? "category = 'News'" : "(category IS NULL OR (category <> 'News' AND " . rocNotGuideSql() . "))"))->fetchColumn();
 
     /* ---------------- head: keep the template's title/description */
     $tpl = (string)file_get_contents(is_file($root . '/cms-templates/blog-list.html')
@@ -673,6 +696,98 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
 }
 
 /* ==================================================================== */
+/*                     guides (/guides/, Deploy 70)                     */
+/* ==================================================================== */
+
+/**
+ * /guides/: every guide, newest first, with a button per type (Buying, How to use, Setup, Game setup ...,
+ * from the categories "Guides: <type>" the owner uses). ?type=game-setup shows one type.
+ */
+function rocRenderGuides(string $root, PDO $pdo, int $page, string $type): void {
+    [$headTop, $bodyToMain, $mainOpen, , $afterMain] = rocTemplate($root, 'blog-list.html');
+    $all = $pdo->query("SELECT id, title, slug, category, read_time, author_name, image, image_alt, excerpt, content, published_at, created_at, updated_at, content_modified_at
+                          FROM blogs WHERE status = 'published' AND " . rocGuideSql() . ' ' . rocOrderSql())->fetchAll(PDO::FETCH_ASSOC);
+    $slugOf = function (string $t) { return trim((string)preg_replace('/[^a-z0-9]+/', '-', strtolower($t)), '-'); };
+    $types = [];
+    foreach ($all as $p) { $t = rocGuideType($p); if ($t !== '') $types[$slugOf($t)] = $t; }
+    ksort($types);
+    $type = $slugOf($type);
+    if ($type !== '' && !isset($types[$type])) { header('Location: /guides/', true, 301); exit; }
+    $list = $type === '' ? $all : array_values(array_filter($all, function ($p) use ($type, $slugOf) { return $slugOf(rocGuideType($p)) === $type; }));
+    $total = count($list);
+    $pages = max(1, (int)ceil($total / ROC_PER_PAGE));
+    if ($page > $pages && $total > 0) rocNotFound($root);
+    $posts = array_slice($list, ($page - 1) * ROC_PER_PAGE, ROC_PER_PAGE);
+
+    $base = '/guides/';
+    $typeName = $type !== '' ? $types[$type] : '';
+    $title = ($typeName !== '' ? $typeName . ' Guides' : 'Gaming Guides: Buying, Setup & How-To') . ($page > 1 ? ' – Page ' . $page : '') . ' | Run On Console';
+    $desc = $typeName !== '' ? $typeName . ' guides from Run On Console: clear, step by step help for gamers.'
+                             : 'Step by step gaming guides: how to choose and buy gear, set up your PC, console and accessories, and get the best settings in your games.';
+    $canonical = ROC_PUBLIC_URL . rocPageUrl($base, $page) . ($type !== '' ? '?type=' . $type : '');
+    $h  = '<title>' . rocH($title) . "</title>\n";
+    $h .= '    <meta name="title" content="' . rocH($title) . "\" />\n";
+    $h .= '    <meta name="description" content="' . rocH($desc) . "\" />\n";
+    $h .= '    <meta name="robots" content="index, follow, max-image-preview:large" />' . "\n";
+    $h .= '    <link rel="canonical" href="' . rocH($canonical) . "\" />\n";
+    $h .= "    <meta property=\"og:type\" content=\"website\" />\n";
+    $h .= '    <meta property="og:url" content="' . rocH($canonical) . "\" />\n";
+    $h .= '    <meta property="og:title" content="' . rocH($title) . "\" />\n";
+    $h .= '    <meta property="og:description" content="' . rocH($desc) . "\" />\n";
+    if (!empty($posts[0]['image'])) $h .= '    <meta property="og:image" content="' . rocH(rocAbs((string)$posts[0]['image'])) . "\" />\n";
+    $h .= "    <meta property=\"og:site_name\" content=\"Run On Console\" />\n";
+    $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => [
+        ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => ROC_PUBLIC_URL . '/'],
+        ['@type' => 'ListItem', 'position' => 2, 'name' => 'Guides', 'item' => ROC_PUBLIC_URL . $base]]]);
+    if ($posts) $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'ItemList', 'itemListElement' => array_map(function ($p, $i) {
+        return ['@type' => 'ListItem', 'position' => $i + 1, 'url' => rocPostUrlOf($p), 'name' => (string)$p['title']]; }, $posts, array_keys($posts))]);
+    $h .= "<style>.gd-chips{display:flex;flex-wrap:wrap;gap:.5rem}.gd-chip{border:1px solid #cbd5e1;border-radius:999px;padding:.4rem .9rem;font-weight:700;font-size:.8rem;color:#334155;background:#fff;text-decoration:none}"
+        . ".gd-chip:hover{border-color:#10b981;color:#047857}.gd-chip.on{background:#10b981;border-color:#10b981;color:#052e2b}</style>\n";
+    $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
+
+    $m = $mainOpen . '<div class="space-y-8 py-6">'
+        . '<div class="gradient-hero-bg text-white rounded-3xl p-8 sm:p-12 shadow-xl"><span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3 py-1 rounded-md tracking-wider">Guides</span>'
+        . '<h1 class="font-display font-extrabold text-3xl sm:text-5xl text-white my-3">' . rocH($typeName !== '' ? $typeName . ' guides' : 'Gaming guides') . '</h1>'
+        . '<p class="text-emerald-100 text-sm sm:text-base max-w-2xl">How to choose and buy gear, set up your PC, console and accessories, and get the best settings in your games, step by step.</p></div>';
+    if ($types) {
+        $m .= '<nav class="gd-chips" aria-label="Guide types"><a class="gd-chip' . ($type === '' ? ' on' : '') . '" href="/guides/">All guides (' . count($all) . ')</a>';
+        foreach ($types as $k => $t) $m .= '<a class="gd-chip' . ($type === $k ? ' on' : '') . '" href="/guides/?type=' . rocH($k) . '">' . rocH($t) . '</a>';
+        $m .= '</nav>';
+    }
+    $m .= '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
+    foreach ($posts as $p) {
+        $img = trim((string)($p['image'] ?? ''));
+        $gt = rocGuideType($p);
+        $m .= '<a href="/guides/' . rocH((string)$p['slug']) . '/" class="block no-underline"><div class="game-card flex flex-col justify-between group cursor-pointer h-full">'
+            . '<div class="relative bg-slate-900 overflow-hidden" style="aspect-ratio:1200 / 630">'
+            . ($img !== '' ? '<img width="1200" height="675" src="' . rocH($img) . '" alt="' . rocH(trim((string)($p['image_alt'] ?? '')) ?: (string)$p['title']) . '" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>' : '')
+            . '<span class="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-md shadow-sm uppercase">' . rocH($gt !== '' ? $gt : 'Guide') . '</span></div>'
+            . '<div class="p-6 flex-1 flex flex-col justify-between space-y-4"><div>'
+            . '<h2 class="font-display font-extrabold text-lg sm:text-xl text-slate-900 group-hover:text-emerald-600 transition-colors leading-snug line-clamp-2 mb-2">' . rocH($p['title']) . '</h2>'
+            . '<p class="text-xs text-slate-500 line-clamp-3 leading-relaxed">' . rocH($p['excerpt'] ?? '') . '</p></div>'
+            . '<div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs"><span class="text-slate-600">' . rocH(rocReadTime($p, rocBodyHtml((string)($p['content'] ?? '')))) . '</span>'
+            . '<span class="text-emerald-600 font-bold">Read the guide &rarr;</span></div></div></div></a>';
+    }
+    $m .= '</div>';
+    if (!$posts) $m .= '<p class="text-center text-slate-500 text-sm py-10">The first guides are on their way. Meanwhile, see our <a class="text-emerald-700 underline font-bold" href="/blogs/">articles</a>.</p>';
+    $m .= rocPager($base, $page, $pages, '') . '</div>';
+
+    $latest = null;
+    foreach ($posts as $p) { $t = rocModified($p); if ($t && (!$latest || $t > $latest)) $latest = $t; }
+    rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $latest);
+}
+
+function rocGuidesSitemap(PDO $pdo): void {
+    header('Content-Type: application/xml; charset=utf-8');
+    header('Cache-Control: public, max-age=600');
+    $out = rocSmOpen() . rocSmLine(ROC_PUBLIC_URL . '/guides/', time(), 'Gaming guides');
+    foreach ($pdo->query("SELECT title, slug, category, published_at, updated_at, content_modified_at, created_at FROM blogs WHERE status = 'published' AND " . rocGuideSql() . ' ' . rocOrderSql())->fetchAll(PDO::FETCH_ASSOC) as $r)
+        $out .= rocSmLine(rocPostUrlOf($r), rocModified($r), (string)$r['title']);
+    echo $out . "</urlset>\n";
+    exit;
+}
+
+/* ==================================================================== */
 /*                news layout (Geo style), pages, ad places             */
 /* ==================================================================== */
 
@@ -757,7 +872,7 @@ function rocNewsItem(array $p, string $cls, string $base, bool $excerpt = false,
 /** Side list: the newest stories (news) or posts (blogs) with small pictures. */
 function rocNewsSideList(PDO $pdo, bool $news, string $title, string $skipSlug = '', int $n = 6): string {
     $st = $pdo->prepare("SELECT title, slug, category, image, image_alt, published_at, created_at FROM blogs WHERE status = 'published' AND "
-        . ($news ? "category = 'News'" : "(category IS NULL OR category <> 'News')") . ' AND slug <> ? ' . rocOrderSql() . ' LIMIT ' . $n);
+        . ($news ? "category = 'News'" : "(category IS NULL OR (category <> 'News' AND " . rocNotGuideSql() . "))") . ' AND slug <> ? ' . rocOrderSql() . ' LIMIT ' . $n);
     $st->execute([$skipSlug]);
     $rows = $st->fetchAll(PDO::FETCH_ASSOC);
     if (!$rows) return '';
@@ -904,7 +1019,7 @@ function rocSitemap(PDO $pdo): void {
     }
     // Blog posts only: news stories are in /sitemaps/news-sitemap.xml.
     $out .= rocSmLine(ROC_PUBLIC_URL . '/blogs/', $latest, 'Blogs');
-    foreach ($rows as $r) if (!rocIsNews($r)) $out .= rocSmLine(rocPostUrl((string)$r['slug'], false), rocModified($r), (string)$r['title']);
+    foreach ($rows as $r) if (!rocIsNews($r) && !rocIsGuide($r)) $out .= rocSmLine(rocPostUrl((string)$r['slug'], false), rocModified($r), (string)$r['title']);
     $out .= "</urlset>\n";
     echo $out;
     exit;

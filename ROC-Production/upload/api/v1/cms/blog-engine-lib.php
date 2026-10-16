@@ -163,7 +163,8 @@ function rocBlogSite(PDO $pdo, bool $fresh = false): array {
     }
     $posts = [];
     foreach ($pdo->query("SELECT id, title, slug, status, category, published_at FROM blogs ORDER BY COALESCE(published_at, created_at) DESC")->fetchAll(PDO::FETCH_ASSOC) as $b) {
-        $posts[$b['id']] = $b + ['url' => (strcasecmp(trim((string)$b['category']), 'News') === 0 ? '/news/' : '/blogs/') . $b['slug'] . '/'];
+        $cat = trim((string)$b['category']);
+        $posts[$b['id']] = $b + ['url' => (strcasecmp($cat, 'News') === 0 ? '/news/' : (preg_match('/^guides?\s*(:.*)?$/i', $cat) ? '/guides/' : '/blogs/')) . $b['slug'] . '/'];
     }
     return $cache = ['cats' => $cats, 'products' => $products, 'platforms' => $plats, 'posts' => $posts];
 }
@@ -571,7 +572,7 @@ function rocBlogCreate(PDO $pdo, string $root, array $in, string $source): array
 /** Internal links must point to real pages: a link to an unknown address becomes plain text. */
 function rocBlogCleanLinks(string $html, PDO $pdo): string {
     $S = rocBlogSite($pdo);
-    $ok = ['/' => 1, '/products/' => 1, '/blogs/' => 1, '/news/' => 1, '/compatibility/' => 1, '/gaming-platforms/' => 1, '/about/' => 1, '/contact/' => 1,
+    $ok = ['/' => 1, '/products/' => 1, '/blogs/' => 1, '/news/' => 1, '/guides/' => 1, '/can-i-run/' => 1, '/compatibility/' => 1, '/gaming-platforms/' => 1, '/about/' => 1, '/contact/' => 1,
            '/category/' => 1, '/category/pc-hardware/' => 1, '/category/gaming-hardware/' => 1];
     foreach ($S['cats'] as $c) $ok[$c['url']] = 1;
     foreach ($S['products'] as $p) $ok[$p['url']] = 1;

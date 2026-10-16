@@ -11,7 +11,17 @@ import { GamingProfileEditor, GamingAvatar } from './GamingProfileEditor';
 export const ProfileView = () => {
   const { currentUser, isSessionLoading, csrfToken, logoutUser, navigateTo } = useApp();
 
-  const [activeTab, setActiveTab] = useState('overview');
+  // ?tab=wishlist opens a tab directly (the wishlist button on product and game pages links here).
+  const [activeTab, setActiveTab] = useState(() => {
+    try { const t = new URLSearchParams(window.location.search).get('tab'); return ['overview', 'wishlist', 'gaming', 'comments', 'settings'].includes(t) ? t : 'overview'; }
+    catch (e) { return 'overview'; }
+  });
+  // Wishlist and the weekly email (api/v1/member.php).
+  const [wish, setWish] = useState(null);
+  const [wishMsg, setWishMsg] = useState('');
+  const loadWish = () => fetch('/api/v1/member.php', { credentials: 'same-origin' }).then((r) => r.json()).then((d) => setWish(d && d.success ? d : { items: [], weekly: false })).catch(() => setWish({ items: [], weekly: false }));
+  const memberPost = (body) => fetch('/api/v1/member.php', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
+  useEffect(() => { if (currentUser && activeTab === 'wishlist' && wish === null) loadWish(); }, [currentUser, activeTab]);
   const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
@@ -336,6 +346,7 @@ export const ProfileView = () => {
         <div className="flex space-x-2 border-b border-slate-800 pb-2 overflow-x-auto">
           {[
             { id: 'overview', label: 'Overview', icon: User },
+            { id: 'wishlist', label: 'Wishlist', icon: Heart },
             { id: 'gaming', label: 'Edit Gaming Profile', icon: Gamepad2 },
             { id: 'comments', label: 'Comments History', icon: MessageSquare },
             { id: 'settings', label: 'Account Settings', icon: Settings },
@@ -395,6 +406,46 @@ export const ProfileView = () => {
                 </div>
               </div>
             </Tilt3DCard>
+          </div>
+        )}
+
+        {activeTab === 'wishlist' && (
+          <div className="space-y-6">
+            <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 backdrop-blur-xl">
+              <h2 className="text-xl font-bold text-white mb-1 flex items-center">
+                <Heart className="w-5 h-5 mr-2 text-rose-400" /> Your wishlist
+              </h2>
+              <p className="text-sm text-slate-400 mb-5">Press ♡ Save on any product or game page to keep it here.</p>
+              {wish === null ? <p className="text-slate-400 text-sm">Loading…</p> : wish.items.length === 0 ? (
+                <p className="text-slate-400 text-sm">Nothing saved yet. Browse the <a href="/products/" className="text-emerald-400 underline">products</a> or <a href="/can-i-run/" className="text-emerald-400 underline">PC games</a>.</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {wish.items.map((it) => (
+                    <div key={it.type + it.key} className="flex gap-3 items-center bg-slate-950/80 border border-slate-800 rounded-2xl p-3">
+                      {it.image ? <img src={it.image} alt="" className="w-16 h-16 object-contain rounded-xl bg-white shrink-0" loading="lazy" />
+                        : <div className="w-16 h-16 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0"><Gamepad2 className="w-7 h-7" /></div>}
+                      <div className="min-w-0 flex-1">
+                        <a href={it.url} className="font-bold text-white hover:text-emerald-400 block truncate">{it.title}</a>
+                        <p className="text-xs text-slate-500 truncate">{it.type === 'game' ? 'PC game' : (it.note || 'Product')}</p>
+                      </div>
+                      <button type="button" title="Remove" aria-label={'Remove ' + it.title}
+                        onClick={() => memberPost({ action: 'toggle', type: it.type, key: it.key }).then(loadWish)}
+                        className="text-slate-500 hover:text-rose-400 p-2"><X className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 backdrop-blur-xl">
+              <h2 className="text-lg font-bold text-white mb-1 flex items-center"><Bell className="w-5 h-5 mr-2 text-emerald-400" /> Weekly email</h2>
+              <p className="text-sm text-slate-400 mb-4">Every Friday: the week's top gaming news, new guides and your wishlist. One click to unsubscribe in every email.</p>
+              <label className="flex items-center gap-3 text-sm text-slate-200 cursor-pointer">
+                <input type="checkbox" className="w-5 h-5 accent-emerald-500" checked={!!(wish && wish.weekly)} disabled={wish === null}
+                  onChange={(e) => { const on = e.target.checked; memberPost({ action: 'weekly', on }).then((d) => { setWishMsg(d.message || ''); loadWish(); }); }} />
+                Send me the weekly Run On Console email
+              </label>
+              {wishMsg && <p className="text-xs text-emerald-400 mt-3">{wishMsg}</p>}
+            </div>
           </div>
         )}
 

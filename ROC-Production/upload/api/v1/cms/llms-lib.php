@@ -62,10 +62,10 @@ function rocLlmsBuild(PDO $pdo): string {
         $o .= "\n## Gaming Platform Hubs\n";
         foreach ($plats as $p) $o .= $line((string)$p['title'], '/gaming-platforms/' . $p['slug'] . '/', rocLlmsText((string)$p['description']));
     }
-    $blogs = $q("SELECT title, slug, excerpt FROM blogs WHERE status = 'published' AND (category IS NULL OR category <> 'News') ORDER BY published_at DESC LIMIT 25");
+    $blogs = $q("SELECT title, slug, excerpt, category FROM blogs WHERE status = 'published' AND (category IS NULL OR category <> 'News') ORDER BY published_at DESC LIMIT 25");
     if ($blogs) {
         $o .= "\n## Guides and Articles\n";
-        foreach ($blogs as $b) $o .= $line((string)$b['title'], '/blogs/' . $b['slug'] . '/', rocLlmsText((string)$b['excerpt']));
+        foreach ($blogs as $b) $o .= $line((string)$b['title'], (preg_match('/^guides?\s*(:.*)?$/i', trim((string)$b['category'])) ? '/guides/' : '/blogs/') . $b['slug'] . '/', rocLlmsText((string)$b['excerpt']));
     }
     $news = $q("SELECT title, slug, excerpt FROM blogs WHERE status = 'published' AND category = 'News' ORDER BY published_at DESC LIMIT 15");
     if ($news) {

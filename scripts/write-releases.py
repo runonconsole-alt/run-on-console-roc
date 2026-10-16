@@ -464,6 +464,14 @@ RELEASES = [
          checks=[dict(label='2-step verification installed', type='contains', path='api/v1/cms/auth.php', text='rocTwofaLoginGate'),
                  dict(label='Backups', type='file', path='api/v1/cms/backup-lib.php')],
          pr=REPO + '69'),
+    dict(deploy=70, date='2026-10-15', title='Wishlist, weekly email and a Guides page',
+         changes=['Wishlist: a ♡ Save button on every product page and game page; signed-in members find their saved items in Profile > Wishlist (visitors are sent to sign in first)',
+                  'Weekly email (opt-in): members who turn it on in Profile > Wishlist get the top news, new guides and their wishlist every Friday from 18:00 Pakistan time, with a one-click unsubscribe link; CMS > Site users > ✉ Weekly email shows subscribers, sends a test and can switch it off',
+                  'Guides page (/guides/): guides you write in the CMS like a blog post with the category "Guides: Buying", "Guides: How to use", "Guides: Setup" or "Guides: Game setup" (any "Guides: <type>" works); buttons per type, guide pages at /guides/{slug}/, a guides sitemap; the category box suggests these types',
+                  'GUIDES in the header menu and Guides in the footer; privacy policy: wishlist and weekly email'],
+         checks=[dict(label='Guides switched on (cli-guides.php)', type='contains', path='.htaccess', text='ROC guides BEGIN'),
+                 dict(label='Wishlist API', type='file', path='api/v1/member.php')],
+         pr=REPO + '70'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
