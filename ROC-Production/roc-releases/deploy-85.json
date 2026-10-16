@@ -1,0 +1,27 @@
+{
+ "deploy": 85,
+ "date": "2026-10-16",
+ "title": "Game pages in the CMS, Clear cache button, game links",
+ "changes": [
+  "CMS > Games > Edit: title, description, intro, an About text and the picture of each game page, or hide a game (404, out of the sitemap and lists)",
+  "Clear cache button on the Dashboard and in the Site builder: Cloudflare, the server code cache and the CMS cache in one click; it lights up after a deploy",
+  "Game names in blogs and news link to their Can I run page (first mention, at most 6 a post)",
+  "Game pages: Ask ROC about my PC opens ROC with the question ready"
+ ],
+ "checks": [
+  {
+   "label": "Games editor",
+   "type": "file",
+   "path": "api/v1/cms/games.php"
+  },
+  {
+   "label": "Clear cache",
+   "type": "file",
+   "path": "api/v1/cms/cache-clear.php"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/85",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

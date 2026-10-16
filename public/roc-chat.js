@@ -96,6 +96,19 @@
       toggle(true);
     });
     if (user.signed_in && state.open) btn.click();
+    // "Ask ROC" buttons on the pages (data-roc-ask="question", Deploy 85): open the chat (made on first use)
+    // with the question written in the box, ready to finish with the visitor's parts and send.
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest ? e.target.closest('[data-roc-ask]') : null;
+      if (!a) return;
+      e.preventDefault(); e.stopPropagation();
+      btn.click();
+      setTimeout(function () {
+        if (!form || form.style.display === 'none') return;   // not signed in: the sign-in card shows
+        input.value = a.getAttribute('data-roc-ask') || '';
+        input.focus(); input.setSelectionRange(input.value.length, input.value.length);
+      }, 80);
+    });
   }
   function loginCard() {
     var back = encodeURIComponent(location.pathname + location.search);

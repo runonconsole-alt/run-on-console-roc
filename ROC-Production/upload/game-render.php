@@ -22,6 +22,28 @@ $slug  = isset($_GET['slug']) ? strtolower(trim((string)$_GET['slug'], "/ \t\n\r
 $isMap = isset($_GET['sitemap']);
 if ($slug !== '' && !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) rocNotFound($ROOT);
 
+/* The database: the CMS changes of the game pages (all of them) and the upgrade picks. The pages work without it. */
+$pdo = null;
+try {
+    ob_start();
+    require_once $ROOT . '/api/v1/config.php';
+    ob_end_clean();
+    $pdo = function_exists('getDBConnection') ? getDBConnection() : null;
+} catch (\Throwable $e) {
+    while (ob_get_level() > 0) ob_end_clean();
+    $pdo = null;
+}
+if (!headers_sent()) foreach (['X-Robots-Tag', 'Content-Type', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials', 'Set-Cookie', 'Expires', 'Pragma', 'Cache-Control'] as $hh) header_remove($hh);
+
+// CMS > Games (Deploy 85): {slug: {title, description, intro, text, hidden, no_picture, t}}.
+$EDITS = [];
+if ($pdo) try {
+    $st = $pdo->prepare("SELECT setting_value FROM cms_settings WHERE setting_key = 'game_edits' LIMIT 1");
+    $st->execute();
+    $EDITS = json_decode((string)$st->fetchColumn(), true) ?: [];
+} catch (\Throwable $e) { $EDITS = []; }
+$GLOBALS['ROC_GP_HIDDEN'] = array_keys(array_filter($EDITS, function ($e) { return !empty($e['hidden']); }));
+
 $games   = rocGpAll($ROOT);
 $updated = rocGpUpdated($ROOT);
 if (!$games) { if ($isMap) { http_response_code(503); exit; } rocNotFound($ROOT); }
@@ -32,25 +54,11 @@ if ($isMap) {
     header('Cache-Control: public, max-age=3600');
     header('X-Robots-Tag: noindex');
     $out = rocSmOpen() . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/', $updated, 'Can I run it? All PC games');
-    foreach ($games as $g) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpPath($g), $updated, 'Can I run ' . $g['name'] . '?');
+    foreach ($games as $g) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpPath($g), max($updated, (int)($EDITS[$g['slug']]['t'] ?? 0)), 'Can I run ' . $g['name'] . '?');
     echo $out . "</urlset>\n";
     exit;
 }
 
-/* The database is only needed for the upgrade picks: the pages work without it. */
-$pdo = null;
-if ($slug !== '') {
-    try {
-        ob_start();
-        require_once $ROOT . '/api/v1/config.php';
-        ob_end_clean();
-        $pdo = function_exists('getDBConnection') ? getDBConnection() : null;
-    } catch (\Throwable $e) {
-        while (ob_get_level() > 0) ob_end_clean();
-        $pdo = null;
-    }
-    if (!headers_sent()) foreach (['X-Robots-Tag', 'Content-Type', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials', 'Set-Cookie', 'Expires', 'Pragma', 'Cache-Control'] as $hh) header_remove($hh);
-}
 
 /* ---------------------------------------------------------- shared bits */
 /**
@@ -179,7 +187,7 @@ function rocGpStyles(): string {
         . ".gp-res b{font-family:Outfit,Inter,sans-serif;font-size:1.6rem;font-weight:800;display:block;line-height:1.1}"
         . ".gp-res.ok{background:#ecfdf5;color:#065f46}.gp-res.mid{background:#fefce8;color:#854d0e}.gp-res.low{background:#fff7ed;color:#9a3412}.gp-res.no{background:#fef2f2;color:#991b1b}"
         . ".gp-bar{height:.55rem;border-radius:999px;background:rgba(15,23,42,.08);margin:.5rem 0;overflow:hidden}.gp-bar i{display:block;height:100%;border-radius:999px;background:currentColor}"
-        . ".gp-btns{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}.gp-btn{display:inline-flex;align-items:center;gap:.3rem;font-weight:800;font-size:.82rem;padding:.6rem 1rem;border-radius:.8rem;text-decoration:none}"
+        . ".gp-btns{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}.gp-btn{display:inline-flex;align-items:center;gap:.3rem;font-weight:800;font-size:.82rem;padding:.6rem 1rem;border-radius:.8rem;text-decoration:none;cursor:pointer;font-family:inherit}"
         . ".gp-btn.p{background:#10b981;color:#052e2b}.gp-btn.p:hover{background:#34d399}.gp-btn.s{border:1px solid #cbd5e1;color:#334155;background:#fff}.gp-btn.s:hover{border-color:#10b981;color:#047857}"
         . ".gp-parts{display:grid;gap:.8rem;grid-template-columns:1fr}.gp-parts>div{border:1px solid #e2e8f0;border-radius:1rem;padding:.9rem 1rem;background:#f8fafc}"
         . ".gp-parts h3{font-family:Outfit,Inter,sans-serif;font-weight:800;color:#0f172a;font-size:1rem;margin-bottom:.4rem}.gp-parts ul{list-style:disc;padding-left:1.2rem;color:#334155;font-size:.9rem;line-height:1.7}"
@@ -320,11 +328,15 @@ $needLine = 'To play it you need at least ' . ($gpuMin ? $cardTxt($gpuMin, ' cla
 if ($rec) $needLine .= ' For the recommended (high) settings: ' . ($gpuRec ? $cardTxt($gpuRec, ' or faster') : 'a faster card')
     . ($cpuRec ? ', ' . $an($cpuRec[0]) . ' class processor' : '') . ($ramGb($rRec['ram'] ?? null) ? ' and ' . $ramGb($rRec['ram'] ?? null) . ' of RAM' : '') . '.';
 
-$metaT = 'Can I Run ' . $name . '? Minimum & Recommended PC Requirements | Run On Console';
+$E = (array)($EDITS[$slug] ?? []);
+if (!empty($E['t'])) $updated = max($updated, (int)$E['t']);
+if (trim((string)($E['intro'] ?? '')) !== '') $intro = trim((string)$E['intro']);
+$metaT = trim((string)($E['title'] ?? '')) ?: 'Can I Run ' . $name . '? Minimum & Recommended PC Requirements | Run On Console';
 $metaD = 'Can your PC run ' . $name . '? Official minimum and recommended specs'
     . ($gpuMin ? ' (from ' . (strpos($gpuMin[0], 'integrated') !== false ? 'integrated graphics' : $an($gpuMin[0])) . ($ramGb($rMin['ram'] ?? null) ? ' and ' . $ramGb($rMin['ram'] ?? null) . ' RAM' : '') . ')' : '')
     . '. Free check for your graphics card, CPU and RAM.';
 if (mb_strlen($metaD) > 155) $metaD = mb_substr($metaD, 0, 152) . '…';   // 155: what Google and SEO tools show in full
+if (trim((string)($E['description'] ?? '')) !== '') $metaD = trim((string)$E['description']);
 
 /* FAQ (each answer from the data) */
 $faqs = [];
@@ -389,7 +401,7 @@ $row = function ($label, $a, $b) use ($clean, $rec) {
         . ($rec ? '<td>' . ($b !== '' ? rocH($b) : '<span class="text-slate-400">Not listed</span>') . '</td>' : '') . '</tr>';
 };
 $m  = $mainOpen . '<article class="max-w-4xl mx-auto py-6 space-y-6">' . rocGpCrumbHtml($crumbs);
-$pic = rocGpSteamImg((int)$g['appid']);
+$pic = empty($E['no_picture']) ? rocGpSteamImg((int)$g['appid']) : '';
 $m .= '<header class="gp-hero' . ($pic !== '' ? ' pic' : '') . '"><div><h1>Can I run ' . rocH($name) . '?</h1><p>' . rocH($intro) . '</p>'
     . '<div class="gp-tags"><span class="gp-tag w">' . rocH(ucfirst($weight)) . '</span>' . ($year ? '<span class="gp-tag">' . $year . '</span>' : '')
     . implode('', array_map(function ($x) { return '<span class="gp-tag">' . rocH(trim($x)) . '</span>'; }, array_slice(array_filter(explode(',', $genre)), 0, 3)))
@@ -397,6 +409,12 @@ $m .= '<header class="gp-hero' . ($pic !== '' ? ' pic' : '') . '"><div><h1>Can I
     . ($pic !== '' ? '<figure class="gp-pic"><img src="' . rocH($pic) . '" alt="' . rocH($name) . ' (Steam store picture)" width="460" height="215" fetchpriority="high"'
         . ' onerror="this.closest(\'figure\').remove()"><figcaption>Picture: <a href="' . rocH((string)($g['u'] ?? '')) . '" target="_blank" rel="noopener" style="color:inherit">Steam store</a>, © ' . rocH($name) . ' publisher</figcaption></figure>' : '')
     . '</header>';
+// The owner's own text about this game (CMS > Games > Edit, Deploy 85): plain text, a blank line = a new paragraph.
+if (trim((string)($E['text'] ?? '')) !== '') {
+    $m .= '<section class="gp-card"><h2>About ' . rocH($name) . '</h2>'
+        . implode('', array_map(function ($p) { return '<p>' . nl2br(rocH(trim($p))) . '</p>'; }, array_filter(preg_split('/\n\s*\n/', (string)$E['text']), 'trim')))
+        . '</section>';
+}
 
 // Quick check
 $opt = function (array $refs, string $pick) { $o = ''; foreach ($refs as $n => $s) $o .= '<option value="' . $s . '"' . ($n === $pick ? ' selected' : '') . '>' . rocH($n) . '</option>'; return $o; };
@@ -408,7 +426,8 @@ $m .= '<section class="gp-card" id="check"><h2>Check your PC</h2>'
     . '<label>Memory (RAM)<select data-k="ram">' . implode('', array_map(function ($r) { return '<option value="' . $r . '"' . ($r === 16 ? ' selected' : '') . '>' . $r . ' GB</option>'; }, [4, 6, 8, 12, 16, 24, 32, 64])) . '</select></label>'
     . '</div><div class="gp-res" id="gp-res" aria-live="polite"></div>'
     . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/?steam=' . (int)$g['appid'] . '">Full check (laptops, consoles, more parts) &rarr;</a>'
-    . '<a class="gp-btn s" href="#requirements">See the requirements</a></div></section>';
+    . '<a class="gp-btn s" href="#requirements">See the requirements</a>'
+    . '<button type="button" class="gp-btn s" data-roc-ask="' . rocH('Can my PC run ' . $name . '? My graphics card: , processor: , RAM: ') . '">Ask ROC about my PC</button></div></section>';
 
 // Requirements
 $m .= '<section class="gp-card" id="requirements"><h2>' . rocH($name) . ' system requirements</h2><div class="gp-wrap"><table class="gp-table">'

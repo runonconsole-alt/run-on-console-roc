@@ -72,6 +72,8 @@ function rocGpAll(string $root): array {
         $g['rank'] = count($all) + 1;
         $all[$slug] = $g;
     }
+    // Games hidden in CMS > Games (Deploy 85): no page, not in the lists, the sitemap or "similar games".
+    foreach ((array)($GLOBALS['ROC_GP_HIDDEN'] ?? []) as $h) unset($all[$h]);
     return $all;
 }
 

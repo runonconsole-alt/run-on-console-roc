@@ -563,6 +563,13 @@ RELEASES = [
                   'Game share cards and social pictures are never moved by the media clean-up; the Media library no longer lists the 2,000+ game cards'],
          checks=[dict(label='Game pictures', type='contains', path='game-render.php', text='rocGpSteamImg')],
          pr=REPO + '84'),
+    dict(deploy=85, date='2026-10-16', title='Game pages in the CMS, Clear cache button, game links',
+         changes=['CMS > Games > Edit: title, description, intro, an About text and the picture of each game page, or hide a game (404, out of the sitemap and lists)',
+                  'Clear cache button on the Dashboard and in the Site builder: Cloudflare, the server code cache and the CMS cache in one click; it lights up after a deploy',
+                  'Game names in blogs and news link to their Can I run page (first mention, at most 6 a post)',
+                  'Game pages: Ask ROC about my PC opens ROC with the question ready'],
+         checks=[dict(label='Games editor', type='file', path='api/v1/cms/games.php'), dict(label='Clear cache', type='file', path='api/v1/cms/cache-clear.php')],
+         pr=REPO + '85'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
