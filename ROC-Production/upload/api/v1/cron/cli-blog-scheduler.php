@@ -108,6 +108,12 @@ try {
         $ct = rocContentTick($pdo, 2);
         if ($ct !== null) echo date('c') . ' ' . $ct . "\n";
     }
+    // "X vs Y" comparison verdicts (Deploy 87): one a run, at most 20 a day, after the news and the writer.
+    if ((!isset($w) || $w === null) && (!isset($n) || $n === null)) {
+        require_once $ROOT . '/api/v1/cms/compare-lib.php';
+        $cp = rocCompareTick($pdo, 1);
+        if ($cp !== null) echo date('c') . ' ' . $cp . "\n";
+    }
 } catch (\Throwable $e) { echo date('c') . ' content error: ' . $e->getMessage() . "\n"; }
 
 // Something new went live (a post or a news story): /llms.txt lists it.

@@ -1,0 +1,21 @@
+{
+ "deploy": 87,
+ "date": "2026-10-16",
+ "title": "X vs Y comparison pages",
+ "changes": [
+  "Comparison pages at /compare/: the top 4 products of every category against each other (about 70 pages), with specs side by side, the differences, who should pick which, pros and cons and questions",
+  "A page shows once its verdict is written (1 a scheduler run, at most 20 a day); product pages link their comparisons; the products sitemap lists them",
+  "IndexNow keeps the addresses while Bing checks the new key (SiteVerificationNotCompleted)"
+ ],
+ "checks": [
+  {
+   "label": "Compare rules",
+   "type": "htaccess",
+   "marker": "# ROC compare BEGIN"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/87",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

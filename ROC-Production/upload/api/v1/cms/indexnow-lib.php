@@ -84,7 +84,9 @@ function rocIndexNowTick(PDO $pdo, string $root): ?string {
     if (!$urls) return null;
     $r = rocIndexNowSend($pdo, $root, $urls);
     // A refusal is tried again next run (at most for a day), except a wrong key or address.
-    $keep = !$r['ok'] && in_array($r['code'], [0, 429, 500, 502, 503], true) && $now - $since < 86400;
+    // 403 "SiteVerificationNotCompleted": Bing checks a new key file first (a few hours), so keep these too (3 days).
+    $wait = !$r['ok'] && $r['code'] === 403 && stripos($r['error'], 'Verification') !== false;
+    $keep = !$r['ok'] && (in_array($r['code'], [0, 429, 500, 502, 503], true) || $wait) && $now - $since < ($wait ? 259200 : 86400);
     rocBlogSet($pdo, 'indexnow_last', ['t' => $keep ? $since : $now, 'sent' => count($urls), 'ok' => $r['ok'], 'error' => $r['error'], 'at' => $now]);
     return 'IndexNow: ' . count($urls) . ' address(es) ' . ($r['ok'] ? 'sent' : 'not sent (' . $r['error'] . ')');
 }

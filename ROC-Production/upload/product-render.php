@@ -55,6 +55,8 @@ $cat   = isset($_GET['cat']) ? strtolower(trim((string)$_GET['cat'], "/ \t\n\r")
 $isMap = isset($_GET['sitemap']);
 $query = isset($_GET['q']) ? trim(mb_substr((string)$_GET['q'], 0, 80)) : '';
 $catPage = isset($_GET['catpage']);      // asked for at /category/{slug}/
+$compare = isset($_GET['compare']) ? strtolower(trim((string)$_GET['compare'], "/ \t\n\r")) : null;   // /compare/ and /compare/{a}-vs-{b}/ (Deploy 87)
+if ($compare !== null && $compare !== '' && !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $compare)) rocNotFound($ROOT);
 
 foreach ([$slug, $cat] as $s) {
     if ($s !== '' && !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $s)) rocNotFound($ROOT);
@@ -104,6 +106,12 @@ $categories = rocProductCategories($pdo);
 $GLOBALS['ROC_GROUPS'] = rocLoadGroups($pdo);
 
 if ($isMap) rocProductSitemap($pdo, $categories);
+
+if ($compare !== null) {
+    require_once $ROOT . '/api/v1/cms/compare-lib.php';
+    if ($compare === '') rocRenderCompareList($ROOT, $pdo, $categories);
+    rocRenderCompare($ROOT, $pdo, $categories, $compare);
+}
 
 if (isset($_GET['json']) && $slug === '' && $cat === '') rocProductsJson($pdo, $categories);
 
@@ -812,6 +820,14 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
     $m .= rocProductAbout($pdo, $p, $title, $catName, $catSlug, $amazon);
 
     $related = array_values(array_filter(rocFetchProducts($pdo, $cat), function ($r) use ($slug) { return $r['slug'] !== $slug; }));
+    // Its comparisons (Deploy 87): "X vs Y" pages that include this product.
+    if (is_file($root . '/api/v1/cms/compare-lib.php')) {
+        require_once $root . '/api/v1/cms/compare-lib.php';
+        $ct = rocCompareTexts($pdo); $cl = [];
+        foreach (rocComparePairs($pdo) as $cs => [$x, $y]) if (($x['slug'] === $slug || $y['slug'] === $slug) && !empty($ct[$cs]['summary']) && empty($ct[$cs]['hidden']))
+            $cl[] = ['/compare/' . $cs . '/', $x['title'] . ' vs ' . $y['title'], 'Which to buy'];
+        if ($cl) $m .= rocLinkBox('Compare ' . $title, $cl);
+    }
     $m .= rocProductFaq($title, $catName, $catSlug, $bestFor, $desc, $specs ?: [], $related, $amazon, rocAboutSplit((string)($p['summary'] ?? ''))[1]);
     if ($related) {
         $m .= '<div class="space-y-4"><div class="flex items-center justify-between gap-3">'
@@ -1079,6 +1095,132 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
 /*                               sitemap                                */
 /* ==================================================================== */
 
+/* ==================================================================== */
+/*                     comparisons (Deploy 87)                          */
+/* ==================================================================== */
+
+/** /compare/{a}-vs-{b}/: two products side by side with the written verdict. */
+function rocRenderCompare(string $root, PDO $pdo, array $categories, string $slug): void {
+    $pairs = rocComparePairs($pdo); $texts = rocCompareTexts($pdo);
+    if (!isset($pairs[$slug])) {
+        // The other order ("b-vs-a") goes to the page that exists.
+        if (preg_match('/^(.+)-vs-(.+)$/', $slug, $mm) && isset($pairs[$mm[2] . '-vs-' . $mm[1]])) { header('Location: /compare/' . $mm[2] . '-vs-' . $mm[1] . '/', true, 301); exit; }
+        rocNotFound($root);
+    }
+    $T = (array)($texts[$slug] ?? []);
+    if (empty($T['summary']) || !empty($T['hidden'])) rocNotFound($root);
+    [$a, $b, $catSlug] = $pairs[$slug];
+    [$headTop, $bodyToMain, $mainOpen, , $afterMain] = rocTemplate($root, ROC_PRODUCT_TEMPLATES['page']);
+    $catName = (string)($categories[$catSlug]['name'] ?? $catSlug);
+    $an = trim((string)$a['title']); $bn = trim((string)$b['title']);
+    $url = ROC_PUBLIC_URL . '/compare/' . $slug . '/';
+    $mod = max((int)($T['t'] ?? 0), rocProductModified($a) ?? 0, rocProductModified($b) ?? 0);
+    $title = rocFitTitle([$an . ' vs ' . $bn . ': Which to Buy? | Run On Console', $an . ' vs ' . $bn . ': Which to Buy?', $an . ' vs ' . $bn . ' | ROC', $an . ' vs ' . $bn]);
+    $desc = rocCmsTruncatePlain($an . ' vs ' . $bn . ': ' . (string)$T['summary'], 155);
+    $imgA = rocProductImage($a, $categories); $imgB = rocProductImage($b, $categories);
+
+    $faq = array_map(function ($f) { return [(string)$f['q'], (string)$f['a']]; }, (array)($T['faq'] ?? []));
+    $h = rocHeadMeta($title, $desc, $url, $imgA, 'index, follow, max-image-preview:large', 'article', $an . ' vs ' . $bn);
+    $h .= rocBreadcrumbLd([['Home', ROC_PUBLIC_URL . '/'], ['Comparisons', ROC_PUBLIC_URL . '/compare/'], [$catName, rocCategoryUrl($catSlug)], [$an . ' vs ' . $bn, $url]]);
+    $h .= rocJsonLd(array_filter(['@context' => 'https://schema.org', '@type' => 'WebPage', '@id' => $url, 'url' => $url, 'name' => $an . ' vs ' . $bn, 'description' => $desc,
+        'dateModified' => $mod ? gmdate('c', $mod) : null, 'inLanguage' => 'en', 'isPartOf' => ['@type' => 'WebSite', 'name' => 'Run On Console', 'url' => ROC_PUBLIC_URL . '/'],
+        'about' => [['@type' => 'Thing', 'name' => $an, 'url' => rocProductUrl((string)$a['slug'])], ['@type' => 'Thing', 'name' => $bn, 'url' => rocProductUrl((string)$b['slug'])]],
+        'primaryImageOfPage' => $imgA !== '' ? ['@type' => 'ImageObject', 'url' => rocAbs($imgA)] : null], function ($v) { return $v !== null; }));
+    if ($faq) $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => array_map(function ($f) {
+        return ['@type' => 'Question', 'name' => $f[0], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f[1]]]; }, $faq)]);
+    $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
+
+    $card = function (array $p, string $img, string $pick) use ($pdo, $categories) {
+        $t = (string)$p['title']; $bf = trim((string)($p['best_for'] ?? ''));
+        return '<div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col gap-3">'
+            . '<a href="/products/' . rocH((string)$p['slug']) . '/" class="block h-48 rounded-2xl overflow-hidden bg-slate-950 border border-slate-800">'
+            . ($img !== '' ? '<img src="' . rocH($img) . '" alt="' . rocH(rocImageAlt($p, $t, $categories)) . '" width="400" height="300" class="w-full h-full ' . (rocIsAmazonImg($img) ? 'object-contain bg-white p-3' : 'object-cover') . '"/>' : '') . '</a>'
+            . '<h2 class="font-display font-extrabold text-lg text-slate-900 leading-snug"><a href="/products/' . rocH((string)$p['slug']) . '/" class="text-slate-900 hover:text-emerald-700 no-underline">' . rocH($t) . '</a></h2>'
+            . ($bf !== '' ? '<span class="self-start bg-emerald-50 border border-emerald-200 text-emerald-800 font-extrabold text-xs px-2.5 py-1 rounded-lg">' . rocH($bf) . '</span>' : '')
+            . ($pick !== '' ? '<p class="text-sm text-slate-600 leading-relaxed">' . rocH($pick) . '</p>' : '')
+            . '<div class="mt-auto flex flex-col gap-2"><a href="' . rocH(rocAmazonUrl($pdo, $p)) . '" target="_blank" rel="sponsored nofollow noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-700 text-white font-display font-extrabold text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 no-underline">'
+            . ROC_ICON_CART . '<span>Check price on Amazon</span></a>'
+            . '<a href="/products/' . rocH((string)$p['slug']) . '/" class="text-center text-xs font-bold text-emerald-700 underline">Full ' . rocH($t) . ' page</a></div></div>';
+    };
+    $box = function (string $head, string $inner) { return '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4"><h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">' . rocH($head) . '</h2>' . $inner . '</div>'; };
+
+    $m  = $mainOpen . '<div class="max-w-6xl mx-auto py-6 space-y-8 animate-page-in">';
+    $m .= '<nav aria-label="Breadcrumb" class="text-xs font-semibold text-slate-500 flex flex-wrap items-center gap-1.5"><a href="/compare/" class="text-slate-500 no-underline hover:text-emerald-600">Comparisons</a><span>/</span>'
+        . '<a href="' . rocH(rocCatPath($catSlug)) . '" class="text-slate-500 no-underline hover:text-emerald-600">' . rocH($catName) . '</a><span>/</span><span class="text-slate-800">' . rocH($an . ' vs ' . $bn) . '</span></nav>';
+    $m .= '<div class="gradient-hero-bg text-white rounded-3xl p-8 sm:p-10 shadow-xl"><span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3 py-1 rounded-md tracking-wider">' . rocH($catName) . ' comparison</span>'
+        . '<h1 class="font-display font-extrabold text-3xl sm:text-4xl text-white my-3 leading-tight">' . rocH($an) . ' vs ' . rocH($bn) . '</h1>'
+        . '<p class="text-emerald-100 text-sm sm:text-base max-w-3xl leading-relaxed">' . rocH((string)$T['summary']) . '</p></div>';
+    $m .= '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">' . $card($a, $imgA, (string)($T['pick_a'] ?? '')) . $card($b, $imgB, (string)($T['pick_b'] ?? '')) . '</div>';
+
+    if (!empty($T['differences'])) $m .= $box('The differences that matter', '<ul class="space-y-2 text-sm text-slate-700">' . implode('', array_map(function ($d) {
+        return '<li class="flex gap-2"><span class="text-emerald-600 font-bold" aria-hidden="true">›</span><span>' . rocH((string)$d) . '</span></li>'; }, (array)$T['differences'])) . '</ul>');
+
+    // Specs side by side (every spec either one lists).
+    $sa = rocProductList($a, 'specs_json'); $sb = rocProductList($b, 'specs_json');
+    $keys = array_values(array_unique(array_merge(array_keys($sa), array_keys($sb))));
+    $val = function ($v) { return is_array($v) ? implode(', ', $v) : trim((string)$v); };
+    if (count($keys) >= 2) {
+        $rows = '';
+        foreach ($keys as $k) $rows .= '<tr class="border-t border-slate-100"><th scope="row" class="text-left py-2.5 pr-3 text-slate-500 font-bold align-top">' . rocH((string)$k) . '</th>'
+            . '<td class="py-2.5 pr-3 text-slate-900 align-top">' . rocH($val($sa[$k] ?? '') ?: '—') . '</td><td class="py-2.5 text-slate-900 align-top">' . rocH($val($sb[$k] ?? '') ?: '—') . '</td></tr>';
+        $m .= $box('Specs side by side', '<div class="overflow-x-auto"><table class="w-full text-xs sm:text-sm"><thead><tr><th></th><th class="text-left pb-2 font-display font-extrabold text-slate-900">' . rocH($an) . '</th><th class="text-left pb-2 font-display font-extrabold text-slate-900">' . rocH($bn) . '</th></tr></thead><tbody>' . $rows . '</tbody></table></div>');
+    }
+    // Pros and cons of each, from their own pages.
+    $pc = function (array $p) {
+        $pros = rocProductList($p, 'pros'); $cons = rocProductList($p, 'cons');
+        if (!$pros && !$cons) return '';
+        $li = function ($l, $mark) { return implode('', array_map(function ($x) use ($mark) { return '<li class="flex gap-2"><span aria-hidden="true">' . $mark . '</span><span>' . rocH(is_array($x) ? implode(' ', $x) : (string)$x) . '</span></li>'; }, $l)); };
+        return '<div class="space-y-2"><h3 class="font-display font-extrabold text-sm text-slate-900">' . rocH((string)$p['title']) . '</h3><ul class="space-y-1.5 text-xs sm:text-sm text-slate-700">' . $li($pros, '✓') . $li($cons, '–') . '</ul></div>';
+    };
+    $both = $pc($a) . $pc($b);
+    if ($both !== '') $m .= $box('Pros and cons', '<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">' . $both . '</div>');
+    if ($faq) {
+        $q = '';
+        foreach ($faq as $i => [$fq, $fa]) $q .= '<details class="border border-slate-100 rounded-2xl p-4 bg-slate-50"' . ($i === 0 ? ' open' : '') . '><summary class="font-bold text-sm text-slate-900 cursor-pointer">' . rocH($fq) . '</summary><p class="text-xs sm:text-sm text-slate-600 leading-relaxed mt-2">' . rocH($fa) . '</p></details>';
+        $m .= $box($an . ' vs ' . $bn . ': questions', $q);
+    }
+    // More comparisons in this category, and the pages around.
+    $links = [[rocCatPath($catSlug), 'All ' . $catName, 'Every pick in this category'], ['/compare/', 'All comparisons', 'Every "X vs Y" on Run On Console']];
+    $texts2 = $texts;
+    foreach ($pairs as $cs => [$x, $y, $c]) if ($c === $catSlug && $cs !== $slug && !empty($texts2[$cs]['summary']) && empty($texts2[$cs]['hidden']) && count($links) < 8)
+        $links[] = ['/compare/' . $cs . '/', $x['title'] . ' vs ' . $y['title'], 'Comparison'];
+    $m .= rocLinkBox('More on Run On Console', $links);
+    $m .= '<p class="text-[11px] text-slate-400">We compare what each product\'s own specs and listing say; we do not show prices because they change every day. We may earn a commission from qualifying purchases.</p>';
+    $m .= '</div>';
+    rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $mod);
+}
+
+/** /compare/: every written comparison, by category. */
+function rocRenderCompareList(string $root, PDO $pdo, array $categories): void {
+    $pairs = rocComparePairs($pdo); $texts = rocCompareTexts($pdo);
+    $by = []; $mod = 0;
+    foreach ($pairs as $cs => [$a, $b, $c]) if (!empty($texts[$cs]['summary']) && empty($texts[$cs]['hidden'])) { $by[$c][] = [$cs, $a, $b]; $mod = max($mod, (int)$texts[$cs]['t']); }
+    if (!$by) rocNotFound($root);
+    [$headTop, $bodyToMain, $mainOpen, , $afterMain] = rocTemplate($root, ROC_PRODUCT_TEMPLATES['list']);
+    $url = ROC_PUBLIC_URL . '/compare/';
+    $n = array_sum(array_map('count', $by));
+    $title = 'Gaming Gear Comparisons: X vs Y, Which to Buy | Run On Console';
+    $desc = $n . ' side by side comparisons of gaming mice, keyboards, headsets, monitors, graphics cards and more: specs, differences and who should pick which.';
+    $h = rocHeadMeta($title, $desc, $url, '', 'index, follow, max-image-preview:large');
+    $h .= rocBreadcrumbLd([['Home', ROC_PUBLIC_URL . '/'], ['Comparisons', $url]]);
+    $items = []; foreach ($by as $list) foreach ($list as [$cs, $a, $b]) $items[] = ['@type' => 'ListItem', 'position' => count($items) + 1, 'url' => ROC_PUBLIC_URL . '/compare/' . $cs . '/', 'name' => $a['title'] . ' vs ' . $b['title']];
+    $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'CollectionPage', 'name' => 'Product comparisons', 'url' => $url, 'description' => $desc,
+        'mainEntity' => ['@type' => 'ItemList', 'numberOfItems' => count($items), 'itemListElement' => $items]]);
+    $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
+    $m  = $mainOpen . '<div class="max-w-6xl mx-auto py-6 space-y-8 animate-page-in">';
+    $m .= '<div class="gradient-hero-bg text-white rounded-3xl p-8 sm:p-12 shadow-xl"><span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3 py-1 rounded-md tracking-wider">Compare</span>'
+        . '<h1 class="font-display font-extrabold text-3xl sm:text-5xl text-white my-3">Which one should you buy?</h1>'
+        . '<p class="text-emerald-100 text-sm sm:text-base max-w-2xl">' . rocH($desc) . '</p></div>';
+    foreach ($by as $c => $list) {
+        $m .= '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-3"><h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">' . rocH((string)($categories[$c]['name'] ?? $c)) . '</h2><div class="grid grid-cols-1 sm:grid-cols-2 gap-3">';
+        foreach ($list as [$cs, $a, $b]) $m .= '<a href="/compare/' . rocH($cs) . '/" class="block border border-slate-200 hover:border-emerald-500 rounded-2xl p-4 no-underline group"><div class="font-bold text-sm text-slate-900 group-hover:text-emerald-700">' . rocH($a['title'] . ' vs ' . $b['title']) . ' &rarr;</div>'
+            . '<div class="text-[11px] text-slate-500 mt-0.5 line-clamp-2">' . rocH(mb_substr((string)$texts[$cs]['summary'], 0, 140)) . '</div></a>';
+        $m .= '</div></div>';
+    }
+    $m .= '</div>';
+    rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $mod ?: null);
+}
+
 function rocProductSitemap(PDO $pdo, array $categories): void {
     $all = array_values(array_filter(rocFetchProducts($pdo, null), function ($p) { return empty($p['is_noindex']); }));
     $latestByCat = [];
@@ -1108,6 +1250,16 @@ function rocProductSitemap(PDO $pdo, array $categories): void {
         if ($mods) $out .= $line(rocCategoryUrl($g), max($mods), rocGroups()[$g]['name']);
     }
     foreach ($all as $p) $out .= $line(rocProductUrl((string)$p['slug']), rocProductModified($p), (string)$p['title']);
+    // Comparison pages with a written verdict (Deploy 87).
+    if (is_file(__DIR__ . '/api/v1/cms/compare-lib.php')) {
+        require_once __DIR__ . '/api/v1/cms/compare-lib.php';
+        $texts = rocCompareTexts($pdo); $pairs = rocComparePairs($pdo); $any = 0;
+        foreach ($pairs as $cs => [$a, $b]) if (!empty($texts[$cs]['summary']) && empty($texts[$cs]['hidden'])) {
+            $out .= $line(ROC_PUBLIC_URL . '/compare/' . $cs . '/', max((int)$texts[$cs]['t'], rocProductModified($a) ?? 0, rocProductModified($b) ?? 0), $a['title'] . ' vs ' . $b['title']);
+            $any = max($any, (int)$texts[$cs]['t']);
+        }
+        if ($any) $out .= $line(ROC_PUBLIC_URL . '/compare/', $any, 'Product comparisons');
+    }
     $out .= "</urlset>\n";
     echo $out;
     exit;
