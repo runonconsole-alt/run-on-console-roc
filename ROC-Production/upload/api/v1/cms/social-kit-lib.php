@@ -106,9 +106,22 @@ function rocKitImage(string $root, string $slug, string $cover, string $title, s
     $dir = $root . '/uploads/social';
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
     $file = $slug . '-' . $suffix . '.jpg';
-    imagejpeg($im, $dir . '/' . $file, 86);
+    file_put_contents($dir . '/' . $file, rocKitJpeg($im));
     imagedestroy($im);
     return '/uploads/social/' . $file;
+}
+
+/**
+ * JPEG data under the site's 100 KB budget (Deploy 82): quality 86 first, lower in steps down to 62.
+ * The social sites compress again anyway, so this costs nothing visible.
+ */
+function rocKitJpeg($im, int $max = 102400): string {
+    $data = '';
+    for ($q = 86; $q >= 62; $q -= 6) {
+        ob_start(); imagejpeg($im, null, $q); $data = (string)ob_get_clean();
+        if (strlen($data) <= $max) break;
+    }
+    return $data;
 }
 
 /** The texts, written by the AI. Returns the kit fields or ['error' => ...]. */

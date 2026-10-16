@@ -756,9 +756,17 @@ function rocRenderUpdates(string $root, PDO $pdo, int $page): void {
     $h .= '    <meta property="og:title" content="' . rocH($title) . "\" />\n";
     $h .= '    <meta property="og:description" content="' . rocH($desc) . "\" />\n";
     $h .= '    <meta property="og:image" content="' . ROC_PUBLIC_URL . "/images/battlestation_pc.jpg\" />\n";
+    $h .= "    <meta name=\"twitter:card\" content=\"summary_large_image\" />\n    <meta name=\"twitter:site\" content=\"@RunOnConsole\" />\n";
+    $h .= '    <meta name="twitter:title" content="' . rocH($title) . "\" />\n" . '    <meta name="twitter:description" content="' . rocH($desc) . "\" />\n";
+    $h .= '    <meta name="twitter:image" content="' . ROC_PUBLIC_URL . "/images/battlestation_pc.jpg\" />\n";
     $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => [
         ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => ROC_PUBLIC_URL . '/'],
         ['@type' => 'ListItem', 'position' => 2, 'name' => 'Updates', 'item' => $url]]]);
+    // The page itself: a collection of the newest blogs, news and guides (Deploy 82).
+    $items = []; foreach ($all as $sec => $ps) foreach ($ps as $p) $items[] = ['@type' => 'ListItem', 'position' => count($items) + 1, 'url' => rocPostUrlOf($p), 'name' => (string)$p['title']];
+    $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'CollectionPage', 'name' => 'Gaming updates: blogs, news and guides', 'url' => $url, 'description' => $desc,
+        'isPartOf' => ['@type' => 'WebSite', 'name' => 'Run On Console', 'url' => ROC_PUBLIC_URL . '/'], 'dateModified' => $latest ? gmdate('c', $latest) : null,
+        'mainEntity' => ['@type' => 'ItemList', 'numberOfItems' => count($items), 'itemListElement' => $items]]);
     $h .= "<style>"
         . ".up-hero{position:relative;overflow:hidden;border-radius:1.5rem;background:linear-gradient(135deg,#022c22,#065f46 55%,#0f766e);color:#fff;display:grid;gap:1.5rem;padding:2rem 1.5rem}"
         . ".up-hero h1{font-family:Outfit,Inter,sans-serif;font-weight:800;font-size:2.1rem;line-height:1.1;color:#fff}"
@@ -853,6 +861,9 @@ function rocRenderGuides(string $root, PDO $pdo, int $page, string $type): void 
     $h .= '    <meta property="og:description" content="' . rocH($desc) . "\" />\n";
     if (!empty($posts[0]['image'])) $h .= '    <meta property="og:image" content="' . rocH(rocAbs((string)$posts[0]['image'])) . "\" />\n";
     $h .= "    <meta property=\"og:site_name\" content=\"Run On Console\" />\n";
+    $h .= "    <meta name=\"twitter:card\" content=\"summary_large_image\" />\n    <meta name=\"twitter:site\" content=\"@RunOnConsole\" />\n";
+    $h .= '    <meta name="twitter:title" content="' . rocH($title) . "\" />\n" . '    <meta name="twitter:description" content="' . rocH($desc) . "\" />\n";
+    if (!empty($posts[0]['image'])) $h .= '    <meta name="twitter:image" content="' . rocH(rocAbs((string)$posts[0]['image'])) . "\" />\n";
     $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => [
         ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => ROC_PUBLIC_URL . '/'],
         ['@type' => 'ListItem', 'position' => 2, 'name' => 'Guides', 'item' => ROC_PUBLIC_URL . $base]]]);

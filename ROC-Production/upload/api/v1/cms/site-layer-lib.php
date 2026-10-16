@@ -191,6 +191,16 @@ function rocLayerTrackingHead(array $t, string $path): string {
     if ($v = $id('clarity', '/^[a-z0-9]{6,20}$/')) {
         $h .= '<script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","' . $v . '");</script>';
     }
+    // The ROC Team author page (Deploy 82): a ProfilePage, the author every blog and news post names.
+    if ($path === '/author/roc-team/') {
+        $h .= '<script type="application/ld+json">' . json_encode(['@context' => 'https://schema.org', '@type' => 'ProfilePage',
+            'url' => 'https://runonconsole.com/author/roc-team/', 'name' => 'ROC Team, Run On Console',
+            'mainEntity' => ['@type' => 'Organization', '@id' => 'https://runonconsole.com/author/roc-team/#team', 'name' => 'ROC (Run On Console)',
+                'alternateName' => 'ROC Team', 'url' => 'https://runonconsole.com/author/roc-team/',
+                'description' => 'The Run On Console editorial team: gaming hardware picks, PC game requirements, guides and news checked against at least two trusted sources.',
+                'parentOrganization' => ['@id' => 'https://runonconsole.com/#organization', '@type' => 'Organization', 'name' => 'Run On Console', 'url' => 'https://runonconsole.com/'],
+                'logo' => 'https://runonconsole.com/images/logo-512.png']], JSON_UNESCAPED_SLASHES) . '</script>';
+    }
     // Google Business Profile: linked from the Organization on the home page.
     $gmb = trim((string)($t['gmb_url'] ?? ''));
     if ($path === '/' && preg_match('#^https://[^\s"<>]+$#', $gmb)) {
