@@ -344,8 +344,9 @@ function rocNavFooterPoints(array $points): string {
 }
 
 function rocNavFooterCols(array $cols): string {
-    // The brand part takes 4 of 12 and FOLLOW US 3 (both in the built page), the menu columns the rest.
-    $spans = [1 => [5], 2 => [3, 2], 3 => [2, 2, 1], 4 => [2, 1, 1, 1]];
+    // The brand part takes 5 of 12 and FOLLOW US 3 (both in the built page), the menu columns the other 4
+    // (two columns: the same width, so there is no empty gap between them).
+    $spans = [1 => [4], 2 => [2, 2], 3 => [2, 1, 1], 4 => [1, 1, 1, 1]];
     $cols = array_values($cols); $n = count($cols); $h = '';
     foreach ($cols as $i => $c) {
         $h .= '<div class="lg:col-span-' . (($spans[$n] ?? [])[$i] ?? 2) . ' space-y-3">'

@@ -1,0 +1,38 @@
+{
+ "deploy": 71,
+ "date": "2026-10-16",
+ "title": "Updates menu and page, topics and tags, AI covers, green hover light everywhere",
+ "changes": [
+  "Header: BLOGS, GUIDES and NEWS are one UPDATES menu (Blogs, Guides, News, All updates); the menu no longer runs into the search box on smaller screens",
+  "/updates/: blogs, guides and news together, with filters by type, hardware (PC Hardware / Gaming Hardware), its category (graphics cards, mice ...), tag and a search",
+  "CMS editor (picture tab): topic = hardware group, then its category; tags (comma separated); they show under the post as links to the filtered Updates page",
+  "Posts without a picture get a cover made with AI (Cloudflare) when you publish; a \"Make an AI cover now\" button too",
+  "Blog writer: no approval step; it writes by itself until Monday 19 October, after that you write the posts (CMS > Blog writer > Automatic blog posts sets the date); news keeps running",
+  "Footer: two menu columns of the same width; POLICIES is now UPDATES & TERMS with Blogs, News and Guides",
+  "The green light that follows the mouse now works on every white card and box of the site, game pages included"
+ ],
+ "checks": [
+  {
+   "label": "Updates switched on (cli-updates.php)",
+   "type": "contains",
+   "path": ".htaccess",
+   "text": "ROC updates BEGIN"
+  },
+  {
+   "label": "Topics",
+   "type": "file",
+   "path": "api/v1/cms/topics-lib.php"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-Df8W_duK.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/71",
+ "build": "index-Df8W_duK.js",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

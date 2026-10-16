@@ -571,3 +571,40 @@ document.addEventListener('submit', function (e) {
   }
   if (document.readyState !== 'loading') start(); else document.addEventListener('DOMContentLoaded', start);
 })();
+
+/* ---------- Green light under the pointer on every white card or box (Deploy 71; owner: the whole site).
+   The same effect as the React cards (.roc-spot in the site CSS: a soft green circle follows the pointer
+   behind the content). Here it is added to any white, rounded box the pointer is over, on every page
+   (also the server-drawn ones: game pages, blogs, products). Menus, forms and the chat are left alone. */
+(function () {
+  if (!window.matchMedia || window.matchMedia('(hover: none)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var SKIP = 'header, nav, form, input, textarea, select, button, .roc-dd-panel, #roc-chat, .veil, [data-roc-region="header-nav"]';
+  var cache = typeof WeakMap === 'function' ? new WeakMap() : null;
+  function ok(el) {
+    if (cache && cache.has(el)) return cache.get(el);
+    var cs = getComputedStyle(el), r = el.getBoundingClientRect(), yes = false;
+    var white = /^rgba?\((25[0-5]|24\d), (25[0-5]|24\d), (25[0-5]|24\d)(, (1|0\.[89]\d*))?\)$/.test(cs.backgroundColor);
+    if (white && parseFloat(cs.borderTopLeftRadius) >= 6 && (cs.position === 'static' || cs.position === 'relative')
+        && r.width >= 120 && r.height >= 60 && r.width < window.innerWidth * 0.98 && !el.closest(SKIP)) yes = true;
+    if (cache) cache.set(el, yes);
+    return yes;
+  }
+  var raf = 0, ev = null;
+  document.addEventListener('pointermove', function (e) {
+    ev = e;
+    if (raf) return;
+    raf = requestAnimationFrame(function () {
+      raf = 0;
+      var el = ev.target && ev.target.nodeType === 1 ? ev.target : null;
+      for (var i = 0; el && i < 8 && el !== document.body; i++, el = el.parentElement) {
+        if (el.classList.contains('roc-spot') || ok(el)) {
+          if (!el.classList.contains('roc-spot')) el.classList.add('roc-spot');
+          var r = el.getBoundingClientRect();
+          el.style.setProperty('--mx', (ev.clientX - r.left) + 'px');
+          el.style.setProperty('--my', (ev.clientY - r.top) + 'px');
+          return;
+        }
+      }
+    });
+  }, { passive: true });
+})();

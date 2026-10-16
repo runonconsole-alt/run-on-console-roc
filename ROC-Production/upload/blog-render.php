@@ -13,6 +13,7 @@
  *   /guides/                     -> guides, by type  (blog-render.php?guides=1, ?type=buying ...)
  *   /guides/{slug}/              -> one guide        (blog-render.php?guides=1&slug=...)
  *   /sitemaps/guides-sitemap.xml -> guides sitemap   (blog-render.php?guides=1&sitemap=1)
+ *   /updates/                    -> blogs, guides and news together with filters (blog-render.php?updates=1, Deploy 71)
  *
  * Guides (Deploy 70) are posts the owner writes in the CMS with the category "Guides" or "Guides: <type>"
  * (Guides: Buying, Guides: How to use, Guides: Setup, Guides: Game setup ...). Routes: cli-guides.php.
@@ -55,7 +56,7 @@ if ($slug !== '' && !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) {
 
 // List pages live at /news/page/2/ and /blogs/page/2/ (cli-news-pages.php): old ?page=2 links move there.
 $reqPath = (string)(parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/');
-if ($slug === '' && !$isMap && !isset($_GET['json']) && isset($_GET['page'])) {
+if ($slug === '' && !$isMap && !isset($_GET['json']) && !isset($_GET['updates']) && isset($_GET['page'])) {
     $pretty = strpos($reqPath, '/page/') !== false;
     if (!$pretty || $page === 1) {
         header('Location: ' . rocPageUrl('/' . $section . '/', $page) . ($query !== '' ? '?q=' . rawurlencode($query) : ''), true, 301);
@@ -118,6 +119,7 @@ if ($slug !== '') {
     }
     rocRenderPost($ROOT, $post, $pdo);
 }
+if (isset($_GET['updates'])) rocRenderUpdates($ROOT, $pdo, $page);   // /updates/ (cli-updates.php)
 if (isset($_GET['json'])) {
     // Published posts for the header search box (/blogs/?json=1).
     // Also used by the home page's latest-articles section (image, date).
@@ -545,6 +547,7 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
     }
     if ($news) $m .= rocAdUnit('article');
     $m .= '<div class="roc-article">' . $body . '</div>';
+    if ($pdo) $m .= rocTopicChips($pdo, $p);
     $m .= '</article>';
     if ($news) {
         $m .= '<aside class="rn-aside"><div class="rn-sticky">' . rocAdSide()
@@ -693,6 +696,160 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
     $latest = null;
     foreach ($posts as $p) { $t = rocModified($p); if ($t && (!$latest || $t > $latest)) $latest = $t; }
     rocSendHtml($headTop . $h . $bodyToMain . $main . $afterMain, $latest);
+}
+
+/* ==================================================================== */
+/*                 updates (/updates/, topics and tags, Deploy 71)      */
+/* ==================================================================== */
+
+/** Topic and tag chips under a post, each a link to the /updates/ page filtered on it. */
+function rocTopicChips(PDO $pdo, array $p): string {
+    $lib = __DIR__ . '/api/v1/cms/topics-lib.php';
+    if (!is_file($lib)) return '';
+    require_once $lib;
+    $chips = [];
+    $g = (string)($p['topic_group'] ?? ''); $c = (string)($p['topic_cat'] ?? '');
+    $groups = rocTopicGroups($pdo);
+    if (isset($groups[$g])) $chips[] = ['/updates/?group=' . rawurlencode($g), $groups[$g]['name'], true];
+    if ($c !== '' && ($cn = rocTopicCatName($pdo, $c)) !== '') $chips[] = ['/updates/?cat=' . rawurlencode($c), $cn, true];
+    foreach (rocTopicTags((string)($p['tags'] ?? '')) as $t) $chips[] = ['/updates/?tag=' . rawurlencode($t), '#' . $t, false];
+    if (!$chips) return '';
+    $h = '<div class="flex flex-wrap gap-2 pt-6 border-t border-slate-200" aria-label="Topics and tags">';
+    foreach ($chips as [$u, $label, $topic]) $h .= '<a href="' . rocH($u) . '" class="no-underline text-xs font-bold px-3 py-1.5 rounded-full border '
+        . ($topic ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-400 hover:text-emerald-700') . '">' . rocH($label) . '</a>';
+    return $h . '</div>';
+}
+
+/**
+ * /updates/: blogs, guides and news together, newest first, with filters: type (blogs, guides, news),
+ * hardware group and its product category, tag, and a search. ?type=&group=&cat=&tag=&q=
+ */
+function rocRenderUpdates(string $root, PDO $pdo, int $page): void {
+    require_once __DIR__ . '/api/v1/cms/topics-lib.php';
+    [$headTop, $bodyToMain, $mainOpen, , $afterMain] = rocTemplate($root, 'blog-list.html');
+    $topics = rocTopicColumns($pdo);
+    $groups = rocTopicGroups($pdo);
+    $f = ['type' => (string)($_GET['type'] ?? ''), 'group' => (string)($_GET['group'] ?? ''), 'cat' => (string)($_GET['cat'] ?? ''),
+          'tag' => mb_strtolower(trim(mb_substr((string)($_GET['tag'] ?? ''), 0, 40))), 'q' => trim(mb_substr((string)($_GET['q'] ?? ''), 0, 80))];
+    if (!in_array($f['type'], ['blogs', 'guides', 'news'], true)) $f['type'] = '';
+    if (!isset($groups[$f['group']])) $f['group'] = '';
+    if ($f['cat'] !== '' && rocTopicCatName($pdo, $f['cat']) === '') $f['cat'] = '';
+    if ($f['cat'] !== '' && $f['group'] === '') foreach ($groups as $gk => $gv) if (isset($gv['cats'][$f['cat']])) $f['group'] = $gk;
+
+    $where = ["status = 'published'"]; $args = [];
+    if ($f['type'] === 'news') $where[] = "category = 'News'";
+    if ($f['type'] === 'guides') $where[] = rocGuideSql();
+    if ($f['type'] === 'blogs') $where[] = "(category IS NULL OR (category <> 'News' AND " . rocNotGuideSql() . "))";
+    if ($topics && $f['group'] !== '') { $where[] = 'topic_group = ?'; $args[] = $f['group']; }
+    if ($topics && $f['cat'] !== '') { $where[] = 'topic_cat = ?'; $args[] = $f['cat']; }
+    if ($topics && $f['tag'] !== '') { $where[] = "(', ' || LOWER(tags) || ',') LIKE ?"; $args[] = '%, ' . $f['tag'] . ',%'; }
+    if ($f['q'] !== '') {
+        $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $f['q']) . '%';
+        $where[] = '(title LIKE ? OR excerpt LIKE ?' . ($topics ? ' OR tags LIKE ?' : '') . ')';
+        array_push($args, $like, $like); if ($topics) $args[] = $like;
+    }
+    // MySQL has no || for text: CONCAT there.
+    $sqlWhere = implode(' AND ', $where);
+    if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') $sqlWhere = str_replace("(', ' || LOWER(tags) || ',')", "CONCAT(', ', LOWER(tags), ',')", $sqlWhere);
+    $per = 12;
+    $cnt = $pdo->prepare("SELECT COUNT(*) FROM blogs WHERE {$sqlWhere}"); $cnt->execute($args);
+    $total = (int)$cnt->fetchColumn();
+    $pages = max(1, (int)ceil($total / $per));
+    if ($page > $pages && $total > 0) rocNotFound($root);
+    $st = $pdo->prepare("SELECT id, title, slug, category, read_time, image, image_alt, excerpt, content, published_at, created_at, updated_at, content_modified_at"
+        . ($topics ? ', topic_group, topic_cat, tags' : '') . " FROM blogs WHERE {$sqlWhere} " . rocOrderSql() . " LIMIT {$per} OFFSET " . (($page - 1) * $per));
+    $st->execute($args);
+    $posts = $st->fetchAll(PDO::FETCH_ASSOC);
+
+    // Popular tags (for the chips).
+    $tagCount = [];
+    if ($topics) foreach ($pdo->query("SELECT tags FROM blogs WHERE status = 'published' AND tags IS NOT NULL AND tags <> ''")->fetchAll(PDO::FETCH_COLUMN) as $tg)
+        foreach (rocTopicTags((string)$tg) as $t) $tagCount[$t] = ($tagCount[$t] ?? 0) + 1;
+    arsort($tagCount);
+    $tagCount = array_slice($tagCount, 0, 18, true);
+
+    $link = function (array $over) use ($f) {
+        $q = array_filter(array_merge(['type' => $f['type'], 'group' => $f['group'], 'cat' => $f['cat'], 'tag' => $f['tag'], 'q' => $f['q']], $over), function ($v) { return $v !== '' && $v !== null; });
+        return '/updates/' . ($q ? '?' . http_build_query($q) : '');
+    };
+    $typeNames = ['' => 'All updates', 'blogs' => 'Blogs', 'guides' => 'Guides', 'news' => 'News'];
+    $filtered = $f['group'] !== '' || $f['cat'] !== '' || $f['tag'] !== '' || $f['q'] !== '' || $page > 1;
+    $heading = $f['cat'] !== '' ? rocTopicCatName($pdo, $f['cat']) : ($f['group'] !== '' ? $groups[$f['group']]['name'] : ($f['tag'] !== '' ? '#' . $f['tag'] : $typeNames[$f['type']]));
+    $title = ($heading === 'All updates' ? 'Gaming Updates: Blogs, Guides & News' : $heading . ' – Updates') . ' | Run On Console';
+    $desc = 'The latest from Run On Console in one place: blog posts, step by step guides and gaming news, filtered by topic, hardware category or tag.';
+    $canonical = ROC_PUBLIC_URL . ($f['type'] !== '' && !$filtered ? '/updates/?type=' . $f['type'] : '/updates/');
+
+    $h  = '<title>' . rocH($title) . "</title>\n";
+    $h .= '    <meta name="description" content="' . rocH($desc) . "\" />\n";
+    $h .= '    <meta name="robots" content="' . ($filtered ? 'noindex, follow' : 'index, follow, max-image-preview:large') . "\" />\n";
+    $h .= '    <link rel="canonical" href="' . rocH($canonical) . "\" />\n";
+    $h .= "    <meta property=\"og:type\" content=\"website\" />\n    <meta property=\"og:site_name\" content=\"Run On Console\" />\n";
+    $h .= '    <meta property="og:title" content="' . rocH($title) . "\" />\n";
+    $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => [
+        ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => ROC_PUBLIC_URL . '/'],
+        ['@type' => 'ListItem', 'position' => 2, 'name' => 'Updates', 'item' => ROC_PUBLIC_URL . '/updates/']]]);
+    $h .= "<style>.up-chips{display:flex;flex-wrap:wrap;gap:.45rem}.up-chip{border:1px solid #cbd5e1;border-radius:999px;padding:.38rem .85rem;font-weight:700;font-size:.78rem;color:#334155;background:#fff;text-decoration:none}"
+        . ".up-chip:hover{border-color:#10b981;color:#047857}.up-chip.on{background:#10b981;border-color:#10b981;color:#052e2b}.up-chip.t{font-weight:600;color:#64748b}"
+        . ".up-bar{background:#fff;border:1px solid #e2e8f0;border-radius:1.25rem;padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.8rem}"
+        . ".up-bar label{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#64748b;margin-right:.4rem}"
+        . ".up-q{display:flex;gap:.5rem}.up-q input{flex:1;border:2px solid #e2e8f0;border-radius:.8rem;padding:.55rem .8rem;font-size:.9rem}.up-q input:focus{outline:none;border-color:#10b981}"
+        . ".up-q button{background:#10b981;color:#052e2b;font-weight:800;border-radius:.8rem;padding:.55rem 1rem;border:0;cursor:pointer}</style>\n";
+    $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
+
+    $m = $mainOpen . '<div class="space-y-6 py-6">'
+        . '<div class="gradient-hero-bg text-white rounded-3xl p-8 sm:p-12 shadow-xl"><span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3 py-1 rounded-md tracking-wider">Updates</span>'
+        . '<h1 class="font-display font-extrabold text-3xl sm:text-5xl text-white my-3">' . rocH($heading === 'All updates' ? 'Blogs, guides & news' : $heading) . '</h1>'
+        . '<p class="text-emerald-100 text-sm sm:text-base max-w-2xl">Everything new on Run On Console in one place. Filter by type, hardware or tag.</p></div>';
+    $m .= '<div class="up-bar"><form class="up-q" method="get" action="/updates/">';
+    foreach (['type', 'group', 'cat', 'tag'] as $k) if ($f[$k] !== '') $m .= '<input type="hidden" name="' . $k . '" value="' . rocH($f[$k]) . '">';
+    $m .= '<input type="search" name="q" value="' . rocH($f['q']) . '" placeholder="Search updates, e.g. RTX 5060, GTA 6, keyboard…" aria-label="Search updates"><button type="submit">Search</button></form>';
+    $m .= '<div class="up-chips"><label>Type</label>';
+    foreach ($typeNames as $k => $n) $m .= '<a class="up-chip' . ($f['type'] === $k ? ' on' : '') . '" href="' . rocH($link(['type' => $k])) . '">' . rocH($n) . '</a>';
+    $m .= '</div>';
+    if ($topics) {
+        $m .= '<div class="up-chips"><label>Hardware</label><a class="up-chip' . ($f['group'] === '' ? ' on' : '') . '" href="' . rocH($link(['group' => '', 'cat' => ''])) . '">All</a>';
+        foreach ($groups as $gk => $gv) $m .= '<a class="up-chip' . ($f['group'] === $gk ? ' on' : '') . '" href="' . rocH($link(['group' => $gk, 'cat' => ''])) . '">' . rocH($gv['name']) . '</a>';
+        $m .= '</div>';
+        if ($f['group'] !== '' && $groups[$f['group']]['cats']) {
+            $m .= '<div class="up-chips"><label>Category</label><a class="up-chip' . ($f['cat'] === '' ? ' on' : '') . '" href="' . rocH($link(['cat' => ''])) . '">All ' . rocH($groups[$f['group']]['name']) . '</a>';
+            foreach ($groups[$f['group']]['cats'] as $ck => $cn) $m .= '<a class="up-chip' . ($f['cat'] === $ck ? ' on' : '') . '" href="' . rocH($link(['cat' => $ck])) . '">' . rocH($cn) . '</a>';
+            $m .= '</div>';
+        }
+        if ($tagCount) {
+            $m .= '<div class="up-chips"><label>Tags</label>' . ($f['tag'] !== '' ? '<a class="up-chip on" href="' . rocH($link(['tag' => ''])) . '">#' . rocH($f['tag']) . ' ✕</a>' : '');
+            foreach ($tagCount as $t => $n) if ($t !== $f['tag']) $m .= '<a class="up-chip t" href="' . rocH($link(['tag' => $t])) . '">#' . rocH($t) . '</a>';
+            $m .= '</div>';
+        }
+    }
+    $m .= '</div><p class="text-sm text-slate-500">' . $total . ' result' . ($total === 1 ? '' : 's') . '</p><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">';
+    foreach ($posts as $p) {
+        $sec = rocSectionOf($p);
+        $label = $sec === 'news' ? 'News' : ($sec === 'guides' ? (rocGuideType($p) ?: 'Guide') : 'Blog');
+        $img = trim((string)($p['image'] ?? ''));
+        $m .= '<a href="/' . $sec . '/' . rocH((string)$p['slug']) . '/" class="block no-underline"><div class="game-card flex flex-col justify-between group cursor-pointer h-full">'
+            . '<div class="relative bg-slate-900 overflow-hidden" style="aspect-ratio:1200 / 630">'
+            . ($img !== '' ? '<img width="1200" height="630" src="' . rocH($img) . '" alt="' . rocH(trim((string)($p['image_alt'] ?? '')) ?: (string)$p['title']) . '" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>' : '')
+            . '<span class="absolute top-3 left-3 ' . ($sec === 'news' ? 'bg-rose-600' : ($sec === 'guides' ? 'bg-sky-600' : 'bg-emerald-600')) . ' text-white text-[10px] font-extrabold px-2.5 py-1 rounded-md uppercase">' . rocH($label) . '</span></div>'
+            . '<div class="p-5 flex-1 flex flex-col justify-between space-y-3"><div>'
+            . '<h2 class="font-display font-extrabold text-base sm:text-lg text-slate-900 group-hover:text-emerald-600 transition-colors leading-snug line-clamp-2 mb-2">' . rocH($p['title']) . '</h2>'
+            . '<p class="text-xs text-slate-500 line-clamp-3 leading-relaxed">' . rocH($p['excerpt'] ?? '') . '</p></div>'
+            . '<div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500"><span>' . (($pd = rocPublished($p)) ? rocH(date('M j, Y', $pd)) : '') . '</span>'
+            . '<span class="text-emerald-600 font-bold">Read &rarr;</span></div></div></div></a>';
+    }
+    $m .= '</div>';
+    if (!$posts) $m .= '<p class="text-center text-slate-500 text-sm py-10">Nothing matches these filters yet. <a class="text-emerald-700 underline font-bold" href="/updates/">See all updates</a>.</p>';
+    if ($pages > 1) {
+        $m .= '<nav class="flex flex-wrap gap-2 justify-center pt-4" aria-label="Pages">';
+        for ($i = 1; $i <= $pages; $i++) {
+            $q = array_filter(['type' => $f['type'], 'group' => $f['group'], 'cat' => $f['cat'], 'tag' => $f['tag'], 'q' => $f['q'], 'page' => $i > 1 ? $i : ''], function ($v) { return $v !== ''; });
+            $m .= '<a class="up-chip' . ($i === $page ? ' on' : '') . '" href="/updates/' . ($q ? '?' . http_build_query($q) : '') . '">' . $i . '</a>';
+        }
+        $m .= '</nav>';
+    }
+    $m .= '</div>';
+    $latest = null;
+    foreach ($posts as $p) { $t = rocModified($p); if ($t && (!$latest || $t > $latest)) $latest = $t; }
+    rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $latest);
 }
 
 /* ==================================================================== */

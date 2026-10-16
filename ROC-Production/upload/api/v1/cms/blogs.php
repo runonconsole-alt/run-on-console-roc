@@ -52,6 +52,7 @@ const ROC_LOCK_SECONDS = 900;   // 15 minutes
 const ROC_BLOG_FIELDS = [
     'title', 'slug', 'excerpt', 'content', 'category', 'author_name', 'image', 'image_alt',
     'meta_title', 'meta_description', 'focus_keyword',
+    'topic_group', 'topic_cat', 'tags',   // Deploy 71: hardware group, product category, tags (api/v1/cms/topics-lib.php)
 ];
 
 /**
@@ -89,7 +90,7 @@ const ROC_BLOG_LIMITS = [
     'focus_keyword' => 200, 'og_title' => 255, 'og_description' => 500,
     'og_image' => 2048, 'og_type' => 40, 'twitter_card' => 40,
     'twitter_title' => 255, 'twitter_description' => 500, 'twitter_image' => 2048,
-    'schema_type' => 60,
+    'schema_type' => 60, 'topic_group' => 40, 'topic_cat' => 80, 'tags' => 500,
 ];
 
 const ROC_ENUMS = [
@@ -163,6 +164,21 @@ function rocCleanBlogPayload(array $raw): array {
         }
         if ($field === 'content') {
             $clean['content'] = rocCmsSanitizeHtml((string)$value);
+            continue;
+        }
+        if ($field === 'topic_group') {
+            $v = trim((string)$value);
+            $clean['topic_group'] = in_array($v, ['pc-hardware', 'gaming-hardware'], true) ? $v : '';
+            continue;
+        }
+        if ($field === 'topic_cat') {
+            $v = strtolower(trim((string)$value));
+            $clean['topic_cat'] = preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $v) ? mb_substr($v, 0, 80) : '';
+            continue;
+        }
+        if ($field === 'tags') {
+            require_once __DIR__ . '/topics-lib.php';
+            $clean['tags'] = mb_substr(implode(', ', rocTopicTags((string)$value)), 0, 500);
             continue;
         }
         if ($field === 'schema_json') {
@@ -419,6 +435,17 @@ if ($method === 'POST') {
         }
         [$clean, $error] = rocCleanBlogPayload($data['draft'] ?? $data);
         if ($error) rocFail($error);
+
+        // No cover picture: one is made from the title (Cloudflare AI when its key is saved, else a title cover).
+        if (trim((string)($clean['image'] ?? '')) === '' && mb_strlen(trim((string)($clean['title'] ?? ''))) >= 5) {
+            try {
+                require_once __DIR__ . '/blog-engine-lib.php';
+                @set_time_limit(120);
+                $clean['image'] = rocBlogMakeCover($pdo, dirname(__DIR__, 3), rocBlogSlug((string)(($clean['slug'] ?? '') ?: $clean['title'])),
+                                                   (string)$clean['title'], (string)(($clean['category'] ?? '') ?: 'Guide'), null, '', (string)$clean['title']);
+            } catch (\Throwable $e) { error_log('blog auto cover: ' . $e->getMessage()); }
+        }
+        if (trim((string)($clean['image_alt'] ?? '')) === '' && trim((string)($clean['image'] ?? '')) !== '') $clean['image_alt'] = (string)$clean['title'];
 
         rocRequirePublishFields($clean);
         $title = $clean['title'];

@@ -8,7 +8,7 @@
  * data-roc-text, data-roc-logo) in step with rocNav*() in site-layer-lib.php.
  *
  * Tailwind classes used only through this data (so the CSS build keeps them):
- * lg:col-span-1 lg:col-span-2 lg:col-span-3 lg:col-span-4 lg:col-span-7 contents
+ * lg:col-span-1 lg:col-span-2 lg:col-span-3 lg:col-span-4 lg:col-span-5 lg:col-span-7 contents
  */
 import { useEffect, useState } from 'react';
 import { NAV_ICONS } from './navIcons.js';
@@ -20,8 +20,13 @@ export const DEFAULT_SITE_NAV = {
     { label: 'CATEGORY', url: '/category/' },
     { label: 'PRODUCTS', url: '/products/' },
     { label: 'SYSTEMS', url: '/compatibility/' },
-    { label: 'BLOGS', url: '/blogs/' },
-    { label: 'GUIDES', url: '/guides/' },
+    // Blogs, guides and news in one menu (owner, 2026-10-16); /updates/ shows them together with filters.
+    { label: 'UPDATES', url: '/updates/', children: [
+      { title: 'Blogs', desc: 'Reviews, comparisons and buying advice', url: '/blogs/', icon: 'book' },
+      { title: 'Guides', desc: 'Step by step: buying, setup, game settings', url: '/guides/', icon: 'file-text' },
+      { title: 'News', desc: 'Gaming and hardware news, checked daily', url: '/news/', icon: 'newspaper' },
+      { title: 'All updates', desc: 'Everything new, with filters', url: '/updates/', icon: 'zap' },
+    ] },
     { label: 'ABOUT US', url: '/about/' },
   ],
   footer: {
@@ -36,17 +41,17 @@ export const DEFAULT_SITE_NAV = {
         { label: 'Products', url: '/products/', icon: 'cpu' },
         { label: 'Can I Run It? PC Game Checker', url: '/compatibility/', icon: 'gamepad' },
         { label: 'PC Game Requirements A to Z', url: '/can-i-run/', icon: 'monitor' },
-        { label: 'Blogs', url: '/blogs/', icon: 'book' },
         { label: 'Gaming Platforms', url: '/gaming-platforms/', icon: 'grid' },
         { label: 'About Run On Console', url: '/about/', icon: 'info' },
       ] },
-      { title: 'POLICIES', icon: 'file-text', links: [
+      { title: 'UPDATES & TERMS', icon: 'file-text', links: [
+        { label: 'Blogs', url: '/blogs/', icon: 'book' },
+        { label: 'News', url: '/news/', icon: 'newspaper' },
+        { label: 'Guides', url: '/guides/', icon: 'file-text' },
         { label: 'Terms & Conditions', url: '/terms-and-conditions/', icon: 'scale' },
         { label: 'Privacy Policy & Affiliate Disclosure', url: '/privacy-policy/', icon: 'file-check' },
         { label: 'Contact Us', url: '/contact/', icon: 'mail' },
         { label: 'Write For Us & Advertising', url: '/write-for-us/', icon: 'pen' },
-        { label: 'News', url: '/news/', icon: 'newspaper' },
-        { label: 'Guides', url: '/guides/', icon: 'book' },
       ] },
     ],
     copyright: '© {year} ROC (Run On Console). All rights reserved. Built for gamers & console enthusiasts.',
@@ -87,8 +92,8 @@ export function navIsActive(url, path) {
   return path === url || (url !== '/' && url.endsWith('/') && path.startsWith(url));
 }
 
-/** Footer column widths on large screens (12-column grid; the logo column takes 5). */
-const SPANS = { 1: [5], 2: [3, 2], 3: [2, 2, 1], 4: [2, 1, 1, 1] };   // brand 4 + FOLLOW US 3 of 12
+/** Footer column widths on large screens (12-column grid): brand 5 + menu columns 4 + FOLLOW US 3; two columns get the same width. */
+const SPANS = { 1: [4], 2: [2, 2], 3: [2, 1, 1], 4: [1, 1, 1, 1] };
 export function footerSpan(count, i) {
   return 'lg:col-span-' + ((SPANS[count] || [])[i] || 2);
 }

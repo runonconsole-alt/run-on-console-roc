@@ -210,7 +210,7 @@ export const ValuePropsFooter = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-b border-emerald-800/60 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
           
-          <div className="lg:col-span-4 space-y-4">
+          <div className="lg:col-span-5 space-y-4">
             <a href="/" onClick={(e) => { e.preventDefault(); navigateTo('home'); }} className="no-underline block">
               <BrandLogo size="large" theme="dark" />
             </a>
