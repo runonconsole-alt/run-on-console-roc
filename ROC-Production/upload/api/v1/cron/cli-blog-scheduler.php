@@ -131,3 +131,13 @@ try {
     $dg = rocDigestTick($pdo, $ROOT);
     if ($dg !== null) echo date('c') . ' ' . $dg . "\n";
 } catch (\Throwable $e) { echo date('c') . ' weekly email error: ' . $e->getMessage() . "\n"; }
+
+// Social media kit (api/v1/cms/social-kit-lib.php): script, captions and two pictures for one new post a run,
+// only when the writer and the news did nothing this run.
+try {
+    if ((!isset($w) || $w === null) && (!isset($n) || $n === null)) {
+        require_once $ROOT . '/api/v1/cms/social-kit-lib.php';
+        $sk = rocKitTick($pdo, $ROOT);
+        if ($sk !== null) echo date('c') . ' ' . $sk . "\n";
+    }
+} catch (\Throwable $e) { echo date('c') . ' social kit error: ' . $e->getMessage() . "\n"; }
