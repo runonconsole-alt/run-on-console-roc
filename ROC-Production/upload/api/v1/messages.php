@@ -74,7 +74,8 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) rocMsgOut(422, ['success' => fal
 $db = getDBConnection();
 if (!$db) rocMsgOut(503, ['success' => false, 'error' => 'The server is busy. Please try again in a minute.']);
 
-$ip = (string)($_SERVER['REMOTE_ADDR'] ?? '');
+require_once __DIR__ . '/client-ip.php';
+$ip = rocClientIp();
 try {
     $q = $db->prepare('SELECT COUNT(*) FROM roc_messages WHERE (ip = ? OR email = ?) AND created_at > ?');
     $q->execute([$ip, $email, date('Y-m-d H:i:s', time() - 600)]);
