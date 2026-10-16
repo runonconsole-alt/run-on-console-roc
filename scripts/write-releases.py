@@ -498,6 +498,14 @@ RELEASES = [
                   'The green light that follows the mouse is brighter'],
          checks=[dict(label='Guide writer', type='file', path='api/v1/cms/guide-writer-lib.php')],
          pr=REPO + '73'),
+    dict(deploy=74, date='2026-10-16', title='RSS feeds for one-click posting, social traffic, Reddit/Quora answer helper',
+         changes=['RSS feeds: /feed.xml (everything), /news/feed.xml, /blogs/feed.xml, /guides/feed.xml; give one to Publer or Buffer and every new post is shared on your connected accounts by itself',
+                  'CMS > Social posts > Social traffic: visits from Facebook, Instagram, X, LinkedIn, Pinterest, TikTok, YouTube, Reddit, Quora in the last 30 days, and which pages they opened (only numbers, nothing about the person)',
+                  'Copy buttons per platform (Facebook, Instagram, LinkedIn, X, Pinterest, TikTok bio, YouTube): their links carry the platform so the visits are counted',
+                  'Reddit & Quora answer helper: paste a question, get a helpful draft to read, edit and post by hand (no bots: both sites ban them)',
+                  'Alert email when the guide writer publishes a guide, like news and blog posts'],
+         checks=[dict(label='Feeds switched on (cli-social-feed.php)', type='contains', path='.htaccess', text='ROC feeds BEGIN')],
+         pr=REPO + '74'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

@@ -2712,10 +2712,15 @@ async function renderSocialKits(m){
   if(S.view!=='socialkits') return;
   var P=d.platforms||{};
   function copyBtn(text,label){ return '<button class="btn sm" data-copy="'+esc(text)+'">'+esc(label||'Copy')+'</button>'; }
+  // The post link with the platform in it, so the visit shows under Social traffic.
+  function utm(url,src){ return url+(url.indexOf('?')<0?'?':'&')+'utm_source='+src+'&utm_medium=social&utm_campaign=kit'; }
+  function withLink(text,url,src){ return String(text||'').split(url).join(utm(url,src)); }
   function kitCard(k){
     var script=[k.hook].concat(k.script||[]).concat(k.cta?[k.cta]:[]).filter(Boolean).join('\n');
     var tags=(k.hashtags||[]).map(function(t){ return '#'+t; }).join(' ');
-    var cap=(k.caption||'')+(tags?'\n\n'+tags:'');
+    var cap=withLink(k.caption,k.url,'facebook')+(tags?'\n\n'+tags:'');
+    var capIg=String(k.caption||'').split(k.url).join('the link in our bio')+(tags?'\n\n'+tags:'');
+    var capLi=withLink(k.caption,k.url,'linkedin')+(tags?'\n\n'+tags.split(' ').slice(0,5).join(' '):'');
     var posted=k.posted||{};
     var sec={news:'News',guides:'Guide',blogs:'Blog'}[k.section]||'Post';
     return '<div class="card"><div class="chead"><h3 style="font-size:15px">'+esc(k.title)+'</h3><span class="note">'+esc(sec)+' · '+esc(pkTime(k.made))+'</span></div><div class="cbody">'+
@@ -2726,7 +2731,8 @@ async function renderSocialKits(m){
           '<div class="hint" style="margin-bottom:4px"><b>Video script (TikTok, Shorts, Reels)</b></div>'+
           '<div style="white-space:pre-wrap;background:var(--bg);border-radius:10px;padding:10px;font-size:13px">'+esc(script)+'</div>'+
           ((k.on_screen||[]).length?'<div class="hint" style="margin-top:6px">Text on screen: '+k.on_screen.map(esc).join(' · ')+'</div>':'')+
-          '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+copyBtn(script,'Copy script')+copyBtn(cap,'Copy caption + hashtags')+copyBtn(k.x_post||'','Copy X post')+copyBtn(k.url,'Copy link')+
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+copyBtn(script,'Copy script')+copyBtn(cap,'Caption: Facebook')+copyBtn(capIg,'Caption: Instagram')+copyBtn(capLi,'Caption: LinkedIn')+
+            copyBtn(withLink(k.x_post||'',k.url,'x'),'Post: X')+copyBtn(utm(k.url,'pinterest'),'Link: Pinterest')+copyBtn(utm(k.url,'tiktok'),'Link: TikTok bio')+copyBtn(utm(k.url,'youtube'),'Link: YouTube')+
             (k.story?'<a class="btn sm" href="'+esc(k.story)+'" download>⬇ Story / Shorts picture</a>':'')+(k.square?'<a class="btn sm" href="'+esc(k.square)+'" download>⬇ Square picture</a>':'')+
             '<button class="btn sm ghost" data-remake="'+esc(k.id)+'">↻ Make again</button></div>'+
           '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">'+Object.keys(P).map(function(pl){
@@ -2734,8 +2740,22 @@ async function renderSocialKits(m){
           }).join('')+'</div>'+
         '</div></div></div></div>';
   }
+  var T=d.traffic||{by_source:[],pages:[]}, SN={facebook:'Facebook',instagram:'Instagram',x:'X',linkedin:'LinkedIn',pinterest:'Pinterest',tiktok:'TikTok',youtube:'YouTube',reddit:'Reddit',quora:'Quora',whatsapp:'WhatsApp',feed:'RSS tools',other:'Other'};
+  var totalSoc=T.by_source.reduce(function(a,b){ return a+(+b.v); },0);
+  var trafficCard='<div class="card"><div class="chead"><h3>Social traffic</h3><span class="note">visits from social media, last 30 days: <b>'+totalSoc+'</b></span></div><div class="cbody">'+
+    (T.by_source.length?'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">'+T.by_source.map(function(r){ return '<div class="stat" style="min-width:110px"><b style="font-size:20px">'+(+r.v)+'</b><div class="hint">'+esc(SN[r.source]||r.source)+'</div></div>'; }).join('')+'</div>'+
+      '<table class="list"><thead><tr><th>Page</th><th>From</th><th>Visits</th></tr></thead><tbody>'+T.pages.map(function(r){ return '<tr><td><a href="'+esc(r.path)+'" target="_blank" rel="noopener">'+esc(r.path)+'</a></td><td>'+esc(SN[r.source]||r.source)+'</td><td>'+(+r.v)+'</td></tr>'; }).join('')+'</tbody></table>'
+     :'<div class="hint">No visits from social media yet. Use the caption and link buttons below: their links carry the platform, so every visit is counted here (only numbers, nothing about the person).</div>')+'</div></div>';
+  var feedCard='<div class="card"><div class="chead"><h3>Post everywhere with one tool</h3></div><div class="cbody"><div class="hint" style="margin-bottom:8px">'+
+    'Connect your accounts in a scheduler such as <b>Publer</b> or <b>Buffer</b> and give it this RSS feed: every new news story, blog and guide is posted by itself. Reddit and Quora: never automatic (use the answer helper below).</div>'+
+    ['/feed.xml','/news/feed.xml','/blogs/feed.xml','/guides/feed.xml'].map(function(f){ var u='https://runonconsole.com'+f; return '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><code style="flex:1">'+esc(u)+'</code>'+copyBtn(u,'Copy')+'</div>'; }).join('')+'</div></div>';
+  var answerCard='<div class="card"><div class="chead"><h3>Reddit &amp; Quora answer helper</h3><span class="note">a draft to read, edit and post by hand</span></div><div class="cbody">'+
+    '<div class="hint" style="margin-bottom:8px">Both sites ban bots and copy-paste promotion. Answer real questions helpfully; link your site only when it really helps, and say it is yours. Keep most of your answers without links.</div>'+
+    '<div class="field"><label for="ah-q">The question (and the post text)</label><textarea id="ah-q" rows="3" placeholder="e.g. Is an RTX 3060 still good for 1440p gaming in 2026?"></textarea></div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id="ah-w"><option value="reddit">Reddit</option><option value="quora">Quora</option></select><button class="btn primary" id="ah-go" type="button">Draft an answer</button></div>'+
+    '<div id="ah-out" style="margin-top:10px"></div></div></div>';
   $('.body',m).innerHTML=
-    (!d.ai?'<div class="alert warn">No AI key saved: add the free Groq or Gemini key in CMS &gt; Blog &amp; news writer, then kits are made.</div>':'')+
+    (!d.ai?'<div class="alert warn">No AI key saved: add the free Groq or Gemini key in CMS &gt; Updates writer, then kits are made.</div>':'')+trafficCard+feedCard+answerCard+
     '<div class="card"><div class="cbody" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">'+
       '<div class="hint">A kit is made for every new news story, guide and blog post (one every 10 minutes). Post the picture with the caption, or film the script for TikTok, YouTube Shorts and Reels.</div>'+
       '<label style="display:flex;gap:6px;align-items:center;font-weight:700;cursor:pointer"><input type="checkbox" id="sk-on"'+(d.on?' checked':'')+'> Make kits by themselves</label></div></div>'+
@@ -2750,6 +2770,15 @@ async function renderSocialKits(m){
     try{ var r=await api('social-kits.php',{action:'make',id:b.dataset.make||b.dataset.remake}); toast(r.message,'good'); renderSocialKits(m); }catch(e){ toast(e.message,'bad'); b.disabled=false; b.textContent='Try again'; } }); });
   m.querySelectorAll('[data-posted]').forEach(function(c){ c.addEventListener('change',async function(){
     try{ await api('social-kits.php',{action:'posted',id:c.dataset.posted,platform:c.dataset.pl,on:c.checked}); }catch(e){ toast(e.message,'bad'); c.checked=!c.checked; } }); });
+  $('#ah-go',m).addEventListener('click',async function(){
+    var b=this, out=$('#ah-out',m); b.disabled=true; b.innerHTML='<span class="spin"></span>';
+    try{ var r=await api('social-kits.php',{action:'answer',question:$('#ah-q',m).value,where:$('#ah-w',m).value});
+      out.innerHTML='<div style="white-space:pre-wrap;background:var(--bg);border-radius:10px;padding:10px;font-size:13px">'+esc(r.answer)+'</div>'+
+        (r.tip?'<div class="hint" style="margin-top:6px">Tip: '+esc(r.tip)+'</div>':'')+'<div style="margin-top:8px">'+copyBtn(r.answer,'Copy answer')+'</div>';
+      out.querySelectorAll('[data-copy]').forEach(function(c){ c.addEventListener('click',function(){ (navigator.clipboard?navigator.clipboard.writeText(c.dataset.copy):Promise.reject()).then(function(){ toast('Copied.','good'); }); }); });
+    }catch(e){ toast(e.message,'bad'); }
+    b.disabled=false; b.textContent='Draft an answer';
+  });
   $('#sk-on',m).addEventListener('change',async function(){ try{ var r=await api('social-kits.php',{action:'settings',on:this.checked}); toast(r.message,'good'); }catch(e){ toast(e.message,'bad'); } });
 }
 
