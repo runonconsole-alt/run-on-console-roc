@@ -589,6 +589,10 @@ document.addEventListener('submit', function (e) {
     if (cache) cache.set(el, yes);
     return yes;
   }
+  // A brighter light (owner, 2026-10-16): the same rule as src/index.css, also for pages built with an older stylesheet.
+  var st = document.createElement('style');
+  st.textContent = '.roc-spot::before{background:radial-gradient(340px circle at var(--mx,50%) var(--my,50%),rgba(16,185,129,.40),rgba(52,211,153,.12) 45%,transparent 70%)!important}';
+  (document.head || document.documentElement).appendChild(st);
   var raf = 0, ev = null;
   document.addEventListener('pointermove', function (e) {
     ev = e;
