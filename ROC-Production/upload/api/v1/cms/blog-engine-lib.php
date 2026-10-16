@@ -51,7 +51,20 @@ const ROC_WRITER_LEAD = 7200;
  */
 const ROC_BLOG_REVIEW_HOURS = 24;
 
-function rocBlogReviewOn(PDO $pdo): bool { return (string)rocBlogGet($pdo, 'blog_review', 'on') !== 'off'; }
+// Owner, 2026-10-16: no approval step any more (the switch in CMS > Blog writer can turn it on again).
+function rocBlogReviewOn(PDO $pdo): bool { return (string)rocBlogGet($pdo, 'blog_review', 'off') === 'on'; }
+
+/**
+ * The server writer writes blog posts by itself until this Pakistan date (owner, 2026-10-16: from Monday
+ * 19 October the owner writes the blog posts; covers are still made by Cloudflare AI). CMS setting
+ * blog_auto_until moves it ('' = no end). News is not affected.
+ */
+const ROC_BLOG_AUTO_UNTIL = '2026-10-19';
+function rocBlogAutoUntil(PDO $pdo): string { $v = rocBlogGet($pdo, 'blog_auto_until', null); return $v === null ? ROC_BLOG_AUTO_UNTIL : (string)$v; }
+function rocBlogAutoEnded(PDO $pdo): bool {
+    $u = rocBlogAutoUntil($pdo);
+    return $u !== '' && (new DateTime('now', new DateTimeZone(ROC_BLOG_TZ)))->format('Y-m-d') >= $u;
+}
 
 /** Posts waiting for review: [post id => time it was written], only the ones still scheduled. */
 function rocBlogPending(PDO $pdo): array {
@@ -1283,6 +1296,7 @@ function rocBlogTestWriters(PDO $pdo): array {
  */
 function rocBlogServerTick(PDO $pdo, string $root, bool $force = false): ?string {
     if (!$force && rocBlogEngine($pdo) !== 'server') return null;
+    if (!$force && rocBlogAutoEnded($pdo)) return null;   // the owner writes the posts now (rocBlogAutoUntil)
     if (!rocBlogWriters($pdo)) return 'No Gemini or Groq key saved (CMS > Blog writer).';
     $state = rocBlogGet($pdo, 'blog_engine_state', []);
     $state = is_array($state) ? $state : [];

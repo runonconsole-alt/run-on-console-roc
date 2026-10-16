@@ -1773,6 +1773,7 @@ function publishErrors(post){
   }
   function filled(v){return String(v||'').replace(/[\s\u00a0\u200b\ufeff]/g,'').length>0;}
   Object.keys(publishLabels).forEach(function(k){
+    if(k==='image'||k==='image_alt') return;   // made automatically when empty (AI cover, alt = title)
     if(k!=='content' && k!=='slug' && !filled(post[k])) errors[k]=publishLabels[k]+' is required before publishing.';
   });
   var doc=new DOMParser().parseFromString(post.content||'','text/html');
@@ -1886,8 +1887,10 @@ function panelBody(){
       '<button class="btn sm" id="fadd">＋ Add question</button>';
   }
   if(S.tab==='image'){
-    return imageField('image','Cover image *','Required before publishing.')+
-      fieldHtml('image_alt','Alt text',{note:'Describe the image. Required before publishing.'})+
+    return imageField('image','Cover image','Leave it empty: when you publish, a cover is made automatically with AI (Cloudflare).')+
+      '<div style="margin:-6px 0 14px"><button class="btn sm" type="button" id="fcover">✨ Make an AI cover now</button> <span class="hint" id="fcover-note">From the title.</span></div>'+
+      fieldHtml('image_alt','Alt text',{note:'Describe the image (the title is used when empty).'})+
+      topicFields()+
       fieldHtml('category','Category',{list:['Guides: Buying','Guides: How to use','Guides: Setup','Guides: Game setup','Buying Guides','How To','Comparisons','Can I Run It','Platforms','News'],
         note:'A guide for the Guides page (/guides/): choose "Guides: Buying", "Guides: How to use", "Guides: Setup" or "Guides: Game setup" (or type "Guides: your type"). News goes to /news/, everything else to /blogs/.'})+
       fieldHtml('author_name','Author');
@@ -2104,6 +2107,15 @@ function wireFaq(root){
   });
   var add=root.querySelector('#fadd');
   if(add) add.addEventListener('click',function(){ (S.editing.faqs=S.editing.faqs||[]).push({q:'',a:''}); markDirty(); refreshPanel(); });
+  // ✨ AI cover from the title (api/v1/cms/topics.php action cover).
+  var cov=root.querySelector('#fcover');
+  if(cov) cov.addEventListener('click',async function(){
+    var e=S.editing; cov.disabled=true; var note=$('#fcover-note'); if(note) note.textContent='Making the picture (up to a minute)…';
+    try{
+      var r=await api('topics.php',{action:'cover',title:e.title||'',slug:e.slug||'',category:e.category||''});
+      e.image=r.image; if(!e.image_alt) e.image_alt=r.image_alt; markDirty(); toast(r.message,'good'); refreshPanel();
+    }catch(err){ toast(err.message,'bad'); cov.disabled=false; if(note) note.textContent='From the title.'; }
+  });
 }
 
 function refreshPanel(tabs){
@@ -2190,7 +2202,7 @@ function draftPayload(){
     return out;
   }
   ['title','slug','excerpt','content','category','author_name','image','image_alt',
-   'meta_title','meta_description','focus_keyword'].forEach(function(k){
+   'meta_title','meta_description','focus_keyword','topic_group','topic_cat','tags'].forEach(function(k){
      out[k] = e[k]==null ? '' : e[k];
    });
   out.content = S.editor ? S.editor.getHtml() : (e.content||'');
@@ -2703,6 +2715,22 @@ async function renderDigest(){
     '<button class="btn" data-a="close">Close</button>',function(a,c){c();});
   $('#dg-on').addEventListener('change',async function(){ try{ var r=await api('digest-admin.php',{action:'settings',on:this.checked}); toast(r.message,'good'); }catch(e){ toast(e.message,'bad'); } });
   $('#dg-test').addEventListener('click',async function(){ try{ var r=await api('digest-admin.php',{action:'test',email:$('#dg-to').value.trim()}); toast(r.message,'good'); }catch(e){ toast(e.message,'bad'); } });
+}
+
+/* ------------------------------------------------------- post topic & tags */
+/* Hardware group (PC / Gaming hardware) > product category, and tags (api/v1/cms/topics.php). Shown on
+   the post and used by the filters of the /updates/ page. */
+function topicFields(){
+  var e=S.editing, T=S.topics;
+  if(!T){ api('topics.php').then(function(d){ S.topics=d; if(S.tab==='image') refreshPanel(); }).catch(function(){ S.topics={groups:[],installed:false}; }); return '<div class="hint">Loading topics…</div>'; }
+  if(!T.installed) return '<div class="alert info">Topics and tags: run <b>cli-updates.php --apply</b> on the server first.</div>';
+  var g=(T.groups||[]).filter(function(x){ return x.slug===e.topic_group; })[0];
+  return '<div class="field"><label for="f-topic_group">Topic: hardware group</label><select id="f-topic_group" data-k="topic_group"><option value="">— none —</option>'+
+      (T.groups||[]).map(function(x){ return '<option value="'+esc(x.slug)+'"'+(e.topic_group===x.slug?' selected':'')+'>'+esc(x.name)+'</option>'; }).join('')+'</select></div>'+
+    (g?'<div class="field"><label for="f-topic_cat">Topic: '+esc(g.name)+' category</label><select id="f-topic_cat" data-k="topic_cat"><option value="">— any —</option>'+
+      g.cats.map(function(c){ return '<option value="'+esc(c.slug)+'"'+(e.topic_cat===c.slug?' selected':'')+'>'+esc(c.name)+'</option>'; }).join('')+'</select>'+
+      '<div class="hint">The post shows this topic, and the Updates page can filter on it.</div></div>':'')+
+    fieldHtml('tags','Tags',{placeholder:'e.g. rtx 5060, 1440p, budget',note:'Comma separated words people search for. Shown on the post and used by the search and filters of the Updates page.'});
 }
 
 /* ---------------------------------------------------- 2-step verification */
@@ -3831,7 +3859,19 @@ async function renderBlogAgent(m, fresh){
   var next=P.topics.filter(function(t){ return t.id===d.next; })[0];
   S.baCluster=S.baCluster||'all'; S.baStage=S.baStage||'all'; S.baStatus=S.baStatus||'planned';
 
+  // Until when the server writes blog posts by itself (owner: from Monday 19 October they write them).
+  function autoCard(){
+    var u=d.auto_until||'';
+    return '<div class="card"'+(d.auto_ended?' style="border-color:var(--amber)"':'')+'><div class="chead"><h3>Automatic blog posts</h3><span class="note">'+
+      (d.auto_ended?'<b style="color:#b45309">● Ended: you write the blog posts</b>':u?'<b style="color:#059669">● On until '+esc(u)+'</b>':'<b style="color:#059669">● On, no end date</b>')+'</span></div><div class="cbody">'+
+      '<div class="hint" style="margin-bottom:10px">The server writes blog posts by itself until this date (not on it). After that, write posts in <b>Blogs &gt; New post</b>: '+
+      'publish without a picture and a cover is made automatically with AI (Cloudflare). News keeps running either way.</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input type="date" id="au-date" value="'+esc(u)+'"><button class="btn" id="au-save">Save</button>'+
+      '<span class="hint">Empty = keep writing every day.</span></div></div></div>';
+  }
+
   function reviewCard(){
+    if(!(d.review&&d.review.on)) return '';
     var R=d.review||{on:true,hours:24,pending:[]};
     var left=function(iso){ var h=Math.round((new Date(iso)-Date.now())/36e5); return h>=1?'in about '+h+' hour'+(h===1?'':'s'):'in under an hour'; };
     return '<div class="card"'+(R.pending.length?' style="border-color:var(--amber)"':'')+'><div class="chead"><h3>Waiting for your review'+(R.pending.length?' ('+R.pending.length+')':'')+'</h3>'+
@@ -3958,7 +3998,10 @@ async function renderBlogAgent(m, fresh){
     var ta=$('#ba-tadd',m); if(ta) ta.addEventListener('click',function(){ times.push('12:00'); drawTimes(); });
   }
 
-  body.innerHTML=reviewCard()+writerCard()+planCard()+postsCard()+pcCard();
+  body.innerHTML=autoCard()+reviewCard()+writerCard()+planCard()+postsCard()+pcCard();
+  var aus=$('#au-save',m); if(aus) aus.addEventListener('click',async function(){
+    try{ var r=await api('blog-agent-admin.php',{action:'auto_until',date:$('#au-date',m).value}); toast(r.message,'good'); renderBlogAgent(m); }catch(e){ toast(e.message,'bad'); }
+  });
   // Review of AI posts: approve, edit, publish now or reject (api: blog-agent-admin.php action review).
   m.querySelectorAll('[data-rv]').forEach(function(b){ b.addEventListener('click',async function(){
     var op=b.dataset.rv, id=b.dataset.id;

@@ -37,6 +37,8 @@ function rocBaSet(PDO $pdo, string $k, string $v, int $uid): void {
 
 /** Posts written by AI that wait for the owner (approve, edit, publish now or reject). */
 function rocBaReview(PDO $pdo): array {
+    // Review switched off: the posts that were waiting simply go live at their time.
+    if (!rocBlogReviewOn($pdo)) { if (rocBlogGet($pdo, 'blog_review_pending', [])) rocBlogSet($pdo, 'blog_review_pending', []); return ['on' => false, 'hours' => ROC_BLOG_REVIEW_HOURS, 'pending' => []]; }
     $p = rocBlogPending($pdo);
     $rows = [];
     if ($p) {
@@ -74,7 +76,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
         'groq' => (function () use ($pdo) { $k = trim((string)rocBlogGet($pdo, 'blog_groq_key', '')); return ['set' => $k !== '', 'end' => $k !== '' ? substr($k, -4) : '', 'model' => (string)rocBlogGet($pdo, 'blog_groq_model', '')]; })(),
         'state' => rocBlogGet($pdo, 'blog_engine_state', []) ?: new stdClass(), 'plan' => $plan, 'next' => $next['id'] ?? null,
         'next_slot' => $nextUtc ? gmdate('c', strtotime($nextUtc . ' UTC')) : null, 'writer_lead' => ROC_WRITER_LEAD,
-        'next_topic' => $next['title'] ?? null, 'review' => rocBaReview($pdo)]);
+        'next_topic' => $next['title'] ?? null, 'review' => rocBaReview($pdo),
+        'auto_until' => rocBlogAutoUntil($pdo), 'auto_ended' => rocBlogAutoEnded($pdo)]);
 }
 
 $in = json_decode((string)file_get_contents('php://input'), true) ?: [];
@@ -145,6 +148,14 @@ if ($act === 'test_key') {
     rocBaOut($any ? 200 : 422, ['success' => $any, 'message' => implode(' · ', $parts), 'error' => $any ? null : implode(' · ', $parts)]);
 }
 // Review of AI posts: {action:'review', id, op: approve|publish_now|reject} or {action:'review_mode', on}.
+// {action:'auto_until', date: 'YYYY-MM-DD' | ''}: the last day + 1 the server writes blog posts by itself.
+if ($act === 'auto_until') {
+    $d = trim((string)($in['date'] ?? ''));
+    if ($d !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $d)) rocBaOut(422, ['success' => false, 'error' => 'Choose a date.']);
+    rocBlogSet($pdo, 'blog_auto_until', $d, $uid);
+    logCmsAudit('cms_blog_auto_until', 'settings', 'blog_auto_until', ['date' => $d]);
+    rocBaOut(200, ['success' => true, 'message' => $d === '' ? 'The server keeps writing blog posts every day.' : 'The server writes blog posts by itself until ' . $d . ' (not on that day). News is not affected.']);
+}
 if ($act === 'review_mode') {
     rocBlogSet($pdo, 'blog_review', !empty($in['on']) ? 'on' : 'off', $uid);
     logCmsAudit('cms_blog_review_mode', 'settings', 'blog_review', ['on' => !empty($in['on'])]);

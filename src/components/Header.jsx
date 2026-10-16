@@ -204,13 +204,13 @@ export const Header = () => {
                 data-roc-search=""
                 role="search"
                 action="/products/"
-                className="relative hidden md:flex items-center w-48 lg:w-56 xl:w-72 shrink-0 bg-slate-100/90 border border-slate-200 rounded-xl focus-within:border-emerald-500 focus-within:bg-white transition-all shadow-inner"
+                className="relative hidden md:flex items-center w-48 lg:w-28 xl:w-52 2xl:w-72 shrink-0 bg-slate-100/90 border border-slate-200 rounded-xl focus-within:border-emerald-500 focus-within:bg-white transition-all shadow-inner"
               >
                 <select
                   name="in"
                   aria-label="Search in"
                   defaultValue="all"
-                  className="bg-transparent border-0 border-r border-slate-200 text-[11px] font-bold text-slate-700 pl-2 pr-1 py-1.5 rounded-l-xl focus:outline-none cursor-pointer"
+                  className="lg:hidden xl:block bg-transparent border-0 border-r border-slate-200 text-[11px] font-bold text-slate-700 pl-2 pr-1 py-1.5 rounded-l-xl focus:outline-none cursor-pointer"
                 >
                   <option value="all">All</option>
                   <option value="products">Products</option>
