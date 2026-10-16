@@ -79,14 +79,14 @@ function rocSmBuilt(string $root, ?string $dir): array {
 
 function rocSmUrlset(array $urls): void {
     echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . ROC_SM_STYLE . "\n"
-       . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:roc="https://runonconsole.com/ns/sitemap">' . "\n";
+       . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
     $lib = __DIR__ . '/api/v1/cms/site-layer-lib.php';
     if (is_file($lib)) require_once $lib;
     foreach ($urls as $path => $mtime) {
         if (function_exists('rocLayerSitemapSkip') && rocLayerSitemapSkip(__DIR__, $path)) continue;   // CMS > Sitemap
         $t = $GLOBALS['ROC_SM_TITLES'][$path] ?? '';
         echo '  <url><loc>' . rocSmEsc(ROC_SM_BASE . $path) . '</loc><lastmod>' . gmdate('c', $mtime) . '</lastmod>'
-           . ($t !== '' ? '<roc:title>' . rocSmEsc($t) . '</roc:title>' : '') . "</url>\n";
+           . ($t !== '' && ($t = rtrim((string)preg_replace(['/[\x00-\x1F]+/', '/-{2,}/'], [' ', '-'], $t), '-')) !== '' ? '<!--t:' . $t . '-->' : '') . "</url>\n";   // name for the stylesheet (Deploy 77: not roc:title)
     }
     echo "</urlset>\n";
     exit;

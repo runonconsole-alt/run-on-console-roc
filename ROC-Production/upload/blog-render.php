@@ -1103,13 +1103,14 @@ CSS;
 
 /**
  * Start of a sitemap. The stylesheet shows it as a readable table (page name, address,
- * last change) when opened in a browser; search engines ignore it. Page names are in
- * roc:title, a namespaced extension that sitemap readers skip.
+ * last change) when opened in a browser; search engines ignore it. Page names are in an XML
+ * comment (<!--t:Name-->): Search Console counted the old roc:title tag as an error on every
+ * address (Deploy 77).
  */
 function rocSmOpen(): string {
     return '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
          . '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>' . "\n"
-         . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:roc="https://runonconsole.com/ns/sitemap">' . "\n";
+         . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
 }
 
 function rocSmLine(string $loc, ?int $mod, string $title = ''): string {
@@ -1118,7 +1119,13 @@ function rocSmLine(string $loc, ?int $mod, string $title = ''): string {
     if (is_file($lib)) { require_once $lib; if (rocLayerSitemapSkip(__DIR__, $loc)) return ''; }
     $x = function ($v) { return htmlspecialchars((string)$v, ENT_XML1 | ENT_QUOTES, 'UTF-8'); };
     return '  <url><loc>' . $x($loc) . '</loc>' . ($mod ? '<lastmod>' . gmdate('c', $mod) . '</lastmod>' : '')
-         . ($title !== '' ? '<roc:title>' . $x($title) . '</roc:title>' : '') . "</url>\n";
+         . rocSmTitle($title) . "</url>\n";
+}
+
+/** The page name for the stylesheet, as an XML comment (no "--" inside, which a comment may not hold). */
+function rocSmTitle(string $t): string {
+    $t = rtrim((string)preg_replace(['/[\x00-\x1F]+/', '/-{2,}/'], [' ', '-'], $t), '-');
+    return $t !== '' ? '<!--t:' . $t . '-->' : '';
 }
 
 
