@@ -553,6 +553,10 @@ RELEASES = [
                   'Social kit pictures saved under 100 KB with alt text (cli-social-images.php --apply); the Media library no longer counts them as heavy website images'],
          checks=[dict(label='Game share picture', type='contains', path='game-render.php', text='rocGpOgCard')],
          pr=REPO + '82'),
+    dict(deploy=83, date='2026-10-16', title='Story pictures under 100 KB too',
+         changes=['Social kit Story pictures (1080x1920) also get under 100 KB: the quality steps go lower (cli-social-images.php --apply again)'],
+         checks=[dict(label='Social pictures', type='contains', path='api/v1/cms/social-kit-lib.php', text='$q >= 40')],
+         pr=REPO + '83'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

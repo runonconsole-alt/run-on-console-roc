@@ -112,12 +112,12 @@ function rocKitImage(string $root, string $slug, string $cover, string $title, s
 }
 
 /**
- * JPEG data under the site's 100 KB budget (Deploy 82): quality 86 first, lower in steps down to 62.
- * The social sites compress again anyway, so this costs nothing visible.
+ * JPEG data under the site's 100 KB budget (Deploy 82): quality 86 first, lower in steps down to 40
+ * (the 1080x1920 Story pictures needed less than 62, Deploy 83). The social sites compress again anyway.
  */
 function rocKitJpeg($im, int $max = 102400): string {
     $data = '';
-    for ($q = 86; $q >= 62; $q -= 6) {
+    for ($q = 86; $q >= 40; $q -= 6) {
         ob_start(); imagejpeg($im, null, $q); $data = (string)ob_get_clean();
         if (strlen($data) <= $max) break;
     }
