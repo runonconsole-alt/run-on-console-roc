@@ -127,6 +127,12 @@ function rocGuideWrite(PDO $pdo, string $root, ?array $topic = null): array {
     array_unshift($log, ['key' => $key, 'id' => $id, 'title' => $title, 'slug' => $slug, 'type' => $type, 'words' => $words, 'by' => (string)$used, 'at' => $now,
                          'day' => (new DateTime('now', new DateTimeZone(ROC_BLOG_TZ)))->format('Y-m-d')]);
     rocBlogSet($pdo, 'guide_log', array_slice($log, 0, 100));
+    // The alert email, as for news and blog posts (CMS > Updates writer > News > Email alerts).
+    try {
+        require_once __DIR__ . '/news-engine-lib.php';
+        rocNotify($pdo, 'Guide published: ' . $title, '<p><b>A guide was published on Run On Console.</b></p><p style="font-size:18px"><a href="https://runonconsole.com/guides/'
+            . rocLayerH($slug) . '/">' . rocLayerH($title) . '</a></p><p>' . rocLayerH($type) . ' guide, ' . $words . ' words.</p>');
+    } catch (\Throwable $e) {}
     return ['ok' => true, 'id' => $id, 'title' => $title, 'url' => 'https://runonconsole.com/guides/' . $slug . '/', 'words' => $words];
 }
 

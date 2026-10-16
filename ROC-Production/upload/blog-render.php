@@ -120,6 +120,7 @@ if ($slug !== '') {
     rocRenderPost($ROOT, $post, $pdo);
 }
 if (isset($_GET['updates'])) rocRenderUpdates($ROOT, $pdo, $page);   // /updates/ (cli-updates.php)
+if (isset($_GET['feed'])) rocNotFound($ROOT);   // the RSS feeds were taken out again (owner, 2026-10-16)
 if (isset($_GET['json'])) {
     // Published posts for the header search box (/blogs/?json=1).
     // Also used by the home page's latest-articles section (image, date).
@@ -727,7 +728,9 @@ function rocTopicChips(PDO $pdo, array $p): string {
  * No filters and no query strings: any /updates/?... address goes back to /updates/.
  */
 function rocRenderUpdates(string $root, PDO $pdo, int $page): void {
-    if (count($_GET) > 1) { header('Location: /updates/', true, 301); exit; }   // only ?updates=1 from the route
+    // Old filter addresses go back to /updates/; tracking tags (utm_..., fbclid ...) stay, so social visits are counted.
+    $extra = array_filter(array_keys($_GET), function ($k) { return $k !== 'updates' && !preg_match('/^(utm_[a-z]+|fbclid|gclid|ttclid|igshid|mc_[a-z]+)$/i', (string)$k); });
+    if ($extra) { header('Location: /updates/', true, 301); exit; }
     [$headTop, $bodyToMain, $mainOpen, , $afterMain] = rocTemplate($root, 'blog-list.html');
     $cols = [
         'blogs'  => ['Blogs', 'Reviews, comparisons and buying advice', "(category IS NULL OR (category <> 'News' AND " . rocNotGuideSql() . '))', '#059669'],

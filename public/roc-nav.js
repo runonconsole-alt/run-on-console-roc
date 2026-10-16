@@ -612,3 +612,27 @@ document.addEventListener('submit', function (e) {
     });
   }, { passive: true });
 })();
+
+/* ---------- Visits from social media (Deploy 74): once per visit, the platform (from utm_source on a
+   utm_medium=social link, or from the site the visitor came from) and the landing page are counted by
+   api/v1/social-visit.php. Nothing about the person is sent. CMS > Social posts > Social traffic. */
+(function () {
+  try { if (sessionStorage.getItem('roc_soc')) return; } catch (e) { return; }
+  var q = new URLSearchParams(location.search), src = '';
+  var map = { facebook: 'facebook', fb: 'facebook', instagram: 'instagram', ig: 'instagram', x: 'x', twitter: 'x', linkedin: 'linkedin', pinterest: 'pinterest',
+              tiktok: 'tiktok', youtube: 'youtube', reddit: 'reddit', quora: 'quora', whatsapp: 'whatsapp', feed: 'feed' };
+  if ((q.get('utm_medium') || '').toLowerCase() === 'social') src = map[(q.get('utm_source') || '').toLowerCase()] || 'other';
+  if (!src && document.referrer) {
+    var h = '';
+    try { h = new URL(document.referrer).hostname.replace(/^www\.|^m\.|^l\.|^lm\./, ''); } catch (e) {}
+    var hosts = [[/(^|\.)facebook\.com$|(^|\.)fb\.com$/, 'facebook'], [/(^|\.)instagram\.com$/, 'instagram'], [/^t\.co$|(^|\.)x\.com$|(^|\.)twitter\.com$/, 'x'],
+                 [/(^|\.)linkedin\.com$|^lnkd\.in$/, 'linkedin'], [/(^|\.)pinterest\./, 'pinterest'], [/(^|\.)tiktok\.com$/, 'tiktok'],
+                 [/(^|\.)youtube\.com$|^youtu\.be$/, 'youtube'], [/(^|\.)reddit\.com$/, 'reddit'], [/(^|\.)quora\.com$/, 'quora'], [/whatsapp\.com$/, 'whatsapp']];
+    for (var i = 0; i < hosts.length; i++) if (hosts[i][0].test(h)) { src = hosts[i][1]; break; }
+  }
+  if (!src) return;
+  try { sessionStorage.setItem('roc_soc', src); } catch (e) {}
+  var body = JSON.stringify({ src: src, path: location.pathname.slice(0, 190) });
+  if (navigator.sendBeacon) navigator.sendBeacon('/api/v1/social-visit.php', new Blob([body], { type: 'application/json' }));
+  else fetch('/api/v1/social-visit.php', { method: 'POST', body: body, keepalive: true, headers: { 'Content-Type': 'application/json' } });
+})();
