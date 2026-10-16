@@ -483,6 +483,13 @@ RELEASES = [
          checks=[dict(label='Updates switched on (cli-updates.php)', type='contains', path='.htaccess', text='ROC updates BEGIN'),
                  dict(label='Topics', type='file', path='api/v1/cms/topics-lib.php')],
          pr=REPO + '71'),
+    dict(deploy=72, date='2026-10-16', title='Social posts: scripts, captions and pictures for every new post',
+         changes=['CMS > Social posts: for every new news story, guide and blog post (one every 10 minutes) a ready kit: a 30-45 second script for TikTok, YouTube Shorts and Reels (hook, lines, text on screen, call to action), a Facebook / Instagram caption with hashtags, a post for X',
+                  'Two pictures per post with its title and the site name: 1080x1920 (Story, Shorts, Reels cover) and 1080x1080 (feed post), to download',
+                  'Copy buttons, Make kit / Make again, and ticks for where each one was posted (TikTok, YouTube Shorts, Instagram, Facebook, X)',
+                  'Written with the free AI key of the blog writer (Groq or Gemini); a switch turns the automatic kits off'],
+         checks=[dict(label='Social kits', type='file', path='api/v1/cms/social-kit-lib.php')],
+         pr=REPO + '72'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

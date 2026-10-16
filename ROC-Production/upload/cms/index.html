@@ -1317,7 +1317,7 @@ function renderShell(){
       (can('activity','view')?item('activity','Live activity','⚡',S.actUnseen?S.actUnseen:undefined):'')+
       (admin?item('messages','Messages','✉',S.msgCounts&&S.msgCounts['new']?S.msgCounts['new']:undefined):'')+'</div>'+
     '<div class="snav"><div class="slabel">Content</div>'+
-      (can('blogs','view')?item('blogs','Blog & news posts','✎',S.blogs.length):'')+
+      (can('blogs','view')?item('blogs','Blog & news posts','✎',S.blogs.length)+item('socialkits','Social posts','📱'):'')+
       (can('media','view')?item('media','Media library','❖',S.media.length):'')+
       (can('pages','view')?item('cmspages','Pages','▦',S.pages.length+(S.sitePagesN||0))+item('metas','Metas','🏷'):'')+
       (can('pages','view')?item('platforms','Gaming platforms','◈'):'')+
@@ -1375,6 +1375,7 @@ function renderView(){
   if(S.view==='metas' && can('pages','view')) return renderMetas(m);
   if(S.view==='announce' && S.user.role==='administrator') return renderAnnouncement(m);
   if(S.view==='blogagent' && S.user.role==='administrator') return renderBlogAgent(m);
+  if(S.view==='socialkits' && can('blogs','view')) return renderSocialKits(m);
   if(S.view==='siteinfo' && S.user.role==='administrator') return renderSiteInfo(m);
   if(S.view==='agent' && S.user.role==='administrator') return renderAgent(m);
   if(S.view==='settings' && S.user.role==='administrator') return renderSettings(m);
@@ -2700,6 +2701,56 @@ function renderChangePassword(forced){
     modal('Change your password', form, '<button class="btn" data-a="close">Cancel</button>', function(a,close){ close(); });
     $('#cpf').addEventListener('submit',submit);
   }
+}
+
+/* ---------------------------------------------------------- social posts */
+/* api/v1/cms/social-kits.php: for every new post a TikTok / Shorts / Reels script, captions with hashtags,
+   a post for X and two pictures (1080x1920, 1080x1080). Copy, download, post, tick where it was posted. */
+async function renderSocialKits(m){
+  m.innerHTML=head('Social posts','Ready-made scripts, captions and pictures for every new post','')+'<div class="body narrow"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d; try{ d=await api('social-kits.php'); }catch(e){ toast(e.message,'bad'); return; }
+  if(S.view!=='socialkits') return;
+  var P=d.platforms||{};
+  function copyBtn(text,label){ return '<button class="btn sm" data-copy="'+esc(text)+'">'+esc(label||'Copy')+'</button>'; }
+  function kitCard(k){
+    var script=[k.hook].concat(k.script||[]).concat(k.cta?[k.cta]:[]).filter(Boolean).join('\n');
+    var tags=(k.hashtags||[]).map(function(t){ return '#'+t; }).join(' ');
+    var cap=(k.caption||'')+(tags?'\n\n'+tags:'');
+    var posted=k.posted||{};
+    var sec={news:'News',guides:'Guide',blogs:'Blog'}[k.section]||'Post';
+    return '<div class="card"><div class="chead"><h3 style="font-size:15px">'+esc(k.title)+'</h3><span class="note">'+esc(sec)+' · '+esc(pkTime(k.made))+'</span></div><div class="cbody">'+
+      '<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">'+
+        (k.story?'<a href="'+esc(k.story)+'" download title="Download 1080x1920"><img src="'+esc(k.story)+'" alt="" style="width:96px;height:170px;object-fit:cover;border-radius:10px;border:1px solid var(--line)"></a>':'')+
+        (k.square?'<a href="'+esc(k.square)+'" download title="Download 1080x1080"><img src="'+esc(k.square)+'" alt="" style="width:120px;height:120px;object-fit:cover;border-radius:10px;border:1px solid var(--line)"></a>':'')+
+        '<div style="flex:1;min-width:240px">'+
+          '<div class="hint" style="margin-bottom:4px"><b>Video script (TikTok, Shorts, Reels)</b></div>'+
+          '<div style="white-space:pre-wrap;background:var(--bg);border-radius:10px;padding:10px;font-size:13px">'+esc(script)+'</div>'+
+          ((k.on_screen||[]).length?'<div class="hint" style="margin-top:6px">Text on screen: '+k.on_screen.map(esc).join(' · ')+'</div>':'')+
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+copyBtn(script,'Copy script')+copyBtn(cap,'Copy caption + hashtags')+copyBtn(k.x_post||'','Copy X post')+copyBtn(k.url,'Copy link')+
+            (k.story?'<a class="btn sm" href="'+esc(k.story)+'" download>⬇ Story / Shorts picture</a>':'')+(k.square?'<a class="btn sm" href="'+esc(k.square)+'" download>⬇ Square picture</a>':'')+
+            '<button class="btn sm ghost" data-remake="'+esc(k.id)+'">↻ Make again</button></div>'+
+          '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">'+Object.keys(P).map(function(pl){
+            return '<label style="display:flex;gap:5px;align-items:center;font-size:12.5px;cursor:pointer"><input type="checkbox" data-posted="'+esc(k.id)+'" data-pl="'+esc(pl)+'"'+(posted[pl]?' checked':'')+'> Posted on '+esc(P[pl])+'</label>';
+          }).join('')+'</div>'+
+        '</div></div></div></div>';
+  }
+  $('.body',m).innerHTML=
+    (!d.ai?'<div class="alert warn">No AI key saved: add the free Groq or Gemini key in CMS &gt; Blog &amp; news writer, then kits are made.</div>':'')+
+    '<div class="card"><div class="cbody" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">'+
+      '<div class="hint">A kit is made for every new news story, guide and blog post (one every 10 minutes). Post the picture with the caption, or film the script for TikTok, YouTube Shorts and Reels.</div>'+
+      '<label style="display:flex;gap:6px;align-items:center;font-weight:700;cursor:pointer"><input type="checkbox" id="sk-on"'+(d.on?' checked':'')+'> Make kits by themselves</label></div></div>'+
+    ((d.without||[]).length?'<div class="card"><div class="chead"><h3>Posts without a kit</h3></div><div class="cbody">'+d.without.map(function(p){
+        return '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)"><span>'+esc(p.title)+' <span class="hint">· '+esc(p.category||'')+'</span></span>'+
+          '<button class="btn sm" data-make="'+esc(p.id)+'">Make kit</button></div>'; }).join('')+'</div></div>':'')+
+    ((d.kits||[]).length?d.kits.map(kitCard).join(''):'<div class="card"><div class="empty">No kits yet. They appear here within minutes of a new post, or press Make kit above.</div></div>');
+  m.querySelectorAll('[data-copy]').forEach(function(b){ b.addEventListener('click',function(){
+    (navigator.clipboard?navigator.clipboard.writeText(b.dataset.copy):Promise.reject()).then(function(){ toast('Copied.','good'); },function(){ toast('Copy did not work: select the text by hand.','bad'); }); }); });
+  m.querySelectorAll('[data-make],[data-remake]').forEach(function(b){ b.addEventListener('click',async function(){
+    b.disabled=true; b.innerHTML='<span class="spin"></span>';
+    try{ var r=await api('social-kits.php',{action:'make',id:b.dataset.make||b.dataset.remake}); toast(r.message,'good'); renderSocialKits(m); }catch(e){ toast(e.message,'bad'); b.disabled=false; b.textContent='Try again'; } }); });
+  m.querySelectorAll('[data-posted]').forEach(function(c){ c.addEventListener('change',async function(){
+    try{ await api('social-kits.php',{action:'posted',id:c.dataset.posted,platform:c.dataset.pl,on:c.checked}); }catch(e){ toast(e.message,'bad'); c.checked=!c.checked; } }); });
+  $('#sk-on',m).addEventListener('change',async function(){ try{ var r=await api('social-kits.php',{action:'settings',on:this.checked}); toast(r.message,'good'); }catch(e){ toast(e.message,'bad'); } });
 }
 
 /* ----------------------------------------------------------- weekly email */
