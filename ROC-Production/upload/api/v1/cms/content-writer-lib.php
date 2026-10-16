@@ -11,7 +11,11 @@
  *   rocContentQueue($pdo)              products / platforms that still have a thin page
  *   rocContentWriteProduct($pdo, $row) writes one product (About, pros, cons, short description, best for)
  *   rocContentWritePlatform($pdo, $row) writes one platform (about_text)
+ *   rocContentDeepenProduct($pdo, $row) adds "Who it is for", setup tips and buyer questions to a page
+ *                                      written before Deploy 78 (new pages get them in the first write)
  *   rocContentTick($pdo, $n)           the next $n items, at most ROC_CONTENT_DAILY a day (scheduler)
+ *
+ * A page the writer fails on twice goes to the end of the line, so one bad answer never blocks the rest.
  */
 if (defined('ROC_CONTENT_LIB')) return;
 define('ROC_CONTENT_LIB', 1);
@@ -28,6 +32,22 @@ function rocContentThin(array $p): bool {
     return mb_strlen($s) < 400 || $s === trim((string)($p['short_desc'] ?? ''));
 }
 
+/** The buyer questions section inside the About text (Deploy 78); product-render.php shows it as the FAQ. */
+const ROC_CONTENT_FAQ_HEAD = '## Common questions';
+
+/** A written page from before Deploy 78: it has About text but no buyer questions yet. */
+function rocContentShallow(array $p): bool {
+    return !rocContentThin($p) && strpos((string)($p['summary'] ?? ''), ROC_CONTENT_FAQ_HEAD) === false;
+}
+
+/** How often the writer failed on a page: [slug => n]. $add = true counts one more failure. */
+function rocContentFails(PDO $pdo, ?string $slug = null, bool $add = false): array {
+    $f = rocBlogGet($pdo, 'content_fail', []);
+    $f = is_array($f) ? $f : [];
+    if ($slug !== null && $add) { $f[$slug] = (int)($f[$slug] ?? 0) + 1; rocBlogSet($pdo, 'content_fail', $f); }
+    return $f;
+}
+
 /** Pages already written once (never written again by the queue; --slug writes one again). */
 function rocContentDone(PDO $pdo, ?string $type = null, ?string $slug = null): array {
     $d = rocBlogGet($pdo, 'content_done', []);
@@ -37,10 +57,17 @@ function rocContentDone(PDO $pdo, ?string $type = null, ?string $slug = null): a
 }
 
 function rocContentQueue(PDO $pdo): array {
-    $q = ['products' => [], 'platforms' => []];
+    $q = ['products' => [], 'platforms' => [], 'deepen' => []];
     $done = rocContentDone($pdo);
-    foreach ($pdo->query("SELECT * FROM products WHERE status = 'published' ORDER BY sort_rank, title")->fetchAll(PDO::FETCH_ASSOC) as $p)
+    $fails = rocContentFails($pdo);
+    foreach ($pdo->query("SELECT * FROM products WHERE status = 'published' ORDER BY sort_rank, title")->fetchAll(PDO::FETCH_ASSOC) as $p) {
+        if ((int)($fails[$p['slug']] ?? 0) >= 4) continue;   // the writer keeps failing on it: write it in the CMS (or --slug=)
         if (!isset($done['product'][$p['slug']]) && rocContentThin($p)) $q['products'][] = $p;
+        elseif (rocContentShallow($p)) $q['deepen'][] = $p;
+    }
+    // Pages that failed before go last.
+    $late = function (array $l) use ($fails) { usort($l, function ($a, $b) use ($fails) { return ((int)($fails[$a['slug']] ?? 0) >= 2) <=> ((int)($fails[$b['slug']] ?? 0) >= 2); }); return $l; };
+    $q['products'] = $late($q['products']); $q['deepen'] = $late($q['deepen']);
     // Platforms only once their about_text column exists (cli-content-writer.php --apply adds it).
     if (in_array('about_text', rocBlogCols($pdo, 'gaming_categories'), true)) try {
         foreach ($pdo->query("SELECT * FROM gaming_categories WHERE status = 'published' ORDER BY sort_rank")->fetchAll(PDO::FETCH_ASSOC) as $c)
@@ -73,7 +100,56 @@ function rocContentProductPrompt(array $p, string $catName, string $groupName): 
         . "- skip_if: 1-2 sentences, who should choose something else.\n"
         . "- before_you_buy: 1-2 sentences, what to check on the listing (version, size, compatibility).\n"
         . "- pros: 3-5 short items. cons: 2-3 short honest items.\n"
-        . "- best_for: a short phrase under 40 characters, like \"Competitive FPS players\".\n";
+        . "- best_for: a short phrase under 40 characters, like \"Competitive FPS players\".\n"
+        . ROC_CONTENT_DEEP_KEYS;
+}
+
+/** The parts added in Deploy 78 (asked in the first write, or on their own for older pages). */
+const ROC_CONTENT_DEEP_KEYS = "- who_for: 2-3 sentences (40-80 words): the player and setup this product suits best, and why (from DATA).\n"
+    . "- setup_tips: 3-4 short practical items for the first days with it (setup, settings, care); general and safe, no feature that is not in DATA.\n"
+    . "- faq: 3-4 objects {\"q\": ..., \"a\": ...}: questions buyers of this exact product really search (fit for a game type, a console or PC, size, noise, upgrade, a comparison with a well-known rival). Each answer 1-3 sentences (25-70 words). If DATA does not settle it, say what to check on the listing instead of guessing.\n";
+
+function rocContentDeepenPrompt(array $p, string $catName, string $groupName): string {
+    $data = ['name' => $p['title'], 'brand' => $p['brand'] ?? '', 'category' => $catName, 'group' => $groupName,
+             'specs' => json_decode((string)($p['specs_json'] ?? ''), true) ?: new stdClass(),
+             'features' => json_decode((string)($p['features_json'] ?? ''), true) ?: [],
+             'best_for' => $p['best_for'] ?? '', 'description' => $p['short_desc'] ?? '',
+             'text_already_on_the_page' => mb_substr((string)($p['summary'] ?? ''), 0, 2500)];
+    return "Add to the buyer's guide of one product page on Run On Console, an independent gaming hardware site. Do not repeat what text_already_on_the_page says; add new, useful points.\n\n"
+        . "DATA:\n" . json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n\n" . ROC_CONTENT_RULES
+        . "\nAnswer with one JSON object with these keys:\n" . ROC_CONTENT_DEEP_KEYS;
+}
+
+/** "Who it is for", setup tips and the buyer questions as About text sections ('' when the answer has none). */
+function rocContentDeepText(array $a): string {
+    $t = '';
+    $who = trim((string)(is_array($a['who_for'] ?? '') ? implode(' ', $a['who_for']) : ($a['who_for'] ?? '')));
+    if ($who !== '') $t .= "\n\n## Who it is for\n" . $who;
+    $tips = rocContentList($a['setup_tips'] ?? [], 4, 220);
+    if ($tips) $t .= "\n\n## Setup tips\n- " . implode("\n- ", $tips);
+    $qa = [];
+    foreach ((array)($a['faq'] ?? []) as $f) {
+        $q = trim((string)(is_array($f) ? ($f['q'] ?? $f['question'] ?? '') : ''));
+        $an = trim((string)(is_array($f) ? ($f['a'] ?? $f['answer'] ?? '') : ''));
+        $q = (string)preg_replace('/\s+/', ' ', $q); $an = (string)preg_replace('/\s+/', ' ', $an);
+        if ($q !== '' && $an !== '' && count($qa) < 4) $qa[] = 'Q: ' . mb_substr(rtrim($q, '?') . '?', 0, 160) . "\nA: " . mb_substr($an, 0, 600);
+    }
+    if ($qa) $t .= "\n\n" . ROC_CONTENT_FAQ_HEAD . "\n\n" . implode("\n\n", $qa);
+    return $t;
+}
+
+/** Adds the Deploy 78 parts to a page written before (the rest of its text stays as it is). */
+function rocContentDeepenProduct(PDO $pdo, array $p, string $catName, string $groupName): array {
+    $r = rocContentAsk($pdo, rocContentDeepenPrompt($p, $catName, $groupName), ['who_for', 'faq']);
+    if (!$r['ok']) return $r;
+    $add = rocContentDeepText($r['a']);
+    if (strpos($add, ROC_CONTENT_FAQ_HEAD) === false) return ['ok' => false, 'error' => 'the writer gave no usable questions'];
+    $now = gmdate('Y-m-d H:i:s');
+    $set = ['summary' => rocContentClean(mb_substr(rtrim((string)$p['summary']) . $add, 0, 14000)), 'updated_at' => $now, 'content_modified_at' => $now];
+    $set = array_intersect_key($set, array_flip(rocBlogCols($pdo, 'products')));
+    $pdo->prepare('UPDATE products SET ' . implode(', ', array_map(function ($c) { return "{$c} = ?"; }, array_keys($set))) . ' WHERE slug = ?')
+        ->execute([...array_values($set), $p['slug']]);
+    return ['ok' => true];
 }
 
 function rocContentPlatformPrompt(array $c, array $devices, array $cats): string {
@@ -140,7 +216,8 @@ function rocContentWriteProduct(PDO $pdo, array $p, string $catName, string $gro
     if ($uses) $about .= "\n\n## Where it fits\n- " . implode("\n- ", $uses);
     $skip = trim((string)($a['skip_if'] ?? '')); $tip = trim((string)($a['before_you_buy'] ?? ''));
     if ($skip !== '' || $tip !== '') $about .= "\n\n## Before you buy\n" . trim($tip . ($tip !== '' && $skip !== '' ? "\n\n" : '') . $skip);
-    $set = ['summary' => rocContentClean(mb_substr($about, 0, 12000)),
+    $about .= rocContentDeepText($a);
+    $set = ['summary' => rocContentClean(mb_substr($about, 0, 14000)),
             'pros' => json_encode(array_map('rocContentClean', rocContentList($a['pros'], 5)), JSON_UNESCAPED_UNICODE),
             'cons' => json_encode(array_map('rocContentClean', rocContentList($a['cons'], 3)), JSON_UNESCAPED_UNICODE)];
     $sd = rocContentClean(trim((string)$a['short_desc']));
@@ -189,6 +266,18 @@ function rocContentNames(PDO $pdo, array $p): array {
     return [$cats[$cs] ?? (string)($p['category'] ?? ''), $gName];
 }
 
+/** The queue as one list: platforms (few), then thin product pages, then older pages to deepen. */
+function rocContentItems(array $q): array {
+    return array_merge(array_map(function ($x) { return ['platform', $x]; }, $q['platforms']),
+        array_map(function ($x) { return ['product', $x]; }, $q['products']), array_map(function ($x) { return ['deepen', $x]; }, $q['deepen'] ?? []));
+}
+
+function rocContentRun(PDO $pdo, string $type, array $row): array {
+    if ($type === 'platform') return rocContentWritePlatform($pdo, $row);
+    [$cn, $gn] = rocContentNames($pdo, $row);
+    return $type === 'deepen' ? rocContentDeepenProduct($pdo, $row, $cn, $gn) : rocContentWriteProduct($pdo, $row, $cn, $gn);
+}
+
 /** Writes the next $n thin pages (platforms first: there are few). Returns a log line or null. */
 function rocContentTick(PDO $pdo, int $n): ?string {
     if ((string)rocBlogGet($pdo, 'content_auto', 'on') === 'off' || !rocBlogWriters($pdo)) return null;
@@ -197,14 +286,13 @@ function rocContentTick(PDO $pdo, int $n): ?string {
     $c = (is_array($c) && ($c['day'] ?? '') === $day) ? $c : ['day' => $day, 'n' => 0];
     if ($c['n'] >= ROC_CONTENT_DAILY) return null;
     $q = rocContentQueue($pdo);
-    $items = array_merge(array_map(function ($x) { return ['platform', $x]; }, $q['platforms']), array_map(function ($x) { return ['product', $x]; }, $q['products']));
+    $items = rocContentItems($q);
     if (!$items) return null;
     $done = [];
     foreach (array_slice($items, 0, min($n, ROC_CONTENT_DAILY - $c['n'])) as [$type, $row]) {
-        if ($type === 'platform') $r = rocContentWritePlatform($pdo, $row);
-        else { [$cn, $gn] = rocContentNames($pdo, $row); $r = rocContentWriteProduct($pdo, $row, $cn, $gn); }
+        $r = rocContentRun($pdo, $type, $row);
         $c['n']++;
-        if (!$r['ok']) { rocBlogSet($pdo, 'content_daily', $c); return "content: {$row['slug']} failed ({$r['error']}); stopped for now"; }
+        if (!$r['ok']) { rocBlogSet($pdo, 'content_daily', $c); rocContentFails($pdo, (string)$row['slug'], true); return "content: {$row['slug']} failed ({$r['error']}); stopped for now"; }
         $done[] = $row['slug'];
     }
     rocBlogSet($pdo, 'content_daily', $c);

@@ -341,7 +341,7 @@ function rocCatPath(string $slug): string { return '/category/' . $slug . '/'; }
  * Questions buyers ask, answered from this product's own data (specs, who it is for, the other
  * products of its category), with FAQPage structured data. No invented facts or prices.
  */
-function rocProductFaq(string $title, string $catName, string $catSlug, string $bestFor, string $desc, array $specs, array $related, string $amazon): string {
+function rocProductFaq(string $title, string $catName, string $catSlug, string $bestFor, string $desc, array $specs, array $related, string $amazon, array $written = []): string {
     $qa = [];
     $list = [];
     foreach ($specs as $k => $v) { if (is_array($v)) $v = implode(', ', $v); $v = trim((string)$v); if ($v !== '' && count($list) < 6) $list[] = $k . ': ' . $v; }
@@ -355,6 +355,8 @@ function rocProductFaq(string $title, string $catName, string $catSlug, string $
     $qa[] = ['What are alternatives to the ' . $title . '?', $names
         ? 'Other ' . $catName . ' worth comparing: the ' . implode(', the ', $names) . '. All ' . (count($related) + 1) . ' picks are on our ' . $catName . ' page, with their specs side by side.'
         : 'See our ' . $catName . ' page for the other picks in this category.'];
+    // Questions written for this product (About text, "## Common questions", Deploy 78) come after the specs one.
+    if ($written) array_splice($qa, $qa && strpos($qa[0][0], 'main specs') !== false ? 1 : 0, 0, $written);
     $qa[] = ['Where can I buy the ' . $title . '?', 'The button on this page opens the ' . $title . ' on Amazon, where you can see the current price, stock and seller. Prices change often, so we do not list them here.'];
     $h = '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">'
         . '<h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">' . rocH($title) . ': questions buyers ask</h2>';
@@ -610,9 +612,24 @@ function rocAboutHtml(string $text, string $catName, string $catSlug): string {
  * Below the product: About (long text from the CMS), pros and cons, the price box (no fixed price:
  * Amazon shows the current one) and links to related pages on the site.
  */
+/**
+ * The About text split in two: [text above the questions, [[question, answer], ...]].
+ * The questions ("## Common questions", then "Q: ..." / "A: ..." blocks) are shown in the FAQ box.
+ */
+function rocAboutSplit(string $text): array {
+    $text = str_replace("\r\n", "\n", $text);
+    $i = strpos($text, "\n## Common questions");
+    if ($i === false && strpos($text, '## Common questions') === 0) $i = 0;
+    if ($i === false) return [$text, []];
+    $qa = [];
+    if (preg_match_all('/^Q:\s*(.+?)\s*\nA:\s*(.+?)\s*(?=\n\s*\n|\n##|\z)/ms', substr($text, $i), $m, PREG_SET_ORDER))
+        foreach ($m as $x) $qa[] = [trim($x[1]), trim((string)preg_replace('/\s+/', ' ', $x[2]))];
+    return [rtrim(substr($text, 0, $i)), $qa];
+}
+
 function rocProductAbout(PDO $pdo, array $p, string $title, string $catName, string $catSlug, string $amazon): string {
-    $about = trim((string)($p['summary'] ?? ''));
-    if ($about === trim((string)($p['short_desc'] ?? '')) || mb_strlen($about) < 200) $about = '';
+    $about = rocAboutSplit(trim((string)($p['summary'] ?? '')))[0];
+    if (trim($about) === trim((string)($p['short_desc'] ?? '')) || mb_strlen($about) < 200) $about = '';
     $pros = rocProductList($p, 'pros'); $cons = rocProductList($p, 'cons');
     $h = '';
     if ($about !== '') {
@@ -795,7 +812,7 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
     $m .= rocProductAbout($pdo, $p, $title, $catName, $catSlug, $amazon);
 
     $related = array_values(array_filter(rocFetchProducts($pdo, $cat), function ($r) use ($slug) { return $r['slug'] !== $slug; }));
-    $m .= rocProductFaq($title, $catName, $catSlug, $bestFor, $desc, $specs ?: [], $related, $amazon);
+    $m .= rocProductFaq($title, $catName, $catSlug, $bestFor, $desc, $specs ?: [], $related, $amazon, rocAboutSplit((string)($p['summary'] ?? ''))[1]);
     if ($related) {
         $m .= '<div class="space-y-4"><div class="flex items-center justify-between gap-3">'
             . '<h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">More ' . rocH($catName) . '</h2>'
