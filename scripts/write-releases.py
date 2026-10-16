@@ -529,7 +529,8 @@ RELEASES = [
     dict(deploy=79, date='2026-10-16', title='Product writer keeps going',
          changes=['The writer opens the database again when the server closed it during a long wait (it stopped with No writer key saved)',
                   'Texts that talk about the writer instructions (the provided data) are refused and written again',
-                  '--deepen on a page that already has its questions stops instead of adding them twice'],
+                  '--deepen on a page that already has its questions stops instead of adding them twice',
+                  '/guides-sitemap.xml and /games-sitemap.xml redirect to /sitemaps/ like the others (cli-sitemap-aliases.php --apply)'],
          checks=[dict(label='Writer', type='contains', path='api/v1/cms/content-writer-lib.php', text='function rocContentDb')],
          pr=REPO + '79'),
 ]
