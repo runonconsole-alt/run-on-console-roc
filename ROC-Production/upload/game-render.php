@@ -225,6 +225,15 @@ function rocGpStyles(): string {
 [$headTop, $bodyToMain, $mainOpen, , $afterMain] = rocTemplate($ROOT, 'blog-post.html');
 
 /* ------------------------------------------------------------ the list */
+if ($slug === '' && isset($_GET['json'])) {
+    // Every game page for the header search box (/can-i-run/?json=1, Deploy 89): name, genre, year, address.
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: public, max-age=3600');
+    header('X-Robots-Tag: noindex');
+    echo json_encode(array_values(array_map(function ($g) { return ['t' => $g['name'], 'g' => (string)($g['g'] ?? ''), 'e' => (string)(int)($g['y'] ?? 0), 'u' => rocGpPath($g)]; }, $games)),
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
 if ($slug === '') {
     $n = count($games);
     $url = ROC_PUBLIC_URL . '/can-i-run/';
@@ -277,7 +286,8 @@ if ($slug === '') {
         . "all=document.getElementById('gp-all'),items=all.querySelectorAll('li[data-n]'),heads=all.querySelectorAll('.gp-letter,.gp-az');"
         . "q.addEventListener('input',function(){var v=q.value.trim().toLowerCase(),hit=0;pop.style.display=v?'none':'';"
         . "for(var i=0;i<items.length;i++){var ok=!v||items[i].getAttribute('data-n').indexOf(v)>-1;items[i].style.display=ok?'':'none';if(ok)hit++;}"
-        . "for(var j=0;j<heads.length;j++)heads[j].style.display=v?'none':'';none.style.display=v&&!hit?'':'none';});})();</script>";
+        . "for(var j=0;j<heads.length;j++)heads[j].style.display=v?'none':'';none.style.display=v&&!hit?'':'none';});"
+        . "var g=new URLSearchParams(location.search).get('q');if(g){q.value=g;q.dispatchEvent(new Event('input'));}})();</script>";
     rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $updated);
 }
 
