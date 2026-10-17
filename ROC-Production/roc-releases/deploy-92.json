@@ -1,0 +1,21 @@
+{
+ "deploy": 92,
+ "date": "2026-10-17",
+ "title": "Post templates in the CMS",
+ "changes": [
+  "New post starts from a template: Product review, Comparison, Buying guide, How-to guide, News story or blank; each has its sections and hints in [brackets]",
+  "Checks: a hint left in [brackets], under 1,000 words, no H2, fewer than 2 links to our pages, cover picture without alt text"
+ ],
+ "checks": [
+  {
+   "label": "Templates",
+   "type": "contains",
+   "path": "cms/index.html",
+   "text": "POST_TEMPLATES"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/92",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}
