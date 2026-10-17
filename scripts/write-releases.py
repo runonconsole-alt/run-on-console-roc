@@ -582,6 +582,10 @@ RELEASES = [
                   'IndexNow keeps the addresses while Bing checks the new key (SiteVerificationNotCompleted)'],
          checks=[dict(label='Compare rules', type='htaccess', marker='# ROC compare BEGIN')],
          pr=REPO + '87'),
+    dict(deploy=88, date='2026-10-16', title='CMS > Comparisons',
+         changes=['CMS > Comparisons: every X vs Y page with its state (live, waiting, hidden); change its text, write it again with the writer, write a waiting one now, or hide it'],
+         checks=[dict(label='Comparisons editor', type='file', path='api/v1/cms/compare-admin.php')],
+         pr=REPO + '88'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
