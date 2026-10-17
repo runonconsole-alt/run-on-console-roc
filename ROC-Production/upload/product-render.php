@@ -985,6 +985,21 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
         $crumbs = [['Home', ROC_PUBLIC_URL . '/'], ['Products', $url]];
         $noindex = false;
     }
+    // "Best of" list of this category (Deploy 90): top picks with awards, how to choose, questions.
+    $best = null; $bestPicks = [];
+    if ($cat && empty($cat['group']) && $query === '' && $page === 1 && is_file(__DIR__ . '/api/v1/cms/best-lib.php')) {
+        require_once __DIR__ . '/api/v1/cms/best-lib.php';
+        $bt = rocBestTexts($pdo)[(string)$cat['slug']] ?? null;
+        if (is_array($bt) && !empty($bt['picks']) && empty($bt['hidden'])) {
+            $bySlug = []; foreach ($inScope as $p) $bySlug[(string)$p['slug']] = $p;
+            foreach ((array)$bt['picks'] as $pk) if (isset($bySlug[$pk['id']])) $bestPicks[] = [$pk, $bySlug[$pk['id']]];
+            if (count($bestPicks) >= 2) {
+                $best = $bt;
+                // The page is the year's best-of list now: say so in the title (unless the CMS set one).
+                if (trim((string)($cat['meta_title'] ?? '')) === '') $title = rocFitTitle(['Best ' . $name . ' ' . gmdate('Y') . ': ' . $n . ' Picks | Run On Console', 'Best ' . $name . ' ' . gmdate('Y') . ' | Run On Console', 'Best ' . $name . ' ' . gmdate('Y')]);
+            }
+        }
+    }
     $robots = ($query !== '' || $noindex || $page > 1) ? 'noindex, follow' : 'index, follow, max-image-preview:large';
     if ($page > 1) $url .= '?page=' . $page;
 
@@ -996,6 +1011,8 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
         foreach ($pageItems as $i => $p) $items[] = ['@type' => 'ListItem', 'position' => ($page - 1) * $per + $i + 1, 'url' => rocProductUrl((string)$p['slug'])];
         $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'ItemList', 'itemListElement' => $items]);
     }
+    if ($best && !empty($best['faq'])) $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => array_map(function ($f) {
+        return ['@type' => 'Question', 'name' => (string)$f['q'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => (string)$f['a']]]; }, (array)$best['faq'])]);
     $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
 
     /* ---------------- body */
@@ -1040,6 +1057,23 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
 
     // No category buttons: /products/ lists every product; categories are in the CATEGORY menu (/category/...).
 
+    if ($best) {
+        $m .= '<section id="top-picks" class="space-y-5 scroll-mt-24"><div class="space-y-2"><h2 class="font-display font-extrabold text-2xl text-slate-900">Our top ' . rocH(strtolower($name)) . ' picks for ' . gmdate('Y') . '</h2>'
+            . '<p class="text-sm text-slate-600 leading-relaxed max-w-3xl">' . rocH((string)$best['intro']) . '</p></div><div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">';
+        foreach ($bestPicks as $i => [$pk, $p]) {
+            $img = rocProductImage($p, $categories);
+            $m .= '<div class="bg-white border-2 ' . ($i === 0 ? 'border-emerald-400' : 'border-slate-200') . ' rounded-3xl p-5 shadow-sm flex flex-col gap-3 relative">'
+                . '<span class="absolute -top-3 left-5 bg-emerald-600 text-white text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full shadow">#' . ($i + 1) . ' ' . rocH((string)$pk['award']) . '</span>'
+                . '<a href="/products/' . rocH((string)$p['slug']) . '/" class="block h-40 rounded-2xl overflow-hidden bg-white border border-slate-100 mt-2">'
+                . ($img !== '' ? '<img src="' . rocH($img) . '" alt="' . rocH(rocImageAlt($p, (string)$p['title'], $categories)) . '" width="400" height="300" loading="lazy" class="w-full h-full object-contain p-3"/>' : '') . '</a>'
+                . '<h3 class="font-display font-extrabold text-base text-slate-900 leading-snug"><a href="/products/' . rocH((string)$p['slug']) . '/" class="text-slate-900 hover:text-emerald-700 no-underline">' . rocH((string)$p['title']) . '</a></h3>'
+                . '<p class="text-sm text-slate-600 leading-relaxed">' . rocH((string)$pk['why']) . '</p>'
+                . '<a href="' . rocH(rocAmazonUrl($pdo, $p)) . '" target="_blank" rel="sponsored nofollow noopener noreferrer" class="mt-auto bg-emerald-600 hover:bg-emerald-700 text-white font-display font-extrabold text-sm py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 no-underline">'
+                . ROC_ICON_CART . '<span>Check price on Amazon</span></a></div>';
+        }
+        $m .= '</div><p class="text-[11px] text-slate-400">Picked from each product\'s own specs and listing; we do not show fixed prices because they change every day.</p></section>';
+    }
+
     $action = $cat ? rocCatPath(rawurlencode((string)$cat['slug'])) : '/products/';
     $m .= '<form method="get" action="' . rocH($action) . '" class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-xs" role="search">'
         . '<div class="relative flex-1 max-w-md"><input type="search" name="q" value="' . rocH($query) . '" placeholder="Search ' . rocH($cat ? strtolower((string)$cat['name']) : 'products') . '…" aria-label="Search products" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500"/></div>'
@@ -1067,6 +1101,18 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
             . 'else a.parentNode.remove();}).catch(function(){location.href=a.href;});});})();</script>';
     }
     $m .= '</div>';
+    // How to choose and the questions of the best-of list (Deploy 90).
+    if ($best && (!empty($best['how']) || !empty($best['faq']))) {
+        $m .= '<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">';
+        if (!empty($best['how'])) $m .= '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-3"><h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">How to choose ' . rocH(strtolower($name)) . '</h2>'
+            . '<ul class="space-y-2 text-sm text-slate-700">' . implode('', array_map(function ($x) { return '<li class="flex gap-2"><span class="text-emerald-600 font-bold" aria-hidden="true">✓</span><span>' . rocH((string)$x) . '</span></li>'; }, (array)$best['how'])) . '</ul></div>';
+        if (!empty($best['faq'])) {
+            $m .= '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-3"><h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">' . rocH($name) . ': questions buyers ask</h2>';
+            foreach ((array)$best['faq'] as $i => $f) $m .= '<details class="border border-slate-100 rounded-2xl p-4 bg-slate-50"' . ($i === 0 ? ' open' : '') . '><summary class="font-bold text-sm text-slate-900 cursor-pointer">' . rocH((string)$f['q']) . '</summary><p class="text-xs sm:text-sm text-slate-600 leading-relaxed mt-2">' . rocH((string)$f['a']) . '</p></details>';
+            $m .= '</div>';
+        }
+        $m .= '</div>';
+    }
     // Links to the rest of the site: guides, gaming platforms and the checker for this category (or every
     // category of a main category), so every category page is linked with the content about it.
     if ($cat && $query === '') {

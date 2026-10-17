@@ -965,6 +965,8 @@ function K(x){ var k=(x&&x._kind)||(S.editing&&S.editing._kind)||'blog'; return 
 function liveUrl(kind, slug){ return KINDS[kind].base+slug+'/'; }
 /* Public path of a post or page (category guides live under their category). */
 function isNewsPost(x){ return K(x)===KINDS.blog && String(x.category||'').trim().toLowerCase()==='news'; }
+/* Guides: category "Guides" or "Guides: Buying" ... (they live at /guides/). */
+function isGuidePost(x){ return K(x)===KINDS.blog && /^guides?\s*(:.*)?$/i.test(String(x.category||'').trim()); }
 function itemPath(x, slug){
   if(slug==null) slug=x.slug||'…';
   if(isNewsPost(x)) return '/news/'+slug+'/';
@@ -1419,7 +1421,7 @@ function renderShell(){
       (can('activity','view')?item('activity','Live activity','⚡',S.actUnseen?S.actUnseen:undefined):'')+
       (admin?item('messages','Messages','✉',S.msgCounts&&S.msgCounts['new']?S.msgCounts['new']:undefined):'')+'</div>'+
     '<div class="snav"><div class="slabel">Content</div>'+
-      (can('blogs','view')?item('blogs','Blog & news posts','✎',S.blogs.length)+item('socialkits','Social posts','📱'):'')+
+      (can('blogs','view')?item('blogs','Blogs, guides & news','✎',S.blogs.length)+item('socialkits','Social posts','📱'):'')+
       (can('media','view')?item('media','Media library','❖',S.media.length):'')+
       (can('pages','view')?item('cmspages','Pages','▦',S.pages.length+(S.sitePagesN||0))+item('metas','Metas','🏷'):'')+
       (can('pages','view')?item('platforms','Gaming platforms','◈'):'')+
@@ -1744,21 +1746,22 @@ async function deleteFromList(b){
 
 function renderBlogs(m){
   S.ptype=S.ptype||'all';
-  var nNews=S.blogs.filter(isNewsPost).length, nBlog=S.blogs.length-nNews;
+  var nNews=S.blogs.filter(isNewsPost).length, nGuide=S.blogs.filter(isGuidePost).length, nBlog=S.blogs.length-nNews-nGuide;
   var rows=S.blogs.filter(function(b){
     if(S.ptype==='news' && !isNewsPost(b)) return false;
-    if(S.ptype==='blog' && isNewsPost(b)) return false;
+    if(S.ptype==='guide' && !isGuidePost(b)) return false;
+    if(S.ptype==='blog' && (isNewsPost(b) || isGuidePost(b))) return false;
     if(S.filter!=='all' && S.filter!==(b.status==='published'||b.status==='scheduled'?b.status:'draft'))return false;
     if(S.search){ var h=(b.title+' '+(b.slug||'')).toLowerCase();
       if(h.indexOf(S.search.toLowerCase())===-1)return false; }
     return true;
   });
 
-  m.innerHTML = head('Blog & news posts', rows.length+' of '+S.blogs.length+' shown · '+nBlog+' blog posts (/blogs/) · '+nNews+' news stories (/news/)',
+  m.innerHTML = head('Blogs, guides & news', rows.length+' of '+S.blogs.length+' shown · '+nBlog+' blog posts (/blogs/) · '+nGuide+' guides (/guides/) · '+nNews+' news stories (/news/)',
     can('blogs','edit')?'<button class="btn primary" id="newpost">＋ New post</button>':'')+
   '<div class="body"><div class="card">'+
     '<div class="chead" style="gap:8px">'+
-      '<div class="seg" id="ptype">'+[['all','All ('+S.blogs.length+')'],['blog','✎ Blog ('+nBlog+')'],['news','📰 News ('+nNews+')']].map(function(x){
+      '<div class="seg" id="ptype">'+[['all','All ('+S.blogs.length+')'],['blog','✎ Blogs ('+nBlog+')'],['guide','📘 Guides ('+nGuide+')'],['news','📰 News ('+nNews+')']].map(function(x){
         return '<button type="button" data-pt="'+x[0]+'"'+(S.ptype===x[0]?' class="on"':'')+'>'+x[1]+'</button>'; }).join('')+'</div>'+
       '<div class="search" style="max-width:280px;flex:1"><input type="text" id="q" placeholder="Search title or slug" value="'+esc(S.search)+'"></div>'+
       '<select id="f" style="max-width:150px">'+
@@ -1777,7 +1780,7 @@ function renderBlogs(m){
         return '<tr><td><div class="t-title" data-open="'+esc(b.id)+'">'+esc(b.title)+
           (locked?' <span style="color:var(--amber);font-size:11px">● being edited</span>':'')+'</div>'+
           '<div class="t-slug">'+esc(itemPath(b, b.slug||''))+'</div></td>'+
-          '<td>'+(isNewsPost(b)?'<span class="tag" style="background:#fee2e2;color:#b91c1c;border-color:#fecaca">📰 News</span>':'<span class="tag" style="background:#ecfdf5;color:#047857;border-color:#a7f3d0">✎ Blog</span>')+'</td>'+
+          '<td>'+(isNewsPost(b)?'<span class="tag" style="background:#fee2e2;color:#b91c1c;border-color:#fecaca">📰 News</span>':isGuidePost(b)?'<span class="tag" style="background:#e0f2fe;color:#0369a1;border-color:#bae6fd">📘 Guide</span>':'<span class="tag" style="background:#ecfdf5;color:#047857;border-color:#a7f3d0">✎ Blog</span>')+'</td>'+
           '<td><span class="tag '+(b.status==='published'?'published':'draft')+'">'+esc(b.status)+'</span>'+
             (b.status==='scheduled'?'<div class="hint" style="margin-top:4px">'+esc(fmtWhen(b.published_at_iso))+'</div>':'')+'</td>'+
           '<td>'+(g.length?'<span style="color:var(--amber);font-size:12px">▲ '+esc(g.join(', '))+'</span>'

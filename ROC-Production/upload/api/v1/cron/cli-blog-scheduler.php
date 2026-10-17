@@ -113,6 +113,12 @@ try {
         require_once $ROOT . '/api/v1/cms/compare-lib.php';
         $cp = rocCompareTick($pdo, 1);
         if ($cp !== null) echo date('c') . ' ' . $cp . "\n";
+        // "Best of" lists on the category pages (Deploy 90): when no comparison was written this run.
+        if ($cp === null) {
+            require_once $ROOT . '/api/v1/cms/best-lib.php';
+            $bl = rocBestTick($pdo);
+            if ($bl !== null) echo date('c') . ' ' . $bl . "\n";
+        }
     }
 } catch (\Throwable $e) { echo date('c') . ' content error: ' . $e->getMessage() . "\n"; }
 

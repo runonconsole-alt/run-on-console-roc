@@ -594,6 +594,13 @@ RELEASES = [
                   'Compare and Can I run pages get the Home / About hero (bright emerald with soft light glows); the Compare list shows four comparisons as picture tiles'],
          checks=[dict(label='Game search', type='contains', path='roc-nav.js', text='/can-i-run/?json=1')],
          pr=REPO + '89'),
+    dict(deploy=90, date='2026-10-17', title='Best-of lists, Guides in the CMS, ROC knows comparisons',
+         changes=['Category pages become the best-of list of the year: top picks with awards and why, how to choose, questions (FAQ schema); 1 category a scheduler run, written again after 30 days',
+                  'Game page titles fit Google (60 characters): the sitemap check found 2,367 titles of 70-90; all 2,758 sitemap pages answer 200 with their own canonical',
+                  'CMS: Blogs, guides & news with a Guides tab and Guide badges',
+                  'ROC links our X vs Y pages when asked which product is better'],
+         checks=[dict(label='Best-of lists', type='file', path='api/v1/cms/best-lib.php')],
+         pr=REPO + '90'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

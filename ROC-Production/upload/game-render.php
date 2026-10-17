@@ -345,7 +345,11 @@ if ($rec) $needLine .= ' For the recommended (high) settings: ' . ($gpuRec ? $ca
 $E = (array)($EDITS[$slug] ?? []);
 if (!empty($E['t'])) $updated = max($updated, (int)$E['t']);
 if (trim((string)($E['intro'] ?? '')) !== '') $intro = trim((string)$E['intro']);
-$metaT = trim((string)($E['title'] ?? '')) ?: 'Can I Run ' . $name . '? Minimum & Recommended PC Requirements | Run On Console';
+// The longest title that fits Google's ~60 characters (Deploy 90: 2,367 titles were 70-90 long).
+$fit = function (array $opts) { foreach ($opts as $o) if (mb_strlen($o) <= 60) return $o; return end($opts); };
+$metaT = trim((string)($E['title'] ?? '')) ?: $fit(['Can I Run ' . $name . '? Minimum & Recommended PC Requirements | ROC',
+    'Can I Run ' . $name . '? PC Requirements | Run On Console', 'Can I Run ' . $name . '? System Requirements',
+    'Can I Run ' . $name . '? PC Requirements', 'Can I Run ' . $name . '?', $name . ' PC Requirements']);
 $metaD = 'Can your PC run ' . $name . '? Official minimum and recommended specs'
     . ($gpuMin ? ' (from ' . (strpos($gpuMin[0], 'integrated') !== false ? 'integrated graphics' : $an($gpuMin[0])) . ($ramGb($rMin['ram'] ?? null) ? ' and ' . $ramGb($rMin['ram'] ?? null) . ' RAM' : '') . ')' : '')
     . '. Free check for your graphics card, CPU and RAM.';
