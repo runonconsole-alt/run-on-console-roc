@@ -607,6 +607,11 @@ RELEASES = [
                   'CMS: the sidebar item is Updates, and an administrator can rename any sidebar item (double-click it)'],
          checks=[dict(label='Sidebar names', type='file', path='api/v1/cms/cms-labels.php')],
          pr=REPO + '91'),
+    dict(deploy=92, date='2026-10-17', title='Post templates in the CMS',
+         changes=['New post starts from a template: Product review, Comparison, Buying guide, How-to guide, News story or blank; each has its sections and hints in [brackets]',
+                  'Checks: a hint left in [brackets], under 1,000 words, no H2, fewer than 2 links to our pages, cover picture without alt text'],
+         checks=[dict(label='Templates', type='contains', path='cms/index.html', text='POST_TEMPLATES')],
+         pr=REPO + '92'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

@@ -1829,7 +1829,75 @@ function blankPage(){
     meta_title:'', meta_description:'', focus_keyword:'', faqs:[], status:'draft',
     page_type:'general', category_slug:'', product_ids:[], placements:[], index_page:1 };
 }
-function newBlog(){ S.editing=blankBlog(); S.editing._kind='blog'; S.validationAttempted=false; S.dirty=false; S.tab='image'; renderShell(); }
+
+/* Post templates (Deploy 92): the owner writes the blogs from 19 Oct 2026. Each one gives the sections
+   a post of that kind needs, with a hint in [brackets] to replace; Checks warns while a hint is left. */
+var POST_TEMPLATES={
+  review:{name:'Product review',ic:'⭐',desc:'One product: who it is for, what is good and bad, the verdict.',category:'',
+    title:'[Product name] Review: Is It Worth Buying in 2026?',excerpt:'[One or two sentences: what the product is and who should buy it.]',
+    html:'<p>[Intro, 2-3 sentences: what the product is, who it is for, and the short verdict.]</p>'+
+      '<h2>Quick verdict</h2><p>[2-3 sentences. Best for: … Skip it if: …]</p>'+
+      '<h2>Key specs</h2><ul><li>[Spec 1, e.g. Sensor / Panel / Chipset]</li><li>[Spec 2]</li><li>[Spec 3]</li><li>[Spec 4]</li></ul>'+
+      '<h2>Design and build</h2><p>[How it looks and feels, size and weight, what is in the box.]</p>'+
+      '<h2>Performance in games</h2><p>[How it does in the games people play: FPS, MOBA, RPG… Facts from the specs and trusted reviews, no invented numbers.]</p>'+
+      '<h2>Pros and cons</h2><ul><li>[Pro 1]</li><li>[Pro 2]</li><li>[Pro 3]</li><li>[Con 1]</li><li>[Con 2]</li></ul>'+
+      '<h2>Alternatives</h2><p>[2-3 other products from our site, each with a link: <a href="/products/">product page</a>, and when to pick it instead. Link a comparison if there is one: <a href="/compare/">/compare/</a>]</p>'+
+      '<h2>Should you buy it?</h2><p>[The final answer in 2-3 sentences, and a link to the product page with the Amazon button.]</p>'+
+      '<h2>FAQ</h2><p><strong>[Question buyers ask 1?]</strong> [Answer.]</p><p><strong>[Question 2?]</strong> [Answer.]</p>'},
+  compare:{name:'Comparison (X vs Y)',ic:'🆚',desc:'Two products side by side: the differences and who should pick which.',category:'Comparisons',
+    title:'[Product A] vs [Product B]: Which Should You Buy?',excerpt:'[One sentence: the main difference and who should pick which.]',
+    html:'<p>[Intro: why people compare these two, and the short answer.]</p>'+
+      '<h2>The short answer</h2><p>[Pick A if … Pick B if …]</p>'+
+      '<h2>Specs side by side</h2><table><tbody><tr><th>Spec</th><th>[Product A]</th><th>[Product B]</th></tr><tr><td>[Spec]</td><td>[value]</td><td>[value]</td></tr><tr><td>[Spec]</td><td>[value]</td><td>[value]</td></tr></tbody></table>'+
+      '<h2>The differences that matter</h2><ul><li>[Difference 1 and why it matters in games]</li><li>[Difference 2]</li><li>[Difference 3]</li></ul>'+
+      '<h2>Who should buy [Product A]</h2><p>[2-3 sentences + link to its product page.]</p>'+
+      '<h2>Who should buy [Product B]</h2><p>[2-3 sentences + link to its product page.]</p>'+
+      '<h2>Verdict</h2><p>[The final pick for most players.]</p>'+
+      '<h2>FAQ</h2><p><strong>[Which is better for FPS?]</strong> [Answer.]</p><p><strong>[Is the upgrade worth it?]</strong> [Answer.]</p>'},
+  bestof:{name:'Buying guide (Best …)',ic:'🏆',desc:'Best products of a kind for a need or a budget, ranked.',category:'Buying Guides',
+    title:'Best [Product type] for [Need] in 2026',excerpt:'[One sentence: what this list helps the reader choose.]',
+    html:'<p>[Intro: who this list is for and how we picked (specs, listings, trusted reviews).]</p>'+
+      '<h2>Our top picks at a glance</h2><ul><li>[Best overall: Product, link]</li><li>[Best budget: Product, link]</li><li>[Best for …: Product, link]</li></ul>'+
+      '<h2>1. [Product name]: best overall</h2><p>[Why it earns it, 3-4 sentences. Who it suits. Link to its product page.]</p>'+
+      '<h2>2. [Product name]: best budget</h2><p>[Why.]</p>'+
+      '<h2>3. [Product name]: best for [need]</h2><p>[Why.]</p>'+
+      '<h2>How to choose</h2><ul><li>[What to look at 1]</li><li>[2]</li><li>[3]</li></ul>'+
+      '<h2>FAQ</h2><p><strong>[Question?]</strong> [Answer.]</p><p><strong>[Question?]</strong> [Answer.]</p>'+
+      '<p>[See every pick: <a href="/category/">our categories</a>.]</p>'},
+  howto:{name:'How-to guide',ic:'📘',desc:'Step by step help: setup, settings, fixing a problem. Goes to /guides/.',category:'Guides: How to use',
+    title:'How to [Do the Task]: Step by Step Guide',excerpt:'[One sentence: what the reader will be able to do.]',
+    html:'<p>[Intro: what this guide does, how long it takes, what you need.]</p>'+
+      '<h2>What you need</h2><ul><li>[Item 1]</li><li>[Item 2]</li></ul>'+
+      '<h2>Step 1: [Do this]</h2><p>[Clear instructions.]</p>'+
+      '<h2>Step 2: [Then this]</h2><p>[Clear instructions.]</p>'+
+      '<h2>Step 3: [Then this]</h2><p>[Clear instructions.]</p>'+
+      '<h2>Common problems and fixes</h2><ul><li>[Problem: fix]</li><li>[Problem: fix]</li></ul>'+
+      '<h2>FAQ</h2><p><strong>[Question?]</strong> [Answer.]</p>'+
+      '<p>[Related: link a product, a game page (/can-i-run/…) or another guide.]</p>'},
+  news:{name:'News story',ic:'📰',desc:'What happened, why it matters to gamers, with sources. Goes to /news/.',category:'News',
+    title:'[What happened, in one clear line]',excerpt:'[One sentence: the news.]',
+    html:'<p>[The news in 2-3 sentences: who, what, when.]</p>'+
+      '<h2>What we know</h2><ul><li>[Fact 1]</li><li>[Fact 2]</li><li>[Fact 3]</li></ul>'+
+      '<h2>Why it matters for gamers</h2><p>[What it changes for players. Link a related product or game page.]</p>'+
+      '<h2>Sources</h2><ul><li>[Source 1: name + link]</li><li>[Source 2: name + link]</li></ul>'}
+};
+function chooseTemplate(){
+  modal('New post: start from a template',
+    '<div class="hint" style="margin-bottom:10px">Pick what you are writing. The template gives the sections and a hint in [brackets] to replace; Checks shows what is still missing.</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">'+
+    Object.keys(POST_TEMPLATES).map(function(k){ var t=POST_TEMPLATES[k];
+      return '<button type="button" class="card" data-tpl="'+k+'" style="text-align:left;padding:14px;cursor:pointer;border:1px solid var(--line)"><div style="font-size:22px">'+t.ic+'</div><b style="display:block;margin:4px 0">'+esc(t.name)+'</b><span class="hint">'+esc(t.desc)+'</span></button>';
+    }).join('')+
+    '<button type="button" class="card" data-tpl="" style="text-align:left;padding:14px;cursor:pointer;border:1px dashed var(--line)"><div style="font-size:22px">📄</div><b style="display:block;margin:4px 0">Blank post</b><span class="hint">Start from an empty page.</span></button></div>',
+    '<button class="btn" data-a="close">Cancel</button>', function(a, close){ close(); }, true);
+  document.querySelectorAll('[data-tpl]').forEach(function(b){ b.addEventListener('click',function(){
+    var t=POST_TEMPLATES[b.dataset.tpl]; closeModal();
+    S.editing=blankBlog(); S.editing._kind='blog';
+    if(t){ S.editing.content=t.html; S.editing.category=t.category; S.editing.title=t.title; S.editing.excerpt=t.excerpt; S.editing._tpl=b.dataset.tpl; }
+    S.validationAttempted=false; S.dirty=!!t; S.tab='image'; renderShell();
+  }); });
+}
+function newBlog(){ chooseTemplate(); }
 async function loadPageMeta(){
   if(S.pageMeta) return;
   try{ S.pageMeta=await api('pages.php?meta=1'); }catch(e){ S.pageMeta={categories:[],products:[]}; }
@@ -2262,6 +2330,14 @@ function checks(){
 
 
   if(words<300) out.push(['warn','Body is about '+words+' words. Thin posts rarely rank.']);
+  // Writing checks for the owner's posts (Deploy 92).
+  var html=String(e.content||''), news=String(e.category||'').trim().toLowerCase()==='news';
+  if(/\[[^\]]{3,}\]/.test(text+' '+(e.title||'')+' '+(e.excerpt||''))) out.push(['error','A template hint in [brackets] is still there: replace it with your text.']);
+  if(!news && words>=300 && words<1000) out.push(['warn','About '+words+' words: blogs and guides do best with 1,000+.']);
+  if(!/<h2[\s>]/i.test(html)) out.push(['warn','No H2 headings: split the post into sections.']);
+  var internal=(html.match(/<a\s[^>]*href="(\/|https:\/\/runonconsole\.com\/)[^"]*"/gi)||[]).length;
+  if(internal<2) out.push(['warn','Link at least 2 pages of this site (a product, a comparison, a game page /can-i-run/…, a guide).']);
+  if(e.image && !(e.image_alt||'').trim()) out.push(['warn','The cover picture has no alt text (Image tab).']);
 
   var k=(e.focus_keyword||'').trim().toLowerCase();
   if(k){
