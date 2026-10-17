@@ -1147,9 +1147,23 @@ function rocRenderCompare(string $root, PDO $pdo, array $categories, string $slu
     $m  = $mainOpen . '<div class="max-w-6xl mx-auto py-6 space-y-8 animate-page-in">';
     $m .= '<nav aria-label="Breadcrumb" class="text-xs font-semibold text-slate-500 flex flex-wrap items-center gap-1.5"><a href="/compare/" class="text-slate-500 no-underline hover:text-emerald-600">Comparisons</a><span>/</span>'
         . '<a href="' . rocH(rocCatPath($catSlug)) . '" class="text-slate-500 no-underline hover:text-emerald-600">' . rocH($catName) . '</a><span>/</span><span class="text-slate-800">' . rocH($an . ' vs ' . $bn) . '</span></nav>';
-    $m .= '<div class="gradient-hero-bg text-white rounded-3xl p-8 sm:p-10 shadow-xl"><span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3 py-1 rounded-md tracking-wider">' . rocH($catName) . ' comparison</span>'
+    // Hero (Deploy 89): the answer on the left, the two products' own pictures on the right.
+    $pic = function (array $p, string $img) use ($categories) {
+        if ($img === '') return '';
+        return '<a href="/products/' . rocH((string)$p['slug']) . '/" class="block w-28 h-28 sm:w-40 sm:h-40 rounded-2xl overflow-hidden bg-white border-4 border-white/30 shadow-xl shrink-0">'
+            . '<img src="' . rocH($img) . '" alt="' . rocH(rocImageAlt($p, (string)$p['title'], $categories)) . '" width="160" height="160" fetchpriority="high" class="w-full h-full object-contain p-2"/></a>';
+    };
+    // The same hero as Home, About and the product pages (soft light glows, Deploy 89).
+    $m .= '<div class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
+        . '<div class="absolute -top-20 -left-20 w-80 h-80 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>'
+        . '<div class="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl pointer-events-none"></div>'
+        . '<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10"><div class="lg:col-span-7">'
+        . '<span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3 py-1 rounded-md tracking-wider">' . rocH($catName) . ' comparison</span>'
         . '<h1 class="font-display font-extrabold text-3xl sm:text-4xl text-white my-3 leading-tight">' . rocH($an) . ' vs ' . rocH($bn) . '</h1>'
-        . '<p class="text-emerald-100 text-sm sm:text-base max-w-3xl leading-relaxed">' . rocH((string)$T['summary']) . '</p></div>';
+        . '<p class="text-emerald-100 text-sm sm:text-base max-w-3xl leading-relaxed">' . rocH((string)$T['summary']) . '</p></div>'
+        . '<div class="lg:col-span-5 flex items-center justify-center gap-3 sm:gap-4">' . $pic($a, $imgA)
+        . '<span class="font-display font-extrabold text-lg sm:text-2xl bg-emerald-400 text-slate-950 rounded-full w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 shadow-lg">VS</span>'
+        . $pic($b, $imgB) . '</div></div></div>';
     $m .= '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">' . $card($a, $imgA, (string)($T['pick_a'] ?? '')) . $card($b, $imgB, (string)($T['pick_b'] ?? '')) . '</div>';
 
     if (!empty($T['differences'])) $m .= $box('The differences that matter', '<ul class="space-y-2 text-sm text-slate-700">' . implode('', array_map(function ($d) {
@@ -1201,16 +1215,46 @@ function rocRenderCompareList(string $root, PDO $pdo, array $categories): void {
     $n = array_sum(array_map('count', $by));
     $title = 'Gaming Gear Comparisons: X vs Y, Which to Buy | Run On Console';
     $desc = $n . ' side by side comparisons of gaming mice, keyboards, headsets, monitors, graphics cards and more: specs, differences and who should pick which.';
-    $h = rocHeadMeta($title, $desc, $url, '', 'index, follow, max-image-preview:large');
+    // Share picture: the first product of the newest comparison (Deploy 89).
+    $share = '';
+    foreach ($by as $list) foreach ($list as [$cs, $a]) if ($share === '') $share = rocProductImage($a, $categories);
+    $h = rocHeadMeta($title, $desc, $url, $share, 'index, follow, max-image-preview:large', 'website', 'Gaming gear comparisons on Run On Console');
     $h .= rocBreadcrumbLd([['Home', ROC_PUBLIC_URL . '/'], ['Comparisons', $url]]);
     $items = []; foreach ($by as $list) foreach ($list as [$cs, $a, $b]) $items[] = ['@type' => 'ListItem', 'position' => count($items) + 1, 'url' => ROC_PUBLIC_URL . '/compare/' . $cs . '/', 'name' => $a['title'] . ' vs ' . $b['title']];
     $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'CollectionPage', 'name' => 'Product comparisons', 'url' => $url, 'description' => $desc,
         'mainEntity' => ['@type' => 'ItemList', 'numberOfItems' => count($items), 'itemListElement' => $items]]);
     $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
     $m  = $mainOpen . '<div class="max-w-6xl mx-auto py-6 space-y-8 animate-page-in">';
-    $m .= '<div class="gradient-hero-bg text-white rounded-3xl p-8 sm:p-12 shadow-xl"><span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3 py-1 rounded-md tracking-wider">Compare</span>'
-        . '<h1 class="font-display font-extrabold text-3xl sm:text-5xl text-white my-3">Which one should you buy?</h1>'
-        . '<p class="text-emerald-100 text-sm sm:text-base max-w-2xl">' . rocH($desc) . '</p></div>';
+    // Hero like Home and About (Deploy 89): the text, and four comparisons as picture tiles (both products).
+    $tiles = ''; $used = []; $cats = [];
+    // One a category first; then more from the same categories when there are fewer than four.
+    foreach ([true, false] as $oneEach) foreach ($by as $list) foreach ($list as [$cs, $a, $b]) {
+        if (count($used) >= 4 || isset($used[$cs]) || ($oneEach && isset($cats[$a['category_slug'] ?? '']))) continue;
+        $ia = rocProductImage($a, $categories); $ib = rocProductImage($b, $categories);
+        if ($ia === '' || $ib === '') continue;
+        $used[$cs] = 1; $cats[$a['category_slug'] ?? ''] = 1;
+        $tiles .= '<a href="/compare/' . rocH($cs) . '/" class="bg-slate-900/85 border-2 border-emerald-400/40 rounded-2xl p-3 backdrop-blur-md shadow-2xl group no-underline">'
+            . '<div class="bg-white rounded-xl mb-2 h-24 flex items-center justify-center gap-1 overflow-hidden px-1">'
+            . '<img width="120" height="120" src="' . rocH($ia) . '" alt="' . rocH((string)$a['title']) . '" class="h-20 w-[42%] object-contain group-hover:scale-105 transition-transform"/>'
+            . '<span class="font-display font-extrabold text-[10px] bg-emerald-500 text-white rounded-full w-7 h-7 flex items-center justify-center shrink-0">VS</span>'
+            . '<img width="120" height="120" src="' . rocH($ib) . '" alt="' . rocH((string)$b['title']) . '" class="h-20 w-[42%] object-contain group-hover:scale-105 transition-transform"/></div>'
+            . '<div class="text-[11px] font-display font-bold text-white line-clamp-2 leading-snug">' . rocH($a['title'] . ' vs ' . $b['title']) . '</div></a>';
+    }
+    $m .= '<div class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
+        . '<div class="absolute -top-20 -left-20 w-80 h-80 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>'
+        . '<div class="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl pointer-events-none"></div>'
+        . '<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10"><div class="lg:col-span-7 space-y-4">'
+        . '<span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5 badge-glow">Compare</span>'
+        . '<h1 class="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight">Which one should you buy?</h1>'
+        . '<p class="text-emerald-100 text-xs sm:text-sm leading-relaxed max-w-lg">' . rocH($desc) . '</p>'
+        . '<div class="flex flex-wrap gap-2.5 pt-2"><span class="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl">' . $n . ' comparisons</span>'
+        . '<span class="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl">Specs side by side</span></div></div>'
+        . ($tiles !== '' ? '<div class="lg:col-span-5 grid grid-cols-2 gap-3">' . $tiles . '</div>' : '') . '</div></div>';
+    $m .= '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm text-sm text-slate-700 leading-relaxed space-y-2">'
+        . '<h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">How we compare</h2>'
+        . '<p>Each page puts two of our top picks in a category side by side: the specs each one lists, the differences that matter in games, who should pick which, '
+        . 'their pros and cons and the questions buyers ask. We use the products\' own specs and listings and never show fixed prices, because prices change every day; Amazon shows today\'s price.</p>'
+        . '<p>Want a single product instead? See <a href="/products/" class="text-emerald-700 font-bold underline">all products</a> or <a href="/category/" class="text-emerald-700 font-bold underline">every category</a>.</p></div>';
     foreach ($by as $c => $list) {
         $m .= '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-3"><h2 class="font-display font-extrabold text-base text-slate-900 uppercase tracking-wider">' . rocH((string)($categories[$c]['name'] ?? $c)) . '</h2><div class="grid grid-cols-1 sm:grid-cols-2 gap-3">';
         foreach ($list as [$cs, $a, $b]) $m .= '<a href="/compare/' . rocH($cs) . '/" class="block border border-slate-200 hover:border-emerald-500 rounded-2xl p-4 no-underline group"><div class="font-bold text-sm text-slate-900 group-hover:text-emerald-700">' . rocH($a['title'] . ' vs ' . $b['title']) . ' &rarr;</div>'

@@ -586,6 +586,14 @@ RELEASES = [
          changes=['CMS > Comparisons: every X vs Y page with its state (live, waiting, hidden); change its text, write it again with the writer, write a waiting one now, or hide it'],
          checks=[dict(label='Comparisons editor', type='file', path='api/v1/cms/compare-admin.php')],
          pr=REPO + '88'),
+    dict(deploy=89, date='2026-10-17', title='Comparison pictures, Compare in the footer, game search',
+         changes=['Every comparison page shows both products in its header with a VS badge',
+                  'The Compare list page has a share picture and a short How we compare text',
+                  'Compare in the footer (EXPLORE HUB, after Can I Run) - cli-footer-compare.php --apply',
+                  'Header search: Games finds every Can I run page (new Steam games too) and opens the game page; See all filters the A to Z list',
+                  'Compare and Can I run pages get the Home / About hero (bright emerald with soft light glows); the Compare list shows four comparisons as picture tiles'],
+         checks=[dict(label='Game search', type='contains', path='roc-nav.js', text='/can-i-run/?json=1')],
+         pr=REPO + '89'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

@@ -40,6 +40,7 @@ export const DEFAULT_SITE_NAV = {
         { label: 'Products', url: '/products/', icon: 'cpu' },
         { label: 'Can I Run It? PC Game Checker', url: '/compatibility/', icon: 'gamepad' },
         { label: 'PC Game Requirements A to Z', url: '/can-i-run/', icon: 'monitor' },
+        { label: 'Compare', url: '/compare/', icon: 'scale' },
         { label: 'Gaming Platforms', url: '/gaming-platforms/', icon: 'grid' },
         { label: 'About Run On Console', url: '/about/', icon: 'info' },
       ] },

@@ -236,7 +236,7 @@
      default, then Blogs, Games, Guides, News and Platforms (the select is rewritten on every page). */
   (function () {
     var data = null, loading = null;
-    var PAGES = { products: '/products/', blogs: '/blogs/', games: '/compatibility/', guides: '/guides/', news: '/news/', platforms: '/gaming-platforms/' };
+    var PAGES = { products: '/products/', blogs: '/blogs/', games: '/can-i-run/', guides: '/guides/', news: '/news/', platforms: '/gaming-platforms/' };
     var LABELS = { products: 'Products', blogs: 'Blogs', games: 'Games & compatibility', guides: 'Guides', news: 'News', platforms: 'Gaming platforms' };
     var OPTIONS = '<option value="products">Products</option><option value="blogs">Blogs</option><option value="games">Games</option><option value="guides">Guides</option><option value="news">News</option><option value="platforms">Platforms</option>';
     function scopeOf(f) { var v = f['in'] ? f['in'].value : 'products'; return PAGES[v] ? v : 'products'; }
@@ -263,7 +263,8 @@
       if (data) return Promise.resolve(data);
       if (loading) return loading;
       function get(u) { return fetch(u, { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; }); }
-      loading = Promise.all([get('/products/?json=1'), get('/blogs/?json=1'), get('/roc-games.json'), get('/gaming-platforms/?json=1')]).then(function (r) {
+      // Games: every "Can I run" page (/can-i-run/?json=1, Deploy 89); the old checker list only when that is not there.
+      loading = Promise.all([get('/products/?json=1'), get('/blogs/?json=1'), get('/can-i-run/?json=1').then(function (x) { return Array.isArray(x) && x.length ? x : get('/roc-games.json'); }), get('/gaming-platforms/?json=1')]).then(function (r) {
         // /blogs/?json=1 has every post: blogs, guides and news (their address says which).
         var posts = r[1] || [], kind = function (k) { return posts.filter(function (p) { return String(p.u || '').indexOf('/' + k + '/') === 0; }); };
         data = { products: r[0] || [], blogs: kind('blogs'), guides: kind('guides'), news: kind('news'), games: r[2] || [], platforms: Array.isArray(r[3]) ? r[3] : [] };
@@ -336,7 +337,7 @@
 
     function targetUrl(scope, q) {
       if (!PAGES[scope]) scope = 'products';
-      // Guides and platforms have no search page: the list itself.
+      // Guides and platforms have no search page: the list itself. Games: the A to Z list, filtered by q.
       return PAGES[scope] + (q && scope !== 'guides' && scope !== 'platforms' ? '?q=' + encodeURIComponent(q) : '');
     }
 
