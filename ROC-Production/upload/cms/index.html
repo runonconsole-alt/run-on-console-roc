@@ -1409,7 +1409,9 @@ function renderShell(){
   // Keep the sidebar where it was scrolled to when the page is redrawn.
   var oldSide = document.querySelector('.side'), sideTop = oldSide ? oldSide.scrollTop : 0;
   function item(v,label,ic,ct){
-    return '<button class="sitem'+(S.view===v?' on':'')+'" data-go="'+v+'">'+
+    // The name can be changed by an administrator: double-click it (Deploy 91, saved in cms_nav_labels).
+    label=(S.navLabels&&S.navLabels[v])||label;
+    return '<button class="sitem'+(S.view===v?' on':'')+'" data-go="'+v+'"'+(S.user&&S.user.role==='administrator'?' title="Double-click to rename"':'')+'>'+
       '<span class="ic">'+ic+'</span><span>'+esc(label)+'</span>'+
       (ct!==undefined?'<span class="ct'+(v==='activity'||v==='messages'?' new':'')+'">'+ct+'</span>':'')+'</button>';
   }
@@ -1421,7 +1423,7 @@ function renderShell(){
       (can('activity','view')?item('activity','Live activity','⚡',S.actUnseen?S.actUnseen:undefined):'')+
       (admin?item('messages','Messages','✉',S.msgCounts&&S.msgCounts['new']?S.msgCounts['new']:undefined):'')+'</div>'+
     '<div class="snav"><div class="slabel">Content</div>'+
-      (can('blogs','view')?item('blogs','Blogs, guides & news','✎',S.blogs.length)+item('socialkits','Social posts','📱'):'')+
+      (can('blogs','view')?item('blogs','Updates','✎',S.blogs.length)+item('socialkits','Social posts','📱'):'')+
       (can('media','view')?item('media','Media library','❖',S.media.length):'')+
       (can('pages','view')?item('cmspages','Pages','▦',S.pages.length+(S.sitePagesN||0))+item('metas','Metas','🏷'):'')+
       (can('pages','view')?item('platforms','Gaming platforms','◈'):'')+
@@ -1444,6 +1446,13 @@ function renderShell(){
   var newSide = app.querySelector('.side'); if (newSide) newSide.scrollTop = sideTop;
   app.querySelectorAll('[data-go]').forEach(function(b){
     b.addEventListener('click',function(){ go(b.dataset.go); });
+    if(S.user&&S.user.role==='administrator') b.addEventListener('dblclick',function(e){
+      e.preventDefault();
+      var cur=(b.querySelector('span:nth-child(2)')||{}).textContent||'';
+      var nv=window.prompt('New name for "'+cur+'" in the sidebar (leave empty for the built-in name):', cur);
+      if(nv===null) return;
+      api('cms-labels.php',{view:b.dataset.go,label:nv}).then(function(r){ S.navLabels=r.labels||{}; toast(r.message,'ok'); renderShell(); }).catch(function(err){ toast(err.message,'bad'); });
+    });
   });
   app.querySelectorAll('.accents [data-accent]').forEach(function(b){
     b.addEventListener('click',function(){
@@ -1757,7 +1766,7 @@ function renderBlogs(m){
     return true;
   });
 
-  m.innerHTML = head('Blogs, guides & news', rows.length+' of '+S.blogs.length+' shown · '+nBlog+' blog posts (/blogs/) · '+nGuide+' guides (/guides/) · '+nNews+' news stories (/news/)',
+  m.innerHTML = head((S.navLabels&&S.navLabels.blogs)||'Updates', rows.length+' of '+S.blogs.length+' shown · '+nBlog+' blog posts (/blogs/) · '+nGuide+' guides (/guides/) · '+nNews+' news stories (/news/)',
     can('blogs','edit')?'<button class="btn primary" id="newpost">＋ New post</button>':'')+
   '<div class="body"><div class="card">'+
     '<div class="chead" style="gap:8px">'+
@@ -5831,6 +5840,7 @@ function closeModal(){ var v=$('.veil'); if(v) v.remove(); document.removeEventL
 /* ----------------------------------------------------------------- boot */
 
 async function load(){
+  if(!S.navLabels){ try{ S.navLabels=(await api('cms-labels.php')).labels||{}; }catch(e){ S.navLabels={}; } }   // sidebar names (Deploy 91)
   try{
     var [b,md] = await Promise.all([
       can('blogs','view') ? api('blogs.php').catch(function(){ return {blogs:[]}; }) : {blogs:[]},

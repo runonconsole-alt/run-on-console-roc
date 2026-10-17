@@ -67,7 +67,7 @@
   function fmt(s) {
     return esc(s).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
       .replace(/\[([^\]]+)\]\((\/[^)\s]*|https:\/\/[^)\s]+)\)/g, function (m, t, u) { return '<a href="' + u + '"' + (/^https:/.test(u) && u.indexOf('runonconsole.com') < 0 ? ' target="_blank" rel="noopener nofollow"' : '') + '>' + t + '</a>'; })
-      .replace(/(^|\s)(\/(?:compatibility|products|blogs|news|category|contact|gaming-platforms)\/[a-z0-9\/?=&%-]*)/g, '$1<a href="$2">$2</a>');
+      .replace(/(^|\s)(\/(?:compatibility|products|blogs|news|guides|category|contact|gaming-platforms|can-i-run|compare|updates)\/[a-z0-9\/?=&%-]*)/g, '$1<a href="$2">$2</a>');
   }
 
   var btn, box, body, form, input, sendBtn, micBtn, att, pic = null, busy = false, rec = null, user = { signed_in: false, name: '' }, styled = false;

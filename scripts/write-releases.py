@@ -601,6 +601,12 @@ RELEASES = [
                   'ROC links our X vs Y pages when asked which product is better'],
          checks=[dict(label='Best-of lists', type='file', path='api/v1/cms/best-lib.php')],
          pr=REPO + '90'),
+    dict(deploy=91, date='2026-10-17', title='Short ROC answers, PC builds for every game, sidebar names',
+         changes=['ROC answers in one or two lines and links the page of the site with a clear anchor (More: ...), so visitors read the page; it knows the best-of lists',
+                  'Every Can I run page shows PC builds from our products: Minimum and Recommended (graphics card, processor and memory that fits the processor: DDR4 or DDR5)',
+                  'CMS: the sidebar item is Updates, and an administrator can rename any sidebar item (double-click it)'],
+         checks=[dict(label='Sidebar names', type='file', path='api/v1/cms/cms-labels.php')],
+         pr=REPO + '91'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

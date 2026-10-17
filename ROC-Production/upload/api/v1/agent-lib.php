@@ -47,7 +47,10 @@ function rocAgentSystem(string $lang, array $facts): string {
                                  : 'Sorry, that is outside my range. Ask me anything about gaming!';
     return "You are ROC, the friendly gaming assistant of the website Run On Console (runonconsole.com). Rules:\n"
          . "- Reply in the visitor's language: " . ($lang === 'roman-urdu' ? 'Roman Urdu (Urdu written in English letters), simple words' : 'simple English')
-         . ". If the visitor writes in Urdu script, reply in Roman Urdu. Keep it short: at most 120 words, no headings.\n"
+         . ". If the visitor writes in Urdu script, reply in Roman Urdu. No headings.\n"
+         // The website is bigger than ROC (owner, Deploy 91): short answers that send the visitor to the page.
+         . "- SHORT ANSWER + LINK: when this website has a page about the question (a game's requirements page, a product, a comparison, a category best-of list, a guide, a blog or news story, a platform guide), answer in ONE or TWO short sentences only (at most 40 words: the direct answer, e.g. the winner, the pick, yes/no, the minimum card), then one line starting \"More:\" with one or two Markdown links to those pages, written as [descriptive anchor text](/path/), for example \"More: [AMD Ryzen 5 5500F vs 7600X3D](/compare/amd-ryzen-5-5500f-vs-amd-ryzen-5-7600x3d/)\". The anchor names the page (product, game or topic), never 'click here'. Do not repeat the page's details in the chat.\n"
+         . "- Longer answers (at most 120 words) only when no page of this website covers it, or for the step by step PC check.\n"
          . "- Roman Urdu means URDU, never Hindi: no Hindi words such as kripya, dhanyavaad, prashn, uttar, sahayata, uplabdh, avashyak, vishay, samasya. Use Urdu: meharbani kar ke, shukriya, sawal, jawab, madad, mojood, zaroori, masla.\n"
          . "- Talk like a friendly gamer friend, the way ChatGPT or Claude chat: natural, warm, varied sentences, never the same reply twice, and follow the conversation. Answer the visitor's actual message first.\n"
          . "- Small talk is fine (hi, salam, how are you, kya haal hai, who are you, what can you do, thanks): reply naturally in one or two lines, and you may ask what they play or how you can help with gaming.\n"
@@ -524,6 +527,18 @@ function rocAgentSite(PDO $pdo, string $q): array {
             usort($cmp, function ($x, $y) { return $y[0] <=> $x[0]; });
             if ($cmp) $out['comparisons_on_this_site'] = array_map(function ($x) { return $x[1]; }, array_slice($cmp, 0, $named ? 3 : 6));
             elseif ($wantsCompare) $out['comparisons_on_this_site'] = [['page' => '/compare/', 'name' => 'All comparisons']];
+        }
+        // "Best X" questions: the best-of list of that category (its page and the top picks), Deploy 91.
+        if (preg_match('/\bbest\b|\btop\b|recommend|suggest|konsa|kaunsa|kon sa|kaun sa|behtareen|sab se acha|sabse acha/i', $q) && is_file(__DIR__ . '/cms/best-lib.php')) {
+            require_once __DIR__ . '/cms/best-lib.php';
+            $bcat = rocAgentCategory($q); $lists = [];
+            foreach (rocBestTexts($pdo) as $cs => $b) {
+                if (!empty($b['hidden']) || empty($b['picks']) || ($bcat !== '' && $cs !== $bcat)) continue;
+                $names = [];
+                try { $st = $pdo->prepare('SELECT slug, title FROM products WHERE slug IN (' . implode(',', array_fill(0, count($b['picks']), '?')) . ')'); $st->execute(array_column($b['picks'], 'id')); foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) $names[$r['slug']] = $r['title']; } catch (\Throwable $e) {}
+                $lists[] = ['page' => '/category/' . $cs . '/', 'top_picks' => array_values(array_filter(array_map(function ($p) use ($names) { return isset($names[$p['id']]) ? $p['award'] . ': ' . $names[$p['id']] . ' (/products/' . $p['id'] . '/)' : null; }, (array)$b['picks'])))];
+            }
+            if ($lists) $out['best_of_lists'] = array_slice($lists, 0, $bcat !== '' ? 1 : 4);
         }
         foreach (array_slice($hit, 0, 2) as $h) {
             $r = $h[1];
