@@ -329,7 +329,8 @@ function rocAgentAbout(): array {
                     'products' => '/products/', 'pc_hardware' => '/category/pc-hardware/', 'gaming_hardware' => '/category/gaming-hardware/',
                     'platforms' => '/gaming-platforms/', 'updates' => '/updates/ (blogs, guides and news together)', 'blogs' => '/blogs/', 'guides' => '/guides/', 'news' => '/news/',
                     'write_for_us' => '/write-for-us/', 'privacy_policy_and_affiliate_disclosure' => '/privacy-policy/', 'terms' => '/terms-and-conditions/',
-                    'author' => '/author/roc-team/', 'sign_up' => '/auth/signup/', 'sign_in' => '/auth/login/', 'profile_and_wishlist' => '/profile/'],
+                    'author' => '/author/roc-team/', 'sign_up' => '/auth/signup/', 'sign_in' => '/auth/login/', 'profile_and_wishlist' => '/profile/',
+                    'comparisons' => '/compare/ ("X vs Y" pages: two of our top picks side by side, specs, differences, who should pick which: /compare/{a}-vs-{b}/)'],
         'link_rule' => 'Only link pages listed here or in this_website (never make up an address). Questions about privacy, cookies, affiliate links or data: /privacy-policy/. Rules of use: /terms-and-conditions/. Help, feedback, partnerships: /contact/ or /write-for-us/.',
         'not_shared' => 'Do not invent or share anything not listed here (owner names, revenue, traffic, servers, passwords, keys, internal tools). Say it is not public.',
     ];
@@ -510,6 +511,20 @@ function rocAgentSite(PDO $pdo, string $q): array {
             foreach (array_unique([$n, $short]) as $k) if (strlen($k) >= 6 && strpos($t, ' ' . $k . ' ') !== false) { $hit[$r['slug']] = [strlen($k), $r]; }
         }
         uasort($hit, function ($a, $b) { return $b[0] <=> $a[0]; });
+        // Our "X vs Y" pages with a product the question names, or any when it asks to compare (Deploy 90).
+        $wantsCompare = (bool)preg_match('/vs|versus|compare|comparison|better|difference|ya\s+phir|konsa|kaunsa|kon sa|kaun sa|behtar/i', $q);
+        if (($hit || $wantsCompare) && is_file(__DIR__ . '/cms/compare-lib.php')) {
+            require_once __DIR__ . '/cms/compare-lib.php';
+            $ct = rocCompareTexts($pdo); $named = array_keys($hit); $cmp = [];
+            foreach (rocComparePairs($pdo) as $cs => [$a, $b]) {
+                if (empty($ct[$cs]['summary']) || !empty($ct[$cs]['hidden'])) continue;
+                $score = (in_array($a['slug'], $named, true) ? 1 : 0) + (in_array($b['slug'], $named, true) ? 1 : 0);
+                if ($score > 0 || ($wantsCompare && !$named)) $cmp[] = [$score, ['page' => '/compare/' . $cs . '/', 'name' => $a['title'] . ' vs ' . $b['title'], 'short_answer' => mb_substr((string)$ct[$cs]['summary'], 0, 300)]];
+            }
+            usort($cmp, function ($x, $y) { return $y[0] <=> $x[0]; });
+            if ($cmp) $out['comparisons_on_this_site'] = array_map(function ($x) { return $x[1]; }, array_slice($cmp, 0, $named ? 3 : 6));
+            elseif ($wantsCompare) $out['comparisons_on_this_site'] = [['page' => '/compare/', 'name' => 'All comparisons']];
+        }
         foreach (array_slice($hit, 0, 2) as $h) {
             $r = $h[1];
             $out['products_named'][] = array_filter(['name' => $r['title'], 'brand' => $r['brand'], 'category' => $r['category'], 'page' => '/products/' . $r['slug'] . '/',
@@ -690,7 +705,7 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
               'recommendations' => $products ? 'shown' : 'only when the visitor asks for gear or upgrades: then tell them to ask, for example "suggest a graphics card"',
               'catalog_categories' => 'mice, keyboards, headsets and audio, speakers, monitors, graphics cards, processors, RAM, PC cases, gaming chairs, handhelds, laptops',
               'links' => ['checker' => '/compatibility/', 'game_requirements' => '/can-i-run/', 'products' => '/products/', 'platforms' => '/gaming-platforms/', 'blogs' => '/blogs/', 'guides' => '/guides/',
-                          'news' => '/news/', 'contact' => '/contact/', 'privacy_policy' => '/privacy-policy/', 'terms' => '/terms-and-conditions/']];
+                          'news' => '/news/', 'contact' => '/contact/', 'privacy_policy' => '/privacy-policy/', 'terms' => '/terms-and-conditions/', 'comparisons' => '/compare/']];
 
     $reply = null; $engine = 'basic';
     if ($useAi && ($key = trim((string)rocBlogGet($pdo, 'blog_groq_key', ''))) !== '') {
