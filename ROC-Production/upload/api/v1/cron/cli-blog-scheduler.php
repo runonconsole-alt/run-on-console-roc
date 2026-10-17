@@ -148,6 +148,15 @@ try {
 } catch (\Throwable $e) { echo date('c') . ' Steam update error: ' . $e->getMessage() . "
 "; }
 
+// Off-page researcher (Deploy 93): only when turned on in CMS > Off-page; once a day after 12:00 Pakistan time.
+try {
+    require_once $ROOT . '/api/v1/cms/offpage-lib.php';
+    $op = rocOffpageTick($pdo);
+    if ($op !== null) echo date('c') . ' ' . $op . "
+";
+} catch (\Throwable $e) { echo date('c') . ' off-page error: ' . $e->getMessage() . "
+"; }
+
 // Daily database backup (api/v1/cms/backup-lib.php): the first run of each Pakistan day makes it, 7 kept.
 try {
     require_once $ROOT . '/api/v1/cms/backup-lib.php';

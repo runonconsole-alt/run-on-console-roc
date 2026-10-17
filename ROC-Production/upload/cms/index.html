@@ -1244,6 +1244,37 @@ async function renderGames(m){
   }); });
 }
 
+/* ---------------------------------------------------------- off-page */
+/* The server's link researcher (Deploy 93). Off by default: while the owner has Claude, the daily research
+   is done by Claude into the ROC Listing Kit page; turn this on when that ends. Never posts anything. */
+async function renderOffpage(m){
+  m.innerHTML=head('Off-page','Loading…')+'<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d; try{ d=await api('offpage.php'); }catch(e){ m.innerHTML=head('Off-page','')+'<div class="body"><div class="alert bad">'+esc(e.message)+'</div></div>'; return; }
+  if(S.view!=='offpage') return;
+  var admin=S.user&&S.user.role==='administrator', last=(d.log||[])[0];
+  var drops=last&&last.dropped?Object.keys(last.dropped).map(function(k){ return k+': '+last.dropped[k]; }).join(' · '):'';
+  var day='';
+  m.innerHTML=head('Off-page','Free, gaming-niche link opportunities with drafts. You post them yourself.',
+      admin?'<button class="btn" id="op-run">Run now</button><button class="btn '+(d.auto?'':'primary')+'" id="op-auto">'+(d.auto?'Turn off':'Turn on daily research')+'</button>':'')+
+    '<div class="body">'+
+    '<div class="alert '+(d.auto?'good':'info')+'"><b>'+(d.auto?'On':'Off')+'.</b> '+(d.auto?'Runs every day after 12:00 (Pakistan time) with the free Groq key.':'While Claude does the daily research (ROC Listing Kit page), keep this off. Turn it on when the Claude subscription ends.')+
+      ' Rules: free only, gaming niche only, the server opens every page and drops paid, off-topic, spam and link-farm sites. It never posts, comments or makes accounts.</div>'+
+    (last?'<div class="hint" style="margin:8px 0">Last run '+esc(last.date)+': '+(last.error?'<b style="color:var(--bad)">'+esc(last.error)+'</b>':last.kept+' kept'+(drops?' · dropped: '+esc(drops):''))+'</div>':'')+
+    '<div class="card">'+((d.items||[]).length?(d.items||[]).map(function(o){
+      var h=(o.date!==day?'<div class="chead"><h3>'+esc(day=o.date)+'</h3></div>':'');
+      return h+'<div class="cbody" style="border-top:1px solid var(--line);'+(o.status==='skip'?'opacity:.55':'')+'">'+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:baseline"><b>'+esc(o.title)+'</b><span class="tag">'+esc(o.kind)+'</span>'+(o.status==='done'?'<span class="tag published">Done</span>':'')+'</div>'+
+        '<a href="'+esc(o.url)+'" target="_blank" rel="noopener">'+esc(o.url)+'</a>'+
+        (o.why?'<div class="hint">'+esc(o.why)+' · Link: '+esc(o.link_to)+'</div>':'')+
+        (o.draft?'<pre style="white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0;font-size:12px">'+esc(o.draft)+'</pre>':'')+
+        '<div style="display:flex;gap:6px"><button class="btn sm" data-opc="'+esc(o.id)+'">Copy draft</button><button class="btn sm" data-ops="'+esc(o.id)+'" data-st="done">Done</button><button class="btn sm" data-ops="'+esc(o.id)+'" data-st="skip">Skip</button></div></div>';
+    }).join(''):'<div class="empty"><div class="big">🔗</div><div>No opportunities here yet. '+(d.auto?'The next run adds them after 12:00.':'It is off: Claude adds them to the ROC Listing Kit page for now.')+'</div></div>')+'</div></div>';
+  var run=$('#op-run',m); if(run) run.addEventListener('click',async function(){ run.disabled=true; run.textContent='Researching… (1-2 min)'; try{ var r=await api('offpage.php',{action:'run'}); toast(r.message,'ok'); }catch(e){ toast(e.message,'bad'); } renderOffpage(m); });
+  var au=$('#op-auto',m); if(au) au.addEventListener('click',async function(){ try{ var r=await api('offpage.php',{action:'auto',on:!d.auto}); toast(r.message,'ok'); }catch(e){ toast(e.message,'bad'); } renderOffpage(m); });
+  m.querySelectorAll('[data-opc]').forEach(function(b){ b.addEventListener('click',function(){ var o=(d.items||[]).filter(function(x){return x.id===b.dataset.opc;})[0]; if(o&&navigator.clipboard) navigator.clipboard.writeText(o.draft||'').then(function(){ toast('Draft copied','ok'); }); }); });
+  m.querySelectorAll('[data-ops]').forEach(function(b){ b.addEventListener('click',async function(){ var o=(d.items||[]).filter(function(x){return x.id===b.dataset.ops;})[0]; try{ await api('offpage.php',{action:'status',id:b.dataset.ops,status:(o&&o.status===b.dataset.st)?'':b.dataset.st}); }catch(e){ toast(e.message,'bad'); } renderOffpage(m); }); });
+}
+
 /* ---------------------------------------------------------- comparisons */
 /* "X vs Y" pages at /compare/ (Deploy 88): the top 4 products of each category against each other.
    The writer writes each verdict (1 a scheduler run); here it can be changed, written again or hidden. */
@@ -1430,7 +1461,7 @@ function renderShell(){
       item('games','Games','🎮')+
       (can('products','view')?item('products','Products','▣')+item('product-categories','Product categories','▤')+item('compare','Comparisons','🆚'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
-      item('builder','Site builder','✦')+item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Updates writer','✍')+item('agent','ROC assistant','🤖')+item('announce','Announcement bar','📣')+
+      item('builder','Site builder','✦')+item('offpage','Off-page','🔗')+item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Updates writer','✍')+item('agent','ROC assistant','🤖')+item('announce','Announcement bar','📣')+
       item('siteusers','Site users','👤')+item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+item('siteinfo','Website info','ℹ')+'</div>':'')+
     '<div class="sfoot"><div class="who"><div class="av">'+
       esc((S.user.username||'?').slice(0,2).toUpperCase())+'</div>'+
@@ -1501,6 +1532,7 @@ function renderView(){
   if(S.view==='platforms' && can('pages','view')) return renderPlatforms(m);
   if(S.view==='games') return renderGames(m);
   if(S.view==='compare') return renderCompare(m);
+  if(S.view==='offpage') return renderOffpage(m);
   if(S.view==='activity') return renderActivity(m);
   if(S.view==='messages' && S.user.role==='administrator') return renderMessages(m);
   if(S.view==='social') return renderSocial(m);
