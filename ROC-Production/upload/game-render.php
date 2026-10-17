@@ -196,6 +196,14 @@ function rocGpStyles(): string {
         . ".gp-parts{display:grid;gap:.8rem;grid-template-columns:1fr}.gp-parts>div{border:1px solid #e2e8f0;border-radius:1rem;padding:.9rem 1rem;background:#f8fafc}"
         . ".gp-parts h3{font-family:Outfit,Inter,sans-serif;font-weight:800;color:#0f172a;font-size:1rem;margin-bottom:.4rem}.gp-parts ul{list-style:disc;padding-left:1.2rem;color:#334155;font-size:.9rem;line-height:1.7}"
         . ".gp-prod{display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}"
+        . ".gp-builds{display:grid;gap:1rem;grid-template-columns:1fr}@media(min-width:760px){.gp-builds{grid-template-columns:1fr 1fr}}"
+        . ".gp-build{border:2px solid #d1fae5;border-radius:1.1rem;padding:1rem;background:#f8fffb}.gp-build:last-child{border-color:#34d399}"
+        . ".gp-build h3{font-family:Outfit,Inter,sans-serif;font-weight:800;font-size:1.05rem;color:#064e3b}.gp-build .d{font-size:.8rem;color:#64748b;margin:.15rem 0 .6rem}"
+        . ".gp-build ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.55rem}.gp-build li{display:flex;align-items:center;gap:.7rem;background:#fff;border:1px solid #e2e8f0;border-radius:.8rem;padding:.5rem .6rem}"
+        . ".gp-build li img{width:56px;height:56px;object-fit:contain;border-radius:.5rem;flex:none}.gp-build li div{flex:1;min-width:0}"
+        . ".gp-build .k{display:block;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#059669}.gp-build .t{font-weight:700;font-size:.85rem;color:#0f172a;text-decoration:none}.gp-build .t:hover{color:#047857}"
+        . ".gp-build .y{flex:none;background:#10b981;color:#052e2b;font-weight:800;font-size:.72rem;padding:.4rem .7rem;border-radius:.6rem;text-decoration:none}"
+        . ".gp-link{background:none;border:0;padding:0;color:#047857;font-weight:800;text-decoration:underline;cursor:pointer;font:inherit}"
         . ".gp-p{border:1px solid #e2e8f0;border-radius:1.1rem;background:#fff;overflow:hidden;display:flex;flex-direction:column}"
         . ".gp-p img{width:100%;height:150px;object-fit:contain;background:#fff;padding:.6rem}.gp-p .b{padding:.9rem;display:flex;flex-direction:column;gap:.35rem;flex:1}"
         . ".gp-p .k{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#059669}"
@@ -391,6 +399,36 @@ if ($pdo) {
 }
 $picks = array_filter($picks, function ($p) { return !empty($p[1]); });
 
+/* PC builds for this game (Deploy 91): the lowest graphics card, processor and memory kit of our product
+   guides that reach the minimum, and the ones that reach the recommended specs. */
+$builds = [];
+if ($pdo) {
+    $part = function (string $cat, $need) use ($pdo) { $r = rocGpProducts($pdo, $cat, $need !== null ? (float)$need : null, 1); return $r[0] ?? null; };
+    // Memory that fits the processor: AM4 Ryzen (1000-5000) and older Intel take DDR4; AM5 Ryzen (7000+) and Core Ultra take DDR5.
+    $ddr = function (?array $cpu) {
+        $t = strtolower((string)($cpu['title'] ?? ''));
+        if (preg_match('/ryzen\s*\d\s*[1-5]\d{3}|core\s*i\d[\s-]*([4-9]|10|11)\d{3}/', $t)) return 'ddr4';
+        if (preg_match('/ryzen\s*\d\s*[7-9]\d{3}|core\s*ultra/', $t)) return 'ddr5';
+        return '';
+    };
+    $mk = function (array $req) use ($part, $pdo, $ddr) {
+        $ram = max(8, (float)($req['ram'] ?? 8));
+        $cpu = $part('cpu', $req['cpu'] ?? null);
+        $type = $ddr($cpu); $mem = null;
+        foreach (rocGpProducts($pdo, 'ram', $ram, 20) as $r) if ($type === '' || stripos((string)$r['title'], $type) !== false) { $mem = $r; break; }
+        // A kit of the right type whose name has no size ("DDR4-3600"): better than the wrong type.
+        if ($mem === null && $type !== '') foreach (rocGpProducts($pdo, 'ram', null, 50) as $r) if (stripos((string)$r['title'], $type) !== false) { $mem = $r; break; }
+        return array_filter(['Graphics card' => $part('gpu', $req['gpu'] ?? null), 'Processor' => $cpu,
+                             'Memory (' . rtrim(rtrim(number_format($ram, 1), '0'), '.') . ' GB+' . ($type !== '' ? ', ' . strtoupper($type) : '') . ')' => $mem]);
+    };
+    $bMin = $mk($rMin); $bRec = $mk($rRec);
+    $ids = function (array $b) { return implode('|', array_map(function ($x) { return $x['slug']; }, $b)); };
+    if (count($bRec) >= 2) {
+        if ($ids($bMin) !== $ids($bRec) && count($bMin) >= 2) $builds[] = ['Minimum build', 'Plays ' . $name . ' on low to medium settings', $bMin];
+        $builds[] = ['Recommended build', 'Plays ' . $name . ' on high settings (the recommended specs)', $bRec];
+    }
+}
+
 /* head */
 $crumbs = [['Home', '/'], ['Can I run it?', '/can-i-run/'], [$name, rocGpPath($g)]];
 $ld = [rocGpCrumbs($crumbs),
@@ -471,7 +509,22 @@ $m .= '</div><p style="margin-top:.9rem">How common PCs do: ' . implode('; ', ar
     . '<p class="gp-src" style="margin-top:.6rem">Parts with the same speed (and newer, faster ones) work too. Laptop versions of a graphics card are usually a little slower.</p></section>';
 
 // Upgrade picks
-if ($picks) {
+if ($builds) {
+    $m .= '<section class="gp-card" id="pc-build"><h2>PC builds for ' . rocH($name) . '</h2><p>Parts from our product guides: the lowest of each that reaches the game\'s ' . (count($builds) > 1 ? 'minimum and recommended' : 'recommended') . ' specs. Prices change every day, so Amazon shows today\'s price.</p>'
+        . '<div class="gp-builds" style="margin-top:.9rem">';
+    foreach ($builds as [$bt, $bd, $parts]) {
+        $m .= '<div class="gp-build"><h3>' . rocH($bt) . '</h3><p class="d">' . rocH($bd) . '</p><ul>';
+        foreach ($parts as $label => $pr) {
+            $buy = trim((string)($pr['affiliate_amazon'] ?? ''));
+            $m .= '<li>' . (!empty($pr['image']) ? '<img src="' . rocH($pr['image']) . '" alt="' . rocH($pr['image_alt'] ?: $pr['title']) . '" width="56" height="56" loading="lazy">' : '')
+                . '<div><span class="k">' . rocH($label) . '</span><a class="t" href="/products/' . rocH($pr['slug']) . '/">' . rocH($pr['title']) . '</a></div>'
+                . (preg_match('#^https?://#i', $buy) ? '<a class="y" href="' . rocH($buy) . '" target="_blank" rel="sponsored nofollow noopener">Amazon</a>' : '') . '</li>';
+        }
+        $m .= '</ul></div>';
+    }
+    $m .= '</div><p class="gp-note">Already have some parts? <button type="button" class="gp-link" data-roc-ask="' . rocH('Can my PC run ' . $name . '? My graphics card: , processor: , RAM: ') . '">Ask ROC</button> what to upgrade first. As an Amazon Associate we earn from qualifying purchases.</p></section>';
+}
+if ($picks && !$builds) {
     $m .= '<section class="gp-card"><h2>Upgrade picks for ' . rocH($name) . '</h2><p>Parts from our product guides that reach the recommended specs.</p><div class="gp-prod" style="margin-top:.9rem">';
     foreach ($picks as [$label, $rows]) foreach ($rows as $pr) {
         $buy = trim((string)($pr['affiliate_amazon'] ?? ''));

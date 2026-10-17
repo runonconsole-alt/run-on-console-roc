@@ -500,7 +500,7 @@
 (function () {
   if (window.__rocChat || /^\/cms\//.test(location.pathname)) return;
   var s = document.createElement('script');
-  s.src = '/roc-chat.js?v=85';
+  s.src = '/roc-chat.js?v=91';
   s.defer = true;
   (document.head || document.documentElement).appendChild(s);
 })();
