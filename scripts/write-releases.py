@@ -612,6 +612,12 @@ RELEASES = [
                   'Checks: a hint left in [brackets], under 1,000 words, no H2, fewer than 2 links to our pages, cover picture without alt text'],
          checks=[dict(label='Templates', type='contains', path='cms/index.html', text='POST_TEMPLATES')],
          pr=REPO + '92'),
+    dict(deploy=93, date='2026-10-17', title='Off-page researcher on the server (off for now)',
+         changes=['CMS > Off-page: the server finds free, gaming-niche link opportunities with drafts, once a day after 12:00, with the free Groq key',
+                  'Strict rules: free only, gaming sites only, the server opens every page and drops paid, off-topic, spam, link-farm and dead pages; it never posts',
+                  'Off until turned on: while Claude does the daily research (ROC Listing Kit page) keep it off; turn it on when the Claude subscription ends'],
+         checks=[dict(label='Off-page', type='file', path='api/v1/cms/offpage.php')],
+         pr=REPO + '93'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
