@@ -169,11 +169,15 @@ function rocGpCrumbHtml(array $crumbs): string {
 
 function rocGpStyles(): string {
     return "<style>"
-        . ".gp-hero{background:linear-gradient(135deg,#022c22,#065f46 55%,#0f766e);color:#fff;border-radius:1.5rem;padding:1.6rem 1.4rem;box-shadow:0 20px 40px -24px rgba(4,120,87,.7)}"
+        // The same hero as Home and About (Deploy 89): bright emerald with soft light glows.
+        . ".gp-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#059669,#10b981 55%,#0d9488);color:#fff;border-radius:1.5rem;padding:1.6rem 1.4rem;border:1px solid rgba(16,185,129,.3);box-shadow:0 25px 50px -12px rgba(0,0,0,.25)}"
+        . ".gp-hero:before,.gp-hero:after{content:'';position:absolute;width:20rem;height:20rem;border-radius:999px;filter:blur(64px);pointer-events:none}"
+        . ".gp-hero:before{top:-5rem;left:-5rem;background:rgba(52,211,153,.25)}.gp-hero:after{bottom:-5rem;right:-5rem;background:rgba(45,212,191,.25)}"
+        . ".gp-hero>*{position:relative;z-index:1}"
         . ".gp-hero h1{font-family:Outfit,Inter,sans-serif;font-weight:800;font-size:1.9rem;line-height:1.15;color:#fff}"
-        . ".gp-hero p{color:#d1fae5;font-size:.95rem;line-height:1.6;margin-top:.6rem;max-width:46rem}"
+        . ".gp-hero p{color:#ecfdf5;font-size:.95rem;line-height:1.6;margin-top:.6rem;max-width:46rem}"
         . ".gp-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.9rem}.gp-tag{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:.2rem .7rem;font-size:.72rem;font-weight:700;color:#ecfdf5}"
-        . ".gp-tag.w{background:#34d399;color:#052e2b;border-color:#34d399}"
+        . ".gp-tag.w{background:#fff;color:#065f46;border-color:#fff}"
         . ".gp-card{background:#fff;border:1px solid #e2e8f0;border-radius:1.25rem;padding:1.2rem 1.25rem}"
         . ".gp-card h2{font-family:Outfit,Inter,sans-serif;font-weight:800;font-size:1.35rem;color:#0f172a;margin-bottom:.8rem}"
         . ".gp-card p{color:#475569;line-height:1.7;font-size:.95rem}.gp-card p+p{margin-top:.6rem}"
