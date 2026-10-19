@@ -65,11 +65,18 @@ function rocGpAll(string $root): array {
         if (preg_match(ROC_GP_SOFTWARE, (string)($g['g'] ?? '')) || preg_match('/benchmark tool/i', (string)$g['t'])) continue;
         $slug = rocGpSlug((string)$g['t']);
         if (!preg_match('/[a-z]/', $slug) || strlen($slug) < 2) continue;   // only non-Latin letters
+        $first = $slug;
         if (isset($all[$slug])) $slug .= '-' . $id;
         $seen[$id] = 1;
         $g['slug'] = $slug;
         $g['name'] = rocGpName((string)$g['t']);
         $g['rank'] = count($all) + 1;
+        // Two Steam games with one name (DOOM 3 and its re-release): both names get their Steam year,
+        // so the pages do not share a title.
+        if ($slug !== $first && !empty($g['y']) && !empty($all[$first]['y']) && (int)$g['y'] !== (int)$all[$first]['y']) {
+            if (strpos($all[$first]['name'], ' (') === false) $all[$first]['name'] .= ' (' . (int)$all[$first]['y'] . ')';
+            $g['name'] .= ' (' . (int)$g['y'] . ')';
+        }
         $all[$slug] = $g;
     }
     // Games hidden in CMS > Games (Deploy 85): no page, not in the lists, the sitemap or "similar games".

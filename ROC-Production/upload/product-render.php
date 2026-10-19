@@ -561,9 +561,10 @@ function rocCatLinks(PDO $pdo, string $catSlug): array {
     if ($words) {
         try {
             $w = implode(' OR ', array_fill(0, count($words), 'LOWER(title) LIKE ?'));
-            $st = $pdo->prepare("SELECT title, slug FROM blogs WHERE status = 'published' AND (category IS NULL OR category <> 'News') AND ({$w}) ORDER BY published_at DESC LIMIT 3");
+            $st = $pdo->prepare("SELECT title, slug, category FROM blogs WHERE status = 'published' AND (category IS NULL OR category <> 'News') AND ({$w}) ORDER BY published_at DESC LIMIT 3");
             $st->execute(array_map(function ($x) { return '%' . $x . '%'; }, $words));
-            foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $b) $links[] = ['/blogs/' . $b['slug'] . '/', (string)$b['title'], 'Guide'];
+            // Guides live at /guides/ (Deploy 70): link there, not to the old /blogs/ address that redirects.
+            foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $b) $links[] = [(preg_match('/^guides?\s*(:.*)?$/i', trim((string)$b['category'])) ? '/guides/' : '/blogs/') . $b['slug'] . '/', (string)$b['title'], 'Guide'];
         } catch (\Throwable $e) {}
     }
     $plats = rocCatPlatforms()[$catSlug] ?? [];
@@ -1161,7 +1162,13 @@ function rocRenderCompare(string $root, PDO $pdo, array $categories, string $slu
     $an = trim((string)$a['title']); $bn = trim((string)$b['title']);
     $url = ROC_PUBLIC_URL . '/compare/' . $slug . '/';
     $mod = max((int)($T['t'] ?? 0), rocProductModified($a) ?? 0, rocProductModified($b) ?? 0);
-    $title = rocFitTitle([$an . ' vs ' . $bn . ': Which to Buy? | Run On Console', $an . ' vs ' . $bn . ': Which to Buy?', $an . ' vs ' . $bn . ' | ROC', $an . ' vs ' . $bn]);
+    // Long names: shorter forms for the title only (no "Wireless"/"Gaming", the second brand dropped when it is the same).
+    $short = function (string $t): string { return trim((string)preg_replace('/\s+/', ' ', preg_replace('/\b(Wireless|Gaming|Mechanical|Keyboard|Headset|Monitor|Mouse)\b/i', '', $t))); };
+    $as = $short($an); $bs = $short($bn);
+    $bb = strtok($bn, ' ');
+    $bs2 = strcasecmp($bb, (string)strtok($an, ' ')) === 0 ? trim(substr($bs, strlen($bb))) : $bs;
+    $title = rocFitTitle([$an . ' vs ' . $bn . ': Which to Buy? | Run On Console', $an . ' vs ' . $bn . ': Which to Buy?', $an . ' vs ' . $bn . ' | ROC', $an . ' vs ' . $bn,
+                          $as . ' vs ' . $bs . ' | ROC', $as . ' vs ' . $bs, $as . ' vs ' . $bs2]);
     $desc = rocCmsTruncatePlain($an . ' vs ' . $bn . ': ' . (string)$T['summary'], 155);
     $imgA = rocProductImage($a, $categories); $imgB = rocProductImage($b, $categories);
 
@@ -1259,7 +1266,7 @@ function rocRenderCompareList(string $root, PDO $pdo, array $categories): void {
     [$headTop, $bodyToMain, $mainOpen, , $afterMain] = rocTemplate($root, ROC_PRODUCT_TEMPLATES['list']);
     $url = ROC_PUBLIC_URL . '/compare/';
     $n = array_sum(array_map('count', $by));
-    $title = 'Gaming Gear Comparisons: X vs Y, Which to Buy | Run On Console';
+    $title = 'Gaming Gear Comparisons: Which to Buy? | Run On Console';
     $desc = $n . ' side by side comparisons of gaming mice, keyboards, headsets, monitors, graphics cards and more: specs, differences and who should pick which.';
     // Share picture: the first product of the newest comparison (Deploy 89).
     $share = '';

@@ -1,0 +1,23 @@
+{
+ "deploy": 94,
+ "date": "2026-10-19",
+ "title": "Fixes from the ROC SEO crawl",
+ "changes": [
+  "Category and product pages link guides at /guides/ (not the old /blogs/ address that redirects)",
+  "DOOM 3 and its re-release: each page shows its Steam year, so the two pages no longer share a title",
+  "Blog posts and guides with a FAQ section get FAQPage markup; Amazon links inside posts get rel=\"sponsored nofollow\"",
+  "Shorter titles for long comparisons and the Can I run, Compare and paged lists; page 2+ of the lists get their own description"
+ ],
+ "checks": [
+  {
+   "label": "FAQ markup in posts",
+   "type": "contains",
+   "path": "blog-render.php",
+   "text": "FAQPage markup too"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/94",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

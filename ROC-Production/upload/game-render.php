@@ -250,7 +250,7 @@ if ($slug === '') {
     $n = count($games);
     $url = ROC_PUBLIC_URL . '/can-i-run/';
     $crumbs = [['Home', '/'], ['Can I run it?', '/can-i-run/']];
-    $title = 'Can I Run It? System Requirements for ' . number_format($n) . ' PC Games | Run On Console';
+    $title = 'Can I Run It? Requirements for ' . number_format($n) . ' PC Games | ROC';
     $desc = 'Official minimum and recommended PC requirements for ' . number_format($n) . ' popular games, with a free check for your graphics card, processor and RAM.';
     $ld = [rocGpCrumbs($crumbs), ['@context' => 'https://schema.org', '@type' => 'CollectionPage', 'name' => 'Can I run it? PC game system requirements', 'url' => $url, 'description' => $desc,
         'isPartOf' => ['@type' => 'WebSite', 'name' => 'Run On Console', 'url' => ROC_PUBLIC_URL . '/'],

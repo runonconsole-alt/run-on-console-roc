@@ -41,7 +41,10 @@ $DB = [
     'platform' => ['table' => 'gaming_categories',  'label' => 'title', 'group' => 'Gaming platforms',    'perm' => 'pages',
                    'url' => function ($r) { return '/gaming-platforms/' . $r['slug'] . '/'; }],
     'blog'     => ['table' => 'blogs',              'label' => 'title', 'group' => 'Blog posts',          'perm' => 'blogs',
-                   'url' => function ($r) { return '/blogs/' . $r['slug'] . '/'; }],
+                   'url' => function ($r) {
+                       if (strcasecmp(trim((string)($r['category'] ?? '')), 'News') === 0) return '/news/' . $r['slug'] . '/';
+                       return (preg_match('/^guides?\s*(:.*)?$/i', trim((string)($r['category'] ?? ''))) ? '/guides/' : '/blogs/') . $r['slug'] . '/';
+                   }],
     'cmspage'  => ['table' => 'pages',              'label' => 'title', 'group' => 'CMS pages',           'perm' => 'pages',
                    'url' => function ($r) {
                        return ($r['page_type'] ?? '') === 'category' && !empty($r['category_slug'])
