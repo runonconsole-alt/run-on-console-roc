@@ -356,11 +356,12 @@ if (trim((string)($E['intro'] ?? '')) !== '') $intro = trim((string)$E['intro'])
 // The longest title that fits Google's ~60 characters (Deploy 90: 2,367 titles were 70-90 long).
 $fit = function (array $opts) { foreach ($opts as $o) if (mb_strlen($o) <= 60) return $o; return end($opts); };
 // Very long Steam names: a shorter form without the edition part ("- Enhanced Edition", "Game of the Year Edition", "(2009)" ...).
-$nm = trim((string)preg_replace('/\s*[-:–]?\s*\b(?:(?:Game of the Year|GOTY|Enhanced|Deluxe|Definitive|Complete|Anniversary|40th Anniversary|Gold|Ultimate|Remastered)\s+)?Edition\b.*$|\s+\(\d{4}\)/iu', '', $name)) ?: $name;
+$nm = trim((string)preg_replace('/\s*[-:–]?\s*\b(?:(?:The\s+)?(?:Game of the Year|GOTY|Enhanced|Deluxe|Definitive|Complete|Anniversary|40th Anniversary|Gold|Ultimate|Remastered)\s+)?Edition\b.*$|\s+\(\d{4}\)/iu', '', $name)) ?: $name;
+$nm2 = preg_match('/^(.{4,}?)\s*(?::|\s[-–\/]\s)/u', $nm, $nmm) ? trim($nmm[1]) : $nm;   // the part before ": " or " - "
 $metaT = trim((string)($E['title'] ?? '')) ?: $fit(['Can I Run ' . $name . '? Minimum & Recommended PC Requirements | ROC',
     'Can I Run ' . $name . '? PC Requirements | Run On Console', 'Can I Run ' . $name . '? System Requirements',
     'Can I Run ' . $name . '? PC Requirements', 'Can I Run ' . $name . '?', 'Can I Run ' . $nm . '? PC Requirements', 'Can I Run ' . $nm . '?',
-    $name . ' PC Requirements', $nm . ' PC Requirements', $name . ' Requirements', $name]);
+    $name . ' PC Requirements', $nm . ' PC Requirements', 'Can I Run ' . $nm2 . '? PC Requirements', 'Can I Run ' . $nm2 . '?', $name]);
 $metaD = 'Can your PC run ' . $name . '? Official minimum and recommended specs'
     . ($gpuMin ? ' (from ' . (strpos($gpuMin[0], 'integrated') !== false ? 'integrated graphics' : $an($gpuMin[0])) . ($ramGb($rMin['ram'] ?? null) ? ' and ' . $ramGb($rMin['ram'] ?? null) . ' RAM' : '') . ')' : '')
     . '. Free check for your graphics card, CPU and RAM.';
