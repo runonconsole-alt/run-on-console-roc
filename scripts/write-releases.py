@@ -626,6 +626,13 @@ RELEASES = [
                   'PC builds: 8th to 11th gen Intel processors get DDR4 memory again (a broken rule fixed); the Updates page pictures have sizes (no layout jump)'],
          checks=[dict(label='FAQ markup in posts', type='contains', path='blog-render.php', text='FAQPage markup too')],
          pr=REPO + '94'),
+    dict(deploy=95, date='2026-10-20', title='Auto-post to the Facebook Page and Instagram',
+         changes=['CMS > Social posts: connect the Facebook Page once (Meta access token); every new social kit then goes out on the Page and on Instagram by itself',
+                  'Facebook gets the picture, caption, link and hashtags; Instagram gets the picture and caption with "link in our bio"',
+                  'Safe pace: at most one post per platform an hour and 6 a day; only kits made after it is turned on; Post one now button; stops and shows why when the token stops working',
+                  'Only the official Meta API; the token stays on the server and is never shown again'],
+         checks=[dict(label='Auto-post', type='file', path='api/v1/cms/social-auto.php')],
+         pr=REPO + '95'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

@@ -2964,6 +2964,8 @@ async function renderSocialKits(m){
             copyBtn(withLink(k.x_post||'',k.url,'x'),'Post: X')+copyBtn(utm(k.url,'pinterest'),'Link: Pinterest')+copyBtn(utm(k.url,'tiktok'),'Link: TikTok bio')+copyBtn(utm(k.url,'youtube'),'Link: YouTube')+
             (k.story?'<a class="btn sm" href="'+esc(k.story)+'" download>⬇ Story / Shorts picture</a>':'')+(k.square?'<a class="btn sm" href="'+esc(k.square)+'" download>⬇ Square picture</a>':'')+
             '<button class="btn sm ghost" data-remake="'+esc(k.id)+'">↻ Make again</button></div>'+
+          (k.auto?'<div class="hint" style="margin-top:8px">Auto-posted: '+Object.keys(k.auto).map(function(pl){ var a=k.auto[pl]||{};
+            return a.link?'<a href="'+esc(a.link)+'" target="_blank" rel="noopener">'+esc(P[pl]||pl)+' ↗</a>':esc(P[pl]||pl); }).join(' · ')+'</div>':'')+
           '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">'+Object.keys(P).map(function(pl){
             return '<label style="display:flex;gap:5px;align-items:center;font-size:12.5px;cursor:pointer"><input type="checkbox" data-posted="'+esc(k.id)+'" data-pl="'+esc(pl)+'"'+(posted[pl]?' checked':'')+'> Posted on '+esc(P[pl])+'</label>';
           }).join('')+'</div>'+
@@ -2981,7 +2983,8 @@ async function renderSocialKits(m){
     '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id="ah-w"><option value="reddit">Reddit</option><option value="quora">Quora</option></select><button class="btn primary" id="ah-go" type="button">Draft an answer</button></div>'+
     '<div id="ah-out" style="margin-top:10px"></div></div></div>';
   $('.body',m).innerHTML=
-    (!d.ai?'<div class="alert warn">No AI key saved: add the free Groq or Gemini key in CMS &gt; Updates writer, then kits are made.</div>':'')+trafficCard+answerCard+
+    (!d.ai?'<div class="alert warn">No AI key saved: add the free Groq or Gemini key in CMS &gt; Updates writer, then kits are made.</div>':'')+
+    (S.user&&S.user.role==='administrator'?'<div id="sa-box"></div>':'')+trafficCard+answerCard+
     '<div class="card"><div class="cbody" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">'+
       '<div class="hint">A kit is made for every new news story, guide and blog post (one every 10 minutes). Post the picture with the caption, or film the script for TikTok, YouTube Shorts and Reels.</div>'+
       '<label style="display:flex;gap:6px;align-items:center;font-weight:700;cursor:pointer"><input type="checkbox" id="sk-on"'+(d.on?' checked':'')+'> Make kits by themselves</label></div></div>'+
@@ -3006,6 +3009,47 @@ async function renderSocialKits(m){
     b.disabled=false; b.textContent='Draft an answer';
   });
   $('#sk-on',m).addEventListener('change',async function(){ try{ var r=await api('social-kits.php',{action:'settings',on:this.checked}); toast(r.message,'good'); }catch(e){ toast(e.message,'bad'); } });
+  if($('#sa-box',m)) renderSocialAuto($('#sa-box',m));
+}
+
+/* api/v1/cms/social-auto.php (Deploy 95, administrators): new kits posted by themselves on the Facebook Page
+   and Instagram through Meta's official API. The token is pasted once; the server never sends it back. */
+async function renderSocialAuto(box){
+  var d; try{ d=await api('social-auto.php'); }catch(e){ box.innerHTML='<div class="alert warn">'+esc(e.message)+'</div>'; return; }
+  var exp=d.expires===0?'never expires':(d.expires>0?'expires '+esc(new Date(d.expires*1000).toLocaleDateString()):'expiry unknown');
+  var how='<details style="margin-top:10px"'+(d.connected?'':' open')+'><summary style="cursor:pointer;font-weight:700">How to get the token (once, about 10 minutes)</summary><ol class="hint" style="margin:8px 0 0 18px;line-height:1.7">'+
+    '<li>Instagram app: Settings &gt; Account type &gt; <b>Professional</b> (Business or Creator), and link it to your Facebook Page (Page settings &gt; Linked accounts &gt; Instagram).</li>'+
+    '<li>Open <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener">developers.facebook.com/apps</a> &gt; Create app &gt; type <b>Business</b> (any name, e.g. ROC Poster). It can stay in Development mode: you are its admin, so it may post on your own Page.</li>'+
+    '<li>Open <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener">Graph API Explorer</a>, pick your app and User token, and add: <b>pages_show_list, pages_read_engagement, pages_manage_posts, instagram_basic, instagram_content_publish, business_management</b>. Press Generate Access Token and allow your Page and Instagram.</li>'+
+    '<li>Paste that token in <a href="https://developers.facebook.com/tools/debug/accesstoken/" target="_blank" rel="noopener">Access Token Debugger</a> &gt; Debug &gt; <b>Extend Access Token</b>, and copy the long token it shows.</li>'+
+    '<li>Paste it below and press Connect. The website takes the Page token from it, which never expires.</li></ol></details>';
+  var log=(d.log||[]).slice(0,6).map(function(l){ return '<div class="hint" style="padding:3px 0">'+esc(pkTime(l.at))+' · '+esc(l.text)+(l.link?' <a href="'+esc(l.link)+'" target="_blank" rel="noopener">open ↗</a>':'')+'</div>'; }).join('');
+  box.innerHTML='<div class="card"><div class="chead"><h3>Auto-post to Facebook &amp; Instagram</h3><span class="note">'+(d.connected?(d.on?'<b>On</b>':'Off'):'Not connected')+'</span></div><div class="cbody">'+
+    (d.error?'<div class="alert warn" style="margin-bottom:10px">'+esc(d.error)+'</div>':'')+
+    (d.connected?
+      '<div style="margin-bottom:8px">Page: <b>'+esc(d.page_name)+'</b> · Instagram: '+(d.ig_name?'<b>@'+esc(d.ig_name)+'</b>':'<span class="hint">not linked to this Page</span>')+' <span class="hint">· token '+exp+'</span></div>'+
+      (d.ig_name&&!d.ig_ok?'<div class="alert warn" style="margin-bottom:8px">The token is missing instagram_content_publish: Instagram posts will fail until you connect again with it.</div>':'')+
+      '<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">'+
+        '<label style="display:flex;gap:6px;align-items:center;font-weight:700;cursor:pointer"><input type="checkbox" id="sa-on"'+(d.on?' checked':'')+'> Post new kits by themselves</label>'+
+        '<label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="checkbox" id="sa-fb"'+(d.fb?' checked':'')+'> Facebook Page</label>'+
+        '<label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="checkbox" id="sa-ig"'+(d.ig?' checked':'')+(d.ig_id?'':' disabled')+'> Instagram</label>'+
+        '<button class="btn sm" id="sa-now" type="button"'+(d.on?'':' disabled')+'>Post one now</button>'+
+        '<button class="btn sm ghost" id="sa-off" type="button">Disconnect</button></div>'+
+      '<div class="hint" style="margin-top:8px">Only kits made after you turn it on are posted (older ones stay for posting by hand). At most one post per platform every '+d.gap_minutes+' minutes and '+d.day_max+' a day, so the accounts never look like spam. Posted kits get their tick below by themselves.</div>'+
+      (log?'<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:6px">'+log+'</div>':'')
+     :'<div class="hint">Connect your Facebook Page once: every new kit (picture, caption, hashtags) then goes out on the Page and on Instagram by itself, through Meta\'s official API. Nothing is posted until you turn it on.</div>')+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:12px"><div class="field" style="flex:1;min-width:240px;margin:0"><label for="sa-token">'+(d.connected?'New access token (only to reconnect)':'Access token from Meta')+'</label>'+
+      '<input id="sa-token" type="password" autocomplete="off" placeholder="EAA..."></div><select id="sa-page" style="display:none"></select><button class="btn primary" id="sa-connect" type="button">Connect</button></div>'+how+
+  '</div></div>';
+  async function send(body,b){ if(b) b.disabled=true; try{ var r=await api('social-auto.php',body); toast(r.message,'good'); renderSocialAuto(box); return r; }catch(e){ toast(e.message,'bad'); if(b) b.disabled=false; throw e; } }
+  $('#sa-connect',box).addEventListener('click',function(){ var sel=$('#sa-page',box);
+    send({action:'connect',token:$('#sa-token',box).value.trim(),page_id:sel.style.display==='none'?'':sel.value},this).catch(function(e){
+      var pg=e.data&&e.data.pages; if(pg&&pg.length){ sel.innerHTML=pg.map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>'; }).join(''); sel.style.display=''; } }); });
+  if(!d.connected) return;
+  function settings(){ send({action:'settings',on:$('#sa-on',box).checked,fb:$('#sa-fb',box).checked,ig:$('#sa-ig',box).checked}).catch(function(){}); }
+  ['#sa-on','#sa-fb','#sa-ig'].forEach(function(id){ $(id,box).addEventListener('change',settings); });
+  $('#sa-now',box).addEventListener('click',function(){ var b=this; b.innerHTML='<span class="spin"></span>'; send({action:'now'},b).catch(function(){ b.textContent='Post one now'; }); });
+  $('#sa-off',box).addEventListener('click',function(){ if(confirm('Disconnect the Facebook Page? The token is deleted from the website and auto-posting stops.')) send({action:'disconnect'},this).catch(function(){}); });
 }
 
 /* ----------------------------------------------------------- weekly email */
