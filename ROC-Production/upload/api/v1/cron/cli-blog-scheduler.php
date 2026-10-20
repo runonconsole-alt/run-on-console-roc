@@ -187,3 +187,10 @@ try {
         if ($sk !== null) echo date('c') . ' ' . $sk . "\n";
     }
 } catch (\Throwable $e) { echo date('c') . ' social kit error: ' . $e->getMessage() . "\n"; }
+
+// Auto-post (api/v1/cms/social-auto-lib.php): one ready kit on the Facebook Page or Instagram a run, when turned on.
+try {
+    require_once $ROOT . '/api/v1/cms/social-auto-lib.php';
+    $ap = rocAutoTick($pdo);
+    if ($ap !== null) echo date('c') . ' ' . $ap . "\n";
+} catch (\Throwable $e) { echo date('c') . ' auto-post error: ' . $e->getMessage() . "\n"; }
