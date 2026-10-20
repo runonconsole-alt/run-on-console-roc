@@ -355,9 +355,12 @@ if (!empty($E['t'])) $updated = max($updated, (int)$E['t']);
 if (trim((string)($E['intro'] ?? '')) !== '') $intro = trim((string)$E['intro']);
 // The longest title that fits Google's ~60 characters (Deploy 90: 2,367 titles were 70-90 long).
 $fit = function (array $opts) { foreach ($opts as $o) if (mb_strlen($o) <= 60) return $o; return end($opts); };
+// Very long Steam names: a shorter form without the edition part ("- Enhanced Edition", "Game of the Year Edition", "(2009)" ...).
+$nm = trim((string)preg_replace('/\s*[-:–]?\s*\b(?:(?:Game of the Year|GOTY|Enhanced|Deluxe|Definitive|Complete|Anniversary|40th Anniversary|Gold|Ultimate|Remastered)\s+)?Edition\b.*$|\s+\(\d{4}\)/iu', '', $name)) ?: $name;
 $metaT = trim((string)($E['title'] ?? '')) ?: $fit(['Can I Run ' . $name . '? Minimum & Recommended PC Requirements | ROC',
     'Can I Run ' . $name . '? PC Requirements | Run On Console', 'Can I Run ' . $name . '? System Requirements',
-    'Can I Run ' . $name . '? PC Requirements', 'Can I Run ' . $name . '?', $name . ' PC Requirements']);
+    'Can I Run ' . $name . '? PC Requirements', 'Can I Run ' . $name . '?', 'Can I Run ' . $nm . '? PC Requirements', 'Can I Run ' . $nm . '?',
+    $name . ' PC Requirements', $nm . ' PC Requirements', $name . ' Requirements', $name]);
 $metaD = 'Can your PC run ' . $name . '? Official minimum and recommended specs'
     . ($gpuMin ? ' (from ' . (strpos($gpuMin[0], 'integrated') !== false ? 'integrated graphics' : $an($gpuMin[0])) . ($ramGb($rMin['ram'] ?? null) ? ' and ' . $ramGb($rMin['ram'] ?? null) . ' RAM' : '') . ')' : '')
     . '. Free check for your graphics card, CPU and RAM.';
@@ -407,7 +410,7 @@ if ($pdo) {
     // Memory that fits the processor: AM4 Ryzen (1000-5000) and older Intel take DDR4; AM5 Ryzen (7000+) and Core Ultra take DDR5.
     $ddr = function (?array $cpu) {
         $t = strtolower((string)($cpu['title'] ?? ''));
-        if (preg_match('/ryzen\s*\d\s*[1-5]\d{3}|core\s*i\d[\s-]*([4-9]|10|11)\d{3}/', $t)) return 'ddr4';
+        if (preg_match('/ryzen\s*\d\s*[1-5]\d{3}|core\s*i\d[\s-]*([4-9]|10|11)\d{3}\b/', $t)) return 'ddr4';
         if (preg_match('/ryzen\s*\d\s*[7-9]\d{3}|core\s*ultra/', $t)) return 'ddr5';
         return '';
     };

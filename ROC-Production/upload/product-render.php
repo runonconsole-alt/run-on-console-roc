@@ -1163,7 +1163,7 @@ function rocRenderCompare(string $root, PDO $pdo, array $categories, string $slu
     $url = ROC_PUBLIC_URL . '/compare/' . $slug . '/';
     $mod = max((int)($T['t'] ?? 0), rocProductModified($a) ?? 0, rocProductModified($b) ?? 0);
     // Long names: shorter forms for the title only (no "Wireless"/"Gaming", the second brand dropped when it is the same).
-    $short = function (string $t): string { return trim((string)preg_replace('/\s+/', ' ', preg_replace('/\b(Wireless|Gaming|Mechanical|Keyboard|Headset|Monitor|Mouse)\b/i', '', $t))); };
+    $short = function (string $t): string { return trim((string)preg_replace('/\s+/', ' ', preg_replace('/\b(Wireless|Gaming|Mechanical|Keyboard|Headset|Monitor|Mouse|Overclocking|Edition|Series)\b/i', '', $t))); };
     $as = $short($an); $bs = $short($bn);
     $bb = strtok($bn, ' ');
     $bs2 = strcasecmp($bb, (string)strtok($an, ' ')) === 0 ? trim(substr($bs, strlen($bb))) : $bs;

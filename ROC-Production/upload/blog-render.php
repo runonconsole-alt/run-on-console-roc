@@ -886,9 +886,9 @@ function rocRenderUpdates(string $root, PDO $pdo, int $page): void {
         . '<p>Everything new on Run On Console in one place: the latest gaming and hardware news, blog posts with reviews and buying advice, and step by step guides.</p>'
         . '<div class="up-ctas"><a class="up-cta n" href="/news/">Latest news &rarr;</a><a class="up-cta b" href="/blogs/">Read the blogs &rarr;</a><a class="up-cta g" href="/guides/">Step by step guides &rarr;</a></div></div>'
         . '<div class="up-pics" aria-hidden="true">'
-        . '<a href="/news/" tabindex="-1"><img src="/images/trending_esports.jpg" alt="" loading="eager"><span style="background:#e11d48">News</span></a>'
-        . '<a href="/blogs/" tabindex="-1"><img src="/images/battlestation_pc.jpg" alt="" loading="lazy"><span style="background:#059669">Blogs</span></a>'
-        . '<a href="/guides/" tabindex="-1"><img src="/images/gaming_monitor.jpg" alt="" loading="lazy"><span style="background:#0284c7">Guides</span></a>'
+        . '<a href="/news/" tabindex="-1"><img src="/images/trending_esports.jpg" alt="" width="1200" height="670" loading="eager"><span style="background:#e11d48">News</span></a>'
+        . '<a href="/blogs/" tabindex="-1"><img src="/images/battlestation_pc.jpg" alt="" width="1200" height="670" loading="lazy"><span style="background:#059669">Blogs</span></a>'
+        . '<a href="/guides/" tabindex="-1"><img src="/images/gaming_monitor.jpg" alt="" width="1200" height="670" loading="lazy"><span style="background:#0284c7">Guides</span></a>'
         . '</div></section>';
     $m .= '<div class="up-cols">';
     foreach ($cols as $sec => [$name, $sub, , $dot]) {
