@@ -511,6 +511,11 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
     $metaT    = trim((string)($p['meta_title'] ?? '')) ?: ($title . ' | Run On Console');
     $excerpt  = trim((string)($p['excerpt'] ?? ''));
     $body     = rocGameLinks($root, rocBodyHtml((string)($p['content'] ?? '')), $pdo);
+    // Affiliate links written into a post (Amazon, or any link with tag=): rel="sponsored nofollow", as Google asks.
+    $body = (string)preg_replace_callback('~<a\b([^>]*\bhref="[^"]*(?:amazon\.|amzn\.|[?&]tag=)[^"]*"[^>]*)>~i', function ($m) {
+        $a = (string)preg_replace('~\srel="[^"]*"~i', '', $m[1]);
+        return '<a' . $a . ' rel="sponsored nofollow noopener">';
+    }, $body);
     $metaD    = trim((string)($p['meta_description'] ?? ''))
                 ?: rocCmsTruncate($excerpt !== '' ? $excerpt : rocCmsTextFromHtml($body), 155);
     $image    = trim((string)($p['image'] ?? ''));
@@ -581,6 +586,17 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
     $words = rocWordCount($body);
     if ($words) $article['wordCount'] = $words;
     $h .= rocJsonLd($article);
+    // A "FAQ" section in the text (an H2, then H3 questions with their answers): FAQPage markup too.
+    if (preg_match('~<h2[^>]*>\s*(?:FAQs?|Frequently asked questions|Common questions)[^<]{0,40}</h2>(.*?)(?=<h2|$)~is', $body, $fm)
+        && preg_match_all('~<h3[^>]*>(.*?)</h3>(.*?)(?=<h3|$)~is', $fm[1], $qs, PREG_SET_ORDER) && count($qs) >= 2) {
+        $faq = [];
+        foreach ($qs as $q) {
+            $qq = trim(html_entity_decode(strip_tags($q[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            $aa = trim((string)preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($q[2]), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+            if ($qq !== '' && mb_strlen($aa) >= 20) $faq[] = ['@type' => 'Question', 'name' => $qq, 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $aa]];
+        }
+        if (count($faq) >= 2) $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => array_slice($faq, 0, 10)]);
+    }
     $h .= rocArticleStyles();
     if ($news) $h .= rocNewsStyles();
     $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
@@ -674,7 +690,7 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
     }
 
     $canonical = ROC_PUBLIC_URL . rocPageUrl($base, $page);
-    if ($page > 1) $title = 'Page ' . $page . ' – ' . $title;
+    if ($page > 1) { $title = 'Page ' . $page . ' – ' . $title; $desc = 'Page ' . $page . ': ' . $desc; }   // no two pages share a description
     $robots = $query !== '' ? 'noindex, follow' : 'index, follow, max-image-preview:large';
 
     $ogImage = ROC_PUBLIC_URL . '/images/trending_elden.jpg';
@@ -870,9 +886,9 @@ function rocRenderUpdates(string $root, PDO $pdo, int $page): void {
         . '<p>Everything new on Run On Console in one place: the latest gaming and hardware news, blog posts with reviews and buying advice, and step by step guides.</p>'
         . '<div class="up-ctas"><a class="up-cta n" href="/news/">Latest news &rarr;</a><a class="up-cta b" href="/blogs/">Read the blogs &rarr;</a><a class="up-cta g" href="/guides/">Step by step guides &rarr;</a></div></div>'
         . '<div class="up-pics" aria-hidden="true">'
-        . '<a href="/news/" tabindex="-1"><img src="/images/trending_esports.jpg" alt="" loading="eager"><span style="background:#e11d48">News</span></a>'
-        . '<a href="/blogs/" tabindex="-1"><img src="/images/battlestation_pc.jpg" alt="" loading="lazy"><span style="background:#059669">Blogs</span></a>'
-        . '<a href="/guides/" tabindex="-1"><img src="/images/gaming_monitor.jpg" alt="" loading="lazy"><span style="background:#0284c7">Guides</span></a>'
+        . '<a href="/news/" tabindex="-1"><img src="/images/trending_esports.jpg" alt="" width="1200" height="670" loading="eager"><span style="background:#e11d48">News</span></a>'
+        . '<a href="/blogs/" tabindex="-1"><img src="/images/battlestation_pc.jpg" alt="" width="1200" height="670" loading="lazy"><span style="background:#059669">Blogs</span></a>'
+        . '<a href="/guides/" tabindex="-1"><img src="/images/gaming_monitor.jpg" alt="" width="1200" height="670" loading="lazy"><span style="background:#0284c7">Guides</span></a>'
         . '</div></section>';
     $m .= '<div class="up-cols">';
     foreach ($cols as $sec => [$name, $sub, , $dot]) {
@@ -917,9 +933,10 @@ function rocRenderGuides(string $root, PDO $pdo, int $page, string $type): void 
 
     $base = '/guides/';
     $typeName = $type !== '' ? $types[$type] : '';
-    $title = ($typeName !== '' ? $typeName . ' Guides' : 'Gaming Guides: Buying, Setup & How-To') . ($page > 1 ? ' – Page ' . $page : '') . ' | Run On Console';
-    $desc = $typeName !== '' ? $typeName . ' guides from Run On Console: clear, step by step help for gamers.'
+    $title = ($typeName !== '' ? $typeName . ' Guides for Gamers: Step by Step' : 'Gaming Guides: Buying, Setup & How-To') . ($page > 1 ? ' – Page ' . $page . ' | ROC' : ' | Run On Console');
+    $desc = $typeName !== '' ? $typeName . ' guides from Run On Console: clear, step by step help for gamers, with the gear, settings and checks that matter.'
                              : 'Step by step gaming guides: how to choose and buy gear, set up your PC, console and accessories, and get the best settings in your games.';
+    if ($page > 1) $desc = 'Page ' . $page . ': ' . $desc;
     $canonical = ROC_PUBLIC_URL . rocPageUrl($base, $page) . ($type !== '' ? '?type=' . $type : '');
     $h  = '<title>' . rocH($title) . "</title>\n";
     $h .= '    <meta name="title" content="' . rocH($title) . "\" />\n";

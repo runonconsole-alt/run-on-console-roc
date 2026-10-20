@@ -618,6 +618,14 @@ RELEASES = [
                   'Off until turned on: while Claude does the daily research (ROC Listing Kit page) keep it off; turn it on when the Claude subscription ends'],
          checks=[dict(label='Off-page', type='file', path='api/v1/cms/offpage.php')],
          pr=REPO + '93'),
+    dict(deploy=94, date='2026-10-19', title='Fixes from the ROC SEO crawl',
+         changes=['Category and product pages link guides at /guides/ (not the old /blogs/ address that redirects)',
+                  'DOOM 3 and its re-release: each page shows its Steam year, so the two pages no longer share a title',
+                  'Blog posts and guides with a FAQ section get FAQPage markup; Amazon links inside posts get rel="sponsored nofollow"',
+                  'Shorter titles for long comparisons, long game names (no edition part) and the Can I run, Compare and paged lists; page 2+ of the lists get their own description',
+                  'PC builds: 8th to 11th gen Intel processors get DDR4 memory again (a broken rule fixed); the Updates page pictures have sizes (no layout jump)'],
+         checks=[dict(label='FAQ markup in posts', type='contains', path='blog-render.php', text='FAQPage markup too')],
+         pr=REPO + '94'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
