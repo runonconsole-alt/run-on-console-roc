@@ -481,6 +481,9 @@ function rocLayerSetMeta(string $html, string $title, string $desc): string {
 function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true): string {
     if (stripos($html, '</head>') === false || !preg_match('#<body\b[^>]*>#i', $html)) return $html;
     $hadNav = strpos($html, 'window.__ROC_NAV') !== false;     // this page shows a CMS menu now
+    // Home page date (Deploy 97): set by ai-files-lib.php; a CMS save keeps the one already on the page.
+    $homeDate = (string)($L['home_modified'] ?? '');
+    if ($path === '/' && $homeDate === '' && preg_match('#<script type="application/ld\+json" id="roc-home-page">[^<]*?"dateModified":"([^"]+)"#s', $html, $m)) $homeDate = $m[1];
     [$html, $orig] = rocLayerStrip($html);
 
     // CMS > Menus & footer: draw the saved menu; after a reset, draw the default one again.
@@ -510,6 +513,20 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
     }
     if ($noindex) $html = rocLayerSetRobots($html, 'noindex, follow');      // CMS > Settings > Noindex rules
     $head .= rocLayerTrackingHead((array)($L['tracking'] ?? []), $path);
+    // RSS feed (Deploy 97, blog-render.php rocFeed) for feed readers and AI search, on every page.
+    if ($path !== '/404' && stripos($html, 'application/rss+xml') === false)
+        $head .= '<link rel="alternate" type="application/rss+xml" title="Run On Console: blogs, news and guides" href="https://runonconsole.com/feed.xml" />';
+    // The home page itself: the same name and description as its meta tags (also after a Metas
+    // override), and the date of the newest post or product change, for AI search and Google.
+    if ($path === '/') {
+        [$t, $d] = rocLayerGetMeta($html);
+        $web = ['@context' => 'https://schema.org', '@type' => 'WebPage', '@id' => 'https://runonconsole.com/#webpage', 'url' => 'https://runonconsole.com/',
+                'name' => $t, 'description' => $d, 'inLanguage' => 'en',
+                'isPartOf' => ['@id' => 'https://runonconsole.com/#website'], 'about' => ['@id' => 'https://runonconsole.com/#organization'],
+                'publisher' => ['@id' => 'https://runonconsole.com/#organization']];
+        if (strtotime($homeDate)) $web['dateModified'] = gmdate('c', strtotime($homeDate));
+        $head .= '<script type="application/ld+json" id="roc-home-page">' . json_encode($web, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) . '</script>';
+    }
     $head .= rocEditHead((array)($L['edits'] ?? []), $path);
     if ($nav) $head .= '<script>window.__ROC_NAV=' . json_encode($nav, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) . ';</script>';
     $ann = rocLayerAnnouncementOn($L['announcement']);

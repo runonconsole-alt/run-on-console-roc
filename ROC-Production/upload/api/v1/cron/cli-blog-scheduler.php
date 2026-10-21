@@ -127,6 +127,10 @@ try {
     require_once $ROOT . '/api/v1/cms/llms-lib.php';
     if ($rows || (isset($n) && is_string($n) && strpos($n, 'News published:') === 0)) {
         if (rocLlmsWrite($pdo, $ROOT)) echo date('c') . " llms.txt updated\n";
+        // Deploy 97: the AI discovery files (/ai/*.json, /.well-known/ai.txt) and the home page date too.
+        require_once $ROOT . '/api/v1/cms/ai-files-lib.php';
+        if (rocAiFilesWrite($pdo, $ROOT)) echo date('c') . " AI files updated\n";
+        if (rocAiDateHome($pdo, $ROOT)) echo date('c') . " home page dated\n";
     }
 } catch (\Throwable $e) { echo date('c') . ' llms.txt error: ' . $e->getMessage() . "\n"; }
 
