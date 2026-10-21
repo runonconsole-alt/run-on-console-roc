@@ -1,0 +1,25 @@
+{
+ "deploy": 97,
+ "date": "2026-10-21",
+ "title": "AI discovery files and a dated home page",
+ "changes": [
+  "/.well-known/ai.txt, /ai/summary.json, /ai/faq.json and /ai/service.json for AI search, rebuilt with llms.txt whenever a post or news story goes live",
+  "The home page says when it last changed (newest post or product) and its schema description matches its meta description, also after a Metas change"
+ ],
+ "checks": [
+  {
+   "label": "AI files",
+   "type": "file",
+   "path": "ai/summary.json"
+  },
+  {
+   "label": "Home page schema",
+   "type": "contains",
+   "path": "index.html",
+   "text": "id=\"roc-home-page\""
+  }
+ ],
+ "steps": [
+  "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
+ ]
+}

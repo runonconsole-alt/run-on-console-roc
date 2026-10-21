@@ -630,6 +630,11 @@ RELEASES = [
          changes=['Product category pages (/category/...) and gaming platform pages say when they last changed (CollectionPage dateModified), for Google freshness and AI search'],
          checks=[dict(label='Category dates', type='contains', path='category-render.php', text='its last real change')],
          pr=REPO + '96'),
+    dict(deploy=97, date='2026-10-21', title='AI discovery files and a dated home page',
+         changes=['/.well-known/ai.txt, /ai/summary.json, /ai/faq.json and /ai/service.json for AI search, rebuilt with llms.txt whenever a post or news story goes live',
+                  'The home page says when it last changed (newest post or product) and its schema description matches its meta description, also after a Metas change'],
+         checks=[dict(label='AI files', type='file', path='ai/summary.json'),
+                 dict(label='Home page schema', type='contains', path='index.html', text='id="roc-home-page"')]),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
