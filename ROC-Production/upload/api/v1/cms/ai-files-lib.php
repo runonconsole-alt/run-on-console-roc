@@ -74,24 +74,26 @@ function rocAiFilesBuild(PDO $pdo): array {
         'llms' => $B . '/llms.txt', 'sitemap' => $B . '/sitemap.xml', 'updated' => $updated,
     ]);
 
+    // The first six are the home page FAQ word for word (src/data/initialData.js PAGE_FAQS.home).
     $faq = [
         ['What is Run On Console?', $desc],
-        ['Is the "Can I run it" checker free?', 'Yes. The checker at ' . $B . '/compatibility/ is free and needs no account. It compares your PC with the official minimum and recommended requirements of 2,000+ games.'],
-        ['Where do the game requirements come from?', 'From the official requirements each game lists on Steam or from its publisher.'],
-        ['How are the product picks chosen?', 'Picks are chosen by the ROC Team from manufacturer specs and published sources. The site does not claim lab testing.'],
-        ['Does Run On Console show prices?', 'No. Prices and stock change on Amazon, so product pages link to Amazon instead of listing a price.'],
-        ['Are the Amazon links affiliate links?', 'Yes. Run On Console earns a commission from qualifying Amazon purchases. This is disclosed at ' . $B . '/privacy-policy/.'],
-        ['How is the news checked?', 'Each news story is checked against at least two trusted sources, which are listed with the story.'],
+        ['Is the "Can I run it" checker free?', 'Yes. The checker is free and needs no account. It compares your PC with the official minimum and recommended requirements of 2,000+ games, taken from Steam or the game\'s publisher.'],
+        ['How are the product picks chosen?', 'The ROC Team picks gear from manufacturer specs, official data and published reviews, and explains who each product is for. We do not claim lab testing, and brands cannot pay for a place on our lists.'],
+        ['Does Run On Console show prices?', 'No. Prices and stock change all the time, so we link straight to Amazon, where you always see the current price and availability.'],
+        ['Are the Amazon links affiliate links?', 'Yes. As an Amazon Associate we earn from qualifying purchases, at no extra cost to you. It keeps the site free and independent.'],
+        ['How is the gaming news checked?', 'Every news story is checked against at least two trusted sources, and the sources are listed with the story.'],
         ['Which gaming platforms are covered?', 'PC, consoles, handhelds, retro systems, VR and cloud gaming' . ($platforms ? ': ' . $platforms . ' platform guides' : '') . ' at ' . $B . '/gaming-platforms/.'],
         ['How do I contact Run On Console?', 'Email contact@runonconsole.com or use the form at ' . $B . '/contact/.'],
     ];
     $out['ai/faq.json'] = $json([
         'name' => 'Run On Console FAQ', 'url' => $B . '/', 'updated' => $updated,
-        'faq' => array_map(function ($f) { return ['question' => $f[0], 'answer' => $f[1]]; }, $faq),
+        'faqs' => array_map(function ($f) { return ['question' => $f[0], 'answer' => $f[1]]; }, $faq),
     ]);
 
     $out['ai/service.json'] = $json([
         'name' => 'Run On Console', 'url' => $B . '/', 'type' => 'Independent gaming information website', 'price' => 'Free', 'account_required' => false,
+        'capabilities' => ['Check if a PC can run a game (official minimum and recommended requirements)', 'Gaming and PC hardware picks with key specs',
+                           'Gaming platform guides', 'Buying guides and how-to articles', 'Gaming news checked against trusted sources'],
         'services' => [
             ['name' => 'Can I Run It? checker', 'url' => $B . '/compatibility/', 'description' => 'Compare a PC with the official minimum and recommended requirements of 2,000+ games.'],
             ['name' => 'Game requirement pages', 'url' => $B . '/can-i-run/', 'description' => 'The PC requirements of each game on its own page.'],

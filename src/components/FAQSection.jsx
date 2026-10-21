@@ -70,14 +70,13 @@ const InteractiveFAQItem = ({ faq, idx, isOpen, onToggle }) => {
         </span>
       </button>
 
-      {isOpen && (
-        <div className="relative z-10 px-5 pb-5 pt-2 text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-emerald-200/60 bg-white/80 backdrop-blur-xs animate-page-in">
-          <div className="flex items-start gap-2.5">
-            <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5 animate-pulse" />
-            <p className="whitespace-pre-line">{richText(faq.a)}</p>
-          </div>
+      {/* Closed answers stay in the HTML (hidden), so search engines and AI read every answer. */}
+      <div hidden={!isOpen} className="relative z-10 px-5 pb-5 pt-2 text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-emerald-200/60 bg-white/80 backdrop-blur-xs animate-page-in">
+        <div className="flex items-start gap-2.5">
+          <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5 animate-pulse" />
+          <p className="whitespace-pre-line">{richText(faq.a)}</p>
         </div>
-      )}
+      </div>
     </div>
   );
 };

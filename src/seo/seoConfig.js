@@ -12,6 +12,7 @@ import {
   BASE_DOMAIN,
   isStagingEnv
 } from './routeRegistry.js';
+import { PAGE_FAQS } from '../data/initialData.js';
 
 const SITE_NAME = 'Run On Console';
 const SITE_DOMAIN = BASE_DOMAIN;
@@ -65,6 +66,18 @@ export function generateJsonLd(routeData) {
         'target': `${SITE_DOMAIN}/products/?q={search_term_string}`,
         'query-input': 'required name=search_term_string'
       }
+    });
+
+    // 3. The home page FAQ (HomeView.jsx shows the same questions)
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      '@id': `${SITE_DOMAIN}/#faq`,
+      'mainEntity': PAGE_FAQS.home.map(f => ({
+        '@type': 'Question',
+        'name': f.q,
+        'acceptedAnswer': { '@type': 'Answer', 'text': f.a }
+      }))
     });
   }
 

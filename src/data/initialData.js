@@ -607,18 +607,31 @@ export const COMMUNITY_TESTIMONIALS = [
 
 // PAGE FAQS
 export const PAGE_FAQS = {
+  // Also the home page FAQPage schema (seoConfig.js) and /ai/faq.json (ai-files-lib.php): keep them the same.
   home: [
     {
-      q: "What is Run On Console and how do you choose products?",
-      a: "Run On Console is an independent gaming site. We pick gaming gear from its specs, official data and published reviews, explain who each product is for, cover 15 gaming platforms and run a free checker for 500+ PC games. Brands cannot pay for a place on our lists."
+      q: "What is Run On Console?",
+      a: "Run On Console (ROC) is an independent gaming and PC hardware site: product picks with key specs and Amazon links, a free \"Can I run it\" checker built on official game requirements, guides to every gaming platform, buying guides and gaming news checked against trusted sources."
     },
     {
-      q: "How do your affiliate links work and will it cost me extra?",
-      a: "No extra cost! When you click our affiliate links to Amazon, Best Buy, or manufacturer stores, we may receive a small referral commission. It helps us keep the site free and independent."
+      q: "Is the \"Can I run it\" checker free?",
+      a: "Yes. The checker is free and needs no account. It compares your PC with the official minimum and recommended requirements of 2,000+ games, taken from Steam or the game's publisher."
     },
     {
-      q: "Do you show prices?",
+      q: "How are the product picks chosen?",
+      a: "The ROC Team picks gear from manufacturer specs, official data and published reviews, and explains who each product is for. We do not claim lab testing, and brands cannot pay for a place on our lists."
+    },
+    {
+      q: "Does Run On Console show prices?",
       a: "No. Prices and stock change all the time, so we link straight to Amazon, where you always see the current price and availability."
+    },
+    {
+      q: "Are the Amazon links affiliate links?",
+      a: "Yes. As an Amazon Associate we earn from qualifying purchases, at no extra cost to you. It keeps the site free and independent."
+    },
+    {
+      q: "How is the gaming news checked?",
+      a: "Every news story is checked against at least two trusted sources, and the sources are listed with the story."
     }
   ],
   categories: [
