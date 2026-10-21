@@ -665,6 +665,12 @@ RELEASES = [
                 'php public_html/api/v1/cron/cli-refresh-templates.php --apply',
                 'php public_html/api/v1/cron/cli-llms.php --apply',
                 'Cloudflare: Purge Everything (new website build)']),
+    dict(deploy=100, date='2026-10-21', title='Home page keeps its date after a website deploy',
+         changes=['A freshly deployed home page takes its "Last updated" date from /ai/summary.json, so cli-refresh-templates.php no longer leaves it undated'],
+         checks=[dict(label='Date fallback', type='contains', path='api/v1/cms/site-layer-lib.php', text='home_fallback')],
+         pr=REPO + '100',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.',
+                'php public_html/api/v1/cron/cli-ai-files.php --apply']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
