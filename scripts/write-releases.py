@@ -677,6 +677,11 @@ RELEASES = [
          pr=REPO + '101',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.',
                 'php public_html/api/v1/cron/cli-ai-files.php --apply']),
+    dict(deploy=102, date='2026-10-21', title='One Live version card on the CMS Dashboard',
+         changes=['The CMS Dashboard showed the Live version card twice when it drew twice; now it keeps one'],
+         checks=[dict(label='CMS dashboard', type='contains', path='cms/index.html', text="el.id='live-version-card'")],
+         pr=REPO + '102',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it, then reload the CMS (Ctrl+F5).']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

@@ -1,0 +1,20 @@
+{
+ "deploy": 102,
+ "date": "2026-10-21",
+ "title": "One Live version card on the CMS Dashboard",
+ "changes": [
+  "The CMS Dashboard showed the Live version card twice when it drew twice; now it keeps one"
+ ],
+ "checks": [
+  {
+   "label": "CMS dashboard",
+   "type": "contains",
+   "path": "cms/index.html",
+   "text": "el.id='live-version-card'"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/102",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it, then reload the CMS (Ctrl+F5)."
+ ]
+}
