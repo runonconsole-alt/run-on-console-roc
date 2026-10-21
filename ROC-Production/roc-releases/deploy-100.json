@@ -1,0 +1,21 @@
+{
+ "deploy": 100,
+ "date": "2026-10-21",
+ "title": "Home page keeps its date after a website deploy",
+ "changes": [
+  "A freshly deployed home page takes its \"Last updated\" date from /ai/summary.json, so cli-refresh-templates.php no longer leaves it undated"
+ ],
+ "checks": [
+  {
+   "label": "Date fallback",
+   "type": "contains",
+   "path": "api/v1/cms/site-layer-lib.php",
+   "text": "home_fallback"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/100",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it.",
+  "php public_html/api/v1/cron/cli-ai-files.php --apply"
+ ]
+}

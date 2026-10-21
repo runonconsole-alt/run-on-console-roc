@@ -484,6 +484,7 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
     // Home page date (Deploy 97): set by ai-files-lib.php; a CMS save keeps the one already on the page.
     $homeDate = (string)($L['home_modified'] ?? '');
     if ($path === '/' && $homeDate === '' && preg_match('#<script type="application/ld\+json" id="roc-home-page">[^<]*?"dateModified":"([^"]+)"#s', $html, $m)) $homeDate = $m[1];
+    if ($path === '/' && $homeDate === '') $homeDate = (string)($L['home_fallback'] ?? '');
     [$html, $orig] = rocLayerStrip($html);
 
     // CMS > Menus & footer: draw the saved menu; after a reset, draw the default one again.
@@ -608,6 +609,12 @@ function rocLayerApplyFiles(string $root, array $L, ?array $paths = null, bool $
     if (!isset($L['site_social'])) {      // the home page's sameAs (rocLayerApply)
         $site = is_file($root . '/roc-site.json') ? json_decode((string)file_get_contents($root . '/roc-site.json'), true) : null;
         $L['site_social'] = is_array($site['social'] ?? null) ? $site['social'] : [];
+    }
+    // A freshly deployed index.html has no date yet: use the one in /ai/summary.json (ai-files-lib.php
+    // writes both at the same time), so a website deploy never leaves the home page undated.
+    if (!isset($L['home_fallback']) && is_file($root . '/ai/summary.json')) {
+        $sum = json_decode((string)file_get_contents($root . '/ai/summary.json'), true);
+        $L['home_fallback'] = (string)($sum['updated'] ?? '');
     }
     foreach (rocLayerStaticFiles($root) as $path => $file) {
         if ($paths !== null && !in_array($path, $paths, true)) continue;
