@@ -15,7 +15,7 @@ export const HERO_SLIDES = [
   },
   {
     id: "checker",
-    title: "Can my PC run it? Check 500+ games",
+    title: "Can my PC run it? Check 2,000+ games",
     badge: "FREE CHECKER",
     image: "/uploads/site/compat-hero.webp",
     summary: "Pick a game and your graphics card, processor and RAM: compared with the official requirements.",
