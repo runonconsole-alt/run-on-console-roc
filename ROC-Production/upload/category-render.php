@@ -270,6 +270,13 @@ function rocRenderHub(string $root, PDO $pdo, array $c, array $cats): void {
         foreach ($devices as $i => $d) $items[] = ['@type' => 'ListItem', 'position' => $i + 1, 'name' => (string)$d['name']];
         $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'ItemList', 'name' => $title . ' devices', 'itemListElement' => $items]);
     }
+    // The page itself with its last real change (the platform or one of its devices), for freshness.
+    $web = ['@context' => 'https://schema.org', '@type' => 'CollectionPage', '@id' => $url, 'url' => $url, 'name' => $metaT, 'description' => $metaD,
+            'isPartOf' => ['@id' => ROC_PUBLIC_URL . '/#website'], 'publisher' => ['@id' => ROC_PUBLIC_URL . '/#organization']];
+    $pub = rocDate($c['created_at'] ?? null); $mod = rocCatModified($c, $devices);
+    if ($pub) $web['datePublished'] = gmdate('c', $pub);
+    if ($mod) $web['dateModified'] = gmdate('c', $mod);
+    $h .= rocJsonLd($web);
     $h .= $faqLd;
     $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
 
