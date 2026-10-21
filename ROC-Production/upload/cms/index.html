@@ -5225,7 +5225,9 @@ async function liveVersionCard(m){
   if(!d.live || S.view!=='dashboard' || S.editing) return;
   var r=d.live, body=$('.body',m); if(!body) return;
   var bad=(r.checks||[]).filter(function(c){return c.ok===false;}).length;
-  var el=document.createElement('div'); el.className='card';
+  // The dashboard can draw twice while this waits for releases.php: keep one card.
+  var old=$('#live-version-card',body); if(old) old.remove();
+  var el=document.createElement('div'); el.className='card'; el.id='live-version-card';
   el.innerHTML='<div class="cbody" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">'+
     '<div style="font-size:26px">🚀</div><div style="flex:1;min-width:200px"><div class="hint">Live version</div>'+
     '<div style="font-weight:700;font-size:15px">Deploy '+r.deploy+' · '+esc(r.title)+'</div>'+
