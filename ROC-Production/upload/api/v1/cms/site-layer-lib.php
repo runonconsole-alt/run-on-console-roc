@@ -513,6 +513,9 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
     }
     if ($noindex) $html = rocLayerSetRobots($html, 'noindex, follow');      // CMS > Settings > Noindex rules
     $head .= rocLayerTrackingHead((array)($L['tracking'] ?? []), $path);
+    // RSS feed (Deploy 97, blog-render.php rocFeed) for feed readers and AI search, on every page.
+    if ($path !== '/404' && stripos($html, 'application/rss+xml') === false)
+        $head .= '<link rel="alternate" type="application/rss+xml" title="Run On Console: blogs, news and guides" href="https://runonconsole.com/feed.xml" />';
     // The home page itself: the same name and description as its meta tags (also after a Metas
     // override), and the date of the newest post or product change, for AI search and Google.
     if ($path === '/') {

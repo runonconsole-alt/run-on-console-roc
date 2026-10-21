@@ -54,6 +54,7 @@ function rocAiFilesBuild(PDO $pdo): array {
         . "Contact: mailto:contact@runonconsole.com\n"
         . "Sitemap: " . $B . "/sitemap.xml\n"
         . "LLMs: " . $B . "/llms.txt\n"
+        . "Feed: " . $B . "/feed.xml\n"
         . "Summary: " . $B . "/ai/summary.json\n"
         . "FAQ: " . $B . "/ai/faq.json\n"
         . "Service: " . $B . "/ai/service.json\n";
