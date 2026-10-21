@@ -626,6 +626,10 @@ RELEASES = [
                   'PC builds: 8th to 11th gen Intel processors get DDR4 memory again (a broken rule fixed); the Updates page pictures have sizes (no layout jump)'],
          checks=[dict(label='FAQ markup in posts', type='contains', path='blog-render.php', text='FAQPage markup too')],
          pr=REPO + '94'),
+    dict(deploy=96, date='2026-10-21', title='Page dates for category and platform pages',
+         changes=['Product category pages (/category/...) and gaming platform pages say when they last changed (CollectionPage dateModified), for Google freshness and AI search'],
+         checks=[dict(label='Category dates', type='contains', path='category-render.php', text='its last real change')],
+         pr=REPO + '96'),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

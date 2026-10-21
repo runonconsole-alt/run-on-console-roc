@@ -1011,6 +1011,13 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
         $items = [];
         foreach ($pageItems as $i => $p) $items[] = ['@type' => 'ListItem', 'position' => ($page - 1) * $per + $i + 1, 'url' => rocProductUrl((string)$p['slug'])];
         $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'ItemList', 'itemListElement' => $items]);
+        // The page itself, dated by its newest product change (or its best-of list), for freshness.
+        $mod = (int)($best['t'] ?? 0);
+        foreach ($pageItems as $p) $mod = max($mod, (int)(rocProductModified($p) ?? 0));
+        $web = ['@context' => 'https://schema.org', '@type' => 'CollectionPage', '@id' => $url, 'url' => $url, 'name' => $title, 'description' => $desc,
+                'isPartOf' => ['@id' => ROC_PUBLIC_URL . '/#website'], 'publisher' => ['@id' => ROC_PUBLIC_URL . '/#organization']];
+        if ($mod > 0) $web['dateModified'] = gmdate('c', $mod);
+        $h .= rocJsonLd($web);
     }
     if ($best && !empty($best['faq'])) $h .= rocJsonLd(['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => array_map(function ($f) {
         return ['@type' => 'Question', 'name' => (string)$f['q'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => (string)$f['a']]]; }, (array)$best['faq'])]);
