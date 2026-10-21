@@ -656,6 +656,15 @@ RELEASES = [
                 'php public_html/api/v1/cron/cli-refresh-templates.php --apply',
                 'php public_html/api/v1/cron/cli-ai-files.php --apply',
                 'Cloudflare: Purge Everything (new website build)']),
+    dict(deploy=99, date='2026-10-21', title='2,000+ games on the home page card and in llms.txt', build='index-Bq_VfKzW.js',
+         changes=['Home page checker card says "Check 2,000+ games" (was 500+), like the rest of the site',
+                  'llms.txt says 2,000+ games for the checker'],
+         checks=[dict(label='llms.txt', type='contains', path='llms.txt', text='requirements of 2,000+ games')],
+         pr=REPO + '99',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.',
+                'php public_html/api/v1/cron/cli-refresh-templates.php --apply',
+                'php public_html/api/v1/cron/cli-llms.php --apply',
+                'Cloudflare: Purge Everything (new website build)']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

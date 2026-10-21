@@ -37,7 +37,7 @@ function rocLlmsBuild(PDO $pdo): string {
     $o .= $line('Contact', '/contact/', 'questions, corrections and partnerships');
     $o .= "\n## Core Resources\n";
     $o .= $line('Home', '/');
-    $o .= $line('Can I Run It? Game Requirements Checker', '/compatibility/', 'compare a PC with the official minimum and recommended requirements of 500+ games');
+    $o .= $line('Can I Run It? Game Requirements Checker', '/compatibility/', 'compare a PC with the official minimum and recommended requirements of 2,000+ games');
     $o .= $line('Gaming Platforms', '/gaming-platforms/', 'guides to every gaming platform, from PC and consoles to retro handhelds, VR and cloud gaming');
     $o .= $line('Product Categories', '/category/', 'every product category in one place');
     $o .= $line('All Products', '/products/', $nProducts . ' gaming and PC hardware picks');
