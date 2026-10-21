@@ -671,6 +671,12 @@ RELEASES = [
          pr=REPO + '100',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.',
                 'php public_html/api/v1/cron/cli-ai-files.php --apply']),
+    dict(deploy=101, date='2026-10-21', title='Complete Organization schema for the sameAs links',
+         changes=['The home page blocks that add the CMS social links and the Google Business link to sameAs also carry name, url and logo, so checkers no longer see an incomplete Organization'],
+         checks=[dict(label='Organization fields', type='contains', path='index.html', text='"@id":"https://runonconsole.com/#organization","name":"Run On Console"')],
+         pr=REPO + '101',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.',
+                'php public_html/api/v1/cron/cli-ai-files.php --apply']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

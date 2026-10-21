@@ -205,7 +205,8 @@ function rocLayerTrackingHead(array $t, string $path): string {
     $gmb = trim((string)($t['gmb_url'] ?? ''));
     if ($path === '/' && preg_match('#^https://[^\s"<>]+$#', $gmb)) {
         $h .= '<script type="application/ld+json">' . json_encode(['@context' => 'https://schema.org', '@type' => 'Organization',
-            '@id' => 'https://runonconsole.com/#organization', 'sameAs' => [$gmb]], JSON_UNESCAPED_SLASHES) . '</script>';
+            '@id' => 'https://runonconsole.com/#organization', 'name' => 'Run On Console', 'url' => 'https://runonconsole.com',
+            'logo' => 'https://runonconsole.com/images/logo-512.png', 'sameAs' => [$gmb]], JSON_UNESCAPED_SLASHES) . '</script>';
     }
     return $h;
 }
@@ -539,7 +540,8 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
             if (preg_match('#^https://[^\s"<>]+$#', $u)) $same[] = $u;
         }
         if ($same) $head .= '<script type="application/ld+json">' . json_encode(['@context' => 'https://schema.org', '@type' => 'Organization',
-            '@id' => 'https://runonconsole.com/#organization', 'sameAs' => array_values(array_unique($same))], JSON_UNESCAPED_SLASHES) . '</script>';
+            '@id' => 'https://runonconsole.com/#organization', 'name' => 'Run On Console', 'url' => 'https://runonconsole.com',
+            'logo' => 'https://runonconsole.com/images/logo-512.png', 'sameAs' => array_values(array_unique($same))], JSON_UNESCAPED_SLASHES) . '</script>';
         $head .= '<script type="application/ld+json" id="roc-home-page">' . json_encode($web, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) . '</script>';
     }
     $head .= rocEditHead((array)($L['edits'] ?? []), $path);
