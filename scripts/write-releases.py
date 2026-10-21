@@ -642,6 +642,20 @@ RELEASES = [
                 'php public_html/api/v1/cron/cli-ai-files.php --apply',
                 'php public_html/api/v1/cron/cli-refresh-templates.php --apply',
                 'Cloudflare: purge /robots.txt and /feed.xml']),
+    dict(deploy=98, date='2026-10-21', title='Home page FAQ, visible date, brand-first title', build='index-DCB0e2NZ.js',
+         changes=['Home page FAQ (6 questions) with FAQPage schema; the same answers in /ai/faq.json',
+                  'Home page shows "Last updated" with the same date as its dateModified',
+                  'Home title starts with Run On Console; the CMS Website info social links join the Organization sameAs',
+                  'FAQ answers stay in the page HTML when closed, on every page with a FAQ',
+                  '/ai/faq.json and /ai/service.json in the format AI checkers read (faqs, capabilities)',
+                  'New website build: also brings the header search scopes (Deploy 81) and Compare in the footer (Deploy 89)'],
+         checks=[dict(label='Home page FAQ', type='contains', path='index.html', text='"@type": "FAQPage"'),
+                 dict(label='Home page date', type='contains', path='index.html', text='Last updated: <time')],
+         pr=REPO + '98',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.',
+                'php public_html/api/v1/cron/cli-refresh-templates.php --apply',
+                'php public_html/api/v1/cron/cli-ai-files.php --apply',
+                'Cloudflare: Purge Everything (new website build)']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

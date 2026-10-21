@@ -524,7 +524,21 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
                 'name' => $t, 'description' => $d, 'inLanguage' => 'en',
                 'isPartOf' => ['@id' => 'https://runonconsole.com/#website'], 'about' => ['@id' => 'https://runonconsole.com/#organization'],
                 'publisher' => ['@id' => 'https://runonconsole.com/#organization']];
-        if (strtotime($homeDate)) $web['dateModified'] = gmdate('c', strtotime($homeDate));
+        if (strtotime($homeDate)) {
+            $iso = gmdate('c', strtotime($homeDate));
+            $web['dateModified'] = $iso;
+            // The same date shown on the page ("Last updated", HomeView.jsx reads window.__ROC_HOME_DATE).
+            $html = rocNavReplaceInner($html, 'data-roc-home-updated', '', 'Last updated: <time datetime="' . $iso . '">' . gmdate('j M Y', strtotime($homeDate)) . '</time>');
+            $head .= '<script>window.__ROC_HOME_DATE="' . $iso . '";</script>';
+        }
+        // CMS > Website info social links (roc-site.json) join the Organization's sameAs, so a new profile counts at once.
+        $same = [];
+        foreach ((array)($L['site_social'] ?? []) as $s) {
+            $u = trim((string)($s['url'] ?? ''));
+            if (preg_match('#^https://[^\s"<>]+$#', $u)) $same[] = $u;
+        }
+        if ($same) $head .= '<script type="application/ld+json">' . json_encode(['@context' => 'https://schema.org', '@type' => 'Organization',
+            '@id' => 'https://runonconsole.com/#organization', 'sameAs' => array_values(array_unique($same))], JSON_UNESCAPED_SLASHES) . '</script>';
         $head .= '<script type="application/ld+json" id="roc-home-page">' . json_encode($web, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) . '</script>';
     }
     $head .= rocEditHead((array)($L['edits'] ?? []), $path);
@@ -591,6 +605,10 @@ function rocLayerStaticFiles(string $root): array {
 /** Rewrites built pages (all, or only $paths). Returns the number of files changed. */
 function rocLayerApplyFiles(string $root, array $L, ?array $paths = null, bool $write = true): int {
     $n = 0;
+    if (!isset($L['site_social'])) {      // the home page's sameAs (rocLayerApply)
+        $site = is_file($root . '/roc-site.json') ? json_decode((string)file_get_contents($root . '/roc-site.json'), true) : null;
+        $L['site_social'] = is_array($site['social'] ?? null) ? $site['social'] : [];
+    }
     foreach (rocLayerStaticFiles($root) as $path => $file) {
         if ($paths !== null && !in_array($path, $paths, true)) continue;
         $html = (string)file_get_contents($file);

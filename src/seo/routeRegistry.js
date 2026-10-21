@@ -144,7 +144,7 @@ export const STATIC_PUBLIC_ROUTES = [
   {
     path: '/',
     canonical: `${BASE_DOMAIN}/`,
-    title: 'Gaming Gear Picks & Can I Run It Checker | Run On Console',
+    title: 'Run On Console | Gaming Gear Picks & Can I Run It Checker',
     description: 'Independent gaming gear picks for PC and console, guides to 15 gaming platforms and a free checker for 2,000+ games. Find out if your PC can run it.',
     h1: 'Discover the Best',
     category: 'Home',
