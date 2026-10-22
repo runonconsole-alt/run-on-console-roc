@@ -695,6 +695,12 @@ RELEASES = [
          checks=[dict(label='CMS cards', type='contains', path='cms/index.html', text='Dashboard number cards: green')],
          pr=REPO + '104',
          steps=['Upload the zip to /home2/runoncon/ and unzip it, then reload the CMS (Ctrl+F5).']),
+    dict(deploy=105, date='2026-10-22', title='Day / night theme on the website',
+         changes=['A sun/moon button in the header switches the whole website to a night theme (home, products, categories, comparisons, Can I run, blogs, guides, news, updates, platforms, sign-in); the choice is remembered and applied before the page shows, so no white flash',
+                  'Product photos keep their white background in the night theme'],
+         checks=[dict(label='Night theme', type='file', path='roc-theme.css'), dict(label='Theme button', type='contains', path='roc-nav.js', text='data-roc-theme')],
+         pr=REPO + '105',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard > Clear cache (roc-nav.js changed).']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

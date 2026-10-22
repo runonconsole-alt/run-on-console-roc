@@ -5,7 +5,7 @@ import {
   Sparkles, Layers, ShoppingBag, ArrowRight, Star, ShoppingCart, 
   Cable, Laptop, Monitor, Headphones, Mouse, Cpu, ShieldCheck, User, LogOut,
   Tv, Glasses, Wrench, BookOpen, Tag, Flame, Activity, HardDrive, Zap, Compass,
-  Scale, FileText, CheckCircle2, Play, Building2, Calendar
+  Scale, FileText, CheckCircle2, Play, Building2, Calendar, Sun, Moon
 } from 'lucide-react';
 import { playClickSound } from '../utils/audioEffects';
 import { BrandLogo } from './BrandLogo';
@@ -250,6 +250,12 @@ export const Header = () => {
                   </span>
                 </button>
               )}
+
+              {/* Day / night: roc-nav.js handles the click on every page (React and server-rendered) */}
+              <button type="button" data-roc-theme aria-label="Switch to night mode" title="Day / night" className="roc-theme-btn">
+                <Sun className="sun" aria-hidden="true" />
+                <Moon className="moon" aria-hidden="true" />
+              </button>
 
               {/* User Dropdown Trigger */}
               {currentUser ? (
