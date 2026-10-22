@@ -309,15 +309,20 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand)!i
 
 /* dashboard */
 .dstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:18px}
-.dstat{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px 18px 16px;box-shadow:var(--shadow);position:relative;cursor:pointer;transition:transform .2s,box-shadow .2s}
-.dstat:hover{transform:translateY(-2px);box-shadow:0 14px 34px -16px rgba(15,31,23,.28)}
-.dstat .l{font-size:13px;font-weight:600;color:var(--ink-2)}
-.dstat .n{font-size:38px;font-weight:750;letter-spacing:-.03em;line-height:1.1;margin:10px 0 6px}
-.dstat .s{font-size:11.5px;color:var(--ink-3)}
-.dstat .go{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;font-size:14px;color:var(--ink-2);background:#fff;transform:rotate(-45deg)}
-.dstat.hero{background:linear-gradient(140deg,var(--brand) 0%,var(--brand-2) 100%);border-color:transparent;color:#fff}
-.dstat.hero .l,.dstat.hero .s{color:rgba(255,255,255,.82)}
-.dstat.hero .go{background:#fff;color:var(--brand-2);border-color:#fff}
+/* Dashboard number cards: green, and white when the mouse is on them (the white grows in from the middle) */
+.dstat{background:linear-gradient(140deg,var(--brand) 0%,var(--brand-2) 100%);border:1px solid transparent;border-radius:20px;padding:18px 18px 16px;box-shadow:0 10px 26px -14px rgba(6,95,70,.55);position:relative;overflow:hidden;isolation:isolate;cursor:pointer;color:#fff;transition:translate .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s,border-color .3s}
+.dstat::before{content:'';position:absolute;inset:-2px;z-index:-1;background:var(--panel);border-radius:inherit;opacity:0;transform:scale(.4);transition:opacity .35s ease,transform .45s cubic-bezier(.2,.8,.2,1)}
+.dstat:hover,.dstat:focus-visible{translate:0 -3px;border-color:var(--line);box-shadow:0 16px 36px -16px rgba(15,31,23,.32)}
+.dstat:hover::before,.dstat:focus-visible::before{opacity:1;transform:none}
+.dstat .l{font-size:13px;font-weight:600;color:rgba(255,255,255,.85);transition:color .3s}
+.dstat .n{font-size:38px;font-weight:750;letter-spacing:-.03em;line-height:1.1;margin:10px 0 6px;color:#fff;transition:color .3s}
+.dstat .s{font-size:11.5px;color:rgba(255,255,255,.78);transition:color .3s}
+.dstat:hover .l,.dstat:focus-visible .l{color:var(--ink-2)}
+.dstat:hover .n,.dstat:focus-visible .n{color:var(--brand-2)}
+.dstat:hover .s,.dstat:focus-visible .s{color:var(--ink-3)}
+.dstat .go{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;border:1px solid #fff;display:grid;place-items:center;font-size:14px;color:var(--brand-2);background:#fff;transform:rotate(-45deg);transition:transform .35s cubic-bezier(.2,.8,.2,1),background .3s,color .3s,border-color .3s}
+.dstat:hover .go,.dstat:focus-visible .go{transform:rotate(0);background:var(--brand-2);border-color:var(--brand-2);color:#fff}
+@media (prefers-reduced-motion:reduce){.dstat,.dstat::before,.dstat .go{transition:none}}
 .dgrid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;margin-bottom:16px}
 .dgrid > .card{margin:0}
 .span-7{grid-column:span 7}.span-5{grid-column:span 5}.span-4{grid-column:span 4}.span-8{grid-column:span 8}.span-6{grid-column:span 6}.span-12{grid-column:span 12}
