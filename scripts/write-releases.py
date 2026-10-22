@@ -701,6 +701,12 @@ RELEASES = [
          checks=[dict(label='Night theme', type='file', path='roc-theme.css'), dict(label='Theme button', type='contains', path='roc-nav.js', text='data-roc-theme')],
          pr=REPO + '105',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard > Clear cache (roc-nav.js changed).']),
+    dict(deploy=106, date='2026-10-22', title='Code resend wait and the paid-post line on the privacy page',
+         changes=['Email code screen: Resend after 90 seconds; after 3 new codes the screen waits one hour (countdown), then shows Try again',
+                  'Write for us: the paid-post line left the top of the page; the privacy policy (Editorial independence) now says paid guest posts are marked sponsored, carry rel=sponsored and start from $50'],
+         checks=[dict(label='Privacy page', type='contains', path='privacy-policy/index.html', text='Paid guest posts')],
+         pr=REPO + '106',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard > Clear cache.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

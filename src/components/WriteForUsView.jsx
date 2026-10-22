@@ -131,7 +131,7 @@ export const WriteForUsView = () => {
             <BouncyText text="Write For Run On Console" />
           </h1>
           <p className="text-emerald-100 text-xs sm:text-base leading-relaxed max-w-2xl mx-auto">
-            Share your gaming expertise, promote your hardware, and get a permanent backlink to your site (marked rel="sponsored", as Google requires for paid posts). Paid editorial publishing starting from <strong className="text-white underline">$50</strong>.
+            Share your gaming expertise with PC and console players: guides, hardware reviews and setup tips, read by gamers every day.
           </p>
         </div>
       </div>

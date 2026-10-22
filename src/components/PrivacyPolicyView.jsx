@@ -86,6 +86,11 @@ export const PrivacyPolicyView = () => {
             listed, ranked higher or described more favourably. If an article is ever sponsored, it will be
             clearly labelled as sponsored.
           </p>
+          <p>
+            Paid guest posts (see <a href="/write-for-us/" className="text-emerald-700 font-semibold underline">Write for us</a>)
+            are marked as sponsored, and their links to the author's site carry rel="sponsored", as Google requires
+            for paid posts. Paid editorial publishing starts from $50.
+          </p>
         </Section>
 
         <Section icon={Lock} title="4. Information we collect">
