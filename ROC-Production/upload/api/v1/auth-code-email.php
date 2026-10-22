@@ -1,9 +1,11 @@
 <?php
 /**
- * Run On Console — the sign-up email with a 6-digit code (no link), in the site's colours.
+ * Run On Console — the sign-up email with a 6-digit code (no link).
  * Used by rocIssueChallenge() in account-runtime.php for purpose 'verify' (hook added by
- * api/v1/cron/cli-auth-code-email.php). The code is shown as six boxes, like the code screen
- * on /auth/verify-email/.
+ * api/v1/cron/cli-auth-code-email.php).
+ *
+ * Plain and light on purpose, like the big sites' code emails: the code is one line of text
+ * after "use the following code", so Gmail and phones recognise it and offer "Copy code".
  */
 
 function rocCodeEmailSubject(string $code): string {
@@ -12,31 +14,32 @@ function rocCodeEmailSubject(string $code): string {
 
 function rocCodeEmail(string $code, array $u): string {
     $esc = function ($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); };
-    $name = trim((string)($u['name'] ?? '')) ?: trim((string)($u['username'] ?? ''));
+    $code = (string)preg_replace('/\D/', '', $code);
+    $name = trim((string)($u['username'] ?? '')) ?: trim((string)($u['name'] ?? ''));
     $base = defined('ROC_SITE_URL') ? rtrim(ROC_SITE_URL, '/') : 'https://runonconsole.com';
-    $boxes = '';
-    foreach (str_split(preg_replace('/\D/', '', $code)) as $d) {
-        $boxes .= '<td style="padding:0 4px"><div style="width:44px;height:54px;line-height:54px;border-radius:12px;background:#0f172a;border:2px solid #14b8a6;'
-            . 'color:#ffffff;font:bold 26px/54px \'Courier New\',monospace;text-align:center">' . $esc($d) . '</div></td>';
-    }
-    return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your code</title></head>'
-        . '<body style="margin:0;background:#020617;font-family:Arial,Helvetica,sans-serif;padding:24px 12px">'
-        . '<div style="display:none;max-height:0;overflow:hidden">Your Run On Console code is ' . $esc($code) . '. It works for 10 minutes.</div>'
-        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">'
-        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#0f172a;border:1px solid #134e4a;border-radius:20px">'
-        . '<tr><td style="height:6px;background:#14b8a6;background-image:linear-gradient(90deg,#14b8a6,#10b981,#059669);border-radius:20px 20px 0 0"></td></tr>'
-        . '<tr><td align="center" style="padding:32px 28px 8px">'
-        . '<img src="' . $esc($base) . '/images/logo-512.png" width="56" height="56" alt="Run On Console" style="display:block;border:0;border-radius:14px">'
-        . '<div style="margin-top:14px;font-size:13px;letter-spacing:2px;color:#5eead4;font-weight:bold">RUN ON CONSOLE</div>'
-        . '<h1 style="margin:18px 0 6px;font-size:24px;color:#ffffff">Verify it’s you</h1>'
-        . '<p style="margin:0;font-size:14px;line-height:22px;color:#94a3b8">' . ($name !== '' ? 'Hi ' . $esc($name) . ', enter' : 'Enter') . ' this code on the verification screen to finish signing up.</p>'
+    $p = 'margin:0 0 16px;font-size:15px;line-height:24px;color:#262626';
+    return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Verify your account</title></head>'
+        . '<body style="margin:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif">'
+        . '<div style="display:none;max-height:0;overflow:hidden">Your Run On Console code is ' . $esc($code) . '</div>'
+        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff"><tr><td align="center" style="padding:32px 16px">'
+        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:460px">'
+        // logo | name, like the header of the big sites' emails
+        . '<tr><td style="padding:0 0 28px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>'
+        . '<td><img src="' . $esc($base) . '/images/logo-512.png" width="36" height="36" alt="" style="display:block;border:0;border-radius:9px"></td>'
+        . '<td style="padding:0 12px;color:#dbdbdb;font-size:22px">|</td>'
+        . '<td style="font-size:20px;font-weight:700;color:#047857;letter-spacing:-.2px">Run On Console</td>'
+        . '</tr></table></td></tr>'
+        . '<tr><td>'
+        . '<p style="' . $p . '">Hi ' . ($name !== '' ? $esc($name) : 'there') . ',</p>'
+        . '<p style="' . $p . '">Someone used this email to create an account on Run On Console.</p>'
+        . '<p style="' . $p . '">If this was you, please use the following code to confirm your email:</p>'
+        . '<p style="margin:0 0 20px;font-size:30px;line-height:36px;font-weight:700;letter-spacing:4px;color:#262626">' . $esc($code) . '</p>'
+        . '<p style="' . $p . '">This code works for 10 minutes. Only the newest code works.</p>'
+        . '<p style="' . $p . '">If this wasn\'t you, you can ignore this email. No account is made without the code, and we will never ask you for it by phone or chat.</p>'
+        . '<p style="margin:0;font-size:15px;line-height:24px;color:#262626">Thanks,<br>Run On Console</p>'
         . '</td></tr>'
-        . '<tr><td align="center" style="padding:22px 12px 6px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>' . $boxes . '</tr></table></td></tr>'
-        . '<tr><td align="center" style="padding:10px 28px 28px">'
-        . '<p style="margin:0;font-size:13px;color:#cbd5e1">The code works for <b style="color:#5eead4">10 minutes</b>. Only the newest code works.</p>'
-        . '<p style="margin:14px 0 0;font-size:12px;line-height:19px;color:#64748b">We will never ask you for this code by phone, chat or email. '
-        . 'If you did not sign up at runonconsole.com, ignore this email: no account is made without the code.</p>'
-        . '</td></tr></table>'
-        . '<p style="margin:16px 0 0;font-size:11px;color:#475569">Run On Console · <a href="' . $esc($base) . '/" style="color:#5eead4;text-decoration:none">runonconsole.com</a></p>'
-        . '</td></tr></table></body></html>';
+        . '<tr><td style="height:32px;line-height:32px;font-size:0">&nbsp;</td></tr>'
+        . '<tr><td style="border-top:1px solid #efefef;padding-top:18px;font-size:12px;line-height:18px;color:#8e8e8e;text-align:center">This message was sent to you by Run On Console<br>'
+        . '<a href="' . $esc($base) . '/" style="color:#8e8e8e">runonconsole.com</a> · Lahore, Pakistan</td></tr>'
+        . '</table></td></tr></table></body></html>';
 }
