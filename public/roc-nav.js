@@ -659,3 +659,36 @@ document.addEventListener('submit', function (e) {
   if (navigator.sendBeacon) navigator.sendBeacon('/api/v1/social-visit.php', new Blob([body], { type: 'application/json' }));
   else fetch('/api/v1/social-visit.php', { method: 'POST', body: body, keepalive: true, headers: { 'Content-Type': 'application/json' } });
 })();
+
+/* Day / night theme: the sun/moon button in the header ([data-roc-theme], Header.jsx). The choice is saved in
+   localStorage "roc-theme" and put on <html> as .roc-dark before the page paints (inline script in index.html);
+   the colours are in /roc-theme.css (scripts/gen-roc-theme.py). Works on React and server-rendered pages. */
+(function () {
+  var root = document.documentElement;
+  function isDark() { return root.classList.contains('roc-dark'); }
+  function label() {
+    document.querySelectorAll('[data-roc-theme]').forEach(function (b) {
+      b.setAttribute('aria-label', isDark() ? 'Switch to day mode' : 'Switch to night mode');
+      b.setAttribute('aria-pressed', isDark() ? 'true' : 'false');
+    });
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', isDark() ? '#020617' : '#064E3B');
+  }
+  function set(dark, animate) {
+    if (animate) { root.classList.add('roc-theme-anim'); setTimeout(function () { root.classList.remove('roc-theme-anim'); }, 450); }
+    root.classList.toggle('roc-dark', dark);
+    try { localStorage.setItem('roc-theme', dark ? 'dark' : 'light'); } catch (e) {}
+    label();
+  }
+  document.addEventListener('click', function (ev) {
+    var b = ev.target && ev.target.closest && ev.target.closest('[data-roc-theme]');
+    if (!b) return;
+    ev.preventDefault();
+    set(!isDark(), true);
+  });
+  // Another tab changed it: follow.
+  window.addEventListener('storage', function (ev) { if (ev.key === 'roc-theme') { root.classList.toggle('roc-dark', ev.newValue === 'dark'); label(); } });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', label); else label();
+  if (window.MutationObserver) new MutationObserver(function () { var b = document.querySelector('[data-roc-theme]:not([aria-pressed])'); if (b) label(); })
+    .observe(document.documentElement, { childList: true, subtree: true });
+})();

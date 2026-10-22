@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Day / night: the saved choice is applied before the page paints (button and saving: roc-nav.js; colours: roc-theme.css) -->
+    <script>try{if(localStorage.getItem('roc-theme')==='dark')document.documentElement.classList.add('roc-dark')}catch(e){}</script>
+    <link rel="stylesheet" href="/roc-theme.css" />
 
 
     <!-- Tracking (GTM, GA4, Clarity) and verification codes are added on the server from CMS > Settings (api/v1/cms/site-layer-lib.php). -->

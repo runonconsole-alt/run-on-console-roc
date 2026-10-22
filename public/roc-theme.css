@@ -1,0 +1,140 @@
+/* Run On Console - night theme. Turned on by html.roc-dark (roc-nav.js: the sun/moon button, saved in
+   localStorage "roc-theme"). Written by scripts/gen-roc-theme.py; edit the generator, not this file. */
+html.roc-dark{color-scheme:dark}
+html.roc-dark body{background:#020617!important;color:#e2e8f0}
+html.roc-dark ::selection{background:rgba(52,211,153,.35)}
+html.roc-dark input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html.roc-dark select,html.roc-dark textarea{background-color:#0b1220;color:#e2e8f0;border-color:#334155}
+html.roc-dark input::placeholder,html.roc-dark textarea::placeholder{color:#64748b}
+html.roc-dark .shadow-xs,html.roc-dark .shadow-sm,html.roc-dark .shadow,html.roc-dark .shadow-md,html.roc-dark .shadow-lg{--tw-shadow-color:rgba(0,0,0,.45)}
+html.roc-dark hr{border-color:#1e293b}
+html.roc-dark .bg-white,
+html.roc-dark .bg-white\/95,
+html.roc-dark .bg-white\/90,
+html.roc-dark .bg-white\/80,
+html.roc-dark .focus\:bg-white:focus,
+html.roc-dark .bg-\[\#FFFFFF\]{background-color:#0f172a!important}
+html.roc-dark .bg-white\/95{background-color:rgba(15,23,42,.92)!important}
+html.roc-dark .bg-\[\#F8FAFC\],
+html.roc-dark .bg-slate-50,
+html.roc-dark .bg-slate-50\/80{background-color:#020617!important}
+html.roc-dark .bg-slate-100,
+html.roc-dark .bg-slate-100\/90{background-color:#0b1220!important}
+html.roc-dark .bg-slate-200{background-color:#1e293b!important}
+html.roc-dark .hover\:bg-slate-100:hover,
+html.roc-dark .hover\:bg-white:hover,
+html.roc-dark .hover\:bg-slate-200:hover{background-color:#152036!important}
+html.roc-dark .bg-emerald-50,
+html.roc-dark .bg-emerald-50\/50,
+html.roc-dark .bg-emerald-50\/70,
+html.roc-dark .bg-emerald-50\/80,
+html.roc-dark .hover\:bg-emerald-50:hover,
+html.roc-dark .hover\:bg-emerald-50\/70:hover,
+html.roc-dark .group:hover .group-hover\:bg-emerald-50{background-color:rgba(16,185,129,.10)!important}
+html.roc-dark .bg-emerald-100,
+html.roc-dark .bg-emerald-100\/60,
+html.roc-dark .bg-emerald-100\/70,
+html.roc-dark .bg-emerald-100\/80,
+html.roc-dark .group:hover .group-hover\:bg-emerald-100,
+html.roc-dark .hover\:bg-emerald-100\/60:hover{background-color:rgba(16,185,129,.18)!important}
+html.roc-dark .bg-amber-50\/70{background-color:rgba(245,158,11,.10)!important}
+html.roc-dark .bg-rose-50{background-color:rgba(244,63,94,.10)!important}
+html.roc-dark .text-\[\#0F172A\],
+html.roc-dark .text-slate-900,
+html.roc-dark .text-slate-950,
+html.roc-dark .hover\:text-slate-900:hover{color:#f8fafc!important}
+html.roc-dark .text-slate-800{color:#e2e8f0!important}
+html.roc-dark .text-slate-700{color:#cbd5e1!important}
+html.roc-dark .text-slate-600,
+html.roc-dark .text-slate-500{color:#94a3b8!important}
+html.roc-dark .text-emerald-700,
+html.roc-dark .text-emerald-800,
+html.roc-dark .text-emerald-900,
+html.roc-dark .hover\:text-emerald-700:hover,
+html.roc-dark .hover\:text-emerald-900:hover,
+html.roc-dark .group:hover .group-hover\:text-emerald-700,
+html.roc-dark .group:hover .group-hover\:text-emerald-800,
+html.roc-dark .group:hover .group-hover\:text-emerald-900{color:#6ee7b7!important}
+html.roc-dark .text-emerald-600,
+html.roc-dark .hover\:text-emerald-600:hover,
+html.roc-dark .group:hover .group-hover\:text-emerald-600{color:#34d399!important}
+html.roc-dark .text-amber-800{color:#fcd34d!important}
+html.roc-dark .border-slate-100,
+html.roc-dark .border-slate-200,
+html.roc-dark .border-slate-200\/80,
+html.roc-dark .border-slate-200\/60,
+html.roc-dark .sm\:border-slate-200{border-color:#1e293b!important}
+html.roc-dark .border-slate-300,
+html.roc-dark .hover\:border-slate-300:hover{border-color:#334155!important}
+html.roc-dark .border-emerald-100,
+html.roc-dark .border-emerald-200,
+html.roc-dark .border-emerald-200\/60,
+html.roc-dark .border-emerald-300,
+html.roc-dark .border-emerald-300\/60,
+html.roc-dark .group:hover .group-hover\:border-emerald-300{border-color:rgba(52,211,153,.28)!important}
+html.roc-dark .border-amber-200{border-color:rgba(245,158,11,.35)!important}
+html.roc-dark .border-rose-200{border-color:rgba(244,63,94,.35)!important}
+
+/* blogs, guides, news */
+html.roc-dark .roc-article{color:#cbd5e1}
+html.roc-dark .roc-article h2,html.roc-dark .roc-article h3,html.roc-dark .roc-article h4,html.roc-dark .roc-article h5,html.roc-dark .roc-article strong{color:#f8fafc}
+html.roc-dark .roc-article blockquote{background:rgba(16,185,129,.10);color:#6ee7b7}
+html.roc-dark .roc-article th,html.roc-dark .roc-article td{border-color:#1e293b}
+html.roc-dark .roc-article th{background:#152036;color:#f8fafc}
+html.roc-dark .roc-article hr{border-top-color:#1e293b}
+html.roc-dark .roc-article a{color:#34d399}
+html.roc-dark .rn-t{color:#f8fafc}
+html.roc-dark .rn-top,html.roc-dark a.rn-row,html.roc-dark a.rn-side-item{border-color:#1e293b}
+html.roc-dark .rn-ad,html.roc-dark .rn-box{background:#0f172a;border-color:#1e293b}
+html.roc-dark .rn-live{background:rgba(225,29,72,.15);color:#fda4af}
+html.roc-dark .rn-pg a,html.roc-dark .rn-pg span{background:#0f172a;border-color:#334155;color:#cbd5e1}
+html.roc-dark .rn-pg .on{background:#047857;border-color:#047857;color:#fff}
+html.roc-dark .gd-chip{background:#0f172a;border-color:#334155;color:#cbd5e1}
+html.roc-dark .gd-chip.on{background:#047857;border-color:#047857;color:#fff}
+/* /updates/ */
+html.roc-dark .up-col{background:#0f172a;border-color:#1e293b}
+html.roc-dark .up-col h2,html.roc-dark .up-item b{color:#f8fafc}
+html.roc-dark .up-item{border-top-color:#1e293b}
+html.roc-dark .up-more a{background:rgba(16,185,129,.10);color:#6ee7b7}
+/* Can I run pages */
+html.roc-dark .gp-card,html.roc-dark .gp-p,html.roc-dark .gp-faq details,html.roc-dark .gp-sim a,html.roc-dark .gp-search,html.roc-dark .gp-az a,html.roc-dark .gp-btn.s,html.roc-dark .gp-build li{background:#0f172a;border-color:#1e293b}
+html.roc-dark .gp-card h2,html.roc-dark .gp-parts h3,html.roc-dark .gp-build .t,html.roc-dark .gp-p a.t,html.roc-dark .gp-faq summary,html.roc-dark .gp-sim strong,html.roc-dark .gp-search,html.roc-dark .gp-list a,html.roc-dark .gp-table thead th{color:#f8fafc}
+html.roc-dark .gp-table th,html.roc-dark .gp-table td{border-top-color:#1e293b}
+html.roc-dark .gp-table thead th{background:#152036}
+html.roc-dark .gp-table tbody th,html.roc-dark .gp-check label,html.roc-dark .gp-parts ul,html.roc-dark .gp-faq .a,html.roc-dark .gp-p .a .m,html.roc-dark .gp-btn.s,html.roc-dark .gp-az a{color:#cbd5e1}
+html.roc-dark .gp-table td{color:#e2e8f0}
+html.roc-dark .gp-check select{background:#0b1220;border-color:#334155;color:#f8fafc}
+html.roc-dark .gp-check select:focus{background:#0f172a}
+html.roc-dark .gp-res{background:#152036;color:#cbd5e1}
+html.roc-dark .gp-res.ok{background:rgba(16,185,129,.14);color:#6ee7b7}
+html.roc-dark .gp-res.mid{background:rgba(234,179,8,.14);color:#fde047}
+html.roc-dark .gp-res.low{background:rgba(249,115,22,.14);color:#fdba74}
+html.roc-dark .gp-res.no{background:rgba(239,68,68,.14);color:#fca5a5}
+html.roc-dark .gp-parts>div{background:#0b1220;border-color:#1e293b}
+html.roc-dark .gp-build{background:rgba(16,185,129,.06);border-color:rgba(52,211,153,.3)}
+html.roc-dark .gp-p .a .m{border-color:#334155}
+html.roc-dark .gp-faq details[open],html.roc-dark .gp-sim a:hover{background:rgba(16,185,129,.10);border-color:#10b981}
+html.roc-dark .gp-tag.w{background:#0f172a;color:#6ee7b7;border-color:#0f172a}
+/* React app components (src/index.css) */
+html.roc-dark .game-card{background:#0f172a;border-color:#1e293b}
+html.roc-dark .mega-dropdown-mirror{background:rgba(15,23,42,.97);box-shadow:0 25px 70px -15px rgba(0,0,0,.7),0 0 30px rgba(16,185,129,.18)}
+html.roc-dark .dropdown-tile{background:rgba(30,41,59,.6);border-color:#1e293b}
+html.roc-dark .dropdown-tile:hover{background:rgba(16,185,129,.14);border-color:rgba(52,211,153,.6)}
+html.roc-dark .bg-white .text-emerald-950:not([class*="bg-"]),html.roc-dark .game-card .text-emerald-950:not([class*="bg-"]){color:#d1fae5!important}
+html.roc-dark .bg-white .text-emerald-950:not([class*="bg-"]),html.roc-dark .bg-emerald-50 .text-emerald-950:not([class*="bg-"]),html.roc-dark [class*="bg-emerald-50"] .text-emerald-950:not([class*="bg-"]){color:#d1fae5!important}
+html.roc-dark .gp-build h3{color:#f8fafc}
+html.roc-dark .rn-head h1,html.roc-dark .rn-h2{color:#f8fafc}
+html.roc-dark [data-roc-wl]{background:#0f172a!important;border-color:#334155!important;color:#cbd5e1!important}
+html.roc-dark [data-roc-wl][aria-pressed="true"]{background:rgba(244,63,94,.15)!important;border-color:rgba(244,63,94,.5)!important;color:#fda4af!important}
+/* Product photos keep their white background (they are shot on white) */
+html.roc-dark img[src*="media-amazon.com"],html.roc-dark img[src*="/images/products/photos/"]{background:#fff}
+
+/* The sun/moon button (roc-nav.js puts it in the header) */
+.roc-theme-btn{position:relative;width:32px;height:32px;border-radius:999px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;display:inline-grid;place-items:center;cursor:pointer;flex-shrink:0;overflow:hidden;transition:background .3s,border-color .3s,color .3s,transform .2s}
+.roc-theme-btn:hover{transform:translateY(-1px);border-color:#10b981}
+.roc-theme-btn svg{position:absolute;width:16px;height:16px;transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .3s}
+.roc-theme-btn .moon{transform:translateY(24px) rotate(-60deg);opacity:0}
+html.roc-dark .roc-theme-btn{background:#0f172a;border-color:#334155;color:#fde68a}
+html.roc-dark .roc-theme-btn .sun{transform:translateY(-24px) rotate(60deg);opacity:0}
+html.roc-dark .roc-theme-btn .moon{transform:none;opacity:1}
+html.roc-theme-anim,html.roc-theme-anim *{transition:background-color .35s ease,border-color .35s ease,color .25s ease!important}
+@media (prefers-reduced-motion:reduce){.roc-theme-btn svg{transition:none}html.roc-theme-anim,html.roc-theme-anim *{transition:none!important}}
