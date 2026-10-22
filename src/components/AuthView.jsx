@@ -564,7 +564,7 @@ export const AuthView = () => {
         {/* Authentication Choices */}
         {(authMode === 'login' || authMode === 'signup') && (
           <div className="space-y-3 mb-6">
-            {authConfig?.google_oauth_configured ? (
+            {(authConfig?.google_oauth_configured || isSessionLoading) ? (
               <a
                 href="/api/v1/oauth/google-start.php"
                 className="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-white font-display font-bold text-xs rounded-xl border border-slate-700 transition flex items-center justify-center gap-2.5 no-underline shadow-sm"

@@ -717,6 +717,16 @@ RELEASES = [
          checks=[dict(label='Chat night theme', type='contains', path='roc-chat.js', text='roc-gate')],
          pr=REPO + '108',
          steps=['Upload the zip to /home2/runoncon/ and unzip it, then CMS Dashboard > Clear cache (roc-nav.js changed).']),
+    dict(deploy=109, date='2026-10-22', title='Plain sign-up code email',
+         changes=['The sign-up email is white and plain like the big sites: logo, a short note and the code on one line, so Gmail and phones show Copy code'],
+         checks=[dict(label='Code email', type='contains', path='api/v1/auth-code-email.php', text='use the following code')],
+         pr=REPO + '109',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it. Nothing else to run.']),
+    dict(deploy=110, date='2026-10-22', title='Continue with Google shows straight away',
+         changes=['Sign-in and sign-up pages show the Continue with Google button while the page loads, instead of a short "Google sign-in is temporarily unavailable" note'],
+         checks=[dict(label='Google button', type='contains', path='auth/login/index.html', text='Continue with Google')],
+         pr=REPO + '110',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard > Clear cache.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
