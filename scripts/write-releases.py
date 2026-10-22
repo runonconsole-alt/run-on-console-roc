@@ -707,6 +707,11 @@ RELEASES = [
          checks=[dict(label='Privacy page', type='contains', path='privacy-policy/index.html', text='Paid guest posts')],
          pr=REPO + '106',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard > Clear cache.']),
+    dict(deploy=107, date='2026-10-22', title='Night theme in the CMS',
+         changes=['CMS: a moon/sun button next to the colour dots in the sidebar switches the whole CMS to a night theme; it is remembered in this browser and works with every accent colour'],
+         checks=[dict(label='CMS night theme', type='contains', path='cms/index.html', text='roc_cms_theme')],
+         pr=REPO + '107',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it, then reload the CMS (Ctrl+F5).']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

@@ -1,0 +1,20 @@
+{
+ "deploy": 107,
+ "date": "2026-10-22",
+ "title": "Night theme in the CMS",
+ "changes": [
+  "CMS: a moon/sun button next to the colour dots in the sidebar switches the whole CMS to a night theme; it is remembered in this browser and works with every accent colour"
+ ],
+ "checks": [
+  {
+   "label": "CMS night theme",
+   "type": "contains",
+   "path": "cms/index.html",
+   "text": "roc_cms_theme"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/107",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it, then reload the CMS (Ctrl+F5)."
+ ]
+}
