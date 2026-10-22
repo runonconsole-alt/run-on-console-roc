@@ -682,6 +682,14 @@ RELEASES = [
          checks=[dict(label='CMS dashboard', type='contains', path='cms/index.html', text="el.id='live-version-card'")],
          pr=REPO + '102',
          steps=['Upload the zip to /home2/runoncon/ and unzip it, then reload the CMS (Ctrl+F5).']),
+    dict(deploy=103, date='2026-10-22', title='Sign-up with a 6-digit email code',
+         changes=['After sign-up the code screen opens: lock badge with a countdown ring, code boxes that pop, a Verifying bar, a green You are verified state and a red shake on a wrong code (site colours, works on phones)',
+                  'The sign-up email carries the code in big boxes instead of a link (links in older emails keep working until they expire)',
+                  'Signing in to an account that is not verified yet: Send me a code opens the code screen'],
+         checks=[dict(label='Code email', type='file', path='api/v1/auth-code-email.php'),
+                 dict(label='Code email turned on (cli-auth-code-email.php --apply)', type='contains', path='api/v1/account-runtime.php', text='ROC code-only email')],
+         pr=REPO + '103',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-auth-code-email.php --apply', 'php public_html/api/v1/cron/cli-refresh-templates.php, then php public_html/api/v1/cron/cli-ai-files.php', 'Purge Everything in Cloudflare (or CMS Dashboard > Clear cache).']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
