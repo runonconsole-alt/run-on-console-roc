@@ -1,0 +1,20 @@
+{
+ "deploy": 108,
+ "date": "2026-10-22",
+ "title": "Ask ROC chat in the night theme",
+ "changes": [
+  "The Ask ROC chat box (and its sign-in card) follows the night theme: dark panel, messages, chips, input and buttons"
+ ],
+ "checks": [
+  {
+   "label": "Chat night theme",
+   "type": "contains",
+   "path": "roc-chat.js",
+   "text": "roc-gate"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/108",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it, then CMS Dashboard > Clear cache (roc-nav.js changed)."
+ ]
+}
