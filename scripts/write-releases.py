@@ -722,6 +722,11 @@ RELEASES = [
          checks=[dict(label='Code email', type='contains', path='api/v1/auth-code-email.php', text='use the following code')],
          pr=REPO + '109',
          steps=['Upload the zip to /home2/runoncon/ and unzip it. Nothing else to run.']),
+    dict(deploy=110, date='2026-10-22', title='Continue with Google shows straight away',
+         changes=['Sign-in and sign-up pages show the Continue with Google button while the page loads, instead of a short "Google sign-in is temporarily unavailable" note'],
+         checks=[dict(label='Google button', type='contains', path='auth/login/index.html', text='Continue with Google')],
+         pr=REPO + '110',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard > Clear cache.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

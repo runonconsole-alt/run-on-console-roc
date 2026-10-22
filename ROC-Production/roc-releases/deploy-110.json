@@ -1,0 +1,29 @@
+{
+ "deploy": 110,
+ "date": "2026-10-22",
+ "title": "Continue with Google shows straight away",
+ "changes": [
+  "Sign-in and sign-up pages show the Continue with Google button while the page loads, instead of a short \"Google sign-in is temporarily unavailable\" note"
+ ],
+ "checks": [
+  {
+   "label": "Google button",
+   "type": "contains",
+   "path": "auth/login/index.html",
+   "text": "Continue with Google"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-Cxpk_aBA.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/110",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it.",
+  "php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply",
+  "CMS Dashboard > Clear cache."
+ ],
+ "build": "index-Cxpk_aBA.js"
+}
