@@ -55,7 +55,24 @@
     '#roc-chat .ft{font-size:10.5px;color:#94a3b8;text-align:center;padding:0 10px 8px;background:#fff}#roc-chat .ft a{color:#64748b}' +
     '#roc-chat .dots span{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:#94a3b8;animation:rocd 1s infinite}' +
     '#roc-chat .dots span:nth-child(2){animation-delay:.15s}#roc-chat .dots span:nth-child(3){animation-delay:.3s}@keyframes rocd{50%{opacity:.2}}@keyframes rocp{50%{opacity:.6}}' +
-    '@media(max-width:480px){#roc-chat{right:0;bottom:0;width:100vw;max-width:100vw;height:100%;max-height:100%;border-radius:0}#roc-chat-btn{right:12px;bottom:12px}}';
+    '@media(max-width:480px){#roc-chat{right:0;bottom:0;width:100vw;max-width:100vw;height:100%;max-height:100%;border-radius:0}#roc-chat-btn{right:12px;bottom:12px}}' +
+    // Night theme (html.roc-dark, the sun/moon button in the header: roc-nav.js / roc-theme.css)
+    'html.roc-dark #roc-chat{background:#0f172a;color:#e2e8f0;border-color:#134e4a}html.roc-dark #roc-chat.inline{border-color:#134e4a}' +
+    'html.roc-dark #roc-chat .rb{background:#020617}' +
+    'html.roc-dark #roc-chat .m.a,html.roc-dark #roc-chat .gc,html.roc-dark #roc-chat .pc{background:#0f172a;border-color:#1e293b}' +
+    'html.roc-dark #roc-chat .gc{border-color:rgba(52,211,153,.35)}html.roc-dark #roc-chat .gc .bar{background:#1e293b}' +
+    'html.roc-dark #roc-chat .m a{color:#6ee7b7}html.roc-dark #roc-chat .m.u a{color:#fff}' +
+    'html.roc-dark #roc-chat .pc span{color:#94a3b8}html.roc-dark #roc-chat .pc img{background:#fff}' +
+    'html.roc-dark #roc-chat .chips button{background:rgba(16,185,129,.12);border-color:rgba(52,211,153,.4);color:#a7f3d0}' +
+    'html.roc-dark #roc-chat .att,html.roc-dark #roc-chat form,html.roc-dark #roc-chat .ft{background:#0f172a;border-color:#1e293b}' +
+    'html.roc-dark #roc-chat input[type=text]{background:#0b1220;border-color:#334155;color:#e2e8f0}' +
+    'html.roc-dark #roc-chat input[type=text]::placeholder{color:#64748b}' +
+    'html.roc-dark #roc-chat form .ic{background:#0b1220;border-color:#334155;color:#6ee7b7}' +
+    'html.roc-dark #roc-chat form .ic.rec,html.roc-dark #roc-chat .att button{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.45);color:#fca5a5}' +
+    'html.roc-dark #roc-chat .vt button{background:#0f172a;border-color:#1e293b}html.roc-dark #roc-chat .vt button:hover,html.roc-dark #roc-chat .vt button.on{background:rgba(16,185,129,.14)}' +
+    'html.roc-dark #roc-chat .ft{color:#64748b}html.roc-dark #roc-chat .ft a{color:#94a3b8}' +
+    'html.roc-dark .roc-gate{background:#0f172a!important;border-color:#134e4a!important}html.roc-dark .roc-gate-in{color:#cbd5e1!important}' +
+    'html.roc-dark .roc-gate-t{color:#6ee7b7!important}html.roc-dark .roc-gate-su{background:rgba(16,185,129,.12)!important;border-color:rgba(52,211,153,.4)!important;color:#a7f3d0!important}';
 
   var SVG = function (p) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>'; };
   var ICON = SVG('<rect x="3" y="7" width="18" height="13" rx="4"/><path d="M12 3v4M8 13h.01M16 13h.01M9 17h6"/>');
@@ -112,13 +129,13 @@
   }
   function loginCard() {
     var back = encodeURIComponent(location.pathname + location.search);
-    return '<div style="text-align:center;padding:18px 10px;font:14px/1.6 Inter,system-ui,sans-serif;color:#334155">' +
+    return '<div class="roc-gate-in" style="text-align:center;padding:18px 10px;font:14px/1.6 Inter,system-ui,sans-serif;color:#334155">' +
       '<div style="width:52px;height:52px;margin:0 auto 10px;border-radius:16px;background:#047857;color:#fff;display:flex;align-items:center;justify-content:center">' + ICON.replace('<svg', '<svg width="28" height="28"') + '</div>' +
-      '<b style="display:block;font:900 18px Outfit,Inter,sans-serif;color:#064e3b">For access, please sign in or sign up</b>' +
+      '<b class="roc-gate-t" style="display:block;font:900 18px Outfit,Inter,sans-serif;color:#064e3b">For access, please sign in or sign up</b>' +
       '<p style="margin:6px auto 14px;max-width:420px">ROC, our gaming assistant, is free for members. Ask anything about games, consoles, PC parts and esports, or if your PC can run a game. ' +
       'Type or speak, in English or Roman Urdu.<br><span style="color:#64748b">Access ke liye login ya sign up karein.</span></p>' +
       '<a href="/auth/login/?return=' + back + '" style="display:inline-block;margin:4px;background:#047857;color:#fff;font-weight:800;padding:11px 20px;border-radius:12px;text-decoration:none">Sign in</a>' +
-      '<a href="/auth/signup/?return=' + back + '" style="display:inline-block;margin:4px;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;font-weight:800;padding:11px 20px;border-radius:12px;text-decoration:none">Sign up free</a></div>';
+      '<a href="/auth/signup/?return=' + back + '" class="roc-gate-su" style="display:inline-block;margin:4px;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;font-weight:800;padding:11px 20px;border-radius:12px;text-decoration:none">Sign up free</a></div>';
   }
   /* Not signed in: the box shows the sign-in card instead of the chat. */
   function gate() {
@@ -133,7 +150,7 @@
     host.setAttribute('data-roc-on', '1');
     style();
     if (!user.signed_in) {
-      host.innerHTML = '<div style="border:2px solid #a7f3d0;border-radius:20px;background:#fff;padding:10px">' + loginCard() + '</div>';
+      host.innerHTML = '<div class="roc-gate" style="border:2px solid #a7f3d0;border-radius:20px;background:#fff;padding:10px">' + loginCard() + '</div>';
       return;
     }
     box = makeBox(true);

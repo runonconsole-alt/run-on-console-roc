@@ -712,6 +712,11 @@ RELEASES = [
          checks=[dict(label='CMS night theme', type='contains', path='cms/index.html', text='roc_cms_theme')],
          pr=REPO + '107',
          steps=['Upload the zip to /home2/runoncon/ and unzip it, then reload the CMS (Ctrl+F5).']),
+    dict(deploy=108, date='2026-10-22', title='Ask ROC chat in the night theme',
+         changes=['The Ask ROC chat box (and its sign-in card) follows the night theme: dark panel, messages, chips, input and buttons'],
+         checks=[dict(label='Chat night theme', type='contains', path='roc-chat.js', text='roc-gate')],
+         pr=REPO + '108',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it, then CMS Dashboard > Clear cache (roc-nav.js changed).']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
