@@ -318,3 +318,65 @@ img[src*="amazon-adsystem.com"], img[src*="media-amazon.com"], img[src*="/images
   background: #fff;
   padding: 6px;
 }
+
+/* ---------------- Email code (OtpVerify.jsx): lock ring, popping boxes, verifying bar, success and shake */
+.otp-card { position: relative; text-align: center; padding: 8px 4px 4px; }
+.otp-badge { position: relative; width: 92px; height: 92px; margin: 0 auto 18px; display: grid; place-items: center; }
+.otp-ring { position: absolute; inset: 0; transform: rotate(-90deg); }
+.otp-ring circle { fill: none; stroke-width: 5; }
+.otp-ring .track { stroke: rgba(148, 163, 184, .18); }
+.otp-ring .bar { stroke: #2dd4bf; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke .4s; }
+.otp-ring.spin { animation: otpSpin 1s linear infinite; }
+.otp-ring.spin .bar { transition: none; }
+.otp-icon { width: 64px; height: 64px; border-radius: 999px; display: grid; place-items: center; color: #5eead4;
+  background: radial-gradient(circle at 30% 30%, rgba(45, 212, 191, .28), rgba(15, 23, 42, .95)); box-shadow: 0 0 0 1px rgba(45, 212, 191, .35), 0 10px 30px rgba(20, 184, 166, .25); transition: all .45s; }
+.otp-badge.ok .otp-icon { color: #022c22; background: linear-gradient(135deg, #34d399, #10b981); box-shadow: 0 0 0 6px rgba(16, 185, 129, .18), 0 12px 34px rgba(16, 185, 129, .45); animation: otpPop .55s cubic-bezier(.2, 1.6, .4, 1); }
+.otp-badge.ok .bar { stroke: #34d399; }
+.otp-badge.ok::after { content: ''; position: absolute; inset: 6px; border-radius: 999px; border: 2px solid #34d399; animation: otpPulse 1.2s ease-out 2; }
+.otp-badge.bad .otp-icon { color: #fda4af; background: radial-gradient(circle at 30% 30%, rgba(244, 63, 94, .3), rgba(15, 23, 42, .95)); box-shadow: 0 0 0 1px rgba(244, 63, 94, .45), 0 10px 30px rgba(244, 63, 94, .25); }
+.otp-badge.bad .bar { stroke: #fb7185; }
+.otp-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.6rem; color: #fff; animation: otpUp .4s ease-out both; }
+.otp-sub { margin-top: 6px; font-size: .85rem; color: #94a3b8; line-height: 1.5; }
+.otp-sub b { color: #e2e8f0; font-weight: 700; letter-spacing: .02em; }
+.otp-email { display: block; text-align: left; margin: 16px auto 0; max-width: 360px; font-size: .75rem; color: #94a3b8; }
+.otp-email input { margin-top: 6px; width: 100%; border-radius: .75rem; background: #020617; border: 1px solid #1e293b; color: #fff; padding: .7rem .9rem; font-size: .9rem; outline: none; }
+.otp-email input:focus { border-color: #14b8a6; }
+.otp-boxes { display: flex; justify-content: center; gap: clamp(6px, 2vw, 12px); margin: 22px 0 6px; }
+.otp-boxes[data-shake='1'] { animation: otpShake .45s ease-in-out; }
+.otp-box { width: clamp(42px, 12vw, 54px); height: clamp(52px, 14vw, 62px); text-align: center; font: 800 1.6rem/1 'JetBrains Mono', ui-monospace, monospace; color: #fff;
+  background: #020617; border: 1.5px solid #1e293b; border-radius: 14px; outline: none; caret-color: #2dd4bf; transition: border-color .2s, box-shadow .2s, transform .2s, background .3s, color .3s; }
+.otp-box:focus { border-color: #2dd4bf; box-shadow: 0 0 0 4px rgba(45, 212, 191, .18); transform: translateY(-2px); }
+.otp-box.filled { border-color: rgba(45, 212, 191, .7); color: #ccfbf1; animation: otpPop .28s cubic-bezier(.2, 1.6, .4, 1); }
+.otp-card.is-bad .otp-box { border-color: #fb7185; color: #fecdd3; background: rgba(76, 5, 25, .5); box-shadow: 0 0 0 3px rgba(244, 63, 94, .15); }
+.otp-card.is-ok .otp-box { border-color: transparent; color: #022c22; background: linear-gradient(160deg, #34d399, #10b981); box-shadow: 0 10px 24px rgba(16, 185, 129, .35);
+  animation: otpBounce .5s cubic-bezier(.2, 1.6, .4, 1) both; animation-delay: calc(var(--i) * 70ms); }
+.otp-msg { min-height: 22px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: .8rem; color: #fb7185; opacity: 0; transform: translateY(-4px); transition: all .25s; }
+.otp-msg.show { opacity: 1; transform: none; }
+.otp-btn { position: relative; overflow: hidden; width: 100%; margin-top: 8px; padding: .95rem 1rem; border-radius: .9rem; font: 800 .85rem/1 'Outfit', sans-serif; letter-spacing: .08em; text-transform: uppercase;
+  color: #022c22; background: linear-gradient(90deg, #10b981, #14b8a6, #06b6d4); box-shadow: 0 10px 26px rgba(20, 184, 166, .28); display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform .15s, opacity .2s; }
+.otp-btn:hover:not(:disabled) { transform: translateY(-1px); }
+.otp-btn:disabled:not(.busy) { opacity: .45; cursor: not-allowed; }
+.otp-btn .fill { position: absolute; inset: 0; width: 0; background: rgba(255, 255, 255, .28); }
+.otp-btn.busy .fill { animation: otpFill .9s ease-out forwards; }
+.otp-btn .lbl { position: relative; display: inline-flex; align-items: center; gap: 8px; }
+.otp-btn.ok { background: linear-gradient(90deg, #22c55e, #10b981); color: #052e16; animation: otpUp .4s ease-out .25s both; }
+.otp-foot { margin-top: 16px; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: .8rem; color: #94a3b8; }
+.otp-wait { display: inline-flex; align-items: center; gap: 6px; color: #cbd5e1; font-variant-numeric: tabular-nums; }
+.otp-wait svg { width: 16px; height: 16px; transform: rotate(-90deg); }
+.otp-wait circle { fill: none; stroke-width: 2.5; }
+.otp-wait .track { stroke: rgba(148, 163, 184, .25); }
+.otp-wait .bar { stroke: #2dd4bf; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+.otp-link { color: #2dd4bf; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.otp-link:hover { color: #5eead4; }
+.otp-note { margin-top: 8px; font-size: .75rem; color: #6ee7b7; }
+.otp-hint { margin-top: 14px; font-size: .72rem; color: #64748b; }
+@keyframes otpSpin { to { transform: rotate(270deg); } }
+@keyframes otpPop { 0% { transform: scale(.82); } 100% { transform: scale(1); } }
+@keyframes otpBounce { 0% { transform: translateY(0) scale(1); } 40% { transform: translateY(-10px) scale(1.06); } 100% { transform: none; } }
+@keyframes otpShake { 0%, 100% { transform: none; } 20% { transform: translateX(-9px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(4px); } }
+@keyframes otpPulse { from { transform: scale(1); opacity: .9; } to { transform: scale(1.45); opacity: 0; } }
+@keyframes otpFill { to { width: 100%; } }
+@keyframes otpUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .otp-card *, .otp-boxes { animation: none !important; transition: none !important; }
+}

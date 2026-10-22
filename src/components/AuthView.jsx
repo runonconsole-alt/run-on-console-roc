@@ -8,6 +8,7 @@ import {
 import { Tilt3DCard } from './Tilt3DCard';
 import { BouncyText } from './BouncyText';
 import { CyberMatrixHoloBackground } from './CyberMatrixHoloBackground';
+import { OtpVerify } from './OtpVerify';
 
 export const AuthView = () => {
   const { 
@@ -125,6 +126,17 @@ export const AuthView = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const verifyCode = async (code) => {
+    const res = await fetch('/api/v1/auth.php?action=verify-email-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken || '' },
+      body: JSON.stringify({ email: unverifiedEmail || email, code })
+    });
+    const data = await res.json().catch(() => ({ success: false, error: 'Verification failed. Please try again.' }));
+    if (!data.success && /invalid|expired|match/i.test(data.error || data.message || '')) data.error = "That code didn't match or has expired. Try again.";
+    return data;
   };
 
   const handleResendWithCooldown = async () => {
@@ -320,7 +332,7 @@ export const AuthView = () => {
       });
 
       if (res.success) {
-        setSuccessMessage(res.message || "Account created! A verification link has been sent to your email.");
+        setSuccessMessage(res.message || "Account created! We sent a 6-digit code to your email.");
         navigateTo('auth', 'verify-email');
         setPassword('');
         setConfirmPassword('');
@@ -386,7 +398,11 @@ export const AuthView = () => {
     try {
       const res = await resendVerification(unverifiedEmail);
       if (res.success) {
-        setSuccessMessage(res.message || "Verification email sent.");
+        // Straight to the code screen: the email now holds a fresh 6-digit code.
+        setErrorMessage('');
+        setSuccessMessage("We sent a new 6-digit code to your email.");
+        setAuthMode('verify-email');
+        navigateTo('auth', 'verify-email');
       } else {
         setErrorMessage(res.error || res.message || "Resend failed.");
       }
@@ -478,7 +494,7 @@ export const AuthView = () => {
           <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-white">
             {authMode === 'login' && "Sign In to Run On Console"}
             {authMode === 'signup' && "Create Your Gamer Account"}
-            {authMode === 'verify-email' && "Email Verification"}
+            {authMode === 'verify-email' && "Verify Your Email"}
             {authMode === 'forgot-password' && "Forgot Password"}
             {authMode === 'reset-password' && "Choose New Password"}
           </h1>
@@ -502,7 +518,7 @@ export const AuthView = () => {
                 onClick={handleResend} 
                 className="mt-2 text-xs bg-rose-800 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1.5"
               >
-                <RefreshCw className="w-3.5 h-3.5" /> Resend Verification Email
+                <RefreshCw className="w-3.5 h-3.5" /> Send me a code
               </button>
             )}
           </div>
@@ -852,76 +868,29 @@ export const AuthView = () => {
           </form>
         )}
 
-        {/* 5. VERIFY EMAIL VIEW (6-DIGIT CODE + SECURE LINK) */}
-        {authMode === 'verify-email' && (
-          <form onSubmit={e => { if (verificationToken) { e.preventDefault(); handleAutoVerify(verificationToken); } else handleVerifyCodeSubmit(e); }} className="space-y-6 text-center">
-            {verificationToken ? <p>Confirm your email to activate your account and open your gaming profile.</p> : <label className="block text-left text-sm text-slate-300">Your registration email
-              <input type="email" autoComplete="email" required value={unverifiedEmail || email}
-                onChange={e => { setUnverifiedEmail(null); setEmail(e.target.value); }}
-                className="mt-2 w-full rounded-xl bg-slate-950 p-3 border border-slate-700" />
-            </label>}
-            <div className="space-y-2">
-              <p className="text-xs text-slate-300">
-                We sent a 6-digit verification code and link to:
-              </p>
-              <p className="text-sm font-bold font-mono text-emerald-400 bg-slate-950/80 py-1.5 px-3 rounded-xl inline-block border border-emerald-500/30">
-                {unverifiedEmail ? (unverifiedEmail.length > 5 ? unverifiedEmail.slice(0, 3) + '***@' + unverifiedEmail.split('@')[1] : unverifiedEmail) : (email ? email.slice(0, 3) + '***@' + email.split('@')[1] : 'your inbox')}
-              </p>
-            </div>
-
-            {/* 6-Digit Code Input Boxes */}
-            <div className="space-y-2" hidden={!!verificationToken}>
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-300 block">
-                Enter 6-Digit Verification Code
-              </label>
-              <div className="flex justify-center gap-2 sm:gap-3" onPaste={handleDigitPaste}>
-                {codeDigits.map((digit, idx) => (
-                  <input
-                    key={idx}
-                    ref={(el) => (inputRefs.current[idx] = el)}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    autoComplete="one-time-code"
-                    value={digit}
-                    onChange={(e) => handleDigitChange(idx, e.target.value)}
-                    onKeyDown={(e) => handleDigitKeyDown(idx, e)}
-                    className="w-10 h-12 sm:w-12 sm:h-14 text-center font-mono font-extrabold text-xl bg-slate-950 border border-slate-800 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 text-emerald-300 rounded-xl focus:outline-none transition-all shadow-inner"
-                  />
-                ))}
-              </div>
-              <p className="text-[10px] text-slate-400">Code expires in 10 minutes. You can also click the verification link in your email.</p>
-            </div>
-
+        {/* 5. VERIFY EMAIL VIEW: a 6-digit code from the email (old emails with a link still work) */}
+        {authMode === 'verify-email' && (verificationToken ? (
+          <form onSubmit={e => { e.preventDefault(); handleAutoVerify(verificationToken); }} className="space-y-6 text-center">
+            <p>Confirm your email to activate your account and open your gaming profile.</p>
             <button
               type="submit"
-              disabled={loading || isSessionLoading || (!verificationToken && codeDigits.join('').length !== 6)}
-              className="w-full py-3.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-display font-extrabold text-sm uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              disabled={loading || isSessionLoading}
+              className="w-full py-3.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-display font-extrabold text-sm uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <>Verify Account <CheckCircle2 className="w-4 h-4" /></>}
             </button>
-
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs border-t border-slate-800">
-              <button
-                type="button"
-                onClick={handleResendWithCooldown}
-                disabled={loading || resendCooldown > 0}
-                className="text-emerald-400 hover:underline font-bold disabled:text-slate-500 disabled:no-underline flex items-center gap-1"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-                {resendCooldown > 0 ? `Resend Code (${resendCooldown}s)` : "Resend Verification Code"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => { setAuthMode('signup'); navigateTo('auth', 'signup'); }}
-                className="text-slate-400 hover:text-white underline"
-              >
-                Change Email / Register Again
-              </button>
-            </div>
           </form>
-        )}
+        ) : (
+          <OtpVerify
+            email={unverifiedEmail || email}
+            emailEditable={!unverifiedEmail}
+            onEmailChange={(v) => { setUnverifiedEmail(null); setEmail(v); }}
+            verify={verifyCode}
+            resend={() => resendVerification(unverifiedEmail || email)}
+            onChangeEmail={() => { setAuthMode('signup'); navigateTo('auth', 'signup'); }}
+            onDone={() => window.location.assign('/profile/')}
+          />
+        ))}
 
         {/* Guest Continue Link */}
         {(authMode === 'login' || authMode === 'signup') && (
