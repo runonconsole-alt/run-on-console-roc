@@ -10,7 +10,12 @@ import { Lock, Check, ArrowRight, AlertCircle, RefreshCw } from 'lucide-react';
  * resend()     -> Promise<{ success, message?, error? }>
  */
 const LEN = 6;
-const RESEND_SECONDS = 60;
+const RESEND_SECONDS = 90;          // wait before "Resend code"
+const MAX_RESENDS = 3;              // after this many new codes, wait an hour
+const LOCK_SECONDS = 3600;
+const memKey = (email) => 'roc-otp-' + String(email || '').toLowerCase();
+const readMem = (email) => { try { return JSON.parse(localStorage.getItem(memKey(email)) || '{}') || {}; } catch (e) { return {}; } };
+const writeMem = (email, m) => { try { localStorage.setItem(memKey(email), JSON.stringify(m)); } catch (e) {} };
 
 const mask = (email) => {
   if (!email || !email.includes('@')) return email || 'your inbox';
@@ -24,10 +29,18 @@ export const OtpVerify = ({ email, emailEditable, onEmailChange, verify, resend,
   const [message, setMessage] = useState('');
   const [note, setNote] = useState('');
   const [cooldown, setCooldown] = useState(RESEND_SECONDS);
+  const [locked, setLocked] = useState(false);         // too many codes: an hour's wait, then "Try again"
+  const [lockDone, setLockDone] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
   const refs = useRef([]);
 
   useEffect(() => { refs.current[0]?.focus(); }, []);
+  // A reload must not skip the hour's wait (kept in this browser per email).
+  useEffect(() => {
+    const m = readMem(email), left = Math.ceil(((m.until || 0) - Date.now()) / 1000);
+    if (left > 0) { setLocked(true); setCooldown(left); }
+  }, [email]);
+  useEffect(() => { if (locked && cooldown <= 0) setLockDone(true); }, [locked, cooldown]);
   useEffect(() => {
     if (cooldown <= 0) return undefined;
     const t = setInterval(() => setCooldown((c) => (c > 0 ? c - 1 : 0)), 1000);
@@ -79,18 +92,45 @@ export const OtpVerify = ({ email, emailEditable, onEmailChange, verify, resend,
     if (e.key === 'Enter') submit(digits.join(''));
   };
 
+  const lockHour = () => {
+    writeMem(email, { n: MAX_RESENDS, until: Date.now() + LOCK_SECONDS * 1000 });
+    setLocked(true); setLockDone(false); setCooldown(LOCK_SECONDS);
+  };
+
   const doResend = async () => {
     if (cooldown > 0) return;
     setNote(''); setMessage('');
+    const m = readMem(email);
+    if ((m.n || 0) >= MAX_RESENDS) { lockHour(); return; }
     let res;
     try { res = await resend(); } catch (e) { res = { success: false, error: 'Could not send a new code. Try again.' }; }
-    if (res && res.success) { setCooldown(RESEND_SECONDS); setNote('A new code is on its way. Only the newest code works.'); setDigits(Array(LEN).fill('')); refs.current[0]?.focus(); }
-    else { setMessage((res && (res.message || res.error)) || 'Could not send a new code.'); }
+    if (res && res.success) {
+      const n = (m.n || 0) + 1;
+      writeMem(email, { n, until: 0 });
+      setNote('A new code is on its way. Only the newest code works.');
+      setDigits(Array(LEN).fill('')); refs.current[0]?.focus();
+      if (n >= MAX_RESENDS) lockHour(); else setCooldown(RESEND_SECONDS);
+    } else if (/too many|try again later|60 seconds/i.test((res && (res.error || res.message)) || '')) {
+      lockHour();                                       // the server says wait: show the hour's countdown
+    } else { setMessage((res && (res.message || res.error)) || 'Could not send a new code.'); }
+  };
+
+  const tryAgain = () => {                             // the hour is over: start fresh
+    writeMem(email, { n: 0, until: 0 });
+    setLocked(false); setLockDone(false); setCooldown(0); setNote(''); setMessage('');
+    doResendFresh();
+  };
+  const doResendFresh = async () => {
+    let res;
+    try { res = await resend(); } catch (e) { res = { success: false }; }
+    if (res && res.success) { writeMem(email, { n: 1, until: 0 }); setCooldown(RESEND_SECONDS); setNote('A new code is on its way. Only the newest code works.'); refs.current[0]?.focus(); }
+    else setMessage((res && (res.message || res.error)) || 'Could not send a new code. Try again later.');
   };
 
   const R = 44, C = 2 * Math.PI * R;
-  const ring = state === 'success' ? 1 : cooldown / RESEND_SECONDS;
+  const ring = state === 'success' ? 1 : cooldown / (locked ? LOCK_SECONDS : RESEND_SECONDS);
   const mm = Math.floor(cooldown / 60), ss = String(cooldown % 60).padStart(2, '0');
+  const ringMax = locked ? LOCK_SECONDS : RESEND_SECONDS;
   const ok = state === 'success', bad = state === 'error', busy = state === 'verifying';
 
   return (
@@ -157,9 +197,11 @@ export const OtpVerify = ({ email, emailEditable, onEmailChange, verify, resend,
           <span>Didn’t get a code?</span>
           {cooldown > 0 ? (
             <span className="otp-wait">
-              <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" className="track" /><circle cx="10" cy="10" r="8" className="bar" strokeDasharray={50.3} strokeDashoffset={50.3 * (1 - cooldown / RESEND_SECONDS)} /></svg>
-              Resend in {mm}:{ss}
+              <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" className="track" /><circle cx="10" cy="10" r="8" className="bar" strokeDasharray={50.3} strokeDashoffset={50.3 * (1 - cooldown / ringMax)} /></svg>
+              {locked ? <>Too many codes. New code in {mm}:{ss}</> : <>Resend in {mm}:{ss}</>}
             </span>
+          ) : locked && lockDone ? (
+            <button type="button" onClick={tryAgain} className="otp-link">Try again</button>
           ) : (
             <button type="button" onClick={doResend} className="otp-link">Resend code</button>
           )}
