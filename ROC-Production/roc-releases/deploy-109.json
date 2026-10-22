@@ -1,0 +1,20 @@
+{
+ "deploy": 109,
+ "date": "2026-10-22",
+ "title": "Plain sign-up code email",
+ "changes": [
+  "The sign-up email is white and plain like the big sites: logo, a short note and the code on one line, so Gmail and phones show Copy code"
+ ],
+ "checks": [
+  {
+   "label": "Code email",
+   "type": "contains",
+   "path": "api/v1/auth-code-email.php",
+   "text": "use the following code"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/109",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it. Nothing else to run."
+ ]
+}
