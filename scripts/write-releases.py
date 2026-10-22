@@ -690,6 +690,11 @@ RELEASES = [
                  dict(label='Code email turned on (cli-auth-code-email.php --apply)', type='contains', path='api/v1/account-runtime.php', text='ROC code-only email')],
          pr=REPO + '103',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-auth-code-email.php --apply', 'php public_html/api/v1/cron/cli-refresh-templates.php, then php public_html/api/v1/cron/cli-ai-files.php', 'Purge Everything in Cloudflare (or CMS Dashboard > Clear cache).']),
+    dict(deploy=104, date='2026-10-22', title='Green number cards on the CMS Dashboard',
+         changes=['The four number cards on the Dashboard are green; with the mouse on one it turns white from the middle, the number turns green and the arrow turns'],
+         checks=[dict(label='CMS cards', type='contains', path='cms/index.html', text='Dashboard number cards: green')],
+         pr=REPO + '104',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it, then reload the CMS (Ctrl+F5).']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
