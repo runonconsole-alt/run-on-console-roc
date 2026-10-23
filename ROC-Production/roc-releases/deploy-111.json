@@ -1,0 +1,20 @@
+{
+ "deploy": 111,
+ "date": "2026-10-23",
+ "title": "Clean search descriptions for news, blogs and guides",
+ "changes": [
+  "Descriptions that were cut in the middle of a word (\"launch, maki…\") now end at the last full sentence, or at a whole word, so Google shows a clean line"
+ ],
+ "checks": [
+  {
+   "label": "Description fit",
+   "type": "contains",
+   "path": "blog-render.php",
+   "text": "function rocDescFit"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/111",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it, then CMS Dashboard > Clear cache."
+ ]
+}
