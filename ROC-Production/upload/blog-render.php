@@ -190,6 +190,28 @@ function rocIsNews(array $p): bool {
     return strcasecmp(trim((string)($p['category'] ?? '')), 'News') === 0;
 }
 
+/**
+ * A meta description that ends cleanly (search results show about 155 characters): a description cut
+ * mid-word ("… launch, maki…") ends at its last full sentence instead, or at a whole word with "…".
+ */
+function rocDescFit(string $d, int $max = 155): string {
+    $d = trim((string)preg_replace('/\s+/u', ' ', $d));
+    $cut = (bool)preg_match('/(…|\.\.\.)$/u', $d);
+    $d = rtrim((string)preg_replace('/(…|\.\.\.)$/u', '', $d));
+    if (!$cut && mb_strlen($d) <= $max) return $d;
+    $head = mb_substr($d, 0, $max);
+    // the last sentence end that keeps at least 70 characters
+    if (preg_match_all('/[.!?](?=\s|$)/u', $head, $m, PREG_OFFSET_CAPTURE)) {
+        $end = end($m[0]);
+        $pos = mb_strlen(substr($head, 0, $end[1])) + 1;
+        if ($pos >= 70) return mb_substr($head, 0, $pos);
+    }
+    $head = mb_substr($d, 0, $max - 1);
+    $sp = mb_strrpos($head, ' ');
+    if ($sp !== false && $sp > 60) $head = mb_substr($head, 0, $sp);
+    return rtrim($head, " ,;:–-") . '…';
+}
+
 function rocDate(?string $v): ?int {
     if (!$v || strpos($v, '0000-00-00') === 0) return null;
     $t = strtotime($v);
@@ -516,8 +538,8 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
         $a = (string)preg_replace('~\srel="[^"]*"~i', '', $m[1]);
         return '<a' . $a . ' rel="sponsored nofollow noopener">';
     }, $body);
-    $metaD    = trim((string)($p['meta_description'] ?? ''))
-                ?: rocCmsTruncate($excerpt !== '' ? $excerpt : rocCmsTextFromHtml($body), 155);
+    $metaD    = rocDescFit(trim((string)($p['meta_description'] ?? ''))
+                ?: rocCmsTruncate($excerpt !== '' ? $excerpt : rocCmsTextFromHtml($body), 155));
     $image    = trim((string)($p['image'] ?? ''));
     $imageAbs = rocAbs($image);
     $alt      = trim((string)($p['image_alt'] ?? '')) ?: $title;

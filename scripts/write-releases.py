@@ -727,6 +727,11 @@ RELEASES = [
          checks=[dict(label='Google button', type='contains', path='auth/login/index.html', text='Continue with Google')],
          pr=REPO + '110',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard > Clear cache.']),
+    dict(deploy=111, date='2026-10-23', title='Clean search descriptions for news, blogs and guides',
+         changes=['Descriptions that were cut in the middle of a word ("launch, maki…") now end at the last full sentence, or at a whole word, so Google shows a clean line'],
+         checks=[dict(label='Description fit', type='contains', path='blog-render.php', text='function rocDescFit')],
+         pr=REPO + '111',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it, then CMS Dashboard > Clear cache.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
