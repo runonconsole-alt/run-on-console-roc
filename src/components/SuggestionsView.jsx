@@ -68,7 +68,7 @@ export const SuggestionsView = () => {
                 </div>
                 <div>
                   <h2 className="font-display font-extrabold text-xl sm:text-2xl text-emerald-950">Send a suggestion</h2>
-                  <p className="text-xs text-emerald-700 font-semibold">It goes to suggestions@runonconsole.com and you get a copy.</p>
+                  <p className="text-xs text-emerald-700 font-semibold">It goes to <a href="mailto:suggestions@runonconsole.com" className="underline">suggestions@runonconsole.com</a> and you get a copy.</p>
                 </div>
               </div>
               <form onSubmit={submit} className="space-y-4 text-xs sm:text-sm relative">
@@ -111,7 +111,7 @@ export const SuggestionsView = () => {
           <Tilt3DCard className="bg-white border-2 border-emerald-500/20 rounded-3xl p-7 shadow-sm space-y-4">
             <h2 className="font-display font-extrabold text-lg text-emerald-950">What happens next</h2>
             <ol className="space-y-3 text-sm text-slate-600 list-decimal pl-5">
-              <li>Your message lands with the team at suggestions@runonconsole.com.</li>
+              <li>Your message lands with the team at <a className="text-emerald-700 font-bold underline" href="mailto:suggestions@runonconsole.com">suggestions@runonconsole.com</a>.</li>
               <li>You get a copy by email with a reference number.</li>
               <li>We read it, and when it needs an answer we reply, usually within 2 working days.</li>
             </ol>

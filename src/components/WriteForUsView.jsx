@@ -238,7 +238,7 @@ export const WriteForUsView = () => {
               <BouncyText text="Submit Your Article Pitch" />
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 font-medium">
-              Fill in your contact details and article outline. Our editorial team receives submissions at <strong className="text-emerald-700">contact@runonconsole.com</strong>, and you get a copy by email.
+              Fill in your contact details and article outline. Our editorial team receives submissions at <a href="mailto:contact@runonconsole.com" className="text-emerald-700 font-bold underline hover:text-emerald-900">contact@runonconsole.com</a>, and you get a copy by email.
             </p>
           </div>
 
