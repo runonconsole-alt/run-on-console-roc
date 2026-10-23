@@ -1,6 +1,7 @@
 /**
- * Send a contact or write-for-us form to the server (/api/v1/messages.php).
- * The message is kept in CMS -> Messages and emailed to support@ / comments@.
+ * Send a website form to the server (/api/v1/messages.php): contact, support, write_for_us, suggestion, comment.
+ * The message is kept in CMS -> Messages, emailed to the matching mailbox (contact@, support@, suggestions@,
+ * comments@) and a copy goes to the sender.
  * Resolves to { reference } or throws an Error with a message to show the visitor.
  */
 export async function sendMessage({ kind, name, email, subject = '', message, meta = {}, website = '' }) {

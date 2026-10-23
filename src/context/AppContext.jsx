@@ -34,6 +34,7 @@ export const AppProvider = ({ children, initialUrl = null }) => {
     if (path.includes('/compatibility')) return { page: 'compatibility', param: null, is404: false };
     if (path.includes('/about')) return { page: 'about', param: null, is404: false };
     if (path.includes('/write-for-us')) return { page: 'write-for-us', param: null, is404: false };
+    if (path.includes('/suggestions')) return { page: 'suggestions', param: null, is404: false };
     if (path.includes('/partnerships')) return { page: 'write-for-us', param: null, is404: false };
     if (path.includes('/terms-and-conditions')) return { page: 'terms-and-conditions', param: null, is404: false };
     if (path.includes('/privacy-policy')) return { page: 'privacy-policy', param: null, is404: false };
@@ -261,6 +262,7 @@ export const AppProvider = ({ children, initialUrl = null }) => {
       }
     } else if (page === 'about') cleanPath = '/about/';
     else if (page === 'write-for-us') cleanPath = '/write-for-us/';
+    else if (page === 'suggestions') cleanPath = '/suggestions/';
     else if (page === 'partnerships') { page = 'write-for-us'; cleanPath = '/write-for-us/'; }
     else if (page === 'terms-and-conditions') cleanPath = '/terms-and-conditions/';
     else if (page === 'privacy-policy') cleanPath = '/privacy-policy/';

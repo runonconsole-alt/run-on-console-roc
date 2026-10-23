@@ -238,7 +238,7 @@ export const WriteForUsView = () => {
               <BouncyText text="Submit Your Article Pitch" />
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 font-medium">
-              Fill in your contact details and article outline. Our editorial team receives submissions directly at <strong className="text-emerald-700">editorial@runonconsole.com</strong>.
+              Fill in your contact details and article outline. Our editorial team receives submissions at <strong className="text-emerald-700">contact@runonconsole.com</strong>, and you get a copy by email.
             </p>
           </div>
 
@@ -363,11 +363,11 @@ export const WriteForUsView = () => {
           </p>
         </div>
         <div className="space-y-3">
-          <a href="mailto:comments@runonconsole.com" className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 no-underline hover:bg-emerald-100">
+          <a href="mailto:contact@runonconsole.com" className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 no-underline hover:bg-emerald-100">
             <Mail className="w-5 h-5 text-emerald-700 shrink-0" />
             <span>
               <span className="block text-xs font-bold text-emerald-950 uppercase tracking-wider">Partnerships &amp; articles</span>
-              <span className="block text-sm font-extrabold text-emerald-700">comments@runonconsole.com</span>
+              <span className="block text-sm font-extrabold text-emerald-700">contact@runonconsole.com</span>
             </span>
           </a>
           <a href="/contact/" className="block text-xs font-bold text-emerald-700 underline">Other questions? Use the contact page →</a>

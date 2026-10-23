@@ -732,6 +732,15 @@ RELEASES = [
          checks=[dict(label='Description fit', type='contains', path='blog-render.php', text='function rocDescFit')],
          pr=REPO + '111',
          steps=['Upload the zip to /home2/runoncon/ and unzip it, then CMS Dashboard > Clear cache.']),
+    dict(deploy=112, date='2026-10-23', title='Every email in its place: contact, support, suggestions, comments',
+         changes=['Forms send to the right mailbox with a clear subject ([ROC · Contact], [ROC · Support], [ROC · Write for us], [ROC · Suggestion], [ROC · Comment]) and the sender gets a copy',
+                  'Contact page: contact@ and support@ both shown; a Help & Support choice goes to support@',
+                  'New page /suggestions/ (ideas about the design, ROC, guides, products) to suggestions@',
+                  'Leave a comment form under every blog post, guide and news story, to comments@ (not published on the page)',
+                  'Write for us: editorial@ (did not exist) replaced by contact@; CMS Messages shows the new kinds'],
+         checks=[dict(label='Suggestions page', type='file', path='suggestions/index.html'), dict(label='Comment form', type='contains', path='blog-render.php', text='function rocCommentForm')],
+         pr=REPO + '112',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard > Clear cache.', 'cPanel > Forwarders: forward alerts@, comments@, contact@, suggestions@ and support@ to runonconsole@gmail.com.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

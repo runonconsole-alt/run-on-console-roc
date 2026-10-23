@@ -9,6 +9,7 @@ import { AboutView } from './components/AboutView';
 import { AuthorView } from './components/AuthorView';
 import { NotFoundView } from './components/NotFoundView';
 import { WriteForUsView } from './components/WriteForUsView';
+import { SuggestionsView } from './components/SuggestionsView';
 import { PartnershipView } from './components/PartnershipView';
 import { TermsAndConditionsView } from './components/TermsAndConditionsView';
 import { PrivacyPolicyView } from './components/PrivacyPolicyView';
@@ -63,6 +64,7 @@ const MainRouter = () => {
             {currentPage === 'about' && <AboutView />}
             {currentPage === 'author' && <AuthorView />}
             {currentPage === 'write-for-us' && <WriteForUsView />}
+            {currentPage === 'suggestions' && <SuggestionsView />}
             {currentPage === 'partnerships' && <PartnershipView />}
             {currentPage === 'policy' && <PrivacyPolicyView />}
             {currentPage === 'terms-and-conditions' && <TermsAndConditionsView />}
