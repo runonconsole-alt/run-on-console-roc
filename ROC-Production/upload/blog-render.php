@@ -212,6 +212,41 @@ function rocDescFit(string $d, int $max = 155): string {
     return rtrim($head, " ,;:–-") . '…';
 }
 
+/**
+ * "Leave a comment" under every blog post, guide and news story. It is not published on the page:
+ * it goes to comments@runonconsole.com through /api/v1/messages.php (kind comment, CMS > Messages)
+ * and the reader gets a copy.
+ */
+function rocCommentForm(string $title, string $url): string {
+    $t = rocH($title); $u = rocH($url);
+    return '<style>.rc-box{margin-top:2.5rem;border:1px solid #d1fae5;border-radius:1.25rem;padding:1.25rem;background:#f8fffb}'
+        . '.rc-box h2{font:800 1.2rem Outfit,Inter,sans-serif;color:#064e3b;margin:0 0 .25rem}.rc-box p.rc-sub{font-size:.85rem;color:#64748b;margin:0 0 1rem}'
+        . '.rc-grid{display:grid;gap:.75rem}@media(min-width:640px){.rc-grid{grid-template-columns:1fr 1fr}}'
+        . '.rc-box input,.rc-box textarea{width:100%;border:1px solid #cbd5e1;border-radius:.75rem;padding:.7rem .85rem;font:inherit;font-size:.9rem;background:#fff;color:#0f172a;outline:none}'
+        . '.rc-box input:focus,.rc-box textarea:focus{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.15)}.rc-box textarea{margin-top:.75rem;min-height:110px;resize:vertical}'
+        . '.rc-box button{margin-top:.75rem;background:#047857;color:#fff;border:0;border-radius:.75rem;padding:.75rem 1.25rem;font:800 .9rem Outfit,Inter,sans-serif;cursor:pointer}.rc-box button:disabled{opacity:.6}'
+        . '.rc-msg{margin-top:.75rem;font-size:.9rem;font-weight:600}.rc-msg.ok{color:#047857}.rc-msg.bad{color:#be123c}'
+        . 'html.roc-dark .rc-box{background:rgba(16,185,129,.06);border-color:rgba(52,211,153,.3)}html.roc-dark .rc-box h2{color:#a7f3d0}'
+        . 'html.roc-dark .rc-box input,html.roc-dark .rc-box textarea{background:#0b1220;border-color:#334155;color:#e2e8f0}html.roc-dark .rc-msg.ok{color:#6ee7b7}html.roc-dark .rc-msg.bad{color:#fda4af}</style>'
+        . '<section class="rc-box" aria-labelledby="rc-h"><h2 id="rc-h">Leave a comment</h2>'
+        . '<p class="rc-sub">Questions, corrections or your own experience: it goes to our team at comments@runonconsole.com and you get a copy.</p>'
+        . '<form class="rc-form" data-title="' . $t . '" data-url="' . $u . '" novalidate>'
+        . '<input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">'
+        . '<div class="rc-grid"><input name="name" required maxlength="120" placeholder="Your name" aria-label="Your name">'
+        . '<input name="email" type="email" required maxlength="150" placeholder="Your email (not shown)" aria-label="Your email"></div>'
+        . '<textarea name="message" required maxlength="5000" placeholder="Your comment" aria-label="Your comment"></textarea>'
+        . '<button type="submit">Send comment</button><div class="rc-msg" role="status"></div></form></section>'
+        . '<script>(function(){var f=document.querySelector(".rc-form");if(!f)return;f.addEventListener("submit",function(e){e.preventDefault();'
+        . 'var m=f.querySelector(".rc-msg"),b=f.querySelector("button"),v=function(n){return (f.elements[n].value||"").trim()};'
+        . 'if(!v("name")||!v("message")||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v("email"))){m.className="rc-msg bad";m.textContent="Please fill in your name, a valid email and your comment.";return}'
+        . 'b.disabled=true;m.className="rc-msg";m.textContent="Sending…";'
+        . 'fetch("/api/v1/messages.php",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({kind:"comment",name:v("name"),email:v("email"),'
+        . 'subject:"Comment on: "+f.dataset.title,message:v("message"),meta:{page:f.dataset.url},website:v("website")})})'
+        . '.then(function(r){return r.json().catch(function(){return {}})}).then(function(d){if(d&&d.success){m.className="rc-msg ok";m.textContent="Thanks! Your comment reached us ("+d.reference+"). A copy is in your inbox.";f.elements.message.value=""}'
+        . 'else{m.className="rc-msg bad";m.textContent=(d&&d.error)||"Your comment could not be sent. Please email comments@runonconsole.com."}})'
+        . '.catch(function(){m.className="rc-msg bad";m.textContent="No connection. Please try again."}).then(function(){b.disabled=false})})})();</script>';
+}
+
 function rocDate(?string $v): ?int {
     if (!$v || strpos($v, '0000-00-00') === 0) return null;
     $t = strtotime($v);
@@ -658,6 +693,7 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
     if ($news) $m .= rocAdUnit('article');
     $m .= '<div class="roc-article">' . $body . '</div>';
     if ($pdo) $m .= rocTopicChips($pdo, $p);
+    $m .= rocCommentForm((string)($p['title'] ?? ''), rocPostUrlOf($p));
     $m .= '</article>';
     if ($news) {
         $m .= '<aside class="rn-aside"><div class="rn-sticky">' . rocAdSide()

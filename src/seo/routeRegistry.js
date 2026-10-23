@@ -217,10 +217,19 @@ export const STATIC_PUBLIC_ROUTES = [
     path: '/write-for-us/',
     canonical: `${BASE_DOMAIN}/write-for-us/`,
     title: 'Write For Us & Advertise | Run On Console',
-    description: 'Pitch a guest article, a sponsored post or an advertising campaign to Run On Console. Email comments@runonconsole.com or use the form.',
+    description: 'Pitch a guest article, a sponsored post or an advertising campaign to Run On Console. Email contact@runonconsole.com or use the form.',
     h1: 'Write For Run On Console',
     category: 'Write For Us',
     lastmod: '2024-05-10T10:00:00+00:00'
+  },
+  {
+    path: '/suggestions/',
+    canonical: `${BASE_DOMAIN}/suggestions/`,
+    title: 'Suggestions & Ideas | Run On Console',
+    description: 'Send Run On Console your ideas and questions about the site design, the ROC assistant, our guides or the gear we cover. Email suggestions@runonconsole.com or use the form.',
+    h1: 'Help Us Make ROC Better',
+    category: 'Suggestions',
+    lastmod: '2026-10-23T10:00:00+00:00'
   },
   {
     path: '/terms-and-conditions/',

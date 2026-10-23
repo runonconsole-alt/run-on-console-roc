@@ -65,9 +65,9 @@ export const SubmissionSuccessCard = ({
     },
     'write-for-us': {
       badge: "GUEST PITCH QUEUED FOR REVIEW",
-      hook: "Your high-tier editorial outline is queued for priority review. Let's forge high-authority Do-Follow backlinks together!",
-      metaLabel: "Review Desk",
-      metaValue: "Senior Content Editor (24h SLA)"
+      hook: "Thanks, your pitch has reached our editors. A copy is in your inbox, and we reply by email, usually within 1-2 working days.",
+      metaLabel: "Sent to",
+      metaValue: "contact@runonconsole.com"
     },
     partnership: {
       badge: "COMMERCIAL PROPOSAL REGISTERED",
@@ -77,15 +77,15 @@ export const SubmissionSuccessCard = ({
     },
     suggestion: {
       badge: "REVIEW SUGGESTION LOCKED IN",
-      hook: "Thanks for the suggestion. Our editor reads every one and uses them to plan new articles.",
+      hook: "Thanks for the suggestion. We read every one and use them to improve the site, ROC and our guides. A copy is in your inbox.",
       metaLabel: "Sent to",
-      metaValue: "Run On Console editor"
+      metaValue: "suggestions@runonconsole.com"
     },
     comment: {
       badge: "DISCUSSION POST DISPATCHED",
-      hook: "Your insights have been added to the reader queue. Keep the battlestation banter rolling!",
-      metaLabel: "Discussion Status",
-      metaValue: "Community Moderation Desk"
+      hook: "Thanks for your comment. We read every one, and a copy is in your inbox.",
+      metaLabel: "Sent to",
+      metaValue: "comments@runonconsole.com"
     }
   };
 

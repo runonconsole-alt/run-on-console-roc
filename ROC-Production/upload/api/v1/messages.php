@@ -3,20 +3,24 @@
  * Run On Console — messages from the website's forms.
  *
  * POST /api/v1/messages.php  (JSON)
- *   kind      'contact' | 'write_for_us'
+ *   kind      'contact' | 'support' | 'write_for_us' | 'suggestion' | 'comment'
  *   name, email, subject, message
  *   meta      optional object (write for us: plan, niche, title, contact)
  *   website   must stay empty (hidden field that only bots fill in)
  *
  * The message is stored in roc_messages (CMS -> Messages, where it can be answered)
- * and a notification email goes to contact@runonconsole.com (both forms)
- * through the site's existing email queue. Tables: api/v1/cron/cli-messages.php.
+ * and a notification email goes to the mailbox of that kind (ROC_MSG_INBOX) through the site's email
+ * queue, with the kind in the subject ("[ROC · Suggestion] ..."); the sender gets a copy of what they sent.
+ * Each mailbox forwards to the owner's Gmail (cPanel > Forwarders). Tables: api/v1/cron/cli-messages.php.
  */
 
 require_once __DIR__ . '/account-runtime.php';   // config, database, email queue (rocQueue / rocRespond)
 
-const ROC_MSG_INBOX = ['contact' => 'contact@runonconsole.com', 'write_for_us' => 'contact@runonconsole.com'];
-const ROC_MSG_LABEL = ['contact' => 'Contact form', 'write_for_us' => 'Write for us'];
+const ROC_MSG_INBOX = ['contact' => 'contact@runonconsole.com', 'support' => 'support@runonconsole.com',
+                       'write_for_us' => 'contact@runonconsole.com', 'suggestion' => 'suggestions@runonconsole.com',
+                       'comment' => 'comments@runonconsole.com'];
+const ROC_MSG_LABEL = ['contact' => 'Contact', 'support' => 'Support', 'write_for_us' => 'Write for us',
+                       'suggestion' => 'Suggestion', 'comment' => 'Comment'];
 
 header('Content-Type: application/json; charset=utf-8');
 if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
@@ -97,16 +101,35 @@ $esc = function ($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
 $rows = ['Name' => $name, 'Email' => $email] + ($subject !== '' ? ['Subject' => $subject] : []);
 foreach ($meta as $k => $v) $rows[ucfirst(str_replace('_', ' ', $k))] = $v;
 $html = '<!doctype html><html><body style="background:#eef7f4;font-family:Arial,sans-serif;padding:24px"><main style="max-width:600px;margin:auto;background:#fff;padding:28px;border-radius:16px">'
-      . '<h2 style="color:#047857;margin-top:0">New message: ' . $esc(ROC_MSG_LABEL[$kind]) . '</h2><table style="border-collapse:collapse;width:100%">';
+      . '<h2 style="color:#047857;margin-top:0">New message: ' . $esc(ROC_MSG_LABEL[$kind]) . '</h2>'
+      . '<p style="color:#64748b;font-size:13px;margin:-6px 0 14px">Sent to ' . $esc(ROC_MSG_INBOX[$kind]) . ' from the ' . $esc(ROC_MSG_LABEL[$kind]) . ' form on runonconsole.com</p>'
+      . '<table style="border-collapse:collapse;width:100%">';
 foreach ($rows as $k => $v) $html .= '<tr><td style="padding:6px 10px;color:#64748b;width:120px;vertical-align:top">' . $esc($k) . '</td><td style="padding:6px 10px">' . $esc($v) . '</td></tr>';
 $html .= '</table><div style="white-space:pre-wrap;background:#f8fafc;border-radius:10px;padding:14px;margin:16px 0">' . $esc($message) . '</div>'
        . '<p><a style="display:inline-block;padding:12px 20px;background:#047857;color:#fff;border-radius:8px;text-decoration:none" href="https://runonconsole.com/cms/#messages">Reply in the CMS</a></p>'
        . '<p style="color:#64748b;font-size:12px">Message #' . $id . '</p></main></body></html>';
 $job = null;
-try { $job = rocQueue($db, ROC_MSG_INBOX[$kind], '[' . ROC_MSG_LABEL[$kind] . '] ' . ($subject !== '' ? $subject : $name), $html, 5); }
+try { $job = rocQueue($db, ROC_MSG_INBOX[$kind], '[ROC · ' . ROC_MSG_LABEL[$kind] . '] ' . ($subject !== '' ? $subject : $name) . ' (' . $email . ')', $html, 5); }
 catch (\Throwable $e) { error_log('[ROC messages] queue failed: ' . get_class($e)); }
+
+/* A copy for the sender: what they sent and the reference. */
+try {
+    $copy = '<!doctype html><html><body style="margin:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif">'
+          . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">'
+          . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">'
+          . '<tr><td style="padding:0 0 22px;font-size:20px;font-weight:700;color:#047857">Run On Console</td></tr><tr><td style="font-size:15px;line-height:24px;color:#262626">'
+          . '<p style="margin:0 0 14px">Hi ' . $esc($name) . ',</p>'
+          . '<p style="margin:0 0 14px">Thanks, we received your ' . $esc(strtolower(ROC_MSG_LABEL[$kind])) . ' message (reference <b>MSG-' . $id . '</b>). '
+          . ($kind === 'comment' ? 'We read every comment.' : 'We usually reply within 2 working days.') . '</p>'
+          . '<p style="margin:0 0 8px;color:#64748b;font-size:13px">Your message:</p>'
+          . '<div style="white-space:pre-wrap;background:#f8fafc;border-radius:10px;padding:14px;margin:0 0 16px;font-size:14px">' . $esc($message) . '</div>'
+          . '<p style="margin:0 0 14px;font-size:13px;color:#64748b">Need to add something? Write to ' . $esc(ROC_MSG_INBOX[$kind]) . ' and mention MSG-' . $id . '.</p>'
+          . '<p style="margin:0">Thanks,<br>Run On Console</p></td></tr></table></td></tr></table></body></html>';
+    $copyJob = rocQueue($db, $email, 'We received your message (MSG-' . $id . ') · Run On Console', $copy, 3);
+} catch (\Throwable $e) { error_log('[ROC messages] copy failed: ' . get_class($e)); }
 
 $data = ['success' => true, 'reference' => 'MSG-' . $id,
          'message' => 'Thank you! Your message has been received. We usually reply within 2 working days.'];
+if (!empty($copyJob)) { try { rocDispatch($db, (int)$copyJob); } catch (\Throwable $e) {} }   // the sender's copy, now
 if ($job) rocRespond(201, $data, $job);   // sends the notification right away
 rocMsgOut(201, $data);

@@ -1,0 +1,2 @@
+# The mail pipe needs Unix line endings (it starts with #!/usr/local/bin/php).
+ROC-Production/upload/api/v1/cron/mail-in.php text eol=lf

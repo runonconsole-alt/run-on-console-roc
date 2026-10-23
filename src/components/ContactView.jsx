@@ -25,7 +25,9 @@ export const ContactView = () => {
     setSending(true);
     setError('');
     try {
-      const r = await sendMessage({ kind: 'contact', name: name.trim(), email: email.trim(), subject, message: message.trim(), website });
+      // Help and problems go to support@, everything else to contact@ (api/v1/messages.php).
+      const kind = /support|bug/i.test(subject) ? 'support' : 'contact';
+      const r = await sendMessage({ kind, name: name.trim(), email: email.trim(), subject, message: message.trim(), website });
       setRefId(r.reference);
       setSubmitted(true);
     } catch (err) {
@@ -122,6 +124,7 @@ export const ContactView = () => {
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 focus:outline-none focus:border-emerald-500 font-semibold"
                   >
                     <option value="General Inquiry">General Reader Question</option>
+                    <option value="Help / Support">Help &amp; Support (account, sign-in, site problem)</option>
                     <option value="Hardware Review Submission">Hardware Review Sample Submission</option>
                     <option value="Brand / Affiliate Partnership">Affiliate / Advertising Partnership</option>
                     <option value="Bug Report / Feedback">Website Feedback / Bug Report</option>
@@ -172,9 +175,31 @@ export const ContactView = () => {
                   <a href={'mailto:' + CONTACT.email} className="text-xs sm:text-sm text-emerald-700 font-extrabold hover:underline block mt-0.5 truncate">
                     {CONTACT.email}
                   </a>
-                  <span className="text-[10px] text-slate-500 block mt-0.5">We usually reply within 2 working days</span>
+                  <span className="text-[10px] text-slate-500 block mt-0.5">Questions, reviews and partnerships · reply within 2 working days</span>
                 </div>
               </div>
+              <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/60 flex items-start gap-4 transition-all hover:bg-emerald-100/60 shadow-xs">
+                <div className="p-3 rounded-xl bg-emerald-800 text-emerald-300 shrink-0 shadow-sm">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-bold text-xs text-emerald-950 uppercase tracking-wider">Help &amp; Support</div>
+                  <a href="mailto:support@runonconsole.com" className="text-xs sm:text-sm text-emerald-700 font-extrabold hover:underline block mt-0.5 truncate">
+                    support@runonconsole.com
+                  </a>
+                  <span className="text-[10px] text-slate-500 block mt-0.5">Account, sign-in or a problem on the site</span>
+                </div>
+              </div>
+              <a href="/suggestions/" className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/60 flex items-start gap-4 transition-all hover:bg-emerald-100/60 shadow-xs no-underline">
+                <div className="p-3 rounded-xl bg-emerald-800 text-emerald-300 shrink-0 shadow-sm">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-bold text-xs text-emerald-950 uppercase tracking-wider">Ideas &amp; suggestions</div>
+                  <span className="text-xs sm:text-sm text-emerald-700 font-extrabold hover:underline block mt-0.5">suggestions@runonconsole.com</span>
+                  <span className="text-[10px] text-slate-500 block mt-0.5">Design, ROC, content: tell us on the suggestions page</span>
+                </div>
+              </a>
               <a href={CONTACT.tel} className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/60 flex items-start gap-4 transition-all hover:bg-emerald-100/60 shadow-xs no-underline">
                 <div className="p-3 rounded-xl bg-emerald-800 text-emerald-300 shrink-0 shadow-sm">
                   <Phone className="w-5 h-5" />
