@@ -741,6 +741,11 @@ RELEASES = [
          checks=[dict(label='Suggestions page', type='file', path='suggestions/index.html'), dict(label='Comment form', type='contains', path='blog-render.php', text='function rocCommentForm')],
          pr=REPO + '112',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard > Clear cache.', 'cPanel > Forwarders: forward alerts@, comments@, contact@, suggestions@ and support@ to runonconsole@gmail.com.']),
+    dict(deploy=113, date='2026-10-23', title='Emails sent straight to the mailboxes are saved in CMS Messages',
+         changes=['Emails that people send directly to contact@, support@, suggestions@, comments@ or alerts@ are saved in CMS > Messages as well (sender, subject, text; no attachments), next to the form messages; Gmail still gets them'],
+         checks=[dict(label='Mail pipe', type='file', path='api/v1/cron/mail-in.php')],
+         pr=REPO + '112',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it, then: chmod 755 public_html/api/v1/cron/mail-in.php', 'cPanel > Forwarders > Add Forwarder for each mailbox > Advanced Options > Pipe to a Program: public_html/api/v1/cron/mail-in.php']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
