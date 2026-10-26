@@ -780,6 +780,11 @@ RELEASES = [
          checks=[dict(label='Delivery animation', type='contains', path='blog-render.php', text='Head of Community')],
          pr=REPO + '117',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard > Clear cache (roc-nav.js changed).']),
+    dict(deploy=119, date='2026-10-26', title='Published date on blog and guide cards',
+         changes=['The blog and guide lists show the date each post was first published (By ROC · Oct 18, 2026), never the date of a later edit; news already did'],
+         checks=[dict(label='Card dates', type='contains', path='blog-render.php', text='pd0 = rocPublished')],
+         pr=REPO + '118',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it, then CMS Dashboard > Clear cache.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
