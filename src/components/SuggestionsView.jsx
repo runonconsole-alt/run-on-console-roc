@@ -5,6 +5,15 @@ import { BouncyText } from './BouncyText';
 import { CyberMatrixHoloBackground } from './CyberMatrixHoloBackground';
 import { SubmissionSuccessCard } from './SubmissionSuccessCard';
 import { sendMessage } from '../utils/sendMessage';
+import { FAQSection } from './FAQSection';
+
+const SUGGESTION_FAQS = [
+  { q: 'What kind of suggestions can I send?', a: 'Anything that would make Run On Console better for you: the design (colours, the night theme, the mobile layout), ROC and its AI agents, guides or news you want us to cover, products we should add or compare, or a bug you noticed.' },
+  { q: 'Do you really read every suggestion?', a: 'Yes. Every suggestion lands with our team at suggestions@runonconsole.com with a reference number, and many of the site features came from reader ideas, for example the night theme and the comparisons.' },
+  { q: 'Will I get an answer?', a: 'When your message needs an answer, we reply by email, usually within 2 working days. You get a copy of what you sent right away.' },
+  { q: 'Where do I ask for help with my account?', a: 'For sign-in, the email code or a problem on a page, write to support@runonconsole.com or use the contact page, so it reaches the support team directly.' },
+];
+
 
 /* /suggestions/: ideas and queries about the site (design, ROC, content, products), sent to suggestions@. */
 const TOPICS = [
@@ -119,6 +128,7 @@ export const SuggestionsView = () => {
           </Tilt3DCard>
         </div>
       </div>
+      <FAQSection faqs={SUGGESTION_FAQS} title="Suggestions FAQs" subtitle="How your ideas are handled." />
     </div>
   );
 };

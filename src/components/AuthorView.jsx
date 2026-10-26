@@ -1,4 +1,14 @@
 import React from 'react';
+import { FAQSection } from './FAQSection';
+
+const AUTHOR_FAQS = [
+  { q: 'Who writes Run On Console?', a: 'ROC, the Run On Console team: gamers and PC builders in Lahore, Pakistan. Posts are signed ROC because they are team work: one person drafts, another checks the facts, the links and the requirements before anything goes live.' },
+  { q: 'How are products chosen?', a: 'From their specifications, the maker\'s own data and well-known published reviews. Each pick says who it suits and who it does not. Brands cannot pay for a place on our lists, and we never invent prices: product pages link to Amazon for the current price.' },
+  { q: 'Where do the game requirements come from?', a: 'From the publishers: the official minimum and recommended specs on Steam for PC games. The Can I run checker compares them with your graphics card, processor and RAM.' },
+  { q: 'Is any content sponsored?', a: 'Sponsored articles are rare and always labelled as sponsored, with rel=sponsored links, as Google asks. Product links to Amazon are affiliate links: we may earn a small commission at no extra cost to you.' },
+  { q: 'How do I report a mistake?', a: 'Use the contact page or write to support@runonconsole.com with the page address. We check every report and correct the page.' },
+];
+
 import { CheckCircle2, ArrowRight } from 'lucide-react';
 
 /** /author/roc-team/ — the team behind Run On Console (author of the blog posts). */
@@ -69,6 +79,8 @@ export const AuthorView = () => {
           </a>
         </div>
       </section>
+
+      <FAQSection faqs={AUTHOR_FAQS} title="About the ROC team" subtitle="Who writes Run On Console and how." />
 
     </div>
   );

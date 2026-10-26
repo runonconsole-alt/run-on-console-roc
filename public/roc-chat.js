@@ -390,7 +390,8 @@
   }
   function formCard(m, i) {
     var f = m.form, done = m.formDone;
-    if (done) return '<div class="fc"><b>✅ Sent (' + esc(done) + ')</b><small>A copy is on its way to your email.</small></div>';
+    var head = { write_for_us: 'Head of Editorial', contact: 'Head of Support', support: 'Head of Support', suggestion: 'Head of Product' }[f.kind] || 'Head of Support';
+    if (done) return '<div class="fc"><b>✅ Reached our ' + head + ' (' + esc(done) + ')</b><small>You will get a reply soon by email; a copy is in your inbox.</small></div>';
     var label = { write_for_us: 'Write for us', contact: 'Contact the team', support: 'Help & support', suggestion: 'Suggestion' }[f.kind] || 'Message';
     var mail = user.email || '', nm = user.name || '';
     state.msgs.forEach(function (x) { if (x.role === 'user') { var e = String(x.content).match(/[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}/i); if (e) mail = e[0]; } });
@@ -417,7 +418,8 @@
       .then(function (d) {
         if (!d || !d.success) { ok.disabled = false; err.textContent = (d && d.error) || 'It could not be sent. Please try again.'; return; }
         m.formDone = d.reference;
-        state.msgs.push({ role: 'assistant', content: 'Done! Your message reached our team (' + d.reference + '), and a copy is on its way to ' + v('email') + '. Anything else I can help with?' });
+        var hd = { write_for_us: 'Head of Editorial', suggestion: 'Head of Product' }[m.form.kind] || 'Head of Support';
+        state.msgs.push({ role: 'assistant', content: 'Done! Your message has reached our ' + hd + ' (' + d.reference + '). You will get a reply soon at ' + v('email') + ', and a copy is already on its way. Anything else I can help with?' });
         save(); render();
       })
       .catch(function () { ok.disabled = false; err.textContent = 'No connection. Please try again.'; });
