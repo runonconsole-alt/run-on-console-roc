@@ -311,11 +311,21 @@ function rocNewsCandidates(PDO $pdo, array $items, ?array $settings = null): arr
     $done = rocNewsDoneList($pdo);
     $doneLinks = [];
     foreach ($done as $d) foreach ((array)($d['links'] ?? []) as $l) $doneLinks[$l] = 1;
+    // Second guard (Deploy 117): the titles of the stories published in the last 7 days, so the same event is
+    // never published twice even when the done list missed it (two "Helen Chiang leaves Xbox" stories, Oct 2026).
+    $recent = [];
+    try {
+        $st = $pdo->prepare("SELECT title FROM blogs WHERE category = 'News' AND status IN ('published', 'scheduled') AND published_at > ?");
+        $st->execute([date('Y-m-d H:i:s', time() - 7 * 86400)]);
+        foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $t) $recent[] = rocNewsTokens((string)$t);
+    } catch (\Throwable $e) {}
     $out = [];
     foreach (rocNewsCluster($items) as $c) {
         if ($c['sources'] < $set['min_sources'] && !$c['official']) continue;
         foreach ($c['items'] as $it) if (isset($doneLinks[$it['link']])) continue 2;
         foreach ($done as $d) if (rocNewsSame($c['tokens'], (array)($d['tokens'] ?? []))) continue 2;
+        foreach ($recent as $rt) if (rocNewsSame($c['tokens'], $rt)) continue 2;
+        foreach ($c['items'] as $it) foreach ($recent as $rt) if (rocNewsSame(rocNewsTokens((string)$it['title']), $rt)) continue 3;
         $text = implode(' ', array_map(function ($it) { return $it['title'] . ' ' . $it['desc']; }, $c['items']));
         $m = rocNewsMatch($pdo, $text);
         if (!$m['products'] && !$m['cats'] && !$m['platforms']) continue;     // must lead readers somewhere on this site

@@ -766,6 +766,13 @@ RELEASES = [
          checks=[dict(label='Link box', type='file', path='api/v1/link-boost-lib.php')],
          pr=REPO + '114',
          steps=['Upload the zip to /home2/runoncon/ and unzip it, then CMS Dashboard > Clear cache.']),
+    dict(deploy=117, date='2026-10-26', title='CMS Indexing page and fixes from the full-site audit',
+         changes=['CMS > Indexing: which pages Google has indexed (Search Console URL Inspection, a few pages every 10 minutes, up to 1,800 a day), by page type, with newly indexed pages emailed every evening to runonconsole@gmail.com; pages not indexed yet go first in the link box',
+                  'Full-site audit (2,836 pages, all 200 OK): the categories page lists every category with links and a short how-we-pick note; the news writer no longer publishes a story that was already published in the last 7 days; Suggestions in the footer; shorter Suggestions description',
+                  'CMS Messages: the texts name all kinds of messages (forms, ROC chat, mailbox emails)'],
+         checks=[dict(label='Indexing', type='file', path='api/v1/cms/indexing.php'), dict(label='Footer: Suggestions', type='file', path='api/v1/cron/cli-footer-suggestions.php')],
+         pr=REPO + '116',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-footer-suggestions.php --apply', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard > Clear cache.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

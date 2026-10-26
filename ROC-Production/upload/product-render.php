@@ -926,6 +926,19 @@ function rocRenderCategoryHub(string $root, PDO $pdo, array $categories): void {
             . '<p class="text-xs sm:text-sm text-slate-500 mt-1">' . rocH($def['description']) . '</p></div>'
             . '<span class="self-start bg-emerald-600 group-hover:bg-emerald-700 text-white font-display font-extrabold text-xs py-2.5 px-4 rounded-xl">See ' . $num . ' products &rarr;</span></a>';
     }
+    // Every category with its count (Deploy 117): a link to each one and a short note on how picks are made,
+    // so the hub is not a thin page and categories Google has not found yet get a link from it.
+    $m .= '<section class="bg-white border-2 border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5"><h2 class="font-display font-extrabold text-2xl text-slate-900">Every category</h2>'
+        . '<div class="grid gap-3" style="grid-template-columns:repeat(auto-fill,minmax(210px,1fr))">';
+    foreach ($categories as $cs => $cat) {
+        if (empty($counts[$cs])) continue;
+        $m .= '<a href="' . rocH(rocCatPath($cs)) . '" class="flex items-center justify-between gap-3 border border-slate-200 hover:border-emerald-500 rounded-2xl px-4 py-3 no-underline text-slate-900 hover:text-emerald-700 transition-all">'
+            . '<span class="font-bold text-sm">' . rocH((string)($cat['name'] ?? $cs)) . '</span><span class="text-xs text-slate-500">' . (int)$counts[$cs] . ' picks</span></a>';
+    }
+    $m .= '</div><div class="text-sm text-slate-600 leading-relaxed space-y-3">'
+        . '<p><strong class="text-slate-900">How we pick:</strong> every product on Run On Console is chosen from its published specifications, official data and independent reviews, and placed where it fits best: budget, competitive play, quiet rooms, small desks or high-end builds. Brands cannot pay for a place on these lists.</p>'
+        . '<p><strong class="text-slate-900">Not sure where to start?</strong> Check whether your PC can run your games with the free <a class="text-emerald-700 font-semibold underline" href="/compatibility/">Can I run it checker</a>, compare two picks side by side on the <a class="text-emerald-700 font-semibold underline" href="/compare/">comparisons page</a>, or read our <a class="text-emerald-700 font-semibold underline" href="/guides/">buying and setup guides</a>. Each product page links to Amazon, where you see the current price and stock.</p>'
+        . '</div></section>';
     $m .= '</div></div>';
     rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, time());
 }

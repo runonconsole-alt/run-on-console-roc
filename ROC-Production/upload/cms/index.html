@@ -1149,7 +1149,7 @@ async function renderMessages(m){
   var f=S.msgFilter||'new', k=S.msgKind||'all';
   var rows=S.msgs.filter(function(x){ return (f==='all'||x.status===f)&&(k==='all'||x.kind===k); });
   var c=S.msgCounts||{}, total=S.msgs.length;
-  m.innerHTML=head('Messages','From the contact and write-for-us forms. Replies are emailed to the sender.',
+  m.innerHTML=head('Messages','From the website forms, the ROC chat agents and emails sent to contact@, support@, suggestions@, comments@ and alerts@. Replies are emailed to the sender.',
       '<button class="btn" id="msg-refresh">⟳ Refresh</button>')+
     '<div class="body">'+
     (S.msgInstalled===false?'<div class="alert warn">The message tables are not installed yet. In the cPanel Terminal run:<br><code>/usr/local/bin/php ~/public_html/api/v1/cron/cli-messages.php --apply</code></div>':'')+
@@ -1159,7 +1159,7 @@ async function renderMessages(m){
         return '<button class="chip'+(f===s?' on':'')+'" data-mf="'+s+'">'+(s==='all'?'All':MSG_STATUS[s])+'<span class="n">'+n+'</span></button>';
       }).join('')+'</div><div class="chips">'+
       ['all','contact','support','write_for_us','suggestion','comment','alerts'].map(function(s){
-        return '<button class="chip'+(k===s?' on':'')+'" data-mk="'+s+'">'+(s==='all'?'Both forms':MSG_KIND[s])+'</button>';
+        return '<button class="chip'+(k===s?' on':'')+'" data-mk="'+s+'">'+(s==='all'?'All kinds':MSG_KIND[s])+'</button>';
       }).join('')+'</div></div>'+
     (rows.length?'<table class="list"><thead><tr><th>From</th><th>Message</th><th>Form</th><th>Status</th><th>Received</th></tr></thead><tbody>'+
       rows.map(function(x){
@@ -1324,6 +1324,51 @@ async function renderOffpage(m){
   var au=$('#op-auto',m); if(au) au.addEventListener('click',async function(){ try{ var r=await api('offpage.php',{action:'auto',on:!d.auto}); toast(r.message,'ok'); }catch(e){ toast(e.message,'bad'); } renderOffpage(m); });
   m.querySelectorAll('[data-opc]').forEach(function(b){ b.addEventListener('click',function(){ var o=(d.items||[]).filter(function(x){return x.id===b.dataset.opc;})[0]; if(o&&navigator.clipboard) navigator.clipboard.writeText(o.draft||'').then(function(){ toast('Draft copied','ok'); }); }); });
   m.querySelectorAll('[data-ops]').forEach(function(b){ b.addEventListener('click',async function(){ var o=(d.items||[]).filter(function(x){return x.id===b.dataset.ops;})[0]; try{ await api('offpage.php',{action:'status',id:b.dataset.ops,status:(o&&o.status===b.dataset.st)?'':b.dataset.st}); }catch(e){ toast(e.message,'bad'); } renderOffpage(m); }); });
+}
+
+/* ------------------------------------------------------------ indexing */
+/* Which pages Google has indexed (Deploy 117): api/v1/cms/indexing.php, checked by the scheduler with the
+   Search Console URL Inspection API (a few pages every 10 minutes); newly indexed pages are emailed daily. */
+var IX={filter:'new',kind:'',q:''};
+async function renderIndexing(m){
+  m.innerHTML=head('Indexing','Loading…')+'<div class="body"><div class="card"><div class="empty"><span class="spin"></span></div></div></div>';
+  var d; try{ d=await api('indexing.php?filter='+encodeURIComponent(IX.filter)+'&kind='+encodeURIComponent(IX.kind)+'&q='+encodeURIComponent(IX.q)); }
+  catch(e){ m.innerHTML=head('Indexing','')+'<div class="body"><div class="alert bad">'+esc(e.message)+'</div></div>'; return; }
+  if(S.view!=='indexing') return;
+  var st=d.stats||{}, admin=S.user&&S.user.role==='administrator', pct=st.total?Math.round(100*(st.indexed||0)/st.total):0;
+  var KIND={game:'Can I run',product:'Products',compare:'Comparisons',category:'Categories',news:'News',blog:'Blogs',guide:'Guides',platform:'Platforms',page:'Main pages'};
+  var FIL=[['new','Newly indexed (14 days)'],['indexed','Indexed'],['not','Not indexed'],['unchecked','Not checked yet'],['all','All']];
+  var fmtD=function(v){ return v?esc(String(v).slice(0,10)):'—'; };
+  var rows=(d.rows||[]).map(function(r){
+    var ok=r.verdict==='PASS', tag=ok?'<span class="tag published">Indexed</span>':(r.verdict?'<span class="tag off">Not indexed</span>':'<span class="tag">Not checked</span>');
+    return '<tr><td style="max-width:460px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(String(r.url).replace('https://runonconsole.com',''))+'</a></td>'+
+      '<td>'+esc(KIND[r.kind]||r.kind)+'</td><td>'+tag+'<div class="hint" style="font-size:11px">'+esc(r.coverage||'')+'</div></td><td>'+fmtD(r.indexed_at)+'</td><td>'+fmtD(r.last_crawl)+'</td><td>'+fmtD(r.checked_at)+'</td></tr>';
+  }).join('');
+  var kinds=Object.keys(st.by_kind||{}).sort(function(a,b){ return (st.by_kind[b].total)-(st.by_kind[a].total); });
+  m.innerHTML=head('Indexing','Which pages Google has indexed, checked a few at a time with Search Console. New ones are emailed every evening.')+
+    '<div class="body">'+
+    (!d.key?'<div class="alert warn"><b>Not connected.</b> Upload the service account key to /home2/runoncon/config/gsc-key.json and add its email as a Full user in Search Console.</div>':
+      '<div class="alert good">Connected as <b>'+esc(d.key)+'</b>. Checked today: '+(d.checked_today||0)+' (up to 1,800 a day).</div>')+
+    (d.error&&d.error.e?'<div class="alert bad">Last problem ('+esc(String(d.error.t).slice(0,16).replace('T',' '))+' UTC): '+esc(d.error.e)+'</div>':'')+
+    '<div class="dstats">'+
+      '<div class="dstat"><div class="l">Indexed</div><div class="n">'+(st.indexed||0)+'</div><div class="s">'+pct+'% of '+(st.total||0)+' pages</div></div>'+
+      '<div class="dstat"><div class="l">Not indexed yet</div><div class="n">'+(st.not_indexed||0)+'</div><div class="s">They get links from indexed pages</div></div>'+
+      '<div class="dstat"><div class="l">Not checked yet</div><div class="n">'+(st.unchecked||0)+'</div><div class="s">Checked over the next days</div></div>'+
+      '<div class="dstat"><div class="l">Pages in the sitemaps</div><div class="n">'+(st.total||0)+'</div><div class="s">Read once a day</div></div></div>'+
+    (kinds.length?'<div class="card"><div class="chead"><h3>By page type</h3></div><div class="cbody" style="display:flex;flex-wrap:wrap;gap:8px">'+kinds.map(function(k){ var b=st.by_kind[k];
+      return '<button class="chip'+(IX.kind===k?' on':'')+'" data-ixk="'+esc(k)+'">'+esc(KIND[k]||k)+' · '+b.indexed+' / '+b.total+'</button>'; }).join('')+
+      (IX.kind?'<button class="chip" data-ixk="">All types</button>':'')+'</div></div>':'')+
+    '<div class="card"><div class="cbody" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">'+
+      FIL.map(function(f){ return '<button class="chip'+(IX.filter===f[0]?' on':'')+'" data-ixf="'+f[0]+'">'+f[1]+'</button>'; }).join('')+
+      '<input id="ix-q" type="search" placeholder="Search a page…" value="'+esc(IX.q)+'" style="margin-left:auto;max-width:240px"></div>'+
+      '<div style="overflow-x:auto"><table class="list" style="width:100%"><thead><tr><th>Page</th><th>Type</th><th>Status</th><th>Indexed on</th><th>Google crawled</th><th>Checked</th></tr></thead><tbody>'+
+      (rows||'<tr><td colspan="6"><div class="empty">'+(IX.filter==='new'?'No newly indexed pages in the last 14 days yet.':'Nothing here.')+'</div></td></tr>')+'</tbody></table></div></div>'+
+    (admin?'<div class="card"><div class="cbody" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><label class="hint">Daily email of newly indexed pages to</label><input id="ix-mail" type="email" value="'+esc(d.email||'')+'" style="max-width:280px"><button class="btn sm" id="ix-save">Save</button></div></div>':'')+
+    '</div>';
+  m.querySelectorAll('[data-ixf]').forEach(function(b){ b.addEventListener('click',function(){ IX.filter=b.dataset.ixf; renderIndexing(m); }); });
+  m.querySelectorAll('[data-ixk]').forEach(function(b){ b.addEventListener('click',function(){ IX.kind=b.dataset.ixk; renderIndexing(m); }); });
+  var q=$('#ix-q',m); if(q) q.addEventListener('keydown',function(e){ if(e.key==='Enter'){ IX.q=q.value.trim(); renderIndexing(m); } });
+  var sv=$('#ix-save',m); if(sv) sv.addEventListener('click',async function(){ try{ var r=await api('indexing.php',{action:'email',email:$('#ix-mail',m).value}); toast(r.message,'ok'); }catch(e){ toast(e.message,'bad'); } });
 }
 
 /* ---------------------------------------------------------- comparisons */
@@ -1512,7 +1557,7 @@ function renderShell(){
       item('games','Games','🎮')+
       (can('products','view')?item('products','Products','▣')+item('product-categories','Product categories','▤')+item('compare','Comparisons','🆚'):'')+'</div>'+
     (admin?'<div class="snav"><div class="slabel">Manage</div>'+
-      item('builder','Site builder','✦')+item('offpage','Off-page','🔗')+item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Updates writer','✍')+item('agent','ROC assistant','🤖')+item('announce','Announcement bar','📣')+
+      item('builder','Site builder','✦')+item('offpage','Off-page','🔗')+item('indexing','Indexing','📈')+item('settings','Settings','⚙')+item('sitemap','Sitemap','🗺')+item('blogagent','Updates writer','✍')+item('agent','ROC assistant','🤖')+item('announce','Announcement bar','📣')+
       item('siteusers','Site users','👤')+item('users','CMS users','◉')+item('social','Social & Amazon tag','☍')+item('audit','Audit log','◴')+item('siteinfo','Website info','ℹ')+'</div>':'')+
     '<div class="sfoot"><div class="who"><div class="av">'+
       esc((S.user.username||'?').slice(0,2).toUpperCase())+'</div>'+
@@ -1592,6 +1637,7 @@ function renderView(){
   if(S.view==='games') return renderGames(m);
   if(S.view==='compare') return renderCompare(m);
   if(S.view==='offpage') return renderOffpage(m);
+  if(S.view==='indexing') return renderIndexing(m);
   if(S.view==='activity') return renderActivity(m);
   if(S.view==='messages' && S.user.role==='administrator') return renderMessages(m);
   if(S.view==='social') return renderSocial(m);
@@ -6018,6 +6064,7 @@ async function load(){
     ]).then(function(r){ S.pages=(r[2]&&r[2].pages)||[]; return r; });
     S.blogs=b.blogs||[]; S.media=prepMedia(md.media);
     if(location.hash==='#messages') S.view='messages';
+    if(location.hash==='#indexing') S.view='indexing';
     if(S.user.role==='administrator') loadMessages().then(function(){ if(!S.editing && !document.querySelector('.veil') && S.view!=='messages') renderShell(); });
     loadProdNames().then(function(){ if(S.view==='dashboard'&&!S.editing) renderShell(); });
     renderShell();
