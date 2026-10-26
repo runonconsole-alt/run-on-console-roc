@@ -693,6 +693,8 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
     if ($news) $m .= rocAdUnit('article');
     $m .= '<div class="roc-article">' . $body . '</div>';
     if ($pdo) $m .= rocTopicChips($pdo, $p);
+    // Links to the pages Google has not indexed yet (Deploy 116): news, blogs and guides are indexed quickly.
+    if ($pdo) { require_once __DIR__ . '/api/v1/link-boost-lib.php'; $m .= rocLinkBoostBox($pdo, (string)parse_url(rocPostUrlOf($p), PHP_URL_PATH)); }
     $m .= rocCommentForm((string)($p['title'] ?? ''), rocPostUrlOf($p));
     $m .= '</article>';
     if ($news) {

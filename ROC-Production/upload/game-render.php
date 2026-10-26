@@ -558,6 +558,8 @@ $more = [['/compatibility/?steam=' . (int)$g['appid'], 'Full PC check', 'Laptops
          ['/category/gpu/', 'Graphics cards', 'Picks for every budget'], ['/category/cpu/', 'Processors', 'Gaming CPUs from entry to high end'],
          ['/category/ram/', 'Memory (RAM)', 'DDR4 and DDR5 kits'], ['/gaming-platforms/pc-handheld-pc/', 'PC and handheld PC guide', 'Gaming platform guide'],
          ['/guides/', 'Gaming guides', 'Buying, setup and game settings, step by step'], ['/can-i-run/', 'All PC games', number_format(count($games)) . ' games with their requirements']];
+// Gear pages that still need links (Deploy 116): the Can I run pages are indexed, the product pages less so.
+if (isset($pdo) && $pdo) { require_once __DIR__ . '/api/v1/link-boost-lib.php'; $m .= rocLinkBoostBox($pdo, rocGpPath($g), 'Gear to play ' . $name); }
 $m .= '<section class="gp-card"><h2>More for PC players</h2><div class="gp-sim">'
     . implode('', array_map(function ($l) { return '<a href="' . rocH($l[0]) . '"><strong>' . rocH($l[1]) . '</strong><span>' . rocH($l[2]) . '</span></a>'; }, $more)) . '</div></section>';
 $m .= '<p class="gp-src">Ask <b>ROC</b>, our gaming assistant (the chat button), "can my PC run ' . rocH($name) . '?" and tell it your parts, or upload your dxdiag file.</p>';

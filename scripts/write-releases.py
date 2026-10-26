@@ -760,6 +760,12 @@ RELEASES = [
          checks=[dict(label='Agents', type='contains', path='roc-chat.js', text='AI AGENT'), dict(label='Agent server', type='contains', path='api/v1/agent-lib.php', text='ROC_AGENTS')],
          pr=REPO + '113',
          steps=['Upload the zip to /home2/runoncon/ and unzip it, then CMS Dashboard > Clear cache (roc-nav.js changed).']),
+    dict(deploy=116, date='2026-10-26', title='Indexed pages link to the pages Google has not found yet',
+         changes=['Every blog post, guide, news story and Can I run page shows a box with 4 product pages and 2 comparison or category pages, different on every page, so all of them get many links from pages Google already indexes',
+                  'CMS setting link_boost (a list of paths) can put chosen pages first; by default all comparisons and categories take turns'],
+         checks=[dict(label='Link box', type='file', path='api/v1/link-boost-lib.php')],
+         pr=REPO + '114',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it, then CMS Dashboard > Clear cache.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
