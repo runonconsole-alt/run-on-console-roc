@@ -832,7 +832,9 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
             . '<h2 class="font-display font-extrabold text-lg sm:text-xl text-slate-900 group-hover:text-emerald-600 transition-colors leading-snug line-clamp-2 mb-2">' . rocH($p['title']) . '</h2>'
             . '<p class="text-xs text-slate-500 line-clamp-3 leading-relaxed">' . rocH($p['excerpt'] ?? '') . '</p></div>'
             . '<div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">'
-            . '<div class="flex items-center gap-2 text-slate-600 font-medium"><span>By ' . rocH($by) . '</span></div>'
+            // The date the post was first published (never the date of a later edit).
+            . '<div class="flex items-center gap-2 text-slate-600 font-medium"><span>By ' . rocH($by) . '</span>'
+            . (!$news && ($pd0 = rocPublished($p)) ? '<span aria-hidden="true">&middot;</span><time datetime="' . gmdate('c', $pd0) . '">' . date('M j, Y', $pd0) . '</time>' : '') . '</div>'
             . '<span class="text-emerald-600 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">' . ($news ? rocH(($pd = rocPublished($p)) ? rocPkt($pd) : 'Read') . ' &rarr;' : 'Read Article &rarr;') . '</span>'
             . '</div></div></div></a>';
     }
@@ -1086,7 +1088,9 @@ function rocRenderGuides(string $root, PDO $pdo, int $page, string $type): void 
             . '<div class="p-6 flex-1 flex flex-col justify-between space-y-4"><div>'
             . '<h2 class="font-display font-extrabold text-lg sm:text-xl text-slate-900 group-hover:text-emerald-600 transition-colors leading-snug line-clamp-2 mb-2">' . rocH($p['title']) . '</h2>'
             . '<p class="text-xs text-slate-500 line-clamp-3 leading-relaxed">' . rocH($p['excerpt'] ?? '') . '</p></div>'
-            . '<div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs"><span class="text-slate-600">' . rocH(rocReadTime($p, rocBodyHtml((string)($p['content'] ?? '')))) . '</span>'
+            . '<div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs"><span class="text-slate-600">'
+            . (($pd0 = rocPublished($p)) ? '<time datetime="' . gmdate('c', $pd0) . '">' . date('M j, Y', $pd0) . '</time> &middot; ' : '')
+            . rocH(rocReadTime($p, rocBodyHtml((string)($p['content'] ?? '')))) . '</span>'
             . '<span class="text-emerald-600 font-bold">Read the guide &rarr;</span></div></div></div></a>';
     }
     $m .= '</div>';

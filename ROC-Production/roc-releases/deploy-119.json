@@ -1,0 +1,20 @@
+{
+ "deploy": 119,
+ "date": "2026-10-26",
+ "title": "Published date on blog and guide cards",
+ "changes": [
+  "The blog and guide lists show the date each post was first published (By ROC · Oct 18, 2026), never the date of a later edit; news already did"
+ ],
+ "checks": [
+  {
+   "label": "Card dates",
+   "type": "contains",
+   "path": "blog-render.php",
+   "text": "pd0 = rocPublished"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/118",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it, then CMS Dashboard > Clear cache."
+ ]
+}
