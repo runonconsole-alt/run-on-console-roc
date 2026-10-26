@@ -3,7 +3,9 @@
  * Run On Console — ROC, the site assistant (the chat box on every page, /roc-chat.js).
  *
  * GET  /api/v1/agent.php                 {on, signed_in, name}: is ROC on (CMS > ROC assistant), is the visitor signed in
- * Only signed-in members can chat (owner's rule); others are sent to /compatibility/ to sign in or sign up.
+ * Members chat freely; visitors who are not signed in get ROC_AGENT_GUEST_DAILY questions a day, then sign in or sign up.
+ * agent: 'vanessa' | 'jimmy' | 'alley' (ROC's three AI agents, picked by the chat box). A reply may carry
+ * form {kind, subject, message}: the chat shows it as a card the visitor completes and sends.
  * POST /api/v1/agent.php  {session, page, messages: [{role: 'user'|'assistant', content}, ...], image?: data URL}
  *      {reply, game?, products[]}: the answer to the last message (see api/v1/agent-lib.php).
  *
@@ -41,13 +43,26 @@ if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
 // Pictures only when the Groq key has a picture model (from the cached model list; unknown = yes).
 $am = rocBlogGet($pdo, 'agent_models', []);
 $vision = !is_array($am) || empty($am['t']) || !empty($am['vision']);
-if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') rocAgentOut(200, ['success' => true, 'on' => $S['on'], 'signed_in' => $uid > 0, 'name' => $first, 'vision' => $vision]);
-if ($uid <= 0) rocAgentOut(401, ['success' => false, 'login' => true, 'error' => 'Please sign in to chat with ROC. / ROC se baat karne ke liye login karein.']);
+// Visitors who are not signed in may ask a few questions a day (owner, Deploy 115), then sign in or sign up.
+const ROC_AGENT_GUEST_DAILY = 5;
+$guestLeft = null;
+if ($uid <= 0) {
+    try {
+        rocAgentTable($pdo);
+        $g = $pdo->prepare('SELECT COUNT(*) FROM roc_agent_chats WHERE user_id = 0 AND ip_hash = ? AND created_at > ?');
+        $g->execute([rocAgentIpHash(), gmdate('Y-m-d H:i:s', time() - 86400)]);
+        $guestLeft = max(0, ROC_AGENT_GUEST_DAILY - (int)$g->fetchColumn());
+    } catch (\Throwable $e) { $guestLeft = 0; }
+}
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') rocAgentOut(200, ['success' => true, 'on' => $S['on'], 'signed_in' => $uid > 0, 'name' => $first, 'vision' => $vision, 'guest_left' => $guestLeft]);
+if ($uid <= 0 && $guestLeft <= 0) rocAgentOut(401, ['success' => false, 'login' => true, 'error' => 'You have used your free questions for today. Sign up free to keep chatting. / Aaj ke free sawal khatam: chat jari rakhne ke liye free sign up karein.']);
 if (!$S['on']) rocAgentOut(200, ['success' => true, 'off' => true, 'reply' => 'ROC is switched off for now.', 'products' => []]);
 
 $in = json_decode((string)file_get_contents('php://input', false, null, 0, 2500000), true);
+$agent = isset(ROC_AGENTS[(string)($in['agent'] ?? '')]) ? (string)$in['agent'] : '';
 // 👍 / 👎 on an answer of this member (CMS > ROC assistant lists the 👎 ones).
 if (($in['action'] ?? '') === 'vote') {
+    if ($uid <= 0) rocAgentOut(200, ['success' => true]);
     rocAgentTable($pdo);
     $v = (int)($in['vote'] ?? 0); $v = $v > 0 ? 1 : ($v < 0 ? -1 : 0);
     $pdo->prepare('UPDATE roc_agent_chats SET vote = ? WHERE id = ? AND user_id = ?')->execute([$v, (int)($in['id'] ?? 0), $uid]);
@@ -70,7 +85,9 @@ $page = mb_substr((string)parse_url((string)($in['page'] ?? ''), PHP_URL_PATH), 
 rocAgentTable($pdo);
 $ip = rocAgentIpHash();
 $now = gmdate('Y-m-d H:i:s');
-$c = $pdo->prepare('SELECT COUNT(*) FROM roc_agent_chats WHERE (user_id = ? OR ip_hash = ?) AND created_at > ?');
+// Guests are counted by their visitor hash only (user_id 0 is shared by every guest).
+$c = $uid > 0 ? $pdo->prepare('SELECT COUNT(*) FROM roc_agent_chats WHERE (user_id = ? OR ip_hash = ?) AND created_at > ?')
+              : $pdo->prepare('SELECT COUNT(*) FROM roc_agent_chats WHERE ? = 0 AND ip_hash = ? AND created_at > ?');
 $c->execute([$uid, $ip, gmdate('Y-m-d H:i:s', time() - 3600)]);
 if ((int)$c->fetchColumn() >= $S['hourly_ip'])
     rocAgentOut(429, ['success' => false, 'error' => 'That is a lot of questions! Please wait a little and ask again. / Thora sa intezar kar ke dobara poochein.']);
@@ -88,11 +105,19 @@ try {
     $dev = is_array($in['device'] ?? null) ? $in['device'] : [];
     $dev = ['gpu' => mb_substr(strip_tags((string)($dev['gpu'] ?? '')), 0, 120), 'threads' => (int)($dev['threads'] ?? 0), 'ram' => (float)($dev['ram'] ?? 0),
             'os' => mb_substr(strip_tags((string)($dev['os'] ?? '')), 0, 40)];
-    $a = rocAgentAnswer($pdo, $ROOT, $msgs, $useAi, $image !== '' ? $image : null, $dev, $uid);
+    $a = rocAgentAnswer($pdo, $ROOT, $msgs, $useAi, $image !== '' ? $image : null, $dev, $uid, $agent);
 } catch (\Throwable $e) {
     error_log('agent: ' . $e->getMessage());
     rocAgentOut(500, ['success' => false, 'error' => 'ROC could not answer this one. Please try again.']);
 }
+
+// A form the agent filled in for the visitor ([[FORM ...]] at the end of the reply): shown as a card in the
+// chat, where the visitor adds name and email and presses Send (roc-chat.js posts it to /api/v1/messages.php).
+$form = null;
+if (preg_match('/\[\[FORM\s+kind=(write_for_us|contact|support|suggestion)\s+subject="([^"]*)"\s+message="([^"]*)"\s*\]\]/s', $a['reply'], $fm)) {
+    $form = ['kind' => $fm[1], 'subject' => mb_substr(trim($fm[2]), 0, 120), 'message' => mb_substr(trim($fm[3]), 0, 1200)];
+}
+$a['reply'] = trim((string)preg_replace('/\[\[FORM[^\]]*\]\]/s', '', $a['reply']));
 
 try {
     $pdo->prepare('INSERT INTO roc_agent_chats (created_at, user_id, session, ip_hash, page, question, answer, game, products, engine, lang) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
@@ -103,4 +128,4 @@ try {
     if (random_int(1, 50) === 1) $pdo->prepare('DELETE FROM roc_agent_chats WHERE created_at < ?')->execute([gmdate('Y-m-d H:i:s', time() - 86400 * $S['keep_days'])]);
 } catch (\Throwable $e) { error_log('agent log: ' . $e->getMessage()); }
 
-rocAgentOut(200, ['success' => true, 'id' => $chatId ?? 0, 'reply' => $a['reply'], 'game' => $a['game'], 'products' => $a['products'], 'ms' => (int)((microtime(true) - $t0) * 1000)]);
+rocAgentOut(200, ['success' => true, 'id' => $chatId ?? 0, 'form' => $form, 'guest_left' => $uid > 0 ? null : max(0, (int)$guestLeft - 1), 'reply' => $a['reply'], 'game' => $a['game'], 'products' => $a['products'], 'ms' => (int)((microtime(true) - $t0) * 1000)]);

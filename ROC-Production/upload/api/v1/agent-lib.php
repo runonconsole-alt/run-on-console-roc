@@ -41,11 +41,33 @@ function rocAgentModels(PDO $pdo, string $key, bool $fresh = false): array {
     return $out;
 }
 
+/** ROC's three AI agents (Deploy 115): the chat box picks one per visit; each answers everything. */
+const ROC_AGENTS = [
+    'vanessa' => ['name' => 'Vanessa', 'role' => 'games and "Can I run it?" checks'],
+    'jimmy'   => ['name' => 'Jimmy',   'role' => 'PC parts, gaming gear and builds'],
+    'alley'   => ['name' => 'Alley',   'role' => 'help with the website, write for us, contact and suggestions'],
+];
+
+/** The agent's name and the rules for the forms the chat can fill in (contact, support, write for us, suggestion). */
+function rocAgentPersona(string $agent): string {
+    if (!isset(ROC_AGENTS[$agent])) return '';
+    $a = ROC_AGENTS[$agent];
+    return "- Your name is " . $a['name'] . ", one of the three AI agents of ROC (Run On Console's assistant); you know most about " . $a['role'] . " but you help with everything in range. "
+         . "You are an AI, not a human: if asked, say so plainly. The chat already introduced you, so do not introduce yourself again; you may sign off as " . $a['name'] . " when it fits.\n"
+         . "- New visitors: welcome them, say in one line what ROC can do (Can I run checks, gear picks, guides, help with the site) and ask what they need.\n"
+         . "- FORMS: when the visitor wants to write for us (guest post, sponsored article, advertising), contact the team, get help with their account or a problem on the site (support), or give a suggestion or idea about the site: "
+         . "ask in one or two short questions what they want to send (for write for us: the article title and a short outline or the link they want; for support: what went wrong; for a suggestion: the idea). "
+         . "Do NOT ask for their name, email or phone: a form card in the chat collects those. When you know enough, write one short line saying the form is ready to check and send, "
+         . "and end the reply with this line exactly, filled in: [[FORM kind=<write_for_us|contact|support|suggestion> subject=\"<short subject, max 80 characters>\" message=\"<their request in their own words, max 600 characters, no double quotes>\"]]\n"
+         . "- Writing for us, contacting the team, support and suggestions are IN range: never refuse them.\n";
+}
+
 /** What ROC may talk about and how (the owner's rules: gaming only, nothing rude or adult). */
-function rocAgentSystem(string $lang, array $facts): string {
+function rocAgentSystem(string $lang, array $facts, string $agent = ''): string {
     $no = $lang === 'roman-urdu' ? 'Maaf kijiye, ye sawal meri range mein nahi hai. Aap gaming se related kuch bhi pooch sakte hain!'
                                  : 'Sorry, that is outside my range. Ask me anything about gaming!';
     return "You are ROC, the friendly gaming assistant of the website Run On Console (runonconsole.com). Rules:\n"
+         . rocAgentPersona($agent)
          . "- Reply in the visitor's language: " . ($lang === 'roman-urdu' ? 'Roman Urdu (Urdu written in English letters), simple words' : 'simple English')
          . ". If the visitor writes in Urdu script, reply in Roman Urdu. No headings.\n"
          // The website is bigger than ROC (owner, Deploy 91): short answers that send the visitor to the page.
@@ -646,7 +668,7 @@ function rocAgentKb(string $root, string $q): ?array {
  * One answer. $history: [['role' => 'user'|'assistant', 'content' => '...'], ...], the last one the question.
  * Returns ['reply' => text, 'game' => check|null, 'products' => [...], 'engine' => model|'basic', 'lang' => ...].
  */
-function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = true, ?string $image = null, array $device = [], int $uid = 0): array {
+function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = true, ?string $image = null, array $device = [], int $uid = 0, string $agent = ''): array {
     $q = (string)end($history)['content'];
     if ($uid > 0 && preg_match('/forget my pc|delete my pc|mera pc (bhool|bhul|delete|hata)|pc (bhool|bhul) ja/i', $q)) {
         try { $pdo->prepare('DELETE FROM roc_agent_pcs WHERE user_id = ?')->execute([$uid]); } catch (\Throwable $e) {}
@@ -724,7 +746,7 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
 
     $reply = null; $engine = 'basic';
     if ($useAi && ($key = trim((string)rocBlogGet($pdo, 'blog_groq_key', ''))) !== '') {
-        $msgs = [['role' => 'system', 'content' => rocAgentSystem($lang, $facts)]];
+        $msgs = [['role' => 'system', 'content' => rocAgentSystem($lang, $facts, $agent)]];
         foreach (array_slice($history, -6) as $m) $msgs[] = ['role' => $m['role'] === 'assistant' ? 'assistant' : 'user', 'content' => mb_substr((string)$m['content'], 0, 600)];
         // Models: a picture goes to the vision model; questions about new things (releases, news, results)
         // first to Groq's model with web search; the rest to the chat models.

@@ -7,13 +7,27 @@
   window.__rocChat = 1;
   var KEY = 'roc-chat-v1', ss = null;
   try { ss = window.sessionStorage; } catch (e) {}
-  var state = { open: false, msgs: [], session: '', voice: 'en', speak: false };
+  var state = { open: false, msgs: [], session: '', voice: 'en', speak: false, agent: '', met: false };
   try { var saved = ss && JSON.parse(ss.getItem(KEY) || 'null'); if (saved) for (var k in saved) state[k] = saved[k]; } catch (e) {}
   if (!state.session) state.session = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-6);
   function save() {
-    try { ss && ss.setItem(KEY, JSON.stringify({ open: state.open, session: state.session, voice: state.voice, speak: state.speak,
+    try { ss && ss.setItem(KEY, JSON.stringify({ open: state.open, session: state.session, voice: state.voice, speak: state.speak, agent: state.agent, met: state.met,
       msgs: state.msgs.slice(-20).map(function (m) { var c = {}; for (var k in m) if (k !== 'pic') c[k] = m[k]; return c; }) })); } catch (e) {}
   }
+  /* ROC's three AI agents (Deploy 115). One is picked for the visit; the avatars are drawn, not photos. */
+  var face = function (bg, skin, hair, hairPath, shirt) {
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="32" fill="' + bg + '"/>' +
+      '<path d="M14 64c2-12 9-18 18-18s16 6 18 18z" fill="' + shirt + '"/><rect x="27" y="38" width="10" height="9" rx="4" fill="' + skin + '"/>' +
+      '<ellipse cx="32" cy="28" rx="12" ry="13" fill="' + skin + '"/>' + hairPath.replace(/H/g, hair) +
+      '<circle cx="27.5" cy="29" r="1.6" fill="#1f2937"/><circle cx="36.5" cy="29" r="1.6" fill="#1f2937"/><path d="M28 35q4 3 8 0" stroke="#b45309" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>');
+  };
+  var AGENTS = {
+    vanessa: { name: 'Vanessa', role: 'Games & Can I run it', img: face('#a7f3d0', '#f1c7a5', '#4b2e1f', '<path d="M19 30c-2-14 7-20 14-20s14 5 12 20c-2-6-6-11-13-11s-11 5-13 11z" fill="H"/><path d="M19 28c-3 10-2 18 2 22l3-12z M45 28c3 10 2 18-2 22l-3-12z" fill="H"/>', '#047857') },
+    jimmy:   { name: 'Jimmy',   role: 'PC parts & gear',     img: face('#bae6fd', '#d9a27c', '#1f2937', '<path d="M20 26c0-10 6-15 12-15s13 4 12 15c-3-5-7-7-12-7s-9 2-12 7z" fill="H"/>', '#0f766e') },
+    alley:   { name: 'Alley',   role: 'Site help & forms',    img: face('#fde68a', '#efc19f', '#7c2d12', '<path d="M19 29c-1-13 6-19 13-19 9 0 14 7 13 19-1-5-4-9-8-10-4 3-11 4-18 10z" fill="H"/><circle cx="43" cy="16" r="6" fill="H"/>', '#065f46') }
+  };
+  if (!AGENTS[state.agent]) state.agent = ['vanessa', 'jimmy', 'alley'][Math.floor(Math.random() * 3)];
+  function agent() { return AGENTS[state.agent]; }
   var Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   var css = '' +
@@ -28,6 +42,19 @@
     '#roc-chat .rh b{font:900 16px Outfit,Inter,sans-serif;display:block}#roc-chat .rh small{color:#a7f3d0;font-size:11px}' +
     '#roc-chat .rh .av{width:34px;height:34px;border-radius:12px;background:#34d399;color:#052e2b;display:flex;align-items:center;justify-content:center;font:900 13px Outfit,sans-serif;flex:none}' +
     '#roc-chat .rh .tools{margin-left:auto;display:flex;gap:6px}' +
+    '#roc-chat .rh img.ag{width:38px;height:38px;border-radius:50%;flex:none;border:2px solid rgba(255,255,255,.7);background:#fff}' +
+    '#roc-chat .rh .ai{display:inline-block;margin-left:6px;font:800 9px Inter,sans-serif;letter-spacing:.06em;background:#34d399;color:#052e2b;border-radius:6px;padding:2px 5px;vertical-align:middle}' +
+    '#roc-chat .conn{margin:auto;text-align:center;color:#475569;font-size:13px;padding:20px}#roc-chat .conn .ring{width:64px;height:64px;margin:0 auto 12px;border-radius:50%;border:3px solid #a7f3d0;border-top-color:#047857;animation:rocspin 1s linear infinite}' +
+    '#roc-chat .conn .bar{height:6px;max-width:220px;margin:12px auto 0;background:#e2e8f0;border-radius:99px;overflow:hidden}#roc-chat .conn .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#10b981,#14b8a6);animation:rocfill var(--d,10s) linear forwards}' +
+    '#roc-chat .hello{display:flex;gap:8px;align-items:flex-end}#roc-chat .hello img{width:28px;height:28px;border-radius:50%;flex:none}' +
+    '#roc-chat .fc{align-self:stretch;background:#fff;border:2px solid #a7f3d0;border-radius:14px;padding:12px;display:grid;gap:8px}#roc-chat .fc b{font:800 13px Outfit,Inter,sans-serif;color:#064e3b}' +
+    '#roc-chat .fc input,#roc-chat .fc textarea{width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:10px;padding:8px 10px;font:13px Inter,sans-serif;color:#0f172a;background:#fff}#roc-chat .fc textarea{min-height:80px;resize:vertical}' +
+    '#roc-chat .fc .row{display:flex;gap:6px}#roc-chat .fc .row button{flex:1;border:0;border-radius:10px;padding:9px;font:800 13px Inter,sans-serif;cursor:pointer}#roc-chat .fc .ok{background:#047857;color:#fff}#roc-chat .fc .no{background:#f1f5f9;color:#334155}' +
+    '#roc-chat .fc small{color:#64748b;font-size:11px}#roc-chat .fc .err{color:#be123c;font-size:12px;font-weight:700}' +
+    '#roc-chat .gl{font-size:11px;color:#047857;text-align:center;padding:4px 10px 0;background:#fff}' +
+    '@keyframes rocspin{to{transform:rotate(360deg)}}@keyframes rocfill{to{width:100%}}' +
+    'html.roc-dark #roc-chat .fc{background:#0f172a;border-color:rgba(52,211,153,.35)}html.roc-dark #roc-chat .fc b{color:#a7f3d0}html.roc-dark #roc-chat .fc input,html.roc-dark #roc-chat .fc textarea{background:#0b1220;border-color:#334155;color:#e2e8f0}' +
+    'html.roc-dark #roc-chat .fc .no{background:#1e293b;color:#cbd5e1}html.roc-dark #roc-chat .conn{color:#94a3b8}html.roc-dark #roc-chat .conn .bar{background:#1e293b}html.roc-dark #roc-chat .gl{background:#0f172a;color:#6ee7b7}' +
     '#roc-chat .rh .tools button{background:rgba(255,255,255,.15);border:0;color:#fff;min-width:30px;height:30px;border-radius:10px;cursor:pointer;font:800 12px Inter,sans-serif;padding:0 7px}' +
     '#roc-chat .rh .tools button.on{background:#34d399;color:#052e2b}' +
     '#roc-chat .rb{flex:1;overflow-y:auto;padding:14px;background:#f8fafc;display:flex;flex-direction:column;gap:10px}' +
@@ -107,12 +134,11 @@
     document.body.appendChild(btn);
     btn.addEventListener('click', function () {
       if (!box) {
-        box = makeBox(false); document.body.appendChild(box); wire();
-        if (user.signed_in) render(); else gate();
+        box = makeBox(false); document.body.appendChild(box); wire(); render();
       }
       toggle(true);
     });
-    if (user.signed_in && state.open) btn.click();
+    if (state.open) btn.click();
     // "Ask ROC" buttons on the pages (data-roc-ask="question", Deploy 85): open the chat (made on first use)
     // with the question written in the box, ready to finish with the visitor's parts and send.
     document.addEventListener('click', function (e) {
@@ -121,7 +147,7 @@
       e.preventDefault(); e.stopPropagation();
       btn.click();
       setTimeout(function () {
-        if (!form || form.style.display === 'none') return;   // not signed in: the sign-in card shows
+        if (!form || input.disabled) return;   // still connecting to an agent
         input.value = a.getAttribute('data-roc-ask') || '';
         input.focus(); input.setSelectionRange(input.value.length, input.value.length);
       }, 80);
@@ -149,10 +175,6 @@
     if (!host || host.getAttribute('data-roc-on')) return;
     host.setAttribute('data-roc-on', '1');
     style();
-    if (!user.signed_in) {
-      host.innerHTML = '<div class="roc-gate" style="border:2px solid #a7f3d0;border-radius:20px;background:#fff;padding:10px">' + loginCard() + '</div>';
-      return;
-    }
     box = makeBox(true);
     host.innerHTML = ''; host.appendChild(box);
     wire(); render();
@@ -160,7 +182,8 @@
   function makeBox(isInline) {
     var b = document.createElement('div');
     b.id = 'roc-chat'; b.className = isInline ? 'on inline' : ''; b.setAttribute('role', isInline ? 'region' : 'dialog'); b.setAttribute('aria-label', 'ROC assistant');
-    b.innerHTML = '<div class="rh"><div class="av">ROC</div><div><b>ROC</b><small>Your gaming assistant · English / Roman Urdu</small></div>' +
+    var A = agent();
+    b.innerHTML = '<div class="rh"><img class="ag" src="' + A.img + '" alt=""><div><b>' + esc(A.name) + '<span class="ai">AI AGENT</span></b><small>ROC · ' + esc(A.role) + ' · English / Roman Urdu</small></div>' +
       '<div class="tools"><button type="button" class="new" title="New chat (clears this conversation)" aria-label="New chat">🔄</button>' +
       (Rec ? '<button type="button" class="lang" title="Microphone language: tap to switch between English and Urdu">' + (state.voice === 'ur' ? '🎤 UR' : '🎤 EN') + '</button>' : '') +
       ('speechSynthesis' in window ? '<button type="button" class="spk' + (state.speak ? ' on' : '') + '" title="Read answers aloud" aria-label="Read answers aloud">🔊</button>' : '') +
@@ -171,7 +194,7 @@
       '<input type="file" class="pcf" accept=".txt,text/plain" hidden>' +
       (Rec ? '<button type="button" class="ic mic" title="Speak" aria-label="Speak your question">' + MIC + '</button>' : '') +
       '<input type="text" maxlength="500" placeholder="Ask anything about gaming..." aria-label="Your question"><button type="submit" class="go">Send</button></form>' +
-      '<div class="ft">ROC answers gaming questions only and can make mistakes. Chats are saved with your account, without personal details. <a href="/privacy-policy/">Privacy</a></div>';
+      '<div class="gl"></div><div class="ft">' + esc(A.name) + ' is an AI agent of ROC: gaming and site help only, and can make mistakes. Chats are saved without personal details. <a href="/privacy-policy/">Privacy</a></div>';
     return b;
   }
   function wire() {
@@ -198,6 +221,7 @@
       try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {}
       state.msgs = []; state.session = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-6);
       save(); render(); input.focus();
+      var g = box.querySelector('.gl'); if (g) g.textContent = guestText();
     });
     // A click anywhere else on the page closes the floating box (the chat is kept).
     if (btn) document.addEventListener('mousedown', function (e) {
@@ -344,17 +368,75 @@
     return '<a class="pc" href="' + esc(p.url) + '">' + (p.image ? '<img src="' + esc(p.image) + '" alt="" loading="lazy">' : '') +
       '<div><b>' + esc(p.title) + '</b>' + (p.about ? '<span>' + esc(p.about) + '</span>' : '') + '<span style="color:#047857;font-weight:800">See it &rarr;</span></div></a>';
   }
+  /* First open of the visit: "connecting you to an agent" for a few seconds, then the agent says hello. */
+  var CONNECT_MS = 10000, connecting = false;
+  function guestText() {
+    return user.signed_in || user.guest_left == null ? '' : user.guest_left > 0 ? 'Free questions left today: ' + user.guest_left + ' · sign up free for unlimited chat' : '';
+  }
+  function hello() {
+    var A = agent(), n = user.name ? ' ' + user.name : '';
+    return 'Hi' + n + '! I\'m ' + A.name + ', an AI agent at Run On Console, and I\'ll be helping you today. ' +
+      'Ask me if your PC can run a game, which gear to buy, or for help with the site, writing for us, contacting the team or a suggestion. What do you need?\n' +
+      'Aap Roman Urdu mein bhi pooch sakte hain.';
+  }
+  function connect() {
+    if (connecting || state.met) return;
+    connecting = true;
+    form.style.opacity = '.5'; input.disabled = true;
+    setTimeout(function () {
+      connecting = false; state.met = true; form.style.opacity = ''; input.disabled = false;
+      state.msgs.push({ role: 'assistant', content: hello(), hello: true }); save(); render(); input.focus();
+    }, CONNECT_MS);
+  }
+  function formCard(m, i) {
+    var f = m.form, done = m.formDone;
+    if (done) return '<div class="fc"><b>✅ Sent (' + esc(done) + ')</b><small>A copy is on its way to your email.</small></div>';
+    var label = { write_for_us: 'Write for us', contact: 'Contact the team', support: 'Help & support', suggestion: 'Suggestion' }[f.kind] || 'Message';
+    var mail = user.email || '', nm = user.name || '';
+    state.msgs.forEach(function (x) { if (x.role === 'user') { var e = String(x.content).match(/[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}/i); if (e) mail = e[0]; } });
+    return '<form class="fc" data-fi="' + i + '"><b>📝 ' + esc(label) + ': check and send</b>' +
+      '<input name="name" placeholder="Your name" required maxlength="120" value="' + esc(nm) + '">' +
+      '<input name="email" type="email" placeholder="Your email" required maxlength="150" value="' + esc(mail) + '">' +
+      (f.kind === 'write_for_us' ? '<input name="phone" placeholder="Phone / WhatsApp (optional)" maxlength="40">' : '') +
+      '<input name="subject" placeholder="Subject" maxlength="120" value="' + esc(f.subject) + '">' +
+      '<textarea name="message" required maxlength="5000">' + esc(f.message) + '</textarea>' +
+      '<small>It goes to our team and you get a copy by email.</small><div class="err"></div>' +
+      '<div class="row"><button type="submit" class="ok">Send</button><button type="button" class="no">Not now</button></div></form>';
+  }
+  function sendForm(el) {
+    var i = +el.getAttribute('data-fi'), m = state.msgs[i]; if (!m || !m.form) return;
+    var v = function (n) { var x = el.elements[n]; return x ? String(x.value || '').trim() : ''; };
+    var err = el.querySelector('.err'), ok = el.querySelector('.ok');
+    if (!v('name') || !v('message') || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('email'))) { err.textContent = 'Please add your name, a valid email and the message.'; return; }
+    ok.disabled = true; err.textContent = '';
+    var meta = { via: 'ROC chat', agent: agent().name };
+    if (v('phone')) meta.contact = v('phone');
+    fetch('/api/v1/messages.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin',
+      body: JSON.stringify({ kind: m.form.kind, name: v('name'), email: v('email'), subject: v('subject'), message: v('message'), meta: meta, website: '' }) })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (d) {
+        if (!d || !d.success) { ok.disabled = false; err.textContent = (d && d.error) || 'It could not be sent. Please try again.'; return; }
+        m.formDone = d.reference;
+        state.msgs.push({ role: 'assistant', content: 'Done! Your message reached our team (' + d.reference + '), and a copy is on its way to ' + v('email') + '. Anything else I can help with?' });
+        save(); render();
+      })
+      .catch(function () { ok.disabled = false; err.textContent = 'No connection. Please try again.'; });
+  }
   function render() {
     var h = '';
-    if (!state.msgs.length) {
-      // Nothing written by ROC before the visitor speaks: only its mark, like an empty chat.
-      h += '<div style="margin:auto;text-align:center;opacity:.35"><div style="width:48px;height:48px;margin:0 auto;border-radius:16px;background:#047857;color:#fff;display:flex;align-items:center;justify-content:center">' +
-        ICON.replace('<svg', '<svg width="26" height="26"') + '</div></div>';
+    if (!state.met) {
+      var A = agent();
+      h += '<div class="conn"><div class="ring"></div><b style="display:block;font-size:14px;color:inherit">Connecting you to an available agent…</b>' +
+        'Aap ko ek agent se mila rahe hain<div class="bar" style="--d:' + (CONNECT_MS / 1000) + 's"><i></i></div></div>';
+      body.innerHTML = h; connect(); return;
     }
     state.msgs.forEach(function (m, i) {
       var shown = m.role === 'user' && /^My PC \(from dxdiag\)/.test(m.content) ? '🖥 ' + m.content.split('\n').slice(1).filter(function (l) { return /Processor|Card name|Memory/i.test(l); }).join('\n') : m.content;
-      h += '<div class="m ' + (m.role === 'user' ? 'u' : 'a') + '">' + (m.pic ? '<img src="' + m.pic + '" alt="">' : m.hadPic ? '📷 ' : '') +
+      var bubble = '<div class="m ' + (m.role === 'user' ? 'u' : 'a') + '">' + (m.pic ? '<img src="' + m.pic + '" alt="">' : m.hadPic ? '📷 ' : '') +
         (m.role === 'user' ? esc(shown) : fmt(m.content)) + '</div>';
+      h += m.hello ? '<div class="hello"><img src="' + agent().img + '" alt="">' + bubble + '</div>' : bubble;
+      if (m.form) h += formCard(m, i);
+      if (m.login) h += '<div class="roc-gate" style="border:2px solid #a7f3d0;border-radius:14px;background:#fff">' + loginCard() + '</div>';
       if (m.role === 'assistant' && m.id) h += '<div class="vt"><button type="button" data-vote="1" data-i="' + i + '" class="' + (m.vote === 1 ? 'on' : '') + '" title="Good answer">👍</button>' +
         '<button type="button" data-vote="-1" data-i="' + i + '" class="' + (m.vote === -1 ? 'on' : '') + '" title="Wrong or not helpful">👎</button></div>';
       if (m.game) h += gameCard(m.game);
@@ -363,11 +445,16 @@
     if (busy) h += '<div class="m a dots"><span></span><span></span><span></span></div>';
     body.innerHTML = h;
     [].forEach.call(body.querySelectorAll('.chips button'), function (b) { b.addEventListener('click', function () { send(b.textContent); }); });
+    [].forEach.call(body.querySelectorAll('form.fc'), function (f) {
+      f.addEventListener('submit', function (e) { e.preventDefault(); sendForm(f); });
+      f.querySelector('.no').addEventListener('click', function () { var m = state.msgs[+f.getAttribute('data-fi')]; if (m) { delete m.form; save(); render(); } });
+    });
+    var g = box && box.querySelector('.gl'); if (g) { g.textContent = guestText(); g.style.display = g.textContent ? '' : 'none'; }
     body.scrollTop = body.scrollHeight;
   }
   function send(text) {
     text = String(text || '').trim();
-    if ((!text && !pic) || busy) return;
+    if ((!text && !pic) || busy || !state.met) return;
     input.value = '';
     try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {}
     var image = pic; pic = null; att.classList.remove('on');
@@ -376,15 +463,19 @@
     busy = true; sendBtn.disabled = true; render(); save();
     var hist = state.msgs.slice(-8).map(function (m) { return { role: m.role, content: m.content }; });
     fetch('/api/v1/agent.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin',
-      body: JSON.stringify({ session: state.session, page: location.pathname, messages: hist, image: image || undefined, device: device() }) })
+      body: JSON.stringify({ session: state.session, page: location.pathname, messages: hist, image: image || undefined, device: device(), agent: state.agent }) })
       .then(function (r) { return r.json().catch(function () { return { error: 'ROC could not answer. Please try again.' }; }); })
       .then(function (d) {
-        if (d && d.reply) { state.msgs.push({ role: 'assistant', content: d.reply, id: d.id || 0, game: d.game || null, products: d.products || [] }); speak(d.reply, voiceTurn); }
-        else if (d && d.login) { user.signed_in = false; state.msgs.pop(); }
+        if (d && d.reply) {
+          state.msgs.push({ role: 'assistant', content: d.reply, id: user.signed_in ? (d.id || 0) : 0, game: d.game || null, products: d.products || [], form: d.form || null });
+          if (d.guest_left != null) user.guest_left = d.guest_left;
+          speak(d.reply, voiceTurn);
+        }
+        else if (d && d.login) { user.guest_left = 0; state.msgs.push({ role: 'assistant', content: d.error || 'Please sign in to keep chatting.', login: true }); }
         else state.msgs.push({ role: 'assistant', content: (d && d.error) || 'ROC could not answer. Please try again.' });
       })
       .catch(function () { state.msgs.push({ role: 'assistant', content: 'No connection. Please try again.' }); })
-      .then(function () { busy = false; sendBtn.disabled = false; save(); if (!user.signed_in) { gate(); return; } render(); input.focus(); });
+      .then(function () { busy = false; sendBtn.disabled = false; save(); render(); input.focus(); });
   }
 
   function start() {
@@ -393,7 +484,7 @@
     fetch('/api/v1/agent.php', { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (d) {
       try { ss && ss.setItem('roc-chat-off', d && d.on === false ? '1' : '0'); } catch (e) {}
       if (!d || d.on === false) return;
-      user = { signed_in: !!d.signed_in, name: d.name || '', vision: d.vision !== false };
+      user = { signed_in: !!d.signed_in, name: d.name || '', vision: d.vision !== false, guest_left: d.guest_left };
       if (!CHECKER) { floating(); return; }
       // The checker page: ROC inside the page. React gives its place after it has drawn the page
       // (GameCompatibilityView: window.__rocChatHost / window.rocChatMount), never before, so the

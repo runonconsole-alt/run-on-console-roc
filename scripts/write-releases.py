@@ -746,6 +746,20 @@ RELEASES = [
          checks=[dict(label='Mail pipe', type='file', path='api/v1/cron/mail-in.php')],
          pr=REPO + '112',
          steps=['Upload the zip to /home2/runoncon/ and unzip it, then: chmod 755 public_html/api/v1/cron/mail-in.php', 'cPanel > Forwarders > Add Forwarder for each mailbox > Advanced Options > Pipe to a Program: public_html/api/v1/cron/mail-in.php']),
+    dict(deploy=114, date='2026-10-23', title='Header fits on laptop screens; emails are links',
+         changes=['Header: on screens about 1024-1100 px wide the search box no longer covers ABOUT US (slightly tighter menu, narrower search)',
+                  'Write for us and Suggestions: the email addresses are clickable'],
+         checks=[dict(label='Header', type='contains', path='api/v1/cms/site-layer-lib.php', text='px-1.5 xl:px-2.5')],
+         pr=REPO + '112',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard > Clear cache.']),
+    dict(deploy=115, date='2026-10-26', title='ROC has three AI agents: Vanessa, Jimmy and Alley',
+         changes=['Ask ROC: one of three AI agents (drawn avatar, name and AI AGENT label) joins after a short "Connecting you to an available agent" screen and says hello',
+                  'Visitors who are not signed in can ask 5 questions a day; then the chat shows sign in / sign up',
+                  'Agents reply in the visitor language (English or Roman Urdu)',
+                  'Write for us, contact, support and suggestions from the chat: the agent prepares a form card, the visitor adds name and email, checks it and presses Send; it reaches the right mailbox and CMS Messages, with a copy to the visitor'],
+         checks=[dict(label='Agents', type='contains', path='roc-chat.js', text='AI AGENT'), dict(label='Agent server', type='contains', path='api/v1/agent-lib.php', text='ROC_AGENTS')],
+         pr=REPO + '113',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it, then CMS Dashboard > Clear cache (roc-nav.js changed).']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
