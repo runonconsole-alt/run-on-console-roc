@@ -321,7 +321,7 @@ function rocNavHeader(array $items, string $path): string {
         $active = rocNavActive($url, $path);
         $kids = array_values((array)($it['children'] ?? []));
         if (!$kids) {
-            $h .= '<a href="' . rocLayerH($url) . '" class="px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap'
+            $h .= '<a href="' . rocLayerH($url) . '" class="px-1.5 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap'
                 . ($i === $n - 1 ? ' mr-1 lg:mr-2' : '') . ' ' . ($active ? $on : $off) . '">' . $label . '</a>';
             continue;
         }

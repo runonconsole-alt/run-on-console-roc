@@ -1,0 +1,30 @@
+{
+ "deploy": 114,
+ "date": "2026-10-23",
+ "title": "Header fits on laptop screens; emails are links",
+ "changes": [
+  "Header: on screens about 1024-1100 px wide the search box no longer covers ABOUT US (slightly tighter menu, narrower search)",
+  "Write for us and Suggestions: the email addresses are clickable"
+ ],
+ "checks": [
+  {
+   "label": "Header",
+   "type": "contains",
+   "path": "api/v1/cms/site-layer-lib.php",
+   "text": "px-1.5 xl:px-2.5"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-sui_61xy.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/112",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it.",
+  "php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply",
+  "CMS Dashboard > Clear cache."
+ ],
+ "build": "index-sui_61xy.js"
+}

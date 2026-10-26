@@ -156,7 +156,7 @@ export const Header = () => {
                 if (!item.children || !item.children.length) {
                   return (
                     <a key={'n' + i} href={item.url} onClick={closeDropdown}
-                      className={'px-2 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap' + (last ? ' mr-1 lg:mr-2' : '') + ' ' + (active ? NAV_ON : NAV_OFF)}>
+                      className={'px-1.5 xl:px-2.5 py-1.5 text-[10px] xl:text-xs font-display font-extrabold uppercase tracking-wide rounded-xl transition-all whitespace-nowrap' + (last ? ' mr-1 lg:mr-2' : '') + ' ' + (active ? NAV_ON : NAV_OFF)}>
                       {item.label}
                     </a>
                   );
@@ -204,7 +204,7 @@ export const Header = () => {
                 data-roc-search=""
                 role="search"
                 action="/products/"
-                className="relative hidden md:flex items-center w-48 lg:w-28 xl:w-52 2xl:w-72 shrink-0 bg-slate-100/90 border border-slate-200 rounded-xl focus-within:border-emerald-500 focus-within:bg-white transition-all shadow-inner"
+                className="relative hidden md:flex items-center w-48 lg:w-24 xl:w-52 2xl:w-72 shrink-0 bg-slate-100/90 border border-slate-200 rounded-xl focus-within:border-emerald-500 focus-within:bg-white transition-all shadow-inner"
               >
                 <select
                   name="in"
