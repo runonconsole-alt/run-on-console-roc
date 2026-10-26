@@ -51,6 +51,7 @@ export const DEFAULT_SITE_NAV = {
         { label: 'Terms & Conditions', url: '/terms-and-conditions/', icon: 'scale' },
         { label: 'Privacy Policy & Affiliate Disclosure', url: '/privacy-policy/', icon: 'file-check' },
         { label: 'Contact Us', url: '/contact/', icon: 'mail' },
+        { label: 'Suggestions', url: '/suggestions/', icon: 'star' },
         { label: 'Write For Us & Advertising', url: '/write-for-us/', icon: 'pen' },
       ] },
     ],

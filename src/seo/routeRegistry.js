@@ -226,7 +226,7 @@ export const STATIC_PUBLIC_ROUTES = [
     path: '/suggestions/',
     canonical: `${BASE_DOMAIN}/suggestions/`,
     title: 'Suggestions & Ideas | Run On Console',
-    description: 'Send Run On Console your ideas and questions about the site design, the ROC assistant, our guides or the gear we cover. Email suggestions@runonconsole.com or use the form.',
+    description: 'Ideas or questions about the Run On Console design, the ROC assistant, our guides or gear? Email suggestions@runonconsole.com or use the form.',
     h1: 'Help Us Make ROC Better',
     category: 'Suggestions',
     lastmod: '2026-10-23T10:00:00+00:00'

@@ -143,6 +143,16 @@ try {
 } catch (\Throwable $e) { echo date('c') . ' IndexNow error: ' . $e->getMessage() . "
 "; }
 
+// Indexing (Deploy 117): a few pages a run are checked with Google's URL Inspection API (CMS > Indexing);
+// newly indexed pages are emailed once a day. Runs only when ~/config/gsc-key.json exists.
+try {
+    require_once $ROOT . '/api/v1/cms/gsc-lib.php';
+    $gx = rocGscTick($pdo);
+    if ($gx !== null) echo date('c') . ' ' . $gx . "
+";
+} catch (\Throwable $e) { echo date('c') . ' indexing error: ' . $e->getMessage() . "
+"; }
+
 // New popular Steam games for the Can I run pages (Deploy 87): a few store requests a run, once a month.
 try {
     require_once $ROOT . '/api/v1/steam-update-lib.php';
