@@ -758,7 +758,7 @@ RELEASES = [
                   'Agents reply in the visitor language (English or Roman Urdu)',
                   'Write for us, contact, support and suggestions from the chat: the agent prepares a form card, the visitor adds name and email, checks it and presses Send; it reaches the right mailbox and CMS Messages, with a copy to the visitor'],
          checks=[dict(label='Agents', type='contains', path='roc-chat.js', text='AI AGENT'), dict(label='Agent server', type='contains', path='api/v1/agent-lib.php', text='ROC_AGENTS')],
-         pr=REPO + '115',
+         pr=REPO + '113',
          steps=['Upload the zip to /home2/runoncon/ and unzip it, then CMS Dashboard > Clear cache (roc-nav.js changed).']),
 ]
 

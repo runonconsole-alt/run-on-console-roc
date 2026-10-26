@@ -22,7 +22,7 @@
    "text": "ROC_AGENTS"
   }
  ],
- "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/115",
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/113",
  "steps": [
   "Upload the zip to /home2/runoncon/ and unzip it, then CMS Dashboard > Clear cache (roc-nav.js changed)."
  ]
