@@ -773,6 +773,13 @@ RELEASES = [
          checks=[dict(label='Indexing', type='file', path='api/v1/cms/indexing.php'), dict(label='Footer: Suggestions', type='file', path='api/v1/cron/cli-footer-suggestions.php')],
          pr=REPO + '116',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-footer-suggestions.php --apply', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard > Clear cache.']),
+    dict(deploy=118, date='2026-10-26', title='Thank-you animation after every form, smaller header search, more helpful pages',
+         changes=['After any form (contact, support, write for us, suggestion, comment, ROC chat) the visitor sees that the message reached the head of the right team (Support, Editorial, Product, Community) with an animation: you, then the head of the team, then your inbox; in English and Roman Urdu',
+                  'Header search is smaller on laptops and big screens, without the Products menu, so it never covers ABOUT US',
+                  'Contact, Suggestions and the ROC team page get short FAQs (they were the pages with the least text)'],
+         checks=[dict(label='Delivery animation', type='contains', path='blog-render.php', text='Head of Community')],
+         pr=REPO + '117',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard > Clear cache (roc-nav.js changed).']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

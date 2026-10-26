@@ -227,7 +227,12 @@ function rocCommentForm(string $title, string $url): string {
         . '.rc-box button{margin-top:.75rem;background:#047857;color:#fff;border:0;border-radius:.75rem;padding:.75rem 1.25rem;font:800 .9rem Outfit,Inter,sans-serif;cursor:pointer}.rc-box button:disabled{opacity:.6}'
         . '.rc-msg{margin-top:.75rem;font-size:.9rem;font-weight:600}.rc-msg.ok{color:#047857}.rc-msg.bad{color:#be123c}'
         . 'html.roc-dark .rc-box{background:rgba(16,185,129,.06);border-color:rgba(52,211,153,.3)}html.roc-dark .rc-box h2{color:#a7f3d0}'
-        . 'html.roc-dark .rc-box input,html.roc-dark .rc-box textarea{background:#0b1220;border-color:#334155;color:#e2e8f0}html.roc-dark .rc-msg.ok{color:#6ee7b7}html.roc-dark .rc-msg.bad{color:#fda4af}</style>'
+        . 'html.roc-dark .rc-box input,html.roc-dark .rc-box textarea{background:#0b1220;border-color:#334155;color:#e2e8f0}html.roc-dark .rc-msg.ok{color:#6ee7b7}html.roc-dark .rc-msg.bad{color:#fda4af}'
+        // After sending: the comment flies to the Head of Community, and the reply comes back to the inbox.
+        . '.rc-dt{display:flex;align-items:center;gap:6px;margin:.6rem 0 .3rem;font-size:.75rem;font-weight:700;color:#047857}.rc-dt span{padding:.3rem .55rem;border-radius:99px;background:#ecfdf5;border:1px solid #a7f3d0;white-space:nowrap}'
+        . '.rc-dt i{position:relative;flex:1;min-width:24px;height:3px;border-radius:99px;background:rgba(16,185,129,.2);overflow:hidden}.rc-dt i::after{content:"";position:absolute;inset:0;background:#10b981;transform:scaleX(0);transform-origin:left;animation:rcfill 1.2s ease forwards}'
+        . '.rc-dt i.r::after{animation-delay:1.3s}.rc-dt span.h{animation:rcpop .5s ease 1.2s both}@keyframes rcfill{to{transform:scaleX(1)}}@keyframes rcpop{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}'
+        . 'html.roc-dark .rc-dt{color:#6ee7b7}html.roc-dark .rc-dt span{background:rgba(16,185,129,.12);border-color:rgba(52,211,153,.35)}@media(prefers-reduced-motion:reduce){.rc-dt i::after{animation:none;transform:none}}</style>'
         . '<section class="rc-box" aria-labelledby="rc-h"><h2 id="rc-h">Leave a comment</h2>'
         . '<p class="rc-sub">Questions, corrections or your own experience: it goes to our team at comments@runonconsole.com and you get a copy.</p>'
         . '<form class="rc-form" data-title="' . $t . '" data-url="' . $u . '" novalidate>'
@@ -242,7 +247,7 @@ function rocCommentForm(string $title, string $url): string {
         . 'b.disabled=true;m.className="rc-msg";m.textContent="Sending…";'
         . 'fetch("/api/v1/messages.php",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({kind:"comment",name:v("name"),email:v("email"),'
         . 'subject:"Comment on: "+f.dataset.title,message:v("message"),meta:{page:f.dataset.url},website:v("website")})})'
-        . '.then(function(r){return r.json().catch(function(){return {}})}).then(function(d){if(d&&d.success){m.className="rc-msg ok";m.textContent="Thanks! Your comment reached us ("+d.reference+"). A copy is in your inbox.";f.elements.message.value=""}'
+        . '.then(function(r){return r.json().catch(function(){return {}})}).then(function(d){if(d&&d.success){m.className="rc-msg ok";m.innerHTML="<div class=\"rc-dt\"><span>You</span><i></i><span class=\"h\">Head of Community</span><i class=\"r\"></i><span>Your inbox</span></div>"+"Thanks! Your comment has reached our Head of Community ("+d.reference+"). You will get a reply soon by email; a copy is in your inbox.";f.elements.message.value=""}'
         . 'else{m.className="rc-msg bad";m.textContent=(d&&d.error)||"Your comment could not be sent. Please email comments@runonconsole.com."}})'
         . '.catch(function(){m.className="rc-msg bad";m.textContent="No connection. Please try again."}).then(function(){b.disabled=false})})})();</script>';
 }

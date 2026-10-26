@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Gamepad2, Sparkles, Check, PartyPopper, ArrowRight, Heart } from 'lucide-react';
 import { BouncyText } from './BouncyText';
+import { DeliveryTrack, DEPARTMENTS } from './DeliveryTrack';
 import confetti from 'canvas-confetti';
 
 /**
@@ -117,9 +118,15 @@ export const SubmissionSuccessCard = ({
         </h3>
 
         <p className="text-sm sm:text-base text-emerald-300 font-bold max-w-xl mx-auto flex items-center justify-center gap-2">
-          <span>Enjoy your life and have fun! We will reply to you soon.</span>
+          <span>Your {formType === 'comment' ? 'comment' : formType === 'suggestion' ? 'suggestion' : 'query'} has reached our {DEPARTMENTS[formType] || DEPARTMENTS.contact}. You will get a reply soon, by email.</span>
           <Heart className="w-4 h-4 text-emerald-400 fill-emerald-400 inline" />
         </p>
+        <p className="text-xs text-emerald-200/80">Aap ka paigham hamare {DEPARTMENTS[formType] || DEPARTMENTS.contact} tak pohanch gaya hai. Jald hi aap ko email par jawab milega.</p>
+      </div>
+
+      {/* Where the message is now: you -> head of the team -> your inbox */}
+      <div className="relative z-10">
+        <DeliveryTrack formType={formType} />
       </div>
 
       {/* Form-Specific Respective Punchline / Hook Box */}

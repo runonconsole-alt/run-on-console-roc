@@ -380,3 +380,25 @@ img[src*="amazon-adsystem.com"], img[src*="media-amazon.com"], img[src*="/images
 @media (prefers-reduced-motion: reduce) {
   .otp-card *, .otp-boxes { animation: none !important; transition: none !important; }
 }
+
+/* ---------------- After a form is sent (DeliveryTrack.jsx): you -> head of the team -> your inbox */
+.dt { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); align-items: start; max-width: 520px; margin: 0 auto; padding: 8px 0 4px; }
+.dt-line { position: absolute; left: 16.6%; right: 16.6%; top: 30px; height: 3px; border-radius: 99px; background: rgba(52, 211, 153, .2); overflow: hidden; }
+.dt-line::after { content: ''; position: absolute; inset: 0; transform-origin: left; transform: scaleX(0); background: linear-gradient(90deg, #10b981, #2dd4bf); animation: dtLine 3.2s ease-in-out .2s forwards; }
+.dt-st { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; opacity: .45; animation: dtOn .4s ease forwards; }
+.dt-st b { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 13px; color: #fff; }
+.dt-st small { font-size: 11px; color: #6ee7b7; }
+.dt-ic { width: 60px; height: 60px; border-radius: 999px; display: grid; place-items: center; background: #064e3b; border: 2px solid rgba(52, 211, 153, .5); color: #a7f3d0; }
+.dt-ic svg { width: 26px; height: 26px; }
+.dt-a { animation-delay: .1s; } .dt-b { animation-delay: 1.5s; } .dt-c { animation-delay: 3.1s; }
+.dt-b .dt-ic { animation: dtPulse 1.2s ease-out 1.5s 2; }
+.dt-env { position: absolute; top: 14px; width: 32px; height: 32px; margin-left: -16px; border-radius: 10px; display: grid; place-items: center; color: #022c22; background: linear-gradient(135deg, #34d399, #2dd4bf); box-shadow: 0 6px 18px rgba(16, 185, 129, .45); opacity: 0; }
+.dt-env svg { width: 18px; height: 18px; }
+.dt-go { animation: dtGo 1.4s cubic-bezier(.4, 0, .2, 1) .2s forwards; }
+.dt-back { animation: dtBack 1.4s cubic-bezier(.4, 0, .2, 1) 1.9s forwards; }
+@keyframes dtOn { to { opacity: 1; } }
+@keyframes dtLine { to { transform: scaleX(1); } }
+@keyframes dtGo { 0% { left: 16.6%; opacity: 0; transform: translateY(0) rotate(-8deg); } 15% { opacity: 1; } 50% { transform: translateY(-14px) rotate(6deg); } 90% { opacity: 1; } 100% { left: 50%; opacity: 0; transform: translateY(0) scale(.6); } }
+@keyframes dtBack { 0% { left: 50%; opacity: 0; transform: scale(.6); } 15% { opacity: 1; transform: scale(1); } 50% { transform: translateY(-14px); } 90% { opacity: 1; } 100% { left: 83.3%; opacity: 0; transform: translateY(0) scale(.6); } }
+@keyframes dtPulse { 0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, .6); } 100% { box-shadow: 0 0 0 16px rgba(52, 211, 153, 0); } }
+@media (prefers-reduced-motion: reduce) { .dt *, .dt *::after { animation: none !important; opacity: 1 !important; transform: none !important; } .dt-env { display: none; } }

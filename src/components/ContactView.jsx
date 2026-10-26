@@ -7,6 +7,16 @@ import { BouncyText } from './BouncyText';
 import { CyberMatrixHoloBackground } from './CyberMatrixHoloBackground';
 import { SubmissionSuccessCard } from './SubmissionSuccessCard';
 import { sendMessage } from '../utils/sendMessage';
+import { FAQSection } from './FAQSection';
+
+const CONTACT_FAQS = [
+  { q: 'How quickly does Run On Console reply?', a: 'We read every message and usually reply within 1-2 working days by email. You get a copy of your message with a reference number as soon as you send it, so you can quote it if you write again.' },
+  { q: 'Which email should I use?', a: 'Use contact@runonconsole.com for questions, corrections, review samples and partnerships, and support@runonconsole.com for help with your account, signing in or a problem on the site. Ideas for the site go to suggestions@runonconsole.com (or the suggestions page).' },
+  { q: 'Can you tell me if my PC can run a game?', a: 'Yes, and faster than by email: the free Can I run it checker at /compatibility/ compares your graphics card, processor and RAM with the official requirements of 2,000+ games, and ROC, our AI assistant (the chat button), can check it with you in English or Roman Urdu.' },
+  { q: 'Do you sell products or handle orders?', a: 'No. Run On Console recommends gear and links to Amazon, where you see the current price and stock and place the order. For an order, a delivery or a return, contact the store you bought from.' },
+  { q: 'I found a mistake on a page. What should I do?', a: 'Send it with the form above and choose Website Feedback / Bug Report, or write to support@runonconsole.com with the page address. We check every report and correct the page.' },
+];
+
 
 export const ContactView = () => {
   const [name, setName] = useState('');
@@ -63,7 +73,7 @@ export const ContactView = () => {
         <div className="lg:col-span-7">
           {submitted ? (
             <SubmissionSuccessCard 
-              formType="contact"
+              formType={/support|bug/i.test(subject) ? 'support' : 'contact'}
               userName={name}
               referenceId={refId}
               onReset={() => {
@@ -250,6 +260,8 @@ export const ContactView = () => {
         </div>
 
       </div>
+
+      <FAQSection faqs={CONTACT_FAQS} title="Contact FAQs" subtitle="Quick answers before you write to us." />
 
     </div>
   );
