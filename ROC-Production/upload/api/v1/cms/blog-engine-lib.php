@@ -1132,6 +1132,7 @@ function rocBlogKeywords(string $kw): array {
     foreach ($sugg as $sg) {
         $l = strtolower($sg);
         if (preg_match('/\b(reddit|near me|amazon|walmart|best buy|ebay|youtube|meme|wiki)\b/', $l)) continue;   // not keywords to write for
+        if (preg_match('/\b(rtings|ign|pcmag|pc ?gamer|tom\'?s ?hardware|techradar|cnet|gamespot|the verge|wirecutter|digital foundry|gamesradar|eurogamer|kotaku|notebookcheck|hardware ?unboxed|gamers ?nexus|linus|mkbhd)\b/', $l)) continue;   // another review site's name (Deploy 123: "audeze maxwell 2 review rtings")
         $hits = 0; foreach ($words as $w) if (strpos($l, rtrim($w, 's')) !== false) $hits++;
         if ($focus === $kw && $words && $hits >= max(1, (int)ceil(count($words) * 0.7))) { $focus = $l; continue; }
         if ($hits >= 1 && $l !== $focus) $more[] = $l;

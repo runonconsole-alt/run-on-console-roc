@@ -123,11 +123,13 @@ function rocGscInspect(PDO $pdo, string $url): ?array {
  *   - CMS > Indexing > Search queries.
  */
 const ROC_GSC_BLOCK = '/\b(porn\w*|sex\w*|xxx|nude\w*|nsfw|hentai|onlyfans|casino|betting|gambl\w*|slot machine|crack(ed)?|torrent\w*|pirat\w*|keygen|serial key|free download|apk|hack(s|ed|er)?|cheat engine|aimbot|wallhack|unblocked|loan|crypto\w*|bitcoin|dating|escort)\b/i';
+// Other review sites (Deploy 123): "audeze maxwell 2 rtings" readers want RTINGS, and ROC must not put their name in its titles or links.
+const ROC_GSC_SITES = '/\b(rtings|ign|pcmag|pc ?gamer|tom\'?s ?hardware|techradar|cnet|gamespot|the verge|wirecutter|digital foundry|gamesradar|eurogamer|kotaku|notebookcheck|hardware ?unboxed|gamers ?nexus|linus|mkbhd)\b/i';
 const ROC_GSC_NICHE = '/\b(gam(e|es|ing|er|ers|eplay)|pc|computer|desktop|laptops?|gpus?|cpus?|ram|ddr[345]|ssd|nvme|hdd|storage|monitors?|display|hz|1080p|1440p|4k|keyboards?|mouse|mice|headsets?|headphones?|speakers?|microphone|webcam|controllers?|gamepad|console|ps[45]|playstation|xbox|switch|nintendo|steam|handhelds?|graphics|processor|motherboard|psu|cooler|chairs?|rtx|gtx|radeon|ryzen|intel|nvidia|amd|geforce|fps|requirements?|specs?|settings|emulators?|retro|vr|streaming|esports?|can i run|bottleneck|overclock\w*)\b/i';
 
 function rocGscNicheOk(string $q, string $path = '', bool $strict = false): bool {
     $q = mb_strtolower(trim($q));
-    if (mb_strlen($q) < 3 || mb_strlen($q) > 90 || !preg_match('/[a-z]/', $q) || preg_match(ROC_GSC_BLOCK, $q)) return false;
+    if (mb_strlen($q) < 3 || mb_strlen($q) > 90 || !preg_match('/[a-z]/', $q) || preg_match(ROC_GSC_BLOCK, $q) || preg_match(ROC_GSC_SITES, $q)) return false;
     if (preg_match(ROC_GSC_NICHE, $q)) return true;
     // A game or product name alone ("elden ring", "aoc 24g2") is fine for its own page, not as a new blog topic.
     return !$strict && (bool)preg_match('#^/(can-i-run|products|compare)/#', $path);
