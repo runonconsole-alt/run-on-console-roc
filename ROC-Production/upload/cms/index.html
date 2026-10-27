@@ -37,6 +37,16 @@ button,input,select,textarea{font:inherit;color:inherit}
 .bname{font-weight:640;line-height:1.15}
 .bsub{font-size:10px;color:#34d399;text-transform:uppercase;letter-spacing:.09em;font-weight:640}
 .snav{padding:12px 9px 0}
+.cfind{padding:12px 12px 0;position:relative}
+.cfind input{width:100%;box-sizing:border-box;padding:9px 12px;border-radius:11px;border:1px solid var(--line);background:var(--bg,#fff);color:var(--ink);font-size:13px}
+.cfind input:focus{outline:2px solid var(--accent,#10b981);outline-offset:1px}
+.cfind-res{position:absolute;left:12px;right:12px;top:calc(100% + 4px);z-index:50;background:var(--card,#fff);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 30px rgba(2,44,34,.18);padding:5px;max-height:60vh;overflow:auto}
+.cfind-it{display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;text-align:left;border:0;background:none;padding:7px 9px;border-radius:9px;cursor:pointer;color:var(--ink)}
+.cfind-it b{font-size:13px;font-weight:650;line-height:1.3}.cfind-it span{font-size:11px;color:var(--ink-3)}
+.cfind-it.on,.cfind-it:hover{background:rgba(16,185,129,.12)}
+.cfind-none{padding:10px;font-size:12.5px;color:var(--ink-3)}
+@keyframes cfindFlash{0%,100%{box-shadow:none}30%{box-shadow:0 0 0 3px rgba(16,185,129,.55)}}
+.cfind-flash{animation:cfindFlash 1.8s ease}
 .slabel{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:0 8px 6px;font-weight:640}
 .sitem{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;background:none;border-radius:9px;color:var(--ink-2);cursor:pointer;text-align:left;font-size:13.5px}
 .sitem:hover{background:var(--panel-2);color:var(--ink)}
@@ -1053,7 +1063,37 @@ function toast(msg, kind){
   box.appendChild(t); setTimeout(function(){t.remove();}, kind==='bad'?7000:3200);
 }
 
+/*
+ * Speed (Deploy 121): a page of the CMS that was opened before shows at once from memory, and its data is
+ * fetched again in the background; when something changed, the page is drawn again (not while editing,
+ * typing or in a dialog). Any save (POST) empties the memory. Never kept: the editors (?id= / ?slug=),
+ * history, sign-in and the live feeds.
+ */
+var API_MEM={};
+var API_FRESH=/^(auth|activity|form-activity|cms-labels|messages|cache-clear)\.php|[?&](id|slug|history)=/;
 async function api(endpoint, body, method){
+  var how=method || (body ? 'POST' : 'GET');
+  if(how!=='GET'){ API_MEM={}; return apiCall(endpoint, body, method); }
+  if(API_FRESH.test(endpoint)) return apiCall(endpoint);
+  var c=API_MEM[endpoint];
+  if(c){
+    if(Date.now()-c.at>8000 && !c.busy){
+      c.busy=true; var view=S.view;
+      apiCall(endpoint).then(function(d){
+        var j=JSON.stringify(d); c.busy=false; c.at=Date.now();
+        if(j===c.json) return;
+        c.json=j;
+        var ae=document.activeElement;
+        if(S.view===view && !S.editing && !S.dirty && !document.querySelector('.veil') && !(ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName))) renderView();
+      }).catch(function(){ c.busy=false; });
+    }
+    return JSON.parse(c.json);          // a copy: a page may change the data it gets
+  }
+  var d=await apiCall(endpoint);
+  API_MEM[endpoint]={json:JSON.stringify(d), at:Date.now()};
+  return d;
+}
+async function apiCall(endpoint, body, method){
   var opts = { method: method || (body ? 'POST' : 'GET'), headers: {} };
   if (body) { opts.headers['Content-Type']='application/json'; opts.body=JSON.stringify(body); }
   if (S.csrf) opts.headers['X-CMS-CSRF-Token']=S.csrf;
@@ -1562,6 +1602,7 @@ function renderShell(){
   '<div class="shell"><aside class="side">'+
     '<div class="side-top"><div class="brand"><div class="mark"><svg viewBox="0 0 100 100" width="24" height="24" fill="none" aria-hidden="true"><path d="M12 28 C8 28 4 36 2 54 C0 72 8 88 22 88 C30 88 36 78 44 68 L56 68 C64 78 70 88 78 88 C92 88 100 72 98 54 C96 36 92 28 88 28 C76 28 68 36 50 36 C32 36 24 28 12 28 Z" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 44 V64 M16 54 H36" stroke="#fff" stroke-width="7" stroke-linecap="round"/><circle cx="74" cy="48" r="4.5" fill="#fff"/><circle cx="84" cy="58" r="4.5" fill="#fff"/><circle cx="64" cy="58" r="4.5" fill="#fff"/><circle cx="74" cy="68" r="4.5" fill="#fff"/></svg></div>'+
     '<div><div class="bname">RUN ON <span style="color:#6ee7b7">CONSOLE</span></div><div class="bsub">Content management</div></div></div></div>'+
+    '<div class="cfind"><input type="search" id="cms-find" placeholder="Search the CMS…  (Ctrl+K)" autocomplete="off" aria-label="Search the CMS"><div class="cfind-res" id="cms-find-res" hidden></div></div>'+
     '<div class="snav"><div class="slabel">Workspace</div>'+item('dashboard','Dashboard','◱')+(admin?item('analytics','Analytics','📈'):'')+item('releases','Live version','🚀')+
       (can('activity','view')?item('activity','Live activity','⚡',S.actUnseen?S.actUnseen:undefined):'')+
       (admin?item('messages','Messages','✉',S.msgCounts&&S.msgCounts['new']?S.msgCounts['new']:undefined):'')+'</div>'+
@@ -1587,6 +1628,7 @@ function renderShell(){
     '</div></aside><main class="main" id="main"></main></div>';
 
   var newSide = app.querySelector('.side'); if (newSide) newSide.scrollTop = sideTop;
+  cmsFindBind();
   app.querySelectorAll('[data-go]').forEach(function(b){
     b.addEventListener('click',function(){ go(b.dataset.go); });
     if(S.user&&S.user.role==='administrator') b.addEventListener('dblclick',function(e){
@@ -1617,10 +1659,119 @@ function renderShell(){
   $('#out').addEventListener('click', async function(){
     if(S.dirty && !confirm('You have unsaved changes. Sign out anyway?'))return;
     try{ await api('auth.php',{action:'logout'}); }catch(e){}
+    try{ Object.keys(localStorage).forEach(function(k){ if(k.indexOf('roc_cms_snap_')===0) localStorage.removeItem(k); }); }catch(e){}
     location.reload();
   });
   renderView();
 }
+
+/* ------------------------------------------------------------ CMS search */
+/*
+ * Deploy 121: the search box above Workspace finds every page of the sidebar, the parts inside a page
+ * (Settings > Redirects, Updates writer > News, Indexing > Search queries ...), posts and products, and
+ * opens them. Ctrl+K (or /) jumps to the box; arrows and Enter choose.
+ * Parts: v = sidebar page, pre = what to choose on that page before it opens, find = the heading to scroll
+ * to, run = something that is not a page (a dialog), admin = only for administrators.
+ */
+var CMS_PARTS=[
+  {v:'settings',label:'Settings › Redirects',words:'redirect redirects 301 old address url move',pre:function(){ S.setTab='redirects'; },admin:1},
+  {v:'settings',label:'Settings › Noindex',words:'noindex no index hide google search pages',pre:function(){ S.setTab='noindex'; },admin:1},
+  {v:'settings',label:'Settings › robots.txt',words:'robots txt crawl block bots',pre:function(){ S.setTab='robots'; },admin:1},
+  {v:'settings',label:'Settings › llms.txt',words:'llms ai chatgpt',pre:function(){ S.setTab='llms'; },admin:1},
+  {v:'settings',label:'Settings › Tracking & verification',words:'tracking analytics google tag verification search console bing code head',pre:function(){ S.setTab='tracking'; },admin:1},
+  {v:'blogagent',label:'Updates writer › Blogs (automatic posts, plan, times)',words:'blog writer automatic posts schedule days plan topics gemini groq key cloudflare times review',pre:function(){ S.baMode='blog'; },admin:1},
+  {v:'blogagent',label:'Updates writer › News',words:'news writer stories sources alerts',pre:function(){ S.baMode='news'; },admin:1},
+  {v:'blogagent',label:'Updates writer › Guides',words:'guides guide writer how to',pre:function(){ S.baMode='guides'; },admin:1},
+  {v:'indexing',label:'Indexing › Search queries',words:'search console queries keywords google searches opportunity anchor',pre:function(){ IX.filter='queries'; },admin:1},
+  {v:'indexing',label:'Indexing › Not indexed',words:'not indexed google pages',pre:function(){ IX.filter='not'; },admin:1},
+  {v:'indexing',label:'Indexing › Newly indexed',words:'newly indexed email daily',pre:function(){ IX.filter='new'; },admin:1},
+  {v:'dashboard',label:'Dashboard › Clear cache',words:'cache clear purge cloudflare',find:'cache',admin:1},
+  {v:'social',label:'Social & Amazon tag › Amazon affiliate tag',words:'amazon tag affiliate associates commission',find:'Amazon affiliate tag'},
+  {v:'social',label:'Social & Amazon tag › Daraz',words:'daraz pakistan',find:'Daraz'},
+  {v:'social',label:'Social & Amazon tag › Your profiles',words:'facebook instagram youtube twitter x linkedin tiktok profiles footer links',find:'Your profiles'},
+  {v:'analytics',label:'Analytics › What people search',words:'analytics search words',find:'What people search',admin:1},
+  {v:'analytics',label:'Analytics › Top pages',words:'top pages visitors views',find:'Top pages',admin:1},
+  {v:'analytics',label:'Analytics › Countries',words:'countries country visitors',find:'Countries',admin:1},
+  {v:'agent',label:'ROC assistant › Settings',words:'chat chatbot agents vanessa jimmy alley assistant',find:'Settings',admin:1},
+  {v:'agent',label:'ROC assistant › Saved chats',words:'chats conversations questions',find:'Saved chats',admin:1},
+  {v:'siteinfo',label:'Website info › Connected tools',words:'tools connected integrations history built',find:'Connected tools',admin:1},
+  {v:'sitemap',label:'Sitemap › Rules',words:'sitemap rules exclude xml',find:'Rules',admin:1},
+  {v:'socialkits',label:'Social posts › Reddit & Quora helper',words:'reddit quora answers social kit',find:'Reddit'},
+  {v:'activity',label:'Live activity › Logins and forms',words:'login logins signup sign up code form forms contact suggestion comment who activity',admin:1},
+  {v:'messages',label:'Messages',words:'email emails inbox contact support suggestions comments reply write for us',admin:1},
+  {v:'siteusers',label:'Site users › Weekly email',words:'weekly email newsletter digest subscribers alerts',run:function(){ renderDigest(); },admin:1},
+  {label:'Backups',words:'backup backups database restore',run:function(){ renderBackups(); },admin:1},
+  {label:'Change password',words:'password change',run:function(){ renderChangePassword(false); }},
+  {label:'2-step verification',words:'2fa two step verification security code authenticator',run:function(){ renderTwofa(); }}
+];
+function cmsFindList(q){
+  var words=q.toLowerCase().split(/\s+/).filter(Boolean);
+  if(!words.length) return [];
+  var admin=S.user&&(S.user.is_admin||S.user.role==='administrator');
+  var hit=function(text){ text=text.toLowerCase(); return words.every(function(w){ return text.indexOf(w)!==-1; }); };
+  var out=[];
+  // Sidebar pages (with the names an administrator gave them).
+  document.querySelectorAll('.side .sitem[data-go]').forEach(function(b){
+    var t=((b.querySelector('span:nth-child(2)')||{}).textContent||'').trim();
+    if(t && hit(t+' '+b.dataset.go.replace(/-/g,' '))) out.push({kind:'Page',label:t,go:b.dataset.go});
+  });
+  CMS_PARTS.forEach(function(p){
+    if(p.admin && !admin) return;
+    if(p.v && !document.querySelector('.side .sitem[data-go="'+p.v+'"]')) return;   // a page this user cannot open
+    if(hit(p.label+' '+p.words)) out.push({kind:'Inside a page',label:p.label,part:p});
+  });
+  (S.blogs||[]).forEach(function(b){ if(out.length<60 && hit((b.title||'')+' '+(b.slug||''))) out.push({kind:b.category==='News'?'News':(/^guides?/i.test(b.category||'')?'Guide':'Post'),label:b.title||b.slug,blog:b.id}); });
+  if(S.prodNames) Object.keys(S.prodNames).forEach(function(slug){ var p=S.prodNames[slug];
+    if(out.length<80 && hit((p.title||'')+' '+slug)) out.push({kind:'Product',label:p.title||slug,product:p.id}); });
+  return out.slice(0,12);
+}
+function cmsFindOpen(r){
+  var box=$('#cms-find'); if(box){ box.value=''; box.blur(); }
+  var res=$('#cms-find-res'); if(res) res.hidden=true;
+  if(r.go) return go(r.go);
+  if(r.blog){ if(S.dirty && !confirm('You have unsaved changes. Leave without saving?')) return; S.dirty=false; S.view='blogs'; return openBlog(r.blog); }
+  if(r.product){ if(S.dirty && !confirm('You have unsaved changes. Leave without saving?')) return; S.dirty=false; go('products'); return openProductEditor(r.product); }
+  var p=r.part;
+  if(!p.v){ return p.run(); }
+  if(p.pre) p.pre();
+  go(p.v);
+  if(p.run) p.run();
+  if(p.find){
+    // The heading appears when the page has its data: look for it for up to 5 seconds, then scroll to it.
+    var t0=Date.now(), want=p.find.toLowerCase();
+    (function look(){
+      var el=[].slice.call(document.querySelectorAll('#main h3, #main .chead, #main .card .l')).filter(function(h){ return (h.textContent||'').toLowerCase().indexOf(want)!==-1; })[0];
+      if(el){ var card=el.closest('.card')||el; card.scrollIntoView({behavior:'smooth',block:'start'}); card.classList.add('cfind-flash'); setTimeout(function(){ card.classList.remove('cfind-flash'); },1800); return; }
+      if(Date.now()-t0<5000 && S.view===p.v) setTimeout(look,150);
+    })();
+  }
+}
+function cmsFindBind(){
+  var box=$('#cms-find'), res=$('#cms-find-res'); if(!box||!res) return;
+  var list=[], at=0;
+  var paint=function(){
+    list=cmsFindList(box.value);
+    if(!box.value.trim()){ res.hidden=true; return; }
+    res.hidden=false;
+    res.innerHTML=list.length?list.map(function(r,i){ return '<button type="button" class="cfind-it'+(i===at?' on':'')+'" data-i="'+i+'"><b>'+esc(r.label)+'</b><span>'+esc(r.kind)+'</span></button>'; }).join('')
+      :'<div class="cfind-none">Nothing found for “'+esc(box.value.trim())+'”.</div>';
+    res.querySelectorAll('[data-i]').forEach(function(b){ b.addEventListener('mousedown',function(e){ e.preventDefault(); cmsFindOpen(list[+b.dataset.i]); }); });
+  };
+  box.addEventListener('input',function(){ at=0; paint(); });
+  box.addEventListener('focus',function(){ if(box.value.trim()) paint(); });
+  box.addEventListener('blur',function(){ setTimeout(function(){ res.hidden=true; },150); });
+  box.addEventListener('keydown',function(e){
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); if(!list.length) return; at=(at+(e.key==='ArrowDown'?1:list.length-1))%list.length; paint(); }
+    else if(e.key==='Enter'){ e.preventDefault(); if(list[at]) cmsFindOpen(list[at]); }
+    else if(e.key==='Escape'){ box.value=''; res.hidden=true; box.blur(); }
+  });
+}
+document.addEventListener('keydown',function(e){
+  var ae=document.activeElement, typing=ae && (/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) || ae.isContentEditable);
+  if(((e.ctrlKey||e.metaKey) && (e.key==='k'||e.key==='K')) || (e.key==='/' && !typing)){
+    var box=$('#cms-find'); if(box){ e.preventDefault(); box.focus(); box.select(); }
+  }
+});
 
 function go(v){
   if(S.dirty && !confirm('You have unsaved changes. Leave without saving?'))return;
@@ -6078,7 +6229,17 @@ function closeModal(){ var v=$('.veil'); if(v) v.remove(); document.removeEventL
 /* ----------------------------------------------------------------- boot */
 
 async function load(){
-  if(!S.navLabels){ try{ S.navLabels=(await api('cms-labels.php')).labels||{}; }catch(e){ S.navLabels={}; } }   // sidebar names (Deploy 91)
+  // Speed (Deploy 121): the CMS opens at once with what this browser saw last time (kept per user),
+  // then the fresh lists replace it a moment later. The sidebar names load at the same time as the lists.
+  var snapKey='roc_cms_snap_'+(S.user.id||S.user.username||''), snap=null, early=false;
+  try{ snap=JSON.parse(localStorage.getItem(snapKey)||'null'); }catch(e){ snap=null; }
+  if(location.hash==='#messages') S.view='messages';
+  if(location.hash==='#indexing') S.view='indexing';
+  if(snap && snap.blogs && !S.blogs.length){
+    S.blogs=snap.blogs; S.pages=snap.pages||[]; S.media=prepMedia(snap.media||[]); S.navLabels=S.navLabels||snap.labels||{};
+    renderShell(); startActivityPolling(); early=true;
+  }
+  var labelsP=S.navLabels&&!early?Promise.resolve(null):api('cms-labels.php').then(function(r){ return r.labels||{}; }).catch(function(){ return null; });   // sidebar names (Deploy 91)
   try{
     var [b,md] = await Promise.all([
       can('blogs','view') ? api('blogs.php').catch(function(){ return {blogs:[]}; }) : {blogs:[]},
@@ -6086,11 +6247,13 @@ async function load(){
       can('pages','view') ? api('pages.php').catch(function(){ return {pages:[]}; }) : {pages:[]}
     ]).then(function(r){ S.pages=(r[2]&&r[2].pages)||[]; return r; });
     S.blogs=b.blogs||[]; S.media=prepMedia(md.media);
-    if(location.hash==='#messages') S.view='messages';
-    if(location.hash==='#indexing') S.view='indexing';
+    var lb=await labelsP; if(lb) S.navLabels=lb; else if(!S.navLabels) S.navLabels={};
+    try{ localStorage.setItem(snapKey, JSON.stringify({blogs:S.blogs, pages:S.pages, media:md.media||[], labels:S.navLabels, at:Date.now()})); }catch(e){}
     if(S.user.role==='administrator') loadMessages().then(function(){ if(!S.editing && !document.querySelector('.veil') && S.view!=='messages') renderShell(); });
     loadProdNames().then(function(){ if(S.view==='dashboard'&&!S.editing) renderShell(); });
-    renderShell();
+    // Drawn again with the fresh lists, unless the user is already editing or typing.
+    var ae=document.activeElement;
+    if(!early || (!S.editing && !S.dirty && !document.querySelector('.veil') && !(ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)))) renderShell();
     startActivityPolling();
     // How many pages the website already has (for the Pages count in the sidebar).
     if(can('pages','view')) api('site-pages.php').then(function(d){ S.sitePagesN=(d.pages||[]).length;

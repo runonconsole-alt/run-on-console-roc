@@ -1,0 +1,22 @@
+{
+ "deploy": 121,
+ "date": "2026-10-28",
+ "title": "CMS search box and a faster CMS",
+ "changes": [
+  "A search box above Workspace (Ctrl+K) finds any CMS page, the parts inside pages (Settings > Redirects or Noindex, Updates writer > News, Indexing > Search queries, Clear cache, Amazon tag ...), posts and products, and opens them",
+  "The CMS opens at once with what your browser saw last time and fills in the fresh lists a moment later; a page you opened before shows at once and updates itself in the background"
+ ],
+ "checks": [
+  {
+   "label": "CMS search",
+   "type": "contains",
+   "path": "cms/index.html",
+   "text": "cmsFindBind"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/120",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it.",
+  "Reload the CMS with Ctrl+F5."
+ ]
+}
