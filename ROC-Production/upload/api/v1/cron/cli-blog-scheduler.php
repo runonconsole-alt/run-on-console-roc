@@ -153,6 +153,13 @@ try {
 } catch (\Throwable $e) { echo date('c') . ' indexing error: ' . $e->getMessage() . "
 "; }
 
+// 12:30 Pakistan time on a day a blog post or guide went live: the sitemap goes to Google again (Deploy 126).
+try {
+    require_once $ROOT . '/api/v1/cms/gsc-lib.php';
+    $sm = rocGscSitemapTick($pdo);
+    if ($sm !== null) echo date('c') . ' ' . $sm . "\n";
+} catch (\Throwable $e) { echo date('c') . ' sitemap submit error: ' . $e->getMessage() . "\n"; }
+
 // Logins for CMS > Live activity (Deploy 120): copied before a logout deletes the session row.
 try {
     require_once $ROOT . '/api/v1/cms/form-activity-lib.php';
@@ -192,7 +199,7 @@ try {
     if ($dg !== null) echo date('c') . ' ' . $dg . "\n";
 } catch (\Throwable $e) { echo date('c') . ' weekly email error: ' . $e->getMessage() . "\n"; }
 
-// Guides (api/v1/cms/guide-writer-lib.php): 2 a day until the end date, at least 2 hours apart.
+// Guides (api/v1/cms/guide-writer-lib.php): from 2 November one on Tuesday, Friday and Saturday for 12:00 (Deploy 126).
 try {
     require_once $ROOT . '/api/v1/cms/guide-writer-lib.php';
     $gw = rocGuideTick($pdo, $ROOT);

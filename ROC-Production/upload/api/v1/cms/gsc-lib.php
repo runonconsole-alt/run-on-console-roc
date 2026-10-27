@@ -24,11 +24,12 @@ function rocGscKey(): ?array {
     return is_array($k) && !empty($k['client_email']) && !empty($k['private_key']) ? $k : null;
 }
 
-function rocGscHttp(string $url, ?string $body, array $headers = [], int $timeout = 25): array {
+function rocGscHttp(string $url, ?string $body, array $headers = [], int $timeout = 25, string $method = ''): array {
     $c = curl_init($url);
     curl_setopt_array($c, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => $timeout, CURLOPT_CONNECTTIMEOUT => 8, CURLOPT_FOLLOWLOCATION => true, CURLOPT_MAXREDIRS => 3,
                            CURLOPT_HTTPHEADER => $headers, CURLOPT_USERAGENT => 'RunOnConsole-Indexing/1.0']);
     if ($body !== null) { curl_setopt($c, CURLOPT_POST, true); curl_setopt($c, CURLOPT_POSTFIELDS, $body); }
+    if ($method !== '') curl_setopt($c, CURLOPT_CUSTOMREQUEST, $method);
     $out = (string)curl_exec($c);
     $code = (int)curl_getinfo($c, CURLINFO_HTTP_CODE);
     curl_close($c);
@@ -37,15 +38,16 @@ function rocGscHttp(string $url, ?string $body, array $headers = [], int $timeou
 
 function rocGscB64(string $s): string { return rtrim(strtr(base64_encode($s), '+/', '-_'), '='); }
 
-/** An access token (one hour), kept in cms_settings gsc_token. */
-function rocGscToken(PDO $pdo): ?string {
-    $t = rocBlogGet($pdo, 'gsc_token', []);
+/** An access token (one hour), kept in cms_settings gsc_token (gsc_token_rw for $write: the sitemap submit). */
+function rocGscToken(PDO $pdo, bool $write = false): ?string {
+    $tkey = $write ? 'gsc_token_rw' : 'gsc_token';
+    $t = rocBlogGet($pdo, $tkey, []);
     if (is_array($t) && !empty($t['token']) && (int)($t['exp'] ?? 0) > time() + 120) return (string)$t['token'];
     $k = rocGscKey();
     if (!$k || !function_exists('openssl_sign')) return null;
     $now = time();
     $jwt = rocGscB64(json_encode(['alg' => 'RS256', 'typ' => 'JWT'])) . '.' . rocGscB64(json_encode([
-        'iss' => $k['client_email'], 'scope' => 'https://www.googleapis.com/auth/webmasters.readonly',
+        'iss' => $k['client_email'], 'scope' => 'https://www.googleapis.com/auth/webmasters' . ($write ? '' : '.readonly'),
         'aud' => 'https://oauth2.googleapis.com/token', 'iat' => $now, 'exp' => $now + 3600]));
     $sig = '';
     if (!openssl_sign($jwt, $sig, (string)$k['private_key'], OPENSSL_ALGO_SHA256)) return null;
@@ -53,7 +55,7 @@ function rocGscToken(PDO $pdo): ?string {
         'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer', 'assertion' => $jwt . '.' . rocGscB64($sig)]), ['Content-Type: application/x-www-form-urlencoded']);
     $d = json_decode($out, true);
     if ($code !== 200 || empty($d['access_token'])) { rocBlogSet($pdo, 'gsc_error', ['t' => gmdate('c'), 'e' => 'token ' . $code . ': ' . mb_substr($out, 0, 200)]); return null; }
-    rocBlogSet($pdo, 'gsc_token', ['token' => $d['access_token'], 'exp' => $now + (int)($d['expires_in'] ?? 3600)]);
+    rocBlogSet($pdo, $tkey, ['token' => $d['access_token'], 'exp' => $now + (int)($d['expires_in'] ?? 3600)]);
     return (string)$d['access_token'];
 }
 
@@ -160,15 +162,83 @@ function rocGscQueriesSync(PDO $pdo): ?string {
     usort($rows, function ($a, $b) { return [$b['i'], $b['c']] <=> [$a['i'], $a['c']]; });
     $rows = array_slice($rows, 0, 2500);
     rocBlogSet($pdo, 'gsc_queries', ['day' => $day, 'from' => $from, 'to' => $to, 'skipped' => $skipped, 'rows' => $rows]);
-    $added = rocGscTopics($pdo, $rows);
-    return 'Search queries: ' . count($rows) . ' kept (' . $skipped . ' off-topic left out)' . ($added ? ', ' . $added . ' new blog topic' . ($added === 1 ? '' : 's') : '');
+    $mem = rocGscRemember($pdo, $rows, $day);
+    $added = rocGscTopics($pdo, rocGscQueryRows($pdo, true));
+    return 'Search queries: ' . count($rows) . ' kept (' . $skipped . ' off-topic left out), ' . $mem . ' remembered'
+        . ($added ? ', ' . $added . ' new blog topic' . ($added === 1 ? '' : 's') : '');
 }
 
-function rocGscQueryRows(PDO $pdo): array {
+/**
+ * Owner, 2026-10-27 (Deploy 126): the searches are remembered, not only the last 4 weeks. gsc_query_mem keeps every
+ * search (with its page) seen in the last 12 months: the most impressions and clicks it had in any 4-week window,
+ * its latest position, and the first and last day it was seen. The link words, the blog topics and the writers'
+ * briefs use the memory; CMS > Indexing > Search queries still shows the last 4 weeks.
+ */
+const ROC_GSC_MEM_MAX = 4000;
+function rocGscRemember(PDO $pdo, array $rows, string $day): int {
+    $m = rocBlogGet($pdo, 'gsc_query_mem', []);
+    $m = is_array($m) ? $m : [];
+    foreach ($rows as $r) {
+        $k = $r['q'] . '|' . $r['p'];
+        $o = $m[$k] ?? ['q' => $r['q'], 'p' => $r['p'], 'i' => 0, 'c' => 0, 'pos' => 0, 'first' => $day];
+        $m[$k] = ['q' => $r['q'], 'p' => $r['p'], 'i' => max((int)$o['i'], (int)$r['i']), 'c' => max((int)$o['c'], (int)$r['c']),
+                  'pos' => $r['pos'], 'first' => $o['first'] ?? $day, 'last' => $day];
+    }
+    $old = gmdate('Y-m-d', time() - 365 * 86400);
+    $m = array_filter($m, function ($x) use ($old) { return is_array($x) && ($x['last'] ?? '') >= $old; });
+    uasort($m, function ($a, $b) { return [$b['last'], $b['i']] <=> [$a['last'], $a['i']]; });
+    $m = array_slice($m, 0, ROC_GSC_MEM_MAX, true);
+    rocBlogSet($pdo, 'gsc_query_mem', $m);
+    return count($m);
+}
+
+/** The searches to use: the last 4 weeks first, then the remembered ones not in it (Deploy 126). */
+function rocGscQueryRows(PDO $pdo, bool $fresh = false): array {
     static $rows = null;
-    if ($rows !== null) return $rows;
+    if ($rows !== null && !$fresh) return $rows;
     $d = rocBlogGet($pdo, 'gsc_queries', []);
-    return $rows = (is_array($d) && is_array($d['rows'] ?? null)) ? $d['rows'] : [];
+    $rows = (is_array($d) && is_array($d['rows'] ?? null)) ? $d['rows'] : [];
+    $seen = [];
+    foreach ($rows as $r) $seen[$r['q'] . '|' . $r['p']] = 1;
+    $m = rocBlogGet($pdo, 'gsc_query_mem', []);
+    $more = [];
+    foreach ((is_array($m) ? $m : []) as $k => $r) if (is_array($r) && !isset($seen[$k]) && isset($r['q'], $r['p'])) $more[] = ['q' => $r['q'], 'p' => $r['p'], 'c' => (int)$r['c'], 'i' => (int)$r['i'], 'pos' => $r['pos']];
+    usort($more, function ($a, $b) { return [$b['i'], $b['c']] <=> [$a['i'], $a['c']]; });
+    return $rows = array_merge($rows, $more);
+}
+
+/**
+ * Owner, 2026-10-27 (Deploy 126): at 12:30 Pakistan time on a day a blog post or a guide went live (they go live
+ * at 12:00), the sitemap is sent to Google again with the Search Console API, with the PC on or off. The service
+ * account needs "Full" permission in Search Console (Settings > Users and permissions); a "Restricted" user can
+ * only read and Google answers 403. The result is kept in gsc_sitemap and shown in CMS > Indexing.
+ */
+const ROC_GSC_SITEMAP = 'https://runonconsole.com/sitemap.xml';
+const ROC_GSC_SITEMAP_AT = '12:30';
+function rocGscSitemapTick(PDO $pdo, bool $force = false): ?string {
+    if (!rocGscKey()) return null;
+    $tz = new DateTimeZone('Asia/Karachi');
+    $now = new DateTime('now', $tz);
+    $day = $now->format('Y-m-d');
+    $last = rocBlogGet($pdo, 'gsc_sitemap', []);
+    if (!$force) {
+        if ($now->format('H:i') < ROC_GSC_SITEMAP_AT) return null;
+        if (is_array($last) && ($last['day'] ?? '') === $day) return null;
+        $from = gmdate('Y-m-d H:i:s', (new DateTime($day . ' 00:00', $tz))->getTimestamp());
+        $st = $pdo->prepare("SELECT COUNT(*) FROM blogs WHERE status = 'published' AND (category IS NULL OR category <> 'News') AND published_at >= ? AND published_at <= ?");
+        $st->execute([$from, gmdate('Y-m-d H:i:s')]);
+        if (!(int)$st->fetchColumn()) return null;                 // no blog post or guide today
+    }
+    $rec = ['day' => $day, 'at' => gmdate('c'), 'ok' => false, 'error' => ''];
+    rocBlogSet($pdo, 'gsc_sitemap', $rec);                         // one try a day
+    $tok = rocGscToken($pdo, true);
+    if (!$tok) { $rec['error'] = 'no access token'; rocBlogSet($pdo, 'gsc_sitemap', $rec); return 'Sitemap submit: no access token'; }
+    [$code, $out] = rocGscHttp('https://www.googleapis.com/webmasters/v3/sites/' . rawurlencode(ROC_GSC_SITE) . '/sitemaps/' . rawurlencode(ROC_GSC_SITEMAP),
+        '', ['Authorization: Bearer ' . $tok, 'Content-Length: 0'], 30, 'PUT');
+    $rec['ok'] = $code >= 200 && $code < 300;
+    if (!$rec['ok']) $rec['error'] = $code . ': ' . mb_substr(trim(strip_tags($out)), 0, 200) . ($code === 403 ? ' (give the service account Full permission in Search Console)' : '');
+    rocBlogSet($pdo, 'gsc_sitemap', $rec);
+    return 'Sitemap submit: ' . ($rec['ok'] ? 'sent to Google' : 'failed ' . $rec['error']);
 }
 
 /** Significant words of a phrase (for matching queries with topics and titles). */

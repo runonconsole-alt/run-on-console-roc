@@ -697,6 +697,8 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
             . '<h2 class="font-display font-extrabold text-base text-emerald-950 mb-1">' . ($news ? 'The story in short' : 'Article Overview &amp; Key Takeaways') . '</h2>'
             . '<p class="text-xs sm:text-sm text-emerald-900 leading-relaxed">' . rocH($excerpt) . '</p></div>';
     }
+    // Products Google has not found yet, near the top of the post (Deploy 126, link-boost-lib.php).
+    if ($pdo) { require_once __DIR__ . '/api/v1/link-boost-lib.php'; $m .= rocLinkBoostTop($pdo, (string)parse_url($url, PHP_URL_PATH), $p, $body); }
     if ($news) $m .= rocAdUnit('article');
     $m .= '<div class="roc-article">' . $body . '</div>';
     if ($pdo) $m .= rocTopicChips($pdo, $p);

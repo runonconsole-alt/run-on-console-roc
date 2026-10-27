@@ -82,21 +82,88 @@ function rocLinkBoostBox(PDO $pdo, string $seed, string $title = 'Gaming gear on
     $items = rocLinkBoostPick($pdo, $seed);
     if (!$items) return '';
     $e = function ($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); };
-    $h = '<style>.lb-box{margin-top:2rem;border:1px solid #e2e8f0;border-radius:1.25rem;padding:1.1rem 1.25rem;background:#fff}'
+    $h = rocLinkBoostCss() . '<section class="lb-box"><h2>' . $e($title) . '</h2><div class="lb-grid">';
+    foreach ($items as $p) $h .= rocLinkBoostCard($p);
+    return $h . '</div><a class="lb-more" href="/products/">All gaming gear &rarr;</a> &nbsp; <a class="lb-more" href="/compare/">All comparisons &rarr;</a></section>';
+}
+
+/** The style of the link boxes, once a page. */
+function rocLinkBoostCss(): string {
+    static $done = false;
+    if ($done) return '';
+    $done = true;
+    return '<style>.lb-box{margin-top:2rem;border:1px solid #e2e8f0;border-radius:1.25rem;padding:1.1rem 1.25rem;background:#fff}'
        . '.lb-box h2{font:800 1.15rem Outfit,Inter,sans-serif;color:#0f172a;margin:0 0 .8rem}.lb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.6rem}'
        . '.lb-grid a{display:flex;gap:.7rem;align-items:center;border:1px solid #e2e8f0;border-radius:.9rem;padding:.55rem;text-decoration:none;color:#0f172a;transition:border-color .2s,background .2s;min-height:66px}'
        . '.lb-grid a:hover{border-color:#10b981;background:#f0fdf4}.lb-grid img{width:52px;height:52px;object-fit:contain;background:#fff;border-radius:.6rem;flex:none}'
        . '.lb-grid i{width:52px;height:52px;border-radius:.6rem;flex:none;display:grid;place-items:center;background:#ecfdf5;color:#047857;font:900 .8rem Outfit,sans-serif;font-style:normal}'
        . '.lb-grid b{font:700 .85rem/1.3 Inter,sans-serif;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.lb-more{display:inline-block;margin-top:.7rem;font-weight:800;font-size:.85rem;color:#047857}'
        . 'html.roc-dark .lb-box{background:#0f172a;border-color:#1e293b}html.roc-dark .lb-box h2,html.roc-dark .lb-grid a{color:#f8fafc}html.roc-dark .lb-grid a{border-color:#1e293b}'
-       . 'html.roc-dark .lb-grid a:hover{background:rgba(16,185,129,.1);border-color:#10b981}html.roc-dark .lb-grid i{background:rgba(16,185,129,.15);color:#6ee7b7}html.roc-dark .lb-more{color:#6ee7b7}</style>'
-       . '<section class="lb-box"><h2>' . $e($title) . '</h2><div class="lb-grid">';
-    foreach ($items as $p) {
-        $pic = $p[2] !== '' ? '<img src="' . $e($p[2]) . '" alt="' . $e($p[3] !== '' ? $p[3] : $p[1]) . '" width="52" height="52" loading="lazy">'
-                            : '<i aria-hidden="true">' . (strpos($p[0], '/compare/') === 0 ? 'VS' : 'TOP') . '</i>';
-        $h .= '<a href="' . $e($p[0]) . '">' . $pic . '<b>' . $e($p[1]) . '</b></a>';
+       . 'html.roc-dark .lb-grid a:hover{background:rgba(16,185,129,.1);border-color:#10b981}html.roc-dark .lb-grid i{background:rgba(16,185,129,.15);color:#6ee7b7}html.roc-dark .lb-more{color:#6ee7b7}'
+       . '.lb-top{margin:0;padding:.9rem 1rem}.lb-top h2{font-size:.95rem;margin-bottom:.6rem}.lb-top .lb-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}</style>';
+}
+
+/** One card: [path, title, image, alt]. */
+function rocLinkBoostCard(array $p): string {
+    $e = function ($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); };
+    $pic = $p[2] !== '' ? '<img src="' . $e($p[2]) . '" alt="' . $e($p[3] !== '' ? $p[3] : $p[1]) . '" width="52" height="52" loading="lazy">'
+                        : '<i aria-hidden="true">' . (strpos($p[0], '/compare/') === 0 ? 'VS' : 'TOP') . '</i>';
+    return '<a href="' . $e($p[0]) . '">' . $pic . '<b>' . $e($p[1]) . '</b></a>';
+}
+
+/**
+ * Owner, 2026-10-27 (Deploy 126): the products Google has not found yet go near the TOP of every blog, news and
+ * guide post (under the summary), so a crawler that reads the start of the page reaches them. The October audit
+ * found most product pages "URL is unknown to Google" or "Discovered - currently not indexed".
+ * Products not indexed = every published product without a PASS in CMS > Indexing (roc_index_status), so the
+ * ones not checked yet count too: [path => [path, title, image, alt, category slug, category name]].
+ */
+function rocLinkBoostUnindexed(PDO $pdo): array {
+    static $list = null;
+    if ($list !== null) return $list;
+    $list = []; $ok = [];
+    try {
+        foreach ($pdo->query("SELECT url FROM roc_index_status WHERE kind = 'product' AND verdict = 'PASS'")->fetchAll(PDO::FETCH_COLUMN) as $u)
+            $ok[(string)parse_url((string)$u, PHP_URL_PATH)] = 1;
+    } catch (\Throwable $e) {}
+    try {
+        foreach ($pdo->query("SELECT slug, title, image, image_alt, category_slug, category FROM products WHERE status = 'published' ORDER BY id")->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $path = '/products/' . $r['slug'] . '/';
+            if (!isset($ok[$path])) $list[$path] = [$path, (string)$r['title'], (string)($r['image'] ?? ''), (string)($r['image_alt'] ?? ''),
+                                                    (string)($r['category_slug'] ?? ''), mb_strtolower((string)($r['category'] ?? ''))];
+        }
+    } catch (\Throwable $e) {}
+    return $list;
+}
+
+/**
+ * The top strip for a post: ROC_TOP_LINKS products Google has not indexed, the post's own product category
+ * first (topic_cat), then the ones whose name or category shares a word with the title, then a different set
+ * on every post (so all of them get links). Products the text already links are left out.
+ */
+const ROC_TOP_LINKS = 3;
+function rocLinkBoostTop(PDO $pdo, string $seed, array $post, string $body = ''): string {
+    $pool = rocLinkBoostUnindexed($pdo);
+    if (!$pool) return '';
+    $cat = (string)($post['topic_cat'] ?? '');
+    $words = [];
+    foreach (preg_split('/[^a-z0-9]+/', mb_strtolower((string)($post['title'] ?? '') . ' ' . (string)($post['focus_keyword'] ?? ''))) as $w)
+        if (strlen($w) > 3 && !in_array($w, ['best', 'gaming', 'review', 'worth', 'buying', 'which', 'should', 'with', 'your', 'from', 'that', 'this', 'what', 'guide', '2026', '2027'], true)) $words[rtrim($w, 's')] = 1;
+    $h = (int)sprintf('%u', crc32($seed));
+    $rank = [];
+    foreach ($pool as $path => $x) {
+        if ($body !== '' && strpos($body, $path . '"') !== false) continue;
+        $score = ($cat !== '' && $x[4] === $cat) ? 10 : 0;
+        $name = mb_strtolower($x[1]) . ' ' . $x[5];
+        foreach ($words as $w => $_) if (strpos($name, $w) !== false) $score += 2;
+        $rank[$path] = [$score, (int)sprintf('%u', crc32($path . $h))];
     }
-    return $h . '</div><a class="lb-more" href="/products/">All gaming gear &rarr;</a> &nbsp; <a class="lb-more" href="/compare/">All comparisons &rarr;</a></section>';
+    uksort($rank, function ($a, $b) use ($rank) { return [$rank[$b][0], $rank[$a][1]] <=> [$rank[$a][0], $rank[$b][1]]; });
+    $items = array_slice(array_keys($rank), 0, ROC_TOP_LINKS);
+    if (!$items) return '';
+    $out = rocLinkBoostCss() . '<section class="lb-box lb-top"><h2>Gaming gear to check</h2><div class="lb-grid">';
+    foreach ($items as $path) $out .= rocLinkBoostCard($pool[$path]);
+    return $out . '</div></section>';
 }
 
 /**
@@ -120,9 +187,14 @@ function rocTopicPhrases(PDO $pdo): array {
     if ($groups !== null) return $groups;
     $ok = function (string $p) { return (bool)preg_match('#^/(products|category|compare|blogs|guides|can-i-run|gaming-platforms)/[a-z0-9/_-]*$#', $p); };
     $anchors = [];
-    // The searches each page is shown for (cms_settings gsc_queries, written daily by cms/gsc-lib.php): 2-6 words, 4 a page.
+    // The searches each page is shown for (gsc_queries, written daily by cms/gsc-lib.php, then the remembered ones
+    // in gsc_query_mem, Deploy 126): 2-6 words, 4 a page.
     $gq = rocLinkBoostSetting($pdo, 'gsc_queries');
-    foreach ((is_array($gq) && is_array($gq['rows'] ?? null)) ? $gq['rows'] : [] as $r) {
+    $gm = rocLinkBoostSetting($pdo, 'gsc_query_mem');
+    $qrows = array_merge((is_array($gq) && is_array($gq['rows'] ?? null)) ? $gq['rows'] : [], is_array($gm) ? array_values($gm) : []);
+    foreach ($qrows as $r) {
+        if (!is_array($r) || !isset($r['p'])) continue;
+        if (in_array((string)($r['q'] ?? ''), $anchors[(string)$r['p']] ?? [], true)) continue;
         $q = (string)($r['q'] ?? ''); $w = count(preg_split('/\s+/', trim($q)));
         if ($w < 2 || $w > 6 || preg_match('/run ?on ?console|\broc\b|site:|https?:|\.com/', $q)) continue;
         if (count($anchors[$r['p']] ?? []) < 4) $anchors[(string)$r['p']][] = $q;
