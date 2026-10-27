@@ -391,6 +391,15 @@ $rInt = $runs['Intel UHD / Iris Xe (integrated)'];
 $faqs[] = ['Can ' . $name . ' run without a graphics card (integrated graphics)?',
     ((float)($rMin['gpu'] ?? 9) <= 1.8 ? 'Yes. The minimum graphics are integrated graphics level, so a laptop or PC without a graphics card can run it, usually on low to medium settings.'
         : 'Not well. The minimum is a dedicated graphics card' . ($gpuMin ? ' (' . $gpuMin[0] . ' class)' : '') . '; with integrated graphics our checker gives ' . $rInt['percent'] . '% (' . $short((int)$rInt['percent']) . ').')];
+// Deploy 124: Search Console shows "can my laptop run <game>" and "can you play <game> on laptop" searches.
+$pInt = (int)$rInt['percent']; $p1650 = (int)$r1650['percent'];
+$faqs[] = ['Can I play ' . $name . ' on a laptop?',
+    ($pInt >= 70 ? 'Yes. Even an everyday laptop with integrated graphics and 8 GB of RAM gets ' . $pInt . '% in our checker (' . $short($pInt) . ').'
+        : ($p1650 > 40 ? 'Yes, on a gaming laptop: one with GTX 1650 class graphics or better gets about ' . $p1650 . '% in our checker (' . $short($p1650) . '). '
+            . 'An everyday laptop with integrated graphics and 8 GB of RAM gets ' . $pInt . '% (' . $short($pInt) . ').'
+            : 'Only on a strong gaming laptop. GTX 1650 class graphics get ' . $p1650 . '% in our checker (' . $short($p1650) . ')'
+            . ($gpuRec ? '; look for a laptop at the level of a ' . $gpuRec[0] . ' or faster.' : '.')))
+    . ' Use the checker above with your laptop\'s graphics card for an exact answer.'];
 $rmn = (float)($rMin['ram'] ?? 0); $rrc = (float)($rRec['ram'] ?? $rmn);
 if ($rmn > 0) $faqs[] = ['Is 8 GB of RAM enough for ' . $name . '?',
     $rmn > 8 ? 'No. ' . $name . ' needs at least ' . $ramGb($rmn) . ' of RAM.' : ($rrc > 8 ? 'Yes for the minimum settings; ' . $ramGb($rrc) . ' is recommended for smooth play.' : 'Yes. 8 GB meets the ' . ($rec ? 'recommended' : 'minimum') . ' memory for ' . $name . '.')];

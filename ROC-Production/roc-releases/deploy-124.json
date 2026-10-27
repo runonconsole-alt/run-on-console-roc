@@ -1,0 +1,21 @@
+{
+ "deploy": 124,
+ "date": "2026-10-28",
+ "title": "Game pages answer: can I play it on a laptop?",
+ "changes": [
+  "Every Can I run page has a new question in its FAQ (and in its Google FAQ data): \"Can I play <game> on a laptop?\", answered from the checker for a gaming laptop and an everyday laptop"
+ ],
+ "checks": [
+  {
+   "label": "Laptop question",
+   "type": "contains",
+   "path": "game-render.php",
+   "text": "on a laptop?"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/123",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it.",
+  "CMS Dashboard > Clear cache."
+ ]
+}
