@@ -816,6 +816,11 @@ RELEASES = [
          checks=[dict(label='Review sites filter', type='contains', path='api/v1/cms/gsc-lib.php', text='ROC_GSC_SITES')],
          pr=REPO + '122',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.']),
+    dict(deploy=124, date='2026-10-28', title='Game pages answer: can I play it on a laptop?',
+         changes=['Every Can I run page has a new question in its FAQ (and in its Google FAQ data): "Can I play <game> on a laptop?", answered from the checker for a gaming laptop and an everyday laptop'],
+         checks=[dict(label='Laptop question', type='contains', path='game-render.php', text='on a laptop?')],
+         pr=REPO + '123',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS Dashboard > Clear cache.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
