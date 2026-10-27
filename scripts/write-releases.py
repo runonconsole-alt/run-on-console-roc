@@ -829,6 +829,19 @@ RELEASES = [
                  dict(label='Guides type filter noindex', type='contains', path='blog-render.php', text="'noindex, follow' : 'index, follow, max-image-preview:large'")],
          pr=REPO + '124',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS Dashboard > Clear cache.']),
+    dict(deploy=126, date='2026-10-28', title='Blogs 4 days and guides 3 days a week at 12:00, products near the top of posts',
+         changes=['From Monday 2 November the server writes a blog post for Monday, Wednesday, Friday and Sunday, live at 12:00 Pakistan time, every week',
+                  'Guides on Tuesday, Friday and Saturday at 12:00: written from 09:30 and scheduled, with a cover picture, internal links and buy boxes; topics first from real "how to" Google searches no post answers yet, then 36 new planned topics',
+                  'At 12:30 on a day a blog post or guide goes live, the sitemap is sent to Google (needs the service account as a Full user in Search Console); the result shows in CMS > Indexing > Search queries',
+                  'Every blog, news and guide post shows 3 products Google has not indexed yet right under the summary, own category first, so crawlers reach them early on the page',
+                  'Google searches are remembered for 12 months (not only the last 4 weeks) and used for link words, blog topics and guide topics',
+                  'CMS: the Updates search finds every word in the title or the address ("xbox first" finds xbox-s-first-coo-...); the Blog writer and Guide writer cards say when they start again and show the new days'],
+         checks=[dict(label='Blog days and time', type='contains', path='api/v1/cms/blog-engine-lib.php', text="ROC_BLOG_TIME = '12:00'"),
+                 dict(label='Guide days', type='contains', path='api/v1/cms/guide-writer-lib.php', text='ROC_GUIDE_DAYS = [2, 5, 6]'),
+                 dict(label='Sitemap submit', type='contains', path='api/v1/cron/cli-blog-scheduler.php', text='rocGscSitemapTick'),
+                 dict(label='Products near the top', type='contains', path='blog-render.php', text='rocLinkBoostTop')],
+         pr=REPO + '125',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS Dashboard > Clear cache.', 'Search Console > Settings > Users and permissions: the service account (its email ends in iam.gserviceaccount.com) must be Full, not Restricted, for the 12:30 sitemap submit.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

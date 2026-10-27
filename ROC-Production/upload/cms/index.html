@@ -1392,9 +1392,11 @@ async function renderIndexing(m){
       return '<tr><td>'+esc(r.q)+(opp?' <span class="tag" title="Shown often but not on page 1 yet: improve this page for this search">Opportunity</span>':'')+'</td>'+
         '<td style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><a href="https://runonconsole.com'+esc(r.p)+'" target="_blank" rel="noopener">'+esc(r.p)+'</a></td>'+
         '<td>'+r.c+'</td><td>'+r.i+'</td><td>'+r.pos+'</td></tr>'; }).join('');
-    var rg=d.queries_range||{}, tp=(d.gsc_topics||[]);
+    var rg=d.queries_range||{}, tp=(d.gsc_topics||[]), sm=d.sitemap_submit;
+    var smLine='<div class="hint" style="margin-top:6px">'+(d.remembered?'<b>'+d.remembered+'</b> searches remembered (the last 12 months) for link words and topics. ':'')+
+      (sm&&sm.day?'Sitemap sent to Google on '+esc(sm.day)+' at 12:30: '+(sm.ok?'<b>OK</b>':'<b style="color:#dc2626">failed</b> '+esc(sm.error||'')):'The sitemap goes to Google at 12:30 on a day a blog post or guide goes live.')+'</div>';
     qhtml='<div class="card"><div class="chead"><h3>Search queries</h3><span class="note">'+(rg.from?esc(rg.from)+' to '+esc(rg.to)+' · '+(d.queries_total||0)+' searches · '+(rg.skipped||0)+' off-topic left out':'The first list comes within a day')+'</span></div>'+
-      '<div class="cbody hint">What people searched on Google and which ROC page it showed. These searches become the link words inside posts, and questions about a product category where ROC is not on page 1 yet become new blog topics.</div>'+
+      '<div class="cbody hint">What people searched on Google and which ROC page it showed. These searches become the link words inside posts, and questions about a product category where ROC is not on page 1 yet become new blog topics.'+smLine+'</div>'+
       '<div style="overflow-x:auto"><table class="list" style="width:100%"><thead><tr><th>Search</th><th>Page shown</th><th>Clicks</th><th>Impressions</th><th>Position</th></tr></thead><tbody>'+
       (qr||'<tr><td colspan="5"><div class="empty">No search data yet.</div></td></tr>')+'</tbody></table></div></div>'+
       (tp.length?'<div class="card"><div class="chead"><h3>Blog topics from searches</h3></div><div class="cbody">'+tp.map(function(t){
@@ -2065,8 +2067,9 @@ function renderBlogs(m){
     if(S.ptype==='guide' && !isGuidePost(b)) return false;
     if(S.ptype==='blog' && (isNewsPost(b) || isGuidePost(b))) return false;
     if(S.filter!=='all' && S.filter!==(b.status==='published'||b.status==='scheduled'?b.status:'draft'))return false;
-    if(S.search){ var h=(b.title+' '+(b.slug||'')).toLowerCase();
-      if(h.indexOf(S.search.toLowerCase())===-1)return false; }
+    // Every word of the search, in the title or the slug ("xbox first" finds xbox-s-first-coo-...).
+    if(S.search){ var h=(b.title+' '+(b.slug||'')+' '+(b.slug||'').replace(/-/g,' ')).toLowerCase();
+      if(!S.search.toLowerCase().split(/\s+/).filter(Boolean).every(function(w){ return h.indexOf(w)!==-1; }))return false; }
     return true;
   });
 
@@ -4429,11 +4432,11 @@ async function renderGuideWriter(m){
   var d; try{ d=await api('guide-writer.php'); }catch(e){ toast(e.message,'bad'); return; }
   if(S.view!=='blogagent'||S.baMode!=='guides') return;
   var s=d.settings||{}, st=d.state||{};
-  var waitTxt={'off':'Off','ended':'Ended: the end date has passed','done today':'All guides for today are written','outside 10:00-23:30':'Waits for 10:00 Pakistan time','next one later':'Next guide about 2 hours after the last one'}[d.wait]||'Writes the next guide within 10 minutes';
+  var waitTxt={'off':'Off','ended':'Starts again on Tuesday 3 November','not a guide day':'Next guide on the next Tuesday, Friday or Saturday','writes from 09:30':'Writes today from 09:30, live at 12:00','too late today':'Next guide on the next guide day','done today':'All guides for today are written','outside 10:00-23:30':'Waits for 10:00 Pakistan time','next one later':'Next guide about 2 hours after the last one'}[d.wait]||'Writes the next guide within 10 minutes';
   $('.body',m).innerHTML=
     (!d.ai?'<div class="alert warn">No AI key saved: add the free Groq or Gemini key in the Blogs tab.</div>':'')+
     '<div class="card"><div class="chead"><h3>Guide writer</h3><span class="note"><b style="color:'+(s.on&&d.wait!=='ended'?'#059669':'#b45309')+'">● '+esc(waitTxt)+'</b></span></div><div class="cbody">'+
-      '<div class="hint" style="margin-bottom:10px">Writes helpful step by step guides (buying, setup, how to use, game settings) and publishes them at /guides/ with a cover made by AI, a topic and tags. Between 10:00 and 23:30 Pakistan time, at least 2 hours apart.</div>'+
+      '<div class="hint" style="margin-bottom:10px">Writes helpful step by step guides (buying, setup, how to use, game settings) and publishes them at /guides/ with a cover made by AI, a topic and tags. From 2 November: one guide every Tuesday, Friday and Saturday, live at 12:00 Pakistan time (Guides a day and Until are no longer used). Topics come first from real how-to Google searches that no post answers yet.</div>'+
       '<label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-bottom:10px"><input type="checkbox" id="gw-on"'+(s.on?' checked':'')+'> Write guides by themselves</label>'+
       '<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">'+
         '<div class="field" style="margin:0"><label for="gw-per">Guides a day</label><input type="number" id="gw-per" min="0" max="6" value="'+(s.per_day||0)+'" style="width:90px"></div>'+
@@ -4480,9 +4483,9 @@ async function renderBlogAgent(m, fresh){
   // Until when the server writes blog posts by itself (owner: from Monday 19 October they write them).
   function autoCard(){
     var u=d.auto_until||'', af=d.auto_from||'', DN=['','Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    var sched=af?'<div class="hint" style="margin-top:6px">From <b>'+esc(af)+'</b> the server writes again: '+(d.blog_days||[]).map(function(x){return DN[x];}).join(', ')+', '+(d.per_day||1)+' post a day, with the real Google searches from Search Console.</div>':'';
+    var sched=af?'<div class="hint" style="margin-top:6px">From <b>'+esc(af)+'</b> the server writes again: '+(d.blog_days||[]).map(function(x){return DN[x];}).join(', ')+', '+(d.per_day||1)+' post a day, live at '+esc(d.blog_time||'12:00')+' Pakistan time, with the real Google searches from Search Console. Guides: Tue, Fri, Sat at 12:00. At 12:30 the sitemap goes to Google.</div>':'';
     return '<div class="card"'+(d.auto_ended?' style="border-color:var(--amber)"':'')+'><div class="chead"><h3>Automatic blog posts</h3><span class="note">'+
-      (d.auto_ended?'<b style="color:#b45309">● Ended: you write the blog posts</b>':u?'<b style="color:#059669">● On until '+esc(u)+'</b>':'<b style="color:#059669">● On, no end date</b>')+'</span></div><div class="cbody">'+
+      (d.auto_ended&&d.auto_from&&d.auto_from>new Date().toISOString().slice(0,10)?'<b style="color:#059669">● Starts again on '+esc(d.auto_from)+'</b>':d.auto_ended?'<b style="color:#b45309">● Ended: you write the blog posts</b>':u?'<b style="color:#059669">● On until '+esc(u)+'</b>':'<b style="color:#059669">● On, no end date</b>')+'</span></div><div class="cbody">'+
       '<div class="hint" style="margin-bottom:10px">The server writes blog posts by itself until this date (not on it). After that, write posts in <b>Blogs &gt; New post</b>: '+
       'publish without a picture and a cover is made automatically with AI (Cloudflare). News keeps running either way.</div>'+
       '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input type="date" id="au-date" value="'+esc(u)+'"><button class="btn" id="au-save">Save</button>'+

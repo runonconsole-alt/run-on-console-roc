@@ -67,10 +67,18 @@ function rocBlogAutoUntil(PDO $pdo): string { $v = rocBlogGet($pdo, 'blog_auto_u
  * above (category rounds, 1,000+ words, buy boxes, internal links) plus the real Google searches (gsc-lib.php).
  * CMS settings: blog_auto_from ('' = do not start again), blog_days ([1, 3, 5]; 1 = Monday ... 7 = Sunday),
  * blog_per_day (1).
+ * Owner, 2026-10-27 (Deploy 126): 4 days a week instead, Monday, Wednesday, Friday and Sunday, every week, and each
+ * post goes live at exactly 12:00 Pakistan time (ROC_BLOG_TIME, CMS setting blog_time) from blog_auto_from on;
+ * the server writes it 2 hours before. Guides have their own days (guide-writer-lib.php) and never take a blog day.
  */
-const ROC_BLOG_AUTO_FROM = '2026-11-01';
-const ROC_BLOG_DAYS = [1, 3, 5];
+const ROC_BLOG_AUTO_FROM = '2026-11-02';   // Deploy 126: the week of Monday 2 November (was 1 November)
+const ROC_BLOG_DAYS = [1, 3, 5, 7];
 const ROC_BLOG_PER_DAY = 1;
+const ROC_BLOG_TIME = '12:00';
+function rocBlogTime(PDO $pdo): string {
+    $t = (string)rocBlogGet($pdo, 'blog_time', ROC_BLOG_TIME);
+    return preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $t) ? $t : ROC_BLOG_TIME;
+}
 function rocBlogAutoFrom(PDO $pdo): string { $v = rocBlogGet($pdo, 'blog_auto_from', null); return $v === null ? ROC_BLOG_AUTO_FROM : (string)$v; }
 function rocBlogDays(PDO $pdo): array {
     $d = rocBlogGet($pdo, 'blog_days', null);
@@ -154,9 +162,13 @@ function rocBlogFreeSlots(PDO $pdo, int $days = 7): array {
     $tz = new DateTimeZone(ROC_BLOG_TZ);
     $taken = [];
     // News (CMS > Blog writer > News) has its own limits and does not take a blog time.
-    $q = $pdo->query("SELECT published_at FROM blogs WHERE status IN ('scheduled', 'published') AND (category IS NULL OR category <> 'News') AND published_at >= '" . gmdate('Y-m-d H:i:s', time() - 86400) . "'");
+    // Guides (category "Guides: ...") have their own days too (Deploy 126).
+    $q = $pdo->query("SELECT published_at FROM blogs WHERE status IN ('scheduled', 'published') AND (category IS NULL OR (category <> 'News' AND category NOT LIKE 'Guide%')) AND published_at >= '" . gmdate('Y-m-d H:i:s', time() - 86400) . "'");
     foreach ($q->fetchAll(PDO::FETCH_COLUMN) as $t) $taken[] = strtotime($t . ' UTC');
     $perDay = rocBlogPerDay($pdo); $blogDays = rocBlogDays($pdo);
+    // From the restart day the posts go live at one fixed time (12:00), not at the CMS publishing slots.
+    $from = rocBlogAutoFrom($pdo);
+    $slots = ($from !== '' && (new DateTime('now', $tz))->format('Y-m-d') >= $from) ? [rocBlogTime($pdo)] : rocBlogSlots($pdo);
     $onDay = [];
     foreach ($taken as $t) { $k = (new DateTime('@' . $t))->setTimezone($tz)->format('Y-m-d'); $onDay[$k] = ($onDay[$k] ?? 0) + 1; }
     $out = [];
@@ -165,7 +177,7 @@ function rocBlogFreeSlots(PDO $pdo, int $days = 7): array {
         $day->modify("+{$d} day");
         if (!in_array((int)$day->format('N'), $blogDays, true)) continue;
         $n = $onDay[$day->format('Y-m-d')] ?? 0;
-        foreach (rocBlogSlots($pdo) as $hm) {
+        foreach ($slots as $hm) {
             if ($n >= $perDay) break;
             $local = new DateTime('today ' . $hm, $tz);
             $local->modify("+{$d} day");

@@ -56,6 +56,10 @@ if ($filter === 'queries') {
     $out['queries_total'] = count($rows);
     $out['queries_range'] = is_array($d) && $d ? ['from' => $d['from'] ?? '', 'to' => $d['to'] ?? '', 'day' => $d['day'] ?? '', 'skipped' => $d['skipped'] ?? 0] : null;
     $out['gsc_topics'] = array_reverse($topics);
+    // Deploy 126: how many searches are remembered, and the last 12:30 sitemap submit.
+    $mem = rocBlogGet($pdo, 'gsc_query_mem', []);
+    $out['remembered'] = is_array($mem) ? count($mem) : 0;
+    $out['sitemap_submit'] = rocBlogGet($pdo, 'gsc_sitemap', null);
     $out['rows'] = [];
     rocIxOut(200, $out);
 }
