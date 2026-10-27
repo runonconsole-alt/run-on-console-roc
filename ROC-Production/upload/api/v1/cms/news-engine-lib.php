@@ -365,6 +365,11 @@ function rocNewsPrompt(array $c): string {
         . "- Start with 1-2 sentences that say what happened (who, what, when). Then <h2>What we know</h2>, <h2>Why it matters for gamers</h2> and <h2>What to do now</h2> (where readers can see the products or guides on our site).\n"
         . "- Allowed HTML only: p, h2, h3, ul, li, strong, em, a. Never <h1>. No source list (the site adds it). No prices.\n"
         . "- The title is newsy and specific (40-70 characters) and names the product, game or company. The focus keyword is what people will search for this news (e.g. \"RTX 5080 Super release date\").\n\n"
+        . "TITLE AND DESCRIPTION RULES (checked by the site; a post that breaks one is sent back):\n"
+        . "- Never name another review site or magazine (RTINGS, IGN, PCMag, Tom's Hardware, TechRadar ...) anywhere, not even if it is in a keyword.\n"
+        . "- Write product and brand names the way the maker does: \"ATH-M50x\", \"RTX 4060\", \"NVIDIA\", \"Xbox\", \"PS5\", \"GPU\", \"FPS\"; never in lowercase.\n"
+        . "- Start the title, meta title and meta description with a capital letter; the meta description starts with what the reader gets, never with \"Discover\", \"Read our\", \"Learn\" or \"Check out\".\n"
+        . "- Meta title at most 60 characters; meta description 120-155 characters; the focus keyword once in the title, in natural words.\n\n"
         . "Answer with ONLY a JSON object with exactly these keys:\n"
         . "{\"title\": \"...\", \"focus_keyword\": \"...\", \"meta_title\": \"max 60 characters\", \"meta_description\": \"110-155 characters\", "
         . "\"excerpt\": \"1-2 sentences\", \"content_html\": \"the article HTML\", \"image_alt\": \"short description of the cover\", "
@@ -417,8 +422,8 @@ function rocNewsCreate(PDO $pdo, string $root, array $a, array $c, string $by): 
     rocBlogSite($pdo, true);
     $t = function ($k, $max) use ($a) { return trim(mb_substr((string)preg_replace('/\s+/u', ' ', strip_tags((string)($a[$k] ?? ''))), 0, $max)); };
     $title = $t('title', 160);
-    $metaT = $t('meta_title', 120); if (mb_strlen($metaT) > 60) $metaT = rtrim(mb_substr($metaT, 0, 57)) . '…'; if ($metaT === '') $metaT = mb_substr($title, 0, 60);
-    $metaD = $t('meta_description', 300); if (mb_strlen($metaD) > 160) $metaD = rtrim(mb_substr($metaD, 0, 157)) . '…';
+    $metaT = $t('meta_title', 120); if ($metaT === '') $metaT = rocSeoCut($title, 60);
+    $metaD = $t('meta_description', 300);
     $excerpt = $t('excerpt', 400); $focus = $t('focus_keyword', 120); $alt = $t('image_alt', 200) ?: $title;
     $content = rocBlogCleanLinks(rocCmsSanitizeHtml((string)($a['content_html'] ?? '')), $pdo);
     $content = (string)preg_replace('#<h1\b[^>]*>(.*?)</h1>#is', '<h2>$1</h2>', $content);
@@ -427,7 +432,9 @@ function rocNewsCreate(PDO $pdo, string $root, array $a, array $c, string $by): 
     if (mb_strlen($title) < 20) $errors[] = 'The title is too short.';
     if ($words < 250) $errors[] = "The article has {$words} words; at least 300 are needed.";
     if ($excerpt === '') $excerpt = rocCmsTruncate(rocCmsTextFromHtml($content), 200);
-    if (mb_strlen($metaD) < 70) $metaD = rocCmsTruncate($excerpt, 155);
+    if (mb_strlen($metaD) < 70) $metaD = rocSeoCut($excerpt, 155);
+    // Deploy 127: the same title and description check as the blog writer; the news writer tries again with the reasons.
+    foreach (rocSeoCheck(['title' => $title, 'meta_title' => $metaT, 'meta_description' => $metaD, 'excerpt' => $excerpt, 'focus_keyword' => $focus]) as $m) $errors[] = $m;
     if ($errors) return ['ok' => false, 'errors' => $errors];
 
     $base = rocBlogSlug($title) ?: 'news-' . gmdate('Ymd-Hi');

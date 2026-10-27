@@ -125,6 +125,9 @@ function rocPublishErrors(array $post): array {
     if (rocAgentSlugify((string)($post['slug'] ?? '') ?: (string)($post['title'] ?? '')) === '') {
         $errors['slug'] = 'URL slug must contain letters or numbers.';
     }
+    // Deploy 127: no other review site's name, meta title at most 60, meta description 70-160 (seo-check-lib.php).
+    require_once __DIR__ . '/seo-check-lib.php';
+    foreach (rocSeoCheck($post, false) as $k => $m) if (!isset($errors[$k])) $errors[$k] = $m;
     return $errors;
 }
 
