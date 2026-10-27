@@ -804,6 +804,12 @@ RELEASES = [
          checks=[dict(label='CMS search', type='contains', path='cms/index.html', text='cmsFindBind')],
          pr=REPO + '120',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Reload the CMS with Ctrl+F5.']),
+    dict(deploy=122, date='2026-10-28', title='Game page titles say System Requirements',
+         changes=['Every Can I run page title now says "System Requirements" (what people type on Google) instead of "PC Requirements", e.g. "Can I Run Arma 3? Minimum & Recommended System Requirements"',
+                  'Titles you set yourself in CMS > Games stay as they are'],
+         checks=[dict(label='New game titles', type='contains', path='game-render.php', text='Recommended System Requirements')],
+         pr=REPO + '121',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS Dashboard > Clear cache.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

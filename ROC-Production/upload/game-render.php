@@ -358,11 +358,14 @@ $fit = function (array $opts) { foreach ($opts as $o) if (mb_strlen($o) <= 60) r
 // Very long Steam names: a shorter form without the edition part ("- Enhanced Edition", "Game of the Year Edition", "(2009)" ...).
 $nm = trim((string)preg_replace('/\s*[-:–]?\s*\b(?:(?:The\s+)?(?:Game of the Year|GOTY|Enhanced|Deluxe|Definitive|Complete|Anniversary|40th Anniversary|Gold|Ultimate|Remastered)\s+)?Edition\b.*$|\s+\(\d{4}\)/iu', '', $name)) ?: $name;
 $nm2 = preg_match('/^(.{4,}?)\s*(?::|\s[-–\/]\s)/u', $nm, $nmm) ? trim($nmm[1]) : $nm;   // the part before ": " or " - "
-$metaT = trim((string)($E['title'] ?? '')) ?: $fit(['Can I Run ' . $name . '? Minimum & Recommended PC Requirements | ROC',
-    'Can I Run ' . $name . '? PC Requirements | Run On Console', 'Can I Run ' . $name . '? System Requirements',
-    'Can I Run ' . $name . '? PC Requirements', 'Can I Run ' . $name . '?', 'Can I Run ' . $nm . '? PC Requirements', 'Can I Run ' . $nm . '?',
-    $name . ' PC Requirements', $nm . ' PC Requirements', 'Can I Run ' . $nm2 . '? PC Requirements', 'Can I Run ' . $nm2 . '?', $name]);
-$metaD = 'Can your PC run ' . $name . '? Official minimum and recommended specs'
+// Deploy 122: Search Console shows people search "<game> system requirements" far more than "PC requirements",
+// and those searches rank at 40-90 while "can i run <game>" ranks 3-9, so every title now says "System Requirements".
+$metaT = trim((string)($E['title'] ?? '')) ?: $fit(['Can I Run ' . $name . '? Minimum & Recommended System Requirements',
+    'Can I Run ' . $name . '? System Requirements | Run On Console', 'Can I Run ' . $name . '? System Requirements | ROC',
+    'Can I Run ' . $name . '? System Requirements', $name . ' System Requirements: Can I Run It?',
+    'Can I Run ' . $nm . '? System Requirements', $name . ' System Requirements', $nm . ' System Requirements',
+    'Can I Run ' . $nm2 . '? System Requirements', 'Can I Run ' . $name . '?', $nm2 . ' System Requirements', 'Can I Run ' . $nm2 . '?', $name]);
+$metaD = 'Can your PC run ' . $name . '? Official minimum and recommended system requirements'
     . ($gpuMin ? ' (from ' . (strpos($gpuMin[0], 'integrated') !== false ? 'integrated graphics' : $an($gpuMin[0])) . ($ramGb($rMin['ram'] ?? null) ? ' and ' . $ramGb($rMin['ram'] ?? null) . ' RAM' : '') . ')' : '')
     . '. Free check for your graphics card, CPU and RAM.';
 if (mb_strlen($metaD) > 155) $metaD = mb_substr($metaD, 0, 152) . '…';   // 155: what Google and SEO tools show in full
