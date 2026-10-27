@@ -1337,13 +1337,29 @@ async function renderIndexing(m){
   if(S.view!=='indexing') return;
   var st=d.stats||{}, admin=S.user&&S.user.role==='administrator', pct=st.total?Math.round(100*(st.indexed||0)/st.total):0;
   var KIND={game:'Can I run',product:'Products',compare:'Comparisons',category:'Categories',news:'News',blog:'Blogs',guide:'Guides',platform:'Platforms',page:'Main pages'};
-  var FIL=[['new','Newly indexed (14 days)'],['indexed','Indexed'],['not','Not indexed'],['unchecked','Not checked yet'],['all','All']];
+  var FIL=[['new','Newly indexed (14 days)'],['indexed','Indexed'],['not','Not indexed'],['unchecked','Not checked yet'],['all','All'],['queries','🔎 Search queries']];
   var fmtD=function(v){ return v?esc(String(v).slice(0,10)):'—'; };
   var rows=(d.rows||[]).map(function(r){
     var ok=r.verdict==='PASS', tag=ok?'<span class="tag published">Indexed</span>':(r.verdict?'<span class="tag off">Not indexed</span>':'<span class="tag">Not checked</span>');
     return '<tr><td style="max-width:460px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(String(r.url).replace('https://runonconsole.com',''))+'</a></td>'+
       '<td>'+esc(KIND[r.kind]||r.kind)+'</td><td>'+tag+'<div class="hint" style="font-size:11px">'+esc(r.coverage||'')+'</div></td><td>'+fmtD(r.indexed_at)+'</td><td>'+fmtD(r.last_crawl)+'</td><td>'+fmtD(r.checked_at)+'</td></tr>';
   }).join('');
+  // Search queries (Deploy 120): what people search on Google and the page it shows them.
+  var qhtml='';
+  if(IX.filter==='queries'){
+    var qr=(d.queries||[]).map(function(r){
+      var opp=r.pos>8&&r.pos<=20&&r.i>=20;
+      return '<tr><td>'+esc(r.q)+(opp?' <span class="tag" title="Shown often but not on page 1 yet: improve this page for this search">Opportunity</span>':'')+'</td>'+
+        '<td style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><a href="https://runonconsole.com'+esc(r.p)+'" target="_blank" rel="noopener">'+esc(r.p)+'</a></td>'+
+        '<td>'+r.c+'</td><td>'+r.i+'</td><td>'+r.pos+'</td></tr>'; }).join('');
+    var rg=d.queries_range||{}, tp=(d.gsc_topics||[]);
+    qhtml='<div class="card"><div class="chead"><h3>Search queries</h3><span class="note">'+(rg.from?esc(rg.from)+' to '+esc(rg.to)+' · '+(d.queries_total||0)+' searches · '+(rg.skipped||0)+' off-topic left out':'The first list comes within a day')+'</span></div>'+
+      '<div class="cbody hint">What people searched on Google and which ROC page it showed. These searches become the link words inside posts, and questions about a product category where ROC is not on page 1 yet become new blog topics.</div>'+
+      '<div style="overflow-x:auto"><table class="list" style="width:100%"><thead><tr><th>Search</th><th>Page shown</th><th>Clicks</th><th>Impressions</th><th>Position</th></tr></thead><tbody>'+
+      (qr||'<tr><td colspan="5"><div class="empty">No search data yet.</div></td></tr>')+'</tbody></table></div></div>'+
+      (tp.length?'<div class="card"><div class="chead"><h3>Blog topics from searches</h3></div><div class="cbody">'+tp.map(function(t){
+        return '<div style="padding:4px 0"><span class="tag'+(t.status==='written'?' published':'')+'">'+esc(t.status)+'</span> '+esc(t.title)+' <span class="hint">· '+esc(t.added)+' · '+(t.impressions||0)+' impressions</span></div>'; }).join('')+'</div></div>':'');
+  }
   var kinds=Object.keys(st.by_kind||{}).sort(function(a,b){ return (st.by_kind[b].total)-(st.by_kind[a].total); });
   m.innerHTML=head('Indexing','Which pages Google has indexed, checked a few at a time with Search Console. New ones are emailed every evening.')+
     '<div class="body">'+
@@ -1360,9 +1376,9 @@ async function renderIndexing(m){
       (IX.kind?'<button class="chip" data-ixk="">All types</button>':'')+'</div></div>':'')+
     '<div class="card"><div class="cbody" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">'+
       FIL.map(function(f){ return '<button class="chip'+(IX.filter===f[0]?' on':'')+'" data-ixf="'+f[0]+'">'+f[1]+'</button>'; }).join('')+
-      '<input id="ix-q" type="search" placeholder="Search a page…" value="'+esc(IX.q)+'" style="margin-left:auto;max-width:240px"></div>'+
-      '<div style="overflow-x:auto"><table class="list" style="width:100%"><thead><tr><th>Page</th><th>Type</th><th>Status</th><th>Indexed on</th><th>Google crawled</th><th>Checked</th></tr></thead><tbody>'+
-      (rows||'<tr><td colspan="6"><div class="empty">'+(IX.filter==='new'?'No newly indexed pages in the last 14 days yet.':'Nothing here.')+'</div></td></tr>')+'</tbody></table></div></div>'+
+      '<input id="ix-q" type="search" placeholder="'+(IX.filter==='queries'?'Search a word…':'Search a page…')+'" value="'+esc(IX.q)+'" style="margin-left:auto;max-width:240px"></div>'+
+      (IX.filter==='queries'?'</div>'+qhtml:'<div style="overflow-x:auto"><table class="list" style="width:100%"><thead><tr><th>Page</th><th>Type</th><th>Status</th><th>Indexed on</th><th>Google crawled</th><th>Checked</th></tr></thead><tbody>'+
+      (rows||'<tr><td colspan="6"><div class="empty">'+(IX.filter==='new'?'No newly indexed pages in the last 14 days yet.':'Nothing here.')+'</div></td></tr>')+'</tbody></table></div></div>')+
     (admin?'<div class="card"><div class="cbody" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><label class="hint">Daily email of newly indexed pages to</label><input id="ix-mail" type="email" value="'+esc(d.email||'')+'" style="max-width:280px"><button class="btn sm" id="ix-save">Save</button></div></div>':'')+
     '</div>';
   m.querySelectorAll('[data-ixf]').forEach(function(b){ b.addEventListener('click',function(){ IX.filter=b.dataset.ixf; renderIndexing(m); }); });
@@ -3451,7 +3467,9 @@ async function renderPages(m, embedded){
 var ACT_TYPES={signup:{label:'Sign-ups',icon:'👤',bg:'#dbeafe'},comment:{label:'Comments',icon:'💬',bg:'#fef3c7'},
   request:{label:'Requests',icon:'✉️',bg:'#ede9fe'},alert:{label:'Price alerts',icon:'🔔',bg:'#fee2e2'},
   save:{label:'Saved products',icon:'★',bg:'#fce7f3'},chat:{label:'AI chats',icon:'🤖',bg:'#e0f2fe'},
-  click:{label:'Buy clicks',icon:'🛒',bg:'#d1fae5'}};
+  click:{label:'Buy clicks',icon:'🛒',bg:'#d1fae5'},
+  // Deploy 120 (form-activity.php, administrators): who signed in and who sent which form.
+  login:{label:'Logins',icon:'🔑',bg:'#e0e7ff'},form:{label:'Form messages',icon:'📨',bg:'#dcfce7'},code:{label:'Codes & resets',icon:'🔢',bg:'#f1f5f9'}};
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
 function ago(at){
@@ -3463,6 +3481,10 @@ async function pollActivity(){
   if(!can('activity','view')) return;
   try{
     var d=await api('activity.php');
+    // Logins, codes and every form (with name and email) for administrators, merged into the same feed.
+    if(S.user&&(S.user.is_admin||S.user.role==='administrator')){ try{ var fa=await api('form-activity.php');
+      d.items=(d.items||[]).concat(fa.items||[]).sort(function(a,b){ return a.at<b.at?1:a.at>b.at?-1:0; });
+      d.counts_24h=Object.assign({},d.counts_24h||{},fa.counts_24h||{}); }catch(e){} }
     // server_time is UTC-less local server time; measure skew so "x min ago" is right.
     if(d.server_time) S.actSkew=Date.now()-new Date(d.server_time.replace(' ','T')+'Z').getTime();
     var items=d.items||[], seen=lsGet('roc_act_seen')||'', prevNewest=S.actNewest;
@@ -4306,13 +4328,14 @@ async function renderBlogAgent(m, fresh){
 
   // Until when the server writes blog posts by itself (owner: from Monday 19 October they write them).
   function autoCard(){
-    var u=d.auto_until||'';
+    var u=d.auto_until||'', af=d.auto_from||'', DN=['','Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    var sched=af?'<div class="hint" style="margin-top:6px">From <b>'+esc(af)+'</b> the server writes again: '+(d.blog_days||[]).map(function(x){return DN[x];}).join(', ')+', '+(d.per_day||1)+' post a day, with the real Google searches from Search Console.</div>':'';
     return '<div class="card"'+(d.auto_ended?' style="border-color:var(--amber)"':'')+'><div class="chead"><h3>Automatic blog posts</h3><span class="note">'+
       (d.auto_ended?'<b style="color:#b45309">● Ended: you write the blog posts</b>':u?'<b style="color:#059669">● On until '+esc(u)+'</b>':'<b style="color:#059669">● On, no end date</b>')+'</span></div><div class="cbody">'+
       '<div class="hint" style="margin-bottom:10px">The server writes blog posts by itself until this date (not on it). After that, write posts in <b>Blogs &gt; New post</b>: '+
       'publish without a picture and a cover is made automatically with AI (Cloudflare). News keeps running either way.</div>'+
       '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input type="date" id="au-date" value="'+esc(u)+'"><button class="btn" id="au-save">Save</button>'+
-      '<span class="hint">Empty = keep writing every day.</span></div></div></div>';
+      '<span class="hint">Empty = keep writing every day.</span></div>'+sched+'</div></div>';
   }
 
   function reviewCard(){

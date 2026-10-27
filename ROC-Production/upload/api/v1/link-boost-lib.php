@@ -98,3 +98,85 @@ function rocLinkBoostBox(PDO $pdo, string $seed, string $title = 'Gaming gear on
     }
     return $h . '</div><a class="lb-more" href="/products/">All gaming gear &rarr;</a> &nbsp; <a class="lb-more" href="/compare/">All comparisons &rarr;</a></section>';
 }
+
+/**
+ * Links inside the text of blog, news and guide posts (Deploy 120): the first time a post names one of our
+ * pages, the words become a link to it, at most ROC_TOPIC_LINKS a post, each page once, never the post itself
+ * and never inside a heading or another link. In this order:
+ *   1. pages Google has not indexed yet (link_boost, CMS > Indexing), by their searches, name or category words;
+ *   2. what people search on Google for a page (Search Console, gsc-lib.php): the search becomes the anchor text;
+ *   3. product names, then category words ("gaming monitors" -> /category/monitors/).
+ */
+const ROC_TOPIC_LINKS = 5;
+const ROC_TOPIC_CAT_WORDS = ['gpu' => ['graphics cards', 'graphics card'], 'monitors' => ['gaming monitors', 'gaming monitor'],
+    'mice' => ['gaming mice', 'gaming mouse'], 'keyboards' => ['gaming keyboards', 'gaming keyboard', 'mechanical keyboard'],
+    'audio' => ['gaming headsets', 'gaming headset'], 'speakers' => ['pc speakers', 'gaming speakers'], 'cpu' => ['gaming cpus', 'gaming cpu', 'gaming processor'],
+    'ram' => ['ram kits', 'ram kit', 'ddr5 ram', 'ddr4 ram'], 'cases' => ['pc cases', 'pc case'], 'chairs' => ['gaming chairs', 'gaming chair'],
+    'handhelds' => ['gaming handhelds', 'handheld gaming pc'], 'laptops' => ['gaming laptops', 'gaming laptop']];
+
+/** [phrase (lower case) => path] lists, in priority order. */
+function rocTopicPhrases(PDO $pdo): array {
+    static $groups = null;
+    if ($groups !== null) return $groups;
+    $ok = function (string $p) { return (bool)preg_match('#^/(products|category|compare|blogs|guides|can-i-run|gaming-platforms)/[a-z0-9/_-]*$#', $p); };
+    $anchors = [];
+    // The searches each page is shown for (cms_settings gsc_queries, written daily by cms/gsc-lib.php): 2-6 words, 4 a page.
+    $gq = rocLinkBoostSetting($pdo, 'gsc_queries');
+    foreach ((is_array($gq) && is_array($gq['rows'] ?? null)) ? $gq['rows'] : [] as $r) {
+        $q = (string)($r['q'] ?? ''); $w = count(preg_split('/\s+/', trim($q)));
+        if ($w < 2 || $w > 6 || preg_match('/run ?on ?console|\broc\b|site:|https?:|\.com/', $q)) continue;
+        if (count($anchors[$r['p']] ?? []) < 4) $anchors[(string)$r['p']][] = $q;
+    }
+    $byPath = [];
+    foreach ($anchors as $path => $qs) if ($ok($path)) foreach ($qs as $q) $byPath[$path][] = $q;
+    foreach (rocLinkBoostProducts($pdo) as $path => $p) if (mb_strlen($p[1]) >= 8) $byPath[$path][] = mb_strtolower($p[1]);
+    foreach (ROC_TOPIC_CAT_WORDS as $slug => $words) foreach ($words as $w) $byPath['/category/' . $slug . '/'][] = $w;
+    $boost = array_flip(array_filter((array)rocLinkBoostSetting($pdo, 'link_boost'), 'is_string'));
+    $g = [[], [], [], []];
+    foreach ($byPath as $path => $phrases) foreach ($phrases as $i => $ph) {
+        $ph = trim((string)preg_replace('/\s+/', ' ', $ph));
+        if (mb_strlen($ph) < 5) continue;
+        $isQuery = isset($anchors[$path]) && in_array($ph, $anchors[$path], true);
+        $k = isset($boost[$path]) ? 0 : ($isQuery ? 1 : (strpos($path, '/products/') === 0 ? 2 : 3));
+        if (!isset($g[$k][$ph])) $g[$k][$ph] = $path;
+    }
+    // Longest first inside a group, so "rtx 4060 ti" wins over "rtx 4060"; in chunks (regex size).
+    $groups = [];
+    foreach ($g as $list) {
+        uksort($list, function ($a, $b) { return mb_strlen($b) <=> mb_strlen($a); });
+        foreach (array_chunk($list, 200, true) as $chunk)
+            $groups[] = ['/(?<![\w\-])(' . implode('|', array_map(function ($x) { return preg_quote($x, '/'); }, array_keys($chunk))) . ')(?![\w\-])/iu', $chunk];
+    }
+    return $groups;
+}
+
+function rocTopicLinks(PDO $pdo, string $html, string $self): string {
+    if ($html === '') return $html;
+    $groups = rocTopicPhrases($pdo);
+    if (!$groups) return $html;
+    preg_match_all('~href="(?:https://runonconsole\.com)?(/[^"#?]*)~', $html, $m);
+    $used = array_flip($m[1]); $used[$self] = 1;
+    $parts = preg_split('/(<[^>]+>)/', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $count = 0; $links = [];
+    foreach ($groups as [$re, $chunk]) {
+        if ($count >= ROC_TOPIC_LINKS) break;
+        $skip = 0;
+        foreach ($parts as $k => $part) {
+            if ($part === '') continue;
+            if ($part[0] === '<') {
+                if (preg_match('#^<(/?)(a|h[1-6]|code|pre|figcaption|button|script|style|table|blockquote)\b#i', $part, $t)) $skip = max(0, $skip + ($t[1] === '/' ? -1 : 1));
+                continue;
+            }
+            if ($skip > 0 || $count >= ROC_TOPIC_LINKS) continue;
+            $parts[$k] = (string)preg_replace_callback($re, function ($x) use ($chunk, &$used, &$count, &$links) {
+                $path = $chunk[mb_strtolower($x[1])] ?? null;
+                if ($path === null || isset($used[$path]) || $count >= ROC_TOPIC_LINKS) return $x[0];
+                $used[$path] = 1; $count++;
+                $links[] = '<a href="' . htmlspecialchars($path, ENT_QUOTES, 'UTF-8') . '">' . $x[1] . '</a>';
+                return "\x01" . (count($links) - 1) . "\x02";      // a placeholder: later phrases must not match inside it
+            }, $part);
+        }
+    }
+    if (!$links) return $html;
+    return (string)preg_replace_callback('/\x01(\d+)\x02/', function ($x) use ($links) { return $links[(int)$x[1]]; }, implode('', $parts));
+}

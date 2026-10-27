@@ -61,9 +61,29 @@ function rocBlogReviewOn(PDO $pdo): bool { return (string)rocBlogGet($pdo, 'blog
  */
 const ROC_BLOG_AUTO_UNTIL = '2026-10-19';
 function rocBlogAutoUntil(PDO $pdo): string { $v = rocBlogGet($pdo, 'blog_auto_until', null); return $v === null ? ROC_BLOG_AUTO_UNTIL : (string)$v; }
+/**
+ * Owner, 2026-10-27: from 1 November 2026 the server writes the blog posts again, on 3 days a week (Monday,
+ * Wednesday, Friday), one post a day at the first free publishing time, going on with the plan and every rule
+ * above (category rounds, 1,000+ words, buy boxes, internal links) plus the real Google searches (gsc-lib.php).
+ * CMS settings: blog_auto_from ('' = do not start again), blog_days ([1, 3, 5]; 1 = Monday ... 7 = Sunday),
+ * blog_per_day (1).
+ */
+const ROC_BLOG_AUTO_FROM = '2026-11-01';
+const ROC_BLOG_DAYS = [1, 3, 5];
+const ROC_BLOG_PER_DAY = 1;
+function rocBlogAutoFrom(PDO $pdo): string { $v = rocBlogGet($pdo, 'blog_auto_from', null); return $v === null ? ROC_BLOG_AUTO_FROM : (string)$v; }
+function rocBlogDays(PDO $pdo): array {
+    $d = rocBlogGet($pdo, 'blog_days', null);
+    $d = is_array($d) ? array_values(array_unique(array_filter(array_map('intval', $d), function ($x) { return $x >= 1 && $x <= 7; }))) : [];
+    return $d ?: ROC_BLOG_DAYS;
+}
+function rocBlogPerDay(PDO $pdo): int { return max(1, min(6, (int)rocBlogGet($pdo, 'blog_per_day', ROC_BLOG_PER_DAY))); }
 function rocBlogAutoEnded(PDO $pdo): bool {
+    $today = (new DateTime('now', new DateTimeZone(ROC_BLOG_TZ)))->format('Y-m-d');
+    $from = rocBlogAutoFrom($pdo);
+    if ($from !== '' && $today >= $from) return false;
     $u = rocBlogAutoUntil($pdo);
-    return $u !== '' && (new DateTime('now', new DateTimeZone(ROC_BLOG_TZ)))->format('Y-m-d') >= $u;
+    return $u !== '' && $today >= $u;
 }
 
 /** Posts waiting for review: [post id => time it was written], only the ones still scheduled. */
@@ -126,22 +146,34 @@ function rocBlogLog(PDO $pdo, array $entry): void {
 
 /* ----------------------------------------------------------------- slots */
 
-/** Free slots (UTC 'Y-m-d H:i:s' => label) for today and the next 2 days, after now + 5 minutes. */
-function rocBlogFreeSlots(PDO $pdo, int $days = 3): array {
+/**
+ * Free slots (UTC 'Y-m-d H:i:s' => label) for today and the next days, after now + 5 minutes: only on the
+ * blog days (rocBlogDays) and at most rocBlogPerDay posts a day.
+ */
+function rocBlogFreeSlots(PDO $pdo, int $days = 7): array {
     $tz = new DateTimeZone(ROC_BLOG_TZ);
     $taken = [];
     // News (CMS > Blog writer > News) has its own limits and does not take a blog time.
     $q = $pdo->query("SELECT published_at FROM blogs WHERE status IN ('scheduled', 'published') AND (category IS NULL OR category <> 'News') AND published_at >= '" . gmdate('Y-m-d H:i:s', time() - 86400) . "'");
     foreach ($q->fetchAll(PDO::FETCH_COLUMN) as $t) $taken[] = strtotime($t . ' UTC');
+    $perDay = rocBlogPerDay($pdo); $blogDays = rocBlogDays($pdo);
+    $onDay = [];
+    foreach ($taken as $t) { $k = (new DateTime('@' . $t))->setTimezone($tz)->format('Y-m-d'); $onDay[$k] = ($onDay[$k] ?? 0) + 1; }
     $out = [];
     for ($d = 0; $d < $days; $d++) {
+        $day = new DateTime('today', $tz);
+        $day->modify("+{$d} day");
+        if (!in_array((int)$day->format('N'), $blogDays, true)) continue;
+        $n = $onDay[$day->format('Y-m-d')] ?? 0;
         foreach (rocBlogSlots($pdo) as $hm) {
+            if ($n >= $perDay) break;
             $local = new DateTime('today ' . $hm, $tz);
             $local->modify("+{$d} day");
             $ts = $local->getTimestamp();
             if ($ts < time() + 300) continue;
             foreach ($taken as $t) if (abs($t - $ts) < 1800) continue 2;    // a post within 30 min of the slot
             $out[gmdate('Y-m-d H:i:s', $ts)] = $local->format('D j M, H:i') . ' (Pakistan time)';
+            $n++;
         }
     }
     return $out;
@@ -293,7 +325,7 @@ function rocBlogPlanSeed(PDO $pdo, array $old = []): array {
     foreach ((array)($old['topics'] ?? []) as $t) if (!empty($t['id'])) $oldTopics[$t['id']] = $t;
     foreach ($oldTopics as $id => $t) {
         if (isset($topics[$id])) $topics[$id] = array_merge($topics[$id], array_intersect_key($t, array_flip(['status', 'post_id', 'slug', 'title', 'keyword', 'secondary', 'stage'])));
-        elseif (($t['status'] ?? '') !== 'planned' || !empty($t['manual'])) $topics[$id] = $t;
+        elseif (($t['status'] ?? '') !== 'planned' || !empty($t['manual']) || ($t['source'] ?? '') === 'gsc') $topics[$id] = $t;
     }
     return ['pillars' => $pillars, 'topics' => array_values($topics), 'built' => gmdate('c'), 'seed_v' => ROC_BLOG_SEED_V,
             'last_pillar' => $old['last_pillar'] ?? null, 'round' => $old['round'] ?? null];
@@ -341,7 +373,11 @@ function rocBlogNewPattern(PDO $pdo): bool {
 /** The next topic of the round under way (plan.round = {pillar, step}), or the first of a new round. */
 function rocBlogNextInRound(array $plan, array $open): ?array {
     $openBy = [];
-    foreach ($open as $t) if (strpos((string)$t['pillar'], 'cat-') === 0) $openBy[$t['pillar']][$t['stage']][] = $t;
+    // Topics from real Google searches (source gsc, gsc-lib.php) go first in their category and stage.
+    foreach ($open as $t) if (strpos((string)$t['pillar'], 'cat-') === 0) {
+        $openBy[$t['pillar']][$t['stage']] = $openBy[$t['pillar']][$t['stage']] ?? [];
+        if (($t['source'] ?? '') === 'gsc') array_unshift($openBy[$t['pillar']][$t['stage']], $t); else $openBy[$t['pillar']][$t['stage']][] = $t;
+    }
     if (!$openBy) return null;
     $pick = function (string $pillar, int $from) use ($openBy): ?array {
         for ($i = $from; $i < count(ROC_BLOG_ROUND); $i++) {
@@ -1119,9 +1155,12 @@ function rocBlogBrief(PDO $pdo, ?array $topic = null): ?array {
     $recent = array_slice(array_values(array_map(function ($b) { return $b['title']; }, rocBlogSite($pdo)['posts'])), 0, 60);
     $kw = rocBlogKeywords((string)$topic['keyword']);
     $secondary = array_values(array_unique(array_merge($kw['secondary'], (array)($topic['secondary'] ?? []))));
+    // What people really searched on Google before landing on ROC (Search Console, gsc-lib.php).
+    $searches = [];
+    try { require_once __DIR__ . '/gsc-lib.php'; $searches = rocGscForTopic($pdo, $topic); } catch (\Throwable $e) {}
     return ['topic_id' => $topic['id'], 'stage' => $topic['stage'], 'cluster' => $pillarName, 'title_idea' => $topic['title'],
             'focus_keyword' => $kw['focus'], 'secondary_keywords' => array_slice($secondary, 0, 8), 'keyword_source' => $kw['source'], 'intent' => $intent,
-            'links' => rocBlogTopicLinks($pdo, $plan, $topic), 'avoid_titles' => $recent,
+            'links' => rocBlogTopicLinks($pdo, $plan, $topic), 'avoid_titles' => $recent, 'searches' => $searches,
             'categories' => ['Buying Guides', 'Can I Run It', 'How To', 'Platforms', 'Comparisons']];
 }
 
@@ -1134,6 +1173,7 @@ function rocBlogPrompt(array $brief, string $publishAt): string {
         . "TITLE IDEA: {$brief['title_idea']} (you may improve it; keep the focus keyword)\n"
         . "FOCUS KEYWORD: {$brief['focus_keyword']}\n"
         . ($brief['secondary_keywords'] ? 'SECONDARY KEYWORDS (use naturally): ' . implode(', ', $brief['secondary_keywords']) . "\n" : '')
+        . (!empty($brief['searches']) ? 'REAL GOOGLE SEARCHES that brought readers to ROC (Search Console). Answer the ones that fit this post, for example as an <h2> or an FAQ question, in honest helpful words; skip any that do not fit the topic: ' . implode(' | ', $brief['searches']) . "\n" : '')
         . "\nINTERNAL LINKS YOU MUST USE (each once). Anchor text = the searched keyword of the page it points to: for a product its full name plus its type (\"Razer Viper V4 Pro gaming mouse\"), for a hub page its \"best ...\" phrase (\"best gaming mice\"), for a post its main keyword. Never \"click here\" or \"this page\":\n" . $links($brief['links']['must'])
         . "\n\nINTERNAL LINKS YOU MAY USE (1-3 of them, only where they really help):\n" . $links($brief['links']['may'])
         . "\nUse NO other internal addresses. External links only to official sources (game publishers, manufacturers) and only if essential.\n\n"

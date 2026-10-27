@@ -153,6 +153,13 @@ try {
 } catch (\Throwable $e) { echo date('c') . ' indexing error: ' . $e->getMessage() . "
 "; }
 
+// Logins for CMS > Live activity (Deploy 120): copied before a logout deletes the session row.
+try {
+    require_once $ROOT . '/api/v1/cms/form-activity-lib.php';
+    rocFaSync($pdo);
+} catch (\Throwable $e) { echo date('c') . ' activity error: ' . $e->getMessage() . "
+"; }
+
 // New popular Steam games for the Can I run pages (Deploy 87): a few store requests a run, once a month.
 try {
     require_once $ROOT . '/api/v1/steam-update-lib.php';

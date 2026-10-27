@@ -135,7 +135,8 @@ function rocDigestEmail(array $content, array $wishlist, string $name, string $u
     };
     $wl = array_map(function ($w) { return ['title' => $w['title'], 'url' => 'https://runonconsole.com' . $w['url'],
         'excerpt' => $w['type'] === 'product' ? 'See the details and check the current price on the product page.' : 'Check if your PC runs it.']; }, array_slice($wishlist, 0, 6));
-    $html = '<!doctype html><html><body style="margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a">'
+    // <!--roc-from:alerts-->: sent from "Run On Console Updates" <alerts@runonconsole.com> (cli-alerts-sender.php).
+    $html = '<!doctype html><!--roc-from:alerts--><html><body style="margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a">'
         . '<div style="max-width:600px;margin:0 auto;background:#fff">'
         . '<div style="background:#064e3b;color:#fff;padding:22px 24px"><div style="font-size:20px;font-weight:bold">Run On Console</div><div style="color:#a7f3d0;font-size:13px">Your week in gaming</div></div>'
         . '<div style="padding:8px 24px 24px;font-size:15px;line-height:1.6">'

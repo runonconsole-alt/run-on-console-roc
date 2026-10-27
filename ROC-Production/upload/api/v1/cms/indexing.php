@@ -2,7 +2,7 @@
 /**
  * Run On Console — CMS > Indexing (Deploy 117): which pages Google has indexed (gsc-lib.php).
  *
- *   GET  indexing.php?filter=all|indexed|not|unchecked|new&kind=&q=&page=1
+ *   GET  indexing.php?filter=all|indexed|not|unchecked|new|queries&kind=&q=&page=1
  *        {key, stats, rows, error, email, checked_today}
  *   POST {action: "email", email}   where the daily "newly indexed" email goes (administrators)
  */
@@ -42,6 +42,23 @@ $out['checked_today'] = (is_array($c) && ($c['day'] ?? '') === gmdate('Y-m-d')) 
 try { $out['stats'] = rocGscStats($pdo); } catch (\Throwable $e) { $out['stats'] = ['total' => 0, 'indexed' => 0, 'not_indexed' => 0, 'unchecked' => 0, 'by_kind' => []]; }
 
 $filter = (string)($_GET['filter'] ?? 'new');
+// Search queries (Deploy 120): what people searched, the page Google showed, clicks, impressions, position.
+if ($filter === 'queries') {
+    $d = rocBlogGet($pdo, 'gsc_queries', []);
+    $rows = is_array($d) && is_array($d['rows'] ?? null) ? $d['rows'] : [];
+    $q = mb_strtolower(trim((string)($_GET['q'] ?? '')));
+    if ($q !== '') $rows = array_values(array_filter($rows, function ($r) use ($q) { return strpos($r['q'], $q) !== false || strpos($r['p'], $q) !== false; }));
+    $plan = rocBlogGet($pdo, 'blog_plan', []);
+    $topics = [];
+    foreach ((array)(is_array($plan) ? ($plan['topics'] ?? []) : []) as $t) if (($t['source'] ?? '') === 'gsc')
+        $topics[] = ['title' => $t['title'], 'status' => $t['status'] ?? 'planned', 'added' => $t['added'] ?? '', 'impressions' => $t['impressions'] ?? 0];
+    $out['queries'] = array_slice($rows, 0, 300);
+    $out['queries_total'] = count($rows);
+    $out['queries_range'] = is_array($d) && $d ? ['from' => $d['from'] ?? '', 'to' => $d['to'] ?? '', 'day' => $d['day'] ?? '', 'skipped' => $d['skipped'] ?? 0] : null;
+    $out['gsc_topics'] = array_reverse($topics);
+    $out['rows'] = [];
+    rocIxOut(200, $out);
+}
 $kind = preg_replace('/[^a-z]/', '', (string)($_GET['kind'] ?? ''));
 $q = trim((string)($_GET['q'] ?? ''));
 $page = max(1, (int)($_GET['page'] ?? 1));

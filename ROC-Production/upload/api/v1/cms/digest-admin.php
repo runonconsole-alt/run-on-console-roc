@@ -27,7 +27,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         $to = trim((string)($in['email'] ?? ''));
         if (!filter_var($to, FILTER_VALIDATE_EMAIL)) rocCmsDeny(422, 'Enter a valid email address.');
         [$subj, $html] = rocDigestEmail(rocDigestContent($pdo), [], 'there', 'https://runonconsole.com/profile/?tab=wishlist');
-        if (!rocDigestQueue($pdo, $to, '[Test] ' . $subj, $html, 9)) rocCmsDeny(500, 'The email could not be queued (email_queue).');
+        if (!rocDigestQueue($pdo, $to, $subj, $html, 9)) rocCmsDeny(500, 'The email could not be queued (email_queue).');
         echo json_encode(['success' => true, 'message' => 'Test email queued for ' . $to . ': it arrives within a few minutes.']); exit;
     }
     rocCmsDeny(400, 'Unknown action.');
