@@ -810,6 +810,12 @@ RELEASES = [
          checks=[dict(label='New game titles', type='contains', path='game-render.php', text='Recommended System Requirements')],
          pr=REPO + '121',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS Dashboard > Clear cache.']),
+    dict(deploy=123, date='2026-10-28', title='Blog writer leaves out other review sites',
+         changes=['The blog writer no longer takes keywords with another review site in them (RTINGS, IGN, PCMag, TechRadar ...), so no title says "review RTINGS" again',
+                  'Search queries with another review site in them are left out of the link words and the blog topics from searches'],
+         checks=[dict(label='Review sites filter', type='contains', path='api/v1/cms/gsc-lib.php', text='ROC_GSC_SITES')],
+         pr=REPO + '122',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

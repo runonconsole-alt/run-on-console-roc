@@ -1,0 +1,21 @@
+{
+ "deploy": 123,
+ "date": "2026-10-28",
+ "title": "Blog writer leaves out other review sites",
+ "changes": [
+  "The blog writer no longer takes keywords with another review site in them (RTINGS, IGN, PCMag, TechRadar ...), so no title says \"review RTINGS\" again",
+  "Search queries with another review site in them are left out of the link words and the blog topics from searches"
+ ],
+ "checks": [
+  {
+   "label": "Review sites filter",
+   "type": "contains",
+   "path": "api/v1/cms/gsc-lib.php",
+   "text": "ROC_GSC_SITES"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/122",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it."
+ ]
+}
