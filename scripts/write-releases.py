@@ -798,6 +798,12 @@ RELEASES = [
                  dict(label='alerts@ sender (cli-alerts-sender.php --apply)', type='contains', path='api/v1/account-runtime.php', text='ROC alerts sender')],
          pr=REPO + '119',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-alerts-sender.php --apply', 'CMS Dashboard > Clear cache.']),
+    dict(deploy=121, date='2026-10-28', title='CMS search box and a faster CMS',
+         changes=['A search box above Workspace (Ctrl+K) finds any CMS page, the parts inside pages (Settings > Redirects or Noindex, Updates writer > News, Indexing > Search queries, Clear cache, Amazon tag ...), posts and products, and opens them',
+                  'The CMS opens at once with what your browser saw last time and fills in the fresh lists a moment later; a page you opened before shows at once and updates itself in the background'],
+         checks=[dict(label='CMS search', type='contains', path='cms/index.html', text='cmsFindBind')],
+         pr=REPO + '120',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Reload the CMS with Ctrl+F5.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
