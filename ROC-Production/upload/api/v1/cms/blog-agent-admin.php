@@ -77,7 +77,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
         'state' => rocBlogGet($pdo, 'blog_engine_state', []) ?: new stdClass(), 'plan' => $plan, 'next' => $next['id'] ?? null,
         'next_slot' => $nextUtc ? gmdate('c', strtotime($nextUtc . ' UTC')) : null, 'writer_lead' => ROC_WRITER_LEAD,
         'next_topic' => $next['title'] ?? null, 'review' => rocBaReview($pdo),
-        'auto_until' => rocBlogAutoUntil($pdo), 'auto_ended' => rocBlogAutoEnded($pdo)]);
+        'auto_until' => rocBlogAutoUntil($pdo), 'auto_ended' => rocBlogAutoEnded($pdo),
+        'auto_from' => rocBlogAutoFrom($pdo), 'blog_days' => rocBlogDays($pdo), 'per_day' => rocBlogPerDay($pdo)]);
 }
 
 $in = json_decode((string)file_get_contents('php://input'), true) ?: [];

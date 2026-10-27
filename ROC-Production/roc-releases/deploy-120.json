@@ -1,0 +1,44 @@
+{
+ "deploy": 120,
+ "date": "2026-10-27",
+ "title": "Blog 3 days a week, Google searches as link words, form activity",
+ "changes": [
+  "From 1 November the server writes blog posts again on Monday, Wednesday and Friday (one a day, 11:00 Pakistan time), going on with the category plan and all its rules",
+  "CMS > Indexing > Search queries: what people search on Google (Search Console, last 4 weeks, only gaming and PC searches) and which page it shows; searches that are shown often but not on page 1 are marked Opportunity",
+  "Blog, news and guide posts link our other pages where they name them (up to 5 a post): pages Google has not indexed yet first, with the words people search as the link text, then products and categories",
+  "The blog writer gets the real Google searches that fit each post; questions about a product category where ROC is not on page 1 yet become new blog topics (at most 3 a day, never adult, gambling, piracy or cheat searches)",
+  "CMS > Live activity also shows logins, sign-up codes, password resets and every form message with name, email, form and page",
+  "The weekly email and the indexing email come from \"Run On Console Updates\" <alerts@runonconsole.com>; the test email has no [Test] in the subject"
+ ],
+ "checks": [
+  {
+   "label": "Search queries",
+   "type": "contains",
+   "path": "api/v1/cms/gsc-lib.php",
+   "text": "rocGscQueriesSync"
+  },
+  {
+   "label": "Links inside posts",
+   "type": "contains",
+   "path": "api/v1/link-boost-lib.php",
+   "text": "function rocTopicLinks"
+  },
+  {
+   "label": "Form activity",
+   "type": "file",
+   "path": "api/v1/cms/form-activity.php"
+  },
+  {
+   "label": "alerts@ sender (cli-alerts-sender.php --apply)",
+   "type": "contains",
+   "path": "api/v1/account-runtime.php",
+   "text": "ROC alerts sender"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/119",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it.",
+  "php public_html/api/v1/cron/cli-alerts-sender.php --apply",
+  "CMS Dashboard > Clear cache."
+ ]
+}

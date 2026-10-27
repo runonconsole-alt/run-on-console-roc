@@ -573,6 +573,8 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
     $metaT    = trim((string)($p['meta_title'] ?? '')) ?: ($title . ' | Run On Console');
     $excerpt  = trim((string)($p['excerpt'] ?? ''));
     $body     = rocGameLinks($root, rocBodyHtml((string)($p['content'] ?? '')), $pdo);
+    // Links to our other pages where the post names them, with the searched words as anchors (link-boost-lib.php).
+    if ($pdo) { require_once __DIR__ . '/api/v1/link-boost-lib.php'; $body = rocTopicLinks($pdo, $body, (string)parse_url($url, PHP_URL_PATH)); }
     // Affiliate links written into a post (Amazon, or any link with tag=): rel="sponsored nofollow", as Google asks.
     $body = (string)preg_replace_callback('~<a\b([^>]*\bhref="[^"]*(?:amazon\.|amzn\.|[?&]tag=)[^"]*"[^>]*)>~i', function ($m) {
         $a = (string)preg_replace('~\srel="[^"]*"~i', '', $m[1]);

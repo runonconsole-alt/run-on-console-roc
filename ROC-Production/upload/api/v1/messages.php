@@ -69,6 +69,10 @@ foreach ((is_array($in['meta'] ?? null) ? $in['meta'] : []) as $k => $v) {
     $meta[$k] = $clip($v, 500);
 }
 
+// The page the form was sent from (CMS > Live activity, Messages).
+$from = (string)parse_url((string)($_SERVER['HTTP_REFERER'] ?? ''), PHP_URL_PATH);
+if ($from !== '' && !isset($meta['page'])) $meta['page'] = $clip($from, 200);
+
 // Bots fill in every field, including the hidden one: pretend it worked.
 if ($clip($in['website'] ?? '', 200) !== '') rocMsgOut(200, ['success' => true, 'reference' => 'MSG-' . random_int(100000, 999999)]);
 
