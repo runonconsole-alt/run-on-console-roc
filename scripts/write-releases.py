@@ -821,6 +821,14 @@ RELEASES = [
          checks=[dict(label='Laptop question', type='contains', path='game-render.php', text='on a laptop?')],
          pr=REPO + '123',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS Dashboard > Clear cache.']),
+    dict(deploy=125, date='2026-10-28', title='Fixes from the October site audit',
+         changes=['The two links on every Can I run page to /compatibility/?steam=... are nofollow, so Google stops spending its visits on 2,400 copies of the checker and has more time for the product pages',
+                  'Guides filtered by type (/guides/?type=buying ...) are noindex, follow: they were thin copies of /guides/',
+                  'News and blog list pages 2 and up keep their description within 155 characters'],
+         checks=[dict(label='Nofollow checker links', type='contains', path='game-render.php', text='rel="nofollow" href="/compatibility/?steam='),
+                 dict(label='Guides type filter noindex', type='contains', path='blog-render.php', text="'noindex, follow' : 'index, follow, max-image-preview:large'")],
+         pr=REPO + '124',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS Dashboard > Clear cache.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

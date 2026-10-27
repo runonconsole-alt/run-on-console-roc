@@ -758,6 +758,7 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
 
     $canonical = ROC_PUBLIC_URL . rocPageUrl($base, $page);
     if ($page > 1) { $title = 'Page ' . $page . ' – ' . $title; $desc = 'Page ' . $page . ': ' . $desc; }   // no two pages share a description
+    if (mb_strlen($desc) > 155) $desc = rtrim(mb_substr($desc, 0, (int)mb_strrpos(mb_substr($desc, 0, 153), ' ')), ' ,:;') . '…';   // Deploy 125 audit: news page 2+ was 166
     $robots = $query !== '' ? 'noindex, follow' : 'index, follow, max-image-preview:large';
 
     $ogImage = ROC_PUBLIC_URL . '/images/trending_elden.jpg';
@@ -1050,7 +1051,8 @@ function rocRenderGuides(string $root, PDO $pdo, int $page, string $type): void 
     $h  = '<title>' . rocH($title) . "</title>\n";
     $h .= '    <meta name="title" content="' . rocH($title) . "\" />\n";
     $h .= '    <meta name="description" content="' . rocH($desc) . "\" />\n";
-    $h .= '    <meta name="robots" content="index, follow, max-image-preview:large" />' . "\n";
+    // Deploy 125 audit: a type filter (?type=buying ...) is a thin copy of /guides/ (137-244 words), so Google skips it but follows its links.
+    $h .= '    <meta name="robots" content="' . ($type !== '' ? 'noindex, follow' : 'index, follow, max-image-preview:large') . '" />' . "\n";
     $h .= '    <link rel="canonical" href="' . rocH($canonical) . "\" />\n";
     $h .= "    <meta property=\"og:type\" content=\"website\" />\n";
     $h .= '    <meta property="og:url" content="' . rocH($canonical) . "\" />\n";
