@@ -497,7 +497,7 @@ $m .= '<section class="gp-card" id="check"><h2>Check your PC</h2>'
     . '<label>Processor<select data-k="cpu">' . $opt($cpus, 'Intel Core i5-8400') . '</select></label>'
     . '<label>Memory (RAM)<select data-k="ram">' . implode('', array_map(function ($r) { return '<option value="' . $r . '"' . ($r === 16 ? ' selected' : '') . '>' . $r . ' GB</option>'; }, [4, 6, 8, 12, 16, 24, 32, 64])) . '</select></label>'
     . '</div><div class="gp-res" id="gp-res" aria-live="polite"></div>'
-    . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/?steam=' . (int)$g['appid'] . '">Full check (laptops, consoles, more parts) &rarr;</a>'
+    . '<div class="gp-btns"><a class="gp-btn p" rel="nofollow" href="/compatibility/?steam=' . (int)$g['appid'] . '">Full check (laptops, consoles, more parts) &rarr;</a>'
     . '<a class="gp-btn s" href="#requirements">See the requirements</a>'
     . '<button type="button" class="gp-btn s" data-roc-ask="' . rocH('Can my PC run ' . $name . '? My graphics card: , processor: , RAM: ') . '">Ask ROC about my PC</button></div></section>';
 
@@ -573,7 +573,7 @@ $more = [['/compatibility/?steam=' . (int)$g['appid'], 'Full PC check', 'Laptops
 // Gear pages that still need links (Deploy 116): the Can I run pages are indexed, the product pages less so.
 if (isset($pdo) && $pdo) { require_once __DIR__ . '/api/v1/link-boost-lib.php'; $m .= rocLinkBoostBox($pdo, rocGpPath($g), 'Gear to play ' . $name); }
 $m .= '<section class="gp-card"><h2>More for PC players</h2><div class="gp-sim">'
-    . implode('', array_map(function ($l) { return '<a href="' . rocH($l[0]) . '"><strong>' . rocH($l[1]) . '</strong><span>' . rocH($l[2]) . '</span></a>'; }, $more)) . '</div></section>';
+    . implode('', array_map(function ($l) { return '<a href="' . rocH($l[0]) . '"' . (strpos($l[0], '?steam=') !== false ? ' rel="nofollow"' : '') . '><strong>' . rocH($l[1]) . '</strong><span>' . rocH($l[2]) . '</span></a>'; }, $more)) . '</div></section>';
 $m .= '<p class="gp-src">Ask <b>ROC</b>, our gaming assistant (the chat button), "can my PC run ' . rocH($name) . '?" and tell it your parts, or upload your dxdiag file.</p>';
 $m .= '</article>';
 
