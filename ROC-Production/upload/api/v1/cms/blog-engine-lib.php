@@ -29,6 +29,7 @@ define('ROC_BLOG_ENGINE_LIB', 1);
 
 require_once __DIR__ . '/site-layer-lib.php';
 require_once __DIR__ . '/cms-html.php';
+require_once __DIR__ . '/seo-check-lib.php';   // Deploy 127: one check for titles and descriptions
 
 const ROC_BLOG_TZ = 'Asia/Karachi';
 const ROC_BLOG_SLOTS = ['16:00', '23:00'];
@@ -575,6 +576,8 @@ function rocBlogCreate(PDO $pdo, string $root, array $in, string $source): array
     if ($metaT === '' || mb_strlen($metaT) > 60) $errors['meta_title'] = 'Meta title must be 1-60 characters.';
     if (mb_strlen($metaD) < 70 || mb_strlen($metaD) > 160) $errors['meta_description'] = 'Meta description must be 70-160 characters.';
     if ($excerpt === '') $errors['excerpt'] = 'Excerpt is required.';
+    foreach (rocSeoCheck(['title' => $title, 'meta_title' => $metaT, 'meta_description' => $metaD, 'excerpt' => $excerpt, 'focus_keyword' => $focus,
+                          'slug' => (string)($in['slug'] ?? '')]) as $k => $m) if (!isset($errors[$k])) $errors[$k] = $m;
     $minWords = rocBlogNewPattern($pdo) ? ROC_BLOG_MIN_WORDS : 600;
     if ($words < $minWords) $errors['content_html'] = "Content has {$words} words; at least {$minWords} are needed. Write more useful detail in every section.";
 
@@ -1200,6 +1203,11 @@ function rocBlogPrompt(array $brief, string $publishAt): string {
         . "- No prices or discounts (say \"check the current price on the product page\"). No invented benchmarks or test results; never say \"we tested\". If unsure of a spec, leave it out.\n"
         . "- Allowed HTML only: p, h2, h3, ul, ol, li, strong, em, a, table, thead, tbody, tr, th, td, blockquote.\n"
         . "- Do not reuse any of these existing titles or near-duplicates: " . implode(' | ', array_slice($brief['avoid_titles'], 0, 40)) . "\n\n"
+        . "TITLE AND DESCRIPTION RULES (checked by the site; a post that breaks one is sent back):\n"
+        . "- Never name another review site or magazine (RTINGS, IGN, PCMag, Tom's Hardware, TechRadar ...) anywhere, not even if it is in a keyword.\n"
+        . "- Write product and brand names the way the maker does: \"ATH-M50x\", \"RTX 4060\", \"NVIDIA\", \"Xbox\", \"PS5\", \"GPU\", \"FPS\"; never in lowercase.\n"
+        . "- Start the title, meta title and meta description with a capital letter; the meta description starts with what the reader gets, never with \"Discover\", \"Read our\", \"Learn\" or \"Check out\".\n"
+        . "- Meta title at most 60 characters; meta description 120-155 characters; the focus keyword once in the title, in natural words.\n\n"
         . "Answer with ONLY a JSON object with exactly these keys:\n"
         . "{\"title\": \"30-70 characters, with the focus keyword\", \"focus_keyword\": \"...\", \"meta_title\": \"max 60 characters\", "
         . "\"meta_description\": \"120-155 characters with the keyword and a clear benefit\", \"excerpt\": \"1-2 sentences\", "
@@ -1373,8 +1381,6 @@ function rocBlogServerTick(PDO $pdo, string $root, bool $force = false): ?string
         if (!$w['ok']) { $msg = $w['error']; continue; }
         $a = $w['article'];
         $a['publish_at'] = $at; $a['topic_id'] = $brief['topic_id'];
-        if (mb_strlen((string)($a['meta_title'] ?? '')) > 60) $a['meta_title'] = rtrim(mb_substr((string)$a['meta_title'], 0, 57)) . '…';
-        if (mb_strlen((string)($a['meta_description'] ?? '')) > 160) $a['meta_description'] = rtrim(mb_substr((string)$a['meta_description'], 0, 157)) . '…';
         $r = rocBlogCreate($pdo, $root, $a, 'server (' . $model . ')');
         if ($r['ok']) {
             $state['last_ok'] = gmdate('Y-m-d H:i:s'); $state['last_error'] = ''; $state['last_by'] = $model;

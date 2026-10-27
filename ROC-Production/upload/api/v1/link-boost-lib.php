@@ -142,10 +142,24 @@ function rocLinkBoostUnindexed(PDO $pdo): array {
  * on every post (so all of them get links). Products the text already links are left out.
  */
 const ROC_TOP_LINKS = 3;
+// A post without a topic category (the older ones) gets one from its title, focus keyword and summary (Deploy 127:
+// the Audeze Maxwell 2 headset review showed a monitor first). The first match wins.
+const ROC_TOP_CAT_WORDS = ['audio' => 'headsets?|headphones?|earbuds|microphones?|\bmic\b|audeze|ath-m50x|\banc\b', 'speakers' => 'speakers?|soundbars?',
+    'chairs' => 'chairs?', 'keyboards' => 'keyboards?|keycaps?|switches', 'mice' => 'mouse|mice|\bdpi\b', 'monitors' => 'monitors?|displays?|\boled\b|refresh rate',
+    'handhelds' => 'handhelds?|steam deck|rog ally|legion go', 'laptops' => 'laptops?|notebooks?', 'cases' => 'pc cases?|computer cases?|\bcases?\b|airflow',
+    'ram' => '\bram\b|\bddr[45]\b|memory kits?', 'cpu' => '\bcpus?\b|processors?|ryzen|core i[3579]|core ultra', 'gpu' => '\bgpus?\b|graphics cards?|\brtx\b|\bgtx\b|radeon'];
+function rocLinkBoostPostCat(array $post): string {
+    if (trim((string)($post['topic_cat'] ?? '')) !== '') return (string)$post['topic_cat'];
+    foreach ([(string)($post['title'] ?? '') . ' ' . (string)($post['focus_keyword'] ?? ''), (string)($post['excerpt'] ?? '')] as $text) {
+        $t = mb_strtolower($text);
+        foreach (ROC_TOP_CAT_WORDS as $cat => $re) if (preg_match('/' . $re . '/u', $t)) return $cat;
+    }
+    return '';
+}
 function rocLinkBoostTop(PDO $pdo, string $seed, array $post, string $body = ''): string {
     $pool = rocLinkBoostUnindexed($pdo);
     if (!$pool) return '';
-    $cat = (string)($post['topic_cat'] ?? '');
+    $cat = rocLinkBoostPostCat($post);
     $words = [];
     foreach (preg_split('/[^a-z0-9]+/', mb_strtolower((string)($post['title'] ?? '') . ' ' . (string)($post['focus_keyword'] ?? ''))) as $w)
         if (strlen($w) > 3 && !in_array($w, ['best', 'gaming', 'review', 'worth', 'buying', 'which', 'should', 'with', 'your', 'from', 'that', 'this', 'what', 'guide', '2026', '2027'], true)) $words[rtrim($w, 's')] = 1;

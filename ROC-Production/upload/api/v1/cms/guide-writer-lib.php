@@ -185,13 +185,26 @@ function rocGuideWrite(PDO $pdo, string $root, ?array $topic = null, ?string $pu
         . "- No prices, no invented benchmarks or test results, never \"we tested\". If unsure of a detail, leave it out.\n"
         . "- End with <h2>FAQ</h2> (3 <h3> questions with <p> answers) and a short conclusion <h2>.\n"
         . "- Allowed HTML: p, h2, h3, ul, ol, li, strong, em, a, table, thead, tbody, tr, th, td, blockquote. Never h1.\n\n"
+        . "TITLE AND DESCRIPTION RULES (checked by the site; a post that breaks one is sent back):\n"
+        . "- Never name another review site or magazine (RTINGS, IGN, PCMag, Tom's Hardware, TechRadar ...) anywhere, not even if it is in a keyword.\n"
+        . "- Write product and brand names the way the maker does: \"ATH-M50x\", \"RTX 4060\", \"NVIDIA\", \"Xbox\", \"PS5\", \"GPU\", \"FPS\"; never in lowercase.\n"
+        . "- Start the title, meta title and meta description with a capital letter; the meta description starts with what the reader gets, never with \"Discover\", \"Read our\", \"Learn\" or \"Check out\".\n"
+        . "- Meta title at most 60 characters; meta description 120-155 characters; the focus keyword once in the title, in natural words.\n\n"
         . "Answer with ONLY a JSON object: {\"title\": \"40-70 characters with the focus keyword\", \"meta_title\": \"max 60 characters\", "
         . "\"meta_description\": \"120-155 characters\", \"excerpt\": \"1-2 sentences\", \"content_html\": \"the guide HTML\", \"image_alt\": \"short description of the cover\", "
         . "\"image_prompt\": \"one sentence: a realistic photo for this guide, the gear or the setup, no text, no logos, no faces\", \"tags\": [\"4 to 6 short search words\"]}";
+    // Deploy 127: the title and description check (seo-check-lib.php); a guide that fails goes back to the AI once.
     $used = null;
-    $w = rocBlogWriteAny($pdo, $prompt, $used);
-    if (!$w['ok']) return ['ok' => false, 'error' => $w['error']];
-    $a = $w['article'];
+    for ($try = 1; $try <= 2; $try++) {
+        $w = rocBlogWriteAny($pdo, $prompt, $used);
+        if (!$w['ok']) return ['ok' => false, 'error' => $w['error']];
+        $a = $w['article'];
+        $bad = rocSeoCheck(['title' => (string)($a['title'] ?? ''), 'meta_title' => (string)($a['meta_title'] ?? ''), 'meta_description' => (string)($a['meta_description'] ?? ''),
+                            'excerpt' => (string)($a['excerpt'] ?? ''), 'focus_keyword' => $kw]);
+        if (!$bad) break;
+        if ($try === 2) return ['ok' => false, 'error' => 'Title or description not accepted: ' . implode(' ', $bad)];
+        $prompt .= "\n\nYour previous answer was rejected: " . implode(' ', $bad) . ' Fix this.';
+    }
     $title = trim(mb_substr(strip_tags((string)($a['title'] ?? '')), 0, 200)) ?: $idea;
     $content = rocBlogCleanLinks(rocCmsSanitizeHtml((string)($a['content_html'] ?? '')), $pdo);
     $words = count(preg_split('/\s+/u', rocCmsTextFromHtml($content)) ?: []);
@@ -200,9 +213,8 @@ function rocGuideWrite(PDO $pdo, string $root, ?array $topic = null, ?string $pu
     $slug = rocBlogSlug($title);
     $st = $pdo->prepare('SELECT COUNT(*) FROM blogs WHERE slug = ?'); $st->execute([$slug]);
     if ((int)$st->fetchColumn() > 0) $slug .= '-' . substr(bin2hex(random_bytes(2)), 0, 3);
-    $metaT = trim(mb_substr(strip_tags((string)($a['meta_title'] ?? $title)), 0, 60));
-    $metaD = trim(strip_tags((string)($a['meta_description'] ?? '')));
-    if (mb_strlen($metaD) > 160) $metaD = rtrim(mb_substr($metaD, 0, 157)) . '…';
+    $metaT = rocSeoCut(strip_tags((string)($a['meta_title'] ?? $title)), 60);
+    $metaD = rocSeoCut(strip_tags((string)($a['meta_description'] ?? '')), 160);
     $alt = trim(mb_substr(strip_tags((string)($a['image_alt'] ?? '')), 0, 300)) ?: $title;
     $image = rocBlogMakeCover($pdo, $root, $slug, $title, 'Guides', null, (string)($a['image_prompt'] ?? ''), $alt);
     $tags = implode(', ', rocTopicTags(implode(',', is_array($a['tags'] ?? null) ? $a['tags'] : [])));

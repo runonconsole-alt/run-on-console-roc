@@ -842,6 +842,15 @@ RELEASES = [
                  dict(label='Products near the top', type='contains', path='blog-render.php', text='rocLinkBoostTop')],
          pr=REPO + '125',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS Dashboard > Clear cache.', 'Search Console > Settings > Users and permissions: the service account (its email ends in iam.gserviceaccount.com) must be Full, not Restricted, for the 12:30 sitemap submit.']),
+    dict(deploy=127, date='2026-10-28', title='One check for every title and description',
+         changes=['Blog, news and guide writers run every post through one check before it is saved: no other review site (RTINGS, IGN ...), product names in the capitals their makers use (ATH-M50x, RTX, GPU), meta title at most 60, meta description 120-155 not starting with Discover or Read our; a post that fails goes back to the AI with the reasons',
+                  'CMS > Blogs: publishing is stopped when a title or description names another review site, the meta title is over 60 or the description is not 70-160 characters',
+                  'cli-blog-titles.php fixes the 5 posts from the October search check (the Audeze Maxwell 2 review loses RTINGS; new meta titles and descriptions for the ATH-M50x, Blacklyte Athena Pro, budget headsets and PC cases posts)',
+                  'The products under the summary of older posts follow the subject of the post (a headset review shows headsets)'],
+         checks=[dict(label='Title check', type='contains', path='api/v1/cms/seo-check-lib.php', text='function rocSeoCheck'),
+                 dict(label='Blog titles fixed', type='contains', path='api/v1/cron/cli-blog-titles.php', text='BT_POSTS')],
+         pr=REPO + '126',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-blog-titles.php --apply', 'CMS Dashboard > Clear cache.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
