@@ -5,6 +5,7 @@
  *   /can-i-run/                  every game: search, the most popular, then A to Z   (game-render.php)
  *   /can-i-run/{slug}/           one game                                              (game-render.php?slug=...)
  *   /can-i-run/without-graphics-card/  the games that run on integrated graphics (Deploy 135)
+ *   /can-i-run/{card}-games/     what games a graphics card runs, e.g. gtx-1650-games (Deploy 136)
  *   /sitemaps/games-sitemap.xml  all game pages                                        (game-render.php?sitemap=1)
  *
  * The games come from roc-steam-games.json (official Steam requirements), see api/v1/game-pages-lib.php.
@@ -56,6 +57,7 @@ if ($isMap) {
     header('X-Robots-Tag: noindex');
     $out = rocSmOpen() . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/', $updated, 'Can I run it? All PC games')
          . rocSmLine(ROC_PUBLIC_URL . ROC_GP_NOGPU, $updated, 'Games that run without a graphics card');
+    foreach (array_keys(ROC_GP_CARD_PAGES) as $cn) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpCardPath($cn), $updated, 'What games can a ' . rocGpCardShort($cn) . ' run?');
     foreach ($games as $g) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpPath($g), max($updated, (int)($EDITS[$g['slug']]['t'] ?? 0)), 'Can I run ' . $g['name'] . '?');
     echo $out . "</urlset>\n";
     exit;
@@ -125,6 +127,28 @@ function rocGpOgCard(string $root, string $slug, string $title, string $line, in
  */
 function rocGpSteamImg(int $appid): string {
     return $appid > 0 ? 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/' . $appid . '/header.jpg' : '';
+}
+
+/** Steam pictures of the first 6 games of a list for a page's hero (as /can-i-run/). */
+function rocGpWall(array $list): string {
+    $w = '';
+    foreach (array_slice($list, 0, 6) as $i => $wg) {
+        $w .= '<a href="' . rocGpPath($wg) . '" title="Can I run ' . rocH($wg['name']) . '?"><img src="' . rocH(rocGpSteamImg((int)$wg['appid'])) . '" alt="' . rocH($wg['name']) . ' (Steam store picture)" width="460" height="215"'
+            . ($i < 3 ? ' fetchpriority="high"' : ' loading="lazy"') . ' onerror="this.parentNode.style.display=\'none\'"></a>';
+    }
+    return $w === '' ? '' : '<div class="gp-wall">' . $w . '<small>Popular games on this list. Pictures: Steam store, © their publishers.</small></div>';
+}
+
+/** Links to every "What games can a <card> run?" page and the integrated graphics list. */
+function rocGpCardNav(string $here = ''): string {
+    $h = '<section class="gp-card"><h2>Games by graphics card</h2><div class="gp-sim">';
+    if ($here !== ROC_GP_NOGPU) $h .= '<a href="' . ROC_GP_NOGPU . '"><strong>No graphics card</strong><span>Integrated graphics (Intel UHD / Iris Xe)</span></a>';
+    foreach (ROC_GP_CARD_PAGES as $main => $same) {
+        $p = rocGpCardPath($main);
+        if ($p === $here) continue;
+        $h .= '<a href="' . $p . '"><strong>' . rocH(rocGpCardShort($main)) . ' games</strong><span>' . rocH($same ? 'Also ' . implode(', ', array_map('rocGpCardShort', $same)) : 'What it runs') . '</span></a>';
+    }
+    return $h . '</div></section>';
 }
 
 function rocGpHead(string $title, string $desc, string $url, array $ld, string $robots = 'index, follow, max-image-preview:large', string $img = '', string $imgAlt = ''): string {
@@ -274,15 +298,17 @@ if ($slug === 'without-graphics-card') {
             return ['@type' => 'Question', 'name' => $f[0], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f[1]]];
         }, $faqs)]];
     $og = rocGpOgCard($ROOT, '_no-gpu', 'Games that run without a graphics card', number_format($n) . ' PC games for integrated graphics', $updated);
+    if ($og !== '') $ld[1]['primaryImageOfPage'] = ['@type' => 'ImageObject', 'url' => ROC_PUBLIC_URL . $og, 'width' => 1200, 'height' => 630];
     $h = rocGpHead($title, $desc, $url, $ld, 'index, follow, max-image-preview:large', $og, 'Games that run without a graphics card on Run On Console');
 
     $item = function ($x) { return '<li data-n="' . rocH(strtolower($x[0]['name'])) . '"><a href="' . rocGpPath($x[0]) . '">' . rocH($x[0]['name']) . '</a><small>' . (int)$x[0]['y'] . ' · ' . $x[1] . '%</small></li>'; };
     $m  = $mainOpen . '<div class="max-w-6xl mx-auto py-6 space-y-6">' . rocGpCrumbHtml($crumbs);
-    $m .= '<header class="gp-hero"><div><h1>Games that run without a graphics card</h1>'
+    $wall = rocGpWall(array_column($good, 0));
+    $m .= '<header class="gp-hero' . ($wall !== '' ? ' pic' : '') . '"><div><h1>Games that run without a graphics card</h1>'
         . '<p>' . number_format($n) . ' PC games that play on integrated graphics, the graphics built into the processor of most laptops and office PCs. '
         . 'Each game is checked with its official Steam requirements against a laptop with Intel UHD / Iris Xe graphics, a Core i5-8400 class processor and 8 GB of RAM, '
         . 'with the same rules as our checker. Open a game to see its full requirements and check your own PC.</p>'
-        . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Check my PC &rarr;</a><a class="gp-btn s" href="/can-i-run/">All ' . number_format(count($games)) . ' games</a></div></div></header>';
+        . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Check my PC &rarr;</a><a class="gp-btn s" href="/can-i-run/">All ' . number_format(count($games)) . ' games</a></div></div>' . $wall . '</header>';
     $m .= '<section class="gp-card"><label for="gp-q" class="sr-only">Search a game</label>'
         . '<input id="gp-q" class="gp-search" type="search" placeholder="Search these ' . number_format($n) . ' games…" autocomplete="off">'
         . '<p id="gp-none" class="gp-src" style="display:none;margin-top:.6rem">Not on this list: it probably needs a graphics card. Search it on <a href="/can-i-run/">all games</a>.</p></section>';
@@ -299,7 +325,108 @@ if ($slug === 'without-graphics-card') {
         . '<a href="/compatibility/"><strong>Full PC check</strong><span>Your exact graphics, processor and RAM</span></a>'
         . '<a href="/category/laptops/"><strong>Gaming laptops</strong><span>When you want a graphics card after all</span></a>'
         . '<a href="/can-i-run/"><strong>All PC games</strong><span>' . number_format(count($games)) . ' games with their requirements</span></a></div></section>';
+    $m .= rocGpCardNav(ROC_GP_NOGPU);
     $m .= '<p class="gp-src">Requirements: the official <a href="https://store.steampowered.com/" target="_blank" rel="noopener">Steam store</a> page of each game, updated ' . gmdate('F Y', $updated) . '.</p>';
+    $m .= '</div>';
+    $m .= "<script>(function(){var q=document.getElementById('gp-q'),none=document.getElementById('gp-none'),items=document.querySelectorAll('.gp-nogpu li[data-n]');"
+        . "q.addEventListener('input',function(){var v=q.value.trim().toLowerCase(),hit=0;"
+        . "for(var i=0;i<items.length;i++){var ok=!v||items[i].getAttribute('data-n').indexOf(v)>-1;items[i].style.display=ok?'':'none';if(ok)hit++;}"
+        . "none.style.display=v&&!hit?'':'none';});})();</script>";
+    rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $updated);
+}
+
+/* ------------------------------------------- what games a card runs */
+// Owner, 2026-10-29 (Deploy 136): Search Console shows "can rtx2050 run witcher 3", "can ... gtx 750 1gb ... run bo3":
+// one page per card class with every game sorted by how it runs with that card. Only the graphics card counts (the
+// checker with no processor or RAM given), so a game is not "too heavy" for an RTX 3060 because of an old processor.
+$cardMain = $slug !== '' ? rocGpCardBySlug($slug) : null;
+if ($cardMain !== null) {
+    $gpus = rocGpRefs('gpu');
+    $score = (float)$gpus[$cardMain];
+    $cs = rocGpCardShort($cardMain);
+    $a = preg_match('/^(?:RX|RTX|Arc|8)/', $cs) ? 'an' : 'a';
+    $same = array_map('rocGpCardShort', ROC_GP_CARD_PAGES[$cardMain]);
+    $tiers = ['high' => [], 'mid' => [], 'low' => [], 'no' => []];
+    // The card against the game's minimum and recommended graphics card: below the minimum, at least 75% of the
+    // recommended (medium to high), the recommended or more (high); in between, low settings.
+    foreach ($games as $g) {
+        $gm = (float)($g['req']['min']['gpu'] ?? 0); $gr = max($gm, (float)($g['req']['rec']['gpu'] ?? $gm));
+        $t = $gm > 0 && $score < $gm ? 'no' : ($gr <= 0 || $score >= $gr ? 'high' : ($score >= 0.75 * $gr ? 'mid' : 'low'));
+        $tiers[$t][] = [$g, $t];
+    }
+    $runs = count($tiers['high']) + count($tiers['mid']) + count($tiers['low']);
+    $path = rocGpCardPath($cardMain);
+    $url = ROC_PUBLIC_URL . $path;
+    $crumbs = [['Home', '/'], ['Can I run it?', '/can-i-run/'], [$cs . ' games', $path]];
+    $title = 'What Games Can ' . $a . ' ' . $cs . ' Run? ' . number_format($runs) . ' PC Games';
+    $desc = 'The PC games ' . $a . ' ' . $cs . ' graphics card runs: ' . number_format(count($tiers['high'])) . ' on high settings, ' . number_format(count($tiers['mid'])) . ' on medium and '
+        . number_format(count($tiers['low'])) . ' on low, from official Steam requirements.';
+    if (mb_strlen($desc) > 155) $desc = mb_substr($desc, 0, 152) . '…';
+    $names = function (array $xs, int $n) { $l = array_map(function ($x) { return $x[0]['name']; }, array_slice($xs, 0, $n)); return count($l) > 1 ? implode(', ', array_slice($l, 0, -1)) . ' and ' . end($l) : ($l[0] ?? ''); };
+
+    // FAQ: the counts, the popular games it struggles with (the searches are "can <card> run <game>"), the upgrade.
+    $faqs = [['What games can ' . $a . ' ' . $cs . ' run?', number_format($runs) . ' of the ' . number_format(count($games)) . ' PC games on Run On Console: ' . number_format(count($tiers['high'])) . ' on high settings'
+        . ($tiers['high'] ? ' (such as ' . $names($tiers['high'], 5) . ')' : '') . ', ' . number_format(count($tiers['mid'])) . ' on medium to high and ' . number_format(count($tiers['low'])) . ' on low settings.']];
+    $hard = array_slice(array_merge($tiers['no'], $tiers['low'], $tiers['mid']), 0, 3);
+    foreach ($hard as [$hg, $ht]) {
+        $faqs[] = ['Can ' . $a . ' ' . $cs . ' run ' . $hg['name'] . '?', ['no' => 'Not well: the ' . $cs . ' is below the minimum graphics card of ' . $hg['name'] . '.',
+            'low' => 'Yes, on low settings: the ' . $cs . ' reaches the minimum graphics card of ' . $hg['name'] . ' but not the recommended one.',
+            'mid' => 'Yes, on medium to high settings: the ' . $cs . ' is a little below the recommended graphics card of ' . $hg['name'] . '.'][$ht]
+            . ' Your processor and RAM need to meet the game too: open the game page for all its requirements.'];
+    }
+    $up = rocGpPartsFor('gpu', $score + 1.5, 3, true);
+    if ($up) $faqs[] = ['What is a good upgrade from the ' . $cs . '?', 'For more games on high settings, ' . (preg_match('/^(?:RX|RTX|Arc)/', rocGpCardShort($up[0])) ? 'an ' : 'a ') . implode(', ', array_map('rocGpCardShort', $up)) . ' class card is a good step up; each of these is still sold new.'];
+    if ($same) $faqs[] = ['Is the ' . implode(' or ', array_slice($same, 0, 2)) . ' the same as the ' . $cs . ' for games?', 'Close enough: ' . implode(', ', $same) . ' are in the same speed class as the ' . $cs . ' in our checker, so this list is for them too. Laptop versions of a card are usually a little slower.'];
+
+    $top = array_slice(array_merge($tiers['high'], $tiers['mid']), 0, 30);
+    $ld = [rocGpCrumbs($crumbs), ['@context' => 'https://schema.org', '@type' => 'CollectionPage', 'name' => 'What games can ' . $a . ' ' . $cs . ' run?', 'url' => $url, 'description' => $desc,
+        'isPartOf' => ['@type' => 'WebSite', 'name' => 'Run On Console', 'url' => ROC_PUBLIC_URL . '/'],
+        'about' => ['@type' => 'Product', 'name' => $cardMain, 'category' => 'Graphics card'],
+        'mainEntity' => ['@type' => 'ItemList', 'numberOfItems' => $runs, 'itemListElement' => array_map(function ($x, $i) {
+            return ['@type' => 'ListItem', 'position' => $i + 1, 'url' => ROC_PUBLIC_URL . rocGpPath($x[0]), 'name' => $x[0]['name']];
+        }, $top, array_keys($top))]],
+        ['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => array_map(function ($f) {
+            return ['@type' => 'Question', 'name' => $f[0], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f[1]]];
+        }, $faqs)]];
+    $og = rocGpOgCard($ROOT, '_card-' . $slug, 'What games can ' . $a . ' ' . $cs . ' run?', number_format($runs) . ' PC games: ' . number_format(count($tiers['high'])) . ' on high settings', $updated);
+    if ($og !== '') $ld[1]['primaryImageOfPage'] = ['@type' => 'ImageObject', 'url' => ROC_PUBLIC_URL . $og, 'width' => 1200, 'height' => 630];
+    $h = rocGpHead($title, $desc, $url, $ld, 'index, follow, max-image-preview:large', $og, 'What games can ' . $a . ' ' . $cs . ' run? on Run On Console');
+
+    $item = function ($x) { return '<li data-n="' . rocH(strtolower($x[0]['name'])) . '"><a href="' . rocGpPath($x[0]) . '">' . rocH($x[0]['name']) . '</a><small>' . (int)$x[0]['y'] . '</small></li>'; };
+    $CAP = 240;   // per list, most popular first: a list of 2,000 links helps no one
+    $list = function (string $id, string $h2, string $note, array $xs) use ($item, $CAP) {
+        if (!$xs) return '';
+        return '<section class="gp-card gp-nogpu" id="' . $id . '"><h2>' . $h2 . ' (' . number_format(count($xs)) . (count($xs) === 1 ? ' game' : ' games') . ')</h2><p class="gp-src">' . $note
+            . (count($xs) > $CAP ? ' The ' . $CAP . ' most popular are listed; search any other game on <a href="/can-i-run/">all games</a>.' : '') . '</p>'
+            . '<ul class="gp-list" style="margin-top:.6rem">' . implode('', array_map($item, array_slice($xs, 0, $CAP))) . '</ul></section>';
+    };
+    $m  = $mainOpen . '<div class="max-w-6xl mx-auto py-6 space-y-6">' . rocGpCrumbHtml($crumbs);
+    $wall = rocGpWall(array_column(array_merge($tiers['high'], $tiers['mid']), 0));
+    $m .= '<header class="gp-hero' . ($wall !== '' ? ' pic' : '') . '"><div><h1>What games can ' . $a . ' ' . rocH($cs) . ' run?</h1>'
+        . '<p>' . number_format($runs) . ' of ' . number_format(count($games)) . ' PC games run on ' . $a . ' ' . rocH($cs) . ': ' . number_format(count($tiers['high'])) . ' on high settings, '
+        . number_format(count($tiers['mid'])) . ' on medium to high and ' . number_format(count($tiers['low'])) . ' on low settings. The official minimum and recommended graphics cards of each game on Steam are compared with the ' . rocH($cs) . ', '
+        . 'from the same card table as our checker. Your processor and RAM need to meet the game too: open a game or check your whole PC.'
+        . ($same ? ' The ' . rocH(implode(', ', $same)) . ' ' . (count($same) > 1 ? 'are' : 'is') . ' in the same speed class, so this list is for ' . (count($same) > 1 ? 'them' : 'it') . ' too.' : '') . '</p>'
+        . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Check my PC &rarr;</a><a class="gp-btn s" href="/category/gpu/">Graphics cards</a></div></div>' . $wall . '</header>';
+    $m .= '<section class="gp-card"><label for="gp-q" class="sr-only">Search a game</label>'
+        . '<input id="gp-q" class="gp-search" type="search" placeholder="Search the games on this page…" autocomplete="off">'
+        . '<p id="gp-none" class="gp-src" style="display:none;margin-top:.6rem">Not on this page. Search it on <a href="/can-i-run/">all games</a>.</p></section>';
+    $m .= $list('high', 'High settings', 'The ' . rocH($cs) . ' meets the recommended graphics card, most popular first.', $tiers['high']);
+    $m .= $list('medium', 'Medium to high settings', 'A little below the recommended graphics card.', $tiers['mid']);
+    $m .= rocAdUnit('list');
+    $m .= $list('low', 'Low settings only', 'Reaches the minimum graphics card, not the recommended: playable with low settings or a lower resolution.', $tiers['low']);
+    $m .= $list('too-heavy', 'Too heavy for the ' . rocH($cs), 'Below the minimum graphics card: these need a faster card.', $tiers['no']);
+    if (isset($pdo) && $pdo) {
+        $prods = rocGpProducts($pdo, 'gpu', $score + 1.5, 4);
+        if ($prods) $m .= '<section class="gp-card"><h2>Faster graphics cards in our guides</h2><div class="gp-sim">'
+            . implode('', array_map(function ($pr) { return '<a href="/products/' . rocH($pr['slug']) . '/"><strong>' . rocH($pr['title']) . '</strong><span>' . rocH(mb_substr(strip_tags((string)($pr['best_for'] ?: $pr['short_desc'] ?: 'Our review')), 0, 90)) . '</span></a>'; }, $prods))
+            . '</div></section>';
+    }
+    $m .= '<section class="gp-card gp-faq"><h2>' . rocH($cs) . ' games: questions</h2>';
+    foreach ($faqs as $i => $f) $m .= '<details' . ($i === 0 ? ' open' : '') . '><summary>' . rocH($f[0]) . '</summary><div class="a">' . rocH($f[1]) . '</div></details>';
+    $m .= '</section>';
+    $m .= rocGpCardNav($path);
+    $m .= '<p class="gp-src">Requirements: the official <a href="https://store.steampowered.com/" target="_blank" rel="noopener">Steam store</a> page of each game, updated ' . gmdate('F Y', $updated) . '. Laptop versions of a graphics card are usually a little slower.</p>';
     $m .= '</div>';
     $m .= "<script>(function(){var q=document.getElementById('gp-q'),none=document.getElementById('gp-none'),items=document.querySelectorAll('.gp-nogpu li[data-n]');"
         . "q.addEventListener('input',function(){var v=q.value.trim().toLowerCase(),hit=0;"
@@ -357,6 +484,7 @@ if ($slug === '') {
     $m .= '<section class="gp-card"><label for="gp-q" class="sr-only">Search a game</label>'
         . '<input id="gp-q" class="gp-search" type="search" placeholder="Search ' . number_format($n) . ' games, e.g. GTA, Elden Ring, Valorant…" autocomplete="off">'
         . '<p id="gp-none" class="gp-src" style="display:none;margin-top:.6rem">No game found. Try another name, or ask ROC in the chat.</p></section>';
+    $m .= rocGpCardNav();
     $m .= '<section class="gp-card" id="gp-pop"><h2>Most popular</h2><ul class="gp-list">' . implode('', array_map($item, array_slice(array_values($games), 0, 60))) . '</ul></section>';
     $m .= rocAdUnit('list');
     $m .= '<section class="gp-card" id="gp-all"><h2>All games A to Z</h2><nav class="gp-az" aria-label="Letters">';
@@ -585,7 +713,7 @@ $m .= '<section class="gp-card" id="requirements"><h2>' . rocH($name) . ' system
 $m .= rocAdUnit('article');
 
 // Which parts run it
-$li = function (array $xs) { return '<ul>' . implode('', array_map(function ($x) { return '<li>' . rocH($x) . '</li>'; }, $xs)) . '</ul>'; };
+$li = function (array $xs) { return '<ul>' . implode('', array_map(function ($x) { $p = rocGpCardPath($x); return '<li>' . ($p !== null ? '<a href="' . $p . '">' . rocH($x) . '</a>' : rocH($x)) . '</li>'; }, $xs)) . '</ul>'; };
 $m .= '<section class="gp-card"><h2>Which PC runs ' . rocH($name) . '?</h2><p>' . rocH($needLine) . '</p><div class="gp-parts" style="margin-top:.9rem">';
 if ($gpuMin) $m .= '<div><h3>Graphics card: minimum</h3>' . $li($gpuMin) . '</div>';
 if ($gpuRec && $rec) $m .= '<div><h3>Graphics card: high settings</h3>' . $li($gpuRec) . '</div>';

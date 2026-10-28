@@ -903,6 +903,18 @@ RELEASES = [
          pr=REPO + '134',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Open https://runonconsole.com/can-i-run/without-graphics-card/',
                 'Search Console: Inspect the new address and press Request indexing.']),
+    dict(deploy=136, date='2026-10-29', title='What games can my graphics card run',
+         changes=['Nine new pages, one per graphics card class: What games can a GT 1030, GTX 750 Ti, GTX 1050 Ti, RX 570, GTX 1650, GTX 1660 Super, RTX 2060, RX 6600 or RTX 3060 run (cards of the same speed, such as the RX 580 and RTX 3050, are named on the GTX 1650 page), with games on high, medium and low settings, the ones too heavy, FAQ, faster cards from our guides and the Steam pictures',
+                  'Linked from /can-i-run/, the no graphics card page and every game page (each graphics card in Which PC runs it links to its page), and in the games sitemap',
+                  'Game requirements: the minimum graphics card is now the cheapest card Steam lists, without the extras for ray tracing or VR (F1 2021 asked for an RTX 3070 class card instead of a GTX 950); about 380 games change after the rescore command',
+                  'The no graphics card page gets the Steam pictures at the top and its picture in the schema'],
+         checks=[dict(label='Card pages', type='contains', path='api/v1/game-pages-lib.php', text='ROC_GP_CARD_PAGES'),
+                 dict(label='Cheapest card rule', type='contains', path='api/v1/steam-req-lib.php', text='function rocSrGpuOne')],
+         pr=REPO + '135',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.',
+                'Dry run: php /home2/runoncon/public_html/api/v1/cron/cli-steam-rescore.php',
+                'Apply: php /home2/runoncon/public_html/api/v1/cron/cli-steam-rescore.php --apply',
+                'Open https://runonconsole.com/can-i-run/gtx-1650-games/']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
