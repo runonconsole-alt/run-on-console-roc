@@ -178,6 +178,10 @@ try {
 
 // Off-page researcher (Deploy 93): only when turned on in CMS > Off-page; once a day after 12:00 Pakistan time.
 try {
+    // Monday to Friday 11:30: the day's 10 products to submit, by email (Deploy 130).
+    require_once $ROOT . '/api/v1/link-boost-lib.php';
+    $dm = rocDailyPicksMail($pdo);
+    if ($dm !== null) echo date('c') . ' ' . $dm . "\n";
     require_once $ROOT . '/api/v1/cms/offpage-lib.php';
     // The link list by email (Deploy 129): 1 November, then Mondays and the 1st of the month, from 10:00.
     $orp = rocOffpageReport($pdo);
