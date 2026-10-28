@@ -927,6 +927,11 @@ RELEASES = [
          checks=[dict(label='High needs the recommended specs', type='contains', path='api/v1/agent-lib.php', text='Deploy 138')],
          pr=REPO + '137',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.']),
+    dict(deploy=139, date='2026-10-29', title='Graphics card pages: no invalid Product item',
+         changes=['The What games can a card run pages named the card as a Product in the schema; Google Search Console said a Product needs offers, a review or a rating (1 invalid item). The card is now a plain Thing, so the page has no invalid item'],
+         checks=[dict(label='Card schema', type='contains', path='game-render.php', text="'@type' => 'Thing', 'name' => $cardMain")],
+         pr=REPO + '138',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Search Console: inspect https://runonconsole.com/can-i-run/gtx-1650-games/ again (Test live URL).']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

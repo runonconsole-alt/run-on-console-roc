@@ -381,7 +381,7 @@ if ($cardMain !== null) {
     $top = array_slice(array_merge($tiers['high'], $tiers['mid']), 0, 30);
     $ld = [rocGpCrumbs($crumbs), ['@context' => 'https://schema.org', '@type' => 'CollectionPage', 'name' => 'What games can ' . $a . ' ' . $cs . ' run?', 'url' => $url, 'description' => $desc,
         'isPartOf' => ['@type' => 'WebSite', 'name' => 'Run On Console', 'url' => ROC_PUBLIC_URL . '/'],
-        'about' => ['@type' => 'Product', 'name' => $cardMain, 'category' => 'Graphics card'],
+        'about' => ['@type' => 'Thing', 'name' => $cardMain, 'description' => 'Graphics card'],   // Deploy 139: a Product needs offers or a review in Google, a Thing does not
         'mainEntity' => ['@type' => 'ItemList', 'numberOfItems' => $runs, 'itemListElement' => array_map(function ($x, $i) {
             return ['@type' => 'ListItem', 'position' => $i + 1, 'url' => ROC_PUBLIC_URL . rocGpPath($x[0]), 'name' => $x[0]['name']];
         }, $top, array_keys($top))]],
