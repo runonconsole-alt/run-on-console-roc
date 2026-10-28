@@ -1402,6 +1402,12 @@ async function renderIndexing(m){
       (tp.length?'<div class="card"><div class="chead"><h3>Blog topics from searches</h3></div><div class="cbody">'+tp.map(function(t){
         return '<div style="padding:4px 0"><span class="tag'+(t.status==='written'?' published':'')+'">'+esc(t.status)+'</span> '+esc(t.title)+' <span class="hint">· '+esc(t.added)+' · '+(t.impressions||0)+' impressions</span></div>'; }).join('')+'</div></div>':'');
   }
+  // The day's 10 products (Deploy 128): linked from every Can I run page and post today; "Request indexing" opens Search Console.
+  var daily=(d.daily||[]);
+  var dhtml=daily.length&&IX.filter!=='queries'?'<div class="card"><div class="chead"><h3>Today\'s 10 for Google</h3><span class="note">changes every day</span></div>'+
+    '<div class="cbody hint">Products Google has not indexed yet. Today they are linked from every Can I run page and the top of every post. Optional: open each one in Search Console and press <b>Request indexing</b> (Google allows about 10 a day).</div>'+
+    '<div class="cbody">'+daily.map(function(x,i){ return '<div style="padding:5px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b>'+(i+1)+'.</b> <a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.name)+'</a>'+
+      ' <a class="btn sm" href="'+esc(x.inspect)+'" target="_blank" rel="noopener">Request indexing ↗</a></div>'; }).join('')+'</div></div>':'';
   var kinds=Object.keys(st.by_kind||{}).sort(function(a,b){ return (st.by_kind[b].total)-(st.by_kind[a].total); });
   m.innerHTML=head('Indexing','Which pages Google has indexed, checked a few at a time with Search Console. New ones are emailed every evening.')+
     '<div class="body">'+
@@ -1413,7 +1419,7 @@ async function renderIndexing(m){
       '<div class="dstat"><div class="l">Not indexed yet</div><div class="n">'+(st.not_indexed||0)+'</div><div class="s">They get links from indexed pages</div></div>'+
       '<div class="dstat"><div class="l">Not checked yet</div><div class="n">'+(st.unchecked||0)+'</div><div class="s">Checked over the next days</div></div>'+
       '<div class="dstat"><div class="l">Pages in the sitemaps</div><div class="n">'+(st.total||0)+'</div><div class="s">Read once a day</div></div></div>'+
-    (kinds.length?'<div class="card"><div class="chead"><h3>By page type</h3></div><div class="cbody" style="display:flex;flex-wrap:wrap;gap:8px">'+kinds.map(function(k){ var b=st.by_kind[k];
+    dhtml+(kinds.length?'<div class="card"><div class="chead"><h3>By page type</h3></div><div class="cbody" style="display:flex;flex-wrap:wrap;gap:8px">'+kinds.map(function(k){ var b=st.by_kind[k];
       return '<button class="chip'+(IX.kind===k?' on':'')+'" data-ixk="'+esc(k)+'">'+esc(KIND[k]||k)+' · '+b.indexed+' / '+b.total+'</button>'; }).join('')+
       (IX.kind?'<button class="chip" data-ixk="">All types</button>':'')+'</div></div>':'')+
     '<div class="card"><div class="cbody" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">'+

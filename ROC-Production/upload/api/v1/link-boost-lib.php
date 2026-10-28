@@ -61,12 +61,63 @@ function rocLinkBoostTargets(PDO $pdo): array {
     return $list;
 }
 
+/**
+ * Owner, 2026-10-28 (Deploy 128): every day 10 products Google has not indexed yet get the strongest links on the
+ * site, instead of the Indexing API (Google allows that API only for job posts and live videos). The day's 10 are
+ * in 2 of the 6 cards on every Can I run page (2,400 pages Google crawls often), first in the top strip of every
+ * post, and in CMS > Indexing with a "Request indexing" link for Search Console. Chosen once a Pakistan day:
+ * "Discovered - currently not indexed" first (Google knows the address and waits), then never seen or not checked,
+ * never one picked in the last 7 days. cms_settings daily_picks {day, paths, seen: {path: day}}.
+ */
+const ROC_DAILY_LINKS = 10;
+function rocDailyPicks(PDO $pdo): array {
+    static $picks = null;
+    if ($picks !== null) return $picks;
+    $day = (new DateTime('now', new DateTimeZone('Asia/Karachi')))->format('Y-m-d');
+    $d = rocLinkBoostSetting($pdo, 'daily_picks');
+    $d = is_array($d) ? $d : [];
+    $pool = rocLinkBoostUnindexed($pdo);
+    if (($d['day'] ?? '') === $day && is_array($d['paths'] ?? null))
+        return $picks = array_values(array_filter($d['paths'], function ($p) use ($pool) { return isset($pool[$p]); }));
+    $cov = [];
+    try {
+        foreach ($pdo->query("SELECT url, coverage FROM roc_index_status WHERE kind = 'product'")->fetchAll(PDO::FETCH_ASSOC) as $r)
+            $cov[(string)parse_url((string)$r['url'], PHP_URL_PATH)] = (string)($r['coverage'] ?? '');
+    } catch (\Throwable $e) {}
+    $seen = is_array($d['seen'] ?? null) ? $d['seen'] : [];
+    $week = (new DateTime($day))->modify('-7 day')->format('Y-m-d');
+    $rank = [];
+    foreach ($pool as $path => $x) {
+        $last = (string)($seen[$path] ?? '');
+        if ($last !== '' && $last > $week) continue;
+        $c = $cov[$path] ?? '';
+        $rank[$path] = [stripos($c, 'Discovered') !== false ? 0 : (stripos($c, 'Crawled') !== false ? 1 : 2), $last, (int)sprintf('%u', crc32($path . $day))];
+    }
+    uasort($rank, function ($a, $b) { return $a <=> $b; });
+    $picks = array_slice(array_keys($rank), 0, ROC_DAILY_LINKS);
+    foreach ($picks as $p) $seen[$p] = $day;
+    $seen = array_filter($seen, function ($v) use ($day) { return $v > (new DateTime($day))->modify('-60 day')->format('Y-m-d'); });
+    $val = json_encode(['day' => $day, 'paths' => $picks, 'seen' => $seen], JSON_UNESCAPED_SLASHES);
+    try {
+        $up = $pdo->prepare('UPDATE cms_settings SET setting_value = ? WHERE setting_key = ?');
+        $up->execute([$val, 'daily_picks']);
+        if ($up->rowCount() === 0) $pdo->prepare('INSERT INTO cms_settings (setting_key, setting_value) VALUES (?, ?)')->execute(['daily_picks', $val]);
+    } catch (\Throwable $e) {}
+    return $picks;
+}
+
 /** For the page $seed (its path): 4 products and 2 boost pages, a different set on every page. */
 function rocLinkBoostPick(PDO $pdo, string $seed, int $products = 4, int $boost = 2): array {
     $h = (int)sprintf('%u', crc32($seed));
     $out = [];
     $t = array_values(rocLinkBoostTargets($pdo));
     for ($i = 0; $i < min($boost, count($t)); $i++) { $x = $t[($h + $i * 3) % count($t)]; if ($x[0] !== $seed) $out[$x[0]] = $x; }
+    // 2 of the day's 10 products (Deploy 128), a different 2 on every page.
+    $daily = rocDailyPicks($pdo); $all = rocLinkBoostProducts($pdo);
+    for ($i = 0, $n = 0; $daily && $n < min(2, $products) && $i < count($daily); $i++) {
+        $path = $daily[($h + $i) % count($daily)];
+        if ($path !== $seed && isset($all[$path]) && !isset($out[$path])) { $out[$path] = $all[$path]; $n++; }
+    }
     $p = array_values(rocLinkBoostProducts($pdo));
     $c = count($p);
     $want = count($out) + $products;
@@ -164,10 +215,11 @@ function rocLinkBoostTop(PDO $pdo, string $seed, array $post, string $body = '')
     foreach (preg_split('/[^a-z0-9]+/', mb_strtolower((string)($post['title'] ?? '') . ' ' . (string)($post['focus_keyword'] ?? ''))) as $w)
         if (strlen($w) > 3 && !in_array($w, ['best', 'gaming', 'review', 'worth', 'buying', 'which', 'should', 'with', 'your', 'from', 'that', 'this', 'what', 'guide', '2026', '2027'], true)) $words[rtrim($w, 's')] = 1;
     $h = (int)sprintf('%u', crc32($seed));
+    $daily = array_flip(rocDailyPicks($pdo));
     $rank = [];
     foreach ($pool as $path => $x) {
         if ($body !== '' && strpos($body, $path . '"') !== false) continue;
-        $score = ($cat !== '' && $x[4] === $cat) ? 10 : 0;
+        $score = (($cat !== '' && $x[4] === $cat) ? 10 : 0) + (isset($daily[$path]) ? 5 : 0);   // the day's 10 (Deploy 128)
         $name = mb_strtolower($x[1]) . ' ' . $x[5];
         foreach ($words as $w => $_) if (strpos($name, $w) !== false) $score += 2;
         $rank[$path] = [$score, (int)sprintf('%u', crc32($path . $h))];
