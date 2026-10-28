@@ -4,6 +4,7 @@
  *
  *   /can-i-run/                  every game: search, the most popular, then A to Z   (game-render.php)
  *   /can-i-run/{slug}/           one game                                              (game-render.php?slug=...)
+ *   /can-i-run/without-graphics-card/  the games that run on integrated graphics (Deploy 135)
  *   /sitemaps/games-sitemap.xml  all game pages                                        (game-render.php?sitemap=1)
  *
  * The games come from roc-steam-games.json (official Steam requirements), see api/v1/game-pages-lib.php.
@@ -53,7 +54,8 @@ if ($isMap) {
     header('Content-Type: application/xml; charset=utf-8');
     header('Cache-Control: public, max-age=3600');
     header('X-Robots-Tag: noindex');
-    $out = rocSmOpen() . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/', $updated, 'Can I run it? All PC games');
+    $out = rocSmOpen() . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/', $updated, 'Can I run it? All PC games')
+         . rocSmLine(ROC_PUBLIC_URL . ROC_GP_NOGPU, $updated, 'Games that run without a graphics card');
     foreach ($games as $g) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpPath($g), max($updated, (int)($EDITS[$g['slug']]['t'] ?? 0)), 'Can I run ' . $g['name'] . '?');
     echo $out . "</urlset>\n";
     exit;
@@ -236,6 +238,76 @@ function rocGpStyles(): string {
 
 [$headTop, $bodyToMain, $mainOpen, , $afterMain] = rocTemplate($ROOT, 'blog-post.html');
 
+/* --------------------------------------------- without a graphics card */
+// Owner, 2026-10-29 (Deploy 135): Search Console shows "can i run <game> without graphics card", "can <game> run on
+// integrated graphics" and "games that i can run" on many game pages. One page lists every game a laptop with
+// integrated graphics plays, with the same rules as the checker and the game pages' laptop answer (70%+ = medium
+// to high settings, 41-69% = low settings), and every game page links to it.
+if ($slug === 'without-graphics-card') {
+    $gpus = rocGpRefs('gpu'); $cpus = rocGpRefs('cpu');
+    $good = []; $low = [];
+    foreach ($games as $g) {
+        $p = (int)rocAgentCheck($g, $gpus['Intel UHD / Iris Xe (integrated)'], $cpus['Intel Core i5-8400'], 8.0)['percent'];
+        if ($p >= 70) $good[] = [$g, $p]; elseif ($p > 40) $low[] = [$g, $p];
+    }
+    $n = count($good) + count($low);
+    $url = ROC_PUBLIC_URL . ROC_GP_NOGPU;
+    $crumbs = [['Home', '/'], ['Can I run it?', '/can-i-run/'], ['Without a graphics card', ROC_GP_NOGPU]];
+    $title = 'Games That Run Without a Graphics Card: ' . number_format($n) . ' PC Games';
+    $desc = number_format($n) . ' PC games that run without a graphics card, on the integrated graphics of most laptops and office PCs (Intel UHD, Iris Xe), from Steam requirements.';
+    if (mb_strlen($desc) > 155) $desc = mb_substr($desc, 0, 152) . '…';
+    $laptopGuide = '/guides/gaming-laptop-performance-tips-power-cooling-settings-guide/';
+    $faqs = [
+        ['Can you play games without a graphics card?', 'Yes. Most laptop and many desktop processors have graphics built in (integrated graphics), and the ' . number_format($n) . ' games on this page run on it. '
+            . 'Intel processors whose name ends in F, and many older AMD Ryzen desktop processors, have no built-in graphics and need a graphics card to show anything.'],
+        ['Which integrated graphics are best for gaming?', 'Newer is much faster. Intel Iris Xe and the Arc graphics of recent Core Ultra laptops, and AMD Radeon 680M and 780M in recent Ryzen laptops, run games far better than older Intel UHD graphics. This list uses the Intel UHD / Iris Xe level of our checker: on older Intel UHD graphics expect lower settings, on faster integrated graphics better ones.'],
+        ['How can I make games run better on integrated graphics?', 'Plug the laptop in and choose the best performance power mode, use two RAM sticks (dual channel, which matters a lot for integrated graphics), play at 720p or 900p, turn on FSR when the game has it and update the graphics driver.'],
+        ['Is 8 GB of RAM enough for gaming on integrated graphics?', 'For the lighter games here, yes. Integrated graphics borrow part of the RAM as video memory, so 16 GB in two sticks gives newer games more room and more speed.'],
+    ];
+    $top = array_slice($good, 0, 30);
+    $ld = [rocGpCrumbs($crumbs), ['@context' => 'https://schema.org', '@type' => 'CollectionPage', 'name' => 'Games that run without a graphics card', 'url' => $url, 'description' => $desc,
+        'isPartOf' => ['@type' => 'WebSite', 'name' => 'Run On Console', 'url' => ROC_PUBLIC_URL . '/'],
+        'mainEntity' => ['@type' => 'ItemList', 'numberOfItems' => $n, 'itemListElement' => array_map(function ($x, $i) {
+            return ['@type' => 'ListItem', 'position' => $i + 1, 'url' => ROC_PUBLIC_URL . rocGpPath($x[0]), 'name' => $x[0]['name']];
+        }, $top, array_keys($top))]],
+        ['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => array_map(function ($f) {
+            return ['@type' => 'Question', 'name' => $f[0], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f[1]]];
+        }, $faqs)]];
+    $og = rocGpOgCard($ROOT, '_no-gpu', 'Games that run without a graphics card', number_format($n) . ' PC games for integrated graphics', $updated);
+    $h = rocGpHead($title, $desc, $url, $ld, 'index, follow, max-image-preview:large', $og, 'Games that run without a graphics card on Run On Console');
+
+    $item = function ($x) { return '<li data-n="' . rocH(strtolower($x[0]['name'])) . '"><a href="' . rocGpPath($x[0]) . '">' . rocH($x[0]['name']) . '</a><small>' . (int)$x[0]['y'] . ' · ' . $x[1] . '%</small></li>'; };
+    $m  = $mainOpen . '<div class="max-w-6xl mx-auto py-6 space-y-6">' . rocGpCrumbHtml($crumbs);
+    $m .= '<header class="gp-hero"><div><h1>Games that run without a graphics card</h1>'
+        . '<p>' . number_format($n) . ' PC games that play on integrated graphics, the graphics built into the processor of most laptops and office PCs. '
+        . 'Each game is checked with its official Steam requirements against a laptop with Intel UHD / Iris Xe graphics, a Core i5-8400 class processor and 8 GB of RAM, '
+        . 'with the same rules as our checker. Open a game to see its full requirements and check your own PC.</p>'
+        . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Check my PC &rarr;</a><a class="gp-btn s" href="/can-i-run/">All ' . number_format(count($games)) . ' games</a></div></div></header>';
+    $m .= '<section class="gp-card"><label for="gp-q" class="sr-only">Search a game</label>'
+        . '<input id="gp-q" class="gp-search" type="search" placeholder="Search these ' . number_format($n) . ' games…" autocomplete="off">'
+        . '<p id="gp-none" class="gp-src" style="display:none;margin-top:.6rem">Not on this list: it probably needs a graphics card. Search it on <a href="/can-i-run/">all games</a>.</p></section>';
+    $m .= '<section class="gp-card gp-nogpu"><h2>Plays well on integrated graphics (' . number_format(count($good)) . ' games)</h2>'
+        . '<p class="gp-src">Medium to high settings in our checker (70% or more), most popular first.</p><ul class="gp-list" style="margin-top:.6rem">' . implode('', array_map($item, $good)) . '</ul></section>';
+    $m .= rocAdUnit('list');
+    if ($low) $m .= '<section class="gp-card gp-nogpu"><h2>Playable on low settings (' . number_format(count($low)) . ' games)</h2>'
+        . '<p class="gp-src">Low settings only (41 to 69% in our checker): fine at 720p, better with faster integrated graphics or 16 GB of RAM.</p><ul class="gp-list" style="margin-top:.6rem">' . implode('', array_map($item, $low)) . '</ul></section>';
+    $m .= '<section class="gp-card gp-faq"><h2>Gaming without a graphics card: questions</h2>';
+    foreach ($faqs as $i => $f) $m .= '<details' . ($i === 0 ? ' open' : '') . '><summary>' . rocH($f[0]) . '</summary><div class="a">' . rocH($f[1]) . '</div></details>';
+    $m .= '</section>';
+    $m .= '<section class="gp-card"><h2>More for laptop players</h2><div class="gp-sim">'
+        . '<a href="' . $laptopGuide . '"><strong>Laptop gaming performance</strong><span>Power, cooling and settings, step by step</span></a>'
+        . '<a href="/compatibility/"><strong>Full PC check</strong><span>Your exact graphics, processor and RAM</span></a>'
+        . '<a href="/category/laptops/"><strong>Gaming laptops</strong><span>When you want a graphics card after all</span></a>'
+        . '<a href="/can-i-run/"><strong>All PC games</strong><span>' . number_format(count($games)) . ' games with their requirements</span></a></div></section>';
+    $m .= '<p class="gp-src">Requirements: the official <a href="https://store.steampowered.com/" target="_blank" rel="noopener">Steam store</a> page of each game, updated ' . gmdate('F Y', $updated) . '.</p>';
+    $m .= '</div>';
+    $m .= "<script>(function(){var q=document.getElementById('gp-q'),none=document.getElementById('gp-none'),items=document.querySelectorAll('.gp-nogpu li[data-n]');"
+        . "q.addEventListener('input',function(){var v=q.value.trim().toLowerCase(),hit=0;"
+        . "for(var i=0;i<items.length;i++){var ok=!v||items[i].getAttribute('data-n').indexOf(v)>-1;items[i].style.display=ok?'':'none';if(ok)hit++;}"
+        . "none.style.display=v&&!hit?'':'none';});})();</script>";
+    rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $updated);
+}
+
 /* ------------------------------------------------------------ the list */
 if ($slug === '' && isset($_GET['json'])) {
     // Every game page for the header search box (/can-i-run/?json=1, Deploy 89): name, genre, year, address.
@@ -280,7 +352,7 @@ if ($slug === '') {
     $m .= '<header class="gp-hero pic"><div><h1>Can I run it? ' . number_format($n) . ' PC games</h1>'
         . '<p>Pick a game to see its official minimum and recommended requirements from Steam, which graphics cards and processors run it, '
         . 'and check your own PC in a few seconds. The full checker also covers consoles, handhelds and phones.</p>'
-        . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Open the full checker &rarr;</a></div></div>'
+        . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Open the full checker &rarr;</a><a class="gp-btn s" href="' . ROC_GP_NOGPU . '">Games without a graphics card</a></div></div>'
         . '<div class="gp-wall">' . $wall . '<small>Most popular games. Pictures: Steam store, © their publishers.</small></div></header>';
     $m .= '<section class="gp-card"><label for="gp-q" class="sr-only">Search a game</label>'
         . '<input id="gp-q" class="gp-search" type="search" placeholder="Search ' . number_format($n) . ' games, e.g. GTA, Elden Ring, Valorant…" autocomplete="off">'
@@ -567,6 +639,7 @@ if ($sim) {
 }
 // More on the site (Deploy 82): the pages a player checking requirements needs next.
 $more = [['/compatibility/?steam=' . (int)$g['appid'], 'Full PC check', 'Laptops, consoles, handhelds and more parts'],
+         [ROC_GP_NOGPU, 'Games without a graphics card', 'The games a laptop with integrated graphics plays'],
          ['/category/gpu/', 'Graphics cards', 'Picks for every budget'], ['/category/cpu/', 'Processors', 'Gaming CPUs from entry to high end'],
          ['/category/ram/', 'Memory (RAM)', 'DDR4 and DDR5 kits'], ['/gaming-platforms/pc-handheld-pc/', 'PC and handheld PC guide', 'Gaming platform guide'],
          ['/guides/', 'Gaming guides', 'Buying, setup and game settings, step by step'], ['/can-i-run/', 'All PC games', number_format(count($games)) . ' games with their requirements']];
