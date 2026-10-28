@@ -94,6 +94,30 @@ function rocGpPath(array $g): string { return '/can-i-run/' . $g['slug'] . '/'; 
 /** The list of games that run on integrated graphics (game-render.php, Deploy 135); no game uses this slug. */
 const ROC_GP_NOGPU = '/can-i-run/without-graphics-card/';
 
+/**
+ * "What games can a <card> run?" pages (Deploy 136): one per speed class of the checker, named after the card people
+ * search most; the cards of the same class (the same score, so the same list) are named on it and link to it, so
+ * Google never sees two pages with the same list. Slugs end in "-games"; no game uses one.
+ */
+const ROC_GP_CARD_PAGES = ['GeForce GT 1030' => [], 'GeForce GTX 750 Ti' => [], 'GeForce GTX 1050 Ti' => ['GeForce GTX 960'], 'Radeon RX 570' => [],
+    'GeForce GTX 1650' => ['GeForce GTX 1060 6GB', 'Radeon RX 580', 'GeForce RTX 3050', 'GeForce RTX 2050'],
+    'GeForce GTX 1660 Super' => ['GeForce GTX 1070'], 'GeForce RTX 2060' => ['GeForce GTX 1080', 'Radeon RX 5600 XT'],
+    'Radeon RX 6600' => ['Intel Arc A750'], 'GeForce RTX 3060' => ['GeForce RTX 4060', 'Radeon RX 7600']];
+/** "GTX 1650", "RX 580", "Arc A750". */
+function rocGpCardShort(string $name): string { return (string)preg_replace('/^(?:GeForce|Radeon|Intel)\s+/', '', $name); }
+function rocGpCardSlug(string $name): string { return trim((string)preg_replace('/[^a-z0-9]+/', '-', strtolower(rocGpCardShort($name))), '-') . '-games'; }
+/** The page of a card (its own or its class's), or null. */
+function rocGpCardPath(string $name): ?string {
+    if (strpos($name, 'integrated') !== false) return ROC_GP_NOGPU;
+    foreach (ROC_GP_CARD_PAGES as $main => $same) if ($name === $main || in_array($name, $same, true)) return '/can-i-run/' . rocGpCardSlug($main) . '/';
+    return null;
+}
+/** The main card of a "-games" slug, or null. */
+function rocGpCardBySlug(string $slug): ?string {
+    foreach (array_keys(ROC_GP_CARD_PAGES) as $main) if (rocGpCardSlug($main) === $slug) return $main;
+    return null;
+}
+
 /** The page of a Steam app id, or null. */
 function rocGpByAppid(string $root, int $appid): ?array {
     foreach (rocGpAll($root) as $g) if ((int)$g['appid'] === $appid) return $g;

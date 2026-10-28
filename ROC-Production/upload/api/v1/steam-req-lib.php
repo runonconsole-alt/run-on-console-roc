@@ -32,7 +32,34 @@ function rocSrReadBlock(string $html): array {
 
 function rocSrMax(array $xs) { return $xs ? max($xs) : null; }
 
+/**
+ * The graphics card a requirement line asks for (Deploy 136). Steam lines list cards that are each enough ("GTX 1060
+ * / RX 580 / Arc A580") and extras ("For Ray Tracing: RTX 3070", "RX 590 (VR)"); the highest of all of them made
+ * F1 2021's minimum an RTX 3070 class card instead of a GTX 950. Now: the extras are dropped, and the lowest NVIDIA
+ * card counts (the most complete table), else the lowest AMD card, else the lowest Intel Arc; a line without a
+ * brand card ("1 GB dedicated VRAM") is read whole as before. (scripts/steam-requirements.mjs still takes the
+ * highest; the server's own updates use this.)
+ */
 function rocSrGpu(string $s) {
+    $t = mb_strtolower($s);
+    $t = (string)preg_split('/\b(?:for|with)\s+(?:ray[\s-]*tracing|rt\b|vr\b|4k|1440p|ultra|high)|\bray[\s-]*tracing\s*:|\bvr\s*:|\brt\s*:/u', $t)[0];
+    $nv = []; $amd = []; $arc = [];
+    foreach (preg_split('/\s*(?:\/\/?|\||,|;|\bor\b|\band\b)\s*/u', $t) as $alt) {
+        if (trim($alt) === '' || preg_match('/\((?!\+)[^)]*\b(?:vr|rt|ray)\b[^)]*\)/u', $alt)) continue;
+        $v = rocSrGpuOne($alt);
+        if ($v === null) continue;
+        if (preg_match('/\b(?:rtx|gtx|gts|gt\s*\d|geforce|nvidia|titan)/u', $alt)) $nv[] = $v;
+        elseif (preg_match('/\barc\b/u', $alt)) $arc[] = $v;
+        elseif (preg_match('/\b(?:rx\s*\d|radeon|r[79]\s*\d|hd\s*\d|vega|amd)/u', $alt)) $amd[] = $v;
+    }
+    if ($nv) return min($nv);
+    if ($amd) return min($amd);
+    if ($arc) return min($arc);
+    return rocSrGpuOne($t);
+}
+
+/** The score of one card name (or of a whole line: the highest card in it). */
+function rocSrGpuOne(string $s) {
     $s = mb_strtolower($s);
     $s = (string)preg_replace('/(?:nvidia|geforce)\s+(?=(?:20|30|40|50)\d0\b)/u', ' rtx ', $s);
     $s = (string)preg_replace('/(?:nvidia|geforce)\s+(?=(?:9[5-8]0|10[5-8]0|16[3-6]0)\b)/u', ' gtx ', $s);
