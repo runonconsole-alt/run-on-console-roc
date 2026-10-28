@@ -113,13 +113,13 @@ function rocDailyPicks(PDO $pdo): array {
  */
 const ROC_DAILY_MAIL_AT = '11:30';
 /**
- * Search Console's URL Inspection page for $url, opened in the Google account that owns the property (Deploy 131:
- * with several Google accounts in Chrome the link opened the first one and Google answered 404).
+ * Search Console for runonconsole.com, in the Google account that owns it. Deploy 132: Search Console has no link
+ * that opens the inspection of a given address (its inspect page takes Google's own id, the owner's test on
+ * 2026-10-29), so the button opens the property and the owner pastes the copied address into "Inspect any URL".
  */
 const ROC_GSC_ACCOUNT = 'runonconsole@gmail.com';
-function rocInspectLink(string $url): string {
-    return 'https://search.google.com/search-console/inspect?resource_id=' . rawurlencode('https://runonconsole.com/') . '&id=' . rawurlencode($url)
-         . '&authuser=' . rawurlencode(ROC_GSC_ACCOUNT);
+function rocInspectLink(string $url = ''): string {
+    return 'https://search.google.com/search-console?resource_id=' . rawurlencode('https://runonconsole.com/') . '&authuser=' . rawurlencode(ROC_GSC_ACCOUNT);
 }
 function rocDailyPicksMail(PDO $pdo, bool $force = false): ?string {
     $now = new DateTime('now', new DateTimeZone('Asia/Karachi'));
@@ -141,12 +141,12 @@ function rocDailyPicksMail(PDO $pdo, bool $force = false): ?string {
     $rows = '';
     foreach ($picks as $i => $p) {
         $u = 'https://runonconsole.com' . $p;
-        $insp = rocInspectLink($u);
-        $rows .= '<tr><td style="padding:8px;border-bottom:1px solid #e2e8f0"><b>' . ($i + 1) . '.</b></td><td style="padding:8px;border-bottom:1px solid #e2e8f0"><a href="' . $e($u) . '">' . $e($pool[$p][1] ?? $p) . '</a><br><span style="color:#64748b;font-size:12px">' . $e($u) . '</span></td>'
-               . '<td style="padding:8px;border-bottom:1px solid #e2e8f0"><a href="' . $e($insp) . '" style="background:#059669;color:#fff;padding:7px 12px;border-radius:8px;text-decoration:none;font-weight:bold;white-space:nowrap">Request indexing</a></td></tr>';
+        $rows .= '<tr><td style="padding:8px;border-bottom:1px solid #e2e8f0;vertical-align:top"><b>' . ($i + 1) . '.</b></td><td style="padding:8px;border-bottom:1px solid #e2e8f0">'
+               . '<b>' . $e($pool[$p][1] ?? $p) . '</b><br><span style="display:inline-block;margin-top:4px;font-family:Consolas,monospace;font-size:13px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;padding:5px 8px">' . $e($u) . '</span></td></tr>';
     }
     $html = '<p><b>Today\'s 10 products for Google</b> (' . $e($now->format('l j F')) . '): not indexed yet, linked today from every Can I run page and the top of every post.</p>'
-          . '<p>At 12:00: press <b>Request indexing</b> for each one. Search Console opens the page check; wait for it, then press <b>Request indexing</b> there (Google allows about 10 a day).</p>'
+          . '<p style="margin:16px 0"><a href="' . $e(rocInspectLink()) . '" style="background:#059669;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:bold">Open Search Console</a></p>'
+          . '<p>At 12:00, for each address below: copy it, paste it into <b>Inspect any URL</b> at the top of Search Console, press Enter, wait for the check, then press <b>Request indexing</b> (Google allows about 10 a day).</p>'
           . '<table style="border-collapse:collapse;width:100%;font-size:14px">' . $rows . '</table>'
           . '<p style="color:#64748b;font-size:13px">The same list is in CMS &gt; Indexing.</p>';
     require_once __DIR__ . '/cms/news-engine-lib.php';

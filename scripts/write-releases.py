@@ -876,6 +876,11 @@ RELEASES = [
          checks=[dict(label='Inspect link with account', type='contains', path='api/v1/link-boost-lib.php', text='function rocInspectLink')],
          pr=REPO + '130',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.']),
+    dict(deploy=132, date='2026-10-29', title='Indexing list: Open Search Console and Copy',
+         changes=['Search Console has no link that opens the check of one address (its inspect page uses Google\'s own id), so the 11:30 email and CMS > Indexing now have one Open Search Console button and each address to copy (a Copy button in the CMS): paste it into Inspect any URL, then Request indexing'],
+         checks=[dict(label='Open Search Console link', type='contains', path='api/v1/link-boost-lib.php', text="search-console?resource_id=")],
+         pr=REPO + '131',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Reload the CMS with Ctrl+F5.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

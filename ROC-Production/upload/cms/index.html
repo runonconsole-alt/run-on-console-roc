@@ -1405,9 +1405,10 @@ async function renderIndexing(m){
   // The day's 10 products (Deploy 128): linked from every Can I run page and post today; "Request indexing" opens Search Console.
   var daily=(d.daily||[]);
   var dhtml=daily.length&&IX.filter!=='queries'?'<div class="card"><div class="chead"><h3>Today\'s 10 for Google</h3><span class="note">changes every day</span></div>'+
-    '<div class="cbody hint">Products Google has not indexed yet. Today they are linked from every Can I run page and the top of every post. Optional: open each one in Search Console and press <b>Request indexing</b> (Google allows about 10 a day).</div>'+
+    '<div class="cbody hint">Products Google has not indexed yet. Today they are linked from every Can I run page and the top of every post. Optional: press <b>Copy</b>, paste the address into <b>Inspect any URL</b> at the top of Search Console, press Enter, then <b>Request indexing</b> (Google allows about 10 a day).'+
+      (daily[0]&&daily[0].inspect?' <a class="btn sm" href="'+esc(daily[0].inspect)+'" target="_blank" rel="noopener">Open Search Console ↗</a>':'')+'</div>'+
     '<div class="cbody">'+daily.map(function(x,i){ return '<div style="padding:5px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b>'+(i+1)+'.</b> <a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.name)+'</a>'+
-      ' <a class="btn sm" href="'+esc(x.inspect)+'" target="_blank" rel="noopener">Request indexing ↗</a></div>'; }).join('')+'</div></div>':'';
+      ' <button class="btn sm" type="button" data-copy="'+esc(x.url)+'" onclick="var b=this;navigator.clipboard.writeText(b.getAttribute(\'data-copy\')).then(function(){b.textContent=\'Copied ✓\';});">Copy</button></div>'; }).join('')+'</div></div>':'';
   var kinds=Object.keys(st.by_kind||{}).sort(function(a,b){ return (st.by_kind[b].total)-(st.by_kind[a].total); });
   m.innerHTML=head('Indexing','Which pages Google has indexed, checked a few at a time with Search Console. New ones are emailed every evening.')+
     '<div class="body">'+
