@@ -851,6 +851,13 @@ RELEASES = [
                  dict(label='Blog titles fixed', type='contains', path='api/v1/cron/cli-blog-titles.php', text='BT_POSTS')],
          pr=REPO + '126',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-blog-titles.php --apply', 'CMS Dashboard > Clear cache.']),
+    dict(deploy=128, date='2026-10-28', title='10 products a day for Google',
+         changes=['Every day the server picks 10 products Google has not indexed yet (first the ones Google has discovered but not crawled, never one picked in the last 7 days)',
+                  'The day\'s 10 are in 2 of the 6 cards on every Can I run page (2,400 pages Google visits often) and come first in the top strip of every post, so Google finds them from many pages that day; no Indexing API (Google allows it only for job posts and live videos)',
+                  'CMS > Indexing shows "Today\'s 10 for Google" with a Request indexing button for each (opens Search Console)'],
+         checks=[dict(label='Daily picks', type='contains', path='api/v1/link-boost-lib.php', text='function rocDailyPicks')],
+         pr=REPO + '127',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS Dashboard > Clear cache.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

@@ -39,6 +39,16 @@ $err = rocBlogGet($pdo, 'gsc_error', null);
 $out['error'] = is_array($err) ? $err : null;
 $c = rocBlogGet($pdo, 'gsc_daily', []);
 $out['checked_today'] = (is_array($c) && ($c['day'] ?? '') === gmdate('Y-m-d')) ? (int)$c['n'] : 0;
+// The day's 10 products (Deploy 128, link-boost-lib.php): with a link to Search Console's URL Inspection.
+try {
+    require_once dirname(__DIR__) . '/link-boost-lib.php';
+    $pool = rocLinkBoostUnindexed($pdo);
+    $out['daily'] = array_map(function ($p) use ($pool) {
+        $u = 'https://runonconsole.com' . $p;
+        return ['url' => $u, 'name' => $pool[$p][1] ?? $p,
+                'inspect' => 'https://search.google.com/search-console/inspect?resource_id=' . rawurlencode('https://runonconsole.com/') . '&id=' . rawurlencode($u)];
+    }, rocDailyPicks($pdo));
+} catch (\Throwable $e) { $out['daily'] = []; }
 try { $out['stats'] = rocGscStats($pdo); } catch (\Throwable $e) { $out['stats'] = ['total' => 0, 'indexed' => 0, 'not_indexed' => 0, 'unchecked' => 0, 'by_kind' => []]; }
 
 $filter = (string)($_GET['filter'] ?? 'new');
