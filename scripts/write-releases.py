@@ -896,6 +896,13 @@ RELEASES = [
                 'Dry run: php /home2/runoncon/public_html/api/v1/cron/cli-guide-faq.php',
                 'Apply: php /home2/runoncon/public_html/api/v1/cron/cli-guide-faq.php --apply',
                 'CMS Dashboard: Clear cache.']),
+    dict(deploy=135, date='2026-10-29', title='Games that run without a graphics card',
+         changes=['New page /can-i-run/without-graphics-card/: every PC game a laptop with integrated graphics plays (about 1,300 well and more on low settings), with a search box, FAQ and FAQ markup',
+                  'Linked from every Can I run page (More for PC players), from the top of /can-i-run/ and listed in the games sitemap'],
+         checks=[dict(label='No graphics card page', type='contains', path='game-render.php', text="without-graphics-card")],
+         pr=REPO + '134',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Open https://runonconsole.com/can-i-run/without-graphics-card/',
+                'Search Console: Inspect the new address and press Request indexing.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

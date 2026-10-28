@@ -91,6 +91,8 @@ function rocGpUpdated(string $root): int {
 }
 
 function rocGpPath(array $g): string { return '/can-i-run/' . $g['slug'] . '/'; }
+/** The list of games that run on integrated graphics (game-render.php, Deploy 135); no game uses this slug. */
+const ROC_GP_NOGPU = '/can-i-run/without-graphics-card/';
 
 /** The page of a Steam app id, or null. */
 function rocGpByAppid(string $root, int $appid): ?array {
