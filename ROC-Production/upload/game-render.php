@@ -403,7 +403,7 @@ $faqs[] = ['Can I play ' . $name . ' on a laptop?',
 $rmn = (float)($rMin['ram'] ?? 0); $rrc = (float)($rRec['ram'] ?? $rmn);
 if ($rmn > 0) $faqs[] = ['Is 8 GB of RAM enough for ' . $name . '?',
     $rmn > 8 ? 'No. ' . $name . ' needs at least ' . $ramGb($rmn) . ' of RAM.' : ($rrc > 8 ? 'Yes for the minimum settings; ' . $ramGb($rrc) . ' is recommended for smooth play.' : 'Yes. 8 GB meets the ' . ($rec ? 'recommended' : 'minimum') . ' memory for ' . $name . '.')];
-if ($storage !== '') $faqs[] = ['How much storage does ' . $name . ' need?', $name . ' needs ' . preg_replace('/\s*available space/i', '', $storage) . ' of free space' . ($storageGb !== null && $storageGb >= 50 ? '. An SSD is a good idea for faster loading.' : '.')];
+if ($storage !== '') $faqs[] = ['How many GB is ' . $name . '?', $name . ' needs ' . preg_replace('/\s*available space/i', '', $storage) . ' of free space' . ($storageGb !== null && $storageGb >= 50 ? '. An SSD is a good idea for faster loading.' : '.')];
 
 /* upgrade picks */
 $picks = [];
