@@ -915,6 +915,13 @@ RELEASES = [
                 'Dry run: php /home2/runoncon/public_html/api/v1/cron/cli-steam-rescore.php',
                 'Apply: php /home2/runoncon/public_html/api/v1/cron/cli-steam-rescore.php --apply',
                 'Open https://runonconsole.com/can-i-run/gtx-1650-games/']),
+    dict(deploy=137, date='2026-10-29', title='Minimum processor as Steam says',
+         changes=['Game requirements: the minimum processor is now the cheapest processor Steam lists (Core i5-8400 / Ryzen 5 2600 counts as a Ryzen 5 2600), as the graphics card in Deploy 136; about 510 games change after the rescore command, so common PCs (GTX 1650 + Core i5-8400) get fairer results on the game pages, the checker and ROC'],
+         checks=[dict(label='Cheapest processor rule', type='contains', path='api/v1/steam-req-lib.php', text='function rocSrCpuOne')],
+         pr=REPO + '136',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.',
+                'Dry run: php /home2/runoncon/public_html/api/v1/cron/cli-steam-rescore.php',
+                'Apply: php /home2/runoncon/public_html/api/v1/cron/cli-steam-rescore.php --apply']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

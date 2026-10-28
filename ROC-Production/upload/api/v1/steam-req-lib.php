@@ -105,7 +105,27 @@ function rocSrGpuOne(string $s) {
     return rocSrMax($f);
 }
 
+/**
+ * The processor a requirement line asks for (Deploy 137, as rocSrGpu in Deploy 136). "Core i5-8400 / Ryzen 5 2600"
+ * lists two processors that are each enough; the highest of them made the minimum harder than Steam says. Now the
+ * lowest named processor model of the line counts; extras ("for ray tracing", "for VR") are dropped, and a line
+ * without a model ("Quad-core 3 GHz", "Intel i5") is read whole as before.
+ */
 function rocSrCpu(string $s) {
+    $t = (string)preg_replace('/®|™/u', '', mb_strtolower($s));
+    $t = (string)preg_split('/\b(?:for|with)\s+(?:ray[\s-]*tracing|rt\b|vr\b|4k|1440p|ultra|high)|\bray[\s-]*tracing\s*:|\bvr\s*:|\brt\s*:/u', $t)[0];
+    $model = '/\bi[3579][\s-]*\d{4,5}|core\s*ultra\s*[579]|ryzen\s*[3579]\s*[\s-]*\d{4}|\br[3579]\s*[\s-]*\d{4}|\bfx[\s-]*\d{4}/u';
+    $vs = [];
+    foreach (preg_split('/\s*(?:\/\/?|\||,|;|\bor\b|\band\b)\s*/u', $t) as $alt) {
+        if (!preg_match($model, $alt) || preg_match('/\((?!\+)[^)]*\b(?:vr|rt|ray)\b[^)]*\)/u', $alt)) continue;
+        $v = rocSrCpuOne($alt);
+        if ($v !== null) $vs[] = $v;
+    }
+    return $vs ? min($vs) : rocSrCpuOne($t);
+}
+
+/** The score of one processor name (or of a whole line: the highest processor in it). */
+function rocSrCpuOne(string $s) {
     $s = (string)preg_replace('/®|™/u', '', mb_strtolower($s));
     $f = [];
     if (preg_match_all('/\bi([3579])[\s-]*(\d{4,5})[a-z]*/u', $s, $mm, PREG_SET_ORDER)) foreach ($mm as $m) {
