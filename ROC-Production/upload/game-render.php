@@ -778,12 +778,12 @@ $m .= '<section class="gp-card"><h2>More for PC players</h2><div class="gp-sim">
 $m .= '<p class="gp-src">Ask <b>ROC</b>, our gaming assistant (the chat button), "can my PC run ' . rocH($name) . '?" and tell it your parts, or upload your dxdiag file.</p>';
 $m .= '</article>';
 
-// The quick check: the same rules as /compatibility/ and ROC (graphics 50%, processor 30%, RAM 20% of the recommended; under the minimum = at most 40%).
+// The quick check: the same rules as ROC (graphics 50%, processor 30%, RAM 20% of the recommended; under the minimum = at most 40%; under the recommended = at most 89%).
 $m .= "<script>(function(){var box=document.querySelector('.gp-check'),res=document.getElementById('gp-res');if(!box)return;var R=JSON.parse(box.getAttribute('data-req'));"
     . "function v(k){return parseFloat(box.querySelector('[data-k=\"'+k+'\"]').value)}"
     . "function run(){var have={gpu:v('gpu'),cpu:v('cpu'),ram:v('ram')},mn=R.min||{},rc=R.rec||mn,w={gpu:.5,cpu:.3,ram:.2},s=0,t=0,below=false,miss=[];"
     . "for(var k in w){var need=rc[k]||mn[k];if(need>0){s+=w[k]*Math.min(1,have[k]/need);t+=w[k];if(have[k]<need)miss.push(k);}if(mn[k]>0&&have[k]<mn[k])below=true;}"
-    . "var p=Math.round(100*s/(t||1));if(below)p=Math.min(p,40);p=Math.max(5,p);"
+    . "var p=Math.round(100*s/(t||1));if(below)p=Math.min(p,40);if(miss.length)p=Math.min(p,89);p=Math.max(5,p);"
     . "var c=p>=90?'ok':p>=70?'mid':p>40?'low':'no',txt=p>=90?'Runs on high settings (meets the recommended specs).':p>=70?'Playable on medium to high settings.':p>40?'Playable on low settings only.':'Below the minimum specs: it will not run well.';"
     . "var names={gpu:'graphics card',cpu:'processor',ram:'RAM'},up=miss.map(function(k){return names[k]});"
     . "res.className='gp-res '+c;res.innerHTML='<b>'+p+'%</b><div class=\"gp-bar\"><i style=\"width:'+p+'%\"></i></div>'+txt+(up.length?' Upgrade first: '+up.join(', ')+'.':'');}"

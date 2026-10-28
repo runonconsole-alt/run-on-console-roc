@@ -1,0 +1,20 @@
+{
+ "deploy": 138,
+ "date": "2026-10-29",
+ "title": "High settings only when the PC meets the recommended specs",
+ "changes": [
+  "Game pages (How common PCs do, FAQ, quick check) and ROC say high settings only when the graphics card, processor and RAM all meet the recommended specs; otherwise at most 89%, medium to high (a GTX 1650 PC was 95% high settings for Elden Ring, whose recommended card is a GTX 1070)"
+ ],
+ "checks": [
+  {
+   "label": "High needs the recommended specs",
+   "type": "contains",
+   "path": "api/v1/agent-lib.php",
+   "text": "Deploy 138"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/137",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it."
+ ]
+}

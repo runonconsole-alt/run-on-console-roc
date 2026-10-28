@@ -922,6 +922,11 @@ RELEASES = [
          steps=['Upload the zip to /home2/runoncon/ and unzip it.',
                 'Dry run: php /home2/runoncon/public_html/api/v1/cron/cli-steam-rescore.php',
                 'Apply: php /home2/runoncon/public_html/api/v1/cron/cli-steam-rescore.php --apply']),
+    dict(deploy=138, date='2026-10-29', title='High settings only when the PC meets the recommended specs',
+         changes=['Game pages (How common PCs do, FAQ, quick check) and ROC say high settings only when the graphics card, processor and RAM all meet the recommended specs; otherwise at most 89%, medium to high (a GTX 1650 PC was 95% high settings for Elden Ring, whose recommended card is a GTX 1070)'],
+         checks=[dict(label='High needs the recommended specs', type='contains', path='api/v1/agent-lib.php', text='Deploy 138')],
+         pr=REPO + '137',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
