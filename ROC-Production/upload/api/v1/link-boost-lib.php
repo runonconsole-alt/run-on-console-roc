@@ -106,6 +106,45 @@ function rocDailyPicks(PDO $pdo): array {
     return $picks;
 }
 
+/**
+ * Owner, 2026-10-28 (Deploy 130): Monday to Friday at 11:30 Pakistan time an email with the day's 10, each with a
+ * "Request indexing" link to Search Console, so the owner submits them at 12:00. To the alert address (CMS >
+ * Updates writer > News > Email alerts), once a day. cms_settings daily_picks_mail = the last day sent.
+ */
+const ROC_DAILY_MAIL_AT = '11:30';
+function rocDailyPicksMail(PDO $pdo, bool $force = false): ?string {
+    $now = new DateTime('now', new DateTimeZone('Asia/Karachi'));
+    $day = $now->format('Y-m-d');
+    if (!$force) {
+        if ((int)$now->format('N') > 5 || $now->format('H:i') < ROC_DAILY_MAIL_AT || $now->format('H:i') > '18:00') return null;
+        if ((string)rocLinkBoostSetting($pdo, 'daily_picks_mail') === $day) return null;
+    }
+    $picks = rocDailyPicks($pdo);
+    $pool = rocLinkBoostUnindexed($pdo);
+    $val = json_encode($day);
+    try {
+        $up = $pdo->prepare('UPDATE cms_settings SET setting_value = ? WHERE setting_key = ?');
+        $up->execute([$val, 'daily_picks_mail']);
+        if ($up->rowCount() === 0) $pdo->prepare('INSERT INTO cms_settings (setting_key, setting_value) VALUES (?, ?)')->execute(['daily_picks_mail', $val]);
+    } catch (\Throwable $e) { return null; }                       // never mail twice when the day cannot be saved
+    if (!$picks) return 'indexing email: no products left to submit';
+    $e = function ($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); };
+    $rows = '';
+    foreach ($picks as $i => $p) {
+        $u = 'https://runonconsole.com' . $p;
+        $insp = 'https://search.google.com/search-console/inspect?resource_id=' . rawurlencode('https://runonconsole.com/') . '&id=' . rawurlencode($u);
+        $rows .= '<tr><td style="padding:8px;border-bottom:1px solid #e2e8f0"><b>' . ($i + 1) . '.</b></td><td style="padding:8px;border-bottom:1px solid #e2e8f0"><a href="' . $e($u) . '">' . $e($pool[$p][1] ?? $p) . '</a><br><span style="color:#64748b;font-size:12px">' . $e($u) . '</span></td>'
+               . '<td style="padding:8px;border-bottom:1px solid #e2e8f0"><a href="' . $e($insp) . '" style="background:#059669;color:#fff;padding:7px 12px;border-radius:8px;text-decoration:none;font-weight:bold;white-space:nowrap">Request indexing</a></td></tr>';
+    }
+    $html = '<p><b>Today\'s 10 products for Google</b> (' . $e($now->format('l j F')) . '): not indexed yet, linked today from every Can I run page and the top of every post.</p>'
+          . '<p>At 12:00: press <b>Request indexing</b> for each one. Search Console opens the page check; wait for it, then press <b>Request indexing</b> there (Google allows about 10 a day).</p>'
+          . '<table style="border-collapse:collapse;width:100%;font-size:14px">' . $rows . '</table>'
+          . '<p style="color:#64748b;font-size:13px">The same list is in CMS &gt; Indexing.</p>';
+    require_once __DIR__ . '/cms/news-engine-lib.php';
+    $ok = rocNotify($pdo, 'Indexing: today\'s 10 products to submit at 12:00', $html);
+    return 'indexing email: ' . ($ok ? 'sent (' . count($picks) . ' products)' : 'failed (check CMS > News > Email alerts)');
+}
+
 /** For the page $seed (its path): 4 products and 2 boost pages, a different set on every page. */
 function rocLinkBoostPick(PDO $pdo, string $seed, int $products = 4, int $boost = 2): array {
     $h = (int)sprintf('%u', crc32($seed));

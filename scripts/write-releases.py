@@ -864,6 +864,11 @@ RELEASES = [
          checks=[dict(label='Backlinks report', type='contains', path='api/v1/cms/offpage-lib.php', text='function rocOffpageReport')],
          pr=REPO + '128',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS > Off-page: turn the daily research on.']),
+    dict(deploy=130, date='2026-10-29', title='Indexing email at 11:30, Monday to Friday',
+         changes=['Monday to Friday at 11:30 Pakistan time the server emails the day\'s 10 products Google has not indexed, each with a Request indexing button that opens Search Console, to submit at 12:00 (to the alert address in CMS > Updates writer > News > Email alerts)'],
+         checks=[dict(label='Indexing email', type='contains', path='api/v1/link-boost-lib.php', text='function rocDailyPicksMail')],
+         pr=REPO + '129',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
