@@ -316,6 +316,9 @@ function rocAgentCheck(array $game, ?float $gpu, ?float $cpu, ?float $ram): arra
     $below = function ($have, $m) use ($known) { return $have !== null && $known($m) && $have < $m; };
     $belowMin = $below($gpu, $min['gpu'] ?? null) || $below($cpu, $min['cpu'] ?? null) || $below($ram, $min['ram'] ?? null);
     if ($belowMin) $pct = min($pct, 40);
+    // Deploy 138: "high settings" (90%+) only when every part meets the recommended specs; a GTX 1650 PC was
+    // 95% "high settings" for Elden Ring, whose recommended card is a GTX 1070.
+    if ($below($gpu, $rec['gpu'] ?? null) || $below($cpu, $rec['cpu'] ?? null) || $below($ram, $rec['ram'] ?? null)) $pct = min($pct, 89);
     $pct = max(5, $pct);
     $missing = [];
     if ($below($gpu, $rec['gpu'] ?? null)) $missing[] = ['part' => 'gpu', 'need' => (float)$rec['gpu'], 'below_min' => $below($gpu, $min['gpu'] ?? null)];
