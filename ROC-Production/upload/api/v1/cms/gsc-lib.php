@@ -107,7 +107,13 @@ function rocGscInspect(PDO $pdo, string $url): ?array {
     [$code, $out] = rocGscHttp('https://searchconsole.googleapis.com/v1/urlInspection/index:inspect',
         json_encode(['inspectionUrl' => $url, 'siteUrl' => ROC_GSC_SITE]), ['Content-Type: application/json', 'Authorization: Bearer ' . $tok]);
     $d = json_decode($out, true);
-    if ($code !== 200) { rocBlogSet($pdo, 'gsc_error', ['t' => gmdate('c'), 'e' => 'inspect ' . $code . ': ' . mb_substr($out, 0, 200)]); return null; }
+    if ($code !== 200) {
+        rocBlogSet($pdo, 'gsc_error', ['t' => gmdate('c'), 'e' => 'inspect ' . $code . ': ' . mb_substr($out, 0, 200)]);
+        // Deploy 131: the daily quota (2,000 checks a property, shared with every tool that uses it) is used up:
+        // wait until Google resets it (midnight Pacific time, 08:00 UTC) instead of asking again every 10 minutes.
+        if ($code === 429) { $next = strtotime(gmdate('Y-m-d') . ' 08:00:00 UTC'); if ($next <= time()) $next += 86400; rocBlogSet($pdo, 'gsc_pause', $next); }
+        return null;
+    }
     $r = (array)($d['inspectionResult']['indexStatusResult'] ?? []);
     $lc = !empty($r['lastCrawlTime']) ? gmdate('Y-m-d H:i:s', (int)strtotime((string)$r['lastCrawlTime'])) : null;
     return [(string)($r['verdict'] ?? 'NEUTRAL'), mb_substr((string)($r['coverageState'] ?? ''), 0, 160), $lc];
@@ -327,6 +333,7 @@ function rocGscTick(PDO $pdo): ?string {
     $c = rocBlogGet($pdo, 'gsc_daily', []); $c = (is_array($c) && ($c['day'] ?? '') === $day) ? $c : ['day' => $day, 'n' => 0];
     $left = min(ROC_GSC_PER_RUN, ROC_GSC_DAILY - (int)$c['n']);
     if ($left <= 0) return $qs;
+    if ((int)rocBlogGet($pdo, 'gsc_pause', 0) > time()) return $qs;   // quota used up (429): Google resets it at 08:00 UTC
     $now = gmdate('Y-m-d H:i:s');
     $rows = $pdo->query("SELECT url_hash, url, verdict FROM roc_index_status
         WHERE checked_at IS NULL
@@ -346,6 +353,7 @@ function rocGscTick(PDO $pdo): ?string {
     }
     $c['n'] = (int)$c['n'] + $n;
     rocBlogSet($pdo, 'gsc_daily', $c);
+    if ($n > 0 && rocBlogGet($pdo, 'gsc_error', null) !== null && count($rows) === $n) rocBlogSet($pdo, 'gsc_error', '');   // working again: the old problem goes
     if ($new) { $q = rocBlogGet($pdo, 'gsc_new', []); $q = is_array($q) ? $q : []; rocBlogSet($pdo, 'gsc_new', array_slice(array_values(array_unique(array_merge($q, $new))), -500)); }
     rocGscBoost($pdo);
     $mail = rocGscEmail($pdo);

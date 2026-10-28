@@ -1,0 +1,22 @@
+{
+ "deploy": 131,
+ "date": "2026-10-29",
+ "title": "Request indexing opens the right Google account",
+ "changes": [
+  "The Request indexing buttons (11:30 email and CMS > Indexing) open Search Console in runonconsole@gmail.com, so Chrome with several Google accounts no longer shows a Google 404 page",
+  "When Google says the daily check quota is used up (error 429), the indexing checker waits until Google resets it (13:00 Pakistan time) instead of asking every 10 minutes",
+  "An old problem message in CMS > Indexing goes away once the checks work again"
+ ],
+ "checks": [
+  {
+   "label": "Inspect link with account",
+   "type": "contains",
+   "path": "api/v1/link-boost-lib.php",
+   "text": "function rocInspectLink"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/130",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it."
+ ]
+}

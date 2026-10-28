@@ -112,6 +112,15 @@ function rocDailyPicks(PDO $pdo): array {
  * Updates writer > News > Email alerts), once a day. cms_settings daily_picks_mail = the last day sent.
  */
 const ROC_DAILY_MAIL_AT = '11:30';
+/**
+ * Search Console's URL Inspection page for $url, opened in the Google account that owns the property (Deploy 131:
+ * with several Google accounts in Chrome the link opened the first one and Google answered 404).
+ */
+const ROC_GSC_ACCOUNT = 'runonconsole@gmail.com';
+function rocInspectLink(string $url): string {
+    return 'https://search.google.com/search-console/inspect?resource_id=' . rawurlencode('https://runonconsole.com/') . '&id=' . rawurlencode($url)
+         . '&authuser=' . rawurlencode(ROC_GSC_ACCOUNT);
+}
 function rocDailyPicksMail(PDO $pdo, bool $force = false): ?string {
     $now = new DateTime('now', new DateTimeZone('Asia/Karachi'));
     $day = $now->format('Y-m-d');
@@ -132,7 +141,7 @@ function rocDailyPicksMail(PDO $pdo, bool $force = false): ?string {
     $rows = '';
     foreach ($picks as $i => $p) {
         $u = 'https://runonconsole.com' . $p;
-        $insp = 'https://search.google.com/search-console/inspect?resource_id=' . rawurlencode('https://runonconsole.com/') . '&id=' . rawurlencode($u);
+        $insp = rocInspectLink($u);
         $rows .= '<tr><td style="padding:8px;border-bottom:1px solid #e2e8f0"><b>' . ($i + 1) . '.</b></td><td style="padding:8px;border-bottom:1px solid #e2e8f0"><a href="' . $e($u) . '">' . $e($pool[$p][1] ?? $p) . '</a><br><span style="color:#64748b;font-size:12px">' . $e($u) . '</span></td>'
                . '<td style="padding:8px;border-bottom:1px solid #e2e8f0"><a href="' . $e($insp) . '" style="background:#059669;color:#fff;padding:7px 12px;border-radius:8px;text-decoration:none;font-weight:bold;white-space:nowrap">Request indexing</a></td></tr>';
     }
