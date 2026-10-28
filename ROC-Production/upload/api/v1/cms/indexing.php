@@ -46,7 +46,7 @@ try {
     $out['daily'] = array_map(function ($p) use ($pool) {
         $u = 'https://runonconsole.com' . $p;
         return ['url' => $u, 'name' => $pool[$p][1] ?? $p,
-                'inspect' => 'https://search.google.com/search-console/inspect?resource_id=' . rawurlencode('https://runonconsole.com/') . '&id=' . rawurlencode($u)];
+                'inspect' => rocInspectLink($u)];
     }, rocDailyPicks($pdo));
 } catch (\Throwable $e) { $out['daily'] = []; }
 try { $out['stats'] = rocGscStats($pdo); } catch (\Throwable $e) { $out['stats'] = ['total' => 0, 'indexed' => 0, 'not_indexed' => 0, 'unchecked' => 0, 'by_kind' => []]; }
