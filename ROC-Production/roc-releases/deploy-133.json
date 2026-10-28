@@ -1,0 +1,20 @@
+{
+ "deploy": 133,
+ "date": "2026-10-29",
+ "title": "Old indexing problem message goes away",
+ "changes": [
+  "CMS > Indexing no longer shows a problem that happened before the last page Google checked (the 429 quota message of 27 October)"
+ ],
+ "checks": [
+  {
+   "label": "Old problem hidden",
+   "type": "contains",
+   "path": "api/v1/cms/indexing.php",
+   "text": "Deploy 133"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/132",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it."
+ ]
+}
