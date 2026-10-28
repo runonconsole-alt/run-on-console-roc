@@ -881,6 +881,11 @@ RELEASES = [
          checks=[dict(label='Open Search Console link', type='contains', path='api/v1/link-boost-lib.php', text="search-console?resource_id=")],
          pr=REPO + '131',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Reload the CMS with Ctrl+F5.']),
+    dict(deploy=133, date='2026-10-29', title='Old indexing problem message goes away',
+         changes=['CMS > Indexing no longer shows a problem that happened before the last page Google checked (the 429 quota message of 27 October)'],
+         checks=[dict(label='Old problem hidden', type='contains', path='api/v1/cms/indexing.php', text='Deploy 133')],
+         pr=REPO + '132',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

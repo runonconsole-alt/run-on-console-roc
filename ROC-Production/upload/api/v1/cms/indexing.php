@@ -37,6 +37,14 @@ $key = rocGscKey();
 $out = ['success' => true, 'key' => $key ? (string)$key['client_email'] : '', 'email' => (string)rocBlogGet($pdo, 'gsc_email', 'runonconsole@gmail.com')];
 $err = rocBlogGet($pdo, 'gsc_error', null);
 $out['error'] = is_array($err) ? $err : null;
+// Deploy 133: a problem from before the last page that was checked is over (the 429 of 27 October kept showing
+// because only a few pages a day are due for a new check, so no run cleared it).
+if ($out['error']) {
+    try {
+        $lastOk = (string)$pdo->query('SELECT MAX(checked_at) FROM roc_index_status')->fetchColumn();
+        if ($lastOk !== '' && strtotime($lastOk . ' UTC') > strtotime((string)($out['error']['t'] ?? ''))) { $out['error'] = null; rocBlogSet($pdo, 'gsc_error', ''); }
+    } catch (\Throwable $e) {}
+}
 $c = rocBlogGet($pdo, 'gsc_daily', []);
 $out['checked_today'] = (is_array($c) && ($c['day'] ?? '') === gmdate('Y-m-d')) ? (int)$c['n'] : 0;
 // The day's 10 products (Deploy 128, link-boost-lib.php): with a link to Search Console's URL Inspection.
