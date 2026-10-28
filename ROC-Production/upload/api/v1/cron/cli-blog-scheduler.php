@@ -179,6 +179,9 @@ try {
 // Off-page researcher (Deploy 93): only when turned on in CMS > Off-page; once a day after 12:00 Pakistan time.
 try {
     require_once $ROOT . '/api/v1/cms/offpage-lib.php';
+    // The link list by email (Deploy 129): 1 November, then Mondays and the 1st of the month, from 10:00.
+    $orp = rocOffpageReport($pdo);
+    if ($orp !== null) echo date('c') . ' ' . $orp . "\n";
     $op = rocOffpageTick($pdo);
     if ($op !== null) echo date('c') . ' ' . $op . "
 ";
