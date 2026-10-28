@@ -886,6 +886,16 @@ RELEASES = [
          checks=[dict(label='Old problem hidden', type='contains', path='api/v1/cms/indexing.php', text='Deploy 133')],
          pr=REPO + '132',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.']),
+    dict(deploy=134, date='2026-10-29', title='Guides answer the questions people ask Google',
+         changes=['Seven guides get the questions Search Console shows people asking, in the FAQ with FAQ markup: how to use and should I enable AMD EXPO, wired or wireless headset, will a graphics card fit my case, PC case size for a big graphics card, how to clean a gaming keyboard, how to sit in a gaming chair and adjust the backrest, how to improve laptop gaming performance',
+                  'Clearer titles: four guide titles lose the keyword stuck on the end, and some meta titles use the words people search',
+                  'Every Can I run page asks How many GB is the game, the words people search, instead of How much storage does it need'],
+         checks=[dict(label='How many GB question', type='contains', path='game-render.php', text='How many GB is ')],
+         pr=REPO + '133',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.',
+                'Dry run: php /home2/runoncon/public_html/api/v1/cron/cli-guide-faq.php',
+                'Apply: php /home2/runoncon/public_html/api/v1/cron/cli-guide-faq.php --apply',
+                'CMS Dashboard: Clear cache.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
