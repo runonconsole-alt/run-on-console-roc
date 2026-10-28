@@ -1,0 +1,22 @@
+{
+ "deploy": 129,
+ "date": "2026-10-28",
+ "title": "Backlinks report by email, made by the server",
+ "changes": [
+  "The server emails the open backlink opportunities from CMS > Off-page (with the drafts) on 1 November, then every Monday and on the 1st of every month, from 10:00 Pakistan time, to the alert address; the PC can be off",
+  "Turn on the daily research in CMS > Off-page so the server finds new free, gaming-niche places every day after 12:00"
+ ],
+ "checks": [
+  {
+   "label": "Backlinks report",
+   "type": "contains",
+   "path": "api/v1/cms/offpage-lib.php",
+   "text": "function rocOffpageReport"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/128",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it.",
+  "CMS > Off-page: turn the daily research on."
+ ]
+}

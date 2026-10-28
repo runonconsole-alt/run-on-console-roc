@@ -123,6 +123,44 @@ function rocOpRun(PDO $pdo): string {
 
 function rocOpSaveLog(PDO $pdo, array $log): void { rocBlogSet($pdo, 'offpage_log', array_slice(array_merge([$log], rocOpLog($pdo)), 0, 30)); }
 
+/**
+ * Owner, 2026-10-28 (Deploy 129): the link list comes by email, made by the server (the PC can be off): on
+ * 1 November 2026, then every Monday and on the 1st of every month, from 10:00 Pakistan time, to the alert
+ * address (CMS > Updates writer > News > Email alerts). It lists the opportunities still open (no status) found
+ * since the last email, newest first, with the drafts. cms_settings offpage_report {day, t}.
+ */
+const ROC_OP_REPORT_FROM = '2026-11-01';
+function rocOffpageReport(PDO $pdo, bool $force = false): ?string {
+    $now = new DateTime('now', new DateTimeZone('Asia/Karachi'));
+    $day = $now->format('Y-m-d');
+    $last = rocBlogGet($pdo, 'offpage_report', []);
+    $last = is_array($last) ? $last : [];
+    if (!$force) {
+        if ($day < ROC_OP_REPORT_FROM || (int)$now->format('G') < 10 || ($last['day'] ?? '') === $day) return null;
+        if ($day !== ROC_OP_REPORT_FROM && $now->format('N') !== '1' && $now->format('j') !== '1') return null;
+    }
+    $since = (int)($last['t'] ?? 0);
+    $open = array_values(array_filter(rocOpItems($pdo), function ($it) use ($since) { return ($it['status'] ?? '') === '' && (int)($it['t'] ?? 0) > $since; }));
+    rocBlogSet($pdo, 'offpage_report', ['day' => $day, 't' => time(), 'n' => count($open)]);
+    if (!$open) return 'off-page report: nothing new to send';
+    $e = function ($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); };
+    $rows = ''; $drafts = '';
+    foreach (array_slice($open, 0, 60) as $i => $it) {
+        $rows .= '<tr><td style="padding:6px;border-bottom:1px solid #e2e8f0">' . $e($it['date'] ?? '') . '</td><td style="padding:6px;border-bottom:1px solid #e2e8f0">' . $e($it['kind'] ?? '')
+               . '</td><td style="padding:6px;border-bottom:1px solid #e2e8f0"><a href="' . $e($it['url']) . '">' . $e($it['title'] ?: $it['site']) . '</a><br><span style="color:#64748b;font-size:12px">' . $e($it['why'] ?? '') . '</span></td>'
+               . '<td style="padding:6px;border-bottom:1px solid #e2e8f0">' . $e(str_replace('https://runonconsole.com', '', (string)($it['link_to'] ?? ''))) . '</td></tr>';
+        if ($i < 15 && trim((string)($it['draft'] ?? '')) !== '')
+            $drafts .= '<h3 style="font-size:15px;margin:18px 0 4px">' . ($i + 1) . '. ' . $e($it['title'] ?: $it['site']) . '</h3><div style="white-space:pre-wrap;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px">' . $e($it['draft']) . '</div>';
+    }
+    $html = '<p><b>Backlink opportunities for Run On Console</b>: ' . count($open) . ' new, free, gaming-niche places found since ' . ($since ? $e(date('j M Y', $since)) : 'the start') . '.</p>'
+          . '<p>Rules: free and gaming-niche only, you post them yourself, natural link words (the page title or Run On Console). Mark each done or skip in CMS &gt; Off-page.</p>'
+          . '<table style="border-collapse:collapse;width:100%;font-size:14px"><tr style="background:#f1f5f9"><th style="padding:6px;text-align:left">Date</th><th style="padding:6px;text-align:left">Kind</th><th style="padding:6px;text-align:left">Where</th><th style="padding:6px;text-align:left">Link to</th></tr>' . $rows . '</table>'
+          . ($drafts !== '' ? '<h2 style="font-size:17px;margin-top:24px">Drafts to edit and post</h2>' . $drafts : '');
+    require_once __DIR__ . '/news-engine-lib.php';
+    $ok = rocNotify($pdo, 'ROC backlinks report - ' . $now->format('j F Y') . ' (' . count($open) . ' new)', $html);
+    return 'off-page report: ' . ($ok ? 'emailed ' . count($open) : 'email failed (check CMS > News > Email alerts)');
+}
+
 /** The scheduler: once a day after 12:00 Pakistan time, only when the owner turned it on. */
 function rocOffpageTick(PDO $pdo): ?string {
     if ((string)rocBlogGet($pdo, 'offpage_auto', 'off') !== 'on') return null;

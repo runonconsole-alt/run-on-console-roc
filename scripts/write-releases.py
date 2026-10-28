@@ -858,6 +858,12 @@ RELEASES = [
          checks=[dict(label='Daily picks', type='contains', path='api/v1/link-boost-lib.php', text='function rocDailyPicks')],
          pr=REPO + '127',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS Dashboard > Clear cache.']),
+    dict(deploy=129, date='2026-10-28', title='Backlinks report by email, made by the server',
+         changes=['The server emails the open backlink opportunities from CMS > Off-page (with the drafts) on 1 November, then every Monday and on the 1st of every month, from 10:00 Pakistan time, to the alert address; the PC can be off',
+                  'Turn on the daily research in CMS > Off-page so the server finds new free, gaming-niche places every day after 12:00'],
+         checks=[dict(label='Backlinks report', type='contains', path='api/v1/cms/offpage-lib.php', text='function rocOffpageReport')],
+         pr=REPO + '128',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS > Off-page: turn the daily research on.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
