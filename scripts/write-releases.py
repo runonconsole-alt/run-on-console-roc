@@ -977,6 +977,11 @@ RELEASES = [
                 'Dry run: php /home2/runoncon/public_html/api/v1/cron/cli-content-cleanup.php',
                 'Apply: php /home2/runoncon/public_html/api/v1/cron/cli-content-cleanup.php --apply',
                 'CMS Dashboard: Clear cache.']),
+    dict(deploy=145, date='2026-10-29', title='AI writing ends after 15 November',
+         changes=['15 November 2026 is the last day the AI writes blog posts, guides and news stories and makes cover pictures; from 16 November nothing is written by itself and posts without a cover get the title cover (CMS setting ai_last_day moves the date)'],
+         checks=[dict(label='Last AI day', type='contains', path='api/v1/cms/blog-engine-lib.php', text="ROC_AI_LAST_DAY = '2026-11-15'")],
+         pr=REPO + '144',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

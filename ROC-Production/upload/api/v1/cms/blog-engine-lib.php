@@ -87,7 +87,19 @@ function rocBlogDays(PDO $pdo): array {
     return $d ?: ROC_BLOG_DAYS;
 }
 function rocBlogPerDay(PDO $pdo): int { return max(1, min(6, (int)rocBlogGet($pdo, 'blog_per_day', ROC_BLOG_PER_DAY))); }
+/**
+ * Owner, 2026-10-29 (Deploy 145): 15 November 2026 is the last day the AI writes blog posts, guides and news and
+ * makes cover pictures; from 16 November the owner writes them. CMS setting ai_last_day moves it ('' = no end).
+ */
+const ROC_AI_LAST_DAY = '2026-11-15';
+function rocAiLastDay(PDO $pdo): string { $v = rocBlogGet($pdo, 'ai_last_day', null); return $v === null ? ROC_AI_LAST_DAY : (string)$v; }
+function rocAiEnded(PDO $pdo): bool {
+    $last = rocAiLastDay($pdo);
+    return $last !== '' && (new DateTime('now', new DateTimeZone(ROC_BLOG_TZ)))->format('Y-m-d') > $last;
+}
+
 function rocBlogAutoEnded(PDO $pdo): bool {
+    if (rocAiEnded($pdo)) return true;
     $today = (new DateTime('now', new DateTimeZone(ROC_BLOG_TZ)))->format('Y-m-d');
     $from = rocBlogAutoFrom($pdo);
     if ($from !== '' && $today >= $from) return false;
@@ -886,7 +898,7 @@ function rocBlogDropOldCovers(string $dir, string $slug, string $keep): void {
  */
 function rocBlogMakeCover(PDO $pdo, string $root, string $slug, string $title, string $category, ?array $topic, string $prompt = '', string $alt = ''): string {
     $img = null;
-    $cf = rocBlogCf($pdo);
+    $cf = rocAiEnded($pdo) ? null : rocBlogCf($pdo);   // Deploy 145: no AI pictures after the last AI day
     if ($cf && function_exists('imagecreatefromstring')) {
         $r = rocCfImage($cf, rocBlogImagePrompt($title, $prompt));
         if ($r['ok']) {
@@ -943,7 +955,7 @@ function rocBlogCoverRetryAdd(PDO $pdo, string $slug): void {
 function rocBlogRetryCovers(PDO $pdo, string $root): ?string {
     $list = rocBlogGet($pdo, 'cover_retry', []);
     if (!is_array($list) || !$list) return null;
-    $cf = rocBlogCf($pdo);
+    $cf = rocAiEnded($pdo) ? null : rocBlogCf($pdo);   // Deploy 145
     if (!$cf || !function_exists('imagecreatefromstring')) return null;
     if (time() - (int)rocBlogGet($pdo, 'cover_retry_at', 0) < 3 * 3600) return null;
     $slug = (string)$list[0];
@@ -1085,7 +1097,7 @@ function rocBlogImagePrompt(string $title, string $given): string {
 
 /** AI cover, cropped to 1200 x 630. Null when Cloudflare is not set up or fails (then the title cover is used). */
 function rocBlogAiCover(PDO $pdo, string $root, string $slug, string $title, string $prompt): ?string {
-    $cf = rocBlogCf($pdo);
+    $cf = rocAiEnded($pdo) ? null : rocBlogCf($pdo);   // Deploy 145
     if (!$cf || !function_exists('imagecreatefromstring')) return null;
     $r = rocCfImage($cf, rocBlogImagePrompt($title, $prompt));
     if (!$r['ok']) {

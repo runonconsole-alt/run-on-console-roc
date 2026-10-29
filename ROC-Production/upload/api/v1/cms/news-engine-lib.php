@@ -611,6 +611,7 @@ function rocNewsToday(PDO $pdo): array {
 function rocNewsTick(PDO $pdo, string $root, bool $force = false): ?string {
     $set = rocNewsSettings($pdo);
     if (!$set['on'] && !$force) return null;
+    if (!$force && function_exists('rocAiEnded') && rocAiEnded($pdo)) return null;   // Deploy 145: the AI writes news until 15 November
     $state = rocNewsState($pdo);
     $items = (array)rocBlogGet($pdo, 'news_items', []);
     if ($force || empty($state['last_fetch']) || time() - strtotime($state['last_fetch'] . ' UTC') >= 1200) {
