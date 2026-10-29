@@ -58,7 +58,7 @@ if ($isMap) {
     $out = rocSmOpen() . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/', $updated, 'Can I run it? All PC games')
          . rocSmLine(ROC_PUBLIC_URL . ROC_GP_NOGPU, $updated, 'Games that run without a graphics card');
     foreach (array_keys(ROC_GP_CARD_PAGES) as $cn) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpCardPath($cn), $updated, 'What games can a ' . rocGpCardShort($cn) . ' run?');
-    foreach ($games as $g) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpPath($g), max($updated, (int)($EDITS[$g['slug']]['t'] ?? 0)), 'Can I run ' . $g['name'] . '?');
+    foreach ($games as $g) if (!rocGpThin($g, (array)($EDITS[$g['slug']] ?? []))) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpPath($g), max($updated, (int)($EDITS[$g['slug']]['t'] ?? 0)), 'Can I run ' . $g['name'] . '?');
     echo $out . "</urlset>\n";
     exit;
 }
@@ -248,6 +248,7 @@ function rocGpStyles(): string {
         . ".gp-search:focus{outline:none;border-color:#10b981}"
         . ".gp-az{display:flex;flex-wrap:wrap;gap:.3rem}.gp-az a{min-width:2rem;text-align:center;border:1px solid #e2e8f0;border-radius:.6rem;padding:.3rem .45rem;font-weight:800;font-size:.8rem;color:#334155;background:#fff}"
         . ".gp-az a:hover{border-color:#10b981;color:#047857}"
+        . ".gp-qa{display:grid;gap:.45rem;margin-top:.6rem;font-size:.92rem;list-style:none;padding:0}.gp-qa li{padding-left:1.1rem;position:relative}.gp-qa li::before{content:\"\";position:absolute;left:0;top:.55em;width:.45rem;height:.45rem;border-radius:99px;background:#10b981}.gp-qa a{color:#047857;font-weight:700;text-decoration:underline}"
         . ".gp-list{columns:1;column-gap:1.5rem}.gp-list li{break-inside:avoid;padding:.22rem 0;font-size:.9rem}.gp-list a{color:#0f172a;font-weight:600}.gp-list a:hover{color:#047857;text-decoration:underline}"
         . ".gp-list small{color:#94a3b8;font-size:.72rem;margin-left:.3rem}.gp-letter{font-family:Outfit,Inter,sans-serif;font-weight:800;font-size:1.3rem;color:#047857;margin:1.2rem 0 .4rem;scroll-margin-top:90px}"
         . ".gp-hero.pic{display:grid;gap:1.2rem;align-items:center}.gp-pic{margin:0;border-radius:1rem;overflow:hidden;background:#022c22;box-shadow:0 18px 40px -18px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15)}"
@@ -663,7 +664,7 @@ $ogLine = implode(' · ', array_filter(['Minimum: ' . ($gpuMin ? (strpos($gpuMin
     $ramGb($rMin['ram'] ?? null) ? $ramGb($rMin['ram'] ?? null) . ' RAM' : '']));
 $og = rocGpOgCard($ROOT, (string)$g['slug'], $name, $ogLine, $updated);
 if ($og !== '') $ld[1]['primaryImageOfPage'] = ['@type' => 'ImageObject', 'url' => ROC_PUBLIC_URL . $og, 'width' => 1200, 'height' => 630];
-$h = rocGpHead($metaT, $metaD, $url, $ld, 'index, follow, max-image-preview:large', $og, 'Can I run ' . $name . '? System requirements card');
+$h = rocGpHead($metaT, $metaD, $url, $ld, rocGpThin($g, $E) ? 'noindex, follow' : 'index, follow, max-image-preview:large', $og, 'Can I run ' . $name . '? System requirements card');
 
 /* body */
 $row = function ($label, $a, $b) use ($clean, $rec) {
@@ -681,6 +682,22 @@ $m .= '<header class="gp-hero' . ($pic !== '' ? ' pic' : '') . '"><div><h1>Can I
     . ($pic !== '' ? '<figure class="gp-pic"><img src="' . rocH($pic) . '" alt="' . rocH($name) . ' (Steam store picture)" width="460" height="215" fetchpriority="high"'
         . ' onerror="this.closest(\'figure\').remove()"><figcaption>Picture: <a href="' . rocH((string)($g['u'] ?? '')) . '" target="_blank" rel="noopener" style="color:inherit">Steam store</a>, © ' . rocH($name) . ' publisher</figcaption></figure>' : '')
     . '</header>';
+// Deploy 146 (programmatic SEO): the answer first, from Run On Console's own data, different on every page: the card
+// classes it needs (linked to the card pages), how three common PCs do in our checker, and how heavy it is next to
+// every other game we track and its genre.
+$hv = rocGpHeavierThan($g, $games);
+$cardLink = function (?array $l) { if (!$l) return ''; $p = rocGpCardPath($l[0]); $t = strpos($l[0], 'integrated') !== false ? 'integrated graphics' : rocH($l[0]) . ' class';
+    return $p !== null ? '<a href="' . $p . '">' . $t . '</a>' : $t; };
+$qa = '<section class="gp-card" id="quick-answer"><h2>Quick answer</h2><ul class="gp-qa">';
+$qa .= '<li><b>Minimum graphics card:</b> ' . ($gpuMin ? $cardLink($gpuMin) : 'not named on Steam') . ($gpuRec && $rec ? '. <b>For high settings:</b> ' . $cardLink($gpuRec) : '') . '.</li>';
+foreach (array_values($runs) as $c) $qa .= '<li><b>' . rocH($c['label']) . ':</b> ' . (int)$c['percent'] . '%, ' . rocH($short((int)$c['percent'])) . '.</li>';
+// Heavier than most: "needs more graphics power than 85%"; lighter than most: "lighter than 70%" (never "more than 0%").
+$heavy = function (array $p, string $of) { return $p[0] >= $p[1] ? 'needs more graphics power than ' . $p[0] . '% of ' . $of : 'is lighter than ' . $p[1] . '% of ' . $of; };
+if ($hv['all'] !== null) $qa .= '<li><b>How heavy:</b> ' . rocH($name) . ' ' . $heavy($hv['all'], 'the ' . number_format(count($games)) . ' PC games on Run On Console')
+    . ($hv['genre'] !== null ? ', and ' . $heavy($hv['genre'], 'the ' . number_format($hv['genre_n']) . ' ' . rocH(strtolower($hv['genre_name'])) . ' games') : '') . '.</li>';
+if ($storage !== '') $qa .= '<li><b>Download size:</b> ' . rocH(preg_replace('/\s*available space/i', '', $storage)) . '.</li>';
+$qa .= '</ul><p class="gp-src" style="margin-top:.6rem">From the official Steam requirements and our checker\'s scores. Check your own PC below.</p></section>';
+$m .= $qa;
 // The owner's own text about this game (CMS > Games > Edit, Deploy 85): plain text, a blank line = a new paragraph.
 if (trim((string)($E['text'] ?? '')) !== '') {
     $m .= '<section class="gp-card"><h2>About ' . rocH($name) . '</h2>'
