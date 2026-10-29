@@ -701,6 +701,7 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
     if ($pdo) { require_once __DIR__ . '/api/v1/link-boost-lib.php'; $m .= rocLinkBoostTop($pdo, (string)parse_url($url, PHP_URL_PATH), $p, $body); }
     if ($news) $m .= rocAdUnit('article');
     $m .= '<div class="roc-article">' . $body . '</div>';
+    if ($pdo) $m .= rocRelatedPosts($pdo, $p);
     if ($pdo) $m .= rocTopicChips($pdo, $p);
     // Links to the pages Google has not indexed yet (Deploy 116): news, blogs and guides are indexed quickly.
     if ($pdo) { require_once __DIR__ . '/api/v1/link-boost-lib.php'; $m .= rocLinkBoostBox($pdo, (string)parse_url(rocPostUrlOf($p), PHP_URL_PATH)); }
@@ -863,6 +864,73 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
 /* ==================================================================== */
 
 /** Topic and tag chips under a post: the topic links to its product category page, tags are plain words. */
+/**
+ * "Keep reading" under every post (Deploy 140). Search Console: 74% of Googlebot's visits refresh known pages and 26%
+ * discover new ones; 32 news stories had no link from any other post. Each post links to 4 posts on the same
+ * topic (shared title words, the same topic category; ties go to the older story, so old posts get links too) and
+ * to the previous and next story of its section by date, so every post has at least two links from other posts.
+ */
+function rocRelatedPosts(PDO $pdo, array $p): string {
+    static $all = null;
+    if ($all === null) {
+        try {
+            $all = $pdo->query("SELECT id, title, slug, category, topic_cat, published_at, created_at FROM blogs WHERE status = 'published' " . rocOrderSql())->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\Throwable $e) {
+            try { $all = $pdo->query("SELECT id, title, slug, category, published_at, created_at FROM blogs WHERE status = 'published' " . rocOrderSql())->fetchAll(PDO::FETCH_ASSOC); }
+            catch (\Throwable $e2) { $all = []; }
+        }
+    }
+    $sec = rocSectionOf($p);
+    $words = function (string $t) {
+        $stop = ['the', 'and', 'for', 'with', 'from', 'your', 'you', 'how', 'what', 'best', 'new', 'its', 'are', 'can', 'all', 'this', 'that', 'into', 'after', 'more', 'than', 'over', 'out', 'gets', 'now', 'set', 'guide', 'review', 'worth', 'buying', 'top', 'picks', '2026', '2027'];
+        $w = preg_split('/[^a-z0-9]+/', strtolower($t), -1, PREG_SPLIT_NO_EMPTY);
+        return array_values(array_unique(array_filter($w, function ($x) use ($stop) { return strlen($x) > 2 && !in_array($x, $stop, true); })));
+    };
+    $mine = $words((string)$p['title']);
+    $same = []; $other = []; $idx = -1;
+    foreach ($all as $q) {
+        if ((string)$q['slug'] === (string)$p['slug']) { if (rocSectionOf($q) === $sec) $idx = count($same); continue; }
+        $score = count(array_intersect($mine, $words((string)$q['title']))) * 2
+            + ((string)($q['topic_cat'] ?? '') !== '' && (string)($q['topic_cat'] ?? '') === (string)($p['topic_cat'] ?? '') ? 1 : 0);
+        $q['_s'] = $score; $q['_t'] = (int)strtotime((string)($q['published_at'] ?: $q['created_at']));
+        if (rocSectionOf($q) === $sec) $same[] = $q; else $other[] = $q;
+    }
+    // Previous (older) and next (newer) story of the same section; $same is newest first.
+    $prev = $idx >= 0 ? ($same[$idx] ?? null) : null;
+    $next = $idx > 0 ? ($same[$idx - 1] ?? null) : null;
+    $taken = array_filter([(string)($prev['slug'] ?? ''), (string)($next['slug'] ?? '')]);
+    $pool = array_merge($same, $sec === 'news' ? [] : $other);
+    usort($pool, function ($a, $b) { return [$b['_s'], $a['_t']] <=> [$a['_s'], $b['_t']]; });
+    $rel = [];
+    foreach ($pool as $q) {
+        if (count($rel) >= 4) break;
+        if ($q['_s'] <= 0 || in_array((string)$q['slug'], $taken, true)) continue;
+        $rel[] = $q; $taken[] = (string)$q['slug'];
+    }
+    // Too few on the same topic: other stories of the section, older first, so they get links too.
+    if (count($rel) < 4) {
+        $fill = $sec === 'news' ? $same : array_merge($same, array_filter($other, function ($q) { return rocSectionOf($q) !== 'news'; }));   // blogs and guides mix
+        $rest = array_values(array_filter($fill, function ($q) use ($taken) { return !in_array((string)$q['slug'], $taken, true); }));
+        usort($rest, function ($a, $b) { return $a['_t'] <=> $b['_t']; });
+        $seed = (int)sprintf('%u', crc32((string)$p['slug']));
+        $n = count($rest);
+        for ($i = 0; $i < $n && count($rel) < 4; $i++) $rel[] = $rest[($seed + $i * 7) % $n];
+    }
+    if (!$rel && !$prev && !$next) return '';
+    $link = function (array $q) { return '<a href="/' . rocSectionOf($q) . '/' . rocH((string)$q['slug']) . '/" class="block p-3 rounded-xl border border-slate-200 bg-white hover:border-emerald-600 no-underline">'
+        . '<span class="block text-[11px] font-bold uppercase tracking-wider text-emerald-700">' . rocH(rocSectionOf($q) === 'news' ? 'News' : (rocIsGuide($q) ? 'Guide' : 'Article')) . '</span>'
+        . '<span class="block text-sm font-bold text-slate-900 leading-snug">' . rocH((string)$q['title']) . '</span></a>'; };
+    $h = '<section class="pt-6 border-t border-slate-200" aria-label="Keep reading"><h2 class="font-display font-extrabold text-xl text-slate-900 mb-3">Keep reading</h2>';
+    if ($rel) $h .= '<div class="grid gap-3 sm:grid-cols-2">' . implode('', array_map($link, $rel)) . '</div>';
+    if ($prev || $next) {
+        $h .= '<nav class="grid gap-3 sm:grid-cols-2 mt-3" aria-label="Previous and next">';
+        $h .= $prev ? '<a href="/' . $sec . '/' . rocH((string)$prev['slug']) . '/" rel="prev" class="block p-3 rounded-xl bg-slate-50 border border-slate-200 hover:border-emerald-600 no-underline"><span class="block text-[11px] font-bold text-slate-500">&larr; Previous</span><span class="block text-sm font-bold text-slate-900">' . rocH((string)$prev['title']) . '</span></a>' : '<span></span>';
+        $h .= $next ? '<a href="/' . $sec . '/' . rocH((string)$next['slug']) . '/" rel="next" class="block p-3 rounded-xl bg-slate-50 border border-slate-200 hover:border-emerald-600 no-underline text-right"><span class="block text-[11px] font-bold text-slate-500">Next &rarr;</span><span class="block text-sm font-bold text-slate-900">' . rocH((string)$next['title']) . '</span></a>' : '';
+        $h .= '</nav>';
+    }
+    return $h . '</section>';
+}
+
 function rocTopicChips(PDO $pdo, array $p): string {
     $lib = __DIR__ . '/api/v1/cms/topics-lib.php';
     if (!is_file($lib)) return '';
@@ -1127,7 +1195,10 @@ function rocPageUrl(string $base, int $n): string {
     return $n <= 1 ? $base : $base . 'page/' . $n . '/';
 }
 
-/** Page numbers with "Previous" and "Next": 1 ... 4 5 6 ... 12. */
+/**
+ * Page numbers with "Previous" and "Next": every number up to 15 pages (Deploy 140: the owner wants every post
+ * within 3 clicks of the home page; /news/ showed 1 2 ... 9, so pages 4-7 were 4-5 clicks deep), else 1 ... 4 5 6 ... 40.
+ */
 function rocPager(string $base, int $page, int $pages, string $query = ''): string {
     if ($pages <= 1) return '';
     $qs = $query !== '' ? '?q=' . rawurlencode($query) : '';
@@ -1136,7 +1207,7 @@ function rocPager(string $base, int $page, int $pages, string $query = ''): stri
     if ($page > 1) $o .= '<a href="' . $u($page - 1) . '" rel="prev">&larr; Previous</a>';
     $last = 0;
     for ($n = 1; $n <= $pages; $n++) {
-        if ($n !== 1 && $n !== $pages && abs($n - $page) > 1) continue;
+        if ($pages > 15 && $n !== 1 && $n !== $pages && abs($n - $page) > 2) continue;
         if ($last && $n - $last > 1) $o .= '<span class="gap">&hellip;</span>';
         $o .= $n === $page ? '<span class="on" aria-current="page">' . $n . '</span>' : '<a href="' . $u($n) . '">' . $n . '</a>';
         $last = $n;

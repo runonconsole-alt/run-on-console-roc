@@ -932,6 +932,13 @@ RELEASES = [
          checks=[dict(label='Card schema', type='contains', path='game-render.php', text="'@type' => 'Thing', 'name' => $cardMain")],
          pr=REPO + '138',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Search Console: inspect https://runonconsole.com/can-i-run/gtx-1650-games/ again (Test live URL).']),
+    dict(deploy=140, date='2026-10-29', title='Every post within 3 clicks and linked from other posts',
+         changes=['Keep reading under every blog post, news story and guide: 4 posts on the same topic (older ones first on a tie, so old posts get links too) and the previous and next story by date; 32 news stories had no link from any other post',
+                  'News, blogs and guides lists show every page number (up to 15 pages): news stories were 4 to 6 clicks from the home page, now at most 3',
+                  'The writers put 5 to 8 internal links in each new news story and guide, and 5 to 10 in each blog post (before: 2 to 4 in news, 3 to 5 in guides)'],
+         checks=[dict(label='Keep reading box', type='contains', path='blog-render.php', text='function rocRelatedPosts')],
+         pr=REPO + '139',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Open any news story and scroll to Keep reading.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

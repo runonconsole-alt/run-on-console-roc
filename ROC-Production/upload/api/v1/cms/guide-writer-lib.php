@@ -178,7 +178,7 @@ function rocGuideWrite(PDO $pdo, string $root, ?array $topic = null, ?string $pu
     $links[] = '- /compatibility/  (Can I run it? game checker)';
     $links[] = '- /can-i-run/  (PC requirements of 2,000+ games)';
     $prompt = "You write for runonconsole.com (Run On Console), a gaming and PC hardware site. Write ONE practical, genuinely helpful step by step GUIDE.\n\n"
-        . "GUIDE TYPE: {$type}\nTITLE IDEA: {$idea}\nFOCUS KEYWORD: {$kw}\n\nINTERNAL LINKS (use 3-5 of them, each once, descriptive anchor text, never \"click here\"):\n" . implode("\n", $links) . "\n\n"
+        . "GUIDE TYPE: {$type}\nTITLE IDEA: {$idea}\nFOCUS KEYWORD: {$kw}\n\nINTERNAL LINKS (use 5-8 of them, each once, descriptive anchor text, never \"click here\"):\n" . implode("\n", $links) . "\n\n"
         . "RULES\n- At least 1,100 words (aim for 1,300-1,600), clear simple English for gamers, no filler.\n"
         . "- Start with 2-3 sentences that say what the reader will achieve. Then a short \"What you need\" list.\n"
         . "- The steps as <h2> sections (\"Step 1: ...\") or an <ol> with a short explanation for each step; add tips and common mistakes.\n"
