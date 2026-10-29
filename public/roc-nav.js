@@ -8,6 +8,20 @@
  * 3. On the server-rendered blog pages (<html data-roc-static>): small replacements for
  *    the React-only header controls — mobile menu, share button, AI button.
  */
+/* ---------- Site events (Deploy 142) for GA4 through Google Tag Manager and for Microsoft Clarity.
+   rocTrack('roc_search', 'gpu', 'products') pushes {event, roc_label, roc_value} to the dataLayer (one GTM
+   trigger "Custom Event ^roc_" and one GA4 event tag send them all) and names the event in Clarity, so
+   Clarity's funnels and recordings can be filtered by it. Both queues exist before GTM loads (Deploy 141). */
+window.dataLayer = window.dataLayer || [];
+window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
+window.rocTrack = function (name, label, value) {
+  try {
+    var o = { event: name, roc_label: String(label == null ? '' : label).slice(0, 100), roc_value: String(value == null ? '' : value).slice(0, 100) };
+    window.dataLayer.push(o);
+    window.clarity('event', name);
+  } catch (e) {}
+};
+
 (function () {
   'use strict';
 
@@ -90,6 +104,7 @@
         var card = a.closest('[class*="card"], article, section');
         var heading = card && card.querySelector('h2, h3, h4');
         if (heading && heading.textContent) label = heading.textContent.trim().slice(0, 160) + (label ? ' · ' + label : '');
+        try { window.clarity('event', 'affiliate_click'); } catch (e) {}
         var body = JSON.stringify({ type: 'affiliate_click', url: u.href, label: label, page: location.pathname });
         if (navigator.sendBeacon) navigator.sendBeacon('/api/v1/track.php', new Blob([body], { type: 'application/json' }));
         else fetch('/api/v1/track.php', { method: 'POST', body: body, keepalive: true, headers: { 'Content-Type': 'application/json' } });
@@ -373,6 +388,7 @@
       e.preventDefault();
       e.stopPropagation();
       var q = f.q.value.trim(), scope = scopeOf(f);
+      if (q) window.rocTrack('roc_search', q, scope);
       load().then(function () { location.assign(targetUrl(scope, q)); });
     }, true);
     document.addEventListener('keydown', function (e) {
@@ -456,6 +472,7 @@
     document.querySelectorAll('[data-roc-share]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var data = { title: document.title, url: location.href.split('#')[0] };
+        window.rocTrack('roc_share', navigator.share ? 'share sheet' : 'copy link', location.pathname);
         if (navigator.share) { navigator.share(data).catch(function () {}); return; }
         var done = function () {
           var label = btn.querySelector('span');
@@ -500,10 +517,18 @@
 (function () {
   if (window.__rocChat || /^\/cms\//.test(location.pathname)) return;
   var s = document.createElement('script');
-  s.src = '/roc-chat.js?v=118';
+  s.src = '/roc-chat.js?v=142';
   s.defer = true;
   (document.head || document.documentElement).appendChild(s);
 })();
+
+/* Clicks on the internal link boxes (Deploy 142): Keep reading under posts, the gear strips and boxes. */
+document.addEventListener('click', function (e) {
+  var a = e.target && e.target.closest ? e.target.closest('a[href^="/"]') : null;
+  if (!a) return;
+  var box = a.closest('[aria-label="Keep reading"], [aria-label="Previous and next"], .lb-box');
+  if (box) window.rocTrack('roc_related_click', a.getAttribute('href'), location.pathname);
+}, true);
 
 /* The contact form above the footer (data-roc-contact-form): sent to /api/v1/messages.php, the same as the
    Contact page, so it lands in CMS > Messages and is emailed to contact@runonconsole.com. Works on every
@@ -524,7 +549,7 @@ document.addEventListener('submit', function (e) {
                            website: val('website'), meta: { page: location.pathname, form: 'footer' } }) })
     .then(function (r) { return r.json().catch(function () { return {}; }); })
     .then(function (d) {
-      if (d && d.success) { f.reset(); say('Thank you! Your message was sent' + (d.reference ? ' (' + d.reference + ')' : '') + '. We usually reply within 2 working days.', true); }
+      if (d && d.success) { window.rocTrack('roc_contact', 'footer form', location.pathname); f.reset(); say('Thank you! Your message was sent' + (d.reference ? ' (' + d.reference + ')' : '') + '. We usually reply within 2 working days.', true); }
       else say((d && d.error) || 'Your message could not be sent. Please email contact@runonconsole.com.');
     })
     .catch(function () { say('No connection. Please try again or email contact@runonconsole.com.'); })

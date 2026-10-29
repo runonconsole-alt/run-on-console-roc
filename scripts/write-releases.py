@@ -948,6 +948,13 @@ RELEASES = [
                 'php /home2/runoncon/public_html/api/v1/cron/cli-refresh-templates.php --apply',
                 'CMS Dashboard: Clear cache.',
                 'PageSpeed Insights: test https://runonconsole.com/ again (mobile and desktop).']),
+    dict(deploy=142, date='2026-10-29', title='Site events for GA4 and Clarity',
+         changes=['The site tells Google Tag Manager and Clarity what visitors do: roc_search (header search), roc_chat_open, roc_chat_message and roc_chat_form (ROC chat), roc_quick_check (the check on a game page), roc_comment, roc_contact (footer form), roc_share and roc_related_click (Keep reading and gear boxes); each with roc_label and roc_value',
+                  'Clarity also gets affiliate_click (Amazon and Daraz buttons), so its funnels can end at the Amazon click'],
+         checks=[dict(label='Site events', type='contains', path='roc-nav.js', text='window.rocTrack')],
+         pr=REPO + '141',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS Dashboard: Clear cache (roc-nav.js changed).',
+                'GTM: Custom Event trigger ^roc_ and one GA4 event tag (see the chat).']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

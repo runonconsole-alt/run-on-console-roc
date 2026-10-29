@@ -787,6 +787,6 @@ $m .= "<script>(function(){var box=document.querySelector('.gp-check'),res=docum
     . "var c=p>=90?'ok':p>=70?'mid':p>40?'low':'no',txt=p>=90?'Runs on high settings (meets the recommended specs).':p>=70?'Playable on medium to high settings.':p>40?'Playable on low settings only.':'Below the minimum specs: it will not run well.';"
     . "var names={gpu:'graphics card',cpu:'processor',ram:'RAM'},up=miss.map(function(k){return names[k]});"
     . "res.className='gp-res '+c;res.innerHTML='<b>'+p+'%</b><div class=\"gp-bar\"><i style=\"width:'+p+'%\"></i></div>'+txt+(up.length?' Upgrade first: '+up.join(', ')+'.':'');}"
-    . "box.addEventListener('change',run);run();})();</script>";
+    . "box.addEventListener('change',function(){run();if(window.rocTrack)rocTrack('roc_quick_check',document.title.split('?')[0].replace('Can I Run ',''),(res.querySelector('b')||{}).textContent||'');});run();})();</script>";
 
 rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $updated);
