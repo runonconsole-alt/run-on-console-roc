@@ -144,6 +144,7 @@ function rocGuideWait(PDO $pdo): ?string {
     $now = new DateTime('now', new DateTimeZone(ROC_BLOG_TZ));
     $day = $now->format('Y-m-d');
     if (!$s['on']) return 'off';
+    if (rocAiEnded($pdo)) return 'ended: the AI writes guides until ' . rocAiLastDay($pdo) . ' (Deploy 145)';
     if (rocGuideWeekly()) {
         // Deploy 126: one guide on Tuesday, Friday and Saturday, written from 09:30 for 12:00.
         if (!in_array((int)$now->format('N'), ROC_GUIDE_DAYS, true)) return 'not a guide day';
