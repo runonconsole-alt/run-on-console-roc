@@ -59,7 +59,7 @@ function rocSeoCheck(array $p, bool $strict = true): array {
 const ROC_SEO_HEDGE = '/\b(?:does not|doesn\'t|do not|did not) (?:specify|mention|list|state|provide|say|include details)|\b(?:is|are|was|were)n?\'?t? (?:not )?(?:specified|mentioned|listed|stated|disclosed|provided)\b|\bnot (?:specified|disclosed|listed|stated|mentioned)\b|\bno (?:exact|official|specific) (?:figure|number|data|details?|information)\b|\binformation (?:is )?not available\b|\b(?:in|from) the (?:available|provided) (?:data|information|description)\b|\bthe (?:general |product )?description (?:does not|doesn\'t|mentions|says)\b/i';
 function rocSeoSentence(string $s, int $max = 155): string {
     $wasCut = (bool)preg_match('/(…|\.\.\.)$/u', trim($s));   // already cut in the middle of a sentence
-    $s = trim((string)preg_replace('/\s+/u', ' ', rtrim(trim($s), '….')));
+    $s = trim((string)preg_replace(['/\s+/u', '/\s*(?:…|\.\.\.)$/u'], [' ', ''], trim($s)));   // only an ellipsis goes, a full stop stays
     if ($s === '') return '';
     $full = preg_match('/[.!?]$/u', $s) ? $s : $s . '.';
     if (!$wasCut && mb_strlen($full) <= $max) return $full;
@@ -69,10 +69,14 @@ function rocSeoSentence(string $s, int $max = 155): string {
         $cut = trim(substr($s, 0, $end[1] + 1));
         if (mb_strlen($cut) >= 70) return $cut;
     }
-    $part = mb_substr($s, 0, $max - 1);
-    $c = max((int)mb_strrpos($part, ','), (int)mb_strrpos($part, ':'));
-    if ($c >= 50) return rtrim(mb_substr($part, 0, $c)) . '.';
-    return $wasCut ? $full : rocSeoCut($s, $max);
+    // Deploy 144: the first whole sentence, even up to 250 characters (Google shortens it on screen itself), rather than a
+    // part of it cut at a comma ("...wooden headphones, a closed-back.").
+    if (preg_match('/^.{70,250}?[.!?](?=\s|$)/u', $s, $first)) return trim($first[0]);
+    if ($wasCut) {   // the end is missing: keep it up to the last comma or colon, a whole clause
+        $c = max((int)mb_strrpos($s, ','), (int)mb_strrpos($s, ':'));
+        return $c >= 50 ? rtrim(mb_substr($s, 0, $c)) . '.' : $full;
+    }
+    return rocSeoCut($s, $max);
 }
 
 function rocSeoCut(string $s, int $max): string {

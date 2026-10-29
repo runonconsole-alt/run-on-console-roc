@@ -968,6 +968,15 @@ RELEASES = [
                 'Apply: php /home2/runoncon/public_html/api/v1/cron/cli-content-cleanup.php --apply',
                 'php /home2/runoncon/public_html/api/v1/cron/cli-refresh-templates.php --apply',
                 'CMS Dashboard: Clear cache.']),
+    dict(deploy=144, date='2026-10-29', title='News with ROC take; whole-sentence descriptions',
+         changes=['Every new news story gets a section ROC take: Run On Console opinion on who should care, whether to wait or act and what is still unknown, so the story is more than the reports retold (opinion only, no new facts)',
+                  'Descriptions never end on a part of a sentence cut at a comma (...wooden headphones, a closed-back.): the first whole sentence is used; the few written by Deploy 143 are fixed by running the cleanup again'],
+         checks=[dict(label='ROC take', type='contains', path='api/v1/cms/news-engine-lib.php', text="ROC's take")],
+         pr=REPO + '143',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.',
+                'Dry run: php /home2/runoncon/public_html/api/v1/cron/cli-content-cleanup.php',
+                'Apply: php /home2/runoncon/public_html/api/v1/cron/cli-content-cleanup.php --apply',
+                'CMS Dashboard: Clear cache.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

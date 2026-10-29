@@ -110,7 +110,11 @@ foreach ($pdo->query("SELECT * FROM blogs WHERE status = 'published'")->fetchAll
     $isNews = strcasecmp(trim((string)($p['category'] ?? '')), 'News') === 0;
     if ($isNews && in_array('meta_description', $B, true)) {
         $md = trim((string)$p['meta_description']);
-        if ($md === '' || preg_match('/(…|\.\.\.)$/u', $md) || !preg_match('/[.!?"\')]$/u', $md)) {
+        // Deploy 144: also a description that is the start of the excerpt cut at a comma and closed with a full stop.
+        $ex0 = trim((string)($p['excerpt'] ?? ''));
+        $frag = $md !== '' && $ex0 !== '' && mb_strlen($md) < mb_strlen($ex0) && mb_strpos($ex0, rtrim($md, '.')) === 0
+            && !preg_match('/^[.!?]/u', mb_substr($ex0, mb_strlen(rtrim($md, '.')), 1));
+        if ($md === '' || $frag || preg_match('/(…|\.\.\.)$/u', $md) || !preg_match('/[.!?"\')]$/u', $md)) {
             $src = $md;
             // The excerpt is the same story in whole sentences: use it when the cut description is part of it.
             $ex = trim((string)($p['excerpt'] ?? ''));
