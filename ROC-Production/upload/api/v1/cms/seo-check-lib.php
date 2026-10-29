@@ -52,6 +52,29 @@ function rocSeoCheck(array $p, bool $strict = true): array {
 }
 
 /** At most $max characters, cut at a word (no half words). */
+/**
+ * A meta description that ends on a whole sentence (Deploy 143: 24 news descriptions ended "...gamers seeking…").
+ * The longest run of whole sentences up to $max; else up to the last comma, closed with a full stop; else rocSeoCut.
+ */
+const ROC_SEO_HEDGE = '/\b(?:does not|doesn\'t|do not|did not) (?:specify|mention|list|state|provide|say|include details)|\b(?:is|are|was|were)n?\'?t? (?:not )?(?:specified|mentioned|listed|stated|disclosed|provided)\b|\bnot (?:specified|disclosed|listed|stated|mentioned)\b|\bno (?:exact|official|specific) (?:figure|number|data|details?|information)\b|\binformation (?:is )?not available\b|\b(?:in|from) the (?:available|provided) (?:data|information|description)\b|\bthe (?:general |product )?description (?:does not|doesn\'t|mentions|says)\b/i';
+function rocSeoSentence(string $s, int $max = 155): string {
+    $wasCut = (bool)preg_match('/(…|\.\.\.)$/u', trim($s));   // already cut in the middle of a sentence
+    $s = trim((string)preg_replace('/\s+/u', ' ', rtrim(trim($s), '….')));
+    if ($s === '') return '';
+    $full = preg_match('/[.!?]$/u', $s) ? $s : $s . '.';
+    if (!$wasCut && mb_strlen($full) <= $max) return $full;
+    if ($wasCut) $max = min($max, mb_strlen($s));
+    if (preg_match_all('/[.!?](?=\s|$)/u', mb_substr($s, 0, $max), $m, PREG_OFFSET_CAPTURE)) {
+        $end = end($m[0]);
+        $cut = trim(substr($s, 0, $end[1] + 1));
+        if (mb_strlen($cut) >= 70) return $cut;
+    }
+    $part = mb_substr($s, 0, $max - 1);
+    $c = max((int)mb_strrpos($part, ','), (int)mb_strrpos($part, ':'));
+    if ($c >= 50) return rtrim(mb_substr($part, 0, $c)) . '.';
+    return $wasCut ? $full : rocSeoCut($s, $max);
+}
+
 function rocSeoCut(string $s, int $max): string {
     $s = trim($s);
     if (mb_strlen($s) <= $max) return $s;

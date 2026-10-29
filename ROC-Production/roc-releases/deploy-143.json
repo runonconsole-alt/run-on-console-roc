@@ -1,0 +1,28 @@
+{
+ "deploy": 143,
+ "date": "2026-10-29",
+ "title": "Audit fixes: no missing-detail lines, whole news descriptions, no adult games",
+ "changes": [
+  "Product pages: pros, cons, About sentences and FAQ answers that only said a detail is not specified or not disclosed are taken out (cli-content-cleanup.php), and the writer no longer writes them",
+  "News: meta descriptions that stopped in the middle (...gamers seeking...) now end on a whole sentence, also for new stories",
+  "The wrong claim that the RTX 5060 is the first RTX 5000-series GPU in mainstream laptops is taken out",
+  "Adult games are no longer listed on Can I run (3 titles); new ones were already skipped",
+  "Meta keywords are no longer on every page; a footer saved as {2026} shows the year"
+ ],
+ "checks": [
+  {
+   "label": "Whole-sentence descriptions",
+   "type": "contains",
+   "path": "api/v1/cms/seo-check-lib.php",
+   "text": "function rocSeoSentence"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/142",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it.",
+  "Dry run: php /home2/runoncon/public_html/api/v1/cron/cli-content-cleanup.php",
+  "Apply: php /home2/runoncon/public_html/api/v1/cron/cli-content-cleanup.php --apply",
+  "php /home2/runoncon/public_html/api/v1/cron/cli-refresh-templates.php --apply",
+  "CMS Dashboard: Clear cache."
+ ]
+}

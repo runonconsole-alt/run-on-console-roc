@@ -419,7 +419,7 @@ function rocNavApply(string $html, string $path, array $nav): string {
         if (isset($f['points'])) $html = rocNavReplaceInner($html, 'data-roc-region', 'footer-points', rocNavFooterPoints((array)$f['points']));
         if (isset($f['columns'])) $html = rocNavReplaceInner($html, 'data-roc-region', 'footer-cols', rocNavFooterCols((array)$f['columns']));
         if (isset($f['about'])) $html = rocNavReplaceInner($html, 'data-roc-text', 'footer-about', rocLayerH((string)$f['about']));
-        if (isset($f['copyright'])) $html = rocNavReplaceInner($html, 'data-roc-text', 'footer-copyright', rocLayerH(str_replace('{year}', date('Y'), (string)$f['copyright'])));
+        if (isset($f['copyright'])) $html = rocNavReplaceInner($html, 'data-roc-text', 'footer-copyright', rocLayerH(preg_replace('/\{(?:year|\d{4})\}/i', date('Y'), (string)$f['copyright'])));
         if (isset($f['disclaimer'])) $html = rocNavReplaceInner($html, 'data-roc-text', 'footer-disclaimer', rocLayerH((string)$f['disclaimer']));
     }
     $lg = (array)($nav['logo'] ?? []);
@@ -514,6 +514,8 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
     if ($path === '/' && $homeDate === '') $homeDate = (string)($L['home_fallback'] ?? '');
     [$html, $orig] = rocLayerStrip($html);
     $html = rocLayerFonts($html);
+    // Deploy 143: Google ignores meta keywords, and every page carried the home page's list.
+    $html = (string)preg_replace('#\s*<meta\s+name="keywords"[^>]*>#i', '', $html);
 
     // CMS > Menus & footer: draw the saved menu; after a reset, draw the default one again.
     $nav = (array)($L['nav'] ?? []);
