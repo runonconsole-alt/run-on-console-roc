@@ -1191,7 +1191,7 @@ function rocBlogPrompt(array $brief, string $publishAt): string {
         . ($brief['secondary_keywords'] ? 'SECONDARY KEYWORDS (use naturally): ' . implode(', ', $brief['secondary_keywords']) . "\n" : '')
         . (!empty($brief['searches']) ? 'REAL GOOGLE SEARCHES that brought readers to ROC (Search Console). Answer the ones that fit this post, for example as an <h2> or an FAQ question, in honest helpful words; skip any that do not fit the topic: ' . implode(' | ', $brief['searches']) . "\n" : '')
         . "\nINTERNAL LINKS YOU MUST USE (each once). Anchor text = the searched keyword of the page it points to: for a product its full name plus its type (\"Razer Viper V4 Pro gaming mouse\"), for a hub page its \"best ...\" phrase (\"best gaming mice\"), for a post its main keyword. Never \"click here\" or \"this page\":\n" . $links($brief['links']['must'])
-        . "\n\nINTERNAL LINKS YOU MAY USE (1-3 of them, only where they really help):\n" . $links($brief['links']['may'])
+        . "\n\nINTERNAL LINKS YOU MAY USE (3-6 of them, so the post has 5-10 internal links in all):\n" . $links($brief['links']['may'])
         . "\nUse NO other internal addresses. External links only to official sources (game publishers, manufacturers) and only if essential.\n\n"
         . "RULES\n"
         . "- At least 1,000 words (aim for 1,200-1,600) of genuinely useful, accurate content in clear natural English. No filler, no keyword stuffing.\n"

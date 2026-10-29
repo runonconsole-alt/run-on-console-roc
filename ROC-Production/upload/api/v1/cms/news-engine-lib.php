@@ -358,7 +358,7 @@ function rocNewsPrompt(array $c): string {
     foreach ($m['posts'] as $b) $links[] = "- {$b['url']}  ({$b['title']}; our article)";
     return "You write short, accurate news for runonconsole.com (Run On Console): an independent gaming and PC hardware site. Write ONE news article in English.\n\n"
         . "REPORTS FROM TRUSTED SOURCES (the ONLY facts you may use):\n{$reports}\n"
-        . "INTERNAL LINKS (use 2-4 of them, each once, where they help the reader; anchor text = the searched name, e.g. \"AMD Ryzen 7 9800X3D\" or \"best graphics cards\", never \"click here\"):\n" . implode("\n", $links) . "\n\n"
+        . "INTERNAL LINKS (use 5-8 of them, or all of them when fewer are listed, each once, where they help the reader; anchor text = the searched name, e.g. \"AMD Ryzen 7 9800X3D\" or \"best graphics cards\", never \"click here\"):\n" . implode("\n", $links) . "\n\n"
         . "RULES\n"
         . "- 350-550 words, in your own words. Never copy sentences from the reports; quote at most 8 words and say who said it.\n"
         . "- Only facts found in the reports. Attribute them (\"according to the PlayStation Blog\"). No guesses, no invented specs, prices, dates or benchmarks. If the reports disagree, say so.\n"
