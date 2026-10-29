@@ -939,6 +939,15 @@ RELEASES = [
          checks=[dict(label='Keep reading box', type='contains', path='blog-render.php', text='function rocRelatedPosts')],
          pr=REPO + '139',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Open any news story and scroll to Keep reading.']),
+    dict(deploy=141, date='2026-10-29', title='Faster pages: tracking after the page, fonts without blocking',
+         changes=['Google Tag Manager, GA4 and Clarity load on the first scroll, tap or key, or 3.5 seconds after the page has loaded, instead of while the page is still opening; no visit is lost (their queues start at once)',
+                  'Google Fonts no longer block the first paint, and JetBrains Mono (only code boxes used it) is not downloaded any more'],
+         checks=[dict(label='Fonts without blocking', type='contains', path='api/v1/cms/site-layer-lib.php', text='function rocLayerFonts')],
+         pr=REPO + '140',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.',
+                'php /home2/runoncon/public_html/api/v1/cron/cli-refresh-templates.php --apply',
+                'CMS Dashboard: Clear cache.',
+                'PageSpeed Insights: test https://runonconsole.com/ again (mobile and desktop).']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

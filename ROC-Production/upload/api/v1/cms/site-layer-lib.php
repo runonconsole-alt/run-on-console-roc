@@ -176,12 +176,17 @@ function rocLayerTrackingHead(array $t, string $path): string {
     if ($v = $id('pinterest', '/^[A-Za-z0-9]{10,64}$/')) $h .= '<meta name="p:domain_verify" content="' . $v . '" />';
     if ($v = $id('facebook', '/^[A-Za-z0-9]{10,64}$/')) $h .= '<meta name="facebook-domain-verification" content="' . $v . '" />';
     if ($v = $id('yandex', '/^[A-Za-z0-9]{10,64}$/')) $h .= '<meta name="yandex-verification" content="' . $v . '" />';
+    // Deploy 141: Google Tag Manager, GA4 and Clarity took 1-3 s of a phone's main thread before the page could be
+    // used (Lighthouse, 2026-10-29). Their queues start at once (no hit is lost: dataLayer, gtag and clarity calls
+    // wait in them), and the scripts load on the first scroll, tap or key, or 3.5 s after the page has loaded.
+    $later = [];
     if ($v = $id('gtm', '/^GTM-[A-Z0-9]{4,12}$/')) {
-        $h .= "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','" . $v . "');</script>";
+        $h .= "<script>window.dataLayer=window.dataLayer||[];window.dataLayer.push({'gtm.start':new Date().getTime(),event:'gtm.js'});</script>";
+        $later[] = 'https://www.googletagmanager.com/gtm.js?id=' . $v;
     }
     if ($v = $id('ga4', '/^G-[A-Z0-9]{4,15}$/')) {
-        $h .= '<script async src="https://www.googletagmanager.com/gtag/js?id=' . $v . '"></script>'
-            . "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','" . $v . "');</script>";
+        $h .= "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','" . $v . "');</script>";
+        $later[] = 'https://www.googletagmanager.com/gtag/js?id=' . $v;
     }
     // Google AdSense: the account tag on every page (approval and Auto ads); units only where a slot is set.
     if ($v = $id('adsense', '/^ca-pub-\d{10,20}$/')) {
@@ -189,7 +194,14 @@ function rocLayerTrackingHead(array $t, string $path): string {
             . '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' . $v . '" crossorigin="anonymous"></script>';
     }
     if ($v = $id('clarity', '/^[a-z0-9]{6,20}$/')) {
-        $h .= '<script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","' . $v . '");</script>';
+        $h .= '<script>window.clarity=window.clarity||function(){(window.clarity.q=window.clarity.q||[]).push(arguments)};</script>';
+        $later[] = 'https://www.clarity.ms/tag/' . $v;
+    }
+    if ($later) {
+        $h .= '<script>(function(u){var done=0,ev=["scroll","pointerdown","keydown","touchstart"];function go(){if(done)return;done=1;'
+            . 'ev.forEach(function(e){removeEventListener(e,go,{passive:true})});u.forEach(function(s){var j=document.createElement("script");j.async=true;j.src=s;document.head.appendChild(j)})}'
+            . 'ev.forEach(function(e){addEventListener(e,go,{passive:true})});if(document.readyState==="complete")setTimeout(go,3500);else addEventListener("load",function(){setTimeout(go,3500)})})('
+            . json_encode($later, JSON_UNESCAPED_SLASHES) . ');</script>';
     }
     // The ROC Team author page (Deploy 82): a ProfilePage, the author every blog and news post names.
     if ($path === '/author/roc-team/') {
@@ -428,6 +440,20 @@ function rocNavDefault(): array {
 /* ---------------------------------------------------------------- apply */
 
 /** Removes earlier additions; returns [html, originals|null]. */
+/**
+ * Deploy 141: the Google Fonts stylesheet blocked the first paint for about a second on phones. It now loads
+ * without blocking (preload, then a stylesheet; plain link for browsers without JavaScript) and without JetBrains
+ * Mono, which only code boxes used (they fall back to the system monospace font). Runs once per page: a page that
+ * already has the new link is left as it is.
+ */
+const ROC_LAYER_FONTS = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap';
+function rocLayerFonts(string $html): string {
+    if (!preg_match('#<link\b[^>]*href="https://fonts\.googleapis\.com/css2\?[^"]*"[^>]*rel="stylesheet"[^>]*>#i', $html, $m, PREG_OFFSET_CAPTURE)) return $html;
+    $u = htmlspecialchars(ROC_LAYER_FONTS, ENT_QUOTES);
+    $new = '<link rel="preload" as="style" href="' . $u . '" onload="this.onload=null;this.rel=\'stylesheet\'"><noscript><link rel="stylesheet" href="' . $u . '"></noscript>';
+    return substr($html, 0, $m[0][1]) . $new . substr($html, $m[0][1] + strlen($m[0][0]));
+}
+
 function rocLayerStrip(string $html): array {
     $orig = null;
     if (preg_match('#<!--roc-orig:([A-Za-z0-9+/=]+)-->#', $html, $m)) {
@@ -487,6 +513,7 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
     if ($path === '/' && $homeDate === '' && preg_match('#<script type="application/ld\+json" id="roc-home-page">[^<]*?"dateModified":"([^"]+)"#s', $html, $m)) $homeDate = $m[1];
     if ($path === '/' && $homeDate === '') $homeDate = (string)($L['home_fallback'] ?? '');
     [$html, $orig] = rocLayerStrip($html);
+    $html = rocLayerFonts($html);
 
     // CMS > Menus & footer: draw the saved menu; after a reset, draw the default one again.
     $nav = (array)($L['nav'] ?? []);
