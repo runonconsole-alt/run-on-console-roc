@@ -247,7 +247,7 @@ function rocCommentForm(string $title, string $url): string {
         . 'b.disabled=true;m.className="rc-msg";m.textContent="Sending…";'
         . 'fetch("/api/v1/messages.php",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({kind:"comment",name:v("name"),email:v("email"),'
         . 'subject:"Comment on: "+f.dataset.title,message:v("message"),meta:{page:f.dataset.url},website:v("website")})})'
-        . '.then(function(r){return r.json().catch(function(){return {}})}).then(function(d){if(d&&d.success){m.className="rc-msg ok";m.innerHTML="<div class=\"rc-dt\"><span>You</span><i></i><span class=\"h\">Head of Community</span><i class=\"r\"></i><span>Your inbox</span></div>"+"Thanks! Your comment has reached our Head of Community ("+d.reference+"). You will get a reply soon by email; a copy is in your inbox.";f.elements.message.value=""}'
+        . '.then(function(r){return r.json().catch(function(){return {}})}).then(function(d){if(d&&d.success){if(window.rocTrack)rocTrack("roc_comment",f.dataset.title,location.pathname);m.className="rc-msg ok";m.innerHTML="<div class=\"rc-dt\"><span>You</span><i></i><span class=\"h\">Head of Community</span><i class=\"r\"></i><span>Your inbox</span></div>"+"Thanks! Your comment has reached our Head of Community ("+d.reference+"). You will get a reply soon by email; a copy is in your inbox.";f.elements.message.value=""}'
         . 'else{m.className="rc-msg bad";m.textContent=(d&&d.error)||"Your comment could not be sent. Please email comments@runonconsole.com."}})'
         . '.catch(function(){m.className="rc-msg bad";m.textContent="No connection. Please try again."}).then(function(){b.disabled=false})})})();</script>';
 }

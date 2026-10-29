@@ -231,6 +231,7 @@
     if (spk) spk.addEventListener('click', function () { state.speak = !state.speak; spk.classList.toggle('on', state.speak); if (!state.speak) speechSynthesis.cancel(); save(); });
   }
   function toggle(on) {
+    if (on && !state.open && window.rocTrack) window.rocTrack('roc_chat_open', agent().name, location.pathname);
     state.open = on; save();
     box.classList.toggle('on', on); btn.style.display = on ? 'none' : 'flex';
     if (on) { body.scrollTop = body.scrollHeight; setTimeout(function () { input.focus(); }, 50); }
@@ -418,6 +419,7 @@
       .then(function (d) {
         if (!d || !d.success) { ok.disabled = false; err.textContent = (d && d.error) || 'It could not be sent. Please try again.'; return; }
         m.formDone = d.reference;
+        if (window.rocTrack) window.rocTrack('roc_chat_form', m.form.kind, agent().name);
         var hd = { write_for_us: 'Head of Editorial', suggestion: 'Head of Product' }[m.form.kind] || 'Head of Support';
         state.msgs.push({ role: 'assistant', content: 'Done! Your message has reached our ' + hd + ' (' + d.reference + '). You will get a reply soon at ' + v('email') + ', and a copy is already on its way. Anything else I can help with?' });
         save(); render();
@@ -461,6 +463,7 @@
     try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {}
     var image = pic; pic = null; att.classList.remove('on');
     var voiceTurn = viaVoice; viaVoice = false;   // asked by voice: the answer is spoken too
+    if (window.rocTrack) window.rocTrack('roc_chat_message', agent().name, location.pathname);
     state.msgs.push(image ? { role: 'user', content: text, pic: image, hadPic: true } : { role: 'user', content: text });
     busy = true; sendBtn.disabled = true; render(); save();
     var hist = state.msgs.slice(-8).map(function (m) { return { role: m.role, content: m.content }; });
