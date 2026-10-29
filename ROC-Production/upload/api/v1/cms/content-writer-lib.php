@@ -86,7 +86,8 @@ const ROC_CONTENT_RULES = "Writing rules (follow all):\n"
 "
     . "- Be honest: name real trade-offs and say who should pick something else.\n"
     . "- Original wording only. Do not copy text from Amazon or the maker's site.\n"
-    . "- Write to the reader. Never mention DATA, \"the data\", \"the information provided\" or these rules; when a detail is unknown, tell the reader to check the listing for it.\n";
+    . "- Write to the reader. Never mention DATA, \"the data\", \"the information provided\", \"the description\" or these rules.\n"
+    . "- When a detail is unknown, leave it out completely. Never write that something is not specified, not listed, not disclosed or not mentioned, and never make that a con or a FAQ answer (Deploy 143).\n";
 
 function rocContentProductPrompt(array $p, string $catName, string $groupName): string {
     $data = ['name' => $p['title'], 'brand' => $p['brand'] ?? '', 'category' => $catName, 'group' => $groupName,
@@ -102,7 +103,7 @@ function rocContentProductPrompt(array $p, string $catName, string $groupName): 
         . "- uses: 3-5 short items, where and how it fits (setups, games, players).\n"
         . "- skip_if: 1-2 sentences, who should choose something else.\n"
         . "- before_you_buy: 1-2 sentences, what to check on the listing (version, size, compatibility).\n"
-        . "- pros: 3-5 short items. cons: 2-3 short honest items.\n"
+        . "- pros: 3-5 short items. cons: 2-3 short honest items, each a real drawback of the product (never missing information).\n"
         . "- best_for: a short phrase under 40 characters, like \"Competitive FPS players\".\n"
         . ROC_CONTENT_DEEP_KEYS;
 }

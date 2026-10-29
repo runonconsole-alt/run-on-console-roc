@@ -15,6 +15,8 @@ if (defined('ROC_GAME_PAGES_LIB')) return;
 define('ROC_GAME_PAGES_LIB', 1);
 require_once __DIR__ . '/agent-lib.php';
 
+/** Adult games added before steam-update-lib.php skipped Steam's adult content descriptors (Deploy 143). */
+const ROC_GP_ADULT = '/hentai|genital|waifu|nsfw|porn|erotic|\bsex(y|ual)?\b|\bnude\b|uncensored|\bstrip\b/i';
 const ROC_GP_SOFTWARE = '/Utilities|Design & Illustration|Animation & Modeling|Video Production|Audio Production|Photo Editing|Software Training|Web Publishing|Game Development|Education/';
 
 /** Graphics cards and processors people own, used for "which card runs it" and the quick check. */
@@ -63,6 +65,7 @@ function rocGpAll(string $root): array {
         $id = (int)($g['appid'] ?? 0);
         if ($id <= 0 || isset($seen[$id]) || empty($g['req']) || empty($g['min'])) continue;
         if (preg_match(ROC_GP_SOFTWARE, (string)($g['g'] ?? '')) || preg_match('/benchmark tool/i', (string)$g['t'])) continue;
+        if (preg_match(ROC_GP_ADULT, (string)$g['t'])) continue;   // Deploy 143: no adult titles next to Amazon links and ads
         $slug = rocGpSlug((string)$g['t']);
         if (!preg_match('/[a-z]/', $slug) || strlen($slug) < 2) continue;   // only non-Latin letters
         $first = $slug;

@@ -432,7 +432,8 @@ function rocNewsCreate(PDO $pdo, string $root, array $a, array $c, string $by): 
     if (mb_strlen($title) < 20) $errors[] = 'The title is too short.';
     if ($words < 250) $errors[] = "The article has {$words} words; at least 300 are needed.";
     if ($excerpt === '') $excerpt = rocCmsTruncate(rocCmsTextFromHtml($content), 200);
-    if (mb_strlen($metaD) < 70) $metaD = rocSeoCut($excerpt, 155);
+    if (mb_strlen($metaD) < 70) $metaD = rocSeoSentence($excerpt, 155);
+    elseif (mb_strlen($metaD) > 160 || preg_match('/(…|\.\.\.)$/u', $metaD)) $metaD = rocSeoSentence($metaD, 155);   // Deploy 143: whole sentences
     // Deploy 127: the same title and description check as the blog writer; the news writer tries again with the reasons.
     foreach (rocSeoCheck(['title' => $title, 'meta_title' => $metaT, 'meta_description' => $metaD, 'excerpt' => $excerpt, 'focus_keyword' => $focus]) as $m) $errors[] = $m;
     if ($errors) return ['ok' => false, 'errors' => $errors];
