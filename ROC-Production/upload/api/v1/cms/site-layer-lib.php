@@ -514,6 +514,8 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
     if ($path === '/' && $homeDate === '') $homeDate = (string)($L['home_fallback'] ?? '');
     [$html, $orig] = rocLayerStrip($html);
     $html = rocLayerFonts($html);
+    // Deploy 146: the footer of the built pages says "© {year}" until JavaScript runs; crawlers that read the HTML saw it.
+    $html = (string)preg_replace('/©\s*\{(?:year|\d{4})\}/u', '© ' . date('Y'), $html);
     // Deploy 143: Google ignores meta keywords, and every page carried the home page's list.
     $html = (string)preg_replace('#\s*<meta\s+name="keywords"[^>]*>#i', '', $html);
 

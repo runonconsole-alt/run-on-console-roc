@@ -195,6 +195,10 @@ function rocIsNews(array $p): bool {
  * mid-word ("… launch, maki…") ends at its last full sentence instead, or at a whole word with "…".
  */
 function rocDescFit(string $d, int $max = 155): string {
+    // Deploy 146: whole sentences (rocSeoSentence, Deploy 143-144): a long description in the database was cut
+    // here to "...for gamers seeking…" on every page view.
+    $lib = __DIR__ . '/api/v1/cms/seo-check-lib.php';
+    if (is_file($lib)) { require_once $lib; if (function_exists('rocSeoSentence')) return rocSeoSentence($d, $max); }
     $d = trim((string)preg_replace('/\s+/u', ' ', $d));
     $cut = (bool)preg_match('/(…|\.\.\.)$/u', $d);
     $d = rtrim((string)preg_replace('/(…|\.\.\.)$/u', '', $d));
