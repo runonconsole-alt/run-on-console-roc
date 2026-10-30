@@ -255,6 +255,26 @@ window.rocTrack = function (name, label, value) {
     var LABELS = { products: 'Products', blogs: 'Blogs', games: 'Games & compatibility', guides: 'Guides', news: 'News', platforms: 'Gaming platforms' };
     var OPTIONS = '<option value="products">Products</option><option value="blogs">Blogs</option><option value="games">Games</option><option value="guides">Guides</option><option value="news">News</option><option value="platforms">Platforms</option>';
     function scopeOf(f) { var v = f['in'] ? f['in'].value : 'products'; return PAGES[v] ? v : 'products'; }
+    /* Deploy 148 (owner, 2026-10-30): one search on every screen. The desktop header had no section list, so it only
+       searched products ("Elden Ring" found nothing); the phone menu had one. Now every search looks in every section,
+       shows the best of each under its heading, and Enter opens the section with the best match. */
+    var ORDER = ['products', 'games', 'guides', 'blogs', 'news', 'platforms'];
+    (function () {
+      var st = document.createElement('style');
+      st.textContent = 'form[data-roc-search] select[name="in"]{display:none!important}';
+      (document.head || document.documentElement).appendChild(st);
+    })();
+    function best(q) {
+      var words = norm(q).split(' ').filter(Boolean), out = [];
+      if (!words.length || !data) return out;
+      ORDER.forEach(function (s) {
+        var top = 0;
+        (data[s] || []).forEach(function (it) { var v = score(it, words); if (v > top) top = v; });
+        if (top > 0) out.push({ s: s, top: top });
+      });
+      // Highest match first; a tie keeps the order above (products, then games ...).
+      return out.sort(function (a, b) { return b.top - a.top || ORDER.indexOf(a.s) - ORDER.indexOf(b.s); });
+    }
     function pageScope() {
       var p = location.pathname;
       return /^\/blogs\//.test(p) ? 'blogs' : /^\/guides\//.test(p) ? 'guides' : /^\/news\//.test(p) ? 'news'
@@ -363,9 +383,10 @@ window.rocTrack = function (name, label, value) {
       css();
       if (!box) { box = document.createElement('div'); box.className = 'roc-sr'; box.setAttribute('role', 'listbox'); form.appendChild(box); }
       if (!data) { box.innerHTML = '<p>Searching…</p>'; return; }
-      var scopes = [scope], html = '', any = false;
+      var ranked = best(q), scopes = ranked.map(function (x) { return x.s; }), html = '', any = false;
+      if (ranked.length) scope = ranked[0].s;
       scopes.forEach(function (s) {
-        var list = find(s, q, 10);
+        var list = find(s, q, ranked.length > 1 ? 4 : 10);
         if (!list.length) return;
         any = true;
         html += '<h6>' + LABELS[s] + '</h6>' + list.map(function (it) {
@@ -387,9 +408,12 @@ window.rocTrack = function (name, label, value) {
       if (!f) return;
       e.preventDefault();
       e.stopPropagation();
-      var q = f.q.value.trim(), scope = scopeOf(f);
-      if (q) window.rocTrack('roc_search', q, scope);
-      load().then(function () { location.assign(targetUrl(scope, q)); });
+      var q = f.q.value.trim();
+      load().then(function () {
+        var r = best(q), scope = r.length ? r[0].s : pageScope();
+        if (q) window.rocTrack('roc_search', q, scope);
+        location.assign(targetUrl(scope, q));
+      });
     }, true);
     document.addEventListener('keydown', function (e) {
       var f = formOf(e.target);
@@ -455,9 +479,7 @@ window.rocTrack = function (name, label, value) {
           s.setAttribute('data-roc-search', '');
           s.setAttribute('role', 'search');
           s.style.cssText = 'margin-top:8px;position:relative;display:flex;gap:6px';
-          s.innerHTML = '<select name="in" aria-label="Search in" style="padding:10px 6px;border:1px solid #cbd5e1;border-radius:12px;font-size:13px;background:#f8fafc">' +
-            '<option value="products">Products</option><option value="blogs">Blogs</option><option value="games">Games</option><option value="guides">Guides</option><option value="news">News</option><option value="platforms">Platforms</option></select>' +
-            '<input name="q" type="search" placeholder="Search products, games, guides..." aria-label="Search" ' +
+          s.innerHTML = '<input name="q" type="search" placeholder="Search products, games, guides..." aria-label="Search" ' +
             'style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid #cbd5e1;border-radius:12px;font-size:14px">';
           panel.appendChild(s);
           header.appendChild(panel);
