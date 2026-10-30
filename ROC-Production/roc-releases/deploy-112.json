@@ -20,12 +20,6 @@
    "type": "contains",
    "path": "blog-render.php",
    "text": "function rocCommentForm"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-VQ9ZSo4X.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/112",
@@ -34,6 +28,5 @@
   "php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply",
   "CMS Dashboard > Clear cache.",
   "cPanel > Forwarders: forward alerts@, comments@, contact@, suggestions@ and support@ to runonconsole@gmail.com."
- ],
- "build": "index-VQ9ZSo4X.js"
+ ]
 }

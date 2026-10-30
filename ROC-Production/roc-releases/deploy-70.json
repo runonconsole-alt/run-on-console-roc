@@ -19,16 +19,9 @@
    "label": "Wishlist API",
    "type": "file",
    "path": "api/v1/member.php"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-3dwkYI1E.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/70",
- "build": "index-3dwkYI1E.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]

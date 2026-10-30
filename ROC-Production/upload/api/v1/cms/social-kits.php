@@ -58,7 +58,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             $st->execute(array_map(function ($w) { return '%' . $w . '%'; }, $words));
             foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) { [$sec] = rocKitSection($r); $pages[] = '- https://runonconsole.com/' . $sec . '/' . $r['slug'] . '/ (' . $r['title'] . ')'; }
         }
-        $pages[] = '- https://runonconsole.com/can-i-run/ (PC requirements of 2,000+ games, a quick check)';
+        $pages[] = '- https://runonconsole.com/can-i-run/ (PC requirements of 2,400+ games, a quick check)';
         $prompt = "Draft an answer for this {$where} question. A real person (a gamer who runs the site runonconsole.com) will read it, edit it and post it by hand.
 
 "

@@ -50,8 +50,8 @@ export const WriteForUsView = () => {
       features: [
         "1500+ words hands-on product article",
         '2 permanent backlinks (rel="sponsored")',
-        "Featured on Run On Console Homepage",
-        "Dedicated Product Gallery & Buy Box"
+        "Shown in the latest articles on the home page, labelled Sponsored",
+        "Photo gallery and a buy link inside the article"
       ]
     },
     {
@@ -63,7 +63,7 @@ export const WriteForUsView = () => {
       features: [
         "2500+ Words cornerstone buyer guide",
         '3 permanent backlinks (rel="sponsored")',
-        "Pinned Category Hub placement",
+        "Linked from the matching guide or category page, labelled Sponsored",
         "Shared on our social channels"
       ]
     }
@@ -100,7 +100,7 @@ export const WriteForUsView = () => {
   const guestFaqs = [
     {
       q: "Why is guest posting on Run On Console a paid service?",
-      a: "To maintain the highest editorial standards, every submission is thoroughly fact-checked, proofread, and formatted by our senior tech editors. Paid slots get priority review. As Google requires for paid placements, links in sponsored articles are marked rel=\"sponsored\"."
+      a: "To maintain the highest editorial standards, every submission is thoroughly fact-checked, proofread, and formatted by our editor, Omar Abobakar. Paid slots get priority review. Every paid article is labelled Sponsored at the top, and payment never buys a place in our product picks or rankings. As Google requires for paid placements, links in sponsored articles are marked rel=\"sponsored\"."
     },
     {
       q: "What payment methods do you accept?",

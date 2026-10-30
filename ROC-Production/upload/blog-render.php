@@ -527,6 +527,24 @@ function rocArticleStyles(): string {
 CSS;
 }
 
+/* Deploy 149: the owner signs the posts (audit: "no named people"). */
+const ROC_OWNER = 'Omar Abobakar';
+const ROC_OWNER_URL = '/author/omar-abobakar/';
+const ROC_OWNER_PHOTO = '/images/omar-abobakar.webp';
+const ROC_OWNER_LINKEDIN = 'https://www.linkedin.com/in/omar-abo-bakar-21ot02/';
+
+/** The name a post is signed with: the owner, unless the CMS names someone else (a guest writer). */
+function rocAuthorName(array $p): string {
+    $a = trim((string)($p['author_name'] ?? ''));
+    $own = ['', 'omar abobakar', 'omar', 'roc', 'roc team', 'run on console', 'run on console team', 'run on console editorial team', 'editorial team', 'admin'];
+    return in_array(strtolower($a), $own, true) ? ROC_OWNER : $a;
+}
+
+/** A paid post: the tag "sponsored" in CMS > Blogs > Tags; it is labelled Sponsored on the page. */
+function rocIsSponsored(array $p): bool {
+    return (bool)preg_match('/(^|,)\s*#?sponsored\s*(,|$)/i', (string)($p['tags'] ?? ''));
+}
+
 function rocSendHtml(string $html, ?int $modified = null): void {
     // Announcement bar, site code and meta overrides from the CMS (api/v1/cms/site-layer-lib.php).
     $lib = __DIR__ . '/api/v1/cms/site-layer-lib.php';
@@ -589,12 +607,11 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
     $image    = trim((string)($p['image'] ?? ''));
     $imageAbs = rocAbs($image);
     $alt      = trim((string)($p['image_alt'] ?? '')) ?: $title;
-    // Posts are signed "ROC" (a name typed in the CMS is shown only when it is
-    // someone else, e.g. a guest writer).
-    $author   = trim((string)($p['author_name'] ?? ''));
-    if ($author === '' || in_array(strtolower($author), ['omar abobakar', 'omar', 'roc', 'roc team', 'run on console', 'run on console team', 'run on console editorial team'], true)) $author = 'ROC';
-    $byPerson = $author !== 'ROC';
-    $authorUrl = $byPerson ? '' : '/author/roc-team/';
+    // Deploy 149 (owner): posts are signed by the owner and editor, Omar Abobakar, with his author page; a name typed
+    // in the CMS is shown only when it is someone else (a guest writer).
+    $author   = rocAuthorName($p);
+    $authorUrl = $author === ROC_OWNER ? ROC_OWNER_URL : '';
+    $sponsored = rocIsSponsored($p);
     $category = rocCategoryLabel($p['category'] ?? '');
     $pub      = rocPublished($p);
     $mod      = rocModified($p) ?? $pub;
@@ -643,8 +660,9 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
     if ($imageAbs) $article['image'] = [$imageAbs];
     if ($pub) $article['datePublished'] = gmdate('c', $pub);
     if ($mod) $article['dateModified'] = gmdate('c', $mod);
-    $article['author'] = $byPerson ? ['@type' => 'Person', 'name' => $author] : ['@type' => 'Organization', 'name' => 'ROC (Run On Console)', 'url' => ROC_PUBLIC_URL . '/author/roc-team/'];
-    if ($authorUrl !== '') $article['author']['url'] = ROC_PUBLIC_URL . $authorUrl;
+    $article['author'] = ['@type' => 'Person', 'name' => $author];
+    if ($authorUrl !== '') $article['author'] += ['@id' => ROC_PUBLIC_URL . ROC_OWNER_URL . '#person', 'url' => ROC_PUBLIC_URL . $authorUrl,
+        'jobTitle' => 'Founder and editor', 'sameAs' => [ROC_OWNER_LINKEDIN]];
     $article['publisher'] = [
         '@type' => 'Organization',
         'name' => 'Run On Console',
@@ -680,17 +698,21 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
 
     $m .= '<header class="space-y-4">'
         . '<span class="bg-emerald-600 text-white text-xs font-extrabold uppercase px-3 py-1 rounded-md tracking-wider shadow-sm badge-glow">' . rocH($category) . '</span>'
+        . ($sponsored ? ' <span class="bg-amber-400 text-slate-950 text-xs font-extrabold uppercase px-3 py-1 rounded-md tracking-wider">Sponsored</span>' : '')
         . '<h1 class="font-display font-extrabold text-3xl sm:text-5xl text-slate-900 leading-tight">' . rocH($title) . '</h1>'
         . '<div class="flex flex-wrap items-center justify-between gap-4 py-3 border-y border-slate-200 text-xs text-slate-500 font-medium">'
         .   '<div class="flex items-center gap-3">'
-        .     '<div class="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-bold flex items-center justify-center shadow-md">' . rocH(rocInitials($author)) . '</div>'
-        .     '<div>' . ($authorUrl !== '' ? '<a href="' . $authorUrl . '" rel="author" class="font-bold text-slate-900 block no-underline hover:text-emerald-700">' . rocH($author) . '</a>' : '<span class="font-bold text-slate-900 block">' . rocH($author) . '</span>') . '</div>'
+        .     ($authorUrl !== '' ? '<img src="' . ROC_OWNER_PHOTO . '" alt="' . rocH($author) . '" width="36" height="36" class="w-9 h-9 rounded-full object-cover shadow-md" loading="lazy"/>'
+                : '<div class="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-bold flex items-center justify-center shadow-md">' . rocH(rocInitials($author)) . '</div>')
+        .     '<div>' . ($authorUrl !== '' ? '<a href="' . $authorUrl . '" rel="author" class="font-bold text-slate-900 block no-underline hover:text-emerald-700">' . rocH($author) . '</a><span class="block text-[11px] text-slate-500">Founder and editor</span>' : '<span class="font-bold text-slate-900 block">' . rocH($author) . '</span>') . '</div>'
         .   '</div>'
         .   '<div class="flex items-center gap-3">'
         .     ($pub ? '<time datetime="' . gmdate('c', $pub) . '">' . rocH($news ? rocPkt($pub, 'M j, Y, H:i') : date('M j, Y', $pub)) . '</time><span>•</span>' : '')
         .     '<span class="text-emerald-600 font-bold">' . rocH($readTime) . '</span>'
         .   '</div>'
         . '</div></header>';
+    if ($sponsored) $m .= '<p class="bg-amber-50 border border-amber-300 text-amber-900 text-sm rounded-2xl p-4">Sponsored: a brand paid for this article. '
+        . 'Its links are marked sponsored, and payment never buys a place in our product picks or rankings.</p>';
 
     if ($image !== '') {
         $m .= '<div class="relative rounded-3xl overflow-hidden shadow-2xl max-h-[480px] bg-slate-900">'
@@ -829,7 +851,7 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
         $img  = trim((string)($p['image'] ?? ''));
         $alt  = trim((string)($p['image_alt'] ?? '')) ?: (string)$p['title'];
         $rt   = rocReadTime($p, rocBodyHtml((string)($p['content'] ?? '')));
-        $by   = trim((string)($p['author_name'] ?? '')) ?: 'Run On Console';
+        $by   = rocAuthorName($p);
         $cards .= '<a href="' . $base . rocH($slug) . '/" class="block no-underline">'
             . '<div class="game-card flex flex-col justify-between group cursor-pointer h-full">'
             . '<div class="relative bg-slate-900 overflow-hidden" style="aspect-ratio:1200 / 630">'
@@ -1245,7 +1267,7 @@ function rocAdSide(): string {
     $ad = rocAdUnit('side');
     if ($ad !== '') return $ad;
     return '<a class="rn-house" href="/compatibility/"><span class="rn-house-k">Free tool</span>'
-        . '<strong>Can your PC run it?</strong><span class="rn-house-p">Check 2,000+ PC games against your graphics card, processor and memory.</span>'
+        . '<strong>Can your PC run it?</strong><span class="rn-house-p">Check 2,400+ PC games against your graphics card, processor and memory.</span>'
         . '<span class="rn-house-b">Check a game &rarr;</span></a>'
         . '<a class="rn-house rn-house-2" href="/products/"><span class="rn-house-k">Gaming gear</span>'
         . '<strong>Our product picks</strong><span class="rn-house-p">Mice, keyboards, headsets, monitors, GPUs and more.</span>'

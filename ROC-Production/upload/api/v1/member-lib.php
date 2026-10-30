@@ -142,7 +142,7 @@ function rocDigestEmail(array $content, array $wishlist, string $name, string $u
         . '<div style="padding:8px 24px 24px;font-size:15px;line-height:1.6">'
         . '<p style="margin-top:18px">Hi' . ($first !== '' ? ' ' . rocDigestH($first) : '') . ', here is what happened this week.</p>'
         . $sec('Top gaming news', $content['news']) . $sec('New guides on the site', $content['blogs']) . $sec('Your wishlist', $wl)
-        . '<p style="margin-top:26px"><a href="https://runonconsole.com/can-i-run/" style="background:#10b981;color:#052e2b;font-weight:bold;padding:10px 16px;border-radius:10px;text-decoration:none">Can your PC run it? Check 2,000+ games</a></p>'
+        . '<p style="margin-top:26px"><a href="https://runonconsole.com/can-i-run/" style="background:#10b981;color:#052e2b;font-weight:bold;padding:10px 16px;border-radius:10px;text-decoration:none">Can your PC run it? Check 2,400+ games</a></p>'
         . '</div><div style="padding:16px 24px;background:#f8fafc;color:#64748b;font-size:12px;line-height:1.6">'
         . 'You get this because you turned on the weekly email in your Run On Console profile. '
         . '<a href="' . rocDigestH($unsubUrl) . '" style="color:#64748b">Unsubscribe</a> (one click). Run On Console, Lahore, Pakistan.</div></div></body></html>';

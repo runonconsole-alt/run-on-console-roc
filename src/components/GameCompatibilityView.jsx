@@ -335,7 +335,7 @@ export const GameCompatibilityView = () => {
                 <span>Compatibility Index</span>
               </span>
               <span className="bg-emerald-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded badge-glow">
-                2,000+ Games
+                2,400+ Games
               </span>
             </div>
 
@@ -361,7 +361,7 @@ export const GameCompatibilityView = () => {
       {/* How it works, in plain words */}
       <section aria-label="How it works" className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          ['1', 'Choose a game', 'Search 2,000+ PC games, from GTA 6 and new releases to classics like San Andreas and CS 1.6.'],
+          ['1', 'Choose a game', 'Search 2,400+ PC games, from GTA 6 and new releases to classics like San Andreas and CS 1.6.'],
           ['2', 'Enter your PC', 'Pick your graphics card, processor and RAM (or a ready laptop or handheld) from the lists below.'],
           ['3', 'Get your answer', 'See if it runs at minimum or recommended settings, your score, and which part to upgrade if needed.'],
         ].map(([n, t, d]) => (

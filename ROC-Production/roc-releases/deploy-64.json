@@ -14,16 +14,9 @@
    "type": "contains",
    "path": "api/v1/agent-lib.php",
    "text": "rocAgentSpecsFromText"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-Bry1vDx-.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/64",
- "build": "index-Bry1vDx-.js",
  "steps": [
   "Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message."
  ]

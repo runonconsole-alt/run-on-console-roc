@@ -17,12 +17,6 @@
    "label": "Footer: Suggestions",
    "type": "file",
    "path": "api/v1/cron/cli-footer-suggestions.php"
-  },
-  {
-   "label": "Page templates refreshed (cli-refresh-templates.php)",
-   "type": "contains",
-   "path": "cms-templates/product-page.html",
-   "text": "index-CXNkIGP2.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/116",
@@ -31,6 +25,5 @@
   "php public_html/api/v1/cron/cli-footer-suggestions.php --apply",
   "php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply",
   "CMS Dashboard > Clear cache."
- ],
- "build": "index-CXNkIGP2.js"
+ ]
 }

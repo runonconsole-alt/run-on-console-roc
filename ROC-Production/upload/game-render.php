@@ -111,7 +111,7 @@ function rocGpOgCard(string $root, string $slug, string $title, string $line, in
     $dir = dirname($file);
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
     $data = '';
-    // A 32-colour PNG: about 15 KB each (2,000+ games, so small for the disk), drawn only when a page is first opened.
+    // A 32-colour PNG: about 15 KB each (2,400+ games, so small for the disk), drawn only when a page is first opened.
     imagetruecolortopalette($im, false, 32);
     ob_start(); imagepng($im, null, 9); $data = (string)ob_get_clean();
     imagedestroy($im);
@@ -531,8 +531,13 @@ $gpuMin = rocGpPartsFor('gpu', isset($rMin['gpu']) ? (float)$rMin['gpu'] : null)
 $gpuRec = rocGpPartsFor('gpu', isset($rRec['gpu']) ? (float)$rRec['gpu'] : null);
 $cpuMin = rocGpPartsFor('cpu', isset($rMin['cpu']) ? (float)$rMin['cpu'] : null);
 $cpuRec = rocGpPartsFor('cpu', isset($rRec['cpu']) ? (float)$rRec['cpu'] : null);
+$gbOf = function (string $s) { return preg_match('/(\d+(?:\.\d+)?)\s*GB/i', $s, $sm) ? (float)$sm[1] : (preg_match('/(\d+)\s*MB/i', $s, $sm) ? round((int)$sm[1] / 1024, 1) : null); };
 $storage = $clean($rec['storage'] ?? '') ?: $clean($min['storage'] ?? '');
-$storageGb = preg_match('/(\d+(?:\.\d+)?)\s*GB/i', $storage, $sm) ? (float)$sm[1] : (preg_match('/(\d+)\s*MB/i', $storage, $sm) ? round((int)$sm[1] / 1024, 1) : null);
+// Deploy 149 (audit): a few Steam pages ask more space for the minimum than the recommended (HELLDIVERS 2: 135 GB
+// and 40 GB); the page then said 40 GB. The larger of the two is the space to plan for.
+$storageOdd = $clean($min['storage'] ?? '') !== '' && $clean($rec['storage'] ?? '') !== '' && (float)$gbOf($clean($min['storage'])) > (float)$gbOf($clean($rec['storage']));
+if ($storageOdd) $storage = $clean($min['storage']);
+$storageGb = $gbOf($storage);
 
 // What a few common PCs get (the same rules as the checker and ROC).
 $common = [['GeForce GTX 1650', 'Intel Core i5-8400', 16, 'GTX 1650 + Core i5-8400 + 16 GB'], ['GeForce RTX 3060', 'AMD Ryzen 5 5600', 16, 'RTX 3060 + Ryzen 5 5600 + 16 GB'],
@@ -550,10 +555,21 @@ $gPhrase = count($genres) > 1 ? implode(', ', array_slice($genres, 0, -1)) . ' a
 $intro = $name . ($year ? ' (' . $year . ')' : '') . ' is ' . ($gPhrase !== '' ? $an($gPhrase) . ' game' : 'a PC game')
     . ' and ' . $an($weight) . ' game for a PC. ' . $weightTxt;
 $cardTxt = function (array $l, string $tail) use ($an) { return strpos($l[0], 'integrated') !== false ? 'integrated graphics (Intel UHD / Iris Xe) or any graphics card' : $an($l[0]) . $tail; };
-$needLine = 'To play it you need at least ' . ($gpuMin ? $cardTxt($gpuMin, ' class graphics card') : 'the graphics card on the list below')
-    . ($cpuMin ? ', ' . $an($cpuMin[0]) . ' class processor' : '') . ($ramGb($rMin['ram'] ?? null) ? ' and ' . $ramGb($rMin['ram'] ?? null) . ' of RAM' : '') . '.';
-if ($rec) $needLine .= ' For the recommended (high) settings: ' . ($gpuRec ? $cardTxt($gpuRec, ' or faster') : 'a faster card')
-    . ($cpuRec ? ', ' . $an($cpuRec[0]) . ' class processor' : '') . ($ramGb($rRec['ram'] ?? null) ? ' and ' . $ramGb($rRec['ram'] ?? null) . ' of RAM' : '') . '.';
+// Deploy 149 (audit): "a GTX 960 class card" under a table that says GTX 1050 Ti read as a mistake (same speed, other
+// name). When Steam names the parts in a short line, the summary uses Steam's words; our class names stay the fallback.
+$official = function (array $b, array $r, string $k) use ($clean) {
+    $t = trim((string)preg_replace('/^\s*(?:\d+\s*(?:GB|MB)\s+(?:VRAM\s*)?)/i', '', $clean($b[$k] ?? '')));
+    $t = trim((string)preg_replace('/[\s,]*(?:or\s+(?:similar|equivalent|better|higher|above|newer)|equivalent(?:\s+or\s+better)?)\.?$/i', '', $t));
+    $model = $k === 'gpu' ? '/\b(?:gtx|rtx|gt|rx|radeon|geforce|arc|iris|uhd|hd)\b.*\d/i' : '/\b(?:i[3579]|ryzen|core|fx|athlon|pentium|xeon)\b.*\d/i';
+    return empty($r['est'][$k]) && $t !== '' && mb_strlen($t) <= 70 && preg_match($model, $t) && !preg_match('/directx|compatible|equivalent|better|similar/i', $t) ? $t : '';
+};
+$gpuTxt = function (string $o, ?array $l, string $tail) use ($cardTxt) { return $o !== '' ? $o . ' (or a card of the same speed)' : ($l ? $cardTxt($l, $tail) : ''); };
+$cpuTxt = function (string $o, ?array $l) use ($an) { return $o !== '' ? $o . ' (or a processor of the same speed)' : ($l ? $an($l[0]) . ' class processor' : ''); };
+$oGm = $official($min, $rMin, 'gpu'); $oCm = $official($min, $rMin, 'cpu'); $oGr = $official($rec, $rRec, 'gpu'); $oCr = $official($rec, $rRec, 'cpu');
+$needLine = 'To play it you need at least ' . (($gpuMin || $oGm !== '') ? $gpuTxt($oGm, $gpuMin, ' class graphics card') : 'the graphics card on the list below')
+    . (($cpuMin || $oCm !== '') ? ', ' . $cpuTxt($oCm, $cpuMin) : '') . ($ramGb($rMin['ram'] ?? null) ? ' and ' . $ramGb($rMin['ram'] ?? null) . ' of RAM' : '') . '.';
+if ($rec) $needLine .= ' For the recommended (high) settings: ' . (($gpuRec || $oGr !== '') ? ($oGr !== '' ? $oGr . ' or faster' : $cardTxt($gpuRec, ' or faster')) : 'a faster card')
+    . (($cpuRec || $oCr !== '') ? ', ' . $cpuTxt($oCr, $cpuRec) : '') . ($ramGb($rRec['ram'] ?? null) ? ' and ' . $ramGb($rRec['ram'] ?? null) . ' of RAM' : '') . '.';
 
 $E = (array)($EDITS[$slug] ?? []);
 if (!empty($E['t'])) $updated = max($updated, (int)$E['t']);
@@ -740,6 +756,7 @@ $m .= '<section class="gp-card" id="requirements"><h2>' . rocH($name) . ' system
     . $row('Graphics', $min['gpu'] ?? '', $rec['gpu'] ?? '') . $row('Storage', $min['storage'] ?? '', $rec['storage'] ?? '')
     . '</tbody></table></div>'
     . ($rec ? '' : '<p class="gp-src" style="margin-top:.6rem">The game\'s Steam page lists only the minimum requirements.</p>')
+    . ($storageOdd ? '<p class="gp-src" style="margin-top:.6rem">Steam lists more free space for the minimum (' . rocH(preg_replace('/\s*available space/i', '', $clean($min['storage']))) . ') than for the recommended settings (' . rocH(preg_replace('/\s*available space/i', '', $clean($rec['storage']))) . '): keep ' . rocH(preg_replace('/\s*available space/i', '', $storage)) . ' free to be safe.</p>' : '')
     . '<p class="gp-src" style="margin-top:.6rem">Source: the official <a href="' . rocH((string)$g['u']) . '" target="_blank" rel="noopener">' . rocH($name) . ' Steam page</a>, checked ' . gmdate('F Y', $updated) . '.</p></section>';
 
 $m .= rocAdUnit('article');

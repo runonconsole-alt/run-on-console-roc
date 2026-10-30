@@ -14,7 +14,7 @@ export const AboutView = () => {
     {
       icon: ShieldCheck,
       title: "Honest Gaming Gear Picks",
-      desc: "We compare keyboards, mice, headsets, speakers, monitors and graphics cards on their specs, official data and published reviews, and say who each one is for. Brands cannot buy a place on our lists."
+      desc: "We compare keyboards, mice, headsets, speakers, monitors and graphics cards on their specs, official data and published reviews, and say who each one is for. Our picks and rankings cannot be bought."
     },
     {
       icon: ShoppingCart,
@@ -24,7 +24,7 @@ export const AboutView = () => {
     {
       icon: Gamepad2,
       title: "Game & Platform Compatibility Engine",
-      desc: "Confused about whether GTA 6, Black Ops 6, or Elden Ring will run smoothly on your PC, PS5, Xbox, or Handheld? Our free checker compares your hardware with the official minimum and recommended requirements of 2,000+ games."
+      desc: "Confused about whether GTA 6, Black Ops 6, or Elden Ring will run smoothly on your PC, PS5, Xbox, or Handheld? Our free checker compares your hardware with the official minimum and recommended requirements of 2,400+ games."
     }
   ];
 
@@ -178,15 +178,28 @@ export const AboutView = () => {
               <CheckCircle className="w-4 h-4 text-emerald-600" /> Who it is for
             </h3>
             <p>
-              Every pick says what it is best for, so you can find the right product for your games and budget. When we test a product ourselves, the article says so. Brands cannot pay for a place on our lists.
+              Every pick says what it is best for, so you can find the right product for your games and budget. When we test a product ourselves, the article says so. Our picks and rankings cannot be bought: a brand can pay for a sponsored article, and every one is labelled Sponsored.
             </p>
           </div>
         </div>
 
-        <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-xs sm:text-sm text-slate-700 leading-relaxed">
-          <strong className="text-slate-900">Who runs Run On Console?</strong>{' '}
-          The site is run by the <strong className="text-slate-900">ROC (Run On Console)</strong> team, an independent group of gamers.
-          Questions or corrections are welcome on our <a href="/contact/" className="font-bold text-emerald-700 hover:text-emerald-900">contact page</a>.
+        {/* Deploy 149 (owner): the person behind the site. */}
+        <div id="founder" className="rounded-2xl bg-slate-50 border border-slate-200 p-5 sm:p-6 flex flex-col sm:flex-row gap-5 items-center sm:items-start">
+          <img src="/images/omar-abobakar.webp" alt="Omar Abobakar, founder of Run On Console" width="128" height="128" loading="lazy" className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover shrink-0 shadow-md" />
+          <div className="space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed text-center sm:text-left">
+            <h3 className="font-display font-extrabold text-lg text-slate-900">Who runs Run On Console?</h3>
+            <p>
+              <strong className="text-slate-900">Omar Abobakar</strong> founded Run On Console in 2026 in Lahore, Pakistan, and owns and edits it.
+              He signs the blogs, guides and news, checks the facts, links and game requirements before they go live, and looks after the gear picks and the Can I run it checker.
+            </p>
+            <p>
+              Questions or corrections are welcome on our <a href="/contact/" className="font-bold text-emerald-700 hover:text-emerald-900">contact page</a>.
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center sm:justify-start pt-1">
+              <a href="/author/omar-abobakar/" className="font-bold text-emerald-700 hover:text-emerald-900">Omar&apos;s author page</a>
+              <a href="https://www.linkedin.com/in/omar-abo-bakar-21ot02/" target="_blank" rel="noopener me" className="font-bold text-emerald-700 hover:text-emerald-900">Omar on LinkedIn</a>
+            </div>
+          </div>
         </div>
 
         <div className="pt-4 border-t border-slate-100 flex flex-wrap gap-4 items-center justify-between">

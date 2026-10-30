@@ -92,7 +92,7 @@ export const ENHANCED_BLOGS = ALL_BLOGS.map(blog => {
   const slug = blog.slug || slugify(blog.title);
   const resolvedContent = resolveInternalLinks(blog.content);
 
-  const authorUrl = `${BASE_DOMAIN}/author/roc-team/`;
+  const authorUrl = `${BASE_DOMAIN}/author/omar-abobakar/`;
 
   let isoDate = '2024-05-20';
   if (blog.date) {
@@ -145,7 +145,7 @@ export const STATIC_PUBLIC_ROUTES = [
     path: '/',
     canonical: `${BASE_DOMAIN}/`,
     title: 'Run On Console | Gaming Gear Picks & Can I Run It Checker',
-    description: 'Independent gaming gear picks for PC and console, guides to 15 gaming platforms and a free checker for 2,000+ games. Find out if your PC can run it.',
+    description: 'Independent gaming gear picks for PC and console, guides to 15 gaming platforms and a free checker for 2,400+ games. Find out if your PC can run it.',
     h1: 'Discover the Best',
     category: 'Home',
     lastmod: '2024-05-20T10:00:00+00:00'
@@ -181,7 +181,7 @@ export const STATIC_PUBLIC_ROUTES = [
     path: '/compatibility/',
     canonical: `${BASE_DOMAIN}/compatibility/`,
     title: 'Can I Run It? PC Game Requirements Checker | ROC',
-    description: 'Check if your PC can run 2,000+ games: pick a game, your graphics card, CPU and RAM, and compare them with the official minimum and recommended specs.',
+    description: 'Check if your PC can run 2,400+ games: pick a game, your graphics card, CPU and RAM, and compare them with the official minimum and recommended specs.',
     h1: 'Can I Run It',
     category: 'Compatibility',
     lastmod: '2024-05-12T10:00:00+00:00'
@@ -196,11 +196,11 @@ export const STATIC_PUBLIC_ROUTES = [
     lastmod: '2024-05-10T10:00:00+00:00'
   },
   {
-    path: '/author/roc-team/',
-    canonical: `${BASE_DOMAIN}/author/roc-team/`,
-    title: 'ROC: who writes Run On Console',
-    description: 'ROC (Run On Console) writes the guides, keeps the gaming gear picks and the game requirements checker up to date.',
-    h1: 'ROC (Run On Console)',
+    path: '/author/omar-abobakar/',
+    canonical: `${BASE_DOMAIN}/author/omar-abobakar/`,
+    title: 'Omar Abobakar, Founder and Editor | Run On Console',
+    description: 'Omar Abobakar founded and edits Run On Console: he writes and checks the blogs, guides and news, the gaming gear picks and the game checker.',
+    h1: 'Omar Abobakar',
     category: 'Author',
     lastmod: '2024-05-20T10:00:00+00:00'
   },

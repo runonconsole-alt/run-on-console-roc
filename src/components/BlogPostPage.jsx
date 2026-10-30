@@ -113,19 +113,19 @@ export const BlogPostPage = () => {
         <div className="flex flex-wrap items-center justify-between gap-4 py-3 border-y border-slate-200 text-xs text-slate-500 font-medium">
           <div className="flex items-center gap-3">
             <a 
-              href="/author/roc-team/"
+              href="/author/omar-abobakar/"
               className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 hover:opacity-80 transition-opacity"
             >
               {(selectedArticle.author || 'FR').slice(0, 2).toUpperCase()}
             </a>
             <div>
               <a 
-                href="/author/roc-team/"
+                href="/author/omar-abobakar/"
                 className="font-bold text-slate-900 hover:text-blue-600 transition-colors block"
               >
-                By ROC
+                By Omar Abobakar
               </a>
-              <div className="text-[11px] text-slate-400">Senior Hardware Columnist</div>
+              <div className="text-[11px] text-slate-400">Founder and editor</div>
             </div>
           </div>
 
