@@ -982,6 +982,14 @@ RELEASES = [
          checks=[dict(label='Last AI day', type='contains', path='api/v1/cms/blog-engine-lib.php', text="ROC_AI_LAST_DAY = '2026-11-15'")],
          pr=REPO + '144',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.']),
+    dict(deploy=146, date='2026-10-29', title='Game pages: a quick answer of their own; thin pages noindex',
+         changes=['Every Can I run page opens with a Quick answer from Run On Console data: the minimum and high-settings graphics card class (linked to the card pages), how three common PCs do in our checker, how heavy the game is next to all 2,400 games and its genre, and the download size',
+                  'About 74 game pages with nothing of their own (Steam names no graphics card and no processor, and few people look for them) are noindex and out of the sitemap, so Google spends its visits on the pages that answer something; text written in CMS > Games makes such a page indexable again',
+                  'News and blog descriptions longer than 155 characters are no longer cut to ...gamers seeking... on the page: they end on a whole sentence',
+                  'The footer shows the year in the page itself (it said {year} until JavaScript ran)'],
+         checks=[dict(label='Quick answer', type='contains', path='game-render.php', text='id="quick-answer"')],
+         pr=REPO + '145',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Open https://runonconsole.com/can-i-run/elden-ring/ and look at Quick answer.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

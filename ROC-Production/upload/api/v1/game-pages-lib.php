@@ -94,6 +94,37 @@ function rocGpUpdated(string $root): int {
 }
 
 function rocGpPath(array $g): string { return '/can-i-run/' . $g['slug'] . '/'; }
+/**
+ * Deploy 146 (programmatic SEO, owner 2026-10-29: 721 of 2,844 pages indexed): a game page with nothing of its own,
+ * where Steam names neither a graphics card nor a processor (both estimated) and few people look for it (outside
+ * the 800 most popular), is noindex and left out of the sitemap, so Google spends its visits on the pages that
+ * answer something. The page stays open and linked. Owner's own text in CMS > Games makes it indexable again.
+ */
+function rocGpThin(array $g, array $edit = []): bool {
+    if (trim((string)($edit['text'] ?? '')) !== '') return false;
+    $est = (array)($g['req']['min']['est'] ?? []);
+    return !empty($est['gpu']) && !empty($est['cpu']) && (int)($g['rank'] ?? 0) > 800;
+}
+
+/** Share of all games (0-100) whose recommended graphics card is lighter than this game's; by genre too. */
+function rocGpHeavierThan(array $g, array $games): array {
+    static $all = null, $byGenre = [];
+    $score = function ($x) { return (float)(($x['req']['rec']['gpu'] ?? null) ?: ($x['req']['min']['gpu'] ?? 0)); };
+    if ($all === null) {
+        $all = [];
+        foreach ($games as $x) {
+            $s = $score($x); $all[] = $s;
+            foreach (array_slice(array_filter(array_map('trim', explode(',', (string)($x['g'] ?? '')))), 0, 1) as $gn) $byGenre[$gn][] = $s;
+        }
+    }
+    $mine = $score($g);
+    // [heavier than, lighter than] in %, or null for fewer than 20 games.
+    $pct = function (array $list) use ($mine) { if (count($list) < 20) return null; $lo = 0; $hi = 0; foreach ($list as $s) { if ($s < $mine) $lo++; elseif ($s > $mine) $hi++; }
+        return [(int)round(100 * $lo / count($list)), (int)round(100 * $hi / count($list))]; };
+    $gn = trim((string)(explode(',', (string)($g['g'] ?? ''))[0] ?? ''));
+    return ['all' => $pct($all), 'genre' => $gn !== '' && isset($byGenre[$gn]) ? $pct($byGenre[$gn]) : null, 'genre_name' => $gn, 'genre_n' => $gn !== '' ? count($byGenre[$gn] ?? []) : 0];
+}
+
 /** The list of games that run on integrated graphics (game-render.php, Deploy 135); no game uses this slug. */
 const ROC_GP_NOGPU = '/can-i-run/without-graphics-card/';
 
