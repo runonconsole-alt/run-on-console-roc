@@ -1,0 +1,22 @@
+{
+ "deploy": 148,
+ "date": "2026-10-30",
+ "title": "One search on every screen",
+ "changes": [
+  "The header search looks in every section at once (products, games, guides, blogs, news, platforms) and shows the best results of each under its heading; Enter opens the section with the best match. The desktop search had no section list and only searched products (Elden Ring found nothing); the phone menu no longer shows a section list either"
+ ],
+ "checks": [
+  {
+   "label": "One search",
+   "type": "contains",
+   "path": "roc-nav.js",
+   "text": "Deploy 148"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/147",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it.",
+  "CMS Dashboard: Clear cache (roc-nav.js changed).",
+  "Search elden ring on a computer and on a phone."
+ ]
+}

@@ -997,6 +997,11 @@ RELEASES = [
                  dict(label='Sticky Amazon bar', type='contains', path='product-render.php', text='roc-sticky-buy')],
          pr=REPO + '146',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'On a phone: open a game page, change the graphics card in Check your PC; open a product page and scroll down.']),
+    dict(deploy=148, date='2026-10-30', title='One search on every screen',
+         changes=['The header search looks in every section at once (products, games, guides, blogs, news, platforms) and shows the best results of each under its heading; Enter opens the section with the best match. The desktop search had no section list and only searched products (Elden Ring found nothing); the phone menu no longer shows a section list either'],
+         checks=[dict(label='One search', type='contains', path='roc-nav.js', text='Deploy 148')],
+         pr=REPO + '147',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS Dashboard: Clear cache (roc-nav.js changed).', 'Search elden ring on a computer and on a phone.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
