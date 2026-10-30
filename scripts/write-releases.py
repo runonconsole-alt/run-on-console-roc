@@ -990,6 +990,13 @@ RELEASES = [
          checks=[dict(label='Quick answer', type='contains', path='game-render.php', text='id="quick-answer"')],
          pr=REPO + '145',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Open https://runonconsole.com/can-i-run/elden-ring/ and look at Quick answer.']),
+    dict(deploy=147, date='2026-10-30', title='More visitors to the product and Amazon (CRO)',
+         changes=['Can I run pages: under the result of Check your PC, a card names the part to upgrade first (graphics card, then processor, then RAM) with the product from the recommended build, its page on Run On Console and Check price on Amazon; it hides when the PC meets the recommended specs',
+                  'Product pages on phones: once the Amazon button has scrolled out of sight, a bar at the bottom shows the product name and Check price on Amazon again (the ROC chat button moves above it); clicks on it are counted as roc_sticky_buy'],
+         checks=[dict(label='Upgrade card', type='contains', path='game-render.php', text='id="gp-up"'),
+                 dict(label='Sticky Amazon bar', type='contains', path='product-render.php', text='roc-sticky-buy')],
+         pr=REPO + '146',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'On a phone: open a game page, change the graphics card in Check your PC; open a product page and scroll down.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
