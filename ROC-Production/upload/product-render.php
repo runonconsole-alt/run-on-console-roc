@@ -800,7 +800,7 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
     }
     $m .= rocVariantPicker($pdo, (string)$p['slug'], $categories);
     $m .= '<div class="space-y-2 pt-2">'
-        . '<a href="' . rocH($amazon) . '" target="_blank" rel="sponsored nofollow noopener noreferrer" aria-label="Check price of ' . rocH($title) . ' on Amazon" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-display font-extrabold text-sm py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all hover:scale-102 no-underline">'
+        . '<a id="roc-main-buy" href="' . rocH($amazon) . '" target="_blank" rel="sponsored nofollow noopener noreferrer" aria-label="Check price of ' . rocH($title) . ' on Amazon" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-display font-extrabold text-sm py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all hover:scale-102 no-underline">'
         . ROC_ICON_CART . '<span>Check price &amp; stock on Amazon</span>' . ROC_ICON_EXT . '</a>'
         . '<p class="text-[11px] text-slate-400">Prices and stock change often; Amazon shows the current price. We may earn a commission from qualifying purchases.</p>'
         . '</div></div></div>';
@@ -840,6 +840,19 @@ function rocRenderProduct(string $root, PDO $pdo, array $p, array $categories): 
     }
     $m .= '</div>';
 
+    // Deploy 147 (CRO): on phones the Amazon button sits at the end of the first screen and is gone after one scroll
+    // down a 14-screen page; a bar at the bottom offers it again once it is out of sight (the chat button moves up).
+    if ($amazon !== '') {
+        $m .= '<div id="roc-sticky-buy" class="rsb" hidden><span class="t">' . rocH($title) . '</span>'
+            . '<a href="' . rocH($amazon) . '" target="_blank" rel="sponsored nofollow noopener noreferrer" onclick="window.rocTrack&&rocTrack(\'roc_sticky_buy\',location.pathname,\'\')">Check price on Amazon</a></div>'
+            . '<style>.rsb{position:fixed;left:0;right:0;bottom:0;z-index:2147482990;display:flex;align-items:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #e2e8f0;box-shadow:0 -6px 20px rgba(15,23,42,.12);transform:translateY(110%);transition:transform .25s}'
+            . '.rsb.on{transform:none}.rsb .t{flex:1;min-width:0;font:800 13px/1.25 Outfit,Inter,sans-serif;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+            . '.rsb a{flex:none;background:#059669;color:#fff;font:800 13px/1 Inter,sans-serif;padding:12px 14px;border-radius:12px;text-decoration:none}'
+            . 'html.roc-dark .rsb{background:#0b1220;border-color:#1e293b}html.roc-dark .rsb .t{color:#e2e8f0}@media(min-width:768px){.rsb{display:none}}'
+            . 'body.rsb-on #roc-chat-btn{bottom:84px}</style>'
+            . '<script>(function(){var b=document.getElementById("roc-sticky-buy"),m=document.getElementById("roc-main-buy");if(!b||!m||!("IntersectionObserver" in window))return;b.hidden=false;'
+            . 'new IntersectionObserver(function(e){var past=!e[0].isIntersecting&&e[0].boundingClientRect.top<0;b.classList.toggle("on",past);document.body.classList.toggle("rsb-on",past&&innerWidth<768);}).observe(m);})();</script>';
+    }
     rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $mod);
 }
 

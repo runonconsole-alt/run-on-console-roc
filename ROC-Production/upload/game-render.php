@@ -248,6 +248,10 @@ function rocGpStyles(): string {
         . ".gp-search:focus{outline:none;border-color:#10b981}"
         . ".gp-az{display:flex;flex-wrap:wrap;gap:.3rem}.gp-az a{min-width:2rem;text-align:center;border:1px solid #e2e8f0;border-radius:.6rem;padding:.3rem .45rem;font-weight:800;font-size:.8rem;color:#334155;background:#fff}"
         . ".gp-az a:hover{border-color:#10b981;color:#047857}"
+        . ".gp-up{margin-top:.8rem;border:1px solid #a7f3d0;background:#ecfdf5;border-radius:1rem;padding:.9rem 1rem}.gp-up .k{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#047857}"
+        . ".gp-up .t{display:block;font-family:Outfit,Inter,sans-serif;font-weight:800;color:#0f172a;margin:.2rem 0 .6rem}.gp-up .b{display:flex;flex-wrap:wrap;gap:.5rem}"
+        . ".gp-up a{font-weight:800;font-size:.82rem;padding:.6rem .9rem;border-radius:.75rem;text-decoration:none}.gp-up a.y{background:#059669;color:#fff}.gp-up a.r{border:1px solid #6ee7b7;color:#065f46;background:#fff}"
+        . "html.roc-dark .gp-up{background:#052e2b;border-color:#065f46}html.roc-dark .gp-up .t{color:#e2e8f0}html.roc-dark .gp-up a.r{background:#0b1220;color:#6ee7b7}"
         . ".gp-qa{display:grid;gap:.45rem;margin-top:.6rem;font-size:.92rem;list-style:none;padding:0}.gp-qa li{padding-left:1.1rem;position:relative}.gp-qa li::before{content:\"\";position:absolute;left:0;top:.55em;width:.45rem;height:.45rem;border-radius:99px;background:#10b981}.gp-qa a{color:#047857;font-weight:700;text-decoration:underline}"
         . ".gp-list{columns:1;column-gap:1.5rem}.gp-list li{break-inside:avoid;padding:.22rem 0;font-size:.9rem}.gp-list a{color:#0f172a;font-weight:600}.gp-list a:hover{color:#047857;text-decoration:underline}"
         . ".gp-list small{color:#94a3b8;font-size:.72rem;margin-left:.3rem}.gp-letter{font-family:Outfit,Inter,sans-serif;font-weight:800;font-size:1.3rem;color:#047857;margin:1.2rem 0 .4rem;scroll-margin-top:90px}"
@@ -646,6 +650,16 @@ if ($pdo) {
     }
 }
 
+// Deploy 147 (CRO): phones met the first product 4.7 screens down; the quick check result now names the part to
+// upgrade first and links its product page and Amazon, from the recommended build of this game.
+$upData = [];
+if (!empty($bRec)) foreach ($bRec as $label => $pr) {
+    $k = strpos($label, 'Graphics') === 0 ? 'gpu' : (strpos($label, 'Processor') === 0 ? 'cpu' : (strpos($label, 'Memory') === 0 ? 'ram' : ''));
+    if ($k === '' || empty($pr['slug'])) continue;
+    $buy = trim((string)($pr['affiliate_amazon'] ?? ''));
+    $upData[$k] = ['t' => (string)$pr['title'], 'u' => '/products/' . $pr['slug'] . '/', 'a' => preg_match('#^https?://#i', $buy) ? $buy : ''];
+}
+
 /* head */
 $crumbs = [['Home', '/'], ['Can I run it?', '/can-i-run/'], [$name, rocGpPath($g)]];
 $ld = [rocGpCrumbs($crumbs),
@@ -714,6 +728,7 @@ $m .= '<section class="gp-card" id="check"><h2>Check your PC</h2>'
     . '<label>Processor<select data-k="cpu">' . $opt($cpus, 'Intel Core i5-8400') . '</select></label>'
     . '<label>Memory (RAM)<select data-k="ram">' . implode('', array_map(function ($r) { return '<option value="' . $r . '"' . ($r === 16 ? ' selected' : '') . '>' . $r . ' GB</option>'; }, [4, 6, 8, 12, 16, 24, 32, 64])) . '</select></label>'
     . '</div><div class="gp-res" id="gp-res" aria-live="polite"></div>'
+    . ($upData ? '<div class="gp-up" id="gp-up" hidden data-up="' . rocH(json_encode($upData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) . '"></div>' : '')
     . '<div class="gp-btns"><a class="gp-btn p" rel="nofollow" href="/compatibility/?steam=' . (int)$g['appid'] . '">Full check (laptops, consoles, more parts) &rarr;</a>'
     . '<a class="gp-btn s" href="#requirements">See the requirements</a>'
     . '<button type="button" class="gp-btn s" data-roc-ask="' . rocH('Can my PC run ' . $name . '? My graphics card: , processor: , RAM: ') . '">Ask ROC about my PC</button></div></section>';
@@ -803,7 +818,12 @@ $m .= "<script>(function(){var box=document.querySelector('.gp-check'),res=docum
     . "var p=Math.round(100*s/(t||1));if(below)p=Math.min(p,40);if(miss.length)p=Math.min(p,89);p=Math.max(5,p);"
     . "var c=p>=90?'ok':p>=70?'mid':p>40?'low':'no',txt=p>=90?'Runs on high settings (meets the recommended specs).':p>=70?'Playable on medium to high settings.':p>40?'Playable on low settings only.':'Below the minimum specs: it will not run well.';"
     . "var names={gpu:'graphics card',cpu:'processor',ram:'RAM'},up=miss.map(function(k){return names[k]});"
-    . "res.className='gp-res '+c;res.innerHTML='<b>'+p+'%</b><div class=\"gp-bar\"><i style=\"width:'+p+'%\"></i></div>'+txt+(up.length?' Upgrade first: '+up.join(', ')+'.':'');}"
+    . "res.className='gp-res '+c;res.innerHTML='<b>'+p+'%</b><div class=\"gp-bar\"><i style=\"width:'+p+'%\"></i></div>'+txt+(up.length?' Upgrade first: '+up.join(', ')+'.':'');"
+    // Deploy 147: the product for the first missing part (graphics card, then processor, then RAM) under the result.
+    . "var ub=document.getElementById('gp-up');if(ub){var U=JSON.parse(ub.getAttribute('data-up')||'{}'),k=['gpu','cpu','ram'].filter(function(x){return miss.indexOf(x)>-1&&U[x]})[0];"
+    . "if(!k){ub.hidden=true;}else{var x=U[k],e=function(s){return String(s).replace(/[&<>\"]/g,function(ch){return{'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch]})};"
+    . "ub.innerHTML='<span class=\"k\">Upgrade first: '+names[k]+'</span><span class=\"t\">'+e(x.t)+'</span><div class=\"b\"><a class=\"r\" href=\"'+e(x.u)+'\">See specs on ROC</a>'"
+    . "+(x.a?'<a class=\"y\" href=\"'+e(x.a)+'\" target=\"_blank\" rel=\"sponsored nofollow noopener\">Check price on Amazon</a>':'')+'</div>';ub.hidden=false;}}}"
     . "box.addEventListener('change',function(){run();if(window.rocTrack)rocTrack('roc_quick_check',document.title.split('?')[0].replace('Can I Run ',''),(res.querySelector('b')||{}).textContent||'');});run();})();</script>";
 
 rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $updated);
