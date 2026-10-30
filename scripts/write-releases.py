@@ -1015,6 +1015,11 @@ RELEASES = [
                 'php public_html/api/v1/cron/cli-author-omar.php --apply (the ROC Team page redirects to /author/omar-abobakar/)',
                 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply',
                 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=150, date='2026-10-30', title='Hotfix: blog, guide and news pages open again',
+         changes=['After Deploy 149 every blog, guide and news page showed an error (500): the new author settings were read before they were set. They are now set first'],
+         checks=[dict(label='Author settings first', type='contains', path='blog-render.php', text='149b: they were further down')],
+         pr=REPO + '149',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

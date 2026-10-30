@@ -35,6 +35,12 @@ declare(strict_types=1);
 
 const ROC_PUBLIC_URL = 'https://runonconsole.com';
 const ROC_PER_PAGE   = 10;   // posts or news stories per page (owner: at most 10)
+// Deploy 149: the owner signs the posts. Up here with the other constants: a top-level const exists only once the
+// file has run past it, and the routing below renders pages first (149b: they were further down, every post failed).
+const ROC_OWNER = 'Omar Abobakar';
+const ROC_OWNER_URL = '/author/omar-abobakar/';
+const ROC_OWNER_PHOTO = '/images/omar-abobakar.webp';
+const ROC_OWNER_LINKEDIN = 'https://www.linkedin.com/in/omar-abo-bakar-21ot02/';
 
 $ROOT = __DIR__;
 
@@ -528,11 +534,6 @@ CSS;
 }
 
 /* Deploy 149: the owner signs the posts (audit: "no named people"). */
-const ROC_OWNER = 'Omar Abobakar';
-const ROC_OWNER_URL = '/author/omar-abobakar/';
-const ROC_OWNER_PHOTO = '/images/omar-abobakar.webp';
-const ROC_OWNER_LINKEDIN = 'https://www.linkedin.com/in/omar-abo-bakar-21ot02/';
-
 /** The name a post is signed with: the owner, unless the CMS names someone else (a guest writer). */
 function rocAuthorName(array $p): string {
     $a = trim((string)($p['author_name'] ?? ''));

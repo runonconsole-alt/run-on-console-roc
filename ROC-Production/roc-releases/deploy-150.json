@@ -1,0 +1,28 @@
+{
+ "deploy": 150,
+ "date": "2026-10-30",
+ "title": "Hotfix: blog, guide and news pages open again",
+ "changes": [
+  "After Deploy 149 every blog, guide and news page showed an error (500): the new author settings were read before they were set. They are now set first"
+ ],
+ "checks": [
+  {
+   "label": "Author settings first",
+   "type": "contains",
+   "path": "blog-render.php",
+   "text": "149b: they were further down"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-C13b4s3S.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/149",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it.",
+  "Cloudflare: Purge Everything."
+ ],
+ "build": "index-C13b4s3S.js"
+}
