@@ -77,8 +77,8 @@ function rocAiFilesBuild(PDO $pdo): array {
     // The first six are the home page FAQ word for word (src/data/initialData.js PAGE_FAQS.home).
     $faq = [
         ['What is Run On Console?', $desc],
-        ['Is the "Can I run it" checker free?', 'Yes. The checker is free and needs no account. It compares your PC with the official minimum and recommended requirements of 2,000+ games, taken from Steam or the game\'s publisher.'],
-        ['How are the product picks chosen?', 'The ROC Team picks gear from manufacturer specs, official data and published reviews, and explains who each product is for. We do not claim lab testing, and brands cannot pay for a place on our lists.'],
+        ['Is the "Can I run it" checker free?', 'Yes. The checker is free and needs no account. It compares your PC with the official minimum and recommended requirements of 2,400+ games, taken from Steam or the game\'s publisher.'],
+        ['How are the product picks chosen?', 'Omar Abobakar, the editor, picks gear from manufacturer specs, official data and published reviews, and explains who each product is for. We do not claim lab testing. Our product picks and rankings cannot be bought; a brand can pay for a sponsored article, and every one is labelled Sponsored.'],
         ['Does Run On Console show prices?', 'No. Prices and stock change all the time, so we link straight to Amazon, where you always see the current price and availability.'],
         ['Are the Amazon links affiliate links?', 'Yes. As an Amazon Associate we earn from qualifying purchases, at no extra cost to you. It keeps the site free and independent.'],
         ['How is the gaming news checked?', 'Every news story is checked against at least two trusted sources, and the sources are listed with the story.'],
@@ -95,7 +95,7 @@ function rocAiFilesBuild(PDO $pdo): array {
         'capabilities' => ['Check if a PC can run a game (official minimum and recommended requirements)', 'Gaming and PC hardware picks with key specs',
                            'Gaming platform guides', 'Buying guides and how-to articles', 'Gaming news checked against trusted sources'],
         'services' => [
-            ['name' => 'Can I Run It? checker', 'url' => $B . '/compatibility/', 'description' => 'Compare a PC with the official minimum and recommended requirements of 2,000+ games.'],
+            ['name' => 'Can I Run It? checker', 'url' => $B . '/compatibility/', 'description' => 'Compare a PC with the official minimum and recommended requirements of 2,400+ games.'],
             ['name' => 'Game requirement pages', 'url' => $B . '/can-i-run/', 'description' => 'The PC requirements of each game on its own page.'],
             ['name' => 'Gaming gear picks', 'url' => $B . '/products/', 'description' => $products . ' gaming and PC hardware picks with key specs and Amazon links.'],
             ['name' => 'Gaming platform guides', 'url' => $B . '/gaming-platforms/', 'description' => 'Guides to every gaming platform, from PC and consoles to handhelds, VR and cloud gaming.'],

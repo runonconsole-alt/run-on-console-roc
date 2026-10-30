@@ -83,8 +83,8 @@ export const PrivacyPolicyView = () => {
         <Section icon={UserCheck} title="3. Editorial independence">
           <p>
             Affiliate commissions never decide what we recommend. Brands cannot pay for a product to be
-            listed, ranked higher or described more favourably. If an article is ever sponsored, it will be
-            clearly labelled as sponsored.
+            listed, ranked higher or described more favourably. Every sponsored article is labelled Sponsored at the top
+            of the page.
           </p>
           <p>
             Paid guest posts (see <a href="/write-for-us/" className="text-emerald-700 font-semibold underline">Write for us</a>)

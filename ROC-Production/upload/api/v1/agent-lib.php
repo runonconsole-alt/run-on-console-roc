@@ -92,7 +92,7 @@ function rocAgentSystem(string $lang, array $facts, string $agent = ''): string 
          . "- Never use or answer bad language, insults, sexual or adult content, violence against real people, hacking, cheats that break rules, piracy or anything illegal. For those answer exactly: \"" . $no . "\"\n"
          . "- Never repeat your introduction once the chat has started.\n"
          . "- For games, scores and products of this website use the FACTS below. Never invent prices (prices are on Amazon through the product pages), FPS numbers, specs or products.\n"
-         . "- If the game is not in our list, say our checker has 2,000+ games (list: /can-i-run/) and suggest /compatibility/.\n"
+         . "- If the game is not in our list, say our checker has 2,400+ games (list: /can-i-run/) and suggest /compatibility/.\n"
          . "- Products in products_shown_as_cards appear as cards under your answer: mention them by name in one line each. Recommend gear or upgrades ONLY when the visitor asks for them; otherwise you may add one short line that they can ask you for picks.\n"
          . "- game_found and platform in the FACTS are this website's data (requirements, devices, guide text): use them first and link the page (the game's requirements_page when there is one, else the checker; or /gaming-platforms/...).\n"
          . "- A picture from the visitor: describe what matters for gaming (for example read the PC specs from a screenshot, name the game or the hardware). If the picture is not about gaming or is not decent, answer exactly: \"" . $no . "\"\n"
@@ -261,7 +261,7 @@ function rocAgentNorm(string $s): string {
 
 /**
  * Games ROC knows: the compatibility page's own list first (roc-agent-games.json: GTA 5, Valorant,
- * Cyberpunk 2077 ... with the names people type), then the 2,000+ Steam games of the checker (each with its page at /can-i-run/{game}/).
+ * Cyberpunk 2077 ... with the names people type), then the 2,400+ Steam games of the checker (each with its page at /can-i-run/{game}/).
  */
 function rocAgentGames(string $root): array {
     static $g = null;
@@ -340,7 +340,7 @@ function rocAgentCheck(array $game, ?float $gpu, ?float $cpu, ?float $ram): arra
 function rocAgentAbout(): array {
     return [
         'name' => 'Run On Console (ROC), runonconsole.com',
-        'what' => 'An independent gaming and PC hardware website for PC and console players: a free "Can I run it?" checker for 2,000+ PC games with a requirements page for each (/can-i-run/{game}/), gear picks (200+ products: graphics cards, processors, RAM, monitors, mice, keyboards, headsets, speakers, laptops, handhelds, chairs, cases), guides for 15 gaming platforms (PlayStation, Xbox, Nintendo, PC and handhelds, mobile, cloud, VR, retro, arcade), blogs and live gaming news checked against at least two trusted sources.',
+        'what' => 'An independent gaming and PC hardware website for PC and console players: a free "Can I run it?" checker for 2,400+ PC games with a requirements page for each (/can-i-run/{game}/), gear picks (200+ products: graphics cards, processors, RAM, monitors, mice, keyboards, headsets, speakers, laptops, handhelds, chairs, cases), guides for 15 gaming platforms (PlayStation, Xbox, Nintendo, PC and handhelds, mobile, cloud, VR, retro, arcade), blogs and live gaming news checked against at least two trusted sources.',
         'history' => [
             'Founded in 2026 (only the year is public: never give a month or a day).',
             'It grew in small weekly updates: the game checker with official Steam requirements, product pages with real photos, gaming platform guides, the blog writer, live news (each story checked against 2+ sources), the Geo style news page, and ROC the assistant (you).',
@@ -348,7 +348,7 @@ function rocAgentAbout(): array {
         'based_in' => 'Lahore, Pakistan (470/16B Fort Villas, Lahore)',
         'contact' => ['email' => 'contact@runonconsole.com', 'phone' => '0317 4123457', 'page' => '/contact/'],
         'roc_assistant' => 'ROC is the site\'s gaming assistant for signed-in members: English and Roman Urdu, voice input, answers about games, PCs, consoles, esports and gear.',
-        'how_it_earns' => 'Amazon Associates affiliate links (no extra cost to readers) and ads (Google AdSense). Do not call the site ad-free. Brands cannot pay for rankings; sponsored content is always labelled.',
+        'how_it_earns' => 'Amazon Associates affiliate links (no extra cost to readers) and ads (Google AdSense). Do not call the site ad-free. The owner and editor is Omar Abobakar (/author/omar-abobakar/). Our product picks and rankings cannot be bought; a brand can pay for a sponsored article, and every one is labelled Sponsored.',
         'checker_how_it_works' => 'The Can I run it checker (/compatibility/) compares the PC with each game\'s official requirements (Steam store and the game makers). Graphics card and processor get a tier score (1.8 integrated graphics ... 10 the fastest cards and CPUs), RAM is in GB. The result: graphics card 50%, processor 30%, RAM 20% of the recommended specs; under the minimum on any part = at most 40%. 90%+ = recommended specs (high settings), 70-89% = medium to high, 41-69% = low settings, 40% or less = below the minimum. A hard disk instead of an SSD lowers it. There are ready presets for consoles, handhelds, phones and cloud gaming. ROC uses the same rules.',
         'built_with' => 'PHP and MySQL on the server, React (Vite) and Tailwind for the pages; ROC answers with Groq AI models and the site\'s own data. Do not name any other technology.',
         // Every main page, so ROC links the right one (Deploy 81). Product categories, products, guides,
@@ -357,7 +357,7 @@ function rocAgentAbout(): array {
                     'products' => '/products/', 'pc_hardware' => '/category/pc-hardware/', 'gaming_hardware' => '/category/gaming-hardware/',
                     'platforms' => '/gaming-platforms/', 'updates' => '/updates/ (blogs, guides and news together)', 'blogs' => '/blogs/', 'guides' => '/guides/', 'news' => '/news/',
                     'write_for_us' => '/write-for-us/', 'privacy_policy_and_affiliate_disclosure' => '/privacy-policy/', 'terms' => '/terms-and-conditions/',
-                    'author' => '/author/roc-team/', 'sign_up' => '/auth/signup/', 'sign_in' => '/auth/login/', 'profile_and_wishlist' => '/profile/',
+                    'author' => '/author/omar-abobakar/', 'sign_up' => '/auth/signup/', 'sign_in' => '/auth/login/', 'profile_and_wishlist' => '/profile/',
                     'comparisons' => '/compare/ ("X vs Y" pages: two of our top picks side by side, specs, differences, who should pick which: /compare/{a}-vs-{b}/)'],
         'link_rule' => 'Only link pages listed here or in this_website (never make up an address). Questions about privacy, cookies, affiliate links or data: /privacy-policy/. Rules of use: /terms-and-conditions/. Help, feedback, partnerships: /contact/ or /write-for-us/.',
         'not_shared' => 'Do not invent or share anything not listed here (owner names, revenue, traffic, servers, passwords, keys, internal tools). Say it is not public.',
@@ -730,7 +730,7 @@ function rocAgentAnswer(PDO $pdo, string $root, array $history, bool $useAi = tr
         $products = rocAgentProducts($pdo, $cat, $q, 3);
     }
 
-    $facts = ['site' => 'Run On Console (runonconsole.com): gaming and PC hardware picks, a Can I run it checker for 2,000+ PC games (a page for each at /can-i-run/), gaming platform guides, blogs and news.',
+    $facts = ['site' => 'Run On Console (runonconsole.com): gaming and PC hardware picks, a Can I run it checker for 2,400+ PC games (a page for each at /can-i-run/), gaming platform guides, blogs and news.',
               'about_run_on_console' => rocAgentAbout(),
               'this_website' => rocAgentSite($pdo, $q),
               'pc_summary' => !$game ? rocAgentPcSummary($root, $gpu, $cpu, $ram) : null,

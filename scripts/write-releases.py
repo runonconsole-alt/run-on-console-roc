@@ -1002,6 +1002,19 @@ RELEASES = [
          checks=[dict(label='One search', type='contains', path='roc-nav.js', text='Deploy 148')],
          pr=REPO + '147',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS Dashboard: Clear cache (roc-nav.js changed).', 'Search elden ring on a computer and on a phone.']),
+    dict(deploy=149, date='2026-10-30', title='Audit fixes: named editor, honest sponsored rule, Amazon tag in the page, game data',
+         changes=['Posts are signed Omar Abobakar (founder and editor) with his photo; his author page /author/omar-abobakar/ (photo, LinkedIn, Person schema) replaces the ROC Team page, which now redirects (301) to it; the About page has a section about him',
+                  'One rule everywhere: product picks and rankings cannot be bought; a brand can pay for a sponsored article, and every one is labelled Sponsored. Write for Us no longer promises a homepage feature, a product buy box or a pinned hub. A post with the tag "sponsored" (CMS > Blogs > Tags) shows a Sponsored label and a note at the top',
+                  'Every Amazon link carries the affiliate tag in the page itself (it was added only by JavaScript after loading), and About, Compatibility, Write for Us and the other built pages get the same robots rule (max-image-preview:large)',
+                  'Game pages: when Steam asks more space for the minimum than the recommended (HELLDIVERS 2: 135 GB and 40 GB) the page uses the larger one and says why; the "Which PC runs it" line names the cards and processors Steam itself lists instead of our class names',
+                  'Counts: 2,400+ games and 200+ products everywhere (it said 2,000+ and 120+)'],
+         checks=[dict(label='Author page', type='contains', path='blog-render.php', text='ROC_OWNER_URL'),
+                 dict(label='Amazon tag in HTML', type='contains', path='api/v1/cms/site-layer-lib.php', text='rocLayerAmazonTag')],
+         pr=REPO + '148',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.',
+                'php public_html/api/v1/cron/cli-author-omar.php --apply (the ROC Team page redirects to /author/omar-abobakar/)',
+                'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply',
+                'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

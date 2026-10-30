@@ -31,13 +31,13 @@ function rocLlmsBuild(PDO $pdo): string {
 
     $o .= "## About and Editorial Information\n";
     $o .= $line('About Run On Console', '/about/', 'who we are, what we cover and how picks are made');
-    $o .= $line('ROC Team', '/author/roc-team/', 'the editorial team behind the guides and news');
+    $o .= $line('Omar Abobakar', '/author/omar-abobakar/', 'founder and editor, who signs the guides, blogs and news');
     $o .= $line('Privacy Policy & Affiliate Disclosure', '/privacy-policy/', 'privacy, cookies and the Amazon Associates disclosure');
     $o .= $line('Terms & Conditions', '/terms-and-conditions/');
     $o .= $line('Contact', '/contact/', 'questions, corrections and partnerships');
     $o .= "\n## Core Resources\n";
     $o .= $line('Home', '/');
-    $o .= $line('Can I Run It? Game Requirements Checker', '/compatibility/', 'compare a PC with the official minimum and recommended requirements of 2,000+ games');
+    $o .= $line('Can I Run It? Game Requirements Checker', '/compatibility/', 'compare a PC with the official minimum and recommended requirements of 2,400+ games');
     $o .= $line('Gaming Platforms', '/gaming-platforms/', 'guides to every gaming platform, from PC and consoles to retro handhelds, VR and cloud gaming');
     $o .= $line('Product Categories', '/category/', 'every product category in one place');
     $o .= $line('All Products', '/products/', $nProducts . ' gaming and PC hardware picks');

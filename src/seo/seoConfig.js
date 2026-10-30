@@ -140,9 +140,9 @@ export function generateJsonLd(routeData) {
       'datePublished': b.isoDate || '2024-05-20T08:00:00+00:00',
       'dateModified': b.isoDateModified || '2024-05-20T08:00:00+00:00',
       'author': {
-        '@type': 'Organization',
-        'name': 'ROC (Run On Console)',
-        'url': `${SITE_DOMAIN}/author/roc-team/`
+        '@type': 'Person',
+        'name': 'Omar Abobakar',
+        'url': `${SITE_DOMAIN}/author/omar-abobakar/`
       },
       'publisher': {
         '@type': 'Organization',

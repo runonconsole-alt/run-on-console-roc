@@ -87,6 +87,10 @@ function rocLayerLoad(string $root): array {
         $d['edits'] = array_values(array_filter((array)($j['edits'] ?? []), 'is_array'));
         $d['updated'] = (string)($j['updated'] ?? '');
     }
+    // Deploy 149: the Amazon tag (CMS > Social & Amazon tag, roc-site.json) goes into the HTML itself; roc-nav.js only
+    // added it after the page loaded, so the built pages (home, checker) showed untagged links to crawlers and audits.
+    $site = is_file($root . '/roc-site.json') ? json_decode((string)file_get_contents($root . '/roc-site.json'), true) : null;
+    $d['amazon_tag'] = preg_match('/^[A-Za-z0-9-]{3,40}$/', (string)($site['amazon_tag'] ?? '')) ? (string)$site['amazon_tag'] : '';
     return $cache[$root] = $d;
 }
 
@@ -203,15 +207,15 @@ function rocLayerTrackingHead(array $t, string $path): string {
             . 'ev.forEach(function(e){addEventListener(e,go,{passive:true})});if(document.readyState==="complete")setTimeout(go,3500);else addEventListener("load",function(){setTimeout(go,3500)})})('
             . json_encode($later, JSON_UNESCAPED_SLASHES) . ');</script>';
     }
-    // The ROC Team author page (Deploy 82): a ProfilePage, the author every blog and news post names.
-    if ($path === '/author/roc-team/') {
+    // The author page (Deploy 149, was the ROC Team page of Deploy 82): Omar Abobakar, owner and editor, who signs every post.
+    if ($path === '/author/omar-abobakar/') {
         $h .= '<script type="application/ld+json">' . json_encode(['@context' => 'https://schema.org', '@type' => 'ProfilePage',
-            'url' => 'https://runonconsole.com/author/roc-team/', 'name' => 'ROC Team, Run On Console',
-            'mainEntity' => ['@type' => 'Organization', '@id' => 'https://runonconsole.com/author/roc-team/#team', 'name' => 'ROC (Run On Console)',
-                'alternateName' => 'ROC Team', 'url' => 'https://runonconsole.com/author/roc-team/',
-                'description' => 'The Run On Console editorial team: gaming hardware picks, PC game requirements, guides and news checked against at least two trusted sources.',
-                'parentOrganization' => ['@id' => 'https://runonconsole.com/#organization', '@type' => 'Organization', 'name' => 'Run On Console', 'url' => 'https://runonconsole.com/'],
-                'logo' => 'https://runonconsole.com/images/logo-512.png']], JSON_UNESCAPED_SLASHES) . '</script>';
+            'url' => 'https://runonconsole.com/author/omar-abobakar/', 'name' => 'Omar Abobakar, founder and editor of Run On Console',
+            'mainEntity' => ['@type' => 'Person', '@id' => 'https://runonconsole.com/author/omar-abobakar/#person', 'name' => 'Omar Abobakar',
+                'url' => 'https://runonconsole.com/author/omar-abobakar/', 'image' => 'https://runonconsole.com/images/omar-abobakar.jpg',
+                'jobTitle' => 'Founder and editor', 'sameAs' => ['https://www.linkedin.com/in/omar-abo-bakar-21ot02/'],
+                'description' => 'Omar Abobakar owns and edits Run On Console: the gaming hardware picks, the PC game requirements checker, the guides and the news.',
+                'worksFor' => ['@id' => 'https://runonconsole.com/#organization', '@type' => 'Organization', 'name' => 'Run On Console', 'url' => 'https://runonconsole.com/']]], JSON_UNESCAPED_SLASHES) . '</script>';
     }
     // Google Business Profile: linked from the Organization on the home page.
     $gmb = trim((string)($t['gmb_url'] ?? ''));
@@ -501,6 +505,16 @@ function rocLayerSetMeta(string $html, string $title, string $desc): string {
     return $html;
 }
 
+/** Every Amazon link in the page carries the site's affiliate tag (an old or missing tag is replaced). */
+function rocLayerAmazonTag(string $html, string $tag): string {
+    return (string)preg_replace_callback('#href="(https?://(?:www\.)?amazon\.[a-z.]+/[^"]*)"#i', function ($m) use ($tag) {
+        $u = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $u = rtrim((string)preg_replace('/([?&])tag=[^&#]*&?/i', '$1', $u), '?&');
+        $u .= (strpos($u, '?') === false ? '?' : '&') . 'tag=' . rawurlencode($tag);
+        return 'href="' . htmlspecialchars($u, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"';
+    }, $html);
+}
+
 /**
  * Adds the announcement, site code and (when $metaOn) the meta override for $path.
  * Safe to run on HTML that already has them.
@@ -518,6 +532,9 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
     $html = (string)preg_replace('/©\s*\{(?:year|\d{4})\}/u', '© ' . date('Y'), $html);
     // Deploy 143: Google ignores meta keywords, and every page carried the home page's list.
     $html = (string)preg_replace('#\s*<meta\s+name="keywords"[^>]*>#i', '', $html);
+    // Deploy 149: one robots rule on every page (About, Compatibility, Write for Us had no large image previews).
+    $html = (string)preg_replace('#(<meta\s+name="robots"\s+content=")index,\s*follow(")#i', '${1}index, follow, max-image-preview:large${2}', $html, 1);
+    if (($L['amazon_tag'] ?? '') !== '') $html = rocLayerAmazonTag($html, (string)$L['amazon_tag']);
 
     // CMS > Menus & footer: draw the saved menu; after a reset, draw the default one again.
     $nav = (array)($L['nav'] ?? []);

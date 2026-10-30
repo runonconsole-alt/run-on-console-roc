@@ -577,7 +577,7 @@ function rocCatLinks(PDO $pdo, string $catSlug): array {
         } catch (\Throwable $e) {}
     }
     if (in_array($catSlug, ['gpu', 'cpu', 'ram', 'laptops', 'handhelds'], true))
-        $links[] = ['/compatibility/', 'Can I run it?', 'Check 2,000+ PC games against your hardware'];
+        $links[] = ['/compatibility/', 'Can I run it?', 'Check 2,400+ PC games against your hardware'];
     return $links;
 }
 
@@ -949,7 +949,7 @@ function rocRenderCategoryHub(string $root, PDO $pdo, array $categories): void {
             . '<span class="font-bold text-sm">' . rocH((string)($cat['name'] ?? $cs)) . '</span><span class="text-xs text-slate-500">' . (int)$counts[$cs] . ' picks</span></a>';
     }
     $m .= '</div><div class="text-sm text-slate-600 leading-relaxed space-y-3">'
-        . '<p><strong class="text-slate-900">How we pick:</strong> every product on Run On Console is chosen from its published specifications, official data and independent reviews, and placed where it fits best: budget, competitive play, quiet rooms, small desks or high-end builds. Brands cannot pay for a place on these lists.</p>'
+        . '<p><strong class="text-slate-900">How we pick:</strong> every product on Run On Console is chosen from its published specifications, official data and independent reviews, and placed where it fits best: budget, competitive play, quiet rooms, small desks or high-end builds. Brands cannot pay for a place on these lists; a paid article is always labelled Sponsored.</p>'
         . '<p><strong class="text-slate-900">Not sure where to start?</strong> Check whether your PC can run your games with the free <a class="text-emerald-700 font-semibold underline" href="/compatibility/">Can I run it checker</a>, compare two picks side by side on the <a class="text-emerald-700 font-semibold underline" href="/compare/">comparisons page</a>, or read our <a class="text-emerald-700 font-semibold underline" href="/guides/">buying and setup guides</a>. Each product page links to Amazon, where you see the current price and stock.</p>'
         . '</div></section>';
     $m .= '</div></div>';
@@ -1159,7 +1159,7 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
         foreach (rocGroups() as $g => $def) $gs[] = [rocCatPath($g), $def['name'], 'Browse by category'];
         $m .= rocLinkBox('Explore Run On Console', array_merge($gs, [
             ['/category/', 'All categories', 'Every product category in one place'],
-            ['/compatibility/', 'Can I run it?', 'Check 2,000+ PC games against your hardware'],
+            ['/compatibility/', 'Can I run it?', 'Check 2,400+ PC games against your hardware'],
             ['/gaming-platforms/', 'Gaming platforms', 'Guides to PC, PlayStation, Xbox, Nintendo and more'],
             ['/blogs/', 'Buying guides', 'Comparisons and how-to articles'],
         ]));

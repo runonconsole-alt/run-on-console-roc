@@ -33,7 +33,7 @@ require_once __DIR__ . '/seo-check-lib.php';   // Deploy 127: one check for titl
 
 const ROC_BLOG_TZ = 'Asia/Karachi';
 const ROC_BLOG_SLOTS = ['16:00', '23:00'];
-const ROC_BLOG_AUTHOR = 'ROC';
+const ROC_BLOG_AUTHOR = 'Omar Abobakar';   // Deploy 149: the owner signs the posts (blog-render.php rocAuthorName)
 const ROC_GEMINI_MODEL = 'gemini-2.5-flash';
 const ROC_GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta';
 const ROC_GROQ_API = 'https://api.groq.com/openai/v1';

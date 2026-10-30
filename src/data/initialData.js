@@ -9,13 +9,13 @@ export const HERO_SLIDES = [
     badge: "PRODUCTS",
     image: "/uploads/site/home-hero.webp",
     summary: "Keyboards, mice, headsets, speakers, monitors and graphics cards, each with what it is best for.",
-    category: "120+ products",
+    category: "200+ products",
     href: "/products/",
     cta: "Browse all gear"
   },
   {
     id: "checker",
-    title: "Can my PC run it? Check 2,000+ games",
+    title: "Can my PC run it? Check 2,400+ games",
     badge: "FREE CHECKER",
     image: "/uploads/site/compat-hero.webp",
     summary: "Pick a game and your graphics card, processor and RAM: compared with the official requirements.",
@@ -615,11 +615,11 @@ export const PAGE_FAQS = {
     },
     {
       q: "Is the \"Can I run it\" checker free?",
-      a: "Yes. The checker is free and needs no account. It compares your PC with the official minimum and recommended requirements of 2,000+ games, taken from Steam or the game's publisher."
+      a: "Yes. The checker is free and needs no account. It compares your PC with the official minimum and recommended requirements of 2,400+ games, taken from Steam or the game's publisher."
     },
     {
       q: "How are the product picks chosen?",
-      a: "The ROC Team picks gear from manufacturer specs, official data and published reviews, and explains who each product is for. We do not claim lab testing, and brands cannot pay for a place on our lists."
+      a: "Omar Abobakar, the editor, picks gear from manufacturer specs, official data and published reviews, and explains who each product is for. We do not claim lab testing. Our product picks and rankings cannot be bought; a brand can pay for a sponsored article, and every one is labelled Sponsored."
     },
     {
       q: "Does Run On Console show prices?",

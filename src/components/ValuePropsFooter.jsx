@@ -24,12 +24,12 @@ export const ValuePropsFooter = () => {
     {
       icon: ShieldCheck,
       title: "INDEPENDENT PICKS",
-      desc: "Picked from specs, official data and published reviews. Brands cannot pay for a place on our lists."
+      desc: "Picked from specs, official data and published reviews. Our picks and rankings cannot be bought."
     },
     {
       icon: Cpu,
       title: "CONSOLE & PC MATRIX",
-      desc: "Check 2,000+ PC games against your hardware, and explore guides to 15 gaming platforms."
+      desc: "Check 2,400+ PC games against your hardware, and explore guides to 15 gaming platforms."
     },
     {
       icon: Tag,
