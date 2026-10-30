@@ -13,6 +13,12 @@
    "type": "contains",
    "path": "blog-render.php",
    "text": "Head of Community"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BVuF8tA0.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/117",
@@ -20,5 +26,6 @@
   "Upload the zip to /home2/runoncon/ and unzip it.",
   "php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply",
   "CMS Dashboard > Clear cache (roc-nav.js changed)."
- ]
+ ],
+ "build": "index-BVuF8tA0.js"
 }

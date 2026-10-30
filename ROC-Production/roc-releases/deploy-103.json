@@ -18,6 +18,12 @@
    "type": "contains",
    "path": "api/v1/account-runtime.php",
    "text": "ROC code-only email"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-DhQGBNC8.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/103",
@@ -26,5 +32,6 @@
   "php public_html/api/v1/cron/cli-auth-code-email.php --apply",
   "php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply",
   "Purge Everything in Cloudflare (or CMS Dashboard > Clear cache)."
- ]
+ ],
+ "build": "index-DhQGBNC8.js"
 }
