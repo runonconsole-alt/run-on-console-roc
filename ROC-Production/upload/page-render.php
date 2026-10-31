@@ -63,7 +63,20 @@ if ($isMap) {
         $rows = $pdo->query("SELECT * FROM pages WHERE status = 'published' AND (is_noindex = 0 OR is_noindex IS NULL) ORDER BY published_at DESC")->fetchAll(PDO::FETCH_ASSOC);
     } catch (\Throwable $e) { $rows = []; }
     foreach ($rows as $r) $out .= rocSmLine(ROC_PUBLIC_URL . rocPagePathOf($r), rocModified($r), (string)($r['title'] ?? ''));
+    // The reviews page, once it has a published review (an empty one is noindex).
+    if (is_file($ROOT . '/api/v1/reviews-lib.php')) {
+        require_once $ROOT . '/api/v1/reviews-lib.php';
+        $rv = rocReviewsPublished($pdo);
+        if ($rv) $out .= rocSmLine(ROC_PUBLIC_URL . '/reviews/', max(array_column($rv, 'date')), 'Reviews of Run On Console');
+    }
     echo $out . "</urlset>\n";
+    exit;
+}
+
+/* ------------------------------------------------- reviews (Deploy 151) */
+if ($slug === 'reviews' && $reqCat === '' && is_file($ROOT . '/api/v1/reviews-lib.php')) {
+    require_once $ROOT . '/api/v1/reviews-lib.php';
+    rocReviewsPage($ROOT, $pdo);
     exit;
 }
 

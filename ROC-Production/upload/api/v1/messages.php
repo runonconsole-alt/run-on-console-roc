@@ -3,7 +3,7 @@
  * Run On Console — messages from the website's forms.
  *
  * POST /api/v1/messages.php  (JSON)
- *   kind      'contact' | 'support' | 'write_for_us' | 'suggestion' | 'comment'
+ *   kind      'contact' | 'support' | 'write_for_us' | 'suggestion' | 'comment' | 'review' (/reviews/, Deploy 151)
  *   name, email, subject, message
  *   meta      optional object (write for us: plan, niche, title, contact)
  *   website   must stay empty (hidden field that only bots fill in)
@@ -18,9 +18,9 @@ require_once __DIR__ . '/account-runtime.php';   // config, database, email queu
 
 const ROC_MSG_INBOX = ['contact' => 'contact@runonconsole.com', 'support' => 'support@runonconsole.com',
                        'write_for_us' => 'contact@runonconsole.com', 'suggestion' => 'suggestions@runonconsole.com',
-                       'comment' => 'comments@runonconsole.com'];
+                       'comment' => 'comments@runonconsole.com', 'review' => 'contact@runonconsole.com'];
 const ROC_MSG_LABEL = ['contact' => 'Contact', 'support' => 'Support', 'write_for_us' => 'Write for us',
-                       'suggestion' => 'Suggestion', 'comment' => 'Comment'];
+                       'suggestion' => 'Suggestion', 'comment' => 'Comment', 'review' => 'Review'];
 
 header('Content-Type: application/json; charset=utf-8');
 if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
@@ -69,6 +69,12 @@ foreach ((is_array($in['meta'] ?? null) ? $in['meta'] : []) as $k => $v) {
     $meta[$k] = $clip($v, 500);
 }
 
+// A review (Deploy 151): a 1-5 rating, and never published from the form (only from the owner's email link).
+if ($kind === 'review') {
+    $meta['rating'] = (string)max(1, min(5, (int)($meta['rating'] ?? 5)));
+    unset($meta['published']);
+}
+
 // The page the form was sent from (CMS > Live activity, Messages).
 $from = (string)parse_url((string)($_SERVER['HTTP_REFERER'] ?? ''), PHP_URL_PATH);
 if ($from !== '' && !isset($meta['page'])) $meta['page'] = $clip($from, 200);
@@ -102,6 +108,15 @@ try {
 
 /* Notification to the inbox; the reply itself is written in the CMS. */
 $esc = function ($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); };
+// A review is shown on /reviews/ only after the owner presses Publish in this email (signed links, reviews-lib.php).
+$reviewBtns = '';
+if ($kind === 'review' && is_file(__DIR__ . '/reviews-lib.php')) {
+    require_once __DIR__ . '/reviews-lib.php';
+    $rl = rocReviewLinks(dirname(__DIR__, 2), $id);
+    $reviewBtns = '<p style="margin:0 0 8px">Not shown on the site yet. Check it is real, then:</p><p>'
+        . '<a style="display:inline-block;padding:12px 20px;background:#047857;color:#fff;border-radius:8px;text-decoration:none;margin-right:8px" href="' . $esc($rl['publish']) . '">Publish this review</a>'
+        . '<a style="display:inline-block;padding:12px 20px;background:#e2e8f0;color:#0f172a;border-radius:8px;text-decoration:none" href="' . $esc($rl['hide']) . '">Hide it again</a></p>';
+}
 $rows = ['Name' => $name, 'Email' => $email] + ($subject !== '' ? ['Subject' => $subject] : []);
 foreach ($meta as $k => $v) $rows[ucfirst(str_replace('_', ' ', $k))] = $v;
 $html = '<!doctype html><html><body style="background:#eef7f4;font-family:Arial,sans-serif;padding:24px"><main style="max-width:600px;margin:auto;background:#fff;padding:28px;border-radius:16px">'
@@ -110,6 +125,7 @@ $html = '<!doctype html><html><body style="background:#eef7f4;font-family:Arial,
       . '<table style="border-collapse:collapse;width:100%">';
 foreach ($rows as $k => $v) $html .= '<tr><td style="padding:6px 10px;color:#64748b;width:120px;vertical-align:top">' . $esc($k) . '</td><td style="padding:6px 10px">' . $esc($v) . '</td></tr>';
 $html .= '</table><div style="white-space:pre-wrap;background:#f8fafc;border-radius:10px;padding:14px;margin:16px 0">' . $esc($message) . '</div>'
+       . $reviewBtns
        . '<p><a style="display:inline-block;padding:12px 20px;background:#047857;color:#fff;border-radius:8px;text-decoration:none" href="https://runonconsole.com/cms/#messages">Reply in the CMS</a></p>'
        . '<p style="color:#64748b;font-size:12px">Message #' . $id . '</p></main></body></html>';
 $job = null;
@@ -124,7 +140,7 @@ try {
           . '<tr><td style="padding:0 0 22px;font-size:20px;font-weight:700;color:#047857">Run On Console</td></tr><tr><td style="font-size:15px;line-height:24px;color:#262626">'
           . '<p style="margin:0 0 14px">Hi ' . $esc($name) . ',</p>'
           . '<p style="margin:0 0 14px">Thanks, we received your ' . $esc(strtolower(ROC_MSG_LABEL[$kind])) . ' message (reference <b>MSG-' . $id . '</b>). '
-          . ($kind === 'comment' ? 'We read every comment.' : 'We usually reply within 2 working days.') . '</p>'
+          . ($kind === 'comment' ? 'We read every comment.' : ($kind === 'review' ? 'We check every review and publish it on runonconsole.com/reviews/ soon.' : 'We usually reply within 2 working days.')) . '</p>'
           . '<p style="margin:0 0 8px;color:#64748b;font-size:13px">Your message:</p>'
           . '<div style="white-space:pre-wrap;background:#f8fafc;border-radius:10px;padding:14px;margin:0 0 16px;font-size:14px">' . $esc($message) . '</div>'
           . '<p style="margin:0 0 14px;font-size:13px;color:#64748b">Need to add something? Write to ' . $esc(ROC_MSG_INBOX[$kind]) . ' and mention MSG-' . $id . '.</p>'
