@@ -125,7 +125,7 @@ export const BlogPostPage = () => {
               >
                 By Omar Abobakar
               </a>
-              <div className="text-[11px] text-slate-400">Founder and editor</div>
+              <div className="text-[11px] text-slate-400">Founder of Run On Console</div>
             </div>
           </div>
 

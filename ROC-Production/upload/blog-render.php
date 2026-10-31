@@ -608,7 +608,7 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
     $image    = trim((string)($p['image'] ?? ''));
     $imageAbs = rocAbs($image);
     $alt      = trim((string)($p['image_alt'] ?? '')) ?: $title;
-    // Deploy 149 (owner): posts are signed by the owner and editor, Omar Abobakar, with his author page; a name typed
+    // Deploy 149 (owner): posts are signed by the founder, Omar Abobakar, who approves them, with his author page; a name typed
     // in the CMS is shown only when it is someone else (a guest writer).
     $author   = rocAuthorName($p);
     $authorUrl = $author === ROC_OWNER ? ROC_OWNER_URL : '';
@@ -663,7 +663,7 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
     if ($mod) $article['dateModified'] = gmdate('c', $mod);
     $article['author'] = ['@type' => 'Person', 'name' => $author];
     if ($authorUrl !== '') $article['author'] += ['@id' => ROC_PUBLIC_URL . ROC_OWNER_URL . '#person', 'url' => ROC_PUBLIC_URL . $authorUrl,
-        'jobTitle' => 'Founder and editor', 'sameAs' => [ROC_OWNER_LINKEDIN]];
+        'jobTitle' => 'Founder of Run On Console', 'sameAs' => [ROC_OWNER_LINKEDIN]];
     $article['publisher'] = [
         '@type' => 'Organization',
         'name' => 'Run On Console',
@@ -705,7 +705,7 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
         .   '<div class="flex items-center gap-3">'
         .     ($authorUrl !== '' ? '<img src="' . ROC_OWNER_PHOTO . '" alt="' . rocH($author) . '" width="36" height="36" class="w-9 h-9 rounded-full object-cover shadow-md" loading="lazy"/>'
                 : '<div class="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-bold flex items-center justify-center shadow-md">' . rocH(rocInitials($author)) . '</div>')
-        .     '<div>' . ($authorUrl !== '' ? '<a href="' . $authorUrl . '" rel="author" class="font-bold text-slate-900 block no-underline hover:text-emerald-700">' . rocH($author) . '</a><span class="block text-[11px] text-slate-500">Founder and editor</span>' : '<span class="font-bold text-slate-900 block">' . rocH($author) . '</span>') . '</div>'
+        .     '<div>' . ($authorUrl !== '' ? '<a href="' . $authorUrl . '" rel="author" class="font-bold text-slate-900 block no-underline hover:text-emerald-700">' . rocH($author) . '</a><span class="block text-[11px] text-slate-500">Founder of Run On Console</span>' : '<span class="font-bold text-slate-900 block">' . rocH($author) . '</span>') . '</div>'
         .   '</div>'
         .   '<div class="flex items-center gap-3">'
         .     ($pub ? '<time datetime="' . gmdate('c', $pub) . '">' . rocH($news ? rocPkt($pub, 'M j, Y, H:i') : date('M j, Y', $pub)) . '</time><span>•</span>' : '')

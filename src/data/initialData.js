@@ -619,7 +619,7 @@ export const PAGE_FAQS = {
     },
     {
       q: "How are the product picks chosen?",
-      a: "Omar Abobakar, the editor, picks gear from manufacturer specs, official data and published reviews, and explains who each product is for. We do not claim lab testing. Our product picks and rankings cannot be bought; a brand can pay for a sponsored article, and every one is labelled Sponsored."
+      a: "The Run On Console team picks gear from manufacturer specs, official data and published reviews, and explains who each product is for. We do not claim lab testing. Our product picks and rankings cannot be bought; a brand can pay for a sponsored article, and every one is labelled Sponsored."
     },
     {
       q: "Does Run On Console show prices?",

@@ -1020,6 +1020,11 @@ RELEASES = [
          checks=[dict(label='Author settings first', type='contains', path='blog-render.php', text='149b: they were further down')],
          pr=REPO + '149',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Cloudflare: Purge Everything.']),
+    dict(deploy=152, date='2026-10-31', title='Omar Abobakar: founder of Run On Console',
+         changes=['Everywhere (posts, author page, About, schema, ROC and AI files): Omar Abobakar is the founder of Run On Console and a digital marketer by profession; the Run On Console team writes the blogs, guides and news with their relevant sources, and he approves every article before it is published'],
+         checks=[dict(label='Founder title', type='contains', path='blog-render.php', text='Founder of Run On Console')],
+         pr=REPO + '151',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
