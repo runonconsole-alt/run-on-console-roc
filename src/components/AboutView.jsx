@@ -189,8 +189,8 @@ export const AboutView = () => {
           <div className="space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed text-center sm:text-left">
             <h3 className="font-display font-extrabold text-lg text-slate-900">Who runs Run On Console?</h3>
             <p>
-              <strong className="text-slate-900">Omar Abobakar</strong> founded Run On Console in 2026 in Lahore, Pakistan, and owns and edits it.
-              He signs the blogs, guides and news, checks the facts, links and game requirements before they go live, and looks after the gear picks and the Can I run it checker.
+              <strong className="text-slate-900">Omar Abobakar</strong> is the founder of Run On Console (Lahore, Pakistan, 2026) and a digital marketer by profession.
+              The Run On Console team writes the blogs, guides and news with their relevant sources, and Omar approves every article before it is published.
             </p>
             <p>
               Questions or corrections are welcome on our <a href="/contact/" className="font-bold text-emerald-700 hover:text-emerald-900">contact page</a>.

@@ -4,7 +4,7 @@ import { FAQSection } from './FAQSection';
 const LINKEDIN = 'https://www.linkedin.com/in/omar-abo-bakar-21ot02/';
 
 const AUTHOR_FAQS = [
-  { q: 'Who writes Run On Console?', a: 'Omar Abobakar, the founder and owner of Run On Console, is the editor: he signs the blogs, guides and news, and checks the facts, the links and the game requirements before anything goes live.' },
+  { q: 'Who writes Run On Console?', a: 'The Run On Console team writes the blogs, guides and news, each with its relevant sources. Omar Abobakar, the founder of Run On Console and a digital marketer by profession, approves every article before it goes live.' },
   { q: 'How are products chosen?', a: 'From their specifications, the maker\'s own data and well-known published reviews. Each pick says who it suits and who it does not. Our product picks and rankings cannot be bought, and we never invent prices: product pages link to Amazon for the current price.' },
   { q: 'Where do the game requirements come from?', a: 'From the publishers: the official minimum and recommended specs on Steam for PC games. The Can I run checker compares them with your graphics card, processor and RAM.' },
   { q: 'Is any content sponsored?', a: 'A brand can pay for a sponsored article. Every one is labelled Sponsored at the top, its links are rel=sponsored, as Google asks, and payment never buys a place in our picks or rankings. Product links to Amazon are affiliate links: we may earn a small commission at no extra cost to you.' },
@@ -13,7 +13,7 @@ const AUTHOR_FAQS = [
 
 import { CheckCircle2, ArrowRight } from 'lucide-react';
 
-/** /author/omar-abobakar/ — Omar Abobakar, founder and editor (Deploy 149; was the ROC Team page). */
+/** /author/omar-abobakar/ — Omar Abobakar, founder of Run On Console (Deploy 149; was the ROC Team page). */
 export const AuthorView = () => {
   return (
     <div className="max-w-4xl mx-auto py-8 space-y-10 animate-fade-in">
@@ -36,12 +36,12 @@ export const AuthorView = () => {
         <img src="/images/omar-abobakar.webp" alt="Omar Abobakar" width="160" height="160" className="w-32 h-32 sm:w-40 sm:h-40 rounded-3xl object-cover shrink-0 shadow-xl border-2 border-emerald-500/40" />
         <div className="space-y-3 text-center md:text-left flex-1">
           <span className="inline-block bg-emerald-500 text-slate-950 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-            Founder &amp; editor
+            Founder of Run On Console
           </span>
           <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-white">Omar Abobakar</h1>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
-            Omar Abobakar founded Run On Console in 2026 and owns and edits it. He writes and checks the blogs, guides and news,
-            keeps the gaming gear picks and the game requirements checker up to date, and answers the messages readers send.
+            Omar Abobakar is the founder of Run On Console and a digital marketer by profession. The Run On Console team writes the blogs,
+            guides and news with their relevant sources, and Omar approves every article before it is published.
           </p>
           <a href={LINKEDIN} target="_blank" rel="noopener me" className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs py-2 px-4 rounded-xl no-underline">
             Omar on LinkedIn <ArrowRight className="w-3.5 h-3.5" />
@@ -50,7 +50,7 @@ export const AuthorView = () => {
       </div>
 
       <section className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-        <h2 className="font-display font-extrabold text-xl text-slate-900">What Omar writes about</h2>
+        <h2 className="font-display font-extrabold text-xl text-slate-900">What Run On Console covers</h2>
         <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 list-none p-0 m-0">
           {[
             'Gaming mice, keyboards and headsets',
@@ -69,15 +69,16 @@ export const AuthorView = () => {
       </section>
 
       <section className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-3">
-        <h2 className="font-display font-extrabold text-xl text-slate-900">How he works</h2>
+        <h2 className="font-display font-extrabold text-xl text-slate-900">How articles are made</h2>
         <p className="text-sm text-slate-600 leading-relaxed">
+          The team writes each article from relevant sources and lists them; Omar reads and approves it before it goes live.
           Products are picked from their specifications, the maker&apos;s own data and well-known published reviews, with who each one is for.
           Game requirements come from the publishers (Steam for PC games). Our product picks and rankings cannot be bought; a brand can pay for a
           sponsored article, and every one is labelled Sponsored. Found a mistake? Tell us on the <a href="/contact/" className="font-bold text-emerald-700">contact page</a>.
         </p>
         <div className="flex flex-wrap gap-3 pt-1">
           <a href="/blogs/" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-5 rounded-xl inline-flex items-center gap-1.5 no-underline">
-            Read his articles <ArrowRight className="w-3.5 h-3.5" />
+            Read the articles <ArrowRight className="w-3.5 h-3.5" />
           </a>
           <a href="/about/" className="bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-2.5 px-5 rounded-xl no-underline">
             About Run On Console
