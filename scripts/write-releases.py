@@ -1020,6 +1020,13 @@ RELEASES = [
          checks=[dict(label='Author settings first', type='contains', path='blog-render.php', text='149b: they were further down')],
          pr=REPO + '149',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Cloudflare: Purge Everything.']),
+    dict(deploy=151, date='2026-10-31', title='Reviews page: real reviews from brands and readers',
+         changes=['New page runonconsole.com/reviews/ with a "Write a review" form (name, email, company, 1-5 stars, text)',
+                  'A review is never shown straight away: it arrives at contact@runonconsole.com (and CMS > Messages) with two buttons, Publish this review and Hide it again; only these signed links can publish it',
+                  'Until the first review is published the page says "Be the first" and is hidden from Google (noindex); then it joins the sitemap'],
+         checks=[dict(label='Reviews page', type='contains', path='page-render.php', text='rocReviewsPage')],
+         pr=REPO + '150',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS > Menus & footer: add a link Reviews -> /reviews/ in the footer.', 'Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
