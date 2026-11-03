@@ -100,6 +100,7 @@ function rocMethodPage(string $root): void {
         . '<p>The same rules run on every game page, in the full <a href="/compatibility/">checker</a> and in ROC, our assistant. The full checker also asks for your storage: a hard disk instead of an SSD lowers the result a little. When a part falls short, the page names the part to upgrade first.</p>'
         . '<h2>5. What we do not do</h2>'
         . '<ul><li>We do not measure <b>FPS</b> and do not run lab tests; the result is a settings level from the official requirements.</li>'
+        . '<li>Game pages can show <b>FPS reported by players</b> (their card, processor, resolution and settings). We check each report before it appears, but we do not measure them.</li>'
         . '<li>Laptop versions of a graphics card are often a little slower than the desktop card with the same name.</li>'
         . '<li>Graphics memory (VRAM), storage speed, drivers and screen resolution are not part of the score; the requirements table on each game page shows what Steam lists.</li></ul>'
         . '<h2>Steam Deck</h2><p>Each game page also shows Valve\'s own Steam Deck rating (Verified, Playable, Unsupported or Unknown) and the tests behind it, as the game\'s Steam page shows them. '
