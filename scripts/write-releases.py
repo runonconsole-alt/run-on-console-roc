@@ -1081,6 +1081,13 @@ RELEASES = [
          checks=[],
          pr=REPO + '160',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=160, date='2026-11-03', title='Players share their FPS on every game page',
+         changes=['Every game page has "FPS: what players get" with a Share your FPS form (graphics card, processor and RAM filled from the saved PC, resolution, settings, upscaling, average FPS, a nickname; email optional)',
+                  'A report goes to contact@runonconsole.com and CMS > Messages with Publish and Hide buttons; only published reports appear, in a table, with the typical FPS when a card has two or more reports at the same resolution and settings',
+                  'How we check games says these are players numbers, checked before they appear, not measured by us'],
+         checks=[dict(label='FPS reports', type='contains', path='api/v1/fps-lib.php', text='rocFpsSection')],
+         pr=REPO + '162',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
