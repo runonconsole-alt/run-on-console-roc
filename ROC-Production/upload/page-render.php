@@ -63,6 +63,8 @@ if ($isMap) {
         $rows = $pdo->query("SELECT * FROM pages WHERE status = 'published' AND (is_noindex = 0 OR is_noindex IS NULL) ORDER BY published_at DESC")->fetchAll(PDO::FETCH_ASSOC);
     } catch (\Throwable $e) { $rows = []; }
     foreach ($rows as $r) $out .= rocSmLine(ROC_PUBLIC_URL . rocPagePathOf($r), rocModified($r), (string)($r['title'] ?? ''));
+    if (is_file($ROOT . '/api/v1/methodology-lib.php'))
+        $out .= rocSmLine(ROC_PUBLIC_URL . '/how-we-check/', (int)(@filemtime($ROOT . '/roc-steam-games.json') ?: time()), 'How we check if a PC can run a game');
     // The reviews page, once it has a published review (an empty one is noindex).
     if (is_file($ROOT . '/api/v1/reviews-lib.php')) {
         require_once $ROOT . '/api/v1/reviews-lib.php';
@@ -70,6 +72,13 @@ if ($isMap) {
         if ($rv) $out .= rocSmLine(ROC_PUBLIC_URL . '/reviews/', max(array_column($rv, 'date')), 'Reviews of Run On Console');
     }
     echo $out . "</urlset>\n";
+    exit;
+}
+
+/* ------------------------------------- how we check games (Deploy 153) */
+if ($slug === 'how-we-check' && $reqCat === '' && is_file($ROOT . '/api/v1/methodology-lib.php')) {
+    require_once $ROOT . '/api/v1/methodology-lib.php';
+    rocMethodPage($ROOT);
     exit;
 }
 
