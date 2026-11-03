@@ -24,7 +24,7 @@
    "label": "Page templates refreshed (cli-refresh-templates.php)",
    "type": "contains",
    "path": "cms-templates/product-page.html",
-   "text": "index-DXNAHGKt.js"
+   "text": "index-BD3hR-ns.js"
   }
  ],
  "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/152",
@@ -33,5 +33,5 @@
   "php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply",
   "CMS Dashboard: Clear cache, then Cloudflare: Purge Everything."
  ],
- "build": "index-DXNAHGKt.js"
+ "build": "index-BD3hR-ns.js"
 }
