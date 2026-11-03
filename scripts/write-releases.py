@@ -1040,6 +1040,13 @@ RELEASES = [
                  dict(label='How we check page', type='contains', path='page-render.php', text='rocMethodPage')],
          pr=REPO + '152',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=154, date='2026-11-03', title='PC Game Requirements Report',
+         changes=['New page runonconsole.com/can-i-run/report-2026/ with our own numbers from the official Steam requirements of every game: how many games integrated graphics run, how much of the list each graphics card class runs, how requirements grew year by year (2015 to now), the most demanding and the lightest popular games, the method and a ready line to cite it',
+                  'The numbers are worked out on each visit from the live game list, so the report updates itself when games are added; Article and Dataset schema; in the Can I run sitemap',
+                  'Linked from the Can I run hub, every game page (More for PC players) and How we check games'],
+         checks=[dict(label='Report page', type='contains', path='api/v1/report-lib.php', text='rocGpReport')],
+         pr=REPO + '154',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

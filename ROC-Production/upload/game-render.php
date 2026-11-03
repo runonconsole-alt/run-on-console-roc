@@ -56,7 +56,8 @@ if ($isMap) {
     header('Cache-Control: public, max-age=3600');
     header('X-Robots-Tag: noindex');
     $out = rocSmOpen() . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/', $updated, 'Can I run it? All PC games')
-         . rocSmLine(ROC_PUBLIC_URL . ROC_GP_NOGPU, $updated, 'Games that run without a graphics card');
+         . rocSmLine(ROC_PUBLIC_URL . ROC_GP_NOGPU, $updated, 'Games that run without a graphics card')
+         . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/report-2026/', $updated, 'PC Game Requirements Report');
     foreach (array_keys(ROC_GP_CARD_PAGES) as $cn) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpCardPath($cn), $updated, 'What games can a ' . rocGpCardShort($cn) . ' run?');
     foreach ($games as $g) if (!rocGpThin($g, (array)($EDITS[$g['slug']] ?? []))) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpPath($g), max($updated, (int)($EDITS[$g['slug']]['t'] ?? 0)), 'Can I run ' . $g['name'] . '?');
     echo $out . "</urlset>\n";
@@ -266,6 +267,13 @@ function rocGpStyles(): string {
 }
 
 [$headTop, $bodyToMain, $mainOpen, , $afterMain] = rocTemplate($ROOT, 'blog-post.html');
+
+/* ------------------------------------- requirements report (Deploy 154) */
+if ($slug === 'report-2026') {
+    require_once $ROOT . '/api/v1/report-lib.php';
+    rocGpReport($ROOT, $games, $updated, $headTop, $bodyToMain, $mainOpen, $afterMain);
+    exit;
+}
 
 /* --------------------------------------------- without a graphics card */
 // Owner, 2026-10-29 (Deploy 135): Search Console shows "can i run <game> without graphics card", "can <game> run on
@@ -484,7 +492,8 @@ if ($slug === '') {
     $m .= '<header class="gp-hero pic"><div><h1>Can I run it? ' . number_format($n) . ' PC games</h1>'
         . '<p>Pick a game to see its official minimum and recommended requirements from Steam, which graphics cards and processors run it, '
         . 'and check your own PC in a few seconds. The full checker also covers consoles, handhelds and phones.</p>'
-        . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Open the full checker &rarr;</a><a class="gp-btn s" href="' . ROC_GP_NOGPU . '">Games without a graphics card</a></div></div>'
+        . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Open the full checker &rarr;</a><a class="gp-btn s" href="' . ROC_GP_NOGPU . '">Games without a graphics card</a>'
+        . '<a class="gp-btn s" href="/can-i-run/report-2026/">Requirements report ' . date('Y') . '</a></div></div>'
         . '<div class="gp-wall">' . $wall . '<small>Most popular games. Pictures: Steam store, © their publishers.</small></div></header>';
     $m .= '<section class="gp-card"><label for="gp-q" class="sr-only">Search a game</label>'
         . '<input id="gp-q" class="gp-search" type="search" placeholder="Search ' . number_format($n) . ' games, e.g. GTA, Elden Ring, Valorant…" autocomplete="off">'
@@ -819,6 +828,7 @@ if ($sim) {
 // More on the site (Deploy 82): the pages a player checking requirements needs next.
 $more = [['/compatibility/?steam=' . (int)$g['appid'], 'Full PC check', 'Laptops, consoles, handhelds and more parts'],
          [ROC_GP_NOGPU, 'Games without a graphics card', 'The games a laptop with integrated graphics plays'],
+         ['/can-i-run/report-2026/', 'PC requirements report', 'What ' . number_format(count($games)) . ' games need, year by year'],
          ['/category/gpu/', 'Graphics cards', 'Picks for every budget'], ['/category/cpu/', 'Processors', 'Gaming CPUs from entry to high end'],
          ['/category/ram/', 'Memory (RAM)', 'DDR4 and DDR5 kits'], ['/gaming-platforms/pc-handheld-pc/', 'PC and handheld PC guide', 'Gaming platform guide'],
          ['/guides/', 'Gaming guides', 'Buying, setup and game settings, step by step'], ['/can-i-run/', 'All PC games', number_format(count($games)) . ' games with their requirements']];

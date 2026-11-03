@@ -84,7 +84,7 @@ function rocMethodPage(string $root): void {
         . '<p>Graphics cards and processors get a tier score from <b>1.8</b> (integrated graphics such as Intel UHD and Iris Xe) to <b>10</b> (the fastest cards and processors). Cards of about the same gaming speed share a score. '
         . 'The scores are our own judgement from the cards\' and processors\' class and generation, not a benchmark result. The graphics cards in our checker:</p>'
         . '<div class="gp-wrap" style="overflow-x:auto"><table class="hw-t"><thead><tr><th>Tier</th><th>Graphics cards</th></tr></thead><tbody>' . $tierRows . '</tbody></table></div>'
-        . '<p>Each tier also has a page of the games that card class runs, for example <a href="/can-i-run/gtx-1650-games/">games a GTX 1650 can run</a> and <a href="/can-i-run/without-graphics-card/">games without a graphics card</a>.</p>'
+        . '<p>For the numbers across all games, see the <a href="/can-i-run/report-2026/">PC Game Requirements Report</a>. Each tier also has a page of the games that card class runs, for example <a href="/can-i-run/gtx-1650-games/">games a GTX 1650 can run</a> and <a href="/can-i-run/without-graphics-card/">games without a graphics card</a>.</p>'
         . '<h2>4. How the percentage is worked out</h2>'
         . '<ul><li>Each part is compared with the game\'s <b>recommended</b> requirement: the graphics card counts for <b>50%</b>, the processor <b>30%</b> and RAM <b>20%</b>. A part at or above the recommended gets its full share.</li>'
         . '<li>If any part is <b>below the minimum</b>, the result is at most <b>40%</b>.</li>'
