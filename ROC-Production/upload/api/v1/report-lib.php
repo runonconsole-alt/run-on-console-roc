@@ -121,6 +121,11 @@ function rocGpReport(string $root, array $games, int $updated, string $headTop, 
         $find[] = 'Games released in ' . $ys[0] . ' could play on integrated graphics at their minimum settings ' . $first['int'] . '% of the time; for ' . $lastY . ' releases it is ' . $last['int'] . '%.';
         $find[] = 'The typical (median) recommended RAM went from ' . (int)$first['ram'] . ' GB for ' . $ys[0] . ' games to ' . (int)$last['ram'] . ' GB for ' . $lastY . ' games; ' . $pc($D['rec16']) . '% of all games now recommend 16 GB or more.';
     }
+    // Deploy 157: Valve's Steam Deck ratings, once at least half the list is rated.
+    require_once __DIR__ . '/steam-deck-lib.php';
+    $dk = rocDeckCounts($root, $games);
+    if ($dk['rated'] >= 0.5 * $n) $find[] = 'On Steam Deck, Valve rates ' . (int)round(100 * $dk[3] / $dk['rated']) . '% of the ' . number_format($dk['rated']) . ' rated games Verified and '
+        . (int)round(100 * $dk[2] / $dk['rated']) . '% Playable; ' . (int)round(100 * $dk[1] / $dk['rated']) . '% are Unsupported.';
     $find[] = number_format($D['sto100']) . ' games (' . $pc($D['sto100']) . '%) ask for 100 GB of free space or more.';
     $cite = 'Run On Console, "PC Game Requirements Report ' . $yr . '", ' . $url . ', data from the official Steam requirements of ' . number_format($n) . ' PC games, updated ' . gmdate('j F Y', $updated) . '.';
 
