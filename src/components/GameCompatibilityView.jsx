@@ -154,6 +154,19 @@ export const GameCompatibilityView = () => {
     { id: 'integrated_uhd', label: 'Intel UHD Graphics 630 / Iris Xe / Integrated AMD APU (Office / Non-Gaming)', score: 1.8, vram: 'Shared' }
   ];
 
+  // Deploy 156: the PC saved on the game pages or /can-i-run/my-pc/ (localStorage "roc_pc") picks the closest tiers here.
+  const [savedPc, setSavedPc] = useState(false);
+  useEffect(() => {
+    let p = null;
+    try { p = JSON.parse(localStorage.getItem('roc_pc') || 'null'); } catch (e) { p = null; }
+    if (!p || !p.gs) return;
+    const fit = (opts, score) => [...opts].sort((x, y) => y.score - x.score).find((o) => o.score <= score) || opts[opts.length - 1];
+    setCustomGpuTier(fit(gpuOptions, p.gs).id);
+    if (p.cs) setCustomCpuTier(fit(cpuOptions, p.cs).id);
+    if (p.ram) setCustomRamGb([64, 32, 16, 8, 4].find((r) => r <= p.ram) || 4);
+    setSavedPc(true);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Custom Hardware Compatibility Engine & Percentage Calculator
   const customAnalysisResult = useMemo(() => {
     if (!selectedCheckerGame) return null;
@@ -599,6 +612,7 @@ export const GameCompatibilityView = () => {
                   Detect my graphics card
                 </button>
                 {gpuDetectMsg && <p className="text-[11px] text-slate-500" role="status">{gpuDetectMsg}</p>}
+                {savedPc && <p className="text-[11px] text-slate-500">Using your saved PC from the game pages (closest tiers). <a href="/can-i-run/my-pc/" className="underline">See every game it runs</a></p>}
                 <a href="/how-we-check/" className="block text-[11px] text-slate-500 hover:text-emerald-700 underline">How we check games</a>
               </div>
 

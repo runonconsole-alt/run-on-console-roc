@@ -57,7 +57,8 @@ if ($isMap) {
     header('X-Robots-Tag: noindex');
     $out = rocSmOpen() . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/', $updated, 'Can I run it? All PC games')
          . rocSmLine(ROC_PUBLIC_URL . ROC_GP_NOGPU, $updated, 'Games that run without a graphics card')
-         . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/report-2026/', $updated, 'PC Game Requirements Report');
+         . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/report-2026/', $updated, 'PC Game Requirements Report')
+         . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/my-pc/', $updated, 'Which games can my PC run?');
     foreach (array_keys(ROC_GP_CARD_PAGES) as $cn) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpCardPath($cn), $updated, 'What games can a ' . rocGpCardShort($cn) . ' run?');
     foreach ($games as $g) if (!rocGpThin($g, (array)($EDITS[$g['slug']] ?? []))) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpPath($g), max($updated, (int)($EDITS[$g['slug']]['t'] ?? 0)), 'Can I run ' . $g['name'] . '?');
     echo $out . "</urlset>\n";
@@ -267,6 +268,14 @@ function rocGpStyles(): string {
 }
 
 [$headTop, $bodyToMain, $mainOpen, , $afterMain] = rocTemplate($ROOT, 'blog-post.html');
+
+/* --------------------------------- which games can my PC run (Deploy 156) */
+if ($slug === 'my-pc') {
+    require_once $ROOT . '/api/v1/mypc-lib.php';
+    if (isset($_GET['data'])) rocGpMyPcData($games);
+    rocGpMyPc($ROOT, $games, $updated, $headTop, $bodyToMain, $mainOpen, $afterMain);
+    exit;
+}
 
 /* ------------------------------------- requirements report (Deploy 154) */
 if ($slug === 'report-2026') {
@@ -493,7 +502,7 @@ if ($slug === '') {
         . '<p>Pick a game to see its official minimum and recommended requirements from Steam, which graphics cards and processors run it, '
         . 'and check your own PC in a few seconds. The full checker also covers consoles, handhelds and phones.</p>'
         . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Open the full checker &rarr;</a><a class="gp-btn s" href="' . ROC_GP_NOGPU . '">Games without a graphics card</a>'
-        . '<a class="gp-btn s" href="/can-i-run/report-2026/">Requirements report ' . date('Y') . '</a></div></div>'
+        . '<a class="gp-btn s" href="/can-i-run/my-pc/">Which games can my PC run?</a><a class="gp-btn s" href="/can-i-run/report-2026/">Requirements report ' . date('Y') . '</a></div></div>'
         . '<div class="gp-wall">' . $wall . '<small>Most popular games. Pictures: Steam store, © their publishers.</small></div></header>';
     $m .= '<section class="gp-card"><label for="gp-q" class="sr-only">Search a game</label>'
         . '<input id="gp-q" class="gp-search" type="search" placeholder="Search ' . number_format($n) . ' games, e.g. GTA, Elden Ring, Valorant…" autocomplete="off">'
@@ -750,6 +759,8 @@ $m .= '<section class="gp-card" id="check"><h2>Check your PC</h2>'
     . '<p>Choose the graphics card, processor and memory closest to yours. Not sure? On Windows press Win + R, type <b>dxdiag</b> and look at "Processor", "Memory" and the Display tab.</p>'
     // Deploy 153: the browser can read the graphics card (WebGL); processor and RAM stay the visitor's choice.
     . '<p style="margin-top:.7rem"><button type="button" class="gp-btn s" id="gp-detect">Detect my graphics card</button> <span class="gp-src" id="gp-detect-msg"></span></p>'
+    // Deploy 156: the PC is remembered in this browser (localStorage "roc_pc", shared with /can-i-run/my-pc/).
+    . '<p class="gp-src" id="gp-saved" style="margin-top:.4rem"><a href="/can-i-run/my-pc/">See every game your PC can run &rarr;</a></p>'
     . '<div class="gp-check" style="margin-top:.9rem" data-req="' . rocH(json_encode(['min' => $rMin, 'rec' => $rRec, 'nr' => !empty($g['req']['nr'])])) . '">'
     . '<label>Graphics card<select data-k="gpu">' . $opt($gpus, 'GeForce GTX 1650') . '</select></label>'
     . '<label>Processor<select data-k="cpu">' . $opt($cpus, 'Intel Core i5-8400') . '</select></label>'
@@ -828,6 +839,7 @@ if ($sim) {
 // More on the site (Deploy 82): the pages a player checking requirements needs next.
 $more = [['/compatibility/?steam=' . (int)$g['appid'], 'Full PC check', 'Laptops, consoles, handhelds and more parts'],
          [ROC_GP_NOGPU, 'Games without a graphics card', 'The games a laptop with integrated graphics plays'],
+         ['/can-i-run/my-pc/', 'Which games can my PC run?', 'Every game checked with your PC at once'],
          ['/can-i-run/report-2026/', 'PC requirements report', 'What ' . number_format(count($games)) . ' games need, year by year'],
          ['/category/gpu/', 'Graphics cards', 'Picks for every budget'], ['/category/cpu/', 'Processors', 'Gaming CPUs from entry to high end'],
          ['/category/ram/', 'Memory (RAM)', 'DDR4 and DDR5 kits'], ['/gaming-platforms/pc-handheld-pc/', 'PC and handheld PC guide', 'Gaming platform guide'],
@@ -860,6 +872,11 @@ $m .= "<script>(function(){var box=document.querySelector('.gp-check'),res=docum
     . "dm.textContent='Found: '+d.name+(d.laptop?' (laptop versions are often a little slower)':'')+'. Set to '+best.textContent+'. Now choose your processor and RAM.';"
     . "box.dispatchEvent(new Event('change'));if(window.rocTrack)rocTrack('roc_detect_gpu',d.name,'');});};"
     . "if(window.rocDetectGpu)go();else{var sc=document.createElement('script');sc.src='/roc-detect.js?v=153';sc.onload=go;sc.onerror=function(){db.disabled=false;dm.textContent='Could not load the detector. Please choose your card.'};document.head.appendChild(sc);}});"
+    . "var K='roc_pc',sv=document.getElementById('gp-saved'),sl=function(k){return box.querySelector('[data-k=\"'+k+'\"]')};"
+    . "function pk(s,name,score){var o=[].filter.call(s.options,function(x){return x.text===name})[0];if(!o&&score){var b=null;[].forEach.call(s.options,function(x){var v=parseFloat(x.value);if(v<=score&&(!b||v>parseFloat(b.value)))b=x});o=b}if(o)s.selectedIndex=o.index}"
+    . "function note(on){sv.innerHTML=(on?'Using your saved PC (change it above). <a href=\"#\" id=\"gp-forget\">Forget it</a> · ':'')+'<a href=\"/can-i-run/my-pc/\">See every game your PC can run &rarr;</a>';var f=document.getElementById('gp-forget');if(f)f.onclick=function(e){e.preventDefault();try{localStorage.removeItem(K)}catch(x){}note(false)}}"
+    . "try{var P=JSON.parse(localStorage.getItem(K)||'null');if(P){pk(sl('gpu'),P.gpu,P.gs);pk(sl('cpu'),P.cpu,P.cs);if(P.ram){var ro=[].filter.call(sl('ram').options,function(x){return +x.value===+P.ram})[0];if(ro)sl('ram').value=ro.value}note(true)}}catch(e){}"
+    . "box.addEventListener('change',function(){try{var g=sl('gpu'),c=sl('cpu');localStorage.setItem(K,JSON.stringify({gpu:g.options[g.selectedIndex].text,cpu:c.options[c.selectedIndex].text,ram:+sl('ram').value,gs:+g.value,cs:+c.value}));note(true)}catch(e){}});"
     . "box.addEventListener('change',function(){run();if(window.rocTrack)rocTrack('roc_quick_check',document.title.split('?')[0].replace('Can I Run ',''),(res.querySelector('b')||{}).textContent||'');});run();})();</script>";
 
 rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $updated);

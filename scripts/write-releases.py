@@ -1054,6 +1054,13 @@ RELEASES = [
          checks=[dict(label='Fair minimum-only games', type='contains', path='api/v1/agent-lib.php', text='rocGameFix')],
          pr=REPO + '155',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=156, date='2026-11-03', title='Remember my PC, and Which games can my PC run?',
+         changes=['The PC a visitor chooses or detects on a game page is remembered in their browser (nothing is sent to us): every game page and the full checker fill it in by themselves, with a Forget link',
+                  'New page runonconsole.com/can-i-run/my-pc/: one PC against every game on the list at once (high, medium to high, low, below the minimum), with search, and the upgrades still sold today that open the most games (for example +265 games on high settings with an RTX 3060 class card); same rules as the game pages',
+                  'Linked from the Can I run hub, every game page and the checker; in the sitemap'],
+         checks=[dict(label='My PC page', type='contains', path='api/v1/mypc-lib.php', text='rocGpMyPc')],
+         pr=REPO + '156',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
