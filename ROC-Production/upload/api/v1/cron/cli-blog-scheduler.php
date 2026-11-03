@@ -176,6 +176,16 @@ try {
 } catch (\Throwable $e) { echo date('c') . ' Steam update error: ' . $e->getMessage() . "
 "; }
 
+// Steam Deck ratings (Deploy 157): 4 games a run until every game is rated, then the ratings older than 60 days.
+try {
+    require_once $ROOT . '/api/v1/game-pages-lib.php';
+    require_once $ROOT . '/api/v1/steam-deck-lib.php';
+    $sd = rocDeckTick($ROOT, rocGpAll($ROOT), 4);
+    if ($sd !== null) echo date('c') . ' ' . $sd . "
+";
+} catch (\Throwable $e) { echo date('c') . ' Steam Deck error: ' . $e->getMessage() . "
+"; }
+
 // Off-page researcher (Deploy 93): only when turned on in CMS > Off-page; once a day after 12:00 Pakistan time.
 try {
     // Monday to Friday 11:30: the day's 10 products to submit, by email (Deploy 130).

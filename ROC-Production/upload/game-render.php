@@ -18,6 +18,7 @@ declare(strict_types=1);
 define('ROC_RENDER_LIB_ONLY', true);
 require __DIR__ . '/blog-render.php';          // helpers only: rocTemplate, rocH, rocJsonLd, rocSendHtml, …
 require_once __DIR__ . '/api/v1/game-pages-lib.php';
+require_once __DIR__ . '/api/v1/steam-deck-lib.php';   // Deploy 157
 
 $ROOT  = __DIR__;
 $slug  = isset($_GET['slug']) ? strtolower(trim((string)$_GET['slug'], "/ \t\n\r")) : '';
@@ -58,7 +59,8 @@ if ($isMap) {
     $out = rocSmOpen() . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/', $updated, 'Can I run it? All PC games')
          . rocSmLine(ROC_PUBLIC_URL . ROC_GP_NOGPU, $updated, 'Games that run without a graphics card')
          . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/report-2026/', $updated, 'PC Game Requirements Report')
-         . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/my-pc/', $updated, 'Which games can my PC run?');
+         . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/my-pc/', $updated, 'Which games can my PC run?')
+         . rocSmLine(ROC_PUBLIC_URL . ROC_DECK_PAGE, max($updated, (int)(rocDeckLoad($ROOT)['updated'] ?? 0)), 'Steam Deck games');
     foreach (array_keys(ROC_GP_CARD_PAGES) as $cn) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpCardPath($cn), $updated, 'What games can a ' . rocGpCardShort($cn) . ' run?');
     foreach ($games as $g) if (!rocGpThin($g, (array)($EDITS[$g['slug']] ?? []))) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpPath($g), max($updated, (int)($EDITS[$g['slug']]['t'] ?? 0)), 'Can I run ' . $g['name'] . '?');
     echo $out . "</urlset>\n";
@@ -239,6 +241,9 @@ function rocGpStyles(): string {
         . ".gp-p .a{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:auto;padding-top:.4rem}.gp-p .a a{font-size:.72rem;font-weight:800;padding:.45rem .7rem;border-radius:.7rem}"
         . ".gp-p .a .m{border:1px solid #cbd5e1;color:#334155}.gp-p .a .y{background:#f59e0b;color:#0f172a}.gp-p .a .y:hover{background:#d97706}"
         . ".gp-note{font-size:.72rem;color:#94a3b8;margin-top:.8rem}"
+        . ".gp-deck{display:inline-block;font-weight:800;font-size:.75rem;padding:.2rem .6rem;border-radius:99px;margin-right:.3rem;vertical-align:1px}.gp-deck.ok{background:#dcfce7;color:#166534}.gp-deck.mid{background:#fef9c3;color:#854d0e}.gp-deck.no{background:#fee2e2;color:#991b1b}.gp-deck.low{background:#e2e8f0;color:#334155}"
+        . ".gp-deck-list{list-style:none;padding:0;margin:.7rem 0 0;display:grid;gap:.35rem}.gp-deck-list li{padding-left:1.5rem;position:relative;color:#334155}.gp-deck-list li::before{position:absolute;left:0;font-weight:800}.gp-deck-list li.y::before{content:'\\2713';color:#16a34a}.gp-deck-list li.n::before{content:'!';color:#b45309;left:.35rem}.gp-deck-list li.x::before{content:'\\2717';color:#dc2626}.gp-deck-list li.i::before{content:'i';color:#0e7490;left:.35rem;font-style:italic}"
+        . "html.roc-dark .gp-deck-list li{color:#cbd5e1}"
         . ".gp-faq details{border:1px solid #e2e8f0;border-radius:1rem;background:#fff;padding:.85rem 1.05rem}.gp-faq details+details{margin-top:.6rem}"
         . ".gp-faq summary{cursor:pointer;font-weight:800;font-family:Outfit,Inter,sans-serif;color:#0f172a}.gp-faq details[open]{border-color:#10b981;background:#f0fdf4}"
         . ".gp-faq .a{margin-top:.5rem;color:#334155;line-height:1.7;font-size:.93rem}"
@@ -268,6 +273,13 @@ function rocGpStyles(): string {
 }
 
 [$headTop, $bodyToMain, $mainOpen, , $afterMain] = rocTemplate($ROOT, 'blog-post.html');
+
+/* ------------------------------------------- Steam Deck games (Deploy 157) */
+if ($slug === 'steam-deck') {
+    require_once $ROOT . '/api/v1/steam-deck-page.php';
+    rocGpDeckPage($ROOT, $games, max($updated, (int)(rocDeckLoad($ROOT)['updated'] ?? 0)), $headTop, $bodyToMain, $mainOpen, $afterMain);
+    exit;
+}
 
 /* --------------------------------- which games can my PC run (Deploy 156) */
 if ($slug === 'my-pc') {
@@ -502,7 +514,7 @@ if ($slug === '') {
         . '<p>Pick a game to see its official minimum and recommended requirements from Steam, which graphics cards and processors run it, '
         . 'and check your own PC in a few seconds. The full checker also covers consoles, handhelds and phones.</p>'
         . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Open the full checker &rarr;</a><a class="gp-btn s" href="' . ROC_GP_NOGPU . '">Games without a graphics card</a>'
-        . '<a class="gp-btn s" href="/can-i-run/my-pc/">Which games can my PC run?</a><a class="gp-btn s" href="/can-i-run/report-2026/">Requirements report ' . date('Y') . '</a></div></div>'
+        . '<a class="gp-btn s" href="/can-i-run/my-pc/">Which games can my PC run?</a><a class="gp-btn s" href="' . ROC_DECK_PAGE . '">Steam Deck games</a><a class="gp-btn s" href="/can-i-run/report-2026/">Requirements report ' . date('Y') . '</a></div></div>'
         . '<div class="gp-wall">' . $wall . '<small>Most popular games. Pictures: Steam store, © their publishers.</small></div></header>';
     $m .= '<section class="gp-card"><label for="gp-q" class="sr-only">Search a game</label>'
         . '<input id="gp-q" class="gp-search" type="search" placeholder="Search ' . number_format($n) . ' games, e.g. GTA, Elden Ring, Valorant…" autocomplete="off">'
@@ -643,6 +655,10 @@ $rmn = (float)($rMin['ram'] ?? 0); $rrc = (float)($rRec['ram'] ?? $rmn);
 if ($rmn > 0) $faqs[] = ['Is 8 GB of RAM enough for ' . $name . '?',
     $rmn > 8 ? 'No. ' . $name . ' needs at least ' . $ramGb($rmn) . ' of RAM.' : ($rrc > 8 ? 'Yes for the minimum settings; ' . $ramGb($rrc) . ' is recommended for smooth play.' : 'Yes. 8 GB meets the ' . ($rec ? 'recommended' : 'minimum') . ' memory for ' . $name . '.')];
 if ($storage !== '') $faqs[] = ['How many GB is ' . $name . '?', $name . ' needs ' . preg_replace('/\s*available space/i', '', $storage) . ' of free space' . ($storageGb !== null && $storageGb >= 50 ? '. An SSD is a good idea for faster loading.' : '.')];
+// Deploy 157: Valve's Steam Deck rating (steam-deck-lib.php), a question people search for every game.
+$deck = rocDeckOf($ROOT, (int)$g['appid']);
+if ($deck && $deck['c'] > 0) $faqs[] = ['Can you play ' . $name . ' on Steam Deck?', ($deck['c'] === 3 ? 'Yes. ' : ($deck['c'] === 2 ? 'Yes, with some extra steps. ' : 'No. '))
+    . 'Valve rates ' . $name . ' as Steam Deck ' . $deck['label'] . ': it ' . $deck['say'] . '.'];
 
 /* upgrade picks */
 $picks = [];
@@ -699,7 +715,7 @@ $crumbs = [['Home', '/'], ['Can I run it?', '/can-i-run/'], [$name, rocGpPath($g
 $ld = [rocGpCrumbs($crumbs),
     ['@context' => 'https://schema.org', '@type' => 'WebPage', '@id' => $url, 'url' => $url, 'name' => 'Can I run ' . $name . '?', 'description' => $metaD,
      'dateModified' => gmdate('c', $updated), 'isPartOf' => ['@type' => 'WebSite', 'name' => 'Run On Console', 'url' => ROC_PUBLIC_URL . '/'],
-     'about' => array_filter(['@type' => 'VideoGame', 'name' => $name, 'gamePlatform' => 'PC', 'genre' => $genre !== '' ? array_map('trim', explode(',', $genre)) : null,
+     'about' => array_filter(['@type' => 'VideoGame', 'name' => $name, 'gamePlatform' => $deck && $deck['c'] >= 2 ? ['PC', 'Steam Deck'] : 'PC', 'genre' => $genre !== '' ? array_map('trim', explode(',', $genre)) : null,
                               'datePublished' => $year ? (string)$year : null, 'sameAs' => (string)($g['u'] ?? '') ?: null,
                               // Its official minimum requirements (VideoGame is a SoftwareApplication).
                               'applicationCategory' => 'Game', 'operatingSystem' => $clean($min['os'] ?? '') ?: null,
@@ -744,6 +760,7 @@ $heavy = function (array $p, string $of) { return $p[0] >= $p[1] ? 'needs more g
 if ($hv['all'] !== null) $qa .= '<li><b>How heavy:</b> ' . rocH($name) . ' ' . $heavy($hv['all'], 'the ' . number_format(count($games)) . ' PC games on Run On Console')
     . ($hv['genre'] !== null ? ', and ' . $heavy($hv['genre'], 'the ' . number_format($hv['genre_n']) . ' ' . rocH(strtolower($hv['genre_name'])) . ' games') : '') . '.</li>';
 if ($storage !== '') $qa .= '<li><b>Download size:</b> ' . rocH(preg_replace('/\s*available space/i', '', $storage)) . '.</li>';
+if ($deck) $qa .= '<li><b>Steam Deck:</b> <a href="#steam-deck">' . rocH($deck['label']) . '</a> (Valve\'s rating).</li>';
 $qa .= '</ul><p class="gp-src" style="margin-top:.6rem">From the official Steam requirements and our checker\'s scores (<a href="/how-we-check/">how we check</a>). Check your own PC below.</p></section>';
 $m .= $qa;
 // The owner's own text about this game (CMS > Games > Edit, Deploy 85): plain text, a blank line = a new paragraph.
@@ -770,6 +787,16 @@ $m .= '<section class="gp-card" id="check"><h2>Check your PC</h2>'
     . '<div class="gp-btns"><a class="gp-btn p" rel="nofollow" href="/compatibility/?steam=' . (int)$g['appid'] . '">Full check (laptops, consoles, more parts) &rarr;</a>'
     . '<a class="gp-btn s" href="#requirements">See the requirements</a>'
     . '<button type="button" class="gp-btn s" data-roc-ask="' . rocH('Can my PC run ' . $name . '? My graphics card: , processor: , RAM: ') . '">Ask ROC about my PC</button></div></section>';
+
+// Steam Deck (Deploy 157): Valve's rating and the test results behind it.
+if ($deck) {
+    $m .= '<section class="gp-card" id="steam-deck"><h2>' . rocH($name) . ' on Steam Deck: ' . rocH($deck['label']) . '</h2>'
+        . '<p><span class="gp-deck ' . $deck['cls'] . '">' . rocH($deck['label']) . '</span> ' . rocH($name) . ' ' . rocH($deck['say']) . '.</p>';
+    $its = array_values(array_filter(array_map(function ($it) { $t = rocDeckItem((string)$it[1]); return $t !== '' ? [(int)$it[0], $t] : null; }, $deck['items'])));
+    if ($its) $m .= '<ul class="gp-deck-list">' . implode('', array_map(function ($it) { return '<li class="' . ([4 => 'y', 3 => 'n', 2 => 'x'][$it[0]] ?? 'i') . '">' . rocH($it[1]) . '</li>'; }, $its)) . '</ul>';
+    $m .= '<p class="gp-src" style="margin-top:.6rem">Rating from Valve\'s Steam Deck tests, as shown on the game\'s Steam page' . ($deck['t'] ? ', checked ' . gmdate('F Y', $deck['t']) : '') . '. '
+        . '<a href="' . ROC_DECK_PAGE . '">All Steam Deck games</a>.</p></section>';
+}
 
 // Requirements
 $m .= '<section class="gp-card" id="requirements"><h2>' . rocH($name) . ' system requirements</h2><div class="gp-wrap"><table class="gp-table">'
@@ -840,6 +867,7 @@ if ($sim) {
 $more = [['/compatibility/?steam=' . (int)$g['appid'], 'Full PC check', 'Laptops, consoles, handhelds and more parts'],
          [ROC_GP_NOGPU, 'Games without a graphics card', 'The games a laptop with integrated graphics plays'],
          ['/can-i-run/my-pc/', 'Which games can my PC run?', 'Every game checked with your PC at once'],
+         [ROC_DECK_PAGE, 'Steam Deck games', 'Valve\'s Verified and Playable ratings'],
          ['/can-i-run/report-2026/', 'PC requirements report', 'What ' . number_format(count($games)) . ' games need, year by year'],
          ['/category/gpu/', 'Graphics cards', 'Picks for every budget'], ['/category/cpu/', 'Processors', 'Gaming CPUs from entry to high end'],
          ['/category/ram/', 'Memory (RAM)', 'DDR4 and DDR5 kits'], ['/gaming-platforms/pc-handheld-pc/', 'PC and handheld PC guide', 'Gaming platform guide'],

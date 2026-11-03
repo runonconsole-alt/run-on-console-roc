@@ -1061,6 +1061,13 @@ RELEASES = [
          checks=[dict(label='My PC page', type='contains', path='api/v1/mypc-lib.php', text='rocGpMyPc')],
          pr=REPO + '156',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=157, date='2026-11-03', title='Steam Deck ratings for every game',
+         changes=['Every game page shows the Valve Steam Deck rating (Verified, Playable, Unsupported) with the tests behind it in plain words, in the quick answer, a Steam Deck box and a "Can you play it on Steam Deck?" FAQ; Steam Deck is added to the game schema when it runs there',
+                  'New page runonconsole.com/can-i-run/steam-deck/: all Verified, Playable and Unsupported games with search; hidden from Google until half the list is rated, then in the sitemap',
+                  'The ratings come from the Steam store: 4 games each scheduler run (all 2,430 in a few days), or all at once with cli-steam-deck.php; each rating is checked again after 60 days. The requirements report and How we check mention them'],
+         checks=[dict(label='Steam Deck ratings', type='contains', path='api/v1/steam-deck-lib.php', text='rocDeckTick')],
+         pr=REPO + '157',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'To rate every game now (about 40 minutes, it can run in the background): nohup php public_html/api/v1/cron/cli-steam-deck.php --apply > ~/steam-deck.log 2>&1 &', 'Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

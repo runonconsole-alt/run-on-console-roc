@@ -102,6 +102,8 @@ function rocMethodPage(string $root): void {
         . '<ul><li>We do not measure <b>FPS</b> and do not run lab tests; the result is a settings level from the official requirements.</li>'
         . '<li>Laptop versions of a graphics card are often a little slower than the desktop card with the same name.</li>'
         . '<li>Graphics memory (VRAM), storage speed, drivers and screen resolution are not part of the score; the requirements table on each game page shows what Steam lists.</li></ul>'
+        . '<h2>Steam Deck</h2><p>Each game page also shows Valve\'s own Steam Deck rating (Verified, Playable, Unsupported or Unknown) and the tests behind it, as the game\'s Steam page shows them. '
+        . 'We ask Steam for every game and check again every two months. All of them: <a href="/can-i-run/steam-deck/">Steam Deck games</a>.</p>'
         . '<h2>6. Detect my graphics card</h2>'
         . '<p>On game pages and in the checker, "Detect my graphics card" asks your browser for the name of its graphics card (WebGL). We rate that name on the same tier scale and choose the closest card in the list. '
         . 'Nothing is stored. Browsers cannot read the processor and RAM reliably, so you choose those. Safari and some privacy settings hide the card; then pick it yourself.</p>'
