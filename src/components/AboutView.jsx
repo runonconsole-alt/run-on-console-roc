@@ -202,6 +202,21 @@ export const AboutView = () => {
           </div>
         </div>
 
+        {/* Deploy 158 (owner): Run On Console's own SEO tool. */}
+        <div id="roc-seo" className="rounded-2xl border border-indigo-200 bg-indigo-50/60 p-5 sm:p-6 space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-700">Also from Run On Console</span>
+          <h3 className="font-display font-extrabold text-lg text-slate-900">ROC SEO: free SEO audit and AI citation checker</h3>
+          <p>
+            We built ROC SEO for anyone who runs a website, a gaming blog or a channel site. The free Chrome extension audits any page in seconds
+            (titles, schema, Core Web Vitals and AI readiness), crawls up to 1,000 pages of a site for free and shows whether ChatGPT, Perplexity
+            and Google AI cite your website.
+          </p>
+          <div className="flex flex-wrap gap-3 pt-1">
+            <a href="https://chromewebstore.google.com/detail/roc-seo-seo-audit-site-cr/mppegackhdlnoifemlpldcmiaabadajm" target="_blank" rel="noopener" className="font-bold text-indigo-700 hover:text-indigo-900">Add ROC SEO to Chrome</a>
+            <a href="https://getrocseo.com/?utm_source=runonconsole&utm_medium=referral&utm_campaign=about" target="_blank" rel="noopener" className="font-bold text-indigo-700 hover:text-indigo-900">getrocseo.com</a>
+          </div>
+        </div>
+
         <div className="pt-4 border-t border-slate-100 flex flex-wrap gap-4 items-center justify-between">
           <div className="text-xs text-slate-500 font-semibold">
             Ready to find the best gear for your favorite game?

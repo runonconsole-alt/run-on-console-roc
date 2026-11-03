@@ -32,6 +32,7 @@ function rocLlmsBuild(PDO $pdo): string {
     $o .= "## About and Editorial Information\n";
     $o .= $line('About Run On Console', '/about/', 'who we are, what we cover and how picks are made');
     $o .= $line('Omar Abobakar', '/author/omar-abobakar/', 'founder of Run On Console, who approves the guides, blogs and news the team writes');
+    $o .= "- [ROC SEO](https://getrocseo.com/): Run On Console's own free Chrome extension for SEO audits, site crawls and AI citation checks\n";
     $o .= $line('Privacy Policy & Affiliate Disclosure', '/privacy-policy/', 'privacy, cookies and the Amazon Associates disclosure');
     $o .= $line('Terms & Conditions', '/terms-and-conditions/');
     $o .= $line('Contact', '/contact/', 'questions, corrections and partnerships');
