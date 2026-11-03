@@ -305,10 +305,10 @@ export const BlogsView = () => {
             </p>
 
             <div className="flex flex-wrap gap-2.5 pt-2">
-              <span className="badge-holo-glow badge-static text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
+              <a href="/guides/" title="Step by step gaming guides" className="badge-holo-glow badge-static no-underline hover:text-white text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
                 <FileText className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
                 <span>{blogs.length} Hardware Reviews & Guides</span>
-              </span>
+              </a>
               <a href="/news/" className="badge-holo-glow text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 no-underline">
                 <span>📰 Latest gaming news</span>
               </a>

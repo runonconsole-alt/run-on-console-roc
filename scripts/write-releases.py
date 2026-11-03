@@ -1076,6 +1076,11 @@ RELEASES = [
                  dict(label='ROC SEO box', type='contains', path='blog-render.php', text='rocRocSeoBox')],
          pr=REPO + '158',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=159, date='2026-11-03', title='Blog page badge links to the guides',
+         changes=['On /blogs/ the "Hardware Reviews & Guides" badge is now a link to /guides/ (owner)'],
+         checks=[],
+         pr=REPO + '160',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
