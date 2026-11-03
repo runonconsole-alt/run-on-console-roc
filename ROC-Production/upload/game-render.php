@@ -56,7 +56,8 @@ if ($isMap) {
     header('Cache-Control: public, max-age=3600');
     header('X-Robots-Tag: noindex');
     $out = rocSmOpen() . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/', $updated, 'Can I run it? All PC games')
-         . rocSmLine(ROC_PUBLIC_URL . ROC_GP_NOGPU, $updated, 'Games that run without a graphics card');
+         . rocSmLine(ROC_PUBLIC_URL . ROC_GP_NOGPU, $updated, 'Games that run without a graphics card')
+         . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/report-2026/', $updated, 'PC Game Requirements Report');
     foreach (array_keys(ROC_GP_CARD_PAGES) as $cn) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpCardPath($cn), $updated, 'What games can a ' . rocGpCardShort($cn) . ' run?');
     foreach ($games as $g) if (!rocGpThin($g, (array)($EDITS[$g['slug']] ?? []))) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpPath($g), max($updated, (int)($EDITS[$g['slug']]['t'] ?? 0)), 'Can I run ' . $g['name'] . '?');
     echo $out . "</urlset>\n";
@@ -267,6 +268,13 @@ function rocGpStyles(): string {
 
 [$headTop, $bodyToMain, $mainOpen, , $afterMain] = rocTemplate($ROOT, 'blog-post.html');
 
+/* ------------------------------------- requirements report (Deploy 154) */
+if ($slug === 'report-2026') {
+    require_once $ROOT . '/api/v1/report-lib.php';
+    rocGpReport($ROOT, $games, $updated, $headTop, $bodyToMain, $mainOpen, $afterMain);
+    exit;
+}
+
 /* --------------------------------------------- without a graphics card */
 // Owner, 2026-10-29 (Deploy 135): Search Console shows "can i run <game> without graphics card", "can <game> run on
 // integrated graphics" and "games that i can run" on many game pages. One page lists every game a laptop with
@@ -356,7 +364,7 @@ if ($cardMain !== null) {
     // recommended (medium to high), the recommended or more (high); in between, low settings.
     foreach ($games as $g) {
         $gm = (float)($g['req']['min']['gpu'] ?? 0); $gr = max($gm, (float)($g['req']['rec']['gpu'] ?? $gm));
-        $t = $gm > 0 && $score < $gm ? 'no' : ($gr <= 0 || $score >= $gr ? 'high' : ($score >= 0.75 * $gr ? 'mid' : 'low'));
+        $t = $gm > 0 && $score < $gm ? 'no' : ($gr <= 0 || $score >= $gr ? (empty($g['req']['nr']) || $score >= $gm + 2 ? 'high' : 'mid') : ($score >= 0.75 * $gr ? 'mid' : 'low'));   // nr: Deploy 155
         $tiers[$t][] = [$g, $t];
     }
     $runs = count($tiers['high']) + count($tiers['mid']) + count($tiers['low']);
@@ -484,7 +492,8 @@ if ($slug === '') {
     $m .= '<header class="gp-hero pic"><div><h1>Can I run it? ' . number_format($n) . ' PC games</h1>'
         . '<p>Pick a game to see its official minimum and recommended requirements from Steam, which graphics cards and processors run it, '
         . 'and check your own PC in a few seconds. The full checker also covers consoles, handhelds and phones.</p>'
-        . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Open the full checker &rarr;</a><a class="gp-btn s" href="' . ROC_GP_NOGPU . '">Games without a graphics card</a></div></div>'
+        . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Open the full checker &rarr;</a><a class="gp-btn s" href="' . ROC_GP_NOGPU . '">Games without a graphics card</a>'
+        . '<a class="gp-btn s" href="/can-i-run/report-2026/">Requirements report ' . date('Y') . '</a></div></div>'
         . '<div class="gp-wall">' . $wall . '<small>Most popular games. Pictures: Steam store, © their publishers.</small></div></header>';
     $m .= '<section class="gp-card"><label for="gp-q" class="sr-only">Search a game</label>'
         . '<input id="gp-q" class="gp-search" type="search" placeholder="Search ' . number_format($n) . ' games, e.g. GTA, Elden Ring, Valorant…" autocomplete="off">'
@@ -741,7 +750,7 @@ $m .= '<section class="gp-card" id="check"><h2>Check your PC</h2>'
     . '<p>Choose the graphics card, processor and memory closest to yours. Not sure? On Windows press Win + R, type <b>dxdiag</b> and look at "Processor", "Memory" and the Display tab.</p>'
     // Deploy 153: the browser can read the graphics card (WebGL); processor and RAM stay the visitor's choice.
     . '<p style="margin-top:.7rem"><button type="button" class="gp-btn s" id="gp-detect">Detect my graphics card</button> <span class="gp-src" id="gp-detect-msg"></span></p>'
-    . '<div class="gp-check" style="margin-top:.9rem" data-req="' . rocH(json_encode(['min' => $rMin, 'rec' => $rRec])) . '">'
+    . '<div class="gp-check" style="margin-top:.9rem" data-req="' . rocH(json_encode(['min' => $rMin, 'rec' => $rRec, 'nr' => !empty($g['req']['nr'])])) . '">'
     . '<label>Graphics card<select data-k="gpu">' . $opt($gpus, 'GeForce GTX 1650') . '</select></label>'
     . '<label>Processor<select data-k="cpu">' . $opt($cpus, 'Intel Core i5-8400') . '</select></label>'
     . '<label>Memory (RAM)<select data-k="ram">' . implode('', array_map(function ($r) { return '<option value="' . $r . '"' . ($r === 16 ? ' selected' : '') . '>' . $r . ' GB</option>'; }, [4, 6, 8, 12, 16, 24, 32, 64])) . '</select></label>'
@@ -819,6 +828,7 @@ if ($sim) {
 // More on the site (Deploy 82): the pages a player checking requirements needs next.
 $more = [['/compatibility/?steam=' . (int)$g['appid'], 'Full PC check', 'Laptops, consoles, handhelds and more parts'],
          [ROC_GP_NOGPU, 'Games without a graphics card', 'The games a laptop with integrated graphics plays'],
+         ['/can-i-run/report-2026/', 'PC requirements report', 'What ' . number_format(count($games)) . ' games need, year by year'],
          ['/category/gpu/', 'Graphics cards', 'Picks for every budget'], ['/category/cpu/', 'Processors', 'Gaming CPUs from entry to high end'],
          ['/category/ram/', 'Memory (RAM)', 'DDR4 and DDR5 kits'], ['/gaming-platforms/pc-handheld-pc/', 'PC and handheld PC guide', 'Gaming platform guide'],
          ['/guides/', 'Gaming guides', 'Buying, setup and game settings, step by step'], ['/can-i-run/', 'All PC games', number_format(count($games)) . ' games with their requirements']];
@@ -834,7 +844,7 @@ $m .= "<script>(function(){var box=document.querySelector('.gp-check'),res=docum
     . "function v(k){return parseFloat(box.querySelector('[data-k=\"'+k+'\"]').value)}"
     . "function run(){var have={gpu:v('gpu'),cpu:v('cpu'),ram:v('ram')},mn=R.min||{},rc=R.rec||mn,w={gpu:.5,cpu:.3,ram:.2},s=0,t=0,below=false,miss=[];"
     . "for(var k in w){var need=rc[k]||mn[k];if(need>0){s+=w[k]*Math.min(1,have[k]/need);t+=w[k];if(have[k]<need)miss.push(k);}if(mn[k]>0&&have[k]<mn[k])below=true;}"
-    . "var p=Math.round(100*s/(t||1));if(below)p=Math.min(p,40);if(miss.length)p=Math.min(p,89);p=Math.max(5,p);"
+    . "var p=Math.round(100*s/(t||1));if(below)p=Math.min(p,40);var room=!R.nr||(have.gpu>=(mn.gpu||0)+2&&have.cpu>=(mn.cpu||0)+2&&have.ram>=2*(mn.ram||0));if(miss.length||!room)p=Math.min(p,89);p=Math.max(5,p);"
     . "var c=p>=90?'ok':p>=70?'mid':p>40?'low':'no',txt=p>=90?'Runs on high settings (meets the recommended specs).':p>=70?'Playable on medium to high settings.':p>40?'Playable on low settings only.':'Below the minimum specs: it will not run well.';"
     . "var names={gpu:'graphics card',cpu:'processor',ram:'RAM'},up=miss.map(function(k){return names[k]});"
     . "res.className='gp-res '+c;res.innerHTML='<b>'+p+'%</b><div class=\"gp-bar\"><i style=\"width:'+p+'%\"></i></div>'+txt+(up.length?' Upgrade first: '+up.join(', ')+'.':'');"

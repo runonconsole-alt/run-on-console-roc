@@ -74,6 +74,7 @@ function rocGpAll(string $root): array {
         $g['slug'] = $slug;
         $g['name'] = rocGpName((string)$g['t']);
         $g['rank'] = count($all) + 1;
+        $g = rocGameFix($g);   // Deploy 155: recommended never below the minimum; "nr" = Steam lists only the minimum (agent-lib.php)
         // Two Steam games with one name (DOOM 3 and its re-release): both names get their Steam year,
         // so the pages do not share a title.
         if ($slug !== $first && !empty($g['y']) && !empty($all[$first]['y']) && (int)$g['y'] !== (int)$all[$first]['y']) {

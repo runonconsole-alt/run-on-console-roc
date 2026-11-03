@@ -1,0 +1,30 @@
+{
+ "deploy": 154,
+ "date": "2026-11-03",
+ "title": "PC Game Requirements Report",
+ "changes": [
+  "New page runonconsole.com/can-i-run/report-2026/ with our own numbers from the official Steam requirements of every game: how many games integrated graphics run, how much of the list each graphics card class runs, how requirements grew year by year (2015 to now), the most demanding and the lightest popular games, the method and a ready line to cite it",
+  "The numbers are worked out on each visit from the live game list, so the report updates itself when games are added; Article and Dataset schema; in the Can I run sitemap",
+  "Linked from the Can I run hub, every game page (More for PC players) and How we check games"
+ ],
+ "checks": [
+  {
+   "label": "Report page",
+   "type": "contains",
+   "path": "api/v1/report-lib.php",
+   "text": "rocGpReport"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BD3hR-ns.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/154",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it.",
+  "Cloudflare: Purge Everything."
+ ],
+ "build": "index-BD3hR-ns.js"
+}

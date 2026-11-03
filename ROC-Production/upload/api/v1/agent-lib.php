@@ -303,9 +303,51 @@ function rocAgentFindGame(string $root, string $text): ?array {
     return $best;
 }
 
+/**
+ * Deploy 155: a game's scores with the recommended never below the minimum. When a Steam page lists only the
+ * minimum (or names no part in its recommended block), the stored "recommended" was a low estimate (graphics 1,
+ * 2 GB), so a PC that only met the minimum showed "high settings"; then the minimum part counts as recommended.
+ * The same rule is in GameCompatibilityView.jsx (fixReq) and report-lib.php.
+ */
+function rocReqFix(array $req): array {
+    if (array_key_exists('nr', $req)) return $req;   // already fixed
+    $min = (array)($req['min'] ?? []); $rec = (array)($req['rec'] ?? []);
+    // No recommended at all: missing, or every part only estimated while the minimum names them ("nr" = no recommended).
+    $estAll = !empty($rec['est']['gpu']) && !empty($rec['est']['cpu']) && !empty($rec['est']['ram']);
+    $req['nr'] = !$rec || ($estAll && !(!empty($min['est']['gpu']) && !empty($min['est']['cpu']) && !empty($min['est']['ram'])));
+    $out = $rec;
+    foreach (['gpu', 'cpu', 'ram'] as $k) {
+        $m = $min[$k] ?? null; $r = $rec[$k] ?? null;
+        if (!is_numeric($r) || !empty($rec['est'][$k]) && empty($min['est'][$k]) || (is_numeric($m) && (float)$r < (float)$m)) {
+            $out[$k] = $m;
+            if (isset($out['est'][$k]) && empty($min['est'][$k])) unset($out['est'][$k]);
+        }
+    }
+    if (isset($out['est']) && !$out['est']) unset($out['est']);
+    $req['rec'] = $out;
+    return $req;
+}
+
+/** Deploy 155: a PC well above a minimum-only game (two tiers on graphics and processor, twice the RAM). */
+function rocReqRoom(array $min, ?float $gpu, ?float $cpu, ?float $ram): bool {
+    foreach ([['gpu', $gpu, 2, 0], ['cpu', $cpu, 2, 0], ['ram', $ram, 0, 2]] as [$k, $have, $plus, $times]) {
+        if ($have === null || !is_numeric($min[$k] ?? null)) continue;
+        if ($have < ($times ? $times * (float)$min[$k] : (float)$min[$k] + $plus)) return false;
+    }
+    return true;
+}
+
+/** rocReqFix for a whole game entry: a game whose Steam page has no recommended block at all ("rec" empty) is "nr" too. */
+function rocGameFix(array $g): array {
+    $noBlock = array_key_exists('rec', $g) && (!is_array($g['rec']) || !array_filter($g['rec']));
+    $g['req'] = rocReqFix((array)($g['req'] ?? []));
+    if ($noBlock) $g['req']['nr'] = true;
+    return $g;
+}
+
 /** The checker's verdict for a game and a PC (the same rules as /compatibility/). */
 function rocAgentCheck(array $game, ?float $gpu, ?float $cpu, ?float $ram): array {
-    $req = (array)($game['req'] ?? []);
+    $req = rocGameFix($game)['req'];
     $min = (array)($req['min'] ?? []); $rec = (array)($req['rec'] ?? $min);
     $known = function ($v) { return is_numeric($v) && $v > 0; };
     $parts = [];
@@ -316,6 +358,9 @@ function rocAgentCheck(array $game, ?float $gpu, ?float $cpu, ?float $ram): arra
     $below = function ($have, $m) use ($known) { return $have !== null && $known($m) && $have < $m; };
     $belowMin = $below($gpu, $min['gpu'] ?? null) || $below($cpu, $min['cpu'] ?? null) || $below($ram, $min['ram'] ?? null);
     if ($belowMin) $pct = min($pct, 40);
+    // Deploy 155: Steam lists only the minimum: meeting it is not proof of high settings; high only with clear room
+    // above it (graphics and processor two tiers higher, twice the RAM; a part not given does not count).
+    if (!empty($req['nr']) && !rocReqRoom($min, $gpu, $cpu, $ram)) $pct = min($pct, 89);
     // Deploy 138: "high settings" (90%+) only when every part meets the recommended specs; a GTX 1650 PC was
     // 95% "high settings" for Elden Ring, whose recommended card is a GTX 1070.
     if ($below($gpu, $rec['gpu'] ?? null) || $below($cpu, $rec['cpu'] ?? null) || $below($ram, $rec['ram'] ?? null)) $pct = min($pct, 89);
