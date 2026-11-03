@@ -76,9 +76,15 @@ const ROC_BLOG_AUTO_FROM = '2026-11-02';   // Deploy 126: the week of Monday 2 N
 const ROC_BLOG_DAYS = [1, 3, 5, 7];
 const ROC_BLOG_PER_DAY = 1;
 const ROC_BLOG_TIME = '12:00';
-function rocBlogTime(PDO $pdo): string {
-    $t = (string)rocBlogGet($pdo, 'blog_time', ROC_BLOG_TIME);
-    return preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $t) ? $t : ROC_BLOG_TIME;
+/** Owner, 2026-11-03 (Deploy 158): two posts on every blog day, at 12:00 and 18:00 Pakistan time, each on a new topic. */
+const ROC_BLOG_TIMES = ['12:00', '18:00'];
+function rocBlogTime(PDO $pdo): string { return implode(' and ', rocBlogTimes($pdo)); }
+/** The publishing times of a blog day (CMS setting blog_times, else ROC_BLOG_TIMES). */
+function rocBlogTimes(PDO $pdo): array {
+    $t = rocBlogGet($pdo, 'blog_times', null);
+    $t = is_array($t) ? array_values(array_filter(array_map('strval', $t), function ($x) { return (bool)preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $x); })) : [];
+    sort($t);
+    return $t ?: ROC_BLOG_TIMES;
 }
 function rocBlogAutoFrom(PDO $pdo): string { $v = rocBlogGet($pdo, 'blog_auto_from', null); return $v === null ? ROC_BLOG_AUTO_FROM : (string)$v; }
 function rocBlogDays(PDO $pdo): array {
@@ -179,9 +185,11 @@ function rocBlogFreeSlots(PDO $pdo, int $days = 7): array {
     $q = $pdo->query("SELECT published_at FROM blogs WHERE status IN ('scheduled', 'published') AND (category IS NULL OR (category <> 'News' AND category NOT LIKE 'Guide%')) AND published_at >= '" . gmdate('Y-m-d H:i:s', time() - 86400) . "'");
     foreach ($q->fetchAll(PDO::FETCH_COLUMN) as $t) $taken[] = strtotime($t . ' UTC');
     $perDay = rocBlogPerDay($pdo); $blogDays = rocBlogDays($pdo);
-    // From the restart day the posts go live at one fixed time (12:00), not at the CMS publishing slots.
+    // From the restart day the posts go live at fixed times (12:00 and 18:00, Deploy 158), one post per time.
     $from = rocBlogAutoFrom($pdo);
-    $slots = ($from !== '' && (new DateTime('now', $tz))->format('Y-m-d') >= $from) ? [rocBlogTime($pdo)] : rocBlogSlots($pdo);
+    $fixed = $from !== '' && (new DateTime('now', $tz))->format('Y-m-d') >= $from;
+    $slots = $fixed ? rocBlogTimes($pdo) : rocBlogSlots($pdo);
+    if ($fixed) $perDay = count($slots);
     $onDay = [];
     foreach ($taken as $t) { $k = (new DateTime('@' . $t))->setTimezone($tz)->format('Y-m-d'); $onDay[$k] = ($onDay[$k] ?? 0) + 1; }
     $out = [];
@@ -1204,8 +1212,9 @@ function rocBlogPrompt(array $brief, string $publishAt): string {
         . (!empty($brief['searches']) ? 'REAL GOOGLE SEARCHES that brought readers to ROC (Search Console). Answer the ones that fit this post, for example as an <h2> or an FAQ question, in honest helpful words; skip any that do not fit the topic: ' . implode(' | ', $brief['searches']) . "\n" : '')
         . "\nINTERNAL LINKS YOU MUST USE (each once). Anchor text = the searched keyword of the page it points to: for a product its full name plus its type (\"Razer Viper V4 Pro gaming mouse\"), for a hub page its \"best ...\" phrase (\"best gaming mice\"), for a post its main keyword. Never \"click here\" or \"this page\":\n" . $links($brief['links']['must'])
         . "\n\nINTERNAL LINKS YOU MAY USE (3-6 of them, so the post has 5-10 internal links in all):\n" . $links($brief['links']['may'])
-        . "\nUse NO other internal addresses. External links only to official sources (game publishers, manufacturers) and only if essential.\n\n"
+        . "\nUse NO other internal addresses. External links only to official sources (game publishers, manufacturers) and only if essential, plus ROC SEO when the rules below allow it.\n\n"
         . "RULES\n"
+        . "- ROC SEO: only when the topic is about running a website, a gaming blog, a YouTube or Twitch channel, streaming or growing an audience online, add ONE short paragraph that mentions ROC SEO (https://getrocseo.com/), Run On Console's own free Chrome extension for SEO audits, site crawls and checking whether AI assistants cite a site, as a genuinely useful tool, linked once. Never mention it in any other post.\n"
         . "- At least 1,000 words (aim for 1,200-1,600) of genuinely useful, accurate content in clear natural English. No filler, no keyword stuffing.\n"
         . "- When the post covers products, give each product its own <h2> or <h3> section that links its product page once (from the links above): who it is for, key features, pros and cons. The site adds a short \"similar products\" box after such sections, so do not write one yourself.\n"
         . "- Focus keyword in the title, in the first 100 words, in one <h2> and in the meta description.\n"

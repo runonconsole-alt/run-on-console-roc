@@ -729,6 +729,7 @@ function rocRenderPost(string $root, array $p, ?PDO $pdo = null): void {
     if ($news) $m .= rocAdUnit('article');
     $m .= '<div class="roc-article">' . $body . '</div>';
     if ($pdo) $m .= rocRelatedPosts($pdo, $p);
+    $m .= rocRocSeoBox();
     if ($pdo) $m .= rocTopicChips($pdo, $p);
     // Links to the pages Google has not indexed yet (Deploy 116): news, blogs and guides are indexed quickly.
     if ($pdo) { require_once __DIR__ . '/api/v1/link-boost-lib.php'; $m .= rocLinkBoostBox($pdo, (string)parse_url(rocPostUrlOf($p), PHP_URL_PATH)); }
@@ -897,6 +898,27 @@ function rocRenderList(string $root, PDO $pdo, string $query, int $page, bool $n
  * topic (shared title words, the same topic category; ties go to the older story, so old posts get links too) and
  * to the previous and next story of its section by date, so every post has at least two links from other posts.
  */
+/**
+ * Owner, 2026-11-03 (Deploy 158): ROC SEO (getrocseo.com, a Chrome extension) is Run On Console's own product; a short
+ * box after every post introduces it to readers who run a site or a channel. Our own product, so a plain link, said so.
+ */
+const ROC_SEO_SITE = 'https://getrocseo.com/';
+const ROC_SEO_CHROME = 'https://chromewebstore.google.com/detail/roc-seo-seo-audit-site-cr/mppegackhdlnoifemlpldcmiaabadajm';
+function rocRocSeoBox(): string {
+    $utm = '?utm_source=runonconsole&utm_medium=referral&utm_campaign=post_box';
+    return '<aside class="rs-box" aria-label="ROC SEO, from the Run On Console team"><span class="rs-k">From the Run On Console team</span>'
+        . '<strong>Run a gaming blog, a channel site or a store? Try ROC SEO</strong>'
+        . '<p>ROC SEO is our free Chrome extension: it audits any page in seconds (titles, schema, Core Web Vitals, AI readiness), crawls up to 1,000 pages of your site for free '
+        . 'and checks whether ChatGPT, Perplexity and Google AI cite your website.</p>'
+        . '<div class="rs-b"><a class="y" href="' . ROC_SEO_CHROME . '" target="_blank" rel="noopener" onclick="window.rocTrack&&rocTrack(\'roc_rocseo_click\',\'chrome\',location.pathname)">Add to Chrome, free</a>'
+        . '<a class="r" href="' . ROC_SEO_SITE . $utm . '" target="_blank" rel="noopener" onclick="window.rocTrack&&rocTrack(\'roc_rocseo_click\',\'site\',location.pathname)">getrocseo.com</a></div></aside>'
+        . '<style>.rs-box{margin-top:2rem;border:1px solid #c7d2fe;background:linear-gradient(135deg,#eef2ff,#ecfeff);border-radius:1.25rem;padding:1.1rem 1.25rem}'
+        . '.rs-k{display:block;font:800 .7rem Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#4338ca}.rs-box strong{display:block;font:800 1.05rem Outfit,Inter,sans-serif;color:#0f172a;margin:.25rem 0 .35rem}'
+        . '.rs-box p{font-size:.88rem;color:#334155;line-height:1.6;margin:0}.rs-b{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem}.rs-b a{font:800 .82rem Inter,sans-serif;padding:.55rem .9rem;border-radius:.75rem;text-decoration:none}'
+        . '.rs-b a.y{background:#4338ca;color:#fff}.rs-b a.r{border:1px solid #a5b4fc;color:#3730a3;background:#fff}'
+        . 'html.roc-dark .rs-box{background:linear-gradient(135deg,#1e1b4b,#083344);border-color:#3730a3}html.roc-dark .rs-box strong{color:#e2e8f0}html.roc-dark .rs-box p{color:#cbd5e1}html.roc-dark .rs-b a.r{background:#0b1220;color:#c7d2fe}</style>';
+}
+
 function rocRelatedPosts(PDO $pdo, array $p): string {
     static $all = null;
     if ($all === null) {

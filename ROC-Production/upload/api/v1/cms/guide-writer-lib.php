@@ -25,6 +25,17 @@ const ROC_GUIDE_GAP = 7200;   // seconds between two guides
 const ROC_GUIDE_FROM = '2026-11-02';
 const ROC_GUIDE_DAYS = [2, 5, 6];     // 1 = Monday ... 7 = Sunday: Tuesday, Friday, Saturday
 const ROC_GUIDE_TIME = '12:00';
+/** Owner, 2026-11-03 (Deploy 158): two guides on every guide day, at 12:00 and 18:00, each written 2.5 hours before. */
+const ROC_GUIDE_TIMES = ['12:00', '18:00'];
+
+/** On a guide day: [guides written today, the time the next one goes live, from when it may be written] or null when done. */
+function rocGuideSlotToday(PDO $pdo): ?array {
+    $day = (new DateTime('now', new DateTimeZone(ROC_BLOG_TZ)))->format('Y-m-d');
+    $done = count(array_filter(rocGuideLog($pdo), function ($l) use ($day) { return ($l['day'] ?? '') === $day; }));
+    if ($done >= count(ROC_GUIDE_TIMES)) return null;
+    $hm = ROC_GUIDE_TIMES[$done];
+    return [$done, $hm, date('H:i', strtotime('2000-01-01 ' . $hm) - 9000)];
+}
 
 /** [key, title idea, type, hardware group, product category, focus keyword]. */
 const ROC_GUIDE_TOPICS = [
@@ -146,12 +157,13 @@ function rocGuideWait(PDO $pdo): ?string {
     if (!$s['on']) return 'off';
     if (rocAiEnded($pdo)) return 'ended: the AI writes guides until ' . rocAiLastDay($pdo) . ' (Deploy 145)';
     if (rocGuideWeekly()) {
-        // Deploy 126: one guide on Tuesday, Friday and Saturday, written from 09:30 for 12:00.
+        // Deploy 126: Tuesday, Friday and Saturday. Deploy 158: two guides, written from 09:30 for 12:00 and from 15:30 for 18:00.
         if (!in_array((int)$now->format('N'), ROC_GUIDE_DAYS, true)) return 'not a guide day';
-        foreach (rocGuideLog($pdo) as $l) if (($l['day'] ?? '') === $day) return 'done today';
+        $slot = rocGuideSlotToday($pdo);
+        if ($slot === null) return 'done today';
         $hm = $now->format('H:i');
-        if ($hm < '09:30') return 'writes from 09:30';
-        if ($hm > '20:00') return 'too late today';
+        if ($hm < $slot[2]) return 'writes from ' . $slot[2] . ' (for ' . $slot[1] . ')';
+        if ($hm > '23:00') return 'too late today';
         return null;
     }
     if ($s['until'] !== '' && $day >= $s['until']) return 'ended';
@@ -181,6 +193,7 @@ function rocGuideWrite(PDO $pdo, string $root, ?array $topic = null, ?string $pu
     $prompt = "You write for runonconsole.com (Run On Console), a gaming and PC hardware site. Write ONE practical, genuinely helpful step by step GUIDE.\n\n"
         . "GUIDE TYPE: {$type}\nTITLE IDEA: {$idea}\nFOCUS KEYWORD: {$kw}\n\nINTERNAL LINKS (use 5-8 of them, each once, descriptive anchor text, never \"click here\"):\n" . implode("\n", $links) . "\n\n"
         . "RULES\n- At least 1,100 words (aim for 1,300-1,600), clear simple English for gamers, no filler.\n"
+        . "- ROC SEO: only when the topic is about running a website, a gaming blog, a YouTube or Twitch channel, streaming or growing an audience online, add ONE short paragraph that mentions ROC SEO (https://getrocseo.com/), Run On Console's own free Chrome extension for SEO audits, site crawls and checking whether AI assistants cite a site, as a genuinely useful tool, linked once. Never mention it in any other post.\n"
         . "- Start with 2-3 sentences that say what the reader will achieve. Then a short \"What you need\" list.\n"
         . "- The steps as <h2> sections (\"Step 1: ...\") or an <ol> with a short explanation for each step; add tips and common mistakes.\n"
         . "- No prices, no invented benchmarks or test results, never \"we tested\". If unsure of a detail, leave it out.\n"
@@ -258,7 +271,8 @@ function rocGuideTick(PDO $pdo, string $root): ?string {
     $at = null;
     if (rocGuideWeekly()) {
         $tz = new DateTimeZone(ROC_BLOG_TZ);
-        $at = gmdate('Y-m-d H:i:s', (new DateTime((new DateTime('now', $tz))->format('Y-m-d') . ' ' . ROC_GUIDE_TIME, $tz))->getTimestamp());
+        $slot = rocGuideSlotToday($pdo);
+        $at = gmdate('Y-m-d H:i:s', (new DateTime((new DateTime('now', $tz))->format('Y-m-d') . ' ' . ($slot ? $slot[1] : ROC_GUIDE_TIME), $tz))->getTimestamp());
     }
     $r = rocGuideWrite($pdo, $root, null, $at);
     $st['last_error'] = $r['ok'] ? '' : gmdate('Y-m-d H:i') . ' UTC: ' . $r['error'];

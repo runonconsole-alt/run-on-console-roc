@@ -1068,6 +1068,14 @@ RELEASES = [
          checks=[dict(label='Steam Deck ratings', type='contains', path='api/v1/steam-deck-lib.php', text='rocDeckTick')],
          pr=REPO + '157',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'To rate every game now (about 40 minutes, it can run in the background): nohup php public_html/api/v1/cron/cli-steam-deck.php --apply > ~/steam-deck.log 2>&1 &', 'Cloudflare: Purge Everything.']),
+    dict(deploy=158, date='2026-11-03', title='Two blog posts and two guides a day, and ROC SEO on the site',
+         changes=['On blog days (Mon, Wed, Fri, Sun) two posts go live, at 12:00 and 18:00 Pakistan time, each on a new topic from the plan; on guide days (Tue, Fri, Sat) two guides, at 12:00 and 18:00 (written from 09:30 and 15:30). AI writing still ends after 15 November',
+                  'ROC SEO (getrocseo.com), our own SEO Chrome extension: a short box after every blog, guide and news post, a section on the About page, a line in llms.txt and in what ROC the assistant knows; the writers mention it in a paragraph only when a post is about running a website, a blog or a channel',
+                  'Clicks on the ROC SEO box are counted in Google Analytics (roc_rocseo_click) and the site link carries utm tags'],
+         checks=[dict(label='Two times a day', type='contains', path='api/v1/cms/blog-engine-lib.php', text='ROC_BLOG_TIMES'),
+                 dict(label='ROC SEO box', type='contains', path='blog-render.php', text='rocRocSeoBox')],
+         pr=REPO + '158',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
