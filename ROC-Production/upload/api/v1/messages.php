@@ -4,6 +4,7 @@
  *
  * POST /api/v1/messages.php  (JSON)
  *   kind      'contact' | 'support' | 'write_for_us' | 'suggestion' | 'comment' | 'review' (/reviews/, Deploy 151)
+ *             | 'fps' (a player's frame rate on a game page, Deploy 160: name may be a nickname, email optional)
  *   name, email, subject, message
  *   meta      optional object (write for us: plan, niche, title, contact)
  *   website   must stay empty (hidden field that only bots fill in)
@@ -18,9 +19,9 @@ require_once __DIR__ . '/account-runtime.php';   // config, database, email queu
 
 const ROC_MSG_INBOX = ['contact' => 'contact@runonconsole.com', 'support' => 'support@runonconsole.com',
                        'write_for_us' => 'contact@runonconsole.com', 'suggestion' => 'suggestions@runonconsole.com',
-                       'comment' => 'comments@runonconsole.com', 'review' => 'contact@runonconsole.com'];
+                       'comment' => 'comments@runonconsole.com', 'review' => 'contact@runonconsole.com', 'fps' => 'contact@runonconsole.com'];
 const ROC_MSG_LABEL = ['contact' => 'Contact', 'support' => 'Support', 'write_for_us' => 'Write for us',
-                       'suggestion' => 'Suggestion', 'comment' => 'Comment', 'review' => 'Review'];
+                       'suggestion' => 'Suggestion', 'comment' => 'Comment', 'review' => 'Review', 'fps' => 'FPS report'];
 
 header('Content-Type: application/json; charset=utf-8');
 if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
@@ -75,6 +76,26 @@ if ($kind === 'review') {
     unset($meta['published']);
 }
 
+// An FPS report (Deploy 160): checked fields, a nickname is enough and the email is optional; shown on the game page
+// only after the owner presses Publish in the notification email.
+if ($kind === 'fps') {
+    $res = ['720p', '900p', '1080p', '1440p', '4K', 'Steam Deck'];
+    $pre = ['Low', 'Medium', 'High', 'Ultra'];
+    $f = ['game' => strtolower($clip($meta['game'] ?? '', 120)), 'gpu' => $clip($meta['gpu'] ?? '', 60), 'cpu' => $clip($meta['cpu'] ?? '', 60),
+          'ram' => (string)(int)($meta['ram'] ?? 0), 'res' => (string)($meta['res'] ?? ''), 'preset' => (string)($meta['preset'] ?? ''), 'fps' => (string)(int)($meta['fps'] ?? 0),
+          'upscale' => !empty($meta['upscale']) && $meta['upscale'] !== '0' ? '1' : '0'];
+    if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $f['game']) || !preg_match('/^[A-Za-z0-9 .\/()+-]{2,60}$/', $f['gpu']) || !preg_match('/^[A-Za-z0-9 .\/()+-]{2,60}$/', $f['cpu'])
+        || (int)$f['ram'] < 2 || (int)$f['ram'] > 128 || !in_array($f['res'], $res, true) || !in_array($f['preset'], $pre, true) || (int)$f['fps'] < 1 || (int)$f['fps'] > 500)
+        rocMsgOut(422, ['success' => false, 'error' => 'Please choose your parts and settings and enter the FPS (1 to 500).']);
+    $meta = $f;
+    if ($name === '') $name = 'A player';
+    $subject = 'FPS report: ' . $f['game'];
+    $message = $f['gpu'] . ', ' . $f['cpu'] . ', ' . $f['ram'] . ' GB RAM; ' . $f['res'] . ' ' . $f['preset'] . ($f['upscale'] === '1' ? ' with upscaling (DLSS/FSR)' : '') . ': ' . $f['fps'] . ' FPS'
+        . ($clip($in['message'] ?? '', 300) !== '' ? "
+
+Note: " . $clip($in['message'] ?? '', 300) : '');
+}
+
 // The page the form was sent from (CMS > Live activity, Messages).
 $from = (string)parse_url((string)($_SERVER['HTTP_REFERER'] ?? ''), PHP_URL_PATH);
 if ($from !== '' && !isset($meta['page'])) $meta['page'] = $clip($from, 200);
@@ -83,7 +104,7 @@ if ($from !== '' && !isset($meta['page'])) $meta['page'] = $clip($from, 200);
 if ($clip($in['website'] ?? '', 200) !== '') rocMsgOut(200, ['success' => true, 'reference' => 'MSG-' . random_int(100000, 999999)]);
 
 if ($name === '' || $message === '') rocMsgOut(422, ['success' => false, 'error' => 'Please fill in your name and message.']);
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) rocMsgOut(422, ['success' => false, 'error' => 'Please enter a valid email address.']);
+if (!($kind === 'fps' && $email === '') && !filter_var($email, FILTER_VALIDATE_EMAIL)) rocMsgOut(422, ['success' => false, 'error' => 'Please enter a valid email address.']);
 
 $db = getDBConnection();
 if (!$db) rocMsgOut(503, ['success' => false, 'error' => 'The server is busy. Please try again in a minute.']);
@@ -110,11 +131,11 @@ try {
 $esc = function ($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); };
 // A review is shown on /reviews/ only after the owner presses Publish in this email (signed links, reviews-lib.php).
 $reviewBtns = '';
-if ($kind === 'review' && is_file(__DIR__ . '/reviews-lib.php')) {
+if (($kind === 'review' || $kind === 'fps') && is_file(__DIR__ . '/reviews-lib.php')) {
     require_once __DIR__ . '/reviews-lib.php';
     $rl = rocReviewLinks(dirname(__DIR__, 2), $id);
     $reviewBtns = '<p style="margin:0 0 8px">Not shown on the site yet. Check it is real, then:</p><p>'
-        . '<a style="display:inline-block;padding:12px 20px;background:#047857;color:#fff;border-radius:8px;text-decoration:none;margin-right:8px" href="' . $esc($rl['publish']) . '">Publish this review</a>'
+        . '<a style="display:inline-block;padding:12px 20px;background:#047857;color:#fff;border-radius:8px;text-decoration:none;margin-right:8px" href="' . $esc($rl['publish']) . '">Publish this ' . ($kind === 'fps' ? 'FPS report' : 'review') . '</a>'
         . '<a style="display:inline-block;padding:12px 20px;background:#e2e8f0;color:#0f172a;border-radius:8px;text-decoration:none" href="' . $esc($rl['hide']) . '">Hide it again</a></p>';
 }
 $rows = ['Name' => $name, 'Email' => $email] + ($subject !== '' ? ['Subject' => $subject] : []);
@@ -132,8 +153,8 @@ $job = null;
 try { $job = rocQueue($db, ROC_MSG_INBOX[$kind], '[ROC · ' . ROC_MSG_LABEL[$kind] . '] ' . ($subject !== '' ? $subject : $name) . ' (' . $email . ')', $html, 5); }
 catch (\Throwable $e) { error_log('[ROC messages] queue failed: ' . get_class($e)); }
 
-/* A copy for the sender: what they sent and the reference. */
-try {
+/* A copy for the sender: what they sent and the reference (an FPS report may come without an email). */
+if ($email !== '') try {
     $copy = '<!doctype html><html><body style="margin:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif">'
           . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">'
           . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">'

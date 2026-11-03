@@ -33,7 +33,7 @@ if ($id <= 0 || !in_array($a, ['publish', 'hide'], true) || !hash_equals(rocRevi
 $db = function_exists('getDBConnection') ? getDBConnection() : null;
 if (!$db) $page('The server is busy. Please try the link again in a minute.', false);
 
-$q = $db->prepare("SELECT meta_json FROM roc_messages WHERE id = ? AND kind = 'review' LIMIT 1");
+$q = $db->prepare("SELECT kind, meta_json FROM roc_messages WHERE id = ? AND kind IN ('review', 'fps') LIMIT 1");
 $q->execute([$id]);
 $row = $q->fetch(PDO::FETCH_ASSOC);
 if (!$row) $page('This review was not found (it may have been deleted in the CMS).', false);
@@ -41,4 +41,5 @@ $meta = json_decode((string)($row['meta_json'] ?? ''), true) ?: [];
 $meta['published'] = $a === 'publish' ? 1 : 0;
 $db->prepare('UPDATE roc_messages SET meta_json = ?, updated_at = ? WHERE id = ?')
    ->execute([json_encode($meta, JSON_UNESCAPED_UNICODE), date('Y-m-d H:i:s'), $id]);
-$page($a === 'publish' ? 'The review is published on /reviews/.' : 'The review is hidden from /reviews/.', true);
+$where = $row['kind'] === 'fps' ? 'the game page (/can-i-run/' . ($meta['game'] ?? '') . '/)' : '/reviews/';   // Deploy 160: FPS reports too
+$page(($row['kind'] === 'fps' ? 'The FPS report' : 'The review') . ($a === 'publish' ? ' is published on ' : ' is hidden from ') . $where . '.', true);

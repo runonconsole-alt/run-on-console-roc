@@ -788,6 +788,10 @@ $m .= '<section class="gp-card" id="check"><h2>Check your PC</h2>'
     . '<a class="gp-btn s" href="#requirements">See the requirements</a>'
     . '<button type="button" class="gp-btn s" data-roc-ask="' . rocH('Can my PC run ' . $name . '? My graphics card: , processor: , RAM: ') . '">Ask ROC about my PC</button></div></section>';
 
+// Players' FPS reports (Deploy 160): published after the owner checks them (api/v1/fps-lib.php).
+require_once __DIR__ . '/api/v1/fps-lib.php';
+$m .= rocFpsSection($pdo, $slug, $name, $gpus, $cpus);
+
 // Steam Deck (Deploy 157): Valve's rating and the test results behind it.
 if ($deck) {
     $m .= '<section class="gp-card" id="steam-deck"><h2>' . rocH($name) . ' on Steam Deck: ' . rocH($deck['label']) . '</h2>'
