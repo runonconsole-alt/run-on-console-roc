@@ -1,0 +1,23 @@
+{
+ "deploy": 159,
+ "date": "2026-11-03",
+ "title": "Blog page badge links to the guides",
+ "changes": [
+  "On /blogs/ the \"Hardware Reviews & Guides\" badge is now a link to /guides/ (owner)"
+ ],
+ "checks": [
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BiNS1jMI.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/160",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it.",
+  "php public_html/api/v1/cron/cli-refresh-templates.php --apply",
+  "CMS Dashboard: Clear cache, then Cloudflare: Purge Everything."
+ ],
+ "build": "index-BiNS1jMI.js"
+}
