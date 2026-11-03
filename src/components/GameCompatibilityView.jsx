@@ -67,6 +67,7 @@ export const GameCompatibilityView = () => {
   const [customDeviceName, setCustomDeviceName] = useState('My Custom PC / Gaming Laptop');
   const [customCpuTier, setCustomCpuTier] = useState('mid_i5'); // 'ultra_i9', 'high_i7', 'mid_i5', 'low_i3', 'ancient'
   const [customGpuTier, setCustomGpuTier] = useState('mid_rtx3060'); // 'ultra_rtx4080', 'high_rtx4070', 'mid_rtx3060', 'entry_gtx1650', 'integrated_uhd'
+  const [gpuDetectMsg, setGpuDetectMsg] = useState('');
   const [customRamGb, setCustomRamGb] = useState(16); // 4, 8, 16, 32, 64
   const [customStorage, setCustomStorage] = useState('nvme'); // 'nvme', 'sata_ssd', 'hdd'
 
@@ -160,6 +161,8 @@ export const GameCompatibilityView = () => {
     const below = (have, min) => known(min) && have < min;
     const belowMin = below(selectedGpu.score, req.min.gpu) || below(selectedCpu.score, req.min.cpu) || below(customRamGb, req.min.ram);
     if (belowMin) percentage = Math.min(percentage, 40);
+    // Deploy 153: "high settings" (90%+) only when every part meets the recommended specs, as on the game pages and in ROC.
+    if (parts.some(([, have, rec]) => have < rec)) percentage = Math.min(percentage, 89);
     percentage = Math.max(5, percentage);
 
     const bottlenecks = [];
@@ -554,6 +557,34 @@ export const GameCompatibilityView = () => {
                     </option>
                   ))}
                 </select>
+                {/* Deploy 153: the browser reads the graphics card (WebGL, public/roc-detect.js); the closest tier at or below it is picked. */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGpuDetectMsg('Reading your graphics card…');
+                    const go = () => window.rocDetectGpu().then((d) => {
+                      if (!d || d.score === null) {
+                        setGpuDetectMsg(d && d.name ? `Your browser shows "${d.name}", which we cannot rate yet: please choose the closest tier.` : 'Your browser does not share the graphics card (Safari and some privacy settings hide it): please choose it.');
+                        return;
+                      }
+                      const fit = [...gpuOptions].sort((x, y) => y.score - x.score).find((g) => g.score <= d.score) || gpuOptions[gpuOptions.length - 1];
+                      setCustomGpuTier(fit.id);
+                      setGpuDetectMsg(`Found: ${d.name}${d.laptop ? ' (laptop versions are often a little slower)' : ''}. Now choose your processor and RAM.`);
+                      if (window.rocTrack) window.rocTrack('roc_detect_gpu', d.name, '');
+                    });
+                    if (window.rocDetectGpu) { go(); return; }
+                    const sc = document.createElement('script');
+                    sc.src = '/roc-detect.js?v=153';
+                    sc.onload = go;
+                    sc.onerror = () => setGpuDetectMsg('Could not load the detector. Please choose your card.');
+                    document.head.appendChild(sc);
+                  }}
+                  className="mt-1.5 text-[11px] font-bold text-emerald-700 hover:text-emerald-900 underline"
+                >
+                  Detect my graphics card
+                </button>
+                {gpuDetectMsg && <p className="text-[11px] text-slate-500" role="status">{gpuDetectMsg}</p>}
+                <a href="/how-we-check/" className="block text-[11px] text-slate-500 hover:text-emerald-700 underline">How we check games</a>
               </div>
 
               {/* 3. RAM Size */}

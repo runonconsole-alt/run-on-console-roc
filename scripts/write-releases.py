@@ -1027,6 +1027,19 @@ RELEASES = [
          checks=[dict(label='Reviews page', type='contains', path='page-render.php', text='rocReviewsPage')],
          pr=REPO + '150',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'CMS > Menus & footer: add a link Reviews -> /reviews/ in the footer.', 'Cloudflare: Purge Everything.']),
+    dict(deploy=152, date='2026-10-31', title='Omar Abobakar: founder of Run On Console',
+         changes=['Everywhere (posts, author page, About, schema, ROC and AI files): Omar Abobakar is the founder of Run On Console and a digital marketer by profession; the Run On Console team writes the blogs, guides and news with their relevant sources, and he approves every article before it is published'],
+         checks=[dict(label='Founder title', type='contains', path='blog-render.php', text='Founder of Run On Console')],
+         pr=REPO + '151',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=153, date='2026-11-03', title='Detect my graphics card, and a How we check games page',
+         changes=['Game pages and the checker have a "Detect my graphics card" button: the browser shares its graphics card name (WebGL), the server rates it with the checker tier scale and picks the closest card; nothing is stored. Processor and RAM are chosen by the visitor (browsers cannot read them reliably)',
+                  'New page runonconsole.com/how-we-check/: where the requirements come from (official Steam pages), how a line with several cards is read, estimated parts, the 1.8-10 tier table, the 50/30/20 rule, the 40% and 89% limits, what we do not do (no FPS, no lab tests) and corrections; its numbers come from the live game list. Linked from every game page, the checker and the author page, and in the sitemap',
+                  'The full checker now also keeps "high settings" (90%+) for PCs that meet every recommended spec, like the game pages and ROC'],
+         checks=[dict(label='Detect endpoint', type='contains', path='api/v1/gpu-detect.php', text='rocGdName'),
+                 dict(label='How we check page', type='contains', path='page-render.php', text='rocMethodPage')],
+         pr=REPO + '152',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

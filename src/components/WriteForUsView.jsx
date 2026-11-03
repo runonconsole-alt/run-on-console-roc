@@ -100,7 +100,7 @@ export const WriteForUsView = () => {
   const guestFaqs = [
     {
       q: "Why is guest posting on Run On Console a paid service?",
-      a: "To maintain the highest editorial standards, every submission is thoroughly fact-checked, proofread, and formatted by our editor, Omar Abobakar. Paid slots get priority review. Every paid article is labelled Sponsored at the top, and payment never buys a place in our product picks or rankings. As Google requires for paid placements, links in sponsored articles are marked rel=\"sponsored\"."
+      a: "To maintain the highest editorial standards, every submission is thoroughly fact-checked, proofread, and formatted and approved by Omar Abobakar, the founder of Run On Console. Paid slots get priority review. Every paid article is labelled Sponsored at the top, and payment never buys a place in our product picks or rankings. As Google requires for paid placements, links in sponsored articles are marked rel=\"sponsored\"."
     },
     {
       q: "What payment methods do you accept?",

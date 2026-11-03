@@ -31,7 +31,7 @@ function rocLlmsBuild(PDO $pdo): string {
 
     $o .= "## About and Editorial Information\n";
     $o .= $line('About Run On Console', '/about/', 'who we are, what we cover and how picks are made');
-    $o .= $line('Omar Abobakar', '/author/omar-abobakar/', 'founder and editor, who signs the guides, blogs and news');
+    $o .= $line('Omar Abobakar', '/author/omar-abobakar/', 'founder of Run On Console, who approves the guides, blogs and news the team writes');
     $o .= $line('Privacy Policy & Affiliate Disclosure', '/privacy-policy/', 'privacy, cookies and the Amazon Associates disclosure');
     $o .= $line('Terms & Conditions', '/terms-and-conditions/');
     $o .= $line('Contact', '/contact/', 'questions, corrections and partnerships');

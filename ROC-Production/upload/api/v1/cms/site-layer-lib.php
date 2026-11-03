@@ -207,14 +207,14 @@ function rocLayerTrackingHead(array $t, string $path): string {
             . 'ev.forEach(function(e){addEventListener(e,go,{passive:true})});if(document.readyState==="complete")setTimeout(go,3500);else addEventListener("load",function(){setTimeout(go,3500)})})('
             . json_encode($later, JSON_UNESCAPED_SLASHES) . ');</script>';
     }
-    // The author page (Deploy 149, was the ROC Team page of Deploy 82): Omar Abobakar, owner and editor, who signs every post.
+    // The author page (Deploy 149, was the ROC Team page of Deploy 82): Omar Abobakar, founder, who approves every post.
     if ($path === '/author/omar-abobakar/') {
         $h .= '<script type="application/ld+json">' . json_encode(['@context' => 'https://schema.org', '@type' => 'ProfilePage',
-            'url' => 'https://runonconsole.com/author/omar-abobakar/', 'name' => 'Omar Abobakar, founder and editor of Run On Console',
+            'url' => 'https://runonconsole.com/author/omar-abobakar/', 'name' => 'Omar Abobakar, founder of Run On Console',
             'mainEntity' => ['@type' => 'Person', '@id' => 'https://runonconsole.com/author/omar-abobakar/#person', 'name' => 'Omar Abobakar',
                 'url' => 'https://runonconsole.com/author/omar-abobakar/', 'image' => 'https://runonconsole.com/images/omar-abobakar.jpg',
-                'jobTitle' => 'Founder and editor', 'sameAs' => ['https://www.linkedin.com/in/omar-abo-bakar-21ot02/'],
-                'description' => 'Omar Abobakar owns and edits Run On Console: the gaming hardware picks, the PC game requirements checker, the guides and the news.',
+                'jobTitle' => 'Founder of Run On Console', 'sameAs' => ['https://www.linkedin.com/in/omar-abo-bakar-21ot02/'],
+                'description' => 'Omar Abobakar is the founder of Run On Console and a digital marketer by profession. He approves every blog, guide and news article the Run On Console team writes from relevant sources.',
                 'worksFor' => ['@id' => 'https://runonconsole.com/#organization', '@type' => 'Organization', 'name' => 'Run On Console', 'url' => 'https://runonconsole.com/']]], JSON_UNESCAPED_SLASHES) . '</script>';
     }
     // Google Business Profile: linked from the Organization on the home page.

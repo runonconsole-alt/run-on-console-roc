@@ -78,7 +78,7 @@ function rocAiFilesBuild(PDO $pdo): array {
     $faq = [
         ['What is Run On Console?', $desc],
         ['Is the "Can I run it" checker free?', 'Yes. The checker is free and needs no account. It compares your PC with the official minimum and recommended requirements of 2,400+ games, taken from Steam or the game\'s publisher.'],
-        ['How are the product picks chosen?', 'Omar Abobakar, the editor, picks gear from manufacturer specs, official data and published reviews, and explains who each product is for. We do not claim lab testing. Our product picks and rankings cannot be bought; a brand can pay for a sponsored article, and every one is labelled Sponsored.'],
+        ['How are the product picks chosen?', 'The Run On Console team picks gear from manufacturer specs, official data and published reviews, and explains who each product is for. We do not claim lab testing. Our product picks and rankings cannot be bought; a brand can pay for a sponsored article, and every one is labelled Sponsored.'],
         ['Does Run On Console show prices?', 'No. Prices and stock change all the time, so we link straight to Amazon, where you always see the current price and availability.'],
         ['Are the Amazon links affiliate links?', 'Yes. As an Amazon Associate we earn from qualifying purchases, at no extra cost to you. It keeps the site free and independent.'],
         ['How is the gaming news checked?', 'Every news story is checked against at least two trusted sources, and the sources are listed with the story.'],

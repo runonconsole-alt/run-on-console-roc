@@ -198,8 +198,8 @@ export const STATIC_PUBLIC_ROUTES = [
   {
     path: '/author/omar-abobakar/',
     canonical: `${BASE_DOMAIN}/author/omar-abobakar/`,
-    title: 'Omar Abobakar, Founder and Editor | Run On Console',
-    description: 'Omar Abobakar founded and edits Run On Console: he writes and checks the blogs, guides and news, the gaming gear picks and the game checker.',
+    title: 'Omar Abobakar, Founder of Run On Console',
+    description: 'Omar Abobakar is the founder of Run On Console and a digital marketer. He approves every blog, guide and news article the team writes from relevant sources.',
     h1: 'Omar Abobakar',
     category: 'Author',
     lastmod: '2024-05-20T10:00:00+00:00'
