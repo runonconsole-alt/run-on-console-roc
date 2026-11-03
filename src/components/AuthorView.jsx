@@ -74,7 +74,7 @@ export const AuthorView = () => {
           The team writes each article from relevant sources and lists them; Omar reads and approves it before it goes live.
           Products are picked from their specifications, the maker&apos;s own data and well-known published reviews, with who each one is for.
           Game requirements come from the publishers (Steam for PC games). Our product picks and rankings cannot be bought; a brand can pay for a
-          sponsored article, and every one is labelled Sponsored. Found a mistake? Tell us on the <a href="/contact/" className="font-bold text-emerald-700">contact page</a>.
+          sponsored article, and every one is labelled Sponsored. How the game checker works is on <a href="/how-we-check/" className="font-bold text-emerald-700">How we check games</a>. Found a mistake? Tell us on the <a href="/contact/" className="font-bold text-emerald-700">contact page</a>.
         </p>
         <div className="flex flex-wrap gap-3 pt-1">
           <a href="/blogs/" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-5 rounded-xl inline-flex items-center gap-1.5 no-underline">

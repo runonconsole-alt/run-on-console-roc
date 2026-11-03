@@ -726,7 +726,7 @@ $heavy = function (array $p, string $of) { return $p[0] >= $p[1] ? 'needs more g
 if ($hv['all'] !== null) $qa .= '<li><b>How heavy:</b> ' . rocH($name) . ' ' . $heavy($hv['all'], 'the ' . number_format(count($games)) . ' PC games on Run On Console')
     . ($hv['genre'] !== null ? ', and ' . $heavy($hv['genre'], 'the ' . number_format($hv['genre_n']) . ' ' . rocH(strtolower($hv['genre_name'])) . ' games') : '') . '.</li>';
 if ($storage !== '') $qa .= '<li><b>Download size:</b> ' . rocH(preg_replace('/\s*available space/i', '', $storage)) . '.</li>';
-$qa .= '</ul><p class="gp-src" style="margin-top:.6rem">From the official Steam requirements and our checker\'s scores. Check your own PC below.</p></section>';
+$qa .= '</ul><p class="gp-src" style="margin-top:.6rem">From the official Steam requirements and our checker\'s scores (<a href="/how-we-check/">how we check</a>). Check your own PC below.</p></section>';
 $m .= $qa;
 // The owner's own text about this game (CMS > Games > Edit, Deploy 85): plain text, a blank line = a new paragraph.
 if (trim((string)($E['text'] ?? '')) !== '') {
@@ -739,6 +739,8 @@ if (trim((string)($E['text'] ?? '')) !== '') {
 $opt = function (array $refs, string $pick) { $o = ''; foreach ($refs as $n => $s) $o .= '<option value="' . $s . '"' . ($n === $pick ? ' selected' : '') . '>' . rocH($n) . '</option>'; return $o; };
 $m .= '<section class="gp-card" id="check"><h2>Check your PC</h2>'
     . '<p>Choose the graphics card, processor and memory closest to yours. Not sure? On Windows press Win + R, type <b>dxdiag</b> and look at "Processor", "Memory" and the Display tab.</p>'
+    // Deploy 153: the browser can read the graphics card (WebGL); processor and RAM stay the visitor's choice.
+    . '<p style="margin-top:.7rem"><button type="button" class="gp-btn s" id="gp-detect">Detect my graphics card</button> <span class="gp-src" id="gp-detect-msg"></span></p>'
     . '<div class="gp-check" style="margin-top:.9rem" data-req="' . rocH(json_encode(['min' => $rMin, 'rec' => $rRec])) . '">'
     . '<label>Graphics card<select data-k="gpu">' . $opt($gpus, 'GeForce GTX 1650') . '</select></label>'
     . '<label>Processor<select data-k="cpu">' . $opt($cpus, 'Intel Core i5-8400') . '</select></label>'
@@ -757,7 +759,7 @@ $m .= '<section class="gp-card" id="requirements"><h2>' . rocH($name) . ' system
     . '</tbody></table></div>'
     . ($rec ? '' : '<p class="gp-src" style="margin-top:.6rem">The game\'s Steam page lists only the minimum requirements.</p>')
     . ($storageOdd ? '<p class="gp-src" style="margin-top:.6rem">Steam lists more free space for the minimum (' . rocH(preg_replace('/\s*available space/i', '', $clean($min['storage']))) . ') than for the recommended settings (' . rocH(preg_replace('/\s*available space/i', '', $clean($rec['storage']))) . '): keep ' . rocH(preg_replace('/\s*available space/i', '', $storage)) . ' free to be safe.</p>' : '')
-    . '<p class="gp-src" style="margin-top:.6rem">Source: the official <a href="' . rocH((string)$g['u']) . '" target="_blank" rel="noopener">' . rocH($name) . ' Steam page</a>, checked ' . gmdate('F Y', $updated) . '.</p></section>';
+    . '<p class="gp-src" style="margin-top:.6rem">Source: the official <a href="' . rocH((string)$g['u']) . '" target="_blank" rel="noopener">' . rocH($name) . ' Steam page</a>, checked ' . gmdate('F Y', $updated) . '. <a href="/how-we-check/">How we check games</a>.</p></section>';
 
 $m .= rocAdUnit('article');
 
@@ -841,6 +843,13 @@ $m .= "<script>(function(){var box=document.querySelector('.gp-check'),res=docum
     . "if(!k){ub.hidden=true;}else{var x=U[k],e=function(s){return String(s).replace(/[&<>\"]/g,function(ch){return{'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch]})};"
     . "ub.innerHTML='<span class=\"k\">Upgrade first: '+names[k]+'</span><span class=\"t\">'+e(x.t)+'</span><div class=\"b\"><a class=\"r\" href=\"'+e(x.u)+'\">See specs on ROC</a>'"
     . "+(x.a?'<a class=\"y\" href=\"'+e(x.a)+'\" target=\"_blank\" rel=\"sponsored nofollow noopener\">Check price on Amazon</a>':'')+'</div>';ub.hidden=false;}}}"
+    . "var db=document.getElementById('gp-detect'),dm=document.getElementById('gp-detect-msg');if(db)db.addEventListener('click',function(){db.disabled=true;dm.textContent='Reading your graphics card…';"
+    . "var go=function(){window.rocDetectGpu().then(function(d){db.disabled=false;var sel=box.querySelector('[data-k=\"gpu\"]');"
+    . "if(!d||d.score===null){dm.textContent=d&&d.name?'Your browser shows \"'+d.name+'\", which we cannot rate yet: please choose the closest card.':'Your browser does not share the graphics card (Safari and some privacy settings hide it): please choose it.';return;}"
+    . "var best=null,low=null;[].forEach.call(sel.options,function(o){var v=parseFloat(o.value);if(!low||v<parseFloat(low.value))low=o;if(v<=d.score&&(!best||v>parseFloat(best.value)))best=o;});best=best||low;sel.value=best.value;"
+    . "dm.textContent='Found: '+d.name+(d.laptop?' (laptop versions are often a little slower)':'')+'. Set to '+best.textContent+'. Now choose your processor and RAM.';"
+    . "box.dispatchEvent(new Event('change'));if(window.rocTrack)rocTrack('roc_detect_gpu',d.name,'');});};"
+    . "if(window.rocDetectGpu)go();else{var sc=document.createElement('script');sc.src='/roc-detect.js?v=153';sc.onload=go;sc.onerror=function(){db.disabled=false;dm.textContent='Could not load the detector. Please choose your card.'};document.head.appendChild(sc);}});"
     . "box.addEventListener('change',function(){run();if(window.rocTrack)rocTrack('roc_quick_check',document.title.split('?')[0].replace('Can I Run ',''),(res.querySelector('b')||{}).textContent||'');});run();})();</script>";
 
 rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $updated);
