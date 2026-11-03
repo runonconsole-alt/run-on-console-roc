@@ -85,7 +85,7 @@ function rocRpData(array $games): array {
         foreach ($all as $g) {
             [$mn, $rc] = rocRpReq($g); $gm = (float)($mn['gpu'] ?? 0); $gr = max($gm, (float)($rc['gpu'] ?? $gm));
             if ($gm > 0 && $score < $gm) continue;
-            if ($gr <= 0 || $score >= $gr) { $high++; $med++; } elseif ($score >= 0.75 * $gr) $med++;
+            if ($gr <= 0 || $score >= $gr) { $med++; if (empty($g['req']['nr']) || $score >= $gm + 2) $high++; } elseif ($score >= 0.75 * $gr) $med++;
         }
         $cards[$cn] = ['med' => $med, 'high' => $high];
     }

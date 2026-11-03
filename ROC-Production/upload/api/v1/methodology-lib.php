@@ -12,11 +12,12 @@ require_once __DIR__ . '/game-pages-lib.php';
 function rocMethodPage(string $root): void {
     $games = rocGpAll($root);
     $n = count($games);
-    $estG = 0; $estC = 0; $onlyMin = 0;
+    $estG = 0; $estC = 0; $onlyMin = 0; $noRec = 0;
     foreach ($games as $g) {
         $e = (array)($g['req']['min']['est'] ?? []);
         if (!empty($e['gpu'])) $estG++;
         if (!empty($e['cpu'])) $estC++;
+        if (!empty($g['req']['nr'])) $noRec++;
         if (!is_array($g['rec'] ?? null) || !$g['rec']) $onlyMin++;   // as the game page: no recommended block on Steam
     }
     $pct = function (int $x) use ($n) { return $n ? (int)round(100 * $x / $n) : 0; };
@@ -88,7 +89,9 @@ function rocMethodPage(string $root): void {
         . '<h2>4. How the percentage is worked out</h2>'
         . '<ul><li>Each part is compared with the game\'s <b>recommended</b> requirement: the graphics card counts for <b>50%</b>, the processor <b>30%</b> and RAM <b>20%</b>. A part at or above the recommended gets its full share.</li>'
         . '<li>If any part is <b>below the minimum</b>, the result is at most <b>40%</b>.</li>'
-        . '<li>If any part is below the recommended, the result is at most <b>89%</b>, so "high settings" only shows when every part meets the recommended specs.</li></ul>'
+        . '<li>If any part is below the recommended, the result is at most <b>89%</b>, so "high settings" only shows when every part meets the recommended specs.</li>'
+        . '<li>When Steam lists only minimum requirements (' . number_format($noRec) . ' games), the minimum also counts as the target and the result is at most <b>89%</b>, because meeting the minimum does not prove high settings. '
+        . 'A PC well above that minimum (graphics card and processor two tiers higher, twice the RAM) can still reach high settings.</li></ul>'
         . '<div class="gp-wrap" style="overflow-x:auto"><table class="hw-t"><thead><tr><th>Result</th><th>What it means</th></tr></thead><tbody>'
         . '<tr><td>90-100%</td><td>Runs on high settings: every part meets the recommended specs</td></tr>'
         . '<tr><td>70-89%</td><td>Playable on medium to high settings</td></tr>'

@@ -23,6 +23,20 @@ const ERA_REQUIREMENTS = {
 };
 const gameRequirements = (game) => game.req || ERA_REQUIREMENTS[game.era] || ERA_REQUIREMENTS.modern;
 
+// Deploy 155 (same rule as rocGameFix in api/v1/agent-lib.php): the recommended part is never below the minimum, and
+// a game whose Steam page lists only the minimum is "nr" (no recommended): meeting it is at most 89%, not high settings.
+const fixReq = (g) => {
+  const min = (g.req && g.req.min) || {}; const rec = (g.req && g.req.rec) || {};
+  const est = (x, k) => !!(x.est && x.est[k]);
+  const out = { ...rec };
+  ['gpu', 'cpu', 'ram'].forEach((k) => {
+    if (typeof rec[k] !== 'number' || (est(rec, k) && !est(min, k)) || (typeof min[k] === 'number' && rec[k] < min[k])) out[k] = min[k];
+  });
+  const allEst = (x) => est(x, 'gpu') && est(x, 'cpu') && est(x, 'ram');
+  const noBlock = !g.rec || (typeof g.rec === 'object' && !Object.values(g.rec).some(Boolean));
+  return { ...g.req, rec: out, nr: noBlock || !g.req.rec || (allEst(rec) && !allEst(min)) };
+};
+
 /* The address of a game's own requirements page (game-render.php, api/v1/game-pages-lib.php rocGpSlug). */
 const gamePageSlug = (t) => t.replace(/[™®©'’‘`]/g, '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
   .toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -102,7 +116,7 @@ export const GameCompatibilityView = () => {
         fpsTarget: 'Official Steam system requirements',
         minSpecs: specLine(steamPick.min) || 'Not listed on Steam',
         recommendedSpecs: specLine(steamPick.rec) || 'Not listed on Steam (the minimum is used)',
-        req: steamPick.req,
+        req: fixReq(steamPick),
         steamUrl: steamPick.u,
       };
     }
@@ -161,6 +175,7 @@ export const GameCompatibilityView = () => {
     const below = (have, min) => known(min) && have < min;
     const belowMin = below(selectedGpu.score, req.min.gpu) || below(selectedCpu.score, req.min.cpu) || below(customRamGb, req.min.ram);
     if (belowMin) percentage = Math.min(percentage, 40);
+    if (req.nr && !(selectedGpu.score >= (req.min.gpu || 0) + 2 && selectedCpu.score >= (req.min.cpu || 0) + 2 && customRamGb >= 2 * (req.min.ram || 0))) percentage = Math.min(percentage, 89);
     // Deploy 153: "high settings" (90%+) only when every part meets the recommended specs, as on the game pages and in ROC.
     if (parts.some(([, have, rec]) => have < rec)) percentage = Math.min(percentage, 89);
     percentage = Math.max(5, percentage);

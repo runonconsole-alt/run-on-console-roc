@@ -1047,6 +1047,13 @@ RELEASES = [
          checks=[dict(label='Report page', type='contains', path='api/v1/report-lib.php', text='rocGpReport')],
          pr=REPO + '154',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Cloudflare: Purge Everything.']),
+    dict(deploy=155, date='2026-11-03', title='Fair results for games with only minimum requirements',
+         changes=['About 720 games have no recommended requirements on Steam (or a recommended block that names no part). Their stored "recommended" was a low guess below the minimum, so a PC that only met the minimum showed 100% "high settings". Now the recommended is never below the minimum, and for these games the result is at most 89% (medium to high) unless the PC is well above the minimum (graphics and processor two tiers higher, twice the RAM)',
+                  'The same rule on the game pages (quick check and quick answer), the card pages, the full checker, ROC the assistant and the requirements report; How we check games explains it',
+                  'New games from Steam without a recommended block no longer get a guessed one'],
+         checks=[dict(label='Fair minimum-only games', type='contains', path='api/v1/agent-lib.php', text='rocGameFix')],
+         pr=REPO + '155',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

@@ -364,7 +364,7 @@ if ($cardMain !== null) {
     // recommended (medium to high), the recommended or more (high); in between, low settings.
     foreach ($games as $g) {
         $gm = (float)($g['req']['min']['gpu'] ?? 0); $gr = max($gm, (float)($g['req']['rec']['gpu'] ?? $gm));
-        $t = $gm > 0 && $score < $gm ? 'no' : ($gr <= 0 || $score >= $gr ? 'high' : ($score >= 0.75 * $gr ? 'mid' : 'low'));
+        $t = $gm > 0 && $score < $gm ? 'no' : ($gr <= 0 || $score >= $gr ? (empty($g['req']['nr']) || $score >= $gm + 2 ? 'high' : 'mid') : ($score >= 0.75 * $gr ? 'mid' : 'low'));   // nr: Deploy 155
         $tiers[$t][] = [$g, $t];
     }
     $runs = count($tiers['high']) + count($tiers['mid']) + count($tiers['low']);
@@ -750,7 +750,7 @@ $m .= '<section class="gp-card" id="check"><h2>Check your PC</h2>'
     . '<p>Choose the graphics card, processor and memory closest to yours. Not sure? On Windows press Win + R, type <b>dxdiag</b> and look at "Processor", "Memory" and the Display tab.</p>'
     // Deploy 153: the browser can read the graphics card (WebGL); processor and RAM stay the visitor's choice.
     . '<p style="margin-top:.7rem"><button type="button" class="gp-btn s" id="gp-detect">Detect my graphics card</button> <span class="gp-src" id="gp-detect-msg"></span></p>'
-    . '<div class="gp-check" style="margin-top:.9rem" data-req="' . rocH(json_encode(['min' => $rMin, 'rec' => $rRec])) . '">'
+    . '<div class="gp-check" style="margin-top:.9rem" data-req="' . rocH(json_encode(['min' => $rMin, 'rec' => $rRec, 'nr' => !empty($g['req']['nr'])])) . '">'
     . '<label>Graphics card<select data-k="gpu">' . $opt($gpus, 'GeForce GTX 1650') . '</select></label>'
     . '<label>Processor<select data-k="cpu">' . $opt($cpus, 'Intel Core i5-8400') . '</select></label>'
     . '<label>Memory (RAM)<select data-k="ram">' . implode('', array_map(function ($r) { return '<option value="' . $r . '"' . ($r === 16 ? ' selected' : '') . '>' . $r . ' GB</option>'; }, [4, 6, 8, 12, 16, 24, 32, 64])) . '</select></label>'
@@ -844,7 +844,7 @@ $m .= "<script>(function(){var box=document.querySelector('.gp-check'),res=docum
     . "function v(k){return parseFloat(box.querySelector('[data-k=\"'+k+'\"]').value)}"
     . "function run(){var have={gpu:v('gpu'),cpu:v('cpu'),ram:v('ram')},mn=R.min||{},rc=R.rec||mn,w={gpu:.5,cpu:.3,ram:.2},s=0,t=0,below=false,miss=[];"
     . "for(var k in w){var need=rc[k]||mn[k];if(need>0){s+=w[k]*Math.min(1,have[k]/need);t+=w[k];if(have[k]<need)miss.push(k);}if(mn[k]>0&&have[k]<mn[k])below=true;}"
-    . "var p=Math.round(100*s/(t||1));if(below)p=Math.min(p,40);if(miss.length)p=Math.min(p,89);p=Math.max(5,p);"
+    . "var p=Math.round(100*s/(t||1));if(below)p=Math.min(p,40);var room=!R.nr||(have.gpu>=(mn.gpu||0)+2&&have.cpu>=(mn.cpu||0)+2&&have.ram>=2*(mn.ram||0));if(miss.length||!room)p=Math.min(p,89);p=Math.max(5,p);"
     . "var c=p>=90?'ok':p>=70?'mid':p>40?'low':'no',txt=p>=90?'Runs on high settings (meets the recommended specs).':p>=70?'Playable on medium to high settings.':p>40?'Playable on low settings only.':'Below the minimum specs: it will not run well.';"
     . "var names={gpu:'graphics card',cpu:'processor',ram:'RAM'},up=miss.map(function(k){return names[k]});"
     . "res.className='gp-res '+c;res.innerHTML='<b>'+p+'%</b><div class=\"gp-bar\"><i style=\"width:'+p+'%\"></i></div>'+txt+(up.length?' Upgrade first: '+up.join(', ')+'.':'');"

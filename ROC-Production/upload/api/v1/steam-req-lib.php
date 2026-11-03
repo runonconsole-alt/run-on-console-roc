@@ -195,7 +195,9 @@ function rocSrBuildGame(array $app, int $year): array {
     $recHtml = (string)($app['pc_requirements']['recommended'] ?? '');
     $rec = $recHtml !== '' ? rocSrReadBlock($recHtml) : null;
     $sMin = rocSrEstimate($min, rocSrScore($min));
-    $sRec = rocSrEstimate($rec, rocSrScore($rec)) ?: $sMin;
+    // Deploy 155: a recommended block that names no part is no recommended at all (it was estimated below the minimum).
+    if ($rec !== null && trim(implode('', array_map('strval', $rec))) === '') $rec = null;
+    $sRec = $rec !== null ? (rocSrEstimate($rec, rocSrScore($rec)) ?: $sMin) : $sMin;
     foreach (['cpu', 'gpu', 'ram'] as $k) if (!isset($sRec[$k]) || $sRec[$k] === null) $sRec[$k] = $sMin[$k];
     return ['id' => 'steam-' . $app['steam_appid'], 'appid' => (int)$app['steam_appid'], 't' => (string)$app['name'], 'y' => $year,
         'g' => implode(', ', array_slice(array_map(function ($x) { return (string)($x['description'] ?? ''); }, (array)($app['genres'] ?? [])), 0, 3)),
