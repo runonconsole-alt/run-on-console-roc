@@ -15,6 +15,23 @@ const ROC_SEO_SITES = '/\b(rtings|ign|pcmag|pc ?gamer|tom\'?s ?hardware|techrada
 // Names that are written in capitals (or with a capital) by their makers; in lowercase they read like stuffed keywords.
 const ROC_SEO_NAMES = '/\b(rtx|gtx|amd|nvidia|asus|msi|rog|hyperx|logitech|razer|corsair|steelseries|intel|ryzen|radeon|geforce|xbox|playstation|ps[45]|ddr[45]|ssd|nvme|oled|dlss|fsr|cpu|gpu|fps|audeze|sennheiser|audio-technica|blacklyte|secretlab|lg|aoc|benq|alienware|lenovo|acer)\b/';
 
+/**
+ * Deploy 164: the first letter in capitals (not iPhone, eSports). Topics come from Google searches in small letters and the
+ * writers copied them; both tries of a blog post were refused for this, so no post went live.
+ */
+function rocSeoCap(string $s): string {
+    $s = trim($s);
+    if (!preg_match('/^\p{Ll}/u', $s) || preg_match('/^\p{Ll}\p{Lu}/u', $s)) return $s;
+    return mb_strtoupper(mb_substr($s, 0, 1)) . mb_substr($s, 1);
+}
+
+/** The reasons of a refused post with their fields, so the writer knows what to fix. */
+function rocSeoReasons(array $errors): string {
+    $o = [];
+    foreach ($errors as $k => $m) $o[] = (is_string($k) ? $k . ': ' : '') . $m;
+    return implode(' ', $o);
+}
+
 /** Field => problem. $strict adds the style rules for the AI writers. */
 function rocSeoCheck(array $p, bool $strict = true): array {
     $get = function ($k) use ($p) { return trim((string)preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags((string)($p[$k] ?? '')), ENT_QUOTES | ENT_HTML5, 'UTF-8'))); };

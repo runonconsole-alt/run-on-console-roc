@@ -585,8 +585,8 @@ function rocBlogTopicLinks(PDO $pdo, array $plan, array $topic): array {
 function rocBlogCreate(PDO $pdo, string $root, array $in, string $source): array {
     rocBlogSite($pdo, true);
     $t = function ($k, $max) use ($in) { return trim(mb_substr((string)preg_replace('/\s+/u', ' ', strip_tags((string)($in[$k] ?? ''))), 0, $max)); };
-    $title = $t('title', 220); $metaT = $t('meta_title', 255); $metaD = $t('meta_description', 500);
-    $excerpt = $t('excerpt', 600); $category = $t('category', 100) ?: 'Guides'; $focus = $t('focus_keyword', 200);
+    $title = rocSeoCap($t('title', 220)); $metaT = rocSeoCap($t('meta_title', 255)); $metaD = rocSeoCap($t('meta_description', 500));
+    $excerpt = rocSeoCap($t('excerpt', 600)); $category = $t('category', 100) ?: 'Guides'; $focus = $t('focus_keyword', 200);
     $alt = $t('image_alt', 300) ?: $title;
     $content = rocBlogCleanLinks(rocCmsSanitizeHtml((string)($in['content_html'] ?? '')), $pdo);
     $words = count(preg_split('/\s+/u', rocCmsTextFromHtml($content)) ?: []);
@@ -1432,8 +1432,8 @@ function rocBlogServerTick(PDO $pdo, string $root, bool $force = false): ?string
             rocBlogSet($pdo, 'blog_engine_state', $state);
             return 'Written: ' . $r['url'] . ' (' . $r['publish_local'] . ')';
         }
-        $msg = 'Article not accepted: ' . implode(' ', $r['errors']);
-        $prompt .= "\n\nYour previous answer was rejected: " . implode(' ', $r['errors']) . ' Fix this.';
+        $msg = 'Article not accepted: ' . rocSeoReasons($r['errors']);
+        $prompt .= "\n\nYour previous answer was rejected: " . rocSeoReasons($r['errors']) . ' Fix this.';
     }
     $state['last_error'] = gmdate('Y-m-d H:i') . ' UTC: ' . $msg;
     rocBlogSet($pdo, 'blog_engine_state', $state);
