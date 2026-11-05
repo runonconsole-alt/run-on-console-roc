@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HeroSection } from './HeroSection';
 import { LatestBlogsSection } from './LatestBlogsSection';
 import { LatestReviewsSection } from './LatestReviewsSection';
@@ -19,6 +19,8 @@ const homeUpdated = () => {
 export const HomeView = () => {
   const { pageFaqs } = useApp();
   const updated = homeUpdated();
+  // Keeps what the server wrote into the page when React takes over (the block is not part of the build).
+  const [fresh] = useState(() => (typeof document !== 'undefined' ? (document.querySelector('[data-roc-home-fresh]')?.innerHTML || '') : ''));
   return (
     <div className="space-y-14 animate-page-in">
 
@@ -37,6 +39,9 @@ export const HomeView = () => {
         title="Run On Console FAQ"
         subtitle="What the site is, how picks are made and how the checker works."
       />
+
+      {/* Deploy 161: fresh links, written into the HTML by the server (ai-files-lib.php rocAiHomeFresh) for crawlers and visitors. */}
+      <section data-roc-home-fresh="" aria-label="New on Run On Console" dangerouslySetInnerHTML={{ __html: fresh }} suppressHydrationWarning />
 
       <p data-roc-home-updated="" className="text-center text-xs text-slate-500 font-semibold">
         {updated && <>Last updated: <time dateTime={updated.iso}>{updated.text}</time></>}

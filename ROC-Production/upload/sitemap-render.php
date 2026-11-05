@@ -36,6 +36,36 @@ function rocSmEsc(string $s): string { return htmlspecialchars($s, ENT_XML1 | EN
 $ROC_SM_TITLES = [];
 const ROC_SM_STYLE = '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>';
 
+/** Deploy 161: the database (once), for the real dates below. Null when it cannot be reached. */
+function rocSmPdo(string $root): ?PDO {
+    static $done = false, $pdo = null;
+    if ($done) return $pdo;
+    $done = true;
+    try {
+        ob_start();
+        require_once $root . '/api/v1/config.php';
+        ob_end_clean();
+        $pdo = function_exists('getDBConnection') ? (getDBConnection() ?: null) : null;
+    } catch (\Throwable $e) {
+        while (ob_get_level() > 0) ob_end_clean();
+        $pdo = null;
+    }
+    // config.php is shared with the API (session, no-cache headers): undo that for the sitemap.
+    if (!headers_sent()) {
+        foreach (['Set-Cookie', 'Expires', 'Pragma', 'Cache-Control', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'] as $h) header_remove($h);
+        header('Cache-Control: public, max-age=600');
+    }
+    return $pdo;
+}
+
+/** The newest date a query returns (Unix time), 0 when there is none. */
+function rocSmNewest(?PDO $pdo, string $sql): int {
+    if (!$pdo) return 0;
+    try { $v = (string)$pdo->query($sql)->fetchColumn(); } catch (\Throwable $e) { return 0; }
+    $t = $v !== '' && strpos($v, '0000-00-00') !== 0 ? (int)strtotime($v . ' UTC') : 0;
+    return $t > 0 && $t <= time() ? $t : 0;
+}
+
 /** Built pages under $dir (or the site root), indexable ones only: [path => mtime]. */
 function rocSmBuilt(string $root, ?string $dir): array {
     $base = $dir === null ? $root : $root . '/' . $dir;
@@ -101,13 +131,13 @@ if ($map === 'pages') {
         foreach ((array)(rocLayerLoad($root)['sitemap']['extra'] ?? []) as $e) {
             $p = (string)($e['path'] ?? '');
             if (!preg_match('#^/[a-z0-9/_.\-]*$#i', $p) || isset($urls[$p])) continue;
-            $urls[$p] = time();
+            $urls[$p] = (int)(strtotime((string)(rocLayerLoad($root)['updated'] ?? '')) ?: time());
             if (trim((string)($e['title'] ?? '')) !== '') $GLOBALS['ROC_SM_TITLES'][$p] = trim((string)$e['title']);
         }
     }
     // Pages served from the CMS database by blog-render.php (no built folder to scan).
     $ht = (string)@file_get_contents($root . '/.htaccess');
-    if (strpos($ht, 'ROC updates BEGIN') !== false && !isset($urls['/updates/'])) { $urls['/updates/'] = time(); $GLOBALS['ROC_SM_TITLES']['/updates/'] = 'Updates: blogs, news and guides'; }
+    if (strpos($ht, 'ROC updates BEGIN') !== false && !isset($urls['/updates/'])) { $urls['/updates/'] = rocSmNewest(rocSmPdo($root), "SELECT MAX(COALESCE(content_modified_at, updated_at, published_at)) FROM blogs WHERE status = 'published'") ?: time(); $GLOBALS['ROC_SM_TITLES']['/updates/'] = 'Updates: blogs, news and guides'; }
     rocSmUrlset($urls);
 }
 if ($map === 'products')   rocSmUrlset(rocSmBuilt($root, 'products'));
@@ -115,38 +145,26 @@ if ($map === 'categories') rocSmUrlset(rocSmBuilt($root, 'categories'));
 
 /* index */
 $latest = function (array $urls): int { return $urls ? max($urls) : time(); };
-// Once product-render.php / category-render.php serve these sitemaps (see .htaccess),
-// their content changes in the CMS database, so the folder dates are no longer a guide.
-$fromDb = function (string $renderer, string $dir) use ($root, $latest): int {
-    return is_file($root . '/' . $renderer) ? time() : $latest(rocSmBuilt($root, $dir));
-};
+// Deploy 161: real dates. time() here told Google every sitemap had changed at each visit, so it stopped trusting them.
+$pdo = rocSmPdo($root);
+$postTime = "MAX(COALESCE(content_modified_at, updated_at, published_at))";
 $children = [
     'pages'      => [$latest(rocSmBuilt($root, null)), 'Main pages'],
-    'products'   => [$fromDb('product-render.php', 'products'), 'Products and product categories'],
-    'categories' => [$fromDb('category-render.php', 'categories'), 'Gaming platforms'],
-    'blogs'      => [time(), 'Blog posts'],
-    'news'       => [time(), 'News stories'],
+    'products'   => [rocSmNewest($pdo, "SELECT MAX(COALESCE(content_modified_at, updated_at, created_at)) FROM products WHERE status = 'published'"), 'Products and product categories'],
+    'categories' => [rocSmNewest($pdo, "SELECT MAX(updated_at) FROM gaming_categories WHERE status = 'published'"), 'Gaming platforms'],
+    'blogs'      => [rocSmNewest($pdo, "SELECT $postTime FROM blogs WHERE status = 'published' AND (category IS NULL OR (category <> 'News' AND category NOT LIKE 'Guide%'))"), 'Blog posts'],
+    'news'       => [rocSmNewest($pdo, "SELECT $postTime FROM blogs WHERE status = 'published' AND category = 'News'"), 'News stories'],
 ];
 // "Can I run it?" game pages (game-render.php, switched on by cli-game-pages.php).
 // Guides (/guides/, switched on by cli-guides.php).
-if (strpos((string)@file_get_contents($root . '/.htaccess'), 'ROC guides BEGIN') !== false) $children['guides'] = [time(), 'Guides'];
+if (strpos((string)@file_get_contents($root . '/.htaccess'), 'ROC guides BEGIN') !== false) $children['guides'] = [rocSmNewest($pdo, "SELECT $postTime FROM blogs WHERE status = 'published' AND category LIKE 'Guide%'"), 'Guides'];
 if (is_file($root . '/game-render.php') && is_file($root . '/roc-steam-games.json')) $children['games'] = [(int)filemtime($root . '/roc-steam-games.json'), 'Can I run it? game pages'];
 // CMS pages (About-style pages made in the CMS) are listed only once there is at least one.
 try {
-    ob_start();
-    require_once $root . '/api/v1/config.php';
-    ob_end_clean();
-    $pdo = function_exists('getDBConnection') ? getDBConnection() : null;
     $n = $pdo ? (int)$pdo->query("SELECT COUNT(*) FROM pages WHERE status = 'published' AND (is_noindex = 0 OR is_noindex IS NULL)")->fetchColumn() : 1;
-    if ($n > 0) $children['cms-pages'] = [time(), 'CMS pages'];
+    if ($n > 0) $children['cms-pages'] = [rocSmNewest($pdo, "SELECT MAX(updated_at) FROM pages WHERE status = 'published'"), 'CMS pages'];
 } catch (\Throwable $e) {
-    while (ob_get_level() > 0) ob_end_clean();
-    $children['cms-pages'] = [time(), 'CMS pages'];
-}
-// config.php is shared with the API (session, no-cache headers): undo that for the sitemap.
-if (!headers_sent()) {
-    foreach (['Set-Cookie', 'Expires', 'Pragma', 'Cache-Control', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'] as $h) header_remove($h);
-    header('Cache-Control: public, max-age=600');
+    $children['cms-pages'] = [0, 'CMS pages'];
 }
 header('Content-Type: application/xml; charset=utf-8');
 header('X-Robots-Tag: noindex');
@@ -154,6 +172,6 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . ROC_SM_STYLE . "\n"
    . '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
 // Plain sitemap index: Google reports any extra tag here as "Invalid XML tag" (sitemap.xsl names them from the address).
 foreach ($children as $name => [$t, $label]) {
-    echo '  <sitemap><loc>' . ROC_SM_BASE . '/sitemaps/' . $name . '-sitemap.xml</loc><lastmod>' . gmdate('c', $t) . "</lastmod></sitemap>\n";
+    echo '  <sitemap><loc>' . ROC_SM_BASE . '/sitemaps/' . $name . '-sitemap.xml</loc>' . ($t > 0 ? '<lastmod>' . gmdate('c', $t) . '</lastmod>' : '') . "</sitemap>\n";
 }
 echo "</sitemapindex>\n";

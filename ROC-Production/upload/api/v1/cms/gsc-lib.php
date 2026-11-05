@@ -230,10 +230,7 @@ function rocGscSitemapTick(PDO $pdo, bool $force = false): ?string {
     if (!$force) {
         if ($now->format('H:i') < ROC_GSC_SITEMAP_AT) return null;
         if (is_array($last) && ($last['day'] ?? '') === $day) return null;
-        $from = gmdate('Y-m-d H:i:s', (new DateTime($day . ' 00:00', $tz))->getTimestamp());
-        $st = $pdo->prepare("SELECT COUNT(*) FROM blogs WHERE status = 'published' AND (category IS NULL OR category <> 'News') AND published_at >= ? AND published_at <= ?");
-        $st->execute([$from, gmdate('Y-m-d H:i:s')]);
-        if (!(int)$st->fetchColumn()) return null;                 // no blog post or guide today
+        // Deploy 161: every day (news goes live daily and the home page changes), not only on blog and guide days.
     }
     $rec = ['day' => $day, 'at' => gmdate('c'), 'ok' => false, 'error' => ''];
     rocBlogSet($pdo, 'gsc_sitemap', $rec);                         // one try a day

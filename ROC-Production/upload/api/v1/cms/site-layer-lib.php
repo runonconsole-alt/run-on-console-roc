@@ -526,6 +526,8 @@ function rocLayerApply(string $html, string $path, array $L, bool $metaOn = true
     $homeDate = (string)($L['home_modified'] ?? '');
     if ($path === '/' && $homeDate === '' && preg_match('#<script type="application/ld\+json" id="roc-home-page">[^<]*?"dateModified":"([^"]+)"#s', $html, $m)) $homeDate = $m[1];
     if ($path === '/' && $homeDate === '') $homeDate = (string)($L['home_fallback'] ?? '');
+    // Deploy 161: fresh links in the home page's HTML (ai-files-lib.php rocAiHomeFresh); other saves leave them as they are.
+    if ($path === '/' && trim((string)($L['home_fresh'] ?? '')) !== '') $html = rocNavReplaceInner($html, 'data-roc-home-fresh', '', (string)$L['home_fresh']);
     [$html, $orig] = rocLayerStrip($html);
     $html = rocLayerFonts($html);
     // Deploy 146: the footer of the built pages says "© {year}" until JavaScript runs; crawlers that read the HTML saw it.
@@ -653,8 +655,11 @@ function rocLayerStaticFiles(string $root): array {
     return $out;
 }
 
-/** Rewrites built pages (all, or only $paths). Returns the number of files changed. */
-function rocLayerApplyFiles(string $root, array $L, ?array $paths = null, bool $write = true): int {
+/**
+ * Rewrites built pages (all, or only $paths). Returns the number of files changed. $keepTime keeps each file's date:
+ * for the automatic news bar, which is not a change of the page (Deploy 161).
+ */
+function rocLayerApplyFiles(string $root, array $L, ?array $paths = null, bool $write = true, bool $keepTime = false): int {
     $n = 0;
     if (!isset($L['site_social'])) {      // the home page's sameAs (rocLayerApply)
         $site = is_file($root . '/roc-site.json') ? json_decode((string)file_get_contents($root . '/roc-site.json'), true) : null;
@@ -674,7 +679,8 @@ function rocLayerApplyFiles(string $root, array $L, ?array $paths = null, bool $
         $n++;
         if (!$write) continue;
         $tmp = $file . '.roc-tmp' . getmypid();
-        if (file_put_contents($tmp, $new) !== false) rename($tmp, $file);
+        $was = $keepTime ? (int)@filemtime($file) : 0;
+        if (file_put_contents($tmp, $new) !== false && rename($tmp, $file) && $was) @touch($file, $was);
     }
     return $n;
 }
@@ -760,15 +766,17 @@ function rocHistGet(string $root, string $id): ?array {
 }
 
 /** Saves one part, publishes site-layer.json and rewrites the built pages. Returns files changed. */
-function rocLayerSave(PDO $pdo, string $root, string $part, array $value, ?int $userId, ?array $onlyPaths = null): int {
+function rocLayerSave(PDO $pdo, string $root, string $part, array $value, ?int $userId, ?array $onlyPaths = null, bool $auto = false): int {
     rocLayerSettingSet($pdo, ROC_LAYER_KEYS[$part], (string)json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), $userId);
     $L = rocLayerFromDb($pdo, $root);
     $L[$part] = in_array($part, ROC_LAYER_LISTS, true) || $part === 'code_pages' ? $value : array_merge(rocLayerDefaults()[$part], $value);
-    $L['updated'] = gmdate('c');
+    // Deploy 161: every news story saved the bar, which dated all pages "changed now" for Google (Last-Modified and the
+    // sitemap) although nothing on them changed, so its dates stopped counting. An automatic save ($auto) keeps the dates.
+    if (!$auto) $L['updated'] = gmdate('c');
     $file = $root . ROC_LAYER_FILE;
     if (!is_dir(dirname($file))) @mkdir(dirname($file), 0755, true);
     $tmp = $file . '.tmp' . getmypid();
     file_put_contents($tmp, json_encode($L, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
     rename($tmp, $file);
-    return rocLayerApplyFiles($root, $L, $onlyPaths);
+    return rocLayerApplyFiles($root, $L, $onlyPaths, true, $auto);
 }

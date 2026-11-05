@@ -126,5 +126,53 @@ function rocAiDateHome(PDO $pdo, string $root): bool {
     if (!$mod) return false;
     $L = rocLayerFromDb($pdo, $root);
     $L['home_modified'] = gmdate('c', $mod);
+    $L['home_fresh'] = rocAiHomeFresh($pdo, $root);
     return rocLayerApplyFiles($root, $L, ['/']) > 0;
+}
+
+/**
+ * Deploy 161: Google visits the home page daily, but the newest posts on it come from JavaScript, so its HTML linked
+ * one news story and no blog, guide or game. This block is in the HTML: the newest posts, the tools and 12 popular
+ * games that change every day, so each visit finds new links (helldivers-2 was unknown to Google).
+ */
+function rocAiHomeFresh(PDO $pdo, string $root): string {
+    $h = function ($s) { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_HTML5, 'UTF-8'); };
+    $posts = []; $news = [];
+    try {
+        $q = $pdo->prepare("SELECT title, slug, category FROM blogs WHERE status = 'published' AND published_at <= ? ORDER BY published_at DESC LIMIT 60");
+        $q->execute([gmdate('Y-m-d H:i:s')]);
+        foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $cat = trim((string)$r['category']);
+            if (strcasecmp($cat, 'News') === 0) { if (count($news) < 4) $news[] = ['/news/' . $r['slug'] . '/', $r['title']]; continue; }
+            if (count($posts) < 6) $posts[] = [(preg_match('/^guides?\b/i', $cat) ? '/guides/' : '/blogs/') . $r['slug'] . '/', $r['title']];
+        }
+    } catch (\Throwable $e) {}
+    $games = [];
+    try {
+        require_once dirname(__DIR__) . '/game-pages-lib.php';
+        $edits = [];
+        $st = $pdo->query("SELECT setting_value FROM cms_settings WHERE setting_key = 'game_edits' LIMIT 1");
+        if ($st) $edits = json_decode((string)$st->fetchColumn(), true) ?: [];
+        $ok = [];
+        foreach (array_slice(array_values(rocGpAll($root)), 0, 1000) as $g) {
+            $e = (array)($edits[$g['slug']] ?? []);
+            if (empty($e['hidden']) && !rocGpThin($g, $e)) $ok[] = $g;
+        }
+        if ($ok) {
+            $parts = array_chunk($ok, 12);
+            foreach ($parts[intdiv(time() + 18000, 86400) % count($parts)] as $g) $games[] = [rocGpPath($g), 'Can I run ' . $g['name'] . '?'];
+        }
+    } catch (\Throwable $e) {}
+    $list = function (string $title, array $items) use ($h) {
+        if (!$items) return '';
+        return '<div class="hf-c"><h2>' . $h($title) . '</h2><ul>' . implode('', array_map(function ($i) use ($h) { return '<li><a href="' . $h($i[0]) . '">' . $h($i[1]) . '</a></li>'; }, $items)) . '</ul></div>';
+    };
+    return '<style>.hf-g{display:grid;gap:1rem}@media(min-width:768px){.hf-g{grid-template-columns:repeat(2,1fr)}}.hf-c{border:1px solid #e2e8f0;background:#fff;border-radius:1.25rem;padding:1.1rem 1.25rem}'
+        . '.hf-c h2{font:800 1.05rem Outfit,Inter,sans-serif;color:#064e3b;margin:0 0 .5rem}.hf-c ul{list-style:none;margin:0;padding:0}.hf-c li{padding:.28rem 0;font-size:.88rem;line-height:1.4}.hf-c a{color:#0f172a;text-decoration:none}.hf-c a:hover{color:#047857;text-decoration:underline}'
+        . 'html.roc-dark .hf-c{background:#0b1220;border-color:#1e293b}html.roc-dark .hf-c h2{color:#a7f3d0}html.roc-dark .hf-c a{color:#e2e8f0}</style><div class="hf-g">'
+        . $list('New blogs and guides', $posts) . $list('Latest gaming news', $news)
+        . $list('Popular PC games: can you run them?', $games)
+        . $list('Free tools and data', [['/can-i-run/my-pc/', 'Which games can my PC run?'], ['/can-i-run/steam-deck/', 'Steam Deck games: Verified and Playable'],
+            ['/can-i-run/report-2026/', 'PC Game Requirements Report'], ['/can-i-run/without-graphics-card/', 'Games without a graphics card'], ['/how-we-check/', 'How we check games'], ['/can-i-run/', 'All PC game requirements']])
+        . '</div>';
 }
