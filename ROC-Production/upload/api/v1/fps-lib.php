@@ -73,7 +73,7 @@ function rocFpsSection(?PDO $pdo, string $slug, string $name, array $gpus, array
         . "var b=f.querySelector('button');b.disabled=true;m.textContent='Sending…';"
         . "fetch('/api/v1/messages.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({kind:'fps',name:v('name'),email:v('email'),message:'',"
         . "meta:{game:" . json_encode($slug) . ",gpu:v('gpu'),cpu:v('cpu'),ram:v('ram'),res:v('res'),preset:v('preset'),fps:String(fps),upscale:f.upscale.checked?'1':'0'},website:v('website')})})"
-        . ".then(function(r){return r.json().catch(function(){return {}})}).then(function(d){if(d&&d.success){f.reset();m.textContent='Thank you! We check every report and add it to this page soon.';if(window.rocTrack)rocTrack('roc_fps_report'," . json_encode($slug) . ",String(fps))}"
+        . ".then(function(r){return r.json().catch(function(){return {}})}).then(function(d){if(d&&d.success){f.reset();m.textContent='Thanks! Your '+fps+' FPS report for '+" . json_encode($name, JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_TAG) . "+' reached us. We check every report and add it to this page soon.';if(window.rocTrack)rocTrack('roc_fps_report'," . json_encode($slug) . ",String(fps))}"
         . "else{m.textContent=(d&&d.error)||'Could not send. Please try again.'}}).catch(function(){m.textContent='No connection. Please try again.'}).then(function(){b.disabled=false})})})();</script>";
     return $h;
 }

@@ -119,7 +119,7 @@ function rocReviewsPage(string $root, PDO $pdo): void {
         . 'b.disabled=true;m.className="rv-msg";m.textContent="Sending…";'
         . 'fetch("/api/v1/messages.php",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({kind:"review",name:v("name"),email:v("email"),'
         . 'subject:"Review ("+v("rating")+"/5)",message:v("message"),meta:{rating:v("rating"),company:v("company"),page:"/reviews/"},website:v("website")})})'
-        . '.then(function(r){return r.json().catch(function(){return {}})}).then(function(d){if(d&&d.success){if(window.rocTrack)rocTrack("roc_review",v("rating"),"");f.reset();m.className="rv-msg ok";m.textContent="Thank you! We check every review and publish it soon."}'
+        . '.then(function(r){return r.json().catch(function(){return {}})}).then(function(d){if(d&&d.success){if(window.rocTrack)rocTrack("roc_review",v("rating"),"");f.reset();m.className="rv-msg ok";m.textContent="Thanks for your review! We check every review and publish it on this page soon."}'
         . 'else{m.className="rv-msg bad";m.textContent=(d&&d.error)||"Your review could not be sent. Please email contact@runonconsole.com."}})'
         . '.catch(function(){m.className="rv-msg bad";m.textContent="No connection. Please try again."}).then(function(){b.disabled=false})})})();</script>'
         . '</article>';
