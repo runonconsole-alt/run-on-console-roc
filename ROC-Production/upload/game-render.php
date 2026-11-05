@@ -218,6 +218,8 @@ function rocGpStyles(): string {
         . ".gp-check select{border:2px solid #e2e8f0;border-radius:.8rem;padding:.6rem .7rem;font-size:.9rem;font-weight:600;color:#0f172a;background:#f8fafc;text-transform:none;letter-spacing:0}"
         . ".gp-check select:focus{outline:none;border-color:#10b981;background:#fff}"
         . ".gp-res{margin-top:1rem;border-radius:1rem;padding:1rem 1.1rem;background:#f1f5f9;color:#334155;font-size:.92rem;line-height:1.6}"
+        . ".gp-bn-h{display:block;font-weight:800;margin-top:.35rem}.gp-bn{list-style:none;margin:.5rem 0 0;padding:0;display:grid;gap:.2rem;font-size:.86rem}.gp-bn li{padding-left:1.25rem;position:relative}.gp-bn li::before{position:absolute;left:0;font-weight:800}.gp-bn li.y::before{content:'\\2713'}.gp-bn li.n::before{content:'!';left:.25rem}.gp-bn li.x::before{content:'\\2717'}"
+        . ".gp-best td,.gp-best th{vertical-align:top}.gp-best a.y{display:inline-block;margin-top:.3rem;font-weight:800;font-size:.8rem;color:#047857}"
         . ".gp-res b{font-family:Outfit,Inter,sans-serif;font-size:1.6rem;font-weight:800;display:block;line-height:1.1}"
         . ".gp-res.ok{background:#ecfdf5;color:#065f46}.gp-res.mid{background:#fefce8;color:#854d0e}.gp-res.low{background:#fff7ed;color:#9a3412}.gp-res.no{background:#fef2f2;color:#991b1b}"
         . ".gp-bar{height:.55rem;border-radius:999px;background:rgba(15,23,42,.08);margin:.5rem 0;overflow:hidden}.gp-bar i{display:block;height:100%;border-radius:999px;background:currentColor}"
@@ -655,6 +657,34 @@ $rmn = (float)($rMin['ram'] ?? 0); $rrc = (float)($rRec['ram'] ?? $rmn);
 if ($rmn > 0) $faqs[] = ['Is 8 GB of RAM enough for ' . $name . '?',
     $rmn > 8 ? 'No. ' . $name . ' needs at least ' . $ramGb($rmn) . ' of RAM.' : ($rrc > 8 ? 'Yes for the minimum settings; ' . $ramGb($rrc) . ' is recommended for smooth play.' : 'Yes. 8 GB meets the ' . ($rec ? 'recommended' : 'minimum') . ' memory for ' . $name . '.')];
 if ($storage !== '') $faqs[] = ['How many GB is ' . $name . '?', $name . ' needs ' . preg_replace('/\s*available space/i', '', $storage) . ' of free space' . ($storageGb !== null && $storageGb >= 50 ? '. An SSD is a good idea for faster loading.' : '.')];
+// Deploy 162: the best graphics cards for this game: the lowest cards still sold new that reach the minimum, the
+// recommended and a level with room to spare, each with a product of ours when there is one. No FPS: we do not measure it.
+$bestGpu = [];
+$gMinNeed = (float)($rMin['gpu'] ?? 0); $gRecNeed = max($gMinNeed, (float)($rRec['gpu'] ?? 0));
+$noRec = !empty($g['req']['nr']);
+$tiersBest = [];
+if ($gMinNeed > 1.8) $tiersBest[] = ['Minimum', 'Reaches the minimum', $gMinNeed];
+if (!$noRec && $gRecNeed > $gMinNeed) $tiersBest[] = ['High settings', 'Reaches the recommended', $gRecNeed];
+$tiersBest[] = ['Room to spare', 'Faster than the game asks for', min(10.0, ($noRec ? max($gMinNeed, 3.0) : max($gRecNeed, 3.0)) + 2)];
+$refsBest = rocGpRefs('gpu'); $floorBest = 0.0; $usedProd = [];
+foreach ($tiersBest as [$tl, $tw, $tn]) {
+    // Each pick is faster than the one before; cards of about the same speed share a row.
+    $tn = max($tn, $floorBest + 0.01);
+    $cards = rocGpPartsFor('gpu', $tn, 2, true);
+    if (!$cards) continue;
+    $top = (float)$refsBest[$cards[0]] + 1;
+    $cards = array_values(array_filter($cards, function ($c) use ($refsBest, $top) { return (float)$refsBest[$c] <= $top; }));
+    $most = max(array_map(function ($c) use ($refsBest) { return (float)$refsBest[$c]; }, $cards));
+    $floorBest = $most;
+    $prod = null;
+    if ($pdo) foreach (rocGpProducts($pdo, 'gpu', $tn, 8) as $pr) {
+        if ($pr['_s'] === null || $pr['_s'] < $tn || $pr['_s'] > $most + 0.5 || isset($usedProd[$pr['slug']])) continue;
+        $prod = $pr; $usedProd[$pr['slug']] = 1; break;
+    }
+    $bestGpu[] = ['label' => $tl, 'why' => $tw, 'cards' => $cards, 'product' => $prod];
+}
+if ($bestGpu) $faqs[] = ['What is the best graphics card for ' . $name . '?', implode(' ', array_map(function ($b) { return $b['label'] . ': ' . implode(' or ', $b['cards']) . ' (' . lcfirst($b['why']) . ').'; }, $bestGpu))
+    . ($gMinNeed <= 1.8 ? ' It also runs without a graphics card, on integrated graphics.' : '')];
 // Deploy 157: Valve's Steam Deck rating (steam-deck-lib.php), a question people search for every game.
 $deck = rocDeckOf($ROOT, (int)$g['appid']);
 if ($deck && $deck['c'] > 0) $faqs[] = ['Can you play ' . $name . ' on Steam Deck?', ($deck['c'] === 3 ? 'Yes. ' : ($deck['c'] === 2 ? 'Yes, with some extra steps. ' : 'No. '))
@@ -826,6 +856,24 @@ $m .= '</div><p style="margin-top:.9rem">How common PCs do: ' . implode('; ', ar
     }, array_values($runs))) . '.</p>'
     . '<p class="gp-src" style="margin-top:.6rem">Parts with the same speed (and newer, faster ones) work too. Laptop versions of a graphics card are usually a little slower.</p></section>';
 
+// Deploy 162: the best graphics cards for this game.
+if ($bestGpu) {
+    $m .= '<section class="gp-card" id="best-gpu"><h2>Best graphics cards for ' . rocH($name) . '</h2>'
+        . ($gMinNeed <= 1.8 ? '<p>' . rocH($name) . ' runs without a graphics card, on integrated graphics. If you want one anyway:</p>' : '')
+        . '<div class="gp-wrap"><table class="gp-table gp-best"><thead><tr><th>Pick</th><th>Graphics cards still sold new</th><th>Why</th></tr></thead><tbody>';
+    foreach ($bestGpu as $b) {
+        $names = implode(' or ', array_map(function ($c) { $p = rocGpCardPath($c); return $p !== null ? '<a href="' . $p . '">' . rocH($c) . '</a>' : rocH($c); }, $b['cards']));
+        $prod = '';
+        if ($b['product']) {
+            $buy = trim((string)($b['product']['affiliate_amazon'] ?? ''));
+            $prod = '<br><a class="y" href="/products/' . rocH((string)$b['product']['slug']) . '/">' . rocH((string)$b['product']['title']) . '</a>'
+                . (preg_match('#^https?://#i', $buy) ? ' · <a class="y" href="' . rocH($buy) . '" target="_blank" rel="sponsored nofollow noopener">Check price on Amazon</a>' : '');
+        }
+        $m .= '<tr><td><b>' . rocH($b['label']) . '</b></td><td>' . $names . $prod . '</td><td>' . rocH($b['why']) . '</td></tr>';
+    }
+    $m .= '</tbody></table></div><p class="gp-src" style="margin-top:.5rem">From the official Steam requirements and our tier scale (<a href="/how-we-check/">how we check</a>). Your processor and RAM need to meet the game too: use the check above to see what holds your PC back.</p></section>';
+}
+
 // Upgrade picks
 if ($builds) {
     $m .= '<section class="gp-card" id="pc-build"><h2>PC builds for ' . rocH($name) . '</h2><p>Parts from our product guides: the lowest of each that reaches the game\'s ' . (count($builds) > 1 ? 'minimum and recommended' : 'recommended') . ' specs. Prices change every day, so Amazon shows today\'s price.</p>'
@@ -886,14 +934,17 @@ $m .= '</article>';
 // The quick check: the same rules as ROC (graphics 50%, processor 30%, RAM 20% of the recommended; under the minimum = at most 40%; under the recommended = at most 89%).
 $m .= "<script>(function(){var box=document.querySelector('.gp-check'),res=document.getElementById('gp-res');if(!box)return;var R=JSON.parse(box.getAttribute('data-req'));"
     . "function v(k){return parseFloat(box.querySelector('[data-k=\"'+k+'\"]').value)}"
-    . "function run(){var have={gpu:v('gpu'),cpu:v('cpu'),ram:v('ram')},mn=R.min||{},rc=R.rec||mn,w={gpu:.5,cpu:.3,ram:.2},s=0,t=0,below=false,miss=[];"
-    . "for(var k in w){var need=rc[k]||mn[k];if(need>0){s+=w[k]*Math.min(1,have[k]/need);t+=w[k];if(have[k]<need)miss.push(k);}if(mn[k]>0&&have[k]<mn[k])below=true;}"
+    . "function run(){var have={gpu:v('gpu'),cpu:v('cpu'),ram:v('ram')},mn=R.min||{},rc=R.rec||mn,w={gpu:.5,cpu:.3,ram:.2},s=0,t=0,below=false,miss=[],rat={};"
+    . "for(var k in w){var need=rc[k]||mn[k];if(need>0){rat[k]=have[k]/need;s+=w[k]*Math.min(1,have[k]/need);t+=w[k];if(have[k]<need)miss.push(k);}if(mn[k]>0&&have[k]<mn[k])below=true;}miss.sort(function(a,b){return rat[a]-rat[b]});"
     . "var p=Math.round(100*s/(t||1));if(below)p=Math.min(p,40);var room=!R.nr||(have.gpu>=(mn.gpu||0)+2&&have.cpu>=(mn.cpu||0)+2&&have.ram>=2*(mn.ram||0));if(miss.length||!room)p=Math.min(p,89);p=Math.max(5,p);"
     . "var c=p>=90?'ok':p>=70?'mid':p>40?'low':'no',txt=p>=90?'Runs on high settings (meets the recommended specs).':p>=70?'Playable on medium to high settings.':p>40?'Playable on low settings only.':'Below the minimum specs: it will not run well.';"
     . "var names={gpu:'graphics card',cpu:'processor',ram:'RAM'},up=miss.map(function(k){return names[k]});"
-    . "res.className='gp-res '+c;res.innerHTML='<b>'+p+'%</b><div class=\"gp-bar\"><i style=\"width:'+p+'%\"></i></div>'+txt+(up.length?' Upgrade first: '+up.join(', ')+'.':'');"
+    . "res.className='gp-res '+c;res.innerHTML='<b>'+p+'%</b><div class=\"gp-bar\"><i style=\"width:'+p+'%\"></i></div>'+txt+(up.length?' <span class=\"gp-bn-h\">Holding you back most: '+up[0]+'.</span>':'')"
+    // Deploy 162: each part against this game (bottleneck check).
+    . "+'<ul class=\"gp-bn\">'+['gpu','cpu','ram'].filter(function(x){return rat[x]!==undefined}).map(function(x){var low=mn[x]>0&&have[x]<mn[x],ok=miss.indexOf(x)<0;"
+    . "return '<li class=\"'+(low?'x':ok?'y':'n')+'\">'+names[x].charAt(0).toUpperCase()+names[x].slice(1)+': '+(low?'below the minimum':ok?(R.nr?'meets the minimum':'meets the recommended'):'meets the minimum, below the recommended')+'</li>'}).join('')+'</ul>';"
     // Deploy 147: the product for the first missing part (graphics card, then processor, then RAM) under the result.
-    . "var ub=document.getElementById('gp-up');if(ub){var U=JSON.parse(ub.getAttribute('data-up')||'{}'),k=['gpu','cpu','ram'].filter(function(x){return miss.indexOf(x)>-1&&U[x]})[0];"
+    . "var ub=document.getElementById('gp-up');if(ub){var U=JSON.parse(ub.getAttribute('data-up')||'{}'),k=miss.filter(function(x){return U[x]})[0];"
     . "if(!k){ub.hidden=true;}else{var x=U[k],e=function(s){return String(s).replace(/[&<>\"]/g,function(ch){return{'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch]})};"
     . "ub.innerHTML='<span class=\"k\">Upgrade first: '+names[k]+'</span><span class=\"t\">'+e(x.t)+'</span><div class=\"b\"><a class=\"r\" href=\"'+e(x.u)+'\">See specs on ROC</a>'"
     . "+(x.a?'<a class=\"y\" href=\"'+e(x.a)+'\" target=\"_blank\" rel=\"sponsored nofollow noopener\">Check price on Amazon</a>':'')+'</div>';ub.hidden=false;}}}"

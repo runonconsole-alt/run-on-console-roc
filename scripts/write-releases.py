@@ -1096,6 +1096,12 @@ RELEASES = [
                  dict(label='Real sitemap dates', type='contains', path='sitemap-render.php', text='rocSmNewest')],
          pr=REPO + '163',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply (this writes the new links into the home page)', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=162, date='2026-11-05', title='What holds your PC back, and the best graphics cards for each game',
+         changes=['The quick check on every game page shows each part against the game (meets the recommended, meets the minimum, below the minimum) and which part holds the PC back most; the upgrade card now follows that part (it always offered the graphics card first)',
+                  'Every game page has Best graphics cards: the lowest cards still sold new for the minimum, for high settings and with room to spare, each pick faster than the one before, with our product and Amazon link when we have one, and a FAQ for that search'],
+         checks=[dict(label='Best graphics cards', type='contains', path='game-render.php', text='best-gpu')],
+         pr=REPO + '164',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
