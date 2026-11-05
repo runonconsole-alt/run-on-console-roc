@@ -1165,7 +1165,9 @@ function renderLoginCode(who, pw, error){
 /* ------------------------------------------------------------- messages */
 /* Contact and write-for-us forms (api/v1/cms/messages.php). Administrators only. */
 
-var MSG_KIND={contact:'Contact',support:'Support',write_for_us:'Write for us',suggestion:'Suggestion',comment:'Comment',alerts:'Alerts'};
+var MSG_KIND={contact:'Contact',support:'Support',write_for_us:'Write for us',suggestion:'Suggestion',comment:'Comment',review:'Review',fps:'FPS report',alerts:'Alerts'};
+function msgPublishable(x){ return x.kind==='review'||x.kind==='fps'; }
+function msgLive(x){ return !!(x.meta&&+x.meta.published===1); }
 var MSG_STATUS={new:'New',replied:'Replied',closed:'Closed',spam:'Spam'};
 
 async function loadMessages(){
@@ -1198,7 +1200,7 @@ async function renderMessages(m){
         var n=s==='all'?total:(c[s]||0);
         return '<button class="chip'+(f===s?' on':'')+'" data-mf="'+s+'">'+(s==='all'?'All':MSG_STATUS[s])+'<span class="n">'+n+'</span></button>';
       }).join('')+'</div><div class="chips">'+
-      ['all','contact','support','write_for_us','suggestion','comment','alerts'].map(function(s){
+      ['all','contact','support','write_for_us','suggestion','comment','review','fps','alerts'].map(function(s){
         return '<button class="chip'+(k===s?' on':'')+'" data-mk="'+s+'">'+(s==='all'?'All kinds':MSG_KIND[s])+'</button>';
       }).join('')+'</div></div>'+
     (rows.length?'<table class="list"><thead><tr><th>From</th><th>Message</th><th>Form</th><th>Status</th><th>Received</th></tr></thead><tbody>'+
@@ -1206,7 +1208,7 @@ async function renderMessages(m){
         return '<tr data-msg="'+x.id+'" style="cursor:pointer'+(x.status==='new'?';font-weight:600':'')+'">'+
           '<td><div>'+esc(x.name)+'</div><div class="t-slug">'+esc(x.email)+'</div></td>'+
           '<td><div>'+esc(x.subject||'(no subject)')+'</div><div class="hint" style="max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(x.preview||'')+'</div></td>'+
-          '<td>'+esc(MSG_KIND[x.kind]||x.kind)+'</td><td>'+msgTag(x.status)+'</td>'+
+          '<td>'+esc(MSG_KIND[x.kind]||x.kind)+'</td><td>'+msgTag(x.status)+(msgPublishable(x)&&msgLive(x)?' <span class="tag published">On the site</span>':'')+'</td>'+
           '<td style="color:var(--ink-3);white-space:nowrap">'+when(x.created_at)+'</td></tr>';
       }).join('')+'</tbody></table>'
       :'<div class="empty"><div class="big">✉</div><div>No messages here.</div></div>')+
@@ -1232,19 +1234,28 @@ async function openMessage(id){
   }).join('');
   modal((MSG_KIND[x.kind]||'Message')+' from '+x.name,
     '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">'+
-      '<div><div style="font-weight:600">'+esc(x.name)+' &lt;<a href="mailto:'+esc(x.email)+'">'+esc(x.email)+'</a>&gt;</div>'+
-      '<div class="hint">'+when(x.created_at)+'</div></div><div>'+msgTag(x.status)+'</div></div>'+
+      '<div><div style="font-weight:600">'+esc(x.name)+(x.email?' &lt;<a href="mailto:'+esc(x.email)+'">'+esc(x.email)+'</a>&gt;':' <span class="hint">(no email)</span>')+'</div>'+
+      '<div class="hint">'+when(x.created_at)+'</div></div><div>'+msgTag(x.status)+(msgPublishable(x)?' <span class="tag '+(msgLive(x)?'published':'draft')+'">'+(msgLive(x)?'On the site':'Not on the site')+'</span>':'')+'</div></div>'+
     (x.subject?'<div style="margin-top:10px;font-weight:600">'+esc(x.subject)+'</div>':'')+
     (metaHtml?'<div style="margin-top:8px;font-size:13px">'+metaHtml+'</div>':'')+
     '<div style="white-space:pre-wrap;background:var(--panel-2);border-radius:8px;padding:12px;margin-top:10px">'+esc(x.message)+'</div>'+
     (replies?'<div style="margin-top:14px"><div class="hint" style="font-weight:600">Replies</div>'+replies+'</div>':'')+
-    '<div class="field" style="margin-top:14px"><label for="msg-body">Reply to '+esc(x.email)+'</label>'+
-      '<textarea id="msg-body" rows="6" placeholder="Write your reply. It is emailed to the sender with their message quoted below."></textarea></div>',
+    (x.email?'<div class="field" style="margin-top:14px"><label for="msg-body">Reply to '+esc(x.email)+'</label>'+
+      '<textarea id="msg-body" rows="6" placeholder="Write your reply. It is emailed to the sender with their message quoted below."></textarea></div>':''),
     '<button class="btn danger" data-a="spam" style="margin-right:auto">Spam</button>'+
     (x.status==='closed'||x.status==='spam'?'<button class="btn" data-a="reopen">Reopen</button>':'<button class="btn" data-a="closeMsg">Mark done</button>')+
-    '<button class="btn" data-a="close">Close</button><button class="btn primary" data-a="send">Send reply</button>',
+    (msgPublishable(x)?'<button class="btn" data-a="'+(msgLive(x)?'unpublish':'publish')+'">'+(msgLive(x)?'Hide from the site':'Publish on the site')+'</button>':'')+
+    '<button class="btn" data-a="close">Close</button>'+(x.email?'<button class="btn primary" data-a="send">Send reply</button>':''),
     async function(a,close){
       if(a==='close') return close();
+      if(a==='publish'||a==='unpublish'){
+        try{
+          await api('messages.php',{action:'set_published',id:x.id,published:a==='publish'});
+          toast(a==='publish'?'Published. It shows on the site after the cache clears.':'Hidden from the site.','good');
+          close(); S.msgs=null; renderShell();
+        }catch(e){ toast(e.message,'bad'); }
+        return;
+      }
       if(a==='send'){
         var body=$('#msg-body').value.trim();
         if(!body){ toast('Write a reply first.','bad'); return; }
@@ -4439,11 +4450,11 @@ async function renderGuideWriter(m){
   var d; try{ d=await api('guide-writer.php'); }catch(e){ toast(e.message,'bad'); return; }
   if(S.view!=='blogagent'||S.baMode!=='guides') return;
   var s=d.settings||{}, st=d.state||{};
-  var waitTxt={'off':'Off','ended':'Starts again on Tuesday 3 November','not a guide day':'Next guide on the next Tuesday, Friday or Saturday','writes from 09:30':'Writes today from 09:30, live at 12:00','too late today':'Next guide on the next guide day','done today':'All guides for today are written','outside 10:00-23:30':'Waits for 10:00 Pakistan time','next one later':'Next guide about 2 hours after the last one'}[d.wait]||'Writes the next guide within 10 minutes';
+  var waitTxt={'off':'Off','ended':'Starts again on Tuesday 3 November','not a guide day':'Next guide on the next Tuesday, Friday or Saturday','writes from 09:30 (for 12:00)':'Writes today from 09:30, live at 12:00','writes from 15:30 (for 18:00)':'The next guide is written from 15:30, live at 18:00','too late today':'Next guide on the next guide day','done today':'All guides for today are written','outside 10:00-23:30':'Waits for 10:00 Pakistan time','next one later':'Next guide about 2 hours after the last one'}[d.wait]||'Writes the next guide within 10 minutes';
   $('.body',m).innerHTML=
     (!d.ai?'<div class="alert warn">No AI key saved: add the free Groq or Gemini key in the Blogs tab.</div>':'')+
     '<div class="card"><div class="chead"><h3>Guide writer</h3><span class="note"><b style="color:'+(s.on&&d.wait!=='ended'?'#059669':'#b45309')+'">● '+esc(waitTxt)+'</b></span></div><div class="cbody">'+
-      '<div class="hint" style="margin-bottom:10px">Writes helpful step by step guides (buying, setup, how to use, game settings) and publishes them at /guides/ with a cover made by AI, a topic and tags. From 2 November: one guide every Tuesday, Friday and Saturday, live at 12:00 Pakistan time (Guides a day and Until are no longer used). Topics come first from real how-to Google searches that no post answers yet.</div>'+
+      '<div class="hint" style="margin-bottom:10px">Writes helpful step by step guides (buying, setup, how to use, game settings) and publishes them at /guides/ with a cover made by AI, a topic and tags. Two guides every Tuesday, Friday and Saturday, live at 12:00 and 18:00 Pakistan time (Guides a day and Until are no longer used). Topics come first from real how-to Google searches that no post answers yet.</div>'+
       '<label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-bottom:10px"><input type="checkbox" id="gw-on"'+(s.on?' checked':'')+'> Write guides by themselves</label>'+
       '<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">'+
         '<div class="field" style="margin:0"><label for="gw-per">Guides a day</label><input type="number" id="gw-per" min="0" max="6" value="'+(s.per_day||0)+'" style="width:90px"></div>'+
@@ -4490,7 +4501,7 @@ async function renderBlogAgent(m, fresh){
   // Until when the server writes blog posts by itself (owner: from Monday 19 October they write them).
   function autoCard(){
     var u=d.auto_until||'', af=d.auto_from||'', DN=['','Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    var sched=af?'<div class="hint" style="margin-top:6px">From <b>'+esc(af)+'</b> the server writes again: '+(d.blog_days||[]).map(function(x){return DN[x];}).join(', ')+', '+(d.per_day||1)+' post a day, live at '+esc(d.blog_time||'12:00')+' Pakistan time, with the real Google searches from Search Console. Guides: Tue, Fri, Sat at 12:00. At 12:30 the sitemap goes to Google.</div>':'';
+    var sched=af?'<div class="hint" style="margin-top:6px">From <b>'+esc(af)+'</b> the server writes again: '+(d.blog_days||[]).map(function(x){return DN[x];}).join(', ')+', '+(d.per_day||1)+(+d.per_day===1?' post':' posts')+' a day, live at '+esc(d.blog_time||'12:00')+' Pakistan time, with the real Google searches from Search Console. Guides: Tue, Fri, Sat at 12:00 and 18:00. Every day at 12:30 the sitemap goes to Google.</div>':'';
     return '<div class="card"'+(d.auto_ended?' style="border-color:var(--amber)"':'')+'><div class="chead"><h3>Automatic blog posts</h3><span class="note">'+
       (d.auto_ended&&d.auto_from&&d.auto_from>new Date().toISOString().slice(0,10)?'<b style="color:#059669">● Starts again on '+esc(d.auto_from)+'</b>':d.auto_ended?'<b style="color:#b45309">● Ended: you write the blog posts</b>':u?'<b style="color:#059669">● On until '+esc(u)+'</b>':'<b style="color:#059669">● On, no end date</b>')+'</span></div><div class="cbody">'+
       '<div class="hint" style="margin-bottom:10px">The server writes blog posts by itself until this date (not on it). After that, write posts in <b>Blogs &gt; New post</b>: '+

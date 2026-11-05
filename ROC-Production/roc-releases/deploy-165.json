@@ -4,7 +4,8 @@
  "title": "The FPS form starts empty, and every form says thanks in its own words",
  "changes": [
   "The Share your FPS form no longer fills in a graphics card, processor, RAM, resolution or preset: the player has to choose them (a saved PC still fills its parts), so a report says what the player really has",
-  "Each form thanks the visitor for what they sent, on the page and in the email copy: contact message, support request, guest post pitch, suggestion, comment, review and FPS report (with the game name), with what happens next"
+  "Each form thanks the visitor for what they sent, on the page and in the email copy: contact message, support request, guest post pitch, suggestion, comment, review and FPS report (with the game name), with what happens next",
+  "CMS > Messages knows reviews and FPS reports: their own filter and label, an On the site tag, Publish and Hide buttons, and no reply box when the sender left no email. The blog and guide writer cards and the Live activity show the new schedule and forms"
  ],
  "checks": [
   {

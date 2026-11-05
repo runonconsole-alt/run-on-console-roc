@@ -6,6 +6,7 @@
  * GET  /api/v1/cms/messages.php?id=12           one message with its replies
  * POST {action:'reply', id, body}               email the visitor and keep the reply
  * POST {action:'set_status', id, status}        new | replied | closed | spam
+ * POST {action:'set_published', id, published}  a review or FPS report on the site or not (Deploy 165)
  *
  * Replies go through the site's email queue (email_queue). The CMS then asks
  * /api/v1/messages.php to send queued mail right away.
@@ -70,8 +71,20 @@ if ($action === 'set_status') {
     rocMsgJson(200, ['success' => true]);
 }
 
+// Deploy 165: the same as the Publish and Hide links in the notification email (review-publish.php).
+if ($action === 'set_published') {
+    $m = rocMsgRow($pdo, $id);
+    if (!in_array($m['kind'], ['review', 'fps'], true)) rocMsgJson(422, ['success' => false, 'error' => 'Only reviews and FPS reports go on the site.']);
+    $meta = (array)$m['meta'];
+    $meta['published'] = !empty($in['published']) ? 1 : 0;
+    $pdo->prepare('UPDATE roc_messages SET meta_json = ?, updated_at = ? WHERE id = ?')->execute([json_encode($meta, JSON_UNESCAPED_UNICODE), $now, $id]);
+    if (function_exists('logCmsAudit')) logCmsAudit('cms_message_publish', 'message', (string)$id, ['published' => $meta['published']]);
+    rocMsgJson(200, ['success' => true, 'published' => $meta['published']]);
+}
+
 if ($action === 'reply') {
     $m = rocMsgRow($pdo, $id);
+    if (trim((string)$m['email']) === '') rocMsgJson(422, ['success' => false, 'error' => 'This message came without an email address.']);
     $body = trim((string)($in['body'] ?? ''));
     if ($body === '' || mb_strlen($body) > 10000) rocMsgJson(422, ['success' => false, 'error' => 'Write a reply (up to 10,000 characters).']);
     $by = (string)($session['username'] ?? $session['email'] ?? 'Run On Console');
