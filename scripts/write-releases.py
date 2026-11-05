@@ -1113,6 +1113,11 @@ RELEASES = [
          checks=[dict(label='First letter', type='contains', path='api/v1/cms/seo-check-lib.php', text='rocSeoCap')],
          pr=REPO + '166',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'To test now: php public_html/api/v1/cron/cli-blog-scheduler.php --write']),
+    dict(deploy=165, date='2026-11-05', title='The FPS form starts empty',
+         changes=['The Share your FPS form no longer fills in a graphics card, processor, RAM, resolution or preset: the player has to choose them (a saved PC still fills its parts), so a report says what the player really has'],
+         checks=[dict(label='Empty FPS form', type='contains', path='api/v1/fps-lib.php', text='Choose your graphics card')],
+         pr=REPO + '167',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

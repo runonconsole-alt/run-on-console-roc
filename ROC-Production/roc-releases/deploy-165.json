@@ -1,0 +1,28 @@
+{
+ "deploy": 165,
+ "date": "2026-11-05",
+ "title": "The FPS form starts empty",
+ "changes": [
+  "The Share your FPS form no longer fills in a graphics card, processor, RAM, resolution or preset: the player has to choose them (a saved PC still fills its parts), so a report says what the player really has"
+ ],
+ "checks": [
+  {
+   "label": "Empty FPS form",
+   "type": "contains",
+   "path": "api/v1/fps-lib.php",
+   "text": "Choose your graphics card"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BPYzVwXN.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/167",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it.",
+  "Cloudflare: Purge Everything."
+ ],
+ "build": "index-BPYzVwXN.js"
+}

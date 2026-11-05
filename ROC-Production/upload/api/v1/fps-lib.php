@@ -48,16 +48,16 @@ function rocFpsSection(?PDO $pdo, string $slug, string $name, array $gpus, array
     } else {
         $h .= '<p>No player has shared an FPS for ' . rocH($name) . ' yet. Played it? Your numbers help the next player decide.</p>';
     }
-    $opt = function (array $list, string $pick) { $o = ''; foreach ($list as $n) $o .= '<option' . ($n === $pick ? ' selected' : '') . '>' . rocH($n) . '</option>'; return $o; };
-    $sel = function (array $list, string $pick) { $o = ''; foreach ($list as $n) $o .= '<option value="' . rocH($n) . '"' . ($n === $pick ? ' selected' : '') . '>' . rocH($n) . '</option>'; return $o; };
+    // Deploy 165: nothing is chosen for the player. The first report came with every default and 60 FPS, which says nothing.
+    $sel = function (array $list, string $first) { $o = '<option value="">' . rocH($first) . '</option>'; foreach ($list as $n) $o .= '<option value="' . rocH($n) . '">' . rocH($n) . '</option>'; return $o; };
     $h .= '<details class="gp-fps-form" style="margin-top:1rem"' . ($reps ? '' : ' open') . '><summary class="gp-btn s" style="cursor:pointer;list-style:none;display:inline-flex">Share your FPS</summary>'
         . '<form id="fps-form" novalidate style="margin-top:.8rem"><input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">'
         . '<div class="gp-check">'
-        . '<label>Graphics card<select name="gpu">' . $sel(array_keys($gpus), 'GeForce GTX 1650') . '</select></label>'
-        . '<label>Processor<select name="cpu">' . $sel(array_keys($cpus), 'Intel Core i5-8400') . '</select></label>'
-        . '<label>Memory (RAM)<select name="ram">' . implode('', array_map(function ($r) { return '<option value="' . $r . '"' . ($r === 16 ? ' selected' : '') . '>' . $r . ' GB</option>'; }, [4, 6, 8, 12, 16, 24, 32, 64])) . '</select></label>'
-        . '<label>Resolution<select name="res">' . $opt(['720p', '900p', '1080p', '1440p', '4K', 'Steam Deck'], '1080p') . '</select></label>'
-        . '<label>Settings<select name="preset">' . $opt(['Low', 'Medium', 'High', 'Ultra'], 'High') . '</select></label>'
+        . '<label>Graphics card<select name="gpu" required>' . $sel(array_keys($gpus), 'Choose your graphics card') . '</select></label>'
+        . '<label>Processor<select name="cpu" required>' . $sel(array_keys($cpus), 'Choose your processor') . '</select></label>'
+        . '<label>Memory (RAM)<select name="ram" required><option value="">Choose your RAM</option>' . implode('', array_map(function ($r) { return '<option value="' . $r . '">' . $r . ' GB</option>'; }, [4, 6, 8, 12, 16, 24, 32, 64])) . '</select></label>'
+        . '<label>Resolution<select name="res" required>' . $sel(['720p', '900p', '1080p', '1440p', '4K', 'Steam Deck'], 'Choose the resolution') . '</select></label>'
+        . '<label>Settings<select name="preset" required>' . $sel(['Low', 'Medium', 'High', 'Ultra'], 'Choose the preset') . '</select></label>'
         . '<label>Average FPS<input name="fps" type="number" min="1" max="500" inputmode="numeric" placeholder="e.g. 60" style="border:2px solid #e2e8f0;border-radius:.8rem;padding:.6rem .7rem;font-size:.9rem;font-weight:600"></label>'
         . '<label>Nickname<input name="name" maxlength="40" placeholder="Shown with your report" style="border:2px solid #e2e8f0;border-radius:.8rem;padding:.6rem .7rem;font-size:.9rem"></label>'
         . '<label>Email (optional)<input name="email" type="email" maxlength="150" placeholder="Never shown" style="border:2px solid #e2e8f0;border-radius:.8rem;padding:.6rem .7rem;font-size:.9rem"></label>'
@@ -67,6 +67,8 @@ function rocFpsSection(?PDO $pdo, string $slug, string $name, array $gpus, array
         // The PC from the quick check (or the saved PC) fills the form.
         . "try{var P=JSON.parse(localStorage.getItem('roc_pc')||'null');if(P){if(P.gpu)f.gpu.value=P.gpu;if(P.cpu)f.cpu.value=P.cpu;if(P.ram)f.ram.value=String(P.ram)}}catch(e){}"
         . "f.addEventListener('submit',function(e){e.preventDefault();var v=function(n){return (f.elements[n].value||'').trim()},fps=parseInt(v('fps'),10);"
+        . "var left=[['gpu','graphics card'],['cpu','processor'],['ram','RAM'],['res','resolution'],['preset','settings']].filter(function(x){return !v(x[0])}).map(function(x){return x[1]});"
+        . "if(left.length){m.textContent='Please choose your '+left.join(', ')+'.';return}"
         . "if(!(fps>=1&&fps<=500)){m.textContent='Please enter your average FPS (1 to 500).';return}"
         . "var b=f.querySelector('button');b.disabled=true;m.textContent='Sending…';"
         . "fetch('/api/v1/messages.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({kind:'fps',name:v('name'),email:v('email'),message:'',"
