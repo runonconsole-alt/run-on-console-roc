@@ -23,6 +23,17 @@ const ROC_MSG_INBOX = ['contact' => 'contact@runonconsole.com', 'support' => 'su
 const ROC_MSG_LABEL = ['contact' => 'Contact', 'support' => 'Support', 'write_for_us' => 'Write for us',
                        'suggestion' => 'Suggestion', 'comment' => 'Comment', 'review' => 'Review', 'fps' => 'FPS report'];
 
+// Deploy 165 (owner): the thank-you fits the form: what was sent, and what happens next.
+const ROC_MSG_THANKS = [
+    'contact' => ['message', 'We usually reply within 2 working days.'],
+    'support' => ['support request', 'Our support team usually replies within 2 working days.'],
+    'write_for_us' => ['guest post pitch', 'Our editors read every pitch and reply by email, usually within 2 working days.'],
+    'suggestion' => ['suggestion', 'We read every suggestion and use them to improve the site, ROC and our guides.'],
+    'comment' => ['comment', 'We read every comment and reply by email when it needs an answer.'],
+    'review' => ['review', 'We check every review and publish it on runonconsole.com/reviews/ soon.'],
+    'fps' => ['FPS report', 'We check every report and add it to the game page soon.'],
+];
+
 header('Content-Type: application/json; charset=utf-8');
 if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
 
@@ -160,17 +171,17 @@ if ($email !== '') try {
           . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">'
           . '<tr><td style="padding:0 0 22px;font-size:20px;font-weight:700;color:#047857">Run On Console</td></tr><tr><td style="font-size:15px;line-height:24px;color:#262626">'
           . '<p style="margin:0 0 14px">Hi ' . $esc($name) . ',</p>'
-          . '<p style="margin:0 0 14px">Thanks, we received your ' . $esc(strtolower(ROC_MSG_LABEL[$kind])) . ' message (reference <b>MSG-' . $id . '</b>). '
-          . ($kind === 'comment' ? 'We read every comment.' : ($kind === 'review' ? 'We check every review and publish it on runonconsole.com/reviews/ soon.' : 'We usually reply within 2 working days.')) . '</p>'
-          . '<p style="margin:0 0 8px;color:#64748b;font-size:13px">Your message:</p>'
+          . '<p style="margin:0 0 14px">Thanks, we received your ' . $esc(ROC_MSG_THANKS[$kind][0]) . ' (reference <b>MSG-' . $id . '</b>). '
+          . $esc(ROC_MSG_THANKS[$kind][1]) . '</p>'
+          . '<p style="margin:0 0 8px;color:#64748b;font-size:13px">Your ' . $esc(ROC_MSG_THANKS[$kind][0]) . ':</p>'
           . '<div style="white-space:pre-wrap;background:#f8fafc;border-radius:10px;padding:14px;margin:0 0 16px;font-size:14px">' . $esc($message) . '</div>'
           . '<p style="margin:0 0 14px;font-size:13px;color:#64748b">Need to add something? Write to ' . $esc(ROC_MSG_INBOX[$kind]) . ' and mention MSG-' . $id . '.</p>'
           . '<p style="margin:0">Thanks,<br>Run On Console</p></td></tr></table></td></tr></table></body></html>';
-    $copyJob = rocQueue($db, $email, 'We received your message (MSG-' . $id . ') · Run On Console', $copy, 3);
+    $copyJob = rocQueue($db, $email, 'Thanks for your ' . ROC_MSG_THANKS[$kind][0] . ' (MSG-' . $id . ') · Run On Console', $copy, 3);
 } catch (\Throwable $e) { error_log('[ROC messages] copy failed: ' . get_class($e)); }
 
 $data = ['success' => true, 'reference' => 'MSG-' . $id,
-         'message' => 'Thank you! Your message has been received. We usually reply within 2 working days.'];
+         'message' => 'Thank you! We received your ' . ROC_MSG_THANKS[$kind][0] . '. ' . ROC_MSG_THANKS[$kind][1]];
 if (!empty($copyJob)) { try { rocDispatch($db, (int)$copyJob); } catch (\Throwable $e) {} }   // the sender's copy, now
 if ($job) rocRespond(201, $data, $job);   // sends the notification right away
 rocMsgOut(201, $data);

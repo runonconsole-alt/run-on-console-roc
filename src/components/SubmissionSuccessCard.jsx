@@ -10,7 +10,7 @@ import confetti from 'canvas-confetti';
  * "Enjoy your life and have fun, we will reply soon" celebration banner!
  */
 export const SubmissionSuccessCard = ({
-  formType = "contact", // 'contact' | 'write-for-us' | 'partnership' | 'suggestion' | 'comment'
+  formType = "contact", // 'contact' | 'support' | 'write-for-us' | 'partnership' | 'suggestion' | 'comment'
   userName = "Gamer",
   referenceId = "",
   onReset
@@ -64,6 +64,12 @@ export const SubmissionSuccessCard = ({
       metaLabel: "Inquiry Channel",
       metaValue: "contact@runonconsole.com"
     },
+    support: {
+      badge: "SUPPORT REQUEST RECEIVED",
+      hook: "Thanks for telling us about the problem. Your request has reached our support team and we reply by email, usually within 1-2 working days.",
+      metaLabel: "Sent to",
+      metaValue: "support@runonconsole.com"
+    },
     'write-for-us': {
       badge: "GUEST PITCH QUEUED FOR REVIEW",
       hook: "Thanks, your pitch has reached our editors. A copy is in your inbox, and we reply by email, usually within 1-2 working days.",
@@ -77,7 +83,7 @@ export const SubmissionSuccessCard = ({
       metaValue: "Commercial Advertising Director"
     },
     suggestion: {
-      badge: "REVIEW SUGGESTION LOCKED IN",
+      badge: "SUGGESTION RECEIVED",
       hook: "Thanks for the suggestion. We read every one and use them to improve the site, ROC and our guides. A copy is in your inbox.",
       metaLabel: "Sent to",
       metaValue: "suggestions@runonconsole.com"

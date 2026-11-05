@@ -12,7 +12,8 @@
 
 const ROC_FA_DAYS = 30;
 const ROC_FA_KIND = ['contact' => 'Contact form', 'support' => 'Support form', 'write_for_us' => 'Write for us form',
-                     'suggestion' => 'Suggestions form', 'comment' => 'Comment form', 'partnership' => 'Partnership form'];
+                     'suggestion' => 'Suggestions form', 'comment' => 'Comment form', 'partnership' => 'Partnership form',
+                     'review' => 'Review form', 'fps' => 'FPS report form'];
 
 function rocFaTable(PDO $pdo): void {
     static $done = false;
