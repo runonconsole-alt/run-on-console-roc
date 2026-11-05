@@ -1317,25 +1317,49 @@ function rocGroqPickModel(string $key): ?string {
     return $have[0] ?? null;
 }
 
-/** Writes the article JSON with Groq. */
-function rocGroqWrite(PDO $pdo, string $key, string $prompt, ?string &$used = null): array {
-    $model = (string)rocBlogGet($pdo, 'blog_groq_model', '');
-    if ($model === '') { $model = rocGroqPickModel($key) ?: ROC_GROQ_MODELS[1]; rocBlogSet($pdo, 'blog_groq_model', $model); }
-    $body = ['model' => $model, 'temperature' => 0.7, 'max_tokens' => 8000, 'response_format' => ['type' => 'json_object'],
-             'messages' => [['role' => 'system', 'content' => 'You are an expert gaming hardware writer. Answer with one JSON object only.'],
-                            ['role' => 'user', 'content' => $prompt]]];
-    $r = rocGroqCall($key, 'POST', '/chat/completions', $body);
-    if (!$r['ok'] && in_array($r['code'], [400, 404], true) && stripos($r['error'], 'model') !== false) {
-        $alt = rocGroqPickModel($key);
-        if ($alt && $alt !== $model) { $model = $alt; rocBlogSet($pdo, 'blog_groq_model', $alt); $body['model'] = $alt; $r = rocGroqCall($key, 'POST', '/chat/completions', $body); }
+/**
+ * Writes the article JSON with Groq.
+ * Deploy 163: Groq counts each model's daily tokens on its own. Blog posts, guides and news all used one model, the news
+ * filled its 200,000 tokens and no blog post was written after 18 October ("Rate limit reached"). Now a model at its limit
+ * waits (content_model_wait) and the next strong model writes; $otherFirst (news) starts with the other models, so the main
+ * model is left for the blog posts and guides. The small 8b models are not used for articles.
+ */
+function rocGroqWrite(PDO $pdo, string $key, string $prompt, ?string &$used = null, bool $otherFirst = false): array {
+    $main = (string)rocBlogGet($pdo, 'blog_groq_model', '');
+    if ($main === '') { $main = rocGroqPickModel($key) ?: ROC_GROQ_MODELS[1]; rocBlogSet($pdo, 'blog_groq_model', $main); }
+    require_once __DIR__ . '/content-writer-lib.php';
+    $others = array_values(array_filter(rocContentModels($pdo, $key), function ($m) use ($main) { return $m !== $main && !preg_match('/8b|instant/i', $m); }));
+    $models = $otherFirst ? array_merge($others, [$main]) : array_merge([$main], $others);
+    $wait = rocBlogGet($pdo, 'content_model_wait', []); $wait = is_array($wait) ? $wait : [];
+    $errors = [];
+    foreach ($models as $model) {
+        if ((int)($wait[$model] ?? 0) > time()) { $errors[] = $model . ': at its daily limit'; continue; }
+        // The other models allow fewer tokens a minute: a request asking for 8,000 would be refused as too large.
+        $body = ['model' => $model, 'temperature' => 0.7, 'max_tokens' => $model === $main ? 8000 : 5000, 'response_format' => ['type' => 'json_object'],
+                 'messages' => [['role' => 'system', 'content' => 'You are an expert gaming hardware writer. Answer with one JSON object only.'],
+                                ['role' => 'user', 'content' => $prompt]]];
+        $r = rocGroqCall($key, 'POST', '/chat/completions', $body);
+        if (!$r['ok'] && $model === $main && in_array($r['code'], [400, 404], true) && stripos($r['error'], 'model') !== false) {
+            $alt = rocGroqPickModel($key);
+            if ($alt && $alt !== $model) { rocBlogSet($pdo, 'blog_groq_model', $alt); $body['model'] = $alt; $model = $alt; $r = rocGroqCall($key, 'POST', '/chat/completions', $body); }
+        }
+        if (!$r['ok']) {
+            if ((int)($r['code'] ?? 0) === 429 || stripos((string)$r['error'], 'rate limit') !== false) {
+                $sec = rocContentRetryIn((string)$r['error']);
+                if ($sec > 90) { $wait[$model] = time() + $sec; rocBlogSet($pdo, 'content_model_wait', $wait); }
+            }
+            $errors[] = $model . ': ' . mb_substr((string)$r['error'], 0, 160);
+            continue;
+        }
+        $text = trim((string)($r['data']['choices'][0]['message']['content'] ?? ''));
+        $text = trim((string)preg_replace('/^```(?:json)?\s*|\s*```$/', '', $text));
+        $a = json_decode($text, true);
+        if (!is_array($a)) { $errors[] = $model . ': did not answer with an article'; continue; }
+        $used = $model;
+        return ['ok' => true, 'article' => $a];
     }
-    $used = $model;
-    if (!$r['ok']) return ['ok' => false, 'error' => 'Groq: ' . $r['error']];
-    $text = trim((string)($r['data']['choices'][0]['message']['content'] ?? ''));
-    $text = trim(preg_replace('/^```(?:json)?\s*|\s*```$/', '', $text));
-    $a = json_decode($text, true);
-    if (!is_array($a)) return ['ok' => false, 'error' => 'Groq did not answer with an article.'];
-    return ['ok' => true, 'article' => $a];
+    $used = $main;
+    return ['ok' => false, 'error' => 'Groq: ' . implode(' | ', $errors)];
 }
 
 /** Writers that have a key, in order: Gemini, then Groq. */
@@ -1349,11 +1373,11 @@ function rocBlogWriters(PDO $pdo): array {
 }
 
 /** Writes with the first writer that works. */
-function rocBlogWriteAny(PDO $pdo, string $prompt, ?string &$used = null): array {
+function rocBlogWriteAny(PDO $pdo, string $prompt, ?string &$used = null, bool $otherFirst = false): array {
     $errors = [];
     foreach (rocBlogWriters($pdo) as $name => $key) {
         $model = null;
-        $r = $name === 'gemini' ? rocGeminiWrite($pdo, $key, $prompt, $model) : rocGroqWrite($pdo, $key, $prompt, $model);
+        $r = $name === 'gemini' ? rocGeminiWrite($pdo, $key, $prompt, $model) : rocGroqWrite($pdo, $key, $prompt, $model, $otherFirst);
         if ($r['ok']) { $used = $name . ' ' . $model; return $r; }
         $errors[] = $r['error'];
     }
@@ -1413,5 +1437,22 @@ function rocBlogServerTick(PDO $pdo, string $root, bool $force = false): ?string
     }
     $state['last_error'] = gmdate('Y-m-d H:i') . ' UTC: ' . $msg;
     rocBlogSet($pdo, 'blog_engine_state', $state);
+    rocWriterAlert($pdo, 'blog post', (string)$msg);
     return $msg;
+}
+
+/**
+ * Deploy 163: the owner hears of it when a writer fails (one email a day each): the blog writer failed from 2 November
+ * without anyone knowing. Only when not forced from the command line, where the message is on the screen.
+ */
+function rocWriterAlert(PDO $pdo, string $what, string $error): void {
+    if (!function_exists('rocNotify')) return;
+    $k = 'writer_alert_' . preg_replace('/\W+/', '_', $what);
+    $day = (new DateTime('now', new DateTimeZone(ROC_BLOG_TZ)))->format('Y-m-d');
+    if ((string)rocBlogGet($pdo, $k, '') === $day) return;
+    rocBlogSet($pdo, $k, $day);
+    try {
+        rocNotify($pdo, 'The ' . $what . ' writer failed on Run On Console',
+            '<p><b>The server could not write a ' . rocLayerH($what) . ' today.</b> It keeps trying every 30 minutes.</p><p>' . rocLayerH(mb_substr($error, 0, 600)) . '</p>');
+    } catch (\Throwable $e) {}
 }
