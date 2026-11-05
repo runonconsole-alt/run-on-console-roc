@@ -93,7 +93,7 @@ function rocGpAll(string $root): array {
  * new game marked every page as changed. Now: the last real change of the page template (ROC_GP_PAGES_CHANGED, moved by
  * hand when a deploy changes what the game pages say), the day the game joined, or its own edit in the CMS.
  */
-const ROC_GP_PAGES_CHANGED = '2026-11-03';
+const ROC_GP_PAGES_CHANGED = '2026-11-05';   // Deploy 162: best graphics cards on every game page
 function rocGpPageTime(array $g, array $edit = []): int {
     return max((int)strtotime(ROC_GP_PAGES_CHANGED . ' 12:00 UTC'), (int)($g['added'] ?? 0), (int)($edit['t'] ?? 0));
 }

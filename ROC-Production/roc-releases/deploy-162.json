@@ -1,0 +1,29 @@
+{
+ "deploy": 162,
+ "date": "2026-11-05",
+ "title": "What holds your PC back, and the best graphics cards for each game",
+ "changes": [
+  "The quick check on every game page shows each part against the game (meets the recommended, meets the minimum, below the minimum) and which part holds the PC back most; the upgrade card now follows that part (it always offered the graphics card first)",
+  "Every game page has Best graphics cards: the lowest cards still sold new for the minimum, for high settings and with room to spare, each pick faster than the one before, with our product and Amazon link when we have one, and a FAQ for that search"
+ ],
+ "checks": [
+  {
+   "label": "Best graphics cards",
+   "type": "contains",
+   "path": "game-render.php",
+   "text": "best-gpu"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BPYzVwXN.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/164",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it.",
+  "Cloudflare: Purge Everything."
+ ],
+ "build": "index-BPYzVwXN.js"
+}
