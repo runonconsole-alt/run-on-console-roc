@@ -586,7 +586,7 @@ function rocNewsToBar(PDO $pdo, string $root, string $title, string $url): void 
     $a['live_title'] = mb_substr($title, 0, 140);
     $a['live_url'] = $url;
     $a['live_at'] = gmdate('c');
-    rocLayerSave($pdo, $root, 'announcement', $a, null);
+    rocLayerSave($pdo, $root, 'announcement', $a, null, null, true);   // Deploy 161: not a change of every page
 }
 
 /* -------------------------------------------------------------------- tick */

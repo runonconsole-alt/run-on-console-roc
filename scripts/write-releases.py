@@ -1088,6 +1088,14 @@ RELEASES = [
          checks=[dict(label='FPS reports', type='contains', path='api/v1/fps-lib.php', text='rocFpsSection')],
          pr=REPO + '162',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'Cloudflare: Purge Everything.']),
+    dict(deploy=161, date='2026-11-05', title='Honest dates for Google, and new links on the home page every day',
+         changes=['Every news story used to mark all pages as changed (Last-Modified and sitemap dates) although nothing on them changed, and the sitemap index said changed now at each visit; Google stops trusting such dates. Now the dates are real: the news bar keeps file dates, the index uses the newest real post or product, and one new game no longer dates all 2,400 game pages',
+                  'The home page, which Google visits daily, now has in its HTML: the 6 newest blogs and guides, the 4 newest news stories, the free tools and 12 popular games that change every day (the newest posts used to come only from JavaScript)',
+                  'The sitemap is submitted to Google every day at 12:30, not only on blog and guide days'],
+         checks=[dict(label='Fresh home links', type='contains', path='api/v1/cms/ai-files-lib.php', text='rocAiHomeFresh'),
+                 dict(label='Real sitemap dates', type='contains', path='sitemap-render.php', text='rocSmNewest')],
+         pr=REPO + '163',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply (this writes the new links into the home page)', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

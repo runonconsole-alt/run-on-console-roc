@@ -176,6 +176,16 @@ try {
 } catch (\Throwable $e) { echo date('c') . ' Steam update error: ' . $e->getMessage() . "
 "; }
 
+// Fresh links in the home page's HTML (Deploy 161): once a day, also without a new post.
+try {
+    require_once $ROOT . '/api/v1/cms/ai-files-lib.php';
+    $hfDay = (new DateTime('now', new DateTimeZone('Asia/Karachi')))->format('Y-m-d');
+    if ((string)rocBlogGet($pdo, 'home_fresh_day', '') !== $hfDay) {
+        rocBlogSet($pdo, 'home_fresh_day', $hfDay);
+        if (rocAiDateHome($pdo, $ROOT)) echo date('c') . ' home page: new links' . PHP_EOL;
+    }
+} catch (\Throwable $e) { echo date('c') . ' home links error: ' . $e->getMessage() . PHP_EOL; }
+
 // Steam Deck ratings (Deploy 157): 4 games a run until every game is rated, then the ratings older than 60 days.
 try {
     require_once $ROOT . '/api/v1/game-pages-lib.php';

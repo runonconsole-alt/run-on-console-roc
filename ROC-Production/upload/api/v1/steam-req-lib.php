@@ -201,5 +201,5 @@ function rocSrBuildGame(array $app, int $year): array {
     foreach (['cpu', 'gpu', 'ram'] as $k) if (!isset($sRec[$k]) || $sRec[$k] === null) $sRec[$k] = $sMin[$k];
     return ['id' => 'steam-' . $app['steam_appid'], 'appid' => (int)$app['steam_appid'], 't' => (string)$app['name'], 'y' => $year,
         'g' => implode(', ', array_slice(array_map(function ($x) { return (string)($x['description'] ?? ''); }, (array)($app['genres'] ?? [])), 0, 3)),
-        'u' => 'https://store.steampowered.com/app/' . $app['steam_appid'] . '/', 'min' => $min, 'rec' => $rec, 'req' => ['min' => $sMin, 'rec' => $sRec]];
+        'u' => 'https://store.steampowered.com/app/' . $app['steam_appid'] . '/', 'min' => $min, 'rec' => $rec, 'req' => ['min' => $sMin, 'rec' => $sRec], 'added' => time()];
 }

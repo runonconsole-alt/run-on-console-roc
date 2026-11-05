@@ -111,15 +111,16 @@ function rocDeckTick(string $root, array $games, int $n, float $pause = 0.0): ?s
     }
     $todo = array_slice($todo, 0, $n);
     if (!$todo) return null;
-    $ok = 0; $fail = 0;
+    $ok = 0; $fail = 0; $changed = false;
     foreach ($todo as $i => $id) {
         if ($i && $pause > 0) usleep((int)($pause * 1e6));
         $r = rocDeckFetch((int)$id);
         if ($r === null) { $fail++; if ($fail >= 3) break; continue; }
+        if ((int)($d['apps'][(string)$id]['c'] ?? -1) !== (int)$r['c']) $changed = true;
         $d['apps'][(string)$id] = $r; $ok++;
     }
     if ($ok) {
-        $d['updated'] = $now;
+        if ($changed) $d['updated'] = $now;   // Deploy 161: only a new or different rating dates the page
         $tmp = $root . ROC_DECK_FILE . '.tmp' . getmypid();
         if (file_put_contents($tmp, json_encode($d, JSON_UNESCAPED_SLASHES)) !== false) rename($tmp, $root . ROC_DECK_FILE);
         rocDeckLoad($root, $d);

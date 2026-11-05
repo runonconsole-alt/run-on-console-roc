@@ -1230,8 +1230,11 @@ function rocRenderGuides(string $root, PDO $pdo, int $page, string $type): void 
 function rocGuidesSitemap(PDO $pdo): void {
     header('Content-Type: application/xml; charset=utf-8');
     header('Cache-Control: public, max-age=600');
-    $out = rocSmOpen() . rocSmLine(ROC_PUBLIC_URL . '/guides/', time(), 'Gaming guides');
-    foreach ($pdo->query("SELECT title, slug, category, published_at, updated_at, content_modified_at, created_at FROM blogs WHERE status = 'published' AND " . rocGuideSql() . ' ' . rocOrderSql())->fetchAll(PDO::FETCH_ASSOC) as $r)
+    $rows = $pdo->query("SELECT title, slug, category, published_at, updated_at, content_modified_at, created_at FROM blogs WHERE status = 'published' AND " . rocGuideSql() . ' ' . rocOrderSql())->fetchAll(PDO::FETCH_ASSOC);
+    $newest = 0;
+    foreach ($rows as $r) $newest = max($newest, (int)rocModified($r));
+    $out = rocSmOpen() . rocSmLine(ROC_PUBLIC_URL . '/guides/', $newest ?: null, 'Gaming guides');   // Deploy 161: the newest guide, not now
+    foreach ($rows as $r)
         $out .= rocSmLine(rocPostUrlOf($r), rocModified($r), (string)$r['title']);
     echo $out . "</urlset>\n";
     exit;

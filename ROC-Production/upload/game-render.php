@@ -62,7 +62,7 @@ if ($isMap) {
          . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/my-pc/', $updated, 'Which games can my PC run?')
          . rocSmLine(ROC_PUBLIC_URL . ROC_DECK_PAGE, max($updated, (int)(rocDeckLoad($ROOT)['updated'] ?? 0)), 'Steam Deck games');
     foreach (array_keys(ROC_GP_CARD_PAGES) as $cn) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpCardPath($cn), $updated, 'What games can a ' . rocGpCardShort($cn) . ' run?');
-    foreach ($games as $g) if (!rocGpThin($g, (array)($EDITS[$g['slug']] ?? []))) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpPath($g), max($updated, (int)($EDITS[$g['slug']]['t'] ?? 0)), 'Can I run ' . $g['name'] . '?');
+    foreach ($games as $g) if (!rocGpThin($g, (array)($EDITS[$g['slug']] ?? []))) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpPath($g), rocGpPageTime($g, (array)($EDITS[$g['slug']] ?? [])), 'Can I run ' . $g['name'] . '?');
     echo $out . "</urlset>\n";
     exit;
 }

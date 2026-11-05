@@ -88,6 +88,16 @@ function rocGpAll(string $root): array {
     return $all;
 }
 
+/**
+ * Deploy 161: the date of one game's page for the sitemap. All 2,370 pages carried the date of the list's file, so one
+ * new game marked every page as changed. Now: the last real change of the page template (ROC_GP_PAGES_CHANGED, moved by
+ * hand when a deploy changes what the game pages say), the day the game joined, or its own edit in the CMS.
+ */
+const ROC_GP_PAGES_CHANGED = '2026-11-03';
+function rocGpPageTime(array $g, array $edit = []): int {
+    return max((int)strtotime(ROC_GP_PAGES_CHANGED . ' 12:00 UTC'), (int)($g['added'] ?? 0), (int)($edit['t'] ?? 0));
+}
+
 function rocGpUpdated(string $root): int {
     $t = 0;
     if (preg_match('/"updated"\s*:\s*"([^"]+)"/', (string)@file_get_contents($root . '/roc-steam-games.json', false, null, 0, 600), $m)) $t = (int)strtotime($m[1]);
