@@ -277,5 +277,6 @@ function rocGuideTick(PDO $pdo, string $root): ?string {
     $r = rocGuideWrite($pdo, $root, null, $at);
     $st['last_error'] = $r['ok'] ? '' : gmdate('Y-m-d H:i') . ' UTC: ' . $r['error'];
     rocBlogSet($pdo, 'guide_state', $st);
+    if (!$r['ok']) rocWriterAlert($pdo, 'guide', (string)$r['error']);
     return $r['ok'] ? 'Guide written: ' . $r['url'] . ' (' . $r['words'] . ' words, live ' . $r['live'] . ')' : 'Guide failed: ' . $r['error'];
 }

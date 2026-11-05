@@ -1,0 +1,29 @@
+{
+ "deploy": 163,
+ "date": "2026-11-05",
+ "title": "Blog posts are written again: a Groq limit no longer stops the writers",
+ "changes": [
+  "No blog post was written after 18 October: news, blogs and guides all used one Groq model, whose free daily tokens the news used up. Now a model at its limit waits and the next strong model writes, and news starts with the other models so the main one stays for blog posts and guides",
+  "If the blog or guide writer still fails, an email goes to the alert address, once a day, with the reason"
+ ],
+ "checks": [
+  {
+   "label": "Writers change model",
+   "type": "contains",
+   "path": "api/v1/cms/blog-engine-lib.php",
+   "text": "rocWriterAlert"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BPYzVwXN.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/165",
+ "steps": [
+  "Upload the zip to /home2/runoncon/ and unzip it.",
+  "To test now: php public_html/api/v1/cron/cli-blog-scheduler.php --write (writes the next blog post for its time)"
+ ],
+ "build": "index-BPYzVwXN.js"
+}

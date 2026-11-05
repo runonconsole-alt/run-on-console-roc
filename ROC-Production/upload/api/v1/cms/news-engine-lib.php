@@ -641,7 +641,7 @@ function rocNewsTick(PDO $pdo, string $root, bool $force = false): ?string {
     $msg = null;
     for ($try = 1; $try <= 2; $try++) {
         $model = null;
-        $w = rocBlogWriteAny($pdo, $prompt, $model);
+        $w = rocBlogWriteAny($pdo, $prompt, $model, true);   // Deploy 163: the main model stays for the blog posts and guides
         if (!$w['ok']) { $msg = $w['error']; continue; }
         $r = rocNewsCreate($pdo, $root, $w['article'], $c, 'server (' . $model . ')');
         if ($r['ok']) {
