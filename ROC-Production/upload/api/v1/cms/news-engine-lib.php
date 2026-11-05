@@ -423,9 +423,9 @@ function rocNewsBoxes(PDO $pdo, array $c): string {
 function rocNewsCreate(PDO $pdo, string $root, array $a, array $c, string $by): array {
     rocBlogSite($pdo, true);
     $t = function ($k, $max) use ($a) { return trim(mb_substr((string)preg_replace('/\s+/u', ' ', strip_tags((string)($a[$k] ?? ''))), 0, $max)); };
-    $title = $t('title', 160);
-    $metaT = $t('meta_title', 120); if ($metaT === '') $metaT = rocSeoCut($title, 60);
-    $metaD = $t('meta_description', 300);
+    $title = rocSeoCap($t('title', 160));
+    $metaT = rocSeoCap($t('meta_title', 120)); if ($metaT === '') $metaT = rocSeoCut($title, 60);
+    $metaD = rocSeoCap($t('meta_description', 300));
     $excerpt = $t('excerpt', 400); $focus = $t('focus_keyword', 120); $alt = $t('image_alt', 200) ?: $title;
     $content = rocBlogCleanLinks(rocCmsSanitizeHtml((string)($a['content_html'] ?? '')), $pdo);
     $content = (string)preg_replace('#<h1\b[^>]*>(.*?)</h1>#is', '<h2>$1</h2>', $content);
@@ -653,8 +653,8 @@ function rocNewsTick(PDO $pdo, string $root, bool $force = false): ?string {
             try { rocNotifyNews($pdo, $r, $c); } catch (\Throwable $e) {}
             return 'News published: ' . $r['url'];
         }
-        $msg = 'Article not accepted: ' . implode(' ', $r['errors']);
-        $prompt .= "\n\nYour previous answer was rejected: " . implode(' ', $r['errors']) . ' Fix this.';
+        $msg = 'Article not accepted: ' . rocSeoReasons($r['errors']);
+        $prompt .= "\n\nYour previous answer was rejected: " . rocSeoReasons($r['errors']) . ' Fix this.';
     }
     rocNewsMarkDone($pdo, $c, 'failed');
     $state = rocNewsState($pdo);

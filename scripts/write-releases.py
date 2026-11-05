@@ -1108,6 +1108,11 @@ RELEASES = [
          checks=[dict(label='Writers change model', type='contains', path='api/v1/cms/blog-engine-lib.php', text='rocWriterAlert')],
          pr=REPO + '165',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'To test now: php public_html/api/v1/cron/cli-blog-scheduler.php --write (writes the next blog post for its time)']),
+    dict(deploy=164, date='2026-11-05', title='A small first letter no longer stops a blog post',
+         changes=['Posts were refused with Start with a capital letter when the writer copied a Google search in small letters. The server now capitalises the first letter of the title, meta title, description and excerpt itself (not iPhone style names), and a refused post tells the writer which field to fix'],
+         checks=[dict(label='First letter', type='contains', path='api/v1/cms/seo-check-lib.php', text='rocSeoCap')],
+         pr=REPO + '166',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'To test now: php public_html/api/v1/cron/cli-blog-scheduler.php --write']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
