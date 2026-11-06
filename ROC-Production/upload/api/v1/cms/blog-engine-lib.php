@@ -94,10 +94,10 @@ function rocBlogDays(PDO $pdo): array {
 }
 function rocBlogPerDay(PDO $pdo): int { return max(1, min(6, (int)rocBlogGet($pdo, 'blog_per_day', ROC_BLOG_PER_DAY))); }
 /**
- * Owner, 2026-10-29 (Deploy 145): 15 November 2026 is the last day the AI writes blog posts, guides and news and
- * makes cover pictures; from 16 November the owner writes them. CMS setting ai_last_day moves it ('' = no end).
+ * Owner, 2026-11-05 (Deploy 166): 30 November 2026 is the last day the AI writes blog posts, guides and news and
+ * makes cover pictures (it was 15 November, Deploy 145). CMS setting ai_last_day moves it ('' = no end).
  */
-const ROC_AI_LAST_DAY = '2026-11-15';
+const ROC_AI_LAST_DAY = '2026-11-30';
 function rocAiLastDay(PDO $pdo): string { $v = rocBlogGet($pdo, 'ai_last_day', null); return $v === null ? ROC_AI_LAST_DAY : (string)$v; }
 function rocAiEnded(PDO $pdo): bool {
     $last = rocAiLastDay($pdo);
@@ -751,6 +751,7 @@ function rocBlogCoverPhoto(PDO $pdo, string $root, ?array $topic): ?string {
  * are on white, so they blend into it). Without a photo: the title, bigger, with the same style.
  */
 function rocBlogCover(string $root, string $slug, string $title, string $category, ?string $photo = null, bool $fill = false): string {
+    $title = str_replace("\u{2011}", '-', $title);   // Deploy 166: the cover font has no non-breaking hyphen (it drew a box)
     $fallback = '/images/hero_cod.jpg';
     if (!function_exists('imagettftext') || !function_exists('imagejpeg')) return $fallback;
     $font = null;

@@ -1120,6 +1120,15 @@ RELEASES = [
          checks=[dict(label='Empty FPS form', type='contains', path='api/v1/fps-lib.php', text='Choose your graphics card')],
          pr=REPO + '167',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=166, date='2026-11-06', title='AI writes until 30 November, more links inside every post, clean cover titles',
+         changes=['The AI keeps writing blog posts, guides and news and making cover pictures until 30 November 2026 (it was 15 November)',
+                  'Every blog post, guide and news story gets more links inside its own text, old posts too, without changing the saved text: platform names, hardware words and useful site sections now become links, up to 8 in all, at most 2 new ones in a stretch of text. The boxes at the end stay as they are',
+                  'New news stories always get at least 8 site pages to link to',
+                  'Cover titles no longer show a box in place of a hyphen, and cli-news-covers.php --boxes redraws the old covers that have it'],
+         checks=[dict(label='AI until 30 November', type='contains', path='api/v1/cms/blog-engine-lib.php', text="ROC_AI_LAST_DAY = '2026-11-30'"),
+                 dict(label='More links in posts', type='contains', path='api/v1/link-boost-lib.php', text='ROC_TOPIC_WIDE_WORDS')],
+         pr=REPO + '168',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-news-covers.php --boxes --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

@@ -7,6 +7,8 @@
  *                                            daily quota is used up, one of the site's own pictures for now
  *                                            (the cron job then swaps in an AI picture later)
  *   php cli-news-covers.php --slug=X --apply only that post (also when its cover already has a picture)
+ *   php cli-news-covers.php --boxes          dry run: covers whose title has the hyphen the font cannot draw (Deploy 166)
+ *   php cli-news-covers.php --boxes --apply  redraws those covers
  *   php cli-news-covers.php --rollback=DIR   puts the old covers back
  *
  * A cover "without a picture" is the green title card: its right side is the plain green background.
@@ -82,6 +84,7 @@ $todo = [];
 foreach ($rows as $r) {
     $img = (string)strtok((string)$r['image'], '?');
     if ($only !== null) { if ($r['slug'] === $only) $todo[] = $r; continue; }
+    if (in_array('--boxes', $args, true)) { if (strpos((string)$r['title'], "\u{2011}") !== false && strpos($img, '/uploads/blog-covers/') === 0) $todo[] = $r; continue; }
     if (strpos($img, '/uploads/blog-covers/') !== 0 || !is_file($ROOT . $img)) continue;
     if (rocCoverTitleOnly($ROOT . $img)) $todo[] = $r;
 }
