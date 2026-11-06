@@ -618,10 +618,21 @@ $metaT = trim((string)($E['title'] ?? '')) ?: $fit(['Can I Run ' . $name . '? Mi
     'Can I Run ' . $name . '? System Requirements', $name . ' System Requirements: Can I Run It?',
     'Can I Run ' . $nm . '? System Requirements', $name . ' System Requirements', $nm . ' System Requirements',
     'Can I Run ' . $nm2 . '? System Requirements', 'Can I Run ' . $name . '?', $nm2 . ' System Requirements', 'Can I Run ' . $nm2 . '?', $name]);
-$metaD = 'Can your PC run ' . $name . '? Official minimum and recommended system requirements'
-    . ($gpuMin ? ' (from ' . (strpos($gpuMin[0], 'integrated') !== false ? 'integrated graphics' : $an($gpuMin[0])) . ($ramGb($rMin['ram'] ?? null) ? ' and ' . $ramGb($rMin['ram'] ?? null) . ' RAM' : '') . ')' : '')
-    . '. Free check for your graphics card, CPU and RAM.';
-if (mb_strlen($metaD) > 155) $metaD = mb_substr($metaD, 0, 152) . '…';   // 155: what Google and SEO tools show in full
+// Deploy 167: the minimum PC comes first and the description always ends in a whole sentence: the longest one that
+// fits in 155 characters (what Google and SEO tools show in full), never one cut with "…".
+$metaMin = $gpuMin ? (strpos($gpuMin[0], 'integrated') !== false ? 'integrated graphics' : $gpuMin[0]) . ($ramGb($rMin['ram'] ?? null) ? ', ' . $ramGb($rMin['ram'] ?? null) . ' RAM' : '') : '';
+$metaD = '';
+foreach ($metaMin !== ''
+    ? ['Can your PC run ' . $name . '? Minimum: ' . $metaMin . '. See the official requirements and check your graphics card, CPU and RAM for free.',
+       'Can your PC run ' . $name . '? Minimum: ' . $metaMin . '. Check your graphics card, CPU and RAM for free.',
+       'Can your PC run ' . $name . '? Minimum: ' . $metaMin . '. Free check for your PC.',
+       $name . ' minimum: ' . $metaMin . '. Free check for your PC.']
+    : ['Can your PC run ' . $name . '? See the official minimum and recommended system requirements and check your graphics card, CPU and RAM for free.',
+       'Can your PC run ' . $name . '? See the official requirements and check your PC for free.'] as $metaTry) {
+    if (mb_strlen($metaTry) <= 155) { $metaD = $metaTry; break; }
+}
+// A very long game name: its official requirements, cut at a whole word.
+if ($metaD === '') $metaD = rtrim((string)preg_replace('/\s+\S*$/u', '', mb_substr($name, 0, 120))) . ' system requirements. Free check for your PC.';
 if (trim((string)($E['description'] ?? '')) !== '') $metaD = trim((string)$E['description']);
 
 /* FAQ (each answer from the data) */

@@ -1129,6 +1129,12 @@ RELEASES = [
                  dict(label='More links in posts', type='contains', path='api/v1/link-boost-lib.php', text='ROC_TOPIC_WIDE_WORDS')],
          pr=REPO + '168',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-news-covers.php --boxes --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=167, date='2026-11-06', title='Game page descriptions show the minimum PC, clearer checker title',
+         changes=['Every game page description now says the minimum graphics card and RAM first and always ends in a whole sentence, never cut with three dots. A description written in the CMS still wins',
+                  'The Can I Run It checker page title now says it is a free check for 2,400+ PC games'],
+         checks=[dict(label='Whole descriptions', type='contains', path='game-render.php', text='$metaTry')],
+         pr=REPO + '169',
+         steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
