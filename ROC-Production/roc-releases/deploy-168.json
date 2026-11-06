@@ -1,0 +1,28 @@
+{
+ "deploy": 168,
+ "date": "2026-11-06",
+ "title": "Game page descriptions say class for the minimum graphics card",
+ "changes": [
+  "The description of a game page now says, for example, GeForce GTX 1080 class: the minimum is our comparison with the Steam requirements, so it no longer reads as the official name"
+ ],
+ "checks": [
+  {
+   "label": "Class in the description",
+   "type": "contains",
+   "path": "game-render.php",
+   "text": "$gpuMin[0] . ' class'"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BX_w5pRK.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/170",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, then unzip it and delete the zip.",
+  "CMS Dashboard: Clear cache, then Cloudflare: Purge Everything."
+ ],
+ "build": "index-BX_w5pRK.js"
+}
