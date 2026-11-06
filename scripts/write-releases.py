@@ -1135,6 +1135,11 @@ RELEASES = [
          checks=[dict(label='Whole descriptions', type='contains', path='game-render.php', text='$metaTry')],
          pr=REPO + '169',
          steps=['Upload the zip to /home2/runoncon/ and unzip it.', 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=168, date='2026-11-06', title='Game page descriptions say class for the minimum graphics card',
+         changes=['The description of a game page now says, for example, GeForce GTX 1080 class: the minimum is our comparison with the Steam requirements, so it no longer reads as the official name'],
+         checks=[dict(label='Class in the description', type='contains', path='game-render.php', text="$gpuMin[0] . ' class'")],
+         pr=REPO + '170',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

@@ -620,7 +620,7 @@ $metaT = trim((string)($E['title'] ?? '')) ?: $fit(['Can I Run ' . $name . '? Mi
     'Can I Run ' . $nm2 . '? System Requirements', 'Can I Run ' . $name . '?', $nm2 . ' System Requirements', 'Can I Run ' . $nm2 . '?', $name]);
 // Deploy 167: the minimum PC comes first and the description always ends in a whole sentence: the longest one that
 // fits in 155 characters (what Google and SEO tools show in full), never one cut with "…".
-$metaMin = $gpuMin ? (strpos($gpuMin[0], 'integrated') !== false ? 'integrated graphics' : $gpuMin[0]) . ($ramGb($rMin['ram'] ?? null) ? ', ' . $ramGb($rMin['ram'] ?? null) . ' RAM' : '') : '';
+$metaMin = $gpuMin ? (strpos($gpuMin[0], 'integrated') !== false ? 'integrated graphics' : $gpuMin[0] . ' class') . ($ramGb($rMin['ram'] ?? null) ? ', ' . $ramGb($rMin['ram'] ?? null) . ' RAM' : '') : '';
 $metaD = '';
 foreach ($metaMin !== ''
     ? ['Can your PC run ' . $name . '? Minimum: ' . $metaMin . '. See the official requirements and check your graphics card, CPU and RAM for free.',
