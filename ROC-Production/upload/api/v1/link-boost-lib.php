@@ -286,9 +286,38 @@ function rocLinkBoostTop(PDO $pdo, string $seed, array $post, string $body = '')
  * and never inside a heading or another link. In this order:
  *   1. pages Google has not indexed yet (link_boost, CMS > Indexing), by their searches, name or category words;
  *   2. what people search on Google for a page (Search Console, gsc-lib.php): the search becomes the anchor text;
- *   3. product names, then category words ("gaming monitors" -> /category/monitors/).
+ *   3. product names, then category words ("gaming monitors" -> /category/monitors/);
+ *   4. Deploy 166: platform names and everyday hardware words (ROC_TOPIC_WIDE_WORDS), so a story about a game or a
+ *      console has something to link too.
+ * Deploy 166: a post's own text gets up to ROC_TOPIC_TARGET links in all (never fewer than ROC_TOPIC_LINKS new ones
+ * allowed), at most 2 new ones in a stretch of text. The boxes the site adds at the end (where to buy, sources,
+ * keep reading) are not touched and do not count, so a page in the box can still be linked in the text.
  */
 const ROC_TOPIC_LINKS = 5;
+const ROC_TOPIC_TARGET = 8;
+const ROC_TOPIC_BOX_TITLES = ['See it on Run On Console', 'Sources', 'Keep reading'];
+const ROC_TOPIC_WIDE_WORDS = [
+    '/gaming-platforms/sony-playstation/' => ['playstation 6', 'playstation 5', 'playstation 4', 'playstation plus', 'ps5 pro', 'playstation', 'ps5', 'ps4'],
+    '/gaming-platforms/microsoft-xbox/' => ['xbox series x', 'xbox series s', 'xbox game pass', 'xbox one', 'game pass', 'xbox'],
+    '/gaming-platforms/nintendo-home/' => ['nintendo switch 2', 'nintendo switch', 'switch 2', 'nintendo'],
+    '/gaming-platforms/pc-handheld-pc/' => ['steam deck', 'rog ally', 'legion go', 'steamos'],
+    '/gaming-platforms/cloud-gaming/' => ['cloud gaming', 'geforce now'],
+    '/compatibility/' => ['system requirements', 'pc requirements', 'minimum requirements', 'recommended specs', 'frame rates', 'frame rate', 'fps'],
+    '/can-i-run/' => ['pc gamers', 'pc players', 'pc version', 'pc games', 'pc game', 'on steam', 'steam'],
+    '/gaming-platforms/' => ['gaming platforms', 'consoles', 'console'],
+    '/products/' => ['gaming hardware', 'gaming gear', 'peripherals', 'accessories', 'hardware'],
+    '/guides/' => ['graphics settings', 'game settings', 'settings'],
+    '/news/' => ['gaming news', 'game releases', 'new releases'],
+    '/category/gpu/' => ['geforce rtx', 'radeon rx', 'nvidia rtx', 'geforce', 'radeon', 'gpus', 'gpu', 'nvidia'],
+    '/category/cpu/' => ['ryzen', 'intel core', 'processors', 'processor', 'cpus', 'cpu', 'amd', 'intel'],
+    '/category/monitors/' => ['portable monitor', 'oled monitor', 'oled display'],
+    '/category/mice/' => ['wireless mouse', 'mouse'],
+    '/category/keyboards/' => ['keyboards', 'keyboard'],
+    '/category/audio/' => ['headphones', 'headsets', 'headset'],
+    '/category/ram/' => ['ddr5', 'ddr4'],
+    '/category/handhelds/' => ['handheld consoles', 'handhelds', 'handheld'],
+    '/category/laptops/' => ['laptops', 'laptop'],
+];
 const ROC_TOPIC_CAT_WORDS = ['gpu' => ['graphics cards', 'graphics card'], 'monitors' => ['gaming monitors', 'gaming monitor'],
     'mice' => ['gaming mice', 'gaming mouse'], 'keyboards' => ['gaming keyboards', 'gaming keyboard', 'mechanical keyboard'],
     'audio' => ['gaming headsets', 'gaming headset'], 'speakers' => ['pc speakers', 'gaming speakers'], 'cpu' => ['gaming cpus', 'gaming cpu', 'gaming processor'],
@@ -318,7 +347,8 @@ function rocTopicPhrases(PDO $pdo): array {
     foreach (rocLinkBoostProducts($pdo) as $path => $p) if (mb_strlen($p[1]) >= 8) $byPath[$path][] = mb_strtolower($p[1]);
     foreach (ROC_TOPIC_CAT_WORDS as $slug => $words) foreach ($words as $w) $byPath['/category/' . $slug . '/'][] = $w;
     $boost = array_flip(array_filter((array)rocLinkBoostSetting($pdo, 'link_boost'), 'is_string'));
-    $g = [[], [], [], []];
+    $g = [[], [], [], [], []];
+    foreach (ROC_TOPIC_WIDE_WORDS as $path => $words) foreach ($words as $w) $g[4][$w] = $path;
     foreach ($byPath as $path => $phrases) foreach ($phrases as $i => $ph) {
         $ph = trim((string)preg_replace('/\s+/', ' ', $ph));
         if (mb_strlen($ph) < 5) continue;
@@ -340,24 +370,32 @@ function rocTopicLinks(PDO $pdo, string $html, string $self): string {
     if ($html === '') return $html;
     $groups = rocTopicPhrases($pdo);
     if (!$groups) return $html;
-    preg_match_all('~href="(?:https://runonconsole\.com)?(/[^"#?]*)~', $html, $m);
-    $used = array_flip($m[1]); $used[$self] = 1;
     $parts = preg_split('/(<[^>]+>)/', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
-    $count = 0; $links = [];
+    // The post's own text ends at the first box the site adds.
+    $end = count($parts); $own = '';
+    foreach ($parts as $k => $part) {
+        if ($part !== '' && $part[0] !== '<' && in_array(trim($part), ROC_TOPIC_BOX_TITLES, true)) { $end = $k; break; }
+        $own .= $part;
+    }
+    preg_match_all('~href="(?:https://runonconsole\.com)?(/[^"#?]*)~', $own, $m);
+    $used = array_flip($m[1]); $used[$self] = 1;
+    $max = max(ROC_TOPIC_LINKS, ROC_TOPIC_TARGET - count(array_unique($m[1])));
+    $count = 0; $links = []; $inPart = [];
     foreach ($groups as [$re, $chunk]) {
-        if ($count >= ROC_TOPIC_LINKS) break;
+        if ($count >= $max) break;
         $skip = 0;
         foreach ($parts as $k => $part) {
+            if ($k >= $end) break;
             if ($part === '') continue;
             if ($part[0] === '<') {
                 if (preg_match('#^<(/?)(a|h[1-6]|code|pre|figcaption|button|script|style|table|blockquote)\b#i', $part, $t)) $skip = max(0, $skip + ($t[1] === '/' ? -1 : 1));
                 continue;
             }
-            if ($skip > 0 || $count >= ROC_TOPIC_LINKS) continue;
-            $parts[$k] = (string)preg_replace_callback($re, function ($x) use ($chunk, &$used, &$count, &$links) {
+            if ($skip > 0 || $count >= $max || ($inPart[$k] ?? 0) >= 2) continue;
+            $parts[$k] = (string)preg_replace_callback($re, function ($x) use ($chunk, $k, $max, &$used, &$count, &$links, &$inPart) {
                 $path = $chunk[mb_strtolower($x[1])] ?? null;
-                if ($path === null || isset($used[$path]) || $count >= ROC_TOPIC_LINKS) return $x[0];
-                $used[$path] = 1; $count++;
+                if ($path === null || isset($used[$path]) || $count >= $max || ($inPart[$k] ?? 0) >= 2) return $x[0];
+                $used[$path] = 1; $count++; $inPart[$k] = ($inPart[$k] ?? 0) + 1;
                 $links[] = '<a href="' . htmlspecialchars($path, ENT_QUOTES, 'UTF-8') . '">' . $x[1] . '</a>';
                 return "\x01" . (count($links) - 1) . "\x02";      // a placeholder: later phrases must not match inside it
             }, $part);

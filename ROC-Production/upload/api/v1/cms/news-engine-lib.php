@@ -356,6 +356,13 @@ function rocNewsPrompt(array $c): string {
     foreach ($m['platforms'] as $pl) $links[] = "- {$pl['url']}  ({$pl['name']}; our platform guide)";
     if ($m['checker']) $links[] = '- /compatibility/  (Can I run it: free PC game requirements checker)';
     foreach ($m['posts'] as $b) $links[] = "- {$b['url']}  ({$b['title']}; our article)";
+    // Deploy 166: a story that matches few pages still has at least 8 to choose from.
+    foreach (['/can-i-run/' => 'PC requirements of 2,400+ games', '/gaming-platforms/' => 'consoles and gaming platforms', '/products/' => 'gaming hardware we cover',
+              '/guides/' => 'our how-to guides', '/compatibility/' => 'Can I run it: free checker', '/news/' => 'more gaming news'] as $u => $what) {
+        if (count($links) >= 8) break;
+        if (strpos(implode("
+", $links), "- {$u} ") === false) $links[] = "- {$u}  ({$what})";
+    }
     return "You write short, accurate news for runonconsole.com (Run On Console): an independent gaming and PC hardware site. Write ONE news article in English.\n\n"
         . "REPORTS FROM TRUSTED SOURCES (the ONLY facts you may use):\n{$reports}\n"
         . "INTERNAL LINKS (use 5-8 of them, or all of them when fewer are listed, each once, where they help the reader; anchor text = the searched name, e.g. \"AMD Ryzen 7 9800X3D\" or \"best graphics cards\", never \"click here\"):\n" . implode("\n", $links) . "\n\n"
@@ -611,7 +618,7 @@ function rocNewsToday(PDO $pdo): array {
 function rocNewsTick(PDO $pdo, string $root, bool $force = false): ?string {
     $set = rocNewsSettings($pdo);
     if (!$set['on'] && !$force) return null;
-    if (!$force && function_exists('rocAiEnded') && rocAiEnded($pdo)) return null;   // Deploy 145: the AI writes news until 15 November
+    if (!$force && function_exists('rocAiEnded') && rocAiEnded($pdo)) return null;   // Deploy 145: the AI writes news until the last AI day (rocAiLastDay)
     $state = rocNewsState($pdo);
     $items = (array)rocBlogGet($pdo, 'news_items', []);
     if ($force || empty($state['last_fetch']) || time() - strtotime($state['last_fetch'] . ' UTC') >= 1200) {
