@@ -1167,6 +1167,11 @@ RELEASES = [
          checks=[dict(label='RAM pages', type='contains', path='api/v1/ram-pages-lib.php', text='function rocGpRamPage')],
          pr=REPO + '174',
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-steam-update.php --refresh --deep=3 --now=60', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=173, date='2026-11-10', title='The deep Steam update saves its list',
+         changes=['cli-steam-update.php --deep keeps the database connection open while it waits for SteamSpy (the list was not saved after the waits) and shows any error on screen. Long --now runs keep the connection open too'],
+         checks=[dict(label='Connection kept open', type='contains', path='api/v1/cron/cli-steam-update.php', text='Deploy 173')],
+         pr=REPO + '175',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-steam-update.php --refresh --deep=3 --now=60']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
