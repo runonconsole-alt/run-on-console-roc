@@ -51,6 +51,7 @@ $games   = rocGpAll($ROOT);
 $updated = rocGpUpdated($ROOT);
 require_once __DIR__ . '/api/v1/ram-pages-lib.php';   // Deploy 172: games for 4 / 8 / 16 GB RAM
 require_once __DIR__ . '/api/v1/upcoming-lib.php';    // Deploy 174: upcoming games
+require_once __DIR__ . '/api/v1/gpu-vs-lib.php';      // Deploy 176: graphics card comparisons
 if (!$games) { if ($isMap) { http_response_code(503); exit; } rocNotFound($ROOT); }
 
 /* ------------------------------------------------------------- sitemap */
@@ -63,6 +64,8 @@ if ($isMap) {
          . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/report-2026/', $updated, 'PC Game Requirements Report')
          . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/my-pc/', $updated, 'Which games can my PC run?')
          . (function () use ($games, $updated) { [$s, $o] = rocGpUpcomingSplit($games); return ($s || $o) ? rocSmLine(ROC_PUBLIC_URL . ROC_GP_UPCOMING, $updated, 'Upcoming PC games') : ''; })()
+         . rocSmLine(ROC_PUBLIC_URL . ROC_GP_VS_HUB, $updated, 'GPU comparisons for gaming')
+         . implode('', array_map(function ($p) use ($updated) { return rocSmLine(ROC_PUBLIC_URL . rocGpVsPath($p), $updated, rocGpCardShort($p[0]) . ' vs ' . rocGpCardShort($p[1])); }, rocGpVsPairs()))
          . implode('', array_map(function ($gb) use ($updated) { return rocSmLine(ROC_PUBLIC_URL . ROC_GP_RAM_PAGES[$gb], $updated, 'Games for ' . $gb . ' GB RAM'); }, array_keys(ROC_GP_RAM_PAGES)))
          . (function () use ($ROOT, $pdo, $games) { require_once $ROOT . '/api/v1/fps-lib.php'; $r = rocFpsAll($pdo, $games);
               return $r ? rocSmLine(ROC_PUBLIC_URL . rocFpsPagePath(), max(array_column($r, 't')), 'FPS reports from real players') : ''; })()
@@ -154,6 +157,7 @@ function rocGpCardNav(string $here = ''): string {
     $h = '<section class="gp-card"><h2>Games by graphics card</h2><div class="gp-sim">';
     if ($here !== ROC_GP_NOGPU) $h .= '<a href="' . ROC_GP_NOGPU . '"><strong>No graphics card</strong><span>Integrated graphics (Intel UHD / Iris Xe)</span></a>';
     if (function_exists('rocGpRamLinks')) $h .= rocGpRamLinks($here);   // Deploy 172
+    if (defined('ROC_GP_VS_HUB') && $here !== ROC_GP_VS_HUB) $h .= '<a href="' . ROC_GP_VS_HUB . '"><strong>GPU comparisons</strong><span>Two cards, game by game</span></a>';   // Deploy 176
     foreach (ROC_GP_CARD_PAGES as $main => $same) {
         $p = rocGpCardPath($main);
         if ($p === $here) continue;
@@ -295,6 +299,17 @@ if ($slug === 'my-pc') {
     require_once $ROOT . '/api/v1/mypc-lib.php';
     if (isset($_GET['data'])) rocGpMyPcData($games);
     rocGpMyPc($ROOT, $games, $updated, $headTop, $bodyToMain, $mainOpen, $afterMain);
+    exit;
+}
+
+/* ------------------------------------ graphics card comparisons (Deploy 176) */
+if ($slug === 'gpu-compare') {
+    rocGpVsHub($ROOT, $games, $updated, $headTop, $bodyToMain, $mainOpen, $afterMain);
+    exit;
+}
+if (($vs = rocGpVsBySlug($slug)) !== null) {
+    if (!$vs[1]) { header('Location: ' . ROC_PUBLIC_URL . rocGpVsPath($vs[0]), true, 301); exit; }
+    rocGpVsPage($ROOT, $pdo, $games, $vs[0], $updated, $headTop, $bodyToMain, $mainOpen, $afterMain);
     exit;
 }
 
@@ -478,6 +493,10 @@ if ($cardMain !== null) {
     $m .= rocAdUnit('list');
     $m .= $list('low', 'Low settings only', 'Reaches the minimum graphics card, not the recommended: playable with low settings or a lower resolution.', $tiers['low']);
     $m .= $list('too-heavy', 'Too heavy for the ' . rocH($cs), 'Below the minimum graphics card: these need a faster card.', $tiers['no']);
+    // Deploy 176: the comparisons with this card and its class.
+    $vsHere = '';
+    foreach (rocGpVsPairs() as $vp) if (array_intersect($vp, array_merge([$cardMain], ROC_GP_CARD_PAGES[$cardMain]))) $vsHere .= '<a href="' . rocGpVsPath($vp) . '"><strong>' . rocH(rocGpCardShort($vp[0]) . ' vs ' . rocGpCardShort($vp[1])) . '</strong><span>Which runs more games?</span></a>';
+    if ($vsHere !== '') $m .= '<section class="gp-card"><h2>Compare the ' . rocH($cs) . '</h2><div class="gp-sim">' . $vsHere . '</div></section>';
     if (isset($pdo) && $pdo) {
         $prods = rocGpProducts($pdo, 'gpu', $score + 1.5, 4);
         if ($prods) $m .= '<section class="gp-card"><h2>Faster graphics cards in our guides</h2><div class="gp-sim">'

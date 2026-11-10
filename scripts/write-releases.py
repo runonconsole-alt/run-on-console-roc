@@ -1186,6 +1186,12 @@ RELEASES = [
          checks=[dict(label='Titles with the year', type='contains', path='game-render.php', text='Deploy 175')],
          pr=REPO + '177',
          steps=['Merge PR 176 first. Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=176, date='2026-11-10', title='GPU vs GPU pages for gaming',
+         changes=['87 new pages such as /can-i-run/rtx-3060-vs-rx-6600/: two graphics cards compared by how many PC games each runs on high, medium and low settings, from the official Steam requirements of every game, the popular games where the faster card makes the difference, the games both run on high, the two cards pages and product pages, and FAQ. No FPS is invented. Each card is compared with the next three faster cards; the other order redirects',
+                  'New page /can-i-run/gpu-compare/ lists every comparison by card. All are in the sitemap and linked from the graphics card pages and the Can I run it? page'],
+         checks=[dict(label='GPU comparisons', type='contains', path='api/v1/gpu-vs-lib.php', text='function rocGpVsPage')],
+         pr=REPO + '178',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
