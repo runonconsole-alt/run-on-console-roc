@@ -1,0 +1,28 @@
+{
+ "deploy": 173,
+ "date": "2026-11-10",
+ "title": "The deep Steam update saves its list",
+ "changes": [
+  "cli-steam-update.php --deep keeps the database connection open while it waits for SteamSpy (the list was not saved after the waits) and shows any error on screen. Long --now runs keep the connection open too"
+ ],
+ "checks": [
+  {
+   "label": "Connection kept open",
+   "type": "contains",
+   "path": "api/v1/cron/cli-steam-update.php",
+   "text": "Deploy 173"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BX_w5pRK.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/175",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, then unzip it and delete the zip.",
+  "php public_html/api/v1/cron/cli-steam-update.php --refresh --deep=3 --now=60"
+ ],
+ "build": "index-BX_w5pRK.js"
+}

@@ -24,6 +24,8 @@ if (in_array('--off', $args, true) || in_array('--on', $args, true)) {
     rocBlogSet($pdo, 'steam_update_auto', in_array('--on', $args, true) ? 'on' : 'off');
     exit('Automatic Steam update is ' . (in_array('--on', $args, true) ? 'on' : 'off') . ".\n");
 }
+// Deploy 173: any error is shown (the site's settings hide PHP errors).
+set_exception_handler(function ($e) { echo "\nError: " . $e->getMessage() . "\n"; exit(1); });
 // Deploy 171: a new list now, or chosen games first.
 $add = [];
 foreach ($args as $a) if (strpos($a, '--add=') === 0) $add = array_values(array_filter(array_map('intval', explode(',', substr($a, 6)))));
@@ -40,7 +42,12 @@ if (in_array('--refresh', $args, true) || $add) {
         $deep = 0;
         foreach ($args as $a) if (strpos($a, '--deep=') === 0) $deep = max(0, min(10, (int)substr($a, 7)));
         for ($pg = 0; $pg < $deep; $pg++) {
-            if ($pg > 0) { echo "  waiting a minute for SteamSpy (page " . ($pg + 1) . " of {$deep})...\n"; sleep(61); }
+            // Deploy 173: the database closes a connection left idle for a few minutes (the save then failed
+            // silently after the waits), so it is pinged while waiting.
+            if ($pg > 0) {
+                echo "  waiting a minute for SteamSpy (page " . ($pg + 1) . " of {$deep})...\n";
+                for ($s = 1; $s <= 61; $s++) { sleep(1); if ($s % 15 === 0) { try { $pdo->query('SELECT 1'); } catch (\Throwable $e) {} } }
+            }
             $all = rocSteamGet('https://steamspy.com/api.php?request=all&page=' . $pg);
             foreach ((array)$all as $a) if (!empty($a['appid'])) $cand[] = (int)$a['appid'];
         }

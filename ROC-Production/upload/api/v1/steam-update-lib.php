@@ -93,6 +93,7 @@ function rocSteamUpdateTick(PDO $pdo, string $root, int $n = 6): ?string {
             $have[$id] = 1; $added[] = (string)$app['name'];
         } elseif (!$app || empty($app['release_date']['coming_soon'])) $skip[$id] = 1;   // not out yet: asked again next month
         usleep(1500000);
+        if ($asked % 10 === 0) { try { $pdo->query('SELECT 1'); } catch (\Throwable $e) {} }   // Deploy 173: keeps the connection open on long runs
     }
     if ($added) {
         $bdir = dirname($root) . '/roc-steam-backups';
