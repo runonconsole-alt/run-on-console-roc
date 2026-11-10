@@ -50,6 +50,7 @@ $GLOBALS['ROC_GP_HIDDEN'] = array_keys(array_filter($EDITS, function ($e) { retu
 $games   = rocGpAll($ROOT);
 $updated = rocGpUpdated($ROOT);
 require_once __DIR__ . '/api/v1/ram-pages-lib.php';   // Deploy 172: games for 4 / 8 / 16 GB RAM
+require_once __DIR__ . '/api/v1/upcoming-lib.php';    // Deploy 174: upcoming games
 if (!$games) { if ($isMap) { http_response_code(503); exit; } rocNotFound($ROOT); }
 
 /* ------------------------------------------------------------- sitemap */
@@ -61,6 +62,7 @@ if ($isMap) {
          . rocSmLine(ROC_PUBLIC_URL . ROC_GP_NOGPU, $updated, 'Games that run without a graphics card')
          . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/report-2026/', $updated, 'PC Game Requirements Report')
          . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/my-pc/', $updated, 'Which games can my PC run?')
+         . (function () use ($games, $updated) { [$s, $o] = rocGpUpcomingSplit($games); return ($s || $o) ? rocSmLine(ROC_PUBLIC_URL . ROC_GP_UPCOMING, $updated, 'Upcoming PC games') : ''; })()
          . implode('', array_map(function ($gb) use ($updated) { return rocSmLine(ROC_PUBLIC_URL . ROC_GP_RAM_PAGES[$gb], $updated, 'Games for ' . $gb . ' GB RAM'); }, array_keys(ROC_GP_RAM_PAGES)))
          . (function () use ($ROOT, $pdo, $games) { require_once $ROOT . '/api/v1/fps-lib.php'; $r = rocFpsAll($pdo, $games);
               return $r ? rocSmLine(ROC_PUBLIC_URL . rocFpsPagePath(), max(array_column($r, 't')), 'FPS reports from real players') : ''; })()
@@ -293,6 +295,12 @@ if ($slug === 'my-pc') {
     require_once $ROOT . '/api/v1/mypc-lib.php';
     if (isset($_GET['data'])) rocGpMyPcData($games);
     rocGpMyPc($ROOT, $games, $updated, $headTop, $bodyToMain, $mainOpen, $afterMain);
+    exit;
+}
+
+/* -------------------------------------------- upcoming games (Deploy 174) */
+if ($slug === 'upcoming') {
+    rocGpUpcomingPage($ROOT, $games, $updated, $headTop, $bodyToMain, $mainOpen, $afterMain);
     exit;
 }
 
@@ -534,7 +542,7 @@ if ($slug === '') {
         . '<p>Pick a game to see its official minimum and recommended requirements from Steam, which graphics cards and processors run it, '
         . 'and check your own PC in a few seconds. The full checker also covers consoles, handhelds and phones.</p>'
         . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Open the full checker &rarr;</a><a class="gp-btn s" href="' . ROC_GP_NOGPU . '">Games without a graphics card</a>'
-        . '<a class="gp-btn s" href="/can-i-run/my-pc/">Which games can my PC run?</a><a class="gp-btn s" href="' . ROC_DECK_PAGE . '">Steam Deck games</a><a class="gp-btn s" href="/can-i-run/fps-reports/">FPS reports</a><a class="gp-btn s" href="/can-i-run/report-2026/">Requirements report ' . date('Y') . '</a></div></div>'
+        . '<a class="gp-btn s" href="/can-i-run/my-pc/">Which games can my PC run?</a><a class="gp-btn s" href="' . ROC_DECK_PAGE . '">Steam Deck games</a><a class="gp-btn s" href="/can-i-run/upcoming/">Upcoming games</a><a class="gp-btn s" href="/can-i-run/fps-reports/">FPS reports</a><a class="gp-btn s" href="/can-i-run/report-2026/">Requirements report ' . date('Y') . '</a></div></div>'
         . '<div class="gp-wall">' . $wall . '<small>Most popular games. Pictures: Steam store, © their publishers.</small></div></header>';
     $m .= '<section class="gp-card"><label for="gp-q" class="sr-only">Search a game</label>'
         . '<input id="gp-q" class="gp-search" type="search" placeholder="Search ' . number_format($n) . ' games, e.g. GTA, Elden Ring, Valorant…" autocomplete="off">'
@@ -648,6 +656,14 @@ foreach ($metaMin !== ''
     : ['Can your PC run ' . $name . '? See the official minimum and recommended system requirements and check your graphics card, CPU and RAM for free.',
        'Can your PC run ' . $name . '? See the official requirements and check your PC for free.'] as $metaTry) {
     if (mb_strlen($metaTry) <= 155) { $metaD = $metaTry; break; }
+}
+// Deploy 174: a game not out yet says so first (Steam's release date), when it fits.
+if (!empty($g['soon']) && trim((string)($E['description'] ?? '')) === '') {
+    foreach (['Can your PC run ' . $name . '? It comes out ' . $g['soon'] . '. Minimum PC on Steam: ' . ($metaMin !== '' ? $metaMin : 'see the page') . '. Check yours for free.',
+              $name . ' comes out ' . $g['soon'] . '. Minimum PC on Steam: ' . ($metaMin !== '' ? $metaMin : 'see the page') . '. Check yours for free.',
+              $name . ' comes out ' . $g['soon'] . '. See its PC requirements and check your PC for free.'] as $metaTry) {
+        if (mb_strlen($metaTry) <= 155) { $metaD = $metaTry; break; }
+    }
 }
 // A very long game name: its official requirements, cut at a whole word.
 if ($metaD === '') $metaD = rtrim((string)preg_replace('/\s+\S*$/u', '', mb_substr($name, 0, 120))) . ' system requirements. Free check for your PC.';
@@ -775,7 +791,7 @@ $ld = [rocGpCrumbs($crumbs),
     ['@context' => 'https://schema.org', '@type' => 'WebPage', '@id' => $url, 'url' => $url, 'name' => 'Can I run ' . $name . '?', 'description' => $metaD,
      'dateModified' => gmdate('c', $updated), 'isPartOf' => ['@type' => 'WebSite', 'name' => 'Run On Console', 'url' => ROC_PUBLIC_URL . '/'],
      'about' => array_filter(['@type' => 'VideoGame', 'name' => $name, 'gamePlatform' => $deck && $deck['c'] >= 2 ? ['PC', 'Steam Deck'] : 'PC', 'genre' => $genre !== '' ? array_map('trim', explode(',', $genre)) : null,
-                              'datePublished' => $year ? (string)$year : null, 'sameAs' => (string)($g['u'] ?? '') ?: null,
+                              'datePublished' => ($year && empty($g['soon'])) ? (string)$year : null, 'sameAs' => (string)($g['u'] ?? '') ?: null,
                               // Its official minimum requirements (VideoGame is a SoftwareApplication).
                               'applicationCategory' => 'Game', 'operatingSystem' => $clean($min['os'] ?? '') ?: null,
                               'processorRequirements' => $clean($min['cpu'] ?? '') ?: null, 'memoryRequirements' => $clean($min['ram'] ?? '') ?: null,
@@ -799,6 +815,9 @@ $row = function ($label, $a, $b) use ($clean, $rec) {
 $m  = $mainOpen . '<article class="max-w-4xl mx-auto py-6 space-y-6">' . rocGpCrumbHtml($crumbs);
 $pic = empty($E['no_picture']) ? rocGpSteamImg((int)$g['appid']) : '';
 $m .= '<header class="gp-hero' . ($pic !== '' ? ' pic' : '') . '"><div><h1>Can I run ' . rocH($name) . '?</h1><p>' . rocH($intro) . '</p>'
+    . (!empty($g['soon']) ? '<p style="background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:.8rem;padding:.55rem .8rem;font-weight:600">'
+        . '<b>Not out yet</b> · Release on Steam: ' . rocH((string)$g['soon']) . '. These are the requirements Steam lists today; they can change before launch, and we check them again every few days. '
+        . '<a href="/can-i-run/upcoming/" style="color:#fff;text-decoration:underline">More upcoming games</a></p>' : '')
     . '<div class="gp-tags"><span class="gp-tag w">' . rocH(ucfirst($weight)) . '</span>' . ($year ? '<span class="gp-tag">' . $year . '</span>' : '')
     . implode('', array_map(function ($x) { return '<span class="gp-tag">' . rocH(trim($x)) . '</span>'; }, array_slice(array_filter(explode(',', $genre)), 0, 3)))
     . '<span class="gp-tag">PC (Windows)</span></div></div>'
@@ -849,7 +868,7 @@ $m .= '<section class="gp-card" id="check"><h2>Check your PC</h2>'
 
 // Players' FPS reports (Deploy 160): published after the owner checks them (api/v1/fps-lib.php).
 require_once __DIR__ . '/api/v1/fps-lib.php';
-$m .= rocFpsSection($pdo, $slug, $name, $gpus, $cpus);
+if (empty($g['soon'])) $m .= rocFpsSection($pdo, $slug, $name, $gpus, $cpus);   // Deploy 174: no FPS before launch
 
 // Steam Deck (Deploy 157): Valve's rating and the test results behind it.
 if ($deck) {
@@ -951,6 +970,7 @@ $more = [['/compatibility/?steam=' . (int)$g['appid'], 'Full PC check', 'Laptops
          [ROC_DECK_PAGE, 'Steam Deck games', 'Valve\'s Verified and Playable ratings'],
          ['/can-i-run/report-2026/', 'PC requirements report', 'What ' . number_format(count($games)) . ' games need, year by year'],
          ['/can-i-run/fps-reports/', 'FPS reports', 'Real frame rates players shared, game by game'],
+         ['/can-i-run/upcoming/', 'Upcoming PC games', 'Requirements of games not out yet'],
          (function () use ($g) { $mr = (float)($g['req']['min']['ram'] ?? 0); $gb = 16; foreach (array_keys(ROC_GP_RAM_PAGES) as $x) if ($mr > 0 && $mr <= $x) { $gb = $x; break; }
              return [ROC_GP_RAM_PAGES[$gb], 'Games for ' . $gb . ' GB RAM', 'What else runs on ' . $gb . ' GB of memory']; })(),
          ['/category/gpu/', 'Graphics cards', 'Picks for every budget'], ['/category/cpu/', 'Processors', 'Gaming CPUs from entry to high end'],
