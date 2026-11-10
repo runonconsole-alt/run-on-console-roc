@@ -10,6 +10,10 @@
  *
  *   rocSteamUpdateTick($pdo, $root, $n)   the scheduler: at most $n store requests this run
  *
+ * Deploy 171: Steam's 100 most played games right now come first (on 10 November 32 of them were missing, for
+ * example Resident Evil Requiem), and a game that is not out yet is asked again next month instead of being
+ * skipped for good.
+ *
  * State in cms_settings: steam_update {month, queue, added, checked, last}. steam_skip: app ids checked and
  * not kept (never asked again). Deploys must not carry roc-steam-games.json any more (the server's copy grows).
  */
@@ -34,6 +38,9 @@ function rocSteamGet(string $url): ?array {
 /** Popular app ids from SteamSpy and the Steam store, most popular first. */
 function rocSteamCandidates(): array {
     $ids = [];
+    // Deploy 171: what people play on Steam now, most played first.
+    $mp = rocSteamGet('https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/');
+    foreach ((array)($mp['response']['ranks'] ?? []) as $a) if (!empty($a['appid'])) $ids[(int)$a['appid']] = 1;
     foreach (['top100in2weeks', 'top100forever'] as $r) {
         $d = rocSteamGet('https://steamspy.com/api.php?request=' . $r);
         foreach ((array)$d as $a) if (!empty($a['appid'])) $ids[(int)$a['appid']] = 1;
@@ -84,7 +91,7 @@ function rocSteamUpdateTick(PDO $pdo, string $root, int $n = 6): ?string {
         if ($app && rocSteamKeep($app)) {
             $data['games'][] = rocSrBuildGame($app, rocSteamYear($app));
             $have[$id] = 1; $added[] = (string)$app['name'];
-        } else $skip[$id] = 1;
+        } elseif (!$app || empty($app['release_date']['coming_soon'])) $skip[$id] = 1;   // not out yet: asked again next month
         usleep(1500000);
     }
     if ($added) {
