@@ -1153,6 +1153,14 @@ RELEASES = [
          checks=[dict(label='Reviews indexed', type='contains', path='api/v1/reviews-lib.php', text='Deploy 170')],
          pr=REPO + '172',
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=171, date='2026-11-10', title='Guides get a second try when too short, and the games people play now join the list',
+         changes=['A guide under 900 words goes back to the AI once, asking for the full length (on 10 November the guide writer failed with 856 words)',
+                  'The monthly Steam update now starts with the 100 most played games on Steam (32 of them were missing, for example Resident Evil Requiem), and a game that is not out yet is asked again next month instead of being skipped for good',
+                  'cli-steam-update.php --refresh makes the list again now, and --add=APPID puts chosen Steam games first'],
+         checks=[dict(label='Guide retry', type='contains', path='api/v1/cms/guide-writer-lib.php', text='Deploy 171'),
+                 dict(label='Most played games', type='contains', path='api/v1/steam-update-lib.php', text='GetMostPlayedGames')],
+         pr=REPO + '173',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-steam-update.php --refresh --now=30']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

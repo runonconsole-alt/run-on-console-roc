@@ -209,21 +209,28 @@ function rocGuideWrite(PDO $pdo, string $root, ?array $topic = null, ?string $pu
         . "\"image_prompt\": \"one sentence: a realistic photo for this guide, the gear or the setup, no text, no logos, no faces\", \"tags\": [\"4 to 6 short search words\"]}";
     // Deploy 127: the title and description check (seo-check-lib.php); a guide that fails goes back to the AI once.
     $used = null;
-    for ($try = 1; $try <= 2; $try++) {
-        $w = rocBlogWriteAny($pdo, $prompt, $used);
-        if (!$w['ok']) return ['ok' => false, 'error' => $w['error']];
-        $a = $w['article'];
-        foreach (['title', 'meta_title', 'meta_description'] as $capK) if (isset($a[$capK])) $a[$capK] = rocSeoCap((string)$a[$capK]);   // Deploy 164
-        $bad = rocSeoCheck(['title' => (string)($a['title'] ?? ''), 'meta_title' => (string)($a['meta_title'] ?? ''), 'meta_description' => (string)($a['meta_description'] ?? ''),
-                            'excerpt' => (string)($a['excerpt'] ?? ''), 'focus_keyword' => $kw]);
-        if (!$bad) break;
-        if ($try === 2) return ['ok' => false, 'error' => 'Title or description not accepted: ' . implode(' ', $bad)];
-        $prompt .= "\n\nYour previous answer was rejected: " . implode(' ', $bad) . ' Fix this.';
+    // Deploy 171: a guide under 900 words goes back to the AI once, asking for the full length (on 10 November the
+    // writer failed all morning with 856 words).
+    for ($len = 1; $len <= 2; $len++) {
+        for ($try = 1; $try <= 2; $try++) {
+            $w = rocBlogWriteAny($pdo, $prompt, $used);
+            if (!$w['ok']) return ['ok' => false, 'error' => $w['error']];
+            $a = $w['article'];
+            foreach (['title', 'meta_title', 'meta_description'] as $capK) if (isset($a[$capK])) $a[$capK] = rocSeoCap((string)$a[$capK]);   // Deploy 164
+            $bad = rocSeoCheck(['title' => (string)($a['title'] ?? ''), 'meta_title' => (string)($a['meta_title'] ?? ''), 'meta_description' => (string)($a['meta_description'] ?? ''),
+                                'excerpt' => (string)($a['excerpt'] ?? ''), 'focus_keyword' => $kw]);
+            if (!$bad) break;
+            if ($try === 2) return ['ok' => false, 'error' => 'Title or description not accepted: ' . implode(' ', $bad)];
+            $prompt .= "\n\nYour previous answer was rejected: " . implode(' ', $bad) . ' Fix this.';
+        }
+        $title = trim(mb_substr(strip_tags((string)($a['title'] ?? '')), 0, 200)) ?: $idea;
+        $content = rocBlogCleanLinks(rocCmsSanitizeHtml((string)($a['content_html'] ?? '')), $pdo);
+        $words = count(preg_split('/\s+/u', rocCmsTextFromHtml($content)) ?: []);
+        if ($words >= 900) break;
+        if ($len === 2) return ['ok' => false, 'error' => "The guide was too short ({$words} words)."];
+        $prompt .= "\n\nYour previous guide had only {$words} words; at least 1,100 are required. Write the whole guide again, longer: "
+                 . "explain every step in more detail, add tips and common mistakes for each step, and answer each FAQ question fully. No filler.";
     }
-    $title = trim(mb_substr(strip_tags((string)($a['title'] ?? '')), 0, 200)) ?: $idea;
-    $content = rocBlogCleanLinks(rocCmsSanitizeHtml((string)($a['content_html'] ?? '')), $pdo);
-    $words = count(preg_split('/\s+/u', rocCmsTextFromHtml($content)) ?: []);
-    if ($words < 900) return ['ok' => false, 'error' => "The guide was too short ({$words} words)."];
     $content = rocBlogBuyBoxes($pdo, $content, ['pillar' => 'cat-' . $cat]);
     $slug = rocBlogSlug($title);
     $st = $pdo->prepare('SELECT COUNT(*) FROM blogs WHERE slug = ?'); $st->execute([$slug]);
