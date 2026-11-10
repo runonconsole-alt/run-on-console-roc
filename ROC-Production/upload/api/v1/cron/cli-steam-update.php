@@ -7,6 +7,7 @@
  *   php cli-steam-update.php --off | --on   stops / restarts the automatic update
  *   php cli-steam-update.php --refresh      makes this month's list again now, with Steam's most played games (Deploy 171)
  *   php cli-steam-update.php --add=APPID[,APPID]   puts these Steam games first in the queue (asked again even if skipped before)
+ *   php cli-steam-update.php --refresh --deep=3     also SteamSpy's most owned games, 1,000 a page (one page a minute, Deploy 172)
  */
 if (PHP_SAPI !== 'cli') { http_response_code(403); exit; }
 $ROOT = dirname(__DIR__, 3);
@@ -35,6 +36,14 @@ if (in_array('--refresh', $args, true) || $add) {
     if (in_array('--refresh', $args, true)) {
         $cand = rocSteamCandidates();
         if (!$cand) exit("Steam did not answer. Try again in a few minutes.\n");
+        // Deploy 172: --deep=N adds the N first pages of SteamSpy's list of all games (most owned first).
+        $deep = 0;
+        foreach ($args as $a) if (strpos($a, '--deep=') === 0) $deep = max(0, min(10, (int)substr($a, 7)));
+        for ($pg = 0; $pg < $deep; $pg++) {
+            if ($pg > 0) { echo "  waiting a minute for SteamSpy (page " . ($pg + 1) . " of {$deep})...\n"; sleep(61); }
+            $all = rocSteamGet('https://steamspy.com/api.php?request=all&page=' . $pg);
+            foreach ((array)$all as $a) if (!empty($a['appid'])) $cand[] = (int)$a['appid'];
+        }
         $queue = array_merge($cand, $queue);
     }
     $queue = array_merge($add, $queue);

@@ -1161,6 +1161,12 @@ RELEASES = [
                  dict(label='Most played games', type='contains', path='api/v1/steam-update-lib.php', text='GetMostPlayedGames')],
          pr=REPO + '173',
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-steam-update.php --refresh --now=30']),
+    dict(deploy=172, date='2026-11-10', title='Games for 4, 8 and 16 GB RAM, and many more popular Steam games',
+         changes=['New pages /can-i-run/4gb-ram-games/, /can-i-run/8gb-ram-games/ and /can-i-run/16gb-ram-games/: which games run on that much RAM, at the recommended RAM or the minimum, and popular games that need more, from the official Steam requirements, with FAQ. In the sitemap, and linked from the Can I run it? page, the graphics card pages and every game page',
+                  'cli-steam-update.php --refresh --deep=3 also adds the most owned games on Steam (SteamSpy, 1,000 a page); the scheduler adds 6 every 10 minutes'],
+         checks=[dict(label='RAM pages', type='contains', path='api/v1/ram-pages-lib.php', text='function rocGpRamPage')],
+         pr=REPO + '174',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-steam-update.php --refresh --deep=3 --now=60', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

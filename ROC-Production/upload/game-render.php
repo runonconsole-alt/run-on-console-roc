@@ -49,6 +49,7 @@ $GLOBALS['ROC_GP_HIDDEN'] = array_keys(array_filter($EDITS, function ($e) { retu
 
 $games   = rocGpAll($ROOT);
 $updated = rocGpUpdated($ROOT);
+require_once __DIR__ . '/api/v1/ram-pages-lib.php';   // Deploy 172: games for 4 / 8 / 16 GB RAM
 if (!$games) { if ($isMap) { http_response_code(503); exit; } rocNotFound($ROOT); }
 
 /* ------------------------------------------------------------- sitemap */
@@ -60,6 +61,7 @@ if ($isMap) {
          . rocSmLine(ROC_PUBLIC_URL . ROC_GP_NOGPU, $updated, 'Games that run without a graphics card')
          . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/report-2026/', $updated, 'PC Game Requirements Report')
          . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/my-pc/', $updated, 'Which games can my PC run?')
+         . implode('', array_map(function ($gb) use ($updated) { return rocSmLine(ROC_PUBLIC_URL . ROC_GP_RAM_PAGES[$gb], $updated, 'Games for ' . $gb . ' GB RAM'); }, array_keys(ROC_GP_RAM_PAGES)))
          . (function () use ($ROOT, $pdo, $games) { require_once $ROOT . '/api/v1/fps-lib.php'; $r = rocFpsAll($pdo, $games);
               return $r ? rocSmLine(ROC_PUBLIC_URL . rocFpsPagePath(), max(array_column($r, 't')), 'FPS reports from real players') : ''; })()
          . rocSmLine(ROC_PUBLIC_URL . ROC_DECK_PAGE, max($updated, (int)(rocDeckLoad($ROOT)['updated'] ?? 0)), 'Steam Deck games');
@@ -149,6 +151,7 @@ function rocGpWall(array $list): string {
 function rocGpCardNav(string $here = ''): string {
     $h = '<section class="gp-card"><h2>Games by graphics card</h2><div class="gp-sim">';
     if ($here !== ROC_GP_NOGPU) $h .= '<a href="' . ROC_GP_NOGPU . '"><strong>No graphics card</strong><span>Integrated graphics (Intel UHD / Iris Xe)</span></a>';
+    if (function_exists('rocGpRamLinks')) $h .= rocGpRamLinks($here);   // Deploy 172
     foreach (ROC_GP_CARD_PAGES as $main => $same) {
         $p = rocGpCardPath($main);
         if ($p === $here) continue;
@@ -290,6 +293,12 @@ if ($slug === 'my-pc') {
     require_once $ROOT . '/api/v1/mypc-lib.php';
     if (isset($_GET['data'])) rocGpMyPcData($games);
     rocGpMyPc($ROOT, $games, $updated, $headTop, $bodyToMain, $mainOpen, $afterMain);
+    exit;
+}
+
+/* ------------------------------------------- RAM pages (Deploy 172) */
+if (rocGpRamSlug($slug)) {
+    rocGpRamPage($ROOT, $games, rocGpRamSlug($slug), $updated, $headTop, $bodyToMain, $mainOpen, $afterMain);
     exit;
 }
 
@@ -942,6 +951,8 @@ $more = [['/compatibility/?steam=' . (int)$g['appid'], 'Full PC check', 'Laptops
          [ROC_DECK_PAGE, 'Steam Deck games', 'Valve\'s Verified and Playable ratings'],
          ['/can-i-run/report-2026/', 'PC requirements report', 'What ' . number_format(count($games)) . ' games need, year by year'],
          ['/can-i-run/fps-reports/', 'FPS reports', 'Real frame rates players shared, game by game'],
+         (function () use ($g) { $mr = (float)($g['req']['min']['ram'] ?? 0); $gb = 16; foreach (array_keys(ROC_GP_RAM_PAGES) as $x) if ($mr > 0 && $mr <= $x) { $gb = $x; break; }
+             return [ROC_GP_RAM_PAGES[$gb], 'Games for ' . $gb . ' GB RAM', 'What else runs on ' . $gb . ' GB of memory']; })(),
          ['/category/gpu/', 'Graphics cards', 'Picks for every budget'], ['/category/cpu/', 'Processors', 'Gaming CPUs from entry to high end'],
          ['/category/ram/', 'Memory (RAM)', 'DDR4 and DDR5 kits'], ['/gaming-platforms/pc-handheld-pc/', 'PC and handheld PC guide', 'Gaming platform guide'],
          ['/guides/', 'Gaming guides', 'Buying, setup and game settings, step by step'], ['/can-i-run/', 'All PC games', number_format(count($games)) . ' games with their requirements']];
