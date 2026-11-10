@@ -60,6 +60,8 @@ if ($isMap) {
          . rocSmLine(ROC_PUBLIC_URL . ROC_GP_NOGPU, $updated, 'Games that run without a graphics card')
          . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/report-2026/', $updated, 'PC Game Requirements Report')
          . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/my-pc/', $updated, 'Which games can my PC run?')
+         . (function () use ($ROOT, $pdo, $games) { require_once $ROOT . '/api/v1/fps-lib.php'; $r = rocFpsAll($pdo, $games);
+              return $r ? rocSmLine(ROC_PUBLIC_URL . rocFpsPagePath(), max(array_column($r, 't')), 'FPS reports from real players') : ''; })()
          . rocSmLine(ROC_PUBLIC_URL . ROC_DECK_PAGE, max($updated, (int)(rocDeckLoad($ROOT)['updated'] ?? 0)), 'Steam Deck games');
     foreach (array_keys(ROC_GP_CARD_PAGES) as $cn) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpCardPath($cn), $updated, 'What games can a ' . rocGpCardShort($cn) . ' run?');
     foreach ($games as $g) if (!rocGpThin($g, (array)($EDITS[$g['slug']] ?? []))) $out .= rocSmLine(ROC_PUBLIC_URL . rocGpPath($g), rocGpPageTime($g, (array)($EDITS[$g['slug']] ?? [])), 'Can I run ' . $g['name'] . '?');
@@ -258,7 +260,7 @@ function rocGpStyles(): string {
         . ".gp-az{display:flex;flex-wrap:wrap;gap:.3rem}.gp-az a{min-width:2rem;text-align:center;border:1px solid #e2e8f0;border-radius:.6rem;padding:.3rem .45rem;font-weight:800;font-size:.8rem;color:#334155;background:#fff}"
         . ".gp-az a:hover{border-color:#10b981;color:#047857}"
         . ".gp-up{margin-top:.8rem;border:1px solid #a7f3d0;background:#ecfdf5;border-radius:1rem;padding:.9rem 1rem}.gp-up .k{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#047857}"
-        . ".gp-up .t{display:block;font-family:Outfit,Inter,sans-serif;font-weight:800;color:#0f172a;margin:.2rem 0 .6rem}.gp-up .b{display:flex;flex-wrap:wrap;gap:.5rem}"
+        . ".gp-up .t{display:block;font-family:Outfit,Inter,sans-serif;font-weight:800;color:#0f172a;margin:.2rem 0 .3rem}.gp-up .w{display:block;font-size:.8rem;color:#475569;margin:0 0 .6rem}html.roc-dark .gp-up .w{color:#94a3b8}.gp-up .b{display:flex;flex-wrap:wrap;gap:.5rem}"
         . ".gp-up a{font-weight:800;font-size:.82rem;padding:.6rem .9rem;border-radius:.75rem;text-decoration:none}.gp-up a.y{background:#059669;color:#fff}.gp-up a.r{border:1px solid #6ee7b7;color:#065f46;background:#fff}"
         . "html.roc-dark .gp-up{background:#052e2b;border-color:#065f46}html.roc-dark .gp-up .t{color:#e2e8f0}html.roc-dark .gp-up a.r{background:#0b1220;color:#6ee7b7}"
         . ".gp-qa{display:grid;gap:.45rem;margin-top:.6rem;font-size:.92rem;list-style:none;padding:0}.gp-qa li{padding-left:1.1rem;position:relative}.gp-qa li::before{content:\"\";position:absolute;left:0;top:.55em;width:.45rem;height:.45rem;border-radius:99px;background:#10b981}.gp-qa a{color:#047857;font-weight:700;text-decoration:underline}"
@@ -288,6 +290,13 @@ if ($slug === 'my-pc') {
     require_once $ROOT . '/api/v1/mypc-lib.php';
     if (isset($_GET['data'])) rocGpMyPcData($games);
     rocGpMyPc($ROOT, $games, $updated, $headTop, $bodyToMain, $mainOpen, $afterMain);
+    exit;
+}
+
+/* --------------------------------------------- FPS reports (Deploy 169) */
+if ($slug === 'fps-reports') {
+    require_once $ROOT . '/api/v1/fps-lib.php';
+    rocFpsPage($ROOT, $pdo, $games, $updated, $headTop, $bodyToMain, $mainOpen, $afterMain);
     exit;
 }
 
@@ -516,7 +525,7 @@ if ($slug === '') {
         . '<p>Pick a game to see its official minimum and recommended requirements from Steam, which graphics cards and processors run it, '
         . 'and check your own PC in a few seconds. The full checker also covers consoles, handhelds and phones.</p>'
         . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Open the full checker &rarr;</a><a class="gp-btn s" href="' . ROC_GP_NOGPU . '">Games without a graphics card</a>'
-        . '<a class="gp-btn s" href="/can-i-run/my-pc/">Which games can my PC run?</a><a class="gp-btn s" href="' . ROC_DECK_PAGE . '">Steam Deck games</a><a class="gp-btn s" href="/can-i-run/report-2026/">Requirements report ' . date('Y') . '</a></div></div>'
+        . '<a class="gp-btn s" href="/can-i-run/my-pc/">Which games can my PC run?</a><a class="gp-btn s" href="' . ROC_DECK_PAGE . '">Steam Deck games</a><a class="gp-btn s" href="/can-i-run/fps-reports/">FPS reports</a><a class="gp-btn s" href="/can-i-run/report-2026/">Requirements report ' . date('Y') . '</a></div></div>'
         . '<div class="gp-wall">' . $wall . '<small>Most popular games. Pictures: Steam store, © their publishers.</small></div></header>';
     $m .= '<section class="gp-card"><label for="gp-q" class="sr-only">Search a game</label>'
         . '<input id="gp-q" class="gp-search" type="search" placeholder="Search ' . number_format($n) . ' games, e.g. GTA, Elden Ring, Valorant…" autocomplete="off">'
@@ -824,7 +833,7 @@ $m .= '<section class="gp-card" id="check"><h2>Check your PC</h2>'
     . '<label>Processor<select data-k="cpu">' . $opt($cpus, 'Intel Core i5-8400') . '</select></label>'
     . '<label>Memory (RAM)<select data-k="ram">' . implode('', array_map(function ($r) { return '<option value="' . $r . '"' . ($r === 16 ? ' selected' : '') . '>' . $r . ' GB</option>'; }, [4, 6, 8, 12, 16, 24, 32, 64])) . '</select></label>'
     . '</div><div class="gp-res" id="gp-res" aria-live="polite"></div>'
-    . ($upData ? '<div class="gp-up" id="gp-up" hidden data-up="' . rocH(json_encode($upData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) . '"></div>' : '')
+    . '<div class="gp-up" id="gp-up" hidden data-up="' . rocH(json_encode((object)$upData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) . '"></div>'
     . '<div class="gp-btns"><a class="gp-btn p" rel="nofollow" href="/compatibility/?steam=' . (int)$g['appid'] . '">Full check (laptops, consoles, more parts) &rarr;</a>'
     . '<a class="gp-btn s" href="#requirements">See the requirements</a>'
     . '<button type="button" class="gp-btn s" data-roc-ask="' . rocH('Can my PC run ' . $name . '? My graphics card: , processor: , RAM: ') . '">Ask ROC about my PC</button></div></section>';
@@ -932,6 +941,7 @@ $more = [['/compatibility/?steam=' . (int)$g['appid'], 'Full PC check', 'Laptops
          ['/can-i-run/my-pc/', 'Which games can my PC run?', 'Every game checked with your PC at once'],
          [ROC_DECK_PAGE, 'Steam Deck games', 'Valve\'s Verified and Playable ratings'],
          ['/can-i-run/report-2026/', 'PC requirements report', 'What ' . number_format(count($games)) . ' games need, year by year'],
+         ['/can-i-run/fps-reports/', 'FPS reports', 'Real frame rates players shared, game by game'],
          ['/category/gpu/', 'Graphics cards', 'Picks for every budget'], ['/category/cpu/', 'Processors', 'Gaming CPUs from entry to high end'],
          ['/category/ram/', 'Memory (RAM)', 'DDR4 and DDR5 kits'], ['/gaming-platforms/pc-handheld-pc/', 'PC and handheld PC guide', 'Gaming platform guide'],
          ['/guides/', 'Gaming guides', 'Buying, setup and game settings, step by step'], ['/can-i-run/', 'All PC games', number_format(count($games)) . ' games with their requirements']];
@@ -955,10 +965,17 @@ $m .= "<script>(function(){var box=document.querySelector('.gp-check'),res=docum
     . "+'<ul class=\"gp-bn\">'+['gpu','cpu','ram'].filter(function(x){return rat[x]!==undefined}).map(function(x){var low=mn[x]>0&&have[x]<mn[x],ok=miss.indexOf(x)<0;"
     . "return '<li class=\"'+(low?'x':ok?'y':'n')+'\">'+names[x].charAt(0).toUpperCase()+names[x].slice(1)+': '+(low?'below the minimum':ok?(R.nr?'meets the minimum':'meets the recommended'):'meets the minimum, below the recommended')+'</li>'}).join('')+'</ul>';"
     // Deploy 147: the product for the first missing part (graphics card, then processor, then RAM) under the result.
-    . "var ub=document.getElementById('gp-up');if(ub){var U=JSON.parse(ub.getAttribute('data-up')||'{}'),k=miss.filter(function(x){return U[x]})[0];"
-    . "if(!k){ub.hidden=true;}else{var x=U[k],e=function(s){return String(s).replace(/[&<>\"]/g,function(ch){return{'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch]})};"
-    . "ub.innerHTML='<span class=\"k\">Upgrade first: '+names[k]+'</span><span class=\"t\">'+e(x.t)+'</span><div class=\"b\"><a class=\"r\" href=\"'+e(x.u)+'\">See specs on ROC</a>'"
-    . "+(x.a?'<a class=\"y\" href=\"'+e(x.a)+'\" target=\"_blank\" rel=\"sponsored nofollow noopener\">Check price on Amazon</a>':'')+'</div>';ub.hidden=false;}}}"
+    // Deploy 169: the part that holds the PC back most, always (a category page when we have no product for it),
+    // with why, the Amazon button first, and the card's views and clicks counted (roc_upgrade_show / roc_upgrade_click).
+    . "var ub=document.getElementById('gp-up');if(ub){var U=JSON.parse(ub.getAttribute('data-up')||'{}'),k=miss[0];"
+    . "if(!k){ub.hidden=true;ub.removeAttribute('data-k');}else{var C={gpu:['/category/gpu/','Graphics cards we cover'],cpu:['/category/cpu/','Processors we cover'],ram:['/category/ram/','Memory kits we cover']},"
+    . "x=U[k]||{t:C[k][1],u:C[k][0],a:''},e=function(s){return String(s).replace(/[&<>\"]/g,function(ch){return{'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch]})},"
+    . "why=(mn[k]>0&&have[k]<mn[k])?'Your '+names[k]+' is below the minimum for this game.':'Your '+names[k]+' meets the minimum but not the recommended specs.';"
+    . "ub.innerHTML='<span class=\"k\">Upgrade first: '+names[k]+'</span><span class=\"t\">'+e(x.t)+'</span><span class=\"w\">'+why+'</span><div class=\"b\">'"
+    . "+(x.a?'<a class=\"y\" data-c=\"amazon\" href=\"'+e(x.a)+'\" target=\"_blank\" rel=\"sponsored nofollow noopener\">Check price on Amazon</a>':'')"
+    . "+'<a class=\"'+(x.a?'r':'y')+'\" data-c=\"roc\" href=\"'+e(x.u)+'\">'+(U[k]?'See specs on ROC':'See our picks')+'</a></div>';ub.hidden=false;"
+    . "if(ub.getAttribute('data-k')!==k){ub.setAttribute('data-k',k);if(ub.getAttribute('data-shown')&&window.rocTrack)rocTrack('roc_upgrade_show',k,x.t);}ub.setAttribute('data-shown','1');}"
+    . "if(!ub.getAttribute('data-ck')){ub.setAttribute('data-ck','1');ub.addEventListener('click',function(ev){var a=ev.target.closest&&ev.target.closest('a');if(a&&window.rocTrack)rocTrack('roc_upgrade_click',ub.getAttribute('data-k')||'',a.getAttribute('data-c')||'');});}}}"
     . "var db=document.getElementById('gp-detect'),dm=document.getElementById('gp-detect-msg');if(db)db.addEventListener('click',function(){db.disabled=true;dm.textContent='Reading your graphics card…';"
     . "var go=function(){window.rocDetectGpu().then(function(d){db.disabled=false;var sel=box.querySelector('[data-k=\"gpu\"]');"
     . "if(!d||d.score===null){dm.textContent=d&&d.name?'Your browser shows \"'+d.name+'\", which we cannot rate yet: please choose the closest card.':'Your browser does not share the graphics card (Safari and some privacy settings hide it): please choose it.';return;}"
