@@ -112,6 +112,7 @@ function rocGpPath(array $g): string { return '/can-i-run/' . $g['slug'] . '/'; 
  * answer something. The page stays open and linked. Owner's own text in CMS > Games makes it indexable again.
  */
 function rocGpThin(array $g, array $edit = []): bool {
+    if (!empty($g['soon'])) return false;   // Deploy 174: an upcoming game is wanted before launch
     if (trim((string)($edit['text'] ?? '')) !== '') return false;
     $est = (array)($g['req']['min']['est'] ?? []);
     return !empty($est['gpu']) && !empty($est['cpu']) && (int)($g['rank'] ?? 0) > 800;

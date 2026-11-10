@@ -1172,6 +1172,14 @@ RELEASES = [
          checks=[dict(label='Connection kept open', type='contains', path='api/v1/cron/cli-steam-update.php', text='Deploy 173')],
          pr=REPO + '175',
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-steam-update.php --refresh --deep=3 --now=60']),
+    dict(deploy=174, date='2026-11-10', title='Upcoming PC games and their requirements',
+         changes=['Steam\'s 50 most popular upcoming games join the list once Steam shows their PC requirements (checked every week); every scheduler run checks two of them again, takes new requirements and notes when a game comes out',
+                  'A game not out yet says so on its page (Not out yet, the release date on Steam, the requirements can change), in its description, and has no FPS section until launch',
+                  'New page /can-i-run/upcoming/: upcoming games by release date with the minimum graphics and RAM, and the games out in the last 60 days. In the sitemap and linked from the Can I run it? page and every game page',
+                  'cli-footer-link.php adds any page to the footer menu (CMS > Menus & footer)'],
+         checks=[dict(label='Upcoming page', type='contains', path='api/v1/upcoming-lib.php', text='function rocGpUpcomingPage')],
+         pr=REPO + '176',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-steam-update.php --now=60 (the upcoming games join the queue on this run)', 'php public_html/api/v1/cron/cli-footer-link.php --url=/can-i-run/upcoming/ --label="Upcoming PC Games" --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
