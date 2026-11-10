@@ -65,11 +65,11 @@ if ($isMap) {
     foreach ($rows as $r) $out .= rocSmLine(ROC_PUBLIC_URL . rocPagePathOf($r), rocModified($r), (string)($r['title'] ?? ''));
     if (is_file($ROOT . '/api/v1/methodology-lib.php'))
         $out .= rocSmLine(ROC_PUBLIC_URL . '/how-we-check/', (int)(@filemtime($ROOT . '/roc-steam-games.json') ?: time()), 'How we check if a PC can run a game');
-    // The reviews page, once it has a published review (an empty one is noindex).
+    // The reviews page (Deploy 170: also before the first review; dated by the newest review, else the day it went in).
     if (is_file($ROOT . '/api/v1/reviews-lib.php')) {
         require_once $ROOT . '/api/v1/reviews-lib.php';
         $rv = rocReviewsPublished($pdo);
-        if ($rv) $out .= rocSmLine(ROC_PUBLIC_URL . '/reviews/', max(array_column($rv, 'date')), 'Reviews of Run On Console');
+        $out .= rocSmLine(ROC_PUBLIC_URL . '/reviews/', $rv ? max(array_column($rv, 'date')) : strtotime('2026-11-10 00:00:00 UTC'), 'Reviews of Run On Console');
     }
     echo $out . "</urlset>\n";
     exit;
