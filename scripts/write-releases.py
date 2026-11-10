@@ -1140,6 +1140,14 @@ RELEASES = [
          checks=[dict(label='Class in the description', type='contains', path='game-render.php', text="$gpuMin[0] . ' class'")],
          pr=REPO + '170',
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=169, date='2026-11-10', title='FPS reports page, and a clearer upgrade card under the quick check',
+         changes=['New page /can-i-run/fps-reports/: every FPS report players shared (game, graphics card, processor, RAM, settings, FPS, date) with a filter, the graphics card pages, how to measure FPS and how to share it, and FAQ. It is in the sitemap and indexed once it has a published report',
+                  'Links to it from the footer (FPS Reports), the Can I run it? page, and the FPS section and More links of every game page',
+                  'The upgrade card under the quick check now always shows the part that holds the PC back most, says why, puts the Amazon button first, and links our category page when we have no product for that part. Its views and clicks are counted in Google Analytics (roc_upgrade_show, roc_upgrade_click)'],
+         checks=[dict(label='FPS reports page', type='contains', path='api/v1/fps-lib.php', text='function rocFpsPage'),
+                 dict(label='Upgrade card', type='contains', path='game-render.php', text='roc_upgrade_click')],
+         pr=REPO + '171',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-fps-footer.php --apply, then php public_html/api/v1/cron/cli-refresh-templates.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

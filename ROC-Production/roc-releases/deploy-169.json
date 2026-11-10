@@ -1,0 +1,37 @@
+{
+ "deploy": 169,
+ "date": "2026-11-10",
+ "title": "FPS reports page, and a clearer upgrade card under the quick check",
+ "changes": [
+  "New page /can-i-run/fps-reports/: every FPS report players shared (game, graphics card, processor, RAM, settings, FPS, date) with a filter, the graphics card pages, how to measure FPS and how to share it, and FAQ. It is in the sitemap and indexed once it has a published report",
+  "Links to it from the footer (FPS Reports), the Can I run it? page, and the FPS section and More links of every game page",
+  "The upgrade card under the quick check now always shows the part that holds the PC back most, says why, puts the Amazon button first, and links our category page when we have no product for that part. Its views and clicks are counted in Google Analytics (roc_upgrade_show, roc_upgrade_click)"
+ ],
+ "checks": [
+  {
+   "label": "FPS reports page",
+   "type": "contains",
+   "path": "api/v1/fps-lib.php",
+   "text": "function rocFpsPage"
+  },
+  {
+   "label": "Upgrade card",
+   "type": "contains",
+   "path": "game-render.php",
+   "text": "roc_upgrade_click"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BX_w5pRK.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/171",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, then unzip it and delete the zip.",
+  "php public_html/api/v1/cron/cli-fps-footer.php --apply, then php public_html/api/v1/cron/cli-refresh-templates.php --apply",
+  "CMS Dashboard: Clear cache, then Cloudflare: Purge Everything."
+ ],
+ "build": "index-BX_w5pRK.js"
+}
