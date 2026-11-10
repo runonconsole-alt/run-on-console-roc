@@ -1192,6 +1192,13 @@ RELEASES = [
          checks=[dict(label='GPU comparisons', type='contains', path='api/v1/gpu-vs-lib.php', text='function rocGpVsPage')],
          pr=REPO + '178',
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=177, date='2026-11-10', title='The game pages in German, Spanish, Portuguese, French and Russian',
+         changes=['Every Can I run it? game page now also exists in five languages at /de/, /es/, /pt/, /fr/ and /ru/ + /can-i-run/<game>/: translated title, description, quick answer, how three common PCs do, the requirements table (Steam lines stay in English, as Steam writes them), FAQ and similar games, with a link to the full English page',
+                  'Each language has its game list (/de/can-i-run/ ...) and its sitemap (/sitemaps/games-de-sitemap.xml ...), listed in the sitemap index',
+                  'Every page names its other languages with hreflang, and the English game pages link them (Also in: ...). Pages that are noindex in English are noindex in every language'],
+         checks=[dict(label='Language pages', type='contains', path='game-i18n.php', text='rocI18nAlternates')],
+         pr=REPO + '179',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-languages.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
