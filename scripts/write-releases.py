@@ -1148,6 +1148,11 @@ RELEASES = [
                  dict(label='Upgrade card', type='contains', path='game-render.php', text='roc_upgrade_click')],
          pr=REPO + '171',
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-fps-footer.php --apply, then php public_html/api/v1/cron/cli-refresh-templates.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=170, date='2026-11-10', title='The reviews page is indexed and in the sitemap',
+         changes=['The Reviews page (/reviews/) is now open to Google and listed in the sitemap, also before the first review is published (it was noindex while empty)'],
+         checks=[dict(label='Reviews indexed', type='contains', path='api/v1/reviews-lib.php', text='Deploy 170')],
+         pr=REPO + '172',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

@@ -1,0 +1,28 @@
+{
+ "deploy": 170,
+ "date": "2026-11-10",
+ "title": "The reviews page is indexed and in the sitemap",
+ "changes": [
+  "The Reviews page (/reviews/) is now open to Google and listed in the sitemap, also before the first review is published (it was noindex while empty)"
+ ],
+ "checks": [
+  {
+   "label": "Reviews indexed",
+   "type": "contains",
+   "path": "api/v1/reviews-lib.php",
+   "text": "Deploy 170"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BX_w5pRK.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/172",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, then unzip it and delete the zip.",
+  "CMS Dashboard: Clear cache, then Cloudflare: Purge Everything."
+ ],
+ "build": "index-BX_w5pRK.js"
+}

@@ -59,8 +59,8 @@ function rocReviewsPage(string $root, PDO $pdo): void {
 
     $h  = '<title>' . rocH($metaT) . "</title>\n";
     $h .= '    <meta name="description" content="' . rocH($metaD) . "\" />\n";
-    // An empty page has nothing for Google yet: it is indexed from the first published review.
-    $h .= '    <meta name="robots" content="' . ($reviews ? 'index, follow, max-image-preview:large' : 'noindex, follow') . "\" />\n";
+    // Owner, 2026-11-10 (Deploy 170): always indexed, also before the first published review (it was noindex while empty).
+    $h .= "    <meta name=\"robots\" content=\"index, follow, max-image-preview:large\" />\n";
     $h .= '    <link rel="canonical" href="' . $url . "\" />\n";
     $h .= "    <meta property=\"og:type\" content=\"website\" />\n";
     $h .= '    <meta property="og:url" content="' . $url . "\" />\n";
