@@ -1180,6 +1180,12 @@ RELEASES = [
          checks=[dict(label='Upcoming page', type='contains', path='api/v1/upcoming-lib.php', text='function rocGpUpcomingPage')],
          pr=REPO + '176',
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-steam-update.php --now=60 (the upcoming games join the queue on this run)', 'php public_html/api/v1/cron/cli-footer-link.php --url=/can-i-run/upcoming/ --label="Upcoming PC Games" --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=175, date='2026-11-10', title='Game page titles lead with System Requirements and the year',
+         changes=['Game page titles now start with the game and System Requirements and show the year, like the pages that rank above ours (for example TEKKEN 7 System Requirements (2026): Can I Run It?). A game whose name has its own year keeps the old title. A title written in the CMS still wins',
+                  'Two more questions on every game page from the Steam numbers: Can I play it with 4 GB of RAM?, and Is 16 GB of RAM enough? when the game recommends more than 8 GB'],
+         checks=[dict(label='Titles with the year', type='contains', path='game-render.php', text='Deploy 175')],
+         pr=REPO + '177',
+         steps=['Merge PR 176 first. Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

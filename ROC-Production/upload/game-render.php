@@ -639,11 +639,16 @@ $nm = trim((string)preg_replace('/\s*[-:–]?\s*\b(?:(?:The\s+)?(?:Game of the Y
 $nm2 = preg_match('/^(.{4,}?)\s*(?::|\s[-–\/]\s)/u', $nm, $nmm) ? trim($nmm[1]) : $nm;   // the part before ": " or " - "
 // Deploy 122: Search Console shows people search "<game> system requirements" far more than "PC requirements",
 // and those searches rank at 40-90 while "can i run <game>" ranks 3-9, so every title now says "System Requirements".
-$metaT = trim((string)($E['title'] ?? '')) ?: $fit(['Can I Run ' . $name . '? Minimum & Recommended System Requirements',
+// Deploy 175: "<game> system requirements" and "<game> pc requirements" are most of the game searches, and the pages
+// that rank above ours start their title with the game and "System Requirements" and show the year. Same order now.
+$tY = gmdate('Y');
+// A name with its own year ("Modern Warfare 3 (2011)") gets no second year: it would read as the game's year.
+$tYear = preg_match('/\(\d{4}\)/', $name) ? [] : [$name . ' System Requirements (' . $tY . '): Can I Run It?', $name . ' System Requirements (' . $tY . ')', $nm . ' System Requirements (' . $tY . ')'];
+$metaT = trim((string)($E['title'] ?? '')) ?: $fit(array_merge($tYear, ['Can I Run ' . $name . '? Minimum & Recommended System Requirements',
     'Can I Run ' . $name . '? System Requirements | Run On Console', 'Can I Run ' . $name . '? System Requirements | ROC',
     'Can I Run ' . $name . '? System Requirements', $name . ' System Requirements: Can I Run It?',
     'Can I Run ' . $nm . '? System Requirements', $name . ' System Requirements', $nm . ' System Requirements',
-    'Can I Run ' . $nm2 . '? System Requirements', 'Can I Run ' . $name . '?', $nm2 . ' System Requirements', 'Can I Run ' . $nm2 . '?', $name]);
+    'Can I Run ' . $nm2 . '? System Requirements', 'Can I Run ' . $name . '?', $nm2 . ' System Requirements', 'Can I Run ' . $nm2 . '?', $name]));
 // Deploy 167: the minimum PC comes first and the description always ends in a whole sentence: the longest one that
 // fits in 155 characters (what Google and SEO tools show in full), never one cut with "…".
 $metaMin = $gpuMin ? (strpos($gpuMin[0], 'integrated') !== false ? 'integrated graphics' : $gpuMin[0] . ' class') . ($ramGb($rMin['ram'] ?? null) ? ', ' . $ramGb($rMin['ram'] ?? null) . ' RAM' : '') : '';
@@ -701,6 +706,11 @@ $faqs[] = ['Can I play ' . $name . ' on a laptop?',
 $rmn = (float)($rMin['ram'] ?? 0); $rrc = (float)($rRec['ram'] ?? $rmn);
 if ($rmn > 0) $faqs[] = ['Is 8 GB of RAM enough for ' . $name . '?',
     $rmn > 8 ? 'No. ' . $name . ' needs at least ' . $ramGb($rmn) . ' of RAM.' : ($rrc > 8 ? 'Yes for the minimum settings; ' . $ramGb($rrc) . ' is recommended for smooth play.' : 'Yes. 8 GB meets the ' . ($rec ? 'recommended' : 'minimum') . ' memory for ' . $name . '.')];
+// Deploy 175: the RAM questions people search ("can I play <game> with 4 GB of RAM"), from the Steam numbers.
+if ($rmn > 0) $faqs[] = ['Can I play ' . $name . ' with 4 GB of RAM?',
+    $rmn > 4 ? 'No. ' . $name . ' needs at least ' . $ramGb($rmn) . ' of RAM.' : ($rrc > 4 ? 'Yes, on the minimum settings; ' . $ramGb($rrc) . ' is recommended.' : 'Yes. 4 GB meets the ' . ($rec ? 'recommended' : 'minimum') . ' memory for ' . $name . '.')];
+if ($rrc > 8) $faqs[] = ['Is 16 GB of RAM enough for ' . $name . '?',
+    $rmn > 16 ? 'No. ' . $name . ' needs at least ' . $ramGb($rmn) . ' of RAM.' : ($rrc > 16 ? 'Yes for the minimum settings; ' . $ramGb($rrc) . ' is recommended.' : 'Yes. 16 GB meets the recommended memory for ' . $name . '.')];
 if ($storage !== '') $faqs[] = ['How many GB is ' . $name . '?', $name . ' needs ' . preg_replace('/\s*available space/i', '', $storage) . ' of free space' . ($storageGb !== null && $storageGb >= 50 ? '. An SSD is a good idea for faster loading.' : '.')];
 // Deploy 162: the best graphics cards for this game: the lowest cards still sold new that reach the minimum, the
 // recommended and a level with room to spare, each with a product of ours when there is one. No FPS: we do not measure it.
