@@ -159,6 +159,9 @@ $children = [
 // Guides (/guides/, switched on by cli-guides.php).
 if (strpos((string)@file_get_contents($root . '/.htaccess'), 'ROC guides BEGIN') !== false) $children['guides'] = [rocSmNewest($pdo, "SELECT $postTime FROM blogs WHERE status = 'published' AND category LIKE 'Guide%'"), 'Guides'];
 if (is_file($root . '/game-render.php') && is_file($root . '/roc-steam-games.json')) $children['games'] = [(int)filemtime($root . '/roc-steam-games.json'), 'Can I run it? game pages'];
+// Deploy 177: the game pages in other languages, once cli-languages.php has added their routes.
+if (is_file($root . '/game-i18n.php') && strpos((string)@file_get_contents($root . '/.htaccess'), '# ROC i18n BEGIN') !== false)
+    foreach (['de', 'es', 'pt', 'fr', 'ru'] as $lg) $children['games-' . $lg] = [(int)filemtime($root . '/roc-steam-games.json'), 'Game pages (' . $lg . ')'];
 // CMS pages (About-style pages made in the CMS) are listed only once there is at least one.
 try {
     $n = $pdo ? (int)$pdo->query("SELECT COUNT(*) FROM pages WHERE status = 'published' AND (is_noindex = 0 OR is_noindex IS NULL)")->fetchColumn() : 1;

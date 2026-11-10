@@ -52,6 +52,7 @@ $updated = rocGpUpdated($ROOT);
 require_once __DIR__ . '/api/v1/ram-pages-lib.php';   // Deploy 172: games for 4 / 8 / 16 GB RAM
 require_once __DIR__ . '/api/v1/upcoming-lib.php';    // Deploy 174: upcoming games
 require_once __DIR__ . '/api/v1/gpu-vs-lib.php';      // Deploy 176: graphics card comparisons
+require_once __DIR__ . '/api/v1/i18n-lib.php';        // Deploy 177: the game pages in other languages
 if (!$games) { if ($isMap) { http_response_code(503); exit; } rocNotFound($ROOT); }
 
 /* ------------------------------------------------------------- sitemap */
@@ -286,6 +287,7 @@ function rocGpStyles(): string {
 }
 
 [$headTop, $bodyToMain, $mainOpen, , $afterMain] = rocTemplate($ROOT, 'blog-post.html');
+if (defined('ROC_GP_AS_LIB')) return;   // Deploy 177: game-i18n.php uses the data and functions, then draws its own page
 
 /* ------------------------------------------- Steam Deck games (Deploy 157) */
 if ($slug === 'steam-deck') {
@@ -833,6 +835,7 @@ $ogLine = implode(' · ', array_filter(['Minimum: ' . ($gpuMin ? (strpos($gpuMin
 $og = rocGpOgCard($ROOT, (string)$g['slug'], $name, $ogLine, $updated);
 if ($og !== '') $ld[1]['primaryImageOfPage'] = ['@type' => 'ImageObject', 'url' => ROC_PUBLIC_URL . $og, 'width' => 1200, 'height' => 630];
 $h = rocGpHead($metaT, $metaD, $url, $ld, rocGpThin($g, $E) ? 'noindex, follow' : 'index, follow, max-image-preview:large', $og, 'Can I run ' . $name . '? System requirements card');
+if (rocI18nOn($ROOT)) $h .= rocI18nAlternates(rocGpPath($g));   // Deploy 177
 
 /* body */
 $row = function ($label, $a, $b) use ($clean, $rec) {
@@ -1050,4 +1053,7 @@ $m .= "<script>(function(){var box=document.querySelector('.gp-check'),res=docum
     . "box.addEventListener('change',function(){try{var g=sl('gpu'),c=sl('cpu');localStorage.setItem(K,JSON.stringify({gpu:g.options[g.selectedIndex].text,cpu:c.options[c.selectedIndex].text,ram:+sl('ram').value,gs:+g.value,cs:+c.value}));note(true)}catch(e){}});"
     . "box.addEventListener('change',function(){run();if(window.rocTrack)rocTrack('roc_quick_check',document.title.split('?')[0].replace('Can I Run ',''),(res.querySelector('b')||{}).textContent||'');});run();})();</script>";
 
+// Deploy 177: this page in other languages.
+if (rocI18nOn($ROOT) && ($ap = strrpos($m, '</article>')) !== false) $m = substr($m, 0, $ap) . '<p class="gp-src">Also in: ' . implode(' · ', array_map(function ($l) use ($g) {
+    return '<a hreflang="' . $l . '" lang="' . $l . '" href="' . rocI18nPath($l, rocGpPath($g)) . '">' . rocH(rocI18n($l)['name']) . '</a>'; }, ROC_I18N_LANGS)) . '</p>' . substr($m, $ap);
 rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $updated);
