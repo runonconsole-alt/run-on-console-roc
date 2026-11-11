@@ -585,7 +585,7 @@ function rocBlogTopicLinks(PDO $pdo, array $plan, array $topic): array {
 function rocBlogCreate(PDO $pdo, string $root, array $in, string $source): array {
     rocBlogSite($pdo, true);
     $t = function ($k, $max) use ($in) { return trim(mb_substr((string)preg_replace('/\s+/u', ' ', strip_tags((string)($in[$k] ?? ''))), 0, $max)); };
-    $title = rocSeoCap($t('title', 220)); $metaT = rocSeoCap($t('meta_title', 255)); $metaD = rocSeoCap($t('meta_description', 500));
+    $title = rocSeoCap($t('title', 220)); $metaT = rocSeoCap($t('meta_title', 255)); $metaD = rocSeoCap(rocSeoLead($t('meta_description', 500)));   // Deploy 179: no "Learn ..." refusals
     $excerpt = rocSeoCap($t('excerpt', 600)); $category = $t('category', 100) ?: 'Guides'; $focus = $t('focus_keyword', 200);
     $alt = $t('image_alt', 300) ?: $title;
     $content = rocBlogCleanLinks(rocCmsSanitizeHtml((string)($in['content_html'] ?? '')), $pdo);

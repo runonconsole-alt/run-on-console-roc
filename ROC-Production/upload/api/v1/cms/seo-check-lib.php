@@ -25,6 +25,18 @@ function rocSeoCap(string $s): string {
     return mb_strtoupper(mb_substr($s, 0, 1)) . mb_substr($s, 1);
 }
 
+/**
+ * Deploy 179: a meta description that opens with "Learn", "Discover", "Read our" ... is mended instead of refused (on
+ * 11 November the blog writer failed all morning on "Learn ..."): "Learn how to pick a mouse" -> "How to pick a mouse",
+ * "Discover the best headsets" -> "The best headsets", "Read our review" -> "Our review".
+ */
+function rocSeoLead(string $s): string {
+    $s = trim($s);
+    $t = (string)preg_replace('/^(?:learn|discover|explore|find out|check out|read)\s+(?:about\s+|more about\s+)?/i', '', $s, 1);
+    if ($t === $s || $t === '') return $s;
+    return rocSeoCap($t);
+}
+
 /** The reasons of a refused post with their fields, so the writer knows what to fix. */
 function rocSeoReasons(array $errors): string {
     $o = [];
