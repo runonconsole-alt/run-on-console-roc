@@ -13,14 +13,16 @@ if (PHP_SAPI !== 'cli') { http_response_code(403); exit; }
 
 $ROOT = dirname(__DIR__, 3);
 $args = array_slice($argv, 1);
-$url = ''; $label = '';
+$url = ''; $label = ''; $move = 0;
 foreach ($args as $a) {
     if (strpos($a, '--url=') === 0) $url = trim(substr($a, 6));
     if (strpos($a, '--label=') === 0) $label = trim(substr($a, 8), " \"'");
+    // Deploy 182: --move-to-column=2 moves a link already in the footer to the end of that column (1 = first).
+    if (strpos($a, '--move-to-column=') === 0) $move = max(1, (int)substr($a, 17));
 }
 if (!preg_match('#^/[a-z0-9/_-]*$#', $url)) exit("Give the page with --url=/path/\n");
 $remove = in_array('--remove', $args, true);
-if (!$remove && $label === '') exit("Give the link text with --label=\"...\"\n");
+if (!$remove && !$move && $label === '') exit("Give the link text with --label=\"...\"\n");
 
 ob_start();
 require_once $ROOT . '/api/v1/config.php';
@@ -37,7 +39,16 @@ if (!$cols) exit("No footer columns found in CMS > Menus & footer.\n");
 
 $has = false;
 foreach ($cols as $c) foreach ((array)($c['links'] ?? []) as $l) if (($l['url'] ?? '') === $url) $has = true;
-if ($remove) {
+if ($move) {
+    if (!$has) exit("The footer has no link to {$url}.\n");
+    if ($move > count($cols)) exit("The footer has " . count($cols) . " columns.\n");
+    $keep = null;   // the link as it is (its text and icon)
+    foreach ($cols as &$c) $c['links'] = array_values(array_filter((array)($c['links'] ?? []), function ($l) use ($url, &$keep) { if (($l['url'] ?? '') === $url) { $keep = $l; return false; } return true; }));
+    unset($c);
+    $cols[$move - 1]['links'][] = $keep;
+    echo '"' . ($keep['label'] ?? $url) . '" goes to the end of "' . ($cols[$move - 1]['title'] ?? 'column ' . $move) . "\"\n";
+    if (!in_array('--apply', $args, true)) exit("Dry run: nothing changed. Run again with --apply.\n");
+} elseif ($remove) {
     if (!$has) exit("The footer has no link to {$url}.\n");
     foreach ($cols as &$c) $c['links'] = array_values(array_filter((array)($c['links'] ?? []), function ($l) use ($url) { return ($l['url'] ?? '') !== $url; }));
     unset($c);
@@ -58,4 +69,4 @@ if ($remove) {
 }
 $nav['footer']['columns'] = $cols;
 $n = rocLayerSave($pdo, $ROOT, 'nav', $nav, null);
-echo ($remove ? 'Removed from' : 'Added to') . " the footer; {$n} page(s) redrawn.\n";
+echo ($move ? 'Moved in' : ($remove ? 'Removed from' : 'Added to')) . " the footer; {$n} page(s) redrawn.\n";

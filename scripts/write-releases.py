@@ -1227,6 +1227,11 @@ RELEASES = [
          checks=[dict(label='Did it run? answers', type='contains', path='api/v1/game-votes-lib.php', text='function rocVotesFor')],
          pr=REPO + '183',
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=182, date='2026-11-11', title='Reviews moves to the Updates and Terms footer column',
+         changes=['cli-footer-link.php --move-to-column=N moves a footer link (with its text and icon) to the end of another column; used to move Reviews under Updates & Terms'],
+         checks=[dict(label='Move a footer link', type='contains', path='api/v1/cron/cli-footer-link.php', text='--move-to-column')],
+         pr=REPO + '184',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-footer-link.php --url=/reviews/ --move-to-column=2 --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
