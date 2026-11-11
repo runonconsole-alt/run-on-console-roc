@@ -22,7 +22,8 @@ function rocPageCacheTry(string $root, ?PDO $pdo, array $extra = []): void {
     foreach ($files as $f) $key[] = (int)@filemtime($root . $f);
     if ($pdo) {
         foreach (["SELECT MAX(updated_at) FROM products", "SELECT CONCAT(COUNT(*), '|', MAX(created_at), '|', MAX(updated_at)) FROM roc_messages WHERE kind = 'fps'",
-                  "SELECT MD5(setting_value) FROM cms_settings WHERE setting_key = 'game_edits'"] as $sql) {
+                  "SELECT MD5(setting_value) FROM cms_settings WHERE setting_key = 'game_edits'",
+                  "SELECT CONCAT(COUNT(*), '|', MAX(updated_at), '|', SUM(hidden)) FROM roc_game_votes"] as $sql) {   // Deploy 181
             try { $key[] = (string)$pdo->query($sql)->fetchColumn(); } catch (\Throwable $e) { $key[] = '-'; }
         }
     }
