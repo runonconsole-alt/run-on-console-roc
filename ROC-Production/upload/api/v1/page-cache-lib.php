@@ -13,7 +13,8 @@ const ROC_PAGE_CACHE_TTL = 3 * 3600;
 
 /** Serves the kept copy and exits, or remembers where rocSendHtml() keeps the new one. */
 function rocPageCacheTry(string $root, ?PDO $pdo, array $extra = []): void {
-    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET' || (string)($_SERVER['QUERY_STRING'] ?? '') !== '' || headers_sent()) return;
+    // Deploy 179: the visitor's own address (the server adds ?slug=... to every game page, which kept them all out).
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET' || (string)parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_QUERY) !== '' || headers_sent()) return;
     $files = ['/roc-steam-games.json', '/roc-steam-deck.json', '/game-render.php', '/game-i18n.php', '/blog-render.php', '/cms-templates/blog-post.html', '/cms-templates/site-layer.json',
               '/api/v1/game-pages-lib.php', '/api/v1/agent-lib.php', '/api/v1/fps-lib.php', '/api/v1/ram-pages-lib.php', '/api/v1/upcoming-lib.php', '/api/v1/gpu-vs-lib.php',
               '/api/v1/i18n-lib.php', '/api/v1/report-lib.php', '/api/v1/mypc-lib.php', '/api/v1/steam-deck-lib.php', '/api/v1/steam-deck-page.php', '/api/v1/link-boost-lib.php'];
@@ -51,7 +52,11 @@ function rocPageCacheSave(string $html, ?int $modified, string $robots): void {
     $dir = dirname($file);
     if (!is_dir($dir)) @mkdir($dir, 0700, true);
     $tmp = $file . '.' . getmypid();
-    if (@file_put_contents($tmp, json_encode(['html' => $html, 'mod' => $modified, 'robots' => $robots], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) !== false) @rename($tmp, $file);
+    // Deploy 179: a page with a broken character in Steam's text could not be kept (json_encode gave nothing); now
+    // such characters are replaced, and an empty result is never written.
+    $json = json_encode(['html' => $html, 'mod' => $modified, 'robots' => $robots], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    if (!is_string($json) || $json === '') return;
+    if (@file_put_contents($tmp, $json) !== false) @rename($tmp, $file);
     // Now and then: copies older than a day go.
     if (random_int(1, 200) === 1) foreach (glob($dir . '/*.json') ?: [] as $f) if (filemtime($f) < time() - 86400) @unlink($f);
 }

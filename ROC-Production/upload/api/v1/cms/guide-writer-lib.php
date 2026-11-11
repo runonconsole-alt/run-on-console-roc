@@ -217,6 +217,7 @@ function rocGuideWrite(PDO $pdo, string $root, ?array $topic = null, ?string $pu
             if (!$w['ok']) return ['ok' => false, 'error' => $w['error']];
             $a = $w['article'];
             foreach (['title', 'meta_title', 'meta_description'] as $capK) if (isset($a[$capK])) $a[$capK] = rocSeoCap((string)$a[$capK]);   // Deploy 164
+            if (isset($a['meta_description'])) $a['meta_description'] = rocSeoLead((string)$a['meta_description']);   // Deploy 179
             $bad = rocSeoCheck(['title' => (string)($a['title'] ?? ''), 'meta_title' => (string)($a['meta_title'] ?? ''), 'meta_description' => (string)($a['meta_description'] ?? ''),
                                 'excerpt' => (string)($a['excerpt'] ?? ''), 'focus_keyword' => $kw]);
             if (!$bad) break;

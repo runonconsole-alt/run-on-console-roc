@@ -1207,6 +1207,13 @@ RELEASES = [
          checks=[dict(label='Page copies', type='contains', path='api/v1/page-cache-lib.php', text='function rocPageCacheTry')],
          pr=REPO + '180',
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=179, date='2026-11-11', title='Game page copies work, and writers mend Learn ... descriptions',
+         changes=['The kept copies of the Can I run it? pages now work for every game page and every language page: the server adds ?slug=... to them, so only /can-i-run/ was kept before',
+                  'A meta description written by the AI that opens with Learn, Discover, Explore, Find out, Check out or Read is mended (Learn how to ... becomes How to ...) instead of refused: on 11 November the blog writer failed all morning on it. Blog posts, guides and news'],
+         checks=[dict(label='Copies for game pages', type='contains', path='api/v1/page-cache-lib.php', text='Deploy 179'),
+                 dict(label='Description mended', type='contains', path='api/v1/cms/seo-check-lib.php', text='function rocSeoLead')],
+         pr=REPO + '181',
+         steps=['Merge PR 180 first. Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'To write today\'s blog post now: php public_html/api/v1/cron/cli-blog-scheduler.php --write', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
