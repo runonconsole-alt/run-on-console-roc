@@ -1220,6 +1220,13 @@ RELEASES = [
          checks=[dict(label='Bottleneck calculator', type='contains', path='api/v1/bottleneck-lib.php', text='function rocGpBottleneck')],
          pr=REPO + '182',
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-footer-link.php --url=/can-i-run/bottleneck-calculator/ --label="Bottleneck Calculator" --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=181, date='2026-11-11', title='Did it run? Players answer on every game page',
+         changes=['After a player checks a PC on a game page, the page asks: Ran well, Ran but slow, or Did not run. The answer is saved with the parts chosen in the check, no name or email; the IP address only as a keyed hash, one answer per game (a new one replaces the old), at most 30 a day',
+                  'A game with 5 or more answers shows them under the check: how many ran well, slow or not at all, and the most common graphics cards. Games not out yet do not ask',
+                  'cli-game-votes.php lists the newest answers and the games with the most, and hides or shows an answer'],
+         checks=[dict(label='Did it run? answers', type='contains', path='api/v1/game-votes-lib.php', text='function rocVotesFor')],
+         pr=REPO + '183',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

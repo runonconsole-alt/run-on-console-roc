@@ -56,6 +56,7 @@ require_once __DIR__ . '/api/v1/ram-pages-lib.php';   // Deploy 172: games for 4
 require_once __DIR__ . '/api/v1/upcoming-lib.php';    // Deploy 174: upcoming games
 require_once __DIR__ . '/api/v1/gpu-vs-lib.php';      // Deploy 176: graphics card comparisons
 require_once __DIR__ . '/api/v1/bottleneck-lib.php';  // Deploy 180: bottleneck calculator
+require_once __DIR__ . '/api/v1/game-votes-lib.php';  // Deploy 181: "Did it run?" answers
 require_once __DIR__ . '/api/v1/i18n-lib.php';        // Deploy 177: the game pages in other languages
 if (!$games) { if ($isMap) { http_response_code(503); exit; } rocNotFound($ROOT); }
 
@@ -276,6 +277,9 @@ function rocGpStyles(): string {
         . ".gp-az{display:flex;flex-wrap:wrap;gap:.3rem}.gp-az a{min-width:2rem;text-align:center;border:1px solid #e2e8f0;border-radius:.6rem;padding:.3rem .45rem;font-weight:800;font-size:.8rem;color:#334155;background:#fff}"
         . ".gp-az a:hover{border-color:#10b981;color:#047857}"
         . ".gp-up{margin-top:.8rem;border:1px solid #a7f3d0;background:#ecfdf5;border-radius:1rem;padding:.9rem 1rem}.gp-up .k{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#047857}"
+        . ".gp-vote{margin-top:.8rem;border:1px dashed #a7f3d0;border-radius:1rem;padding:.8rem 1rem;font-size:.9rem;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}.gp-vote[hidden]{display:none}"
+        . ".gp-vote button{border:1px solid #6ee7b7;background:#fff;color:#065f46;border-radius:.7rem;padding:.4rem .75rem;font-weight:800;font-size:.82rem;cursor:pointer}.gp-vote button:disabled{opacity:.6}.gp-vote-msg{flex-basis:100%}"
+        . ".gp-votes{margin-top:.8rem;font-size:.88rem;color:#334155}html.roc-dark .gp-votes{color:#cbd5e1}html.roc-dark .gp-vote button{background:#0b1220;color:#6ee7b7}"
         . ".gp-up .t{display:block;font-family:Outfit,Inter,sans-serif;font-weight:800;color:#0f172a;margin:.2rem 0 .3rem}.gp-up .w{display:block;font-size:.8rem;color:#475569;margin:0 0 .6rem}html.roc-dark .gp-up .w{color:#94a3b8}.gp-up .b{display:flex;flex-wrap:wrap;gap:.5rem}"
         . ".gp-up a{font-weight:800;font-size:.82rem;padding:.6rem .9rem;border-radius:.75rem;text-decoration:none}.gp-up a.y{background:#059669;color:#fff}.gp-up a.r{border:1px solid #6ee7b7;color:#065f46;background:#fff}"
         . "html.roc-dark .gp-up{background:#052e2b;border-color:#065f46}html.roc-dark .gp-up .t{color:#e2e8f0}html.roc-dark .gp-up a.r{background:#0b1220;color:#6ee7b7}"
@@ -928,6 +932,11 @@ $m .= '<section class="gp-card" id="check"><h2>Check your PC</h2>'
     . '<label>Memory (RAM)<select data-k="ram">' . implode('', array_map(function ($r) { return '<option value="' . $r . '"' . ($r === 16 ? ' selected' : '') . '>' . $r . ' GB</option>'; }, [4, 6, 8, 12, 16, 24, 32, 64])) . '</select></label>'
     . '</div><div class="gp-res" id="gp-res" aria-live="polite"></div>'
     . '<div class="gp-up" id="gp-up" hidden data-up="' . rocH(json_encode((object)$upData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) . '"></div>'
+    // Deploy 181: the players' answers (from ROC_VOTES_MIN), and the question after the player's own check.
+    . rocVotesHtml(rocVotesFor($pdo, $slug))
+    . (empty($g['soon']) ? '<div class="gp-vote" id="gp-vote" hidden data-game="' . rocH($slug) . '"><b>Played ' . rocH($name) . ' on this PC?</b> '
+        . '<button type="button" data-v="ok">Ran well</button><button type="button" data-v="slow">Ran, but slow</button><button type="button" data-v="no">Did not run</button>'
+        . '<span class="gp-vote-msg gp-src" role="status">Your answer helps other players. Only the parts you chose are saved, no name.</span></div>' : '')
     . '<div class="gp-btns"><a class="gp-btn p" rel="nofollow" href="/compatibility/?steam=' . (int)$g['appid'] . '">Full check (laptops, consoles, more parts) &rarr;</a>'
     . '<a class="gp-btn s" href="#requirements">See the requirements</a>'
     . '<button type="button" class="gp-btn s" data-roc-ask="' . rocH('Can my PC run ' . $name . '? My graphics card: , processor: , RAM: ') . '">Ask ROC about my PC</button></div></section>';
@@ -1087,6 +1096,24 @@ $m .= "<script>(function(){var box=document.querySelector('.gp-check'),res=docum
     . "try{var P=JSON.parse(localStorage.getItem(K)||'null');if(P){pk(sl('gpu'),P.gpu,P.gs);pk(sl('cpu'),P.cpu,P.cs);if(P.ram){var ro=[].filter.call(sl('ram').options,function(x){return +x.value===+P.ram})[0];if(ro)sl('ram').value=ro.value}note(true)}}catch(e){}"
     . "box.addEventListener('change',function(){try{var g=sl('gpu'),c=sl('cpu');localStorage.setItem(K,JSON.stringify({gpu:g.options[g.selectedIndex].text,cpu:c.options[c.selectedIndex].text,ram:+sl('ram').value,gs:+g.value,cs:+c.value}));note(true)}catch(e){}});"
     . "box.addEventListener('change',function(){run();if(window.rocTrack)rocTrack('roc_quick_check',document.title.split('?')[0].replace('Can I Run ',''),(res.querySelector('b')||{}).textContent||'');});run();})();</script>";
+$m .= <<<'ROCJS'
+<script>(function(){
+/* Deploy 181: "Did it run on your PC?" after the player's own check (not the default parts on load). */
+var box=document.querySelector('.gp-check'),vb=document.getElementById('gp-vote');if(!box||!vb)return;
+var game=vb.getAttribute('data-game'),K='roc_vote_'+game,done=false;try{done=!!localStorage.getItem(K)}catch(e){}
+function sel(k){var s=box.querySelector('[data-k="'+k+'"]');return s?s.options[s.selectedIndex]:null}
+box.addEventListener('change',function(){if(!done)vb.hidden=false});
+vb.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('button[data-v]');if(!b)return;
+var g=sel('gpu'),c=sel('cpu'),r=sel('ram'),msg=vb.querySelector('.gp-vote-msg');
+[].forEach.call(vb.querySelectorAll('button'),function(x){x.disabled=true});msg.textContent='Saving…';
+fetch('/api/v1/game-vote.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',
+body:JSON.stringify({game:game,vote:b.getAttribute('data-v'),gpu:g?g.text:'',cpu:c?c.text:'',ram:r?parseInt(r.value,10):0})})
+.then(function(x){return x.json().catch(function(){return{}})}).then(function(d){if(d&&d.success){done=true;try{localStorage.setItem(K,b.getAttribute('data-v'))}catch(e){}
+msg.textContent='Thanks! Your answer counts for this game.';if(window.rocTrack)rocTrack('roc_game_vote',game,b.getAttribute('data-v'))}
+else{msg.textContent=(d&&d.error)||'Your answer could not be saved.';[].forEach.call(vb.querySelectorAll('button'),function(x){x.disabled=false})}})
+.catch(function(){msg.textContent='No connection. Please try again.';[].forEach.call(vb.querySelectorAll('button'),function(x){x.disabled=false})});});
+})();</script>
+ROCJS;
 
 // Deploy 177: this page in other languages.
 if (rocI18nOn($ROOT) && ($ap = strrpos($m, '</article>')) !== false) $m = substr($m, 0, $ap) . '<p class="gp-src">Also in: ' . implode(' · ', array_map(function ($l) use ($g) {

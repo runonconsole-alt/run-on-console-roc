@@ -1,0 +1,30 @@
+{
+ "deploy": 181,
+ "date": "2026-11-11",
+ "title": "Did it run? Players answer on every game page",
+ "changes": [
+  "After a player checks a PC on a game page, the page asks: Ran well, Ran but slow, or Did not run. The answer is saved with the parts chosen in the check, no name or email; the IP address only as a keyed hash, one answer per game (a new one replaces the old), at most 30 a day",
+  "A game with 5 or more answers shows them under the check: how many ran well, slow or not at all, and the most common graphics cards. Games not out yet do not ask",
+  "cli-game-votes.php lists the newest answers and the games with the most, and hides or shows an answer"
+ ],
+ "checks": [
+  {
+   "label": "Did it run? answers",
+   "type": "contains",
+   "path": "api/v1/game-votes-lib.php",
+   "text": "function rocVotesFor"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BX_w5pRK.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/183",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, then unzip it and delete the zip.",
+  "CMS Dashboard: Clear cache, then Cloudflare: Purge Everything."
+ ],
+ "build": "index-BX_w5pRK.js"
+}
