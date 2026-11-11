@@ -1214,6 +1214,12 @@ RELEASES = [
                  dict(label='Description mended', type='contains', path='api/v1/cms/seo-check-lib.php', text='function rocSeoLead')],
          pr=REPO + '181',
          steps=['Merge PR 180 first. Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'To write today\'s blog post now: php public_html/api/v1/cron/cli-blog-scheduler.php --write', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=180, date='2026-11-11', title='Bottleneck calculator for games',
+         changes=['New page /can-i-run/bottleneck-calculator/: choose a graphics card, processor and RAM (a saved PC is filled in) and see, across all the PC games on the site and their official Steam requirements, how many games each part keeps below high settings, the verdict (graphics card, processor or balanced), the upgrades still sold new that lift the most games, and popular games held back. No invented bottleneck percentage',
+                  'A table of six common PCs worked out on the server, FAQ, and links from the Can I run it? page, the card navigation and every game page. In the sitemap'],
+         checks=[dict(label='Bottleneck calculator', type='contains', path='api/v1/bottleneck-lib.php', text='function rocGpBottleneck')],
+         pr=REPO + '182',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-footer-link.php --url=/can-i-run/bottleneck-calculator/ --label="Bottleneck Calculator" --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
