@@ -55,6 +55,7 @@ $updated = rocGpUpdated($ROOT);
 require_once __DIR__ . '/api/v1/ram-pages-lib.php';   // Deploy 172: games for 4 / 8 / 16 GB RAM
 require_once __DIR__ . '/api/v1/upcoming-lib.php';    // Deploy 174: upcoming games
 require_once __DIR__ . '/api/v1/gpu-vs-lib.php';      // Deploy 176: graphics card comparisons
+require_once __DIR__ . '/api/v1/bottleneck-lib.php';  // Deploy 180: bottleneck calculator
 require_once __DIR__ . '/api/v1/i18n-lib.php';        // Deploy 177: the game pages in other languages
 if (!$games) { if ($isMap) { http_response_code(503); exit; } rocNotFound($ROOT); }
 
@@ -69,6 +70,7 @@ if ($isMap) {
          . rocSmLine(ROC_PUBLIC_URL . '/can-i-run/my-pc/', $updated, 'Which games can my PC run?')
          . (function () use ($games, $updated) { [$s, $o] = rocGpUpcomingSplit($games); return ($s || $o) ? rocSmLine(ROC_PUBLIC_URL . ROC_GP_UPCOMING, $updated, 'Upcoming PC games') : ''; })()
          . rocSmLine(ROC_PUBLIC_URL . ROC_GP_VS_HUB, $updated, 'GPU comparisons for gaming')
+         . rocSmLine(ROC_PUBLIC_URL . ROC_GP_BOTTLENECK, $updated, 'Bottleneck calculator for games')
          . implode('', array_map(function ($p) use ($updated) { return rocSmLine(ROC_PUBLIC_URL . rocGpVsPath($p), $updated, rocGpCardShort($p[0]) . ' vs ' . rocGpCardShort($p[1])); }, rocGpVsPairs()))
          . implode('', array_map(function ($gb) use ($updated) { return rocSmLine(ROC_PUBLIC_URL . ROC_GP_RAM_PAGES[$gb], $updated, 'Games for ' . $gb . ' GB RAM'); }, array_keys(ROC_GP_RAM_PAGES)))
          . (function () use ($ROOT, $pdo, $games) { require_once $ROOT . '/api/v1/fps-lib.php'; $r = rocFpsAll($pdo, $games);
@@ -162,6 +164,7 @@ function rocGpCardNav(string $here = ''): string {
     if ($here !== ROC_GP_NOGPU) $h .= '<a href="' . ROC_GP_NOGPU . '"><strong>No graphics card</strong><span>Integrated graphics (Intel UHD / Iris Xe)</span></a>';
     if (function_exists('rocGpRamLinks')) $h .= rocGpRamLinks($here);   // Deploy 172
     if (defined('ROC_GP_VS_HUB') && $here !== ROC_GP_VS_HUB) $h .= '<a href="' . ROC_GP_VS_HUB . '"><strong>GPU comparisons</strong><span>Two cards, game by game</span></a>';   // Deploy 176
+    if (defined('ROC_GP_BOTTLENECK') && $here !== ROC_GP_BOTTLENECK) $h .= '<a href="' . ROC_GP_BOTTLENECK . '"><strong>Bottleneck calculator</strong><span>CPU or GPU: what holds games back</span></a>';   // Deploy 180
     foreach (ROC_GP_CARD_PAGES as $main => $same) {
         $p = rocGpCardPath($main);
         if ($p === $here) continue;
@@ -304,6 +307,12 @@ if ($slug === 'my-pc') {
     require_once $ROOT . '/api/v1/mypc-lib.php';
     if (isset($_GET['data'])) rocGpMyPcData($games);
     rocGpMyPc($ROOT, $games, $updated, $headTop, $bodyToMain, $mainOpen, $afterMain);
+    exit;
+}
+
+/* ------------------------------------------ bottleneck calculator (Deploy 180) */
+if ($slug === 'bottleneck-calculator') {
+    rocGpBottleneck($ROOT, $games, $updated, $headTop, $bodyToMain, $mainOpen, $afterMain);
     exit;
 }
 
@@ -566,7 +575,7 @@ if ($slug === '') {
         . '<p>Pick a game to see its official minimum and recommended requirements from Steam, which graphics cards and processors run it, '
         . 'and check your own PC in a few seconds. The full checker also covers consoles, handhelds and phones.</p>'
         . '<div class="gp-btns"><a class="gp-btn p" href="/compatibility/">Open the full checker &rarr;</a><a class="gp-btn s" href="' . ROC_GP_NOGPU . '">Games without a graphics card</a>'
-        . '<a class="gp-btn s" href="/can-i-run/my-pc/">Which games can my PC run?</a><a class="gp-btn s" href="' . ROC_DECK_PAGE . '">Steam Deck games</a><a class="gp-btn s" href="/can-i-run/upcoming/">Upcoming games</a><a class="gp-btn s" href="/can-i-run/fps-reports/">FPS reports</a><a class="gp-btn s" href="/can-i-run/report-2026/">Requirements report ' . date('Y') . '</a></div></div>'
+        . '<a class="gp-btn s" href="/can-i-run/my-pc/">Which games can my PC run?</a><a class="gp-btn s" href="' . ROC_DECK_PAGE . '">Steam Deck games</a><a class="gp-btn s" href="/can-i-run/bottleneck-calculator/">Bottleneck calculator</a><a class="gp-btn s" href="/can-i-run/upcoming/">Upcoming games</a><a class="gp-btn s" href="/can-i-run/fps-reports/">FPS reports</a><a class="gp-btn s" href="/can-i-run/report-2026/">Requirements report ' . date('Y') . '</a></div></div>'
         . '<div class="gp-wall">' . $wall . '<small>Most popular games. Pictures: Steam store, © their publishers.</small></div></header>';
     $m .= '<section class="gp-card"><label for="gp-q" class="sr-only">Search a game</label>'
         . '<input id="gp-q" class="gp-search" type="search" placeholder="Search ' . number_format($n) . ' games, e.g. GTA, Elden Ring, Valorant…" autocomplete="off">'
@@ -1028,6 +1037,7 @@ $more = [['/compatibility/?steam=' . (int)$g['appid'], 'Full PC check', 'Laptops
          ['/can-i-run/report-2026/', 'PC requirements report', 'What ' . number_format(count($games)) . ' games need, year by year'],
          ['/can-i-run/fps-reports/', 'FPS reports', 'Real frame rates players shared, game by game'],
          ['/can-i-run/upcoming/', 'Upcoming PC games', 'Requirements of games not out yet'],
+         ['/can-i-run/bottleneck-calculator/', 'Bottleneck calculator', 'Is your graphics card or processor holding games back?'],
          (function () use ($g) { $mr = (float)($g['req']['min']['ram'] ?? 0); $gb = 16; foreach (array_keys(ROC_GP_RAM_PAGES) as $x) if ($mr > 0 && $mr <= $x) { $gb = $x; break; }
              return [ROC_GP_RAM_PAGES[$gb], 'Games for ' . $gb . ' GB RAM', 'What else runs on ' . $gb . ' GB of memory']; })(),
          ['/category/gpu/', 'Graphics cards', 'Picks for every budget'], ['/category/cpu/', 'Processors', 'Gaming CPUs from entry to high end'],
