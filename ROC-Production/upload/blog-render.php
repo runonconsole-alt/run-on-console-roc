@@ -566,6 +566,8 @@ function rocSendHtml(string $html, ?int $modified = null): void {
     // Same rule as the page's robots meta tag, also as an HTTP header (some SEO tools look for it).
     if (preg_match('#<meta\s+name="robots"\s+content="([^"]+)"#i', $html, $rm)) header('X-Robots-Tag: ' . $rm[1]);
     if ($modified) header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $modified) . ' GMT');
+    // Deploy 178: the game pages keep a copy (api/v1/page-cache-lib.php).
+    if (!empty($GLOBALS['ROC_PAGE_CACHE']) && function_exists('rocPageCacheSave')) rocPageCacheSave($html, $modified, (string)($rm[1] ?? ''));
     echo $html;
     exit;
 }

@@ -1199,6 +1199,14 @@ RELEASES = [
          checks=[dict(label='Language pages', type='contains', path='game-i18n.php', text='rocI18nAlternates')],
          pr=REPO + '179',
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-languages.php --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=178, date='2026-11-11', title='Faster Can I run it? pages and a search that forgives typos',
+         changes=['The Can I run it? pages (games, card, RAM, comparison, upcoming and language pages) keep a drawn copy for up to 3 hours, used only while nothing they show has changed (game list, page code, template, CMS edits, products, FPS reports). CMS > Clear cache empties it',
+                  'The A to Z list on /can-i-run/ is one link per game: the page had 9,000 elements, now about 3,400',
+                  'Searching /can-i-run/ finds names typed a letter or two wrong and offers Did you mean (taken finds TEKKEN), and short names work: gta, cs2, cod',
+                  'The header search everywhere also accepts two wrong letters in a 4+ letter word that starts right'],
+         checks=[dict(label='Page copies', type='contains', path='api/v1/page-cache-lib.php', text='function rocPageCacheTry')],
+         pr=REPO + '180',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

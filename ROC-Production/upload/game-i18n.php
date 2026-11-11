@@ -20,6 +20,7 @@ require_once __DIR__ . '/api/v1/i18n-lib.php';
 
 if (!in_array($lang, ROC_I18N_LANGS, true) || ($want !== '' && !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $want))) rocNotFound($ROOT);
 $T = rocI18n($lang);
+if (!$asMap) rocPageCacheTry($ROOT, $pdo, [$lang]);   // Deploy 178
 $t = function (string $k, ...$a) use ($T) { return rocI18nT($T, $k, ...$a); };
 $headTop = (string)preg_replace('/<html\s+lang="en"/i', '<html lang="' . $lang . '"', $headTop, 1);
 // Numbers the way each language writes them (2.456 / 2 456).
