@@ -333,8 +333,10 @@ window.rocTrack = function (name, label, value) {
         if (alts.some(function (a) { return title.indexOf(a) !== -1; })) { total += 3; continue; }
         if (alts.some(function (a) { return hay.indexOf(a) !== -1; })) { total += 2; continue; }
         if (w.length < 4) return 0;
-        var max = w.length >= 7 ? 2 : 1, hit = false;
+        var hit = false;
         for (var k = 0; k < hayWords.length && !hit; k++) {
+          // Two letters off for long words, and (Deploy 178) for 4+ letter words that start right ("taken" ~ "tekken").
+          var max = w.length >= 7 || (w.length >= 4 && hayWords[k].charAt(0) === w.charAt(0)) ? 2 : 1;
           // Whole word, or its start ("superlite" ~ "superligh|t").
           if (lev(w, hayWords[k], max) <= max || lev(w, hayWords[k].slice(0, w.length), max) <= max) hit = true;
         }

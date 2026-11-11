@@ -45,6 +45,9 @@ if ($pdo) try {
     $st->execute();
     $EDITS = json_decode((string)$st->fetchColumn(), true) ?: [];
 } catch (\Throwable $e) { $EDITS = []; }
+// Deploy 178: a page drawn in the last hours, unchanged since, is sent as it is (api/v1/page-cache-lib.php).
+require_once __DIR__ . '/api/v1/page-cache-lib.php';
+if (!defined('ROC_GP_AS_LIB') && !$isMap) rocPageCacheTry($ROOT, $pdo);
 $GLOBALS['ROC_GP_HIDDEN'] = array_keys(array_filter($EDITS, function ($e) { return !empty($e['hidden']); }));
 
 $games   = rocGpAll($ROOT);
@@ -275,7 +278,7 @@ function rocGpStyles(): string {
         . "html.roc-dark .gp-up{background:#052e2b;border-color:#065f46}html.roc-dark .gp-up .t{color:#e2e8f0}html.roc-dark .gp-up a.r{background:#0b1220;color:#6ee7b7}"
         . ".gp-qa{display:grid;gap:.45rem;margin-top:.6rem;font-size:.92rem;list-style:none;padding:0}.gp-qa li{padding-left:1.1rem;position:relative}.gp-qa li::before{content:\"\";position:absolute;left:0;top:.55em;width:.45rem;height:.45rem;border-radius:99px;background:#10b981}.gp-qa a{color:#047857;font-weight:700;text-decoration:underline}"
         . ".gp-list{columns:1;column-gap:1.5rem}.gp-list li{break-inside:avoid;padding:.22rem 0;font-size:.9rem}.gp-list a{color:#0f172a;font-weight:600}.gp-list a:hover{color:#047857;text-decoration:underline}"
-        . ".gp-list small{color:#94a3b8;font-size:.72rem;margin-left:.3rem}.gp-letter{font-family:Outfit,Inter,sans-serif;font-weight:800;font-size:1.3rem;color:#047857;margin:1.2rem 0 .4rem;scroll-margin-top:90px}"
+        . ".gp-list small{color:#94a3b8;font-size:.72rem;margin-left:.3rem}.gp-azl{line-height:2;font-size:.9rem}.gp-azl a{display:inline-block;margin-right:1.1rem;color:#0f172a;font-weight:600}.gp-azl a:hover{color:#047857;text-decoration:underline}html.roc-dark .gp-azl a{color:#e2e8f0}.gp-letter{font-family:Outfit,Inter,sans-serif;font-weight:800;font-size:1.3rem;color:#047857;margin:1.2rem 0 .4rem;scroll-margin-top:90px}"
         . ".gp-hero.pic{display:grid;gap:1.2rem;align-items:center}.gp-pic{margin:0;border-radius:1rem;overflow:hidden;background:#022c22;box-shadow:0 18px 40px -18px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15)}"
         . ".gp-pic img{display:block;width:100%;height:auto;aspect-ratio:460/215;object-fit:cover}.gp-pic figcaption{font-size:.62rem;color:#a7f3d0;padding:.3rem .6rem;background:rgba(2,44,34,.85)}"
         . ".gp-wall{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}.gp-wall a{display:block;border-radius:.7rem;overflow:hidden;border:1px solid rgba(255,255,255,.15);transition:transform .25s}.gp-wall a:hover{transform:translateY(-3px)}"
@@ -574,16 +577,38 @@ if ($slug === '') {
     $m .= '<section class="gp-card" id="gp-all"><h2>All games A to Z</h2><nav class="gp-az" aria-label="Letters">';
     foreach (array_keys($byLetter) as $l) $m .= '<a href="#l-' . ($l === '#' ? '0' : $l) . '">' . $l . '</a>';
     $m .= '</nav>';
-    foreach ($byLetter as $l => $list) $m .= '<h3 class="gp-letter" id="l-' . ($l === '#' ? '0' : $l) . '">' . $l . '</h3><ul class="gp-list">' . implode('', array_map($item, $list)) . '</ul>';
+    // Deploy 178: one link per game (a list item with its year made 9,000 page elements and a slow page on phones).
+    // The search words: the name, and its initials so "gta", "cs2" and "cod" find Grand Theft Auto, Counter-Strike 2 and Call of Duty.
+    $azWords = function ($name) { $n = trim((string)preg_replace('/[^a-z0-9]+/', ' ', strtolower($name))); $w = explode(' ', $n);
+        if (count($w) < 2) return $n; $ini = implode('', array_map(function ($x) { return $x[0]; }, $w)); return $n . ' ' . $ini . ' ' . substr($ini, 0, 3); };
+    $azItem = function ($g) use ($azWords) { return '<a data-n="' . rocH($azWords($g['name'])) . '" data-r="' . (int)$g['rank'] . '" href="' . rocGpPath($g) . '">' . rocH($g['name']) . '</a> '; };
+    foreach ($byLetter as $l => $list) $m .= '<h3 class="gp-letter" id="l-' . ($l === '#' ? '0' : $l) . '">' . $l . '</h3><p class="gp-azl">' . implode('', array_map($azItem, $list)) . '</p>';
     $m .= '</section>';
     $m .= '<p class="gp-src">Requirements: the official <a href="https://store.steampowered.com/" target="_blank" rel="noopener">Steam store</a> page of each game, updated ' . gmdate('F Y', $updated) . '.</p>';
     $m .= '</div>';
-    $m .= "<script>(function(){var q=document.getElementById('gp-q'),pop=document.getElementById('gp-pop'),none=document.getElementById('gp-none'),"
-        . "all=document.getElementById('gp-all'),items=all.querySelectorAll('li[data-n]'),heads=all.querySelectorAll('.gp-letter,.gp-az');"
-        . "q.addEventListener('input',function(){var v=q.value.trim().toLowerCase(),hit=0;pop.style.display=v?'none':'';"
-        . "for(var i=0;i<items.length;i++){var ok=!v||items[i].getAttribute('data-n').indexOf(v)>-1;items[i].style.display=ok?'':'none';if(ok)hit++;}"
-        . "for(var j=0;j<heads.length;j++)heads[j].style.display=v?'none':'';none.style.display=v&&!hit?'':'none';});"
-        . "var g=new URLSearchParams(location.search).get('q');if(g){q.value=g;q.dispatchEvent(new Event('input'));}})();</script>";
+    $m .= <<<'ROCJS'
+<script>(function(){
+var q=document.getElementById('gp-q'),pop=document.getElementById('gp-pop'),none=document.getElementById('gp-none'),all=document.getElementById('gp-all');
+if(!q||!all)return;
+var items=all.querySelectorAll('a[data-n]'),heads=all.querySelectorAll('.gp-letter,.gp-az'),msg=none.innerHTML;
+function norm(t){return String(t||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
+function lev(a,b,max){if(Math.abs(a.length-b.length)>max)return max+1;var p=[],c,i,j;for(j=0;j<=b.length;j++)p[j]=j;
+for(i=1;i<=a.length;i++){c=[i];for(j=1;j<=b.length;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c;}return p[b.length];}
+/* Deploy 178: a name typed with a letter or two wrong ("taken" for Tekken) still finds the game. */
+function near(v){var ws=v.split(' ').filter(function(w){return w.length>=3}),out=[];if(!ws.length)return out;
+for(var i=0;i<items.length;i++){var hw=items[i].getAttribute('data-n').split(' '),s=0,ok=true;
+for(var k=0;k<ws.length&&ok;k++){var w=ws[k],best=9;for(var h=0;h<hw.length;h++){var x=hw[h],m=(w.length>=7||(w.length>=4&&x.charAt(0)===w.charAt(0)))?2:1;
+var d=Math.min(lev(w,x,m),lev(w,x.slice(0,w.length),m));if(d<=m&&d<best)best=d;}if(best===9)ok=false;else s+=best;}
+if(ok)out.push([s,+items[i].getAttribute('data-r')||9999,i]);}
+out.sort(function(a,b){return a[1]-b[1]});return out.slice(0,8).map(function(x){return items[x[2]]});}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]});}
+q.addEventListener('input',function(){var v=norm(q.value),hit=0;pop.style.display=v?'none':'';
+for(var i=0;i<items.length;i++){var ok=!v||items[i].getAttribute('data-n').indexOf(v)>-1;items[i].style.display=ok?'':'none';if(ok)hit++;}
+for(var j=0;j<heads.length;j++)heads[j].style.display=v?'none':'';
+if(v&&!hit){var n=near(v);none.innerHTML=n.length?'No exact match. Did you mean: '+n.map(function(a){return '<a class="text-emerald-700 font-bold" href="'+a.getAttribute('href')+'">'+esc(a.textContent)+'</a>'}).join(', ')+'?':msg;}
+none.style.display=v&&!hit?'':'none';});
+var g=new URLSearchParams(location.search).get('q');if(g){q.value=g;q.dispatchEvent(new Event('input'));}})();</script>
+ROCJS;
     rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $updated);
 }
 
