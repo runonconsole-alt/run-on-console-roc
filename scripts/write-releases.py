@@ -1227,6 +1227,23 @@ RELEASES = [
          checks=[dict(label='Did it run? answers', type='contains', path='api/v1/game-votes-lib.php', text='function rocVotesFor')],
          pr=REPO + '183',
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=182, date='2026-11-11', title='Reviews moves to the Updates and Terms footer column',
+         changes=['cli-footer-link.php --move-to-column=N moves a footer link (with its text and icon) to the end of another column; used to move Reviews under Updates & Terms'],
+         checks=[dict(label='Move a footer link', type='contains', path='api/v1/cron/cli-footer-link.php', text='--move-to-column')],
+         pr=REPO + '184',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.', 'php public_html/api/v1/cron/cli-footer-link.php --url=/reviews/ --move-to-column=2 --apply', 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=183, date='2026-11-12', title='The hosting disk stays small: page copies compressed and capped, a bigger clean-up',
+         changes=['On 12 November the 1 GB hosting account was full and uploads stopped. The page copies of the game pages (Deploy 178) made a new file for every page each time the game list changed (every 10 minutes while new Steam games are added), uncompressed, kept a day. Now each page has one compressed file, the game list counts by its date, and the folder never grows past 80 MB (oldest first)',
+                  'cli-disk-usage.php --apply also removes the page copies, week-old post copies, game list backups beyond the newest 2, and, when the disk is nearly full, installer backups older than 3 days (the newest of each kind kept)',
+                  'Includes Deploy 182 (move a footer link to another column)'],
+         checks=[dict(label='Page copies capped', type='contains', path='api/v1/page-cache-lib.php', text='ROC_PAGE_CACHE_MAX'),
+                 dict(label='Bigger clean-up', type='contains', path='api/v1/cron/cli-disk-usage.php', text='Deploy 183')],
+         pr=REPO + '184',
+         steps=['First free space: rm -rf /home2/runoncon/roc-cms-cache/pages, then php public_html/api/v1/cron/cli-disk-usage.php --apply',
+                'Upload the zip to /home2/runoncon/, then unzip it and delete the zip.',
+                'php public_html/api/v1/cron/cli-disk-usage.php --apply (again, with the new rules)',
+                'php public_html/api/v1/cron/cli-footer-link.php --url=/reviews/ --move-to-column=2 --apply',
+                'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
