@@ -78,6 +78,20 @@ foreach ($kinds as $k => $list) {
 }
 // 3. Media trash older than 30 days.
 foreach (glob($HOME . '/roc-media-trash/*') ?: [] as $t) if ($now - filemtime($t) > 30 * 86400) $del[] = [$t, 'CMS media trash'];
+// Deploy 183 (the 1 GB account was full on 12 November):
+// 5. Page copies of the game pages (~/roc-cms-cache/pages): all of them; the pages make new ones when visited.
+if (is_dir($HOME . '/roc-cms-cache/pages')) $del[] = [$HOME . '/roc-cms-cache/pages', 'page copies, made again on the next visit'];
+// 6. Old linked-text copies of posts (~/roc-cms-cache/gamelinks) not used for a week.
+foreach (glob($HOME . '/roc-cms-cache/gamelinks/*') ?: [] as $t) if ($now - filemtime($t) > 7 * 86400) $del[] = [$t, 'old post copy'];
+// 7. Game list backups (~/roc-steam-backups): the newest 2 kept.
+$sb = glob($HOME . '/roc-steam-backups/*') ?: [];
+usort($sb, function ($a, $b) { return filemtime($b) <=> filemtime($a); });
+foreach (array_slice($sb, 2) as $b) $del[] = [$b, 'old game list backup'];
+// 8. Installer backups older than 3 days (not 14) when the disk is nearly full: the newest of each kind still kept.
+if (array_sum($top) > 900 * 1048576) foreach ($kinds as $k => $list) {
+    usort($list, function ($a, $b) { return filemtime($b) <=> filemtime($a); });
+    foreach (array_slice($list, 1) as $b) if ($now - filemtime($b) > 3 * 86400 && $now - filemtime($b) <= 14 * 86400) $del[] = [$b, 'installer backup (disk nearly full)'];
+}
 // 4. Big PHP error logs: emptied.
 $logs = array_merge(glob($ROOT . '/error_log') ?: [], glob($ROOT . '/*/error_log') ?: [], glob($ROOT . '/api/v1/*/error_log') ?: [], glob($ROOT . '/api/v1/error_log') ?: [],
                     glob($HOME . '/logs/*.log') ?: [], glob($HOME . '/logs/*error*') ?: []);

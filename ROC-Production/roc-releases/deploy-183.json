@@ -1,0 +1,39 @@
+{
+ "deploy": 183,
+ "date": "2026-11-12",
+ "title": "The hosting disk stays small: page copies compressed and capped, a bigger clean-up",
+ "changes": [
+  "On 12 November the 1 GB hosting account was full and uploads stopped. The page copies of the game pages (Deploy 178) made a new file for every page each time the game list changed (every 10 minutes while new Steam games are added), uncompressed, kept a day. Now each page has one compressed file, the game list counts by its date, and the folder never grows past 80 MB (oldest first)",
+  "cli-disk-usage.php --apply also removes the page copies, week-old post copies, game list backups beyond the newest 2, and, when the disk is nearly full, installer backups older than 3 days (the newest of each kind kept)",
+  "Includes Deploy 182 (move a footer link to another column)"
+ ],
+ "checks": [
+  {
+   "label": "Page copies capped",
+   "type": "contains",
+   "path": "api/v1/page-cache-lib.php",
+   "text": "ROC_PAGE_CACHE_MAX"
+  },
+  {
+   "label": "Bigger clean-up",
+   "type": "contains",
+   "path": "api/v1/cron/cli-disk-usage.php",
+   "text": "Deploy 183"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BX_w5pRK.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/184",
+ "steps": [
+  "First free space: rm -rf /home2/runoncon/roc-cms-cache/pages, then php public_html/api/v1/cron/cli-disk-usage.php --apply",
+  "Upload the zip to /home2/runoncon/, then unzip it and delete the zip.",
+  "php public_html/api/v1/cron/cli-disk-usage.php --apply (again, with the new rules)",
+  "php public_html/api/v1/cron/cli-footer-link.php --url=/reviews/ --move-to-column=2 --apply",
+  "CMS Dashboard: Clear cache, then Cloudflare: Purge Everything."
+ ],
+ "build": "index-BX_w5pRK.js"
+}
