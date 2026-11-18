@@ -1244,6 +1244,17 @@ RELEASES = [
                 'php public_html/api/v1/cron/cli-disk-usage.php --apply (again, with the new rules)',
                 'php public_html/api/v1/cron/cli-footer-link.php --url=/reviews/ --move-to-column=2 --apply',
                 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=184, date='2026-11-18', title='Meet the owner page, and old website files cleaned up',
+         changes=['New page /meet-the-owner/ about Omar Abobakar, from his own website omarabobakar.com: who he is, why he started Run On Console, how the content is made and checked, career, education and certifications, skills, his other projects ROC SEO and ROC Toolz, FAQ and contact links, with ProfilePage and Person schema. In the sitemap',
+                  'The About page has a new Meet the owner box that explains it, with links to the new page and to omarabobakar.com',
+                  'cli-assets-prune.php removes old website files from public_html/assets that no page uses any more (they were about 89 MB): it follows the pages and scripts, keeps anything newer than 7 days, and shows a dry run first'],
+         checks=[dict(label='Meet the owner', type='contains', path='api/v1/owner-lib.php', text='function rocOwnerPage'),
+                 dict(label='Assets clean-up', type='contains', path='api/v1/cron/cli-assets-prune.php', text='Deploy 184')],
+         pr=REPO + '185',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.',
+                'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply',
+                'php public_html/api/v1/cron/cli-assets-prune.php (dry run), then the same with --apply',
+                'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

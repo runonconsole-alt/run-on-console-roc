@@ -71,6 +71,10 @@ if ($isMap) {
         $rv = rocReviewsPublished($pdo);
         $out .= rocSmLine(ROC_PUBLIC_URL . '/reviews/', $rv ? max(array_column($rv, 'date')) : strtotime('2026-11-10 00:00:00 UTC'), 'Reviews of Run On Console');
     }
+    if (is_file($ROOT . '/api/v1/owner-lib.php')) {   // Deploy 184
+        require_once $ROOT . '/api/v1/owner-lib.php';
+        $out .= rocSmLine(ROC_PUBLIC_URL . ROC_OWNER_PATH, (int)strtotime(ROC_OWNER_CHANGED . ' 12:00 UTC'), 'Meet the owner: Omar Abobakar');
+    }
     echo $out . "</urlset>\n";
     exit;
 }
@@ -79,6 +83,13 @@ if ($isMap) {
 if ($slug === 'how-we-check' && $reqCat === '' && is_file($ROOT . '/api/v1/methodology-lib.php')) {
     require_once $ROOT . '/api/v1/methodology-lib.php';
     rocMethodPage($ROOT);
+    exit;
+}
+
+/* ------------------------------------------- meet the owner (Deploy 184) */
+if ($slug === 'meet-the-owner' && $reqCat === '' && is_file($ROOT . '/api/v1/owner-lib.php')) {
+    require_once $ROOT . '/api/v1/owner-lib.php';
+    rocOwnerPage($ROOT);
     exit;
 }
 
