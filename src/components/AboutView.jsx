@@ -202,6 +202,24 @@ export const AboutView = () => {
           </div>
         </div>
 
+        {/* Deploy 184 (owner): the page about the owner, from his own website. */}
+        <div id="meet-the-owner" className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5 sm:p-6 space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+          <h3 className="font-display font-extrabold text-lg text-slate-900">Meet the owner</h3>
+          <p>
+            Run On Console is owned and run by <strong className="text-slate-900">Omar Abobakar</strong>, an AI-driven SEO specialist from Lahore with a Computer Science degree
+            from UMT and more than four years of experience growing search traffic for over 10 US-based brands. He built Run On Console so that the simple question
+            &ldquo;will this game run on my PC?&rdquo; gets a free answer from the official requirements, with nothing to install.
+          </p>
+          <p>
+            His page tells his story: his career, education and certifications, why he started the site, how the articles are made and checked, and his other free
+            projects, ROC SEO and ROC Toolz.
+          </p>
+          <div className="flex flex-wrap gap-3 pt-1">
+            <a href="/meet-the-owner/" className="font-bold text-emerald-700 hover:text-emerald-900">Meet the owner &rarr;</a>
+            <a href="https://omarabobakar.com/" target="_blank" rel="noopener me" className="font-bold text-emerald-700 hover:text-emerald-900">omarabobakar.com</a>
+          </div>
+        </div>
+
         {/* Deploy 158 (owner): Run On Console's own SEO tool. */}
         <div id="roc-seo" className="rounded-2xl border border-indigo-200 bg-indigo-50/60 p-5 sm:p-6 space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
           <span className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-700">Also from Run On Console</span>
