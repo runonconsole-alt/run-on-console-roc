@@ -142,6 +142,12 @@ function rocGuideLog(PDO $pdo): array { $l = rocBlogGet($pdo, 'guide_log', []); 
 
 /** The next topic that is not written yet (by key, or a post with the same title). */
 function rocGuideNext(PDO $pdo): ?array {
+    // Deploy 188 (owner): until 31 December the guides are about GTA 6 (gta6-lib.php), on the normal guide days.
+    if (is_file(dirname(__DIR__) . '/gta6-lib.php')) {
+        require_once dirname(__DIR__) . '/gta6-lib.php';
+        $g = rocGta6NextGuide(array_column(rocGuideLog($pdo), 'key'), array_map('strtolower', $pdo->query('SELECT title FROM blogs')->fetchAll(PDO::FETCH_COLUMN)));
+        if ($g) return $g;
+    }
     if (rocGuideWeekly()) { try { $g = rocGuideFromSearches($pdo); if ($g) return $g; } catch (\Throwable $e) {} }
     $done = array_column(rocGuideLog($pdo), 'key');
     $titles = array_map('strtolower', $pdo->query('SELECT title FROM blogs')->fetchAll(PDO::FETCH_COLUMN));

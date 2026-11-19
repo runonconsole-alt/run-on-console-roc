@@ -14,7 +14,7 @@ if (PHP_SAPI !== 'cli') { http_response_code(403); exit; }
 $ROOT = dirname(__DIR__, 3);
 $args = array_slice($argv, 1);
 $apply = in_array('--apply', $args, true);
-$days = [1, 2, 3, 4, 5, 6, 7];
+$days = [1, 3, 5, 7];   // Deploy 188 (owner): the normal blog days (Mon, Wed, Fri, Sun); --days=1,2,3,4,5,6,7 for every day
 foreach ($args as $a) if (strpos($a, '--days=') === 0) $days = array_values(array_filter(array_map('intval', explode(',', substr($a, 7))), function ($d) { return $d >= 1 && $d <= 7; }));
 
 ob_start();

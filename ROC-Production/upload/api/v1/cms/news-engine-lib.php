@@ -335,6 +335,7 @@ function rocNewsCandidates(PDO $pdo, array $items, ?array $settings = null): arr
                + min(4, $c['sources']) * 2 + ($c['official'] ? 3 : 0) - (int)((time() - $c['ts']) / 21600)
                - (preg_match('/\b(reportedly|allegedly|could|might|may)\b/i', $titles) ? 3 : 0);
         if ($score < 3) continue;                                            // too weak or too old
+        if (preg_match('/\b(gta ?(6|vi)|grand theft auto (6|vi))\b/i', $titles)) $score += 12;   // Deploy 188: GTA 6 stories first (same 2+ sources rule)
         $out[] = $c + ['match' => $m, 'score' => $score];
     }
     usort($out, function ($a, $b) { return $b['score'] <=> $a['score']; });
@@ -344,6 +345,15 @@ function rocNewsCandidates(PDO $pdo, array $items, ?array $settings = null): arr
 /* --------------------------------------------------------------- the writer */
 
 function rocNewsPrompt(array $c): string {
+    // Deploy 188: a GTA 6 story gets the checked fact sheet too.
+    if (preg_match('/\b(gta ?(6|vi)|grand theft auto (6|vi))\b/i', implode(' ', array_column($c['items'], 'title'))) && is_file(dirname(__DIR__) . '/gta6-lib.php')) {
+        require_once dirname(__DIR__) . '/gta6-lib.php';
+        $c2 = $c; unset($c2['gta6']);
+        return rocNewsPromptBase($c2) . "\n\n" . rocGta6Facts() . "\nIn this news story never contradict the fact sheet; the reports above are the news, the sheet is background.";
+    }
+    return rocNewsPromptBase($c);
+}
+function rocNewsPromptBase(array $c): string {
     $m = $c['match'];
     $reports = '';
     foreach (array_slice($c['items'], 0, 6) as $i => $it) {
