@@ -12,13 +12,14 @@
  * the GTA 6 fact sheet, and then puts the normal times back. News: only GTA 6 stories reported by 2+ trusted sources
  * (the usual news rules), with the fact sheet added to the news writer's brief. Run cli-gta6-plan.php --apply first.
  * Guides: --guides=N (default 4) GTA 6 how-to guides, published at once at /guides/, also with the fact sheet.
- * The AI is free (Groq/Gemini), so it waits --pause seconds (default 45) between articles.
+ * The AI is free (Groq: about 8,000 tokens a minute, one article is about that much), so it waits --pause seconds
+ * (default 90) between articles, and when Groq says "rate limit" it waits 70 seconds and tries once more.
  */
 if (PHP_SAPI !== 'cli') { http_response_code(403); exit; }
 $ROOT = dirname(__DIR__, 3);
 $args = array_slice($argv, 1);
 $apply = in_array('--apply', $args, true);
-$nBlogs = 8; $nNews = 3; $nGuides = 4; $pause = 45;
+$nBlogs = 8; $nNews = 3; $nGuides = 4; $pause = 90;
 foreach ($args as $a) {
     if (strpos($a, '--blogs=') === 0) $nBlogs = max(0, min(14, (int)substr($a, 8)));
     if (strpos($a, '--news=') === 0) $nNews = max(0, min(6, (int)substr($a, 7)));
@@ -37,6 +38,7 @@ require_once $ROOT . '/api/v1/gta6-lib.php';
 $pdo = function_exists('getDBConnection') ? getDBConnection() : null;
 if (!$pdo) exit("No database connection.\n");
 $ping = function () use ($pdo) { try { $pdo->query('SELECT 1'); } catch (\Throwable $e) {} };
+$limited = function ($msg) { return (bool)preg_match('/rate limit|too large|tokens per minute|TPM|OTPM/i', (string)$msg); };
 echo "Run On Console - GTA 6 posts today\n\n";
 if (rocAiEnded($pdo)) exit("The AI writing period has ended (" . rocAiLastDay($pdo) . ").\n");
 if (!rocBlogWriters($pdo)) exit("No Groq or Gemini key saved (CMS > Blog writer).\n");
@@ -99,6 +101,12 @@ if ($extra) {
             $next = rocBlogBrief($pdo);
             if (!$next || strpos((string)$next['topic_id'], 'gta6-') !== 0) { echo "No GTA 6 topic left.\n"; break; }
             $r = rocBlogServerTick($pdo, $ROOT, true);
+            if ($r !== null && strpos($r, 'Written:') !== 0 && $limited($r)) {
+                echo "  Groq rate limit: waiting 70s and trying again\n"; sleep(70); $ping();
+                $st = rocBlogGet($pdo, 'blog_engine_state', []);
+                if (is_array($st)) { unset($st['last_try']); rocBlogSet($pdo, 'blog_engine_state', $st); }
+                $r = rocBlogServerTick($pdo, $ROOT, true);
+            }
             echo '  Blog ' . ($i + 1) . ': ' . ($r ?? 'nothing written') . "\n";
             if ($r !== null && strpos($r, 'Written:') === 0) $written++;
         }
@@ -117,7 +125,7 @@ foreach (array_slice($cands, 0, $nNews) as $k => $c) {
     for ($try = 1; $try <= 2; $try++) {
         $model = null;
         $w = rocBlogWriteAny($pdo, $prompt, $model, true);
-        if (!$w['ok']) { $msg = $w['error']; continue; }
+        if (!$w['ok']) { $msg = $w['error']; if ($limited($msg)) { echo "  Groq rate limit: waiting 70s\n"; sleep(70); $ping(); } continue; }
         $r = rocNewsCreate($pdo, $ROOT, $w['article'], $c, 'server (' . $model . ')');
         if ($r['ok']) {
             rocNewsMarkDone($pdo, $c, 'published', $r['id']);
@@ -136,6 +144,7 @@ $gdone = 0;
 foreach ($guides as $k => $g) {
     if ($k || $written || $news) { echo "  (waiting {$pause}s)\n"; sleep($pause); $ping(); }
     $r = rocGuideWrite($pdo, $ROOT, $g);
+    if (!$r['ok'] && $limited($r['error'])) { echo "  Groq rate limit: waiting 70s and trying again\n"; sleep(70); $ping(); $r = rocGuideWrite($pdo, $ROOT, $g); }
     echo '  Guide ' . ($k + 1) . ': ' . ($r['ok'] ? 'published ' . $r['url'] . ' (' . $r['words'] . ' words)' : $r['error']) . "\n";
     if ($r['ok']) $gdone++;
 }
