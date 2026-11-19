@@ -75,6 +75,10 @@ if ($isMap) {
         require_once $ROOT . '/api/v1/owner-lib.php';
         $out .= rocSmLine(ROC_PUBLIC_URL . ROC_OWNER_PATH, (int)strtotime(ROC_OWNER_CHANGED . ' 12:00 UTC'), 'Meet the owner: Omar Abobakar');
     }
+    if (is_file($ROOT . '/api/v1/gta6-lib.php')) {   // Deploy 185
+        require_once $ROOT . '/api/v1/gta6-lib.php';
+        $out .= rocGta6SitemapLines($pdo);
+    }
     echo $out . "</urlset>\n";
     exit;
 }
@@ -84,6 +88,13 @@ if ($slug === 'how-we-check' && $reqCat === '' && is_file($ROOT . '/api/v1/metho
     require_once $ROOT . '/api/v1/methodology-lib.php';
     rocMethodPage($ROOT);
     exit;
+}
+
+/* -------------------------------------------------- GTA 6 hub (Deploy 185) */
+if ($reqCat === '' && strpos($slug, 'gta-6') === 0 && is_file($ROOT . '/api/v1/gta6-lib.php')) {
+    require_once $ROOT . '/api/v1/gta6-lib.php';
+    $g6 = rocGta6LangOf($slug);
+    if ($g6 !== '') { rocGta6Page($ROOT, $pdo, $g6); exit; }
 }
 
 /* ------------------------------------------- meet the owner (Deploy 184) */

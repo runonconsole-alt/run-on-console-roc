@@ -349,6 +349,8 @@ function rocTopicPhrases(PDO $pdo): array {
     $boost = array_flip(array_filter((array)rocLinkBoostSetting($pdo, 'link_boost'), 'is_string'));
     $g = [[], [], [], [], []];
     foreach (ROC_TOPIC_WIDE_WORDS as $path => $words) foreach ($words as $w) $g[4][$w] = $path;
+    // Deploy 185: every "GTA 6" in a post links the GTA 6 hub first.
+    foreach (['grand theft auto vi', 'grand theft auto 6', 'gta 6', 'gta vi'] as $w) $g[0][$w] = '/gta-6/';
     foreach ($byPath as $path => $phrases) foreach ($phrases as $i => $ph) {
         $ph = trim((string)preg_replace('/\s+/', ' ', $ph));
         if (mb_strlen($ph) < 5) continue;
