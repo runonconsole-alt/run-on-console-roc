@@ -90,7 +90,7 @@ export const SidebarWidgets = () => {
       </div>
 
       {/* 3. STAY IN THE GAME NEWSLETTER */}
-      <div className="gradient-hero-bg text-white rounded-3xl p-6 shadow-lg space-y-3">
+      <div className="gradient-hero-bg text-white rounded-3xl p-6 shadow-lg space-y-3 no-pic">
         <div className="flex items-center gap-2">
           <Mail className="w-4 h-4 text-emerald-300" />
           <h3 className="font-display font-extrabold text-xs uppercase tracking-wider text-white">

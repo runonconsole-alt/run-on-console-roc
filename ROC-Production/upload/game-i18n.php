@@ -56,7 +56,7 @@ if ($want === '') {
     $sorted = array_values($games);
     usort($sorted, function ($a, $b) { return strcasecmp($a['name'], $b['name']); });
     $m  = $mainOpen . '<div class="max-w-6xl mx-auto py-6 space-y-6" lang="' . $lang . '">' . rocGpCrumbHtml($crumbs);
-    $m .= '<header class="gp-hero"><div><h1>' . rocH($t('hub_h1', $nf($n))) . '</h1><p>' . rocH($t('hub_p')) . '</p></div></header>';
+    $m .= '<header class="gp-hero" style="--hero-img:url(/images/trending_spiderman.jpg)"><div><h1>' . rocH($t('hub_h1', $nf($n))) . '</h1><p>' . rocH($t('hub_p')) . '</p></div></header>';
     $m .= '<section class="gp-card"><h2>' . rocH($t('pop')) . '</h2><ul class="gp-list">' . implode('', array_map($item, array_slice(array_values($games), 0, 60))) . '</ul></section>';
     $m .= '<section class="gp-card"><h2>' . rocH($t('all')) . '</h2><ul class="gp-list">' . implode('', array_map($item, $sorted)) . '</ul></section>';
     $m .= '<p class="gp-src">' . rocH($t('langs')) . ': ' . $langLinks('/can-i-run/') . '</p></div>';

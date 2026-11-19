@@ -11,6 +11,7 @@ export const Tilt3DCard = ({
   children,
   className = "",
   onClick,
+  style,
 }) => {
   const cardRef = useRef(null);
 
@@ -28,6 +29,7 @@ export const Tilt3DCard = ({
       onMouseMove={handleMouseMove}
       onClick={onClick}
       className={`roc-spot ${className}`}
+      style={style}
     >
       {children}
     </div>

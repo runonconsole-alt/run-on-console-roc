@@ -78,7 +78,7 @@ function rocGpBottleneck(string $root, array $games, int $updated, string $headT
 
     $opt = function (array $refs, string $pick) { $o = ''; foreach ($refs as $nm => $s) $o .= '<option value="' . rocH($nm) . '"' . ($nm === $pick ? ' selected' : '') . '>' . rocH($nm) . '</option>'; return $o; };
     $m  = $mainOpen . '<div class="max-w-5xl mx-auto py-6 space-y-6">' . rocGpCrumbHtml($crumbs);
-    $m .= '<header class="gp-hero"><div><h1>Bottleneck calculator for games</h1>'
+    $m .= '<header class="gp-hero" style="--hero-img:url(/images/battlestation_pc.jpg)"><div><h1>Bottleneck calculator for games</h1>'
         . '<p>Is it your graphics card or your processor? Choose your parts and see, across ' . number_format($n) . ' PC games and their official Steam requirements, how many games each part keeps below high settings, '
         . 'and which single upgrade lifts the most games. No invented bottleneck percentage: just the games.</p></div></header>';
     $m .= '<section class="gp-card"><h2>Your PC</h2><div class="gp-check" style="margin-top:.6rem" id="bn-box">'

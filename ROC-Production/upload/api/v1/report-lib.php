@@ -144,7 +144,7 @@ function rocGpReport(string $root, array $games, int $updated, string $headTop, 
         . 'html.roc-dark .rp-t th{background:#0b1220;color:#cbd5e1}html.roc-dark .rp-t td,html.roc-dark .rp-t th{border-color:#1e293b}html.roc-dark .rp-cite{background:#0b1220;color:#cbd5e1;border-color:#334155}</style>';
 
     $m  = $mainOpen . '<article class="max-w-4xl mx-auto py-6 space-y-6">' . rocGpCrumbHtml($crumbs);
-    $m .= '<header class="gp-hero"><div><h1>PC Game Requirements Report ' . $yr . '</h1>'
+    $m .= '<header class="gp-hero" style="--hero-img:url(/images/trending_elden.jpg)"><div><h1>PC Game Requirements Report ' . $yr . '</h1>'
         . '<p>What ' . number_format($n) . ' PC games need, from their official Steam requirements, worked out with the same rules as our <a href="/compatibility/" style="color:inherit;text-decoration:underline">checker</a>. '
         . 'By <a href="' . ROC_OWNER_URL . '" style="color:inherit;text-decoration:underline">' . ROC_OWNER . '</a>, Founder of Run On Console. Updated ' . gmdate('j F Y', $updated) . '; the numbers update themselves when games are added.</p></div></header>';
     $m .= '<section class="gp-card"><h2>Key findings</h2><ul class="rp-find">' . implode('', array_map(function ($f) { return '<li>' . rocH($f) . '</li>'; }, $find)) . '</ul></section>';

@@ -356,7 +356,7 @@ export const ProductsView = () => {
   return (
     <div className="space-y-10 py-6 animate-page-in">
 
-      <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">
+      <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30" style={{ '--hero-img': 'url(/images/gaming_monitor.jpg)' }}>
         <CyberMatrixHoloBackground />
         <div className="absolute -top-20 -left-20 w-80 h-80 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl pointer-events-none"></div>

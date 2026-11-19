@@ -49,7 +49,7 @@ export const SuggestionsView = () => {
 
   return (
     <div className="space-y-10 py-6 max-w-5xl mx-auto animate-page-in">
-      <div className="gradient-hero-bg text-white rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden text-center max-w-3xl mx-auto border border-emerald-500/30">
+      <div className="gradient-hero-bg text-white rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden text-center max-w-3xl mx-auto border border-emerald-500/30" style={{ '--hero-img': 'url(/images/cyber_keyboard.jpg)' }}>
         <CyberMatrixHoloBackground />
         <div className="relative z-10 space-y-3">
           <span className="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5">

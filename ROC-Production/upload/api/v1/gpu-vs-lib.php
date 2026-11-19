@@ -100,7 +100,7 @@ function rocGpVsPage(string $root, ?PDO $pdo, array $games, array $pair, int $up
 
     $tag = function (string $t) use ($label) { return '<span class="gp-tag ' . ($t === 'high' ? 'w' : '') . '" style="color:inherit">' . $label[$t] . '</span>'; };
     $m  = $mainOpen . '<div class="max-w-5xl mx-auto py-6 space-y-6">' . rocGpCrumbHtml($crumbs);
-    $m .= '<header class="gp-hero"><div><h1>' . rocH($a) . ' vs ' . rocH($b) . ': which runs more games?</h1>'
+    $m .= '<header class="gp-hero" style="--hero-img:url(/images/gaming_monitor.jpg)"><div><h1>' . rocH($a) . ' vs ' . rocH($b) . ': which runs more games?</h1>'
         . '<p>Out of ' . number_format($n) . ' PC games, the ' . rocH($a) . ' runs ' . number_format($cnt['A']['high']) . ' on high settings and the ' . rocH($b) . ' ' . number_format($cnt['B']['high']) . '. '
         . 'Every game is checked against its official minimum and recommended graphics card on Steam, with the same rule as our checker. This compares what each card can run, not FPS.</p>'
         . '<div class="gp-btns"><a class="gp-btn p" href="/can-i-run/my-pc/">Which games can my PC run? &rarr;</a><a class="gp-btn s" href="' . ROC_GP_VS_HUB . '">All GPU comparisons</a></div></div></header>';
@@ -154,7 +154,7 @@ function rocGpVsHub(string $root, array $games, int $updated, string $headTop, s
         }, array_slice($pairs, 0, 50), array_keys(array_slice($pairs, 0, 50)))]]];
     $h = rocGpHead($title, $desc, $url, $ld, 'index, follow, max-image-preview:large', '', 'GPU comparisons on Run On Console');
     $m  = $mainOpen . '<div class="max-w-6xl mx-auto py-6 space-y-6">' . rocGpCrumbHtml($crumbs);
-    $m .= '<header class="gp-hero"><div><h1>GPU comparisons for gaming</h1><p>Thinking of an upgrade? Each page compares two graphics cards by the PC games they run on high, medium and low settings, '
+    $m .= '<header class="gp-hero" style="--hero-img:url(/images/gaming_monitor.jpg)"><div><h1>GPU comparisons for gaming</h1><p>Thinking of an upgrade? Each page compares two graphics cards by the PC games they run on high, medium and low settings, '
         . 'checked against the official Steam requirements of ' . number_format(count($games)) . ' games. Each card is compared with the next three faster cards.</p>'
         . '<div class="gp-btns"><a class="gp-btn p" href="/can-i-run/my-pc/">Which games can my PC run? &rarr;</a><a class="gp-btn s" href="/category/gpu/">Graphics cards we cover</a></div></div></header>';
     $by = [];

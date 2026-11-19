@@ -29,7 +29,7 @@ export const HeroSection = () => {
   };
 
   return (
-    <section className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">
+    <section className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30 no-pic">
       
 
       {/* Ambient Soft Glow Orbs */}

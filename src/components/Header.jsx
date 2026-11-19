@@ -149,7 +149,7 @@ export const Header = () => {
             {/* 5 Pillar Crawlable Navigation Anchors */}
             {/* Main menu (CMS > Menus & footer). The server draws the same markup from the
                 CMS menu (rocNavHeader in api/v1/cms/site-layer-lib.php): keep them in step. */}
-            <nav data-roc-region="header-nav" className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 flex-1 justify-center min-w-0 px-1">
+            <nav data-roc-region="header-nav" className="hidden xl:flex items-center gap-0.5 xl:gap-1.5 flex-1 justify-center min-w-0 px-1">
               {siteNav.header.map((item, i) => {
                 const active = navIsActive(item.url, currentPath);
                 const last = i === siteNav.header.length - 1;
@@ -204,13 +204,13 @@ export const Header = () => {
                 data-roc-search=""
                 role="search"
                 action="/products/"
-                className="relative hidden md:flex items-center w-48 lg:w-24 2xl:w-44 shrink-0 bg-slate-100/90 border border-slate-200 rounded-xl focus-within:border-emerald-500 focus-within:bg-white transition-all shadow-inner"
+                className="relative hidden md:flex items-center w-48 xl:w-24 2xl:w-44 shrink-0 bg-slate-100/90 border border-slate-200 rounded-xl focus-within:border-emerald-500 focus-within:bg-white transition-all shadow-inner"
               >
                 <select
                   name="in"
                   aria-label="Search in"
                   defaultValue="products"
-                  className="lg:hidden bg-transparent border-0 border-r border-slate-200 text-[11px] font-bold text-slate-700 pl-2 pr-1 py-1.5 rounded-l-xl focus:outline-none cursor-pointer"
+                  className="xl:hidden bg-transparent border-0 border-r border-slate-200 text-[11px] font-bold text-slate-700 pl-2 pr-1 py-1.5 rounded-l-xl focus:outline-none cursor-pointer"
                 >
                   <option value="products">Products</option>
                   <option value="blogs">Blogs</option>
@@ -337,7 +337,7 @@ export const Header = () => {
                 aria-label="Toggle mobile navigation menu"
                 aria-expanded={mobileMenuOpen}
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
+                className="xl:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -349,7 +349,7 @@ export const Header = () => {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-xl animate-page-in max-h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="xl:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-xl animate-page-in max-h-[calc(100vh-4rem)] overflow-y-auto">
             {/* Search (the header search bar is hidden below md) */}
             <form data-roc-search="" role="search" action="/products/" className="relative md:hidden flex gap-1.5">
               <select name="in" aria-label="Search in" defaultValue="products" className="bg-slate-100 border border-slate-200 rounded-xl px-2 text-xs font-bold text-slate-700">

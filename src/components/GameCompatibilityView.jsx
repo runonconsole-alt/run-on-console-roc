@@ -307,7 +307,7 @@ export const GameCompatibilityView = () => {
     <div className="space-y-12 py-6 animate-page-in">
 
       {/* 1. Game Compatibility Hero Banner with BouncyText */}
-      <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">
+      <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30" style={{ '--hero-img': 'url(/images/trending_spiderman.jpg)' }}>
         <CyberMatrixHoloBackground />
 
         <div className="absolute -top-20 -left-20 w-80 h-80 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>

@@ -899,7 +899,7 @@ function rocRenderCategoryHub(string $root, PDO $pdo, array $categories): void {
     $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
 
     $m  = $mainOpen . '<div class="space-y-10 py-6 animate-page-in">';
-    $m .= '<div class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
+    $m .= '<div style="--hero-img:url(/images/gaming_monitor.jpg)" class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
         . '<div class="absolute -top-20 -left-20 w-80 h-80 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>'
         . '<div class="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl pointer-events-none"></div>'
         . '<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10"><div class="lg:col-span-7 space-y-4">'
@@ -1051,7 +1051,7 @@ function rocRenderProductList(string $root, PDO $pdo, array $categories, ?array 
 
     /* ---------------- body */
     $m  = $mainOpen . '<div class="space-y-10 py-6 animate-page-in">';
-    $m .= '<div class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
+    $m .= '<div style="--hero-img:url(/images/gaming_monitor.jpg)" class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
         . '<div class="absolute -top-20 -left-20 w-80 h-80 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>'
         . '<div class="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl pointer-events-none"></div>'
         . '<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10"><div class="lg:col-span-7 space-y-4">'
@@ -1240,7 +1240,7 @@ function rocRenderCompare(string $root, PDO $pdo, array $categories, string $slu
             . '<img src="' . rocH($img) . '" alt="' . rocH(rocImageAlt($p, (string)$p['title'], $categories)) . '" width="160" height="160" fetchpriority="high" class="w-full h-full object-contain p-2"/></a>';
     };
     // The same hero as Home, About and the product pages (soft light glows, Deploy 89).
-    $m .= '<div class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
+    $m .= '<div style="--hero-img:url(/images/gaming_monitor.jpg)" class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
         . '<div class="absolute -top-20 -left-20 w-80 h-80 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>'
         . '<div class="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl pointer-events-none"></div>'
         . '<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10"><div class="lg:col-span-7">'
@@ -1326,7 +1326,7 @@ function rocRenderCompareList(string $root, PDO $pdo, array $categories): void {
             . '<img width="120" height="120" src="' . rocH($ib) . '" alt="' . rocH((string)$b['title']) . '" class="h-20 w-[42%] object-contain group-hover:scale-105 transition-transform"/></div>'
             . '<div class="text-[11px] font-display font-bold text-white line-clamp-2 leading-snug">' . rocH($a['title'] . ' vs ' . $b['title']) . '</div></a>';
     }
-    $m .= '<div class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
+    $m .= '<div style="--hero-img:url(/images/gaming_monitor.jpg)" class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
         . '<div class="absolute -top-20 -left-20 w-80 h-80 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>'
         . '<div class="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl pointer-events-none"></div>'
         . '<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10"><div class="lg:col-span-7 space-y-4">'

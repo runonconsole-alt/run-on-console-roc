@@ -281,7 +281,7 @@ export const BlogsView = () => {
     <div className="space-y-12 py-6 animate-page-in">
 
       {/* Visually Rich Blogs Catalog Header Banner with BouncyText */}
-      <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">
+      <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30" style={{ '--hero-img': 'url(/images/trending_esports.jpg)' }}>
 
         <CyberMatrixHoloBackground />
 

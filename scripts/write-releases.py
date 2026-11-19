@@ -1278,6 +1278,16 @@ RELEASES = [
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.',
                 'php public_html/api/v1/cron/cli-gta6-now.php (dry run), then the same with --apply (takes about 15 minutes)',
                 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=187, date='2026-11-19', title='Pictures in every banner, the games A-Z as a table, contact page and header fixes',
+         changes=['Every green banner on the site has a picture now (right side, behind a green fade), each page with its own: guides, gaming platforms, products, blogs, the game checker, bottleneck calculator, FPS reports, GPU comparisons, Steam Deck, contact, about and more. Terms and Privacy stay plain; phones get no picture so pages stay fast',
+                  'The A-Z list of all games on /can-i-run/ is a neat table now instead of a long run of names',
+                  'Contact page: only contact@runonconsole.com is shown, and the form and the details box are the same height',
+                  'Header: the full menu shows from 1280 px wide; below that (or when zoomed in) the menu button is used, so the menu no longer runs into the search box'],
+         checks=[dict(label='A-Z table', type='contains', path='game-render.php', text='grid-template-columns:repeat(auto-fill,minmax(200px,1fr))')],
+         pr=REPO + '188',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.',
+                'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply',
+                'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

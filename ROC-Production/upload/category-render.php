@@ -285,7 +285,7 @@ function rocRenderHub(string $root, PDO $pdo, array $c, array $cats): void {
         . '<a href="/gaming-platforms/" class="bg-white border border-slate-300 hover:border-emerald-600 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition-colors shadow-sm no-underline"><span aria-hidden="true">&larr;</span><span>Back to All ' . count($cats) . ' Platforms</span></a>'
         . '<nav aria-label="Breadcrumb" class="text-xs text-slate-500 font-semibold hidden sm:flex items-center gap-1.5"><a href="/gaming-platforms/" class="text-slate-500 no-underline">Platform Directory</a><span>/</span><span class="text-emerald-700 font-extrabold">' . rocH($title) . '</span></nav></div>';
 
-    $m .= '<div class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
+    $m .= '<div style="--hero-img:url(/images/pro_controller.jpg)" class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
         . '<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10"><div class="lg:col-span-7 space-y-4">'
         . '<div class="flex flex-wrap items-center gap-2"><span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3.5 py-1.5 rounded-full tracking-wider inline-flex items-center gap-1.5 badge-glow">DEDICATED PLATFORM HUB</span>'
         . '<span class="bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 text-xs font-bold px-3 py-1 rounded-full">Era: ' . rocH($era) . '</span></div>'
@@ -388,7 +388,7 @@ function rocRenderPlatformList(string $root, PDO $pdo, array $cats): void {
     $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
 
     $m  = $mainOpen . '<div class="space-y-12 py-6 animate-page-in">';
-    $m .= '<div class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
+    $m .= '<div style="--hero-img:url(/images/handheld_console.jpg)" class="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">'
         . '<div class="absolute -top-20 -left-20 w-80 h-80 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>'
         . '<div class="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl pointer-events-none"></div>'
         . '<div class="relative z-10 space-y-4 max-w-3xl">'

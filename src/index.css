@@ -46,6 +46,27 @@
   background: linear-gradient(135deg, #059669 0%, #10B981 55%, #0D9488 100%);
 }
 
+/* Deploy 187 (owner): a picture in every green banner (React pages and the PHP pages, which load this file), on the
+   right behind a green fade so the text stays readable. A page picks its picture with style="--hero-img:url(...)";
+   .no-pic keeps a banner plain (Terms, Privacy, the sidebar box, the home slider). Phones get no picture (speed). */
+@media (min-width: 640px) {
+  .gradient-hero-bg:not(.no-pic),
+  .gp-hero:not(.pic):not(.no-pic) {
+    background-image:
+      linear-gradient(90deg, #059669 0%, rgba(16, 185, 129, 0.97) 40%, rgba(13, 148, 136, 0.62) 72%, rgba(13, 148, 136, 0.3) 100%),
+      var(--hero-img, url(/images/battlestation_pc.jpg));
+    background-size: 100% 100%, cover;
+    background-position: center, right center;
+    background-repeat: no-repeat;
+  }
+  .gradient-hero-bg.text-center:not(.no-pic) {
+    background-image:
+      linear-gradient(135deg, rgba(5, 150, 105, 0.9) 0%, rgba(16, 185, 129, 0.82) 55%, rgba(13, 148, 136, 0.85) 100%),
+      var(--hero-img, url(/images/battlestation_pc.jpg));
+    background-position: center, center;
+  }
+}
+
 .footer-emerald-gradient {
   background: linear-gradient(180deg, #064E3B 0%, #047857 60%, #059669 100%);
 }

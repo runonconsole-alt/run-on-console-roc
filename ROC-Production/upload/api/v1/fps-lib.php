@@ -132,7 +132,7 @@ function rocFpsPage(string $root, ?PDO $pdo, array $games, int $updated, string 
     $h = rocGpHead($title, $desc, $url, $ld, $reps ? 'index, follow, max-image-preview:large' : 'noindex, follow', '', 'FPS reports from real players on Run On Console');
 
     $m = $mainOpen . '<div class="max-w-6xl mx-auto py-6 space-y-6">' . rocGpCrumbHtml($crumbs);
-    $m .= '<header class="gp-hero"><div><h1>FPS reports from real players</h1>'
+    $m .= '<header class="gp-hero" style="--hero-img:url(/images/trending_forza.jpg)"><div><h1>FPS reports from real players</h1>'
         . '<p>How PC games really run on the parts players own: the graphics card, processor, RAM, resolution and settings of every report, with the average FPS they saw. '
         . 'Find a PC like yours, then check the game&rsquo;s official requirements.</p>'
         . ($reps ? '<p class="gp-src"><b>' . count($reps) . '</b> report' . (count($reps) === 1 ? '' : 's') . ' · <b>' . $nGames . '</b> game' . ($nGames === 1 ? '' : 's')

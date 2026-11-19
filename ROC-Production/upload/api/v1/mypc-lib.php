@@ -57,7 +57,7 @@ function rocGpMyPc(string $root, array $games, int $updated, string $headTop, st
 
     $opt = function (array $refs, string $pick) { $o = ''; foreach ($refs as $nm => $s) $o .= '<option value="' . rocH($nm) . '"' . ($nm === $pick ? ' selected' : '') . '>' . rocH($nm) . '</option>'; return $o; };
     $m  = $mainOpen . '<div class="max-w-5xl mx-auto py-6 space-y-6">' . rocGpCrumbHtml($crumbs);
-    $m .= '<header class="gp-hero"><div><h1>Which games can my PC run?</h1>'
+    $m .= '<header class="gp-hero" style="--hero-img:url(/images/battlestation_pc.jpg)"><div><h1>Which games can my PC run?</h1>'
         . '<p>Set your PC once and see all ' . number_format($n) . ' PC games at once: which run on high, medium or low settings, which do not, and which upgrade opens the most games. '
         . 'Same rules as every game page, from the official Steam requirements. Your PC stays in this browser.</p></div></header>';
     $m .= '<section class="gp-card" id="check"><h2>Your PC</h2>'

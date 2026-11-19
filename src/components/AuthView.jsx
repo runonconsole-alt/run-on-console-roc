@@ -484,7 +484,7 @@ export const AuthView = () => {
     <div className="py-8 max-w-xl mx-auto space-y-8 animate-page-in">
 
       {/* Cyber Matrix Hero Card */}
-      <Tilt3DCard className="gradient-hero-bg text-white rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden border border-emerald-500/30">
+      <Tilt3DCard className="gradient-hero-bg text-white rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden border border-emerald-500/30" style={{ '--hero-img': 'url(/images/pro_controller.jpg)' }}>
         <CyberMatrixHoloBackground />
 
         <div className="relative z-10 text-center space-y-3">
