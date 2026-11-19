@@ -1269,6 +1269,14 @@ RELEASES = [
                 'php public_html/api/v1/cron/cli-footer-link.php --url=/gta-6/ --label="GTA 6" --apply',
                 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.',
                 'Search Console: request indexing for /gta-6/ and /gta-6-urdu/.']),
+    dict(deploy=186, date='2026-11-19', title='GTA 6 launch day: 10+ GTA 6 posts today',
+         changes=['cli-gta6-now.php writes GTA 6 posts right away for today: it adds extra blog times for today only (45 minutes apart), writes the next GTA 6 plan topics into them with the checked fact sheet, then puts the normal 12:00 and 18:00 times back',
+                  'It also publishes GTA 6 news stories that 2+ trusted sources report, with the GTA 6 fact sheet in the news brief'],
+         checks=[dict(label='GTA 6 today', type='contains', path='api/v1/cron/cli-gta6-now.php', text='Deploy 186')],
+         pr=REPO + '187',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.',
+                'php public_html/api/v1/cron/cli-gta6-now.php (dry run), then the same with --apply (takes about 15 minutes)',
+                'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
