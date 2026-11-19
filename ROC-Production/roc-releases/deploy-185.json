@@ -1,0 +1,41 @@
+{
+ "deploy": 185,
+ "date": "2026-11-19",
+ "title": "GTA 6 hub in 7 languages, and GTA 6 posts every day until the end of November",
+ "changes": [
+  "New page /gta-6/ with the GTA 6 release time in every country (worked out from each time zone), why it unlocks first in New Zealand, platforms, price, 212 GB size, length, map, where to buy, why there is no PC version yet, a timeline, FAQ, sources, and a list of every GTA 6 post on the site",
+  "The same page in Urdu, German, Spanish, Portuguese, French and Russian (/gta-6-urdu/, /gta-6-de/, /gta-6-es/, /gta-6-pt/, /gta-6-fr/, /gta-6-ru/), linked with hreflang and in the sitemap",
+  "The blog writer gets a checked GTA 6 fact sheet for GTA 6 posts, so it never invents a PC date, PC requirements, FPS or prices, and links the GTA 6 hub in every one",
+  "Every \"GTA 6\" in a post now links the GTA 6 hub",
+  "cli-gta6-plan.php puts 24 GTA 6 topics first in the blog plan and turns on blog posts every day, at 12:00 and 18:00 Pakistan time, until the AI stops on 30 November"
+ ],
+ "checks": [
+  {
+   "label": "GTA 6 hub",
+   "type": "contains",
+   "path": "api/v1/gta6-lib.php",
+   "text": "function rocGta6Page"
+  },
+  {
+   "label": "GTA 6 plan",
+   "type": "contains",
+   "path": "api/v1/cron/cli-gta6-plan.php",
+   "text": "Deploy 185"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-CKyfRqqU.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/186",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, then unzip it and delete the zip.",
+  "php public_html/api/v1/cron/cli-gta6-plan.php (dry run), then the same with --apply",
+  "php public_html/api/v1/cron/cli-footer-link.php --url=/gta-6/ --label=\"GTA 6\" --apply",
+  "CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.",
+  "Search Console: request indexing for /gta-6/ and /gta-6-urdu/."
+ ],
+ "build": "index-CKyfRqqU.js"
+}

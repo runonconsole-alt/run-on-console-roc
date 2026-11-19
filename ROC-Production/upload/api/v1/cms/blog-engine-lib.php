@@ -657,7 +657,8 @@ function rocBlogCreate(PDO $pdo, string $root, array $in, string $source): array
 function rocBlogCleanLinks(string $html, PDO $pdo): string {
     $S = rocBlogSite($pdo);
     $ok = ['/' => 1, '/products/' => 1, '/blogs/' => 1, '/news/' => 1, '/guides/' => 1, '/can-i-run/' => 1, '/compatibility/' => 1, '/gaming-platforms/' => 1, '/about/' => 1, '/contact/' => 1,
-           '/category/' => 1, '/category/pc-hardware/' => 1, '/category/gaming-hardware/' => 1];
+           '/category/' => 1, '/category/pc-hardware/' => 1, '/category/gaming-hardware/' => 1,
+           '/gta-6/' => 1, '/can-i-run/red-dead-redemption-2/' => 1, '/can-i-run/grand-theft-auto-v-enhanced/' => 1, '/can-i-run/bottleneck-calculator/' => 1, '/can-i-run/upcoming/' => 1];   // Deploy 185
     foreach ($S['cats'] as $c) $ok[$c['url']] = 1;
     foreach ($S['products'] as $p) $ok[$p['url']] = 1;
     foreach ($S['platforms'] as $p) $ok[$p['url']] = 1;
@@ -1195,9 +1196,17 @@ function rocBlogBrief(PDO $pdo, ?array $topic = null): ?array {
     // What people really searched on Google before landing on ROC (Search Console, gsc-lib.php).
     $searches = [];
     try { require_once __DIR__ . '/gsc-lib.php'; $searches = rocGscForTopic($pdo, $topic); } catch (\Throwable $e) {}
+    $links = rocBlogTopicLinks($pdo, $plan, $topic);
+    // Deploy 185: GTA 6 topics get the checked fact sheet and the GTA 6 hub as their first link.
+    $facts = '';
+    if (strpos((string)$topic['id'], 'gta6-') === 0 && is_file(dirname(__DIR__) . '/gta6-lib.php')) {
+        require_once dirname(__DIR__) . '/gta6-lib.php';
+        $facts = rocGta6Facts();
+        array_unshift($links['must'], ['url' => '/gta-6/', 'text' => 'GTA 6 release date, price and PC status', 'why' => 'the GTA 6 hub: link it in the first two paragraphs']);
+    }
     return ['topic_id' => $topic['id'], 'stage' => $topic['stage'], 'cluster' => $pillarName, 'title_idea' => $topic['title'],
             'focus_keyword' => $kw['focus'], 'secondary_keywords' => array_slice($secondary, 0, 8), 'keyword_source' => $kw['source'], 'intent' => $intent,
-            'links' => rocBlogTopicLinks($pdo, $plan, $topic), 'avoid_titles' => $recent, 'searches' => $searches,
+            'links' => $links, 'avoid_titles' => $recent, 'searches' => $searches, 'facts' => $facts,
             'categories' => ['Buying Guides', 'Can I Run It', 'How To', 'Platforms', 'Comparisons']];
 }
 
@@ -1210,6 +1219,7 @@ function rocBlogPrompt(array $brief, string $publishAt): string {
         . "TITLE IDEA: {$brief['title_idea']} (you may improve it; keep the focus keyword)\n"
         . "FOCUS KEYWORD: {$brief['focus_keyword']}\n"
         . ($brief['secondary_keywords'] ? 'SECONDARY KEYWORDS (use naturally): ' . implode(', ', $brief['secondary_keywords']) . "\n" : '')
+        . (!empty($brief['facts']) ? "\n" . $brief['facts'] . "\n\n" : '')
         . (!empty($brief['searches']) ? 'REAL GOOGLE SEARCHES that brought readers to ROC (Search Console). Answer the ones that fit this post, for example as an <h2> or an FAQ question, in honest helpful words; skip any that do not fit the topic: ' . implode(' | ', $brief['searches']) . "\n" : '')
         . "\nINTERNAL LINKS YOU MUST USE (each once). Anchor text = the searched keyword of the page it points to: for a product its full name plus its type (\"Razer Viper V4 Pro gaming mouse\"), for a hub page its \"best ...\" phrase (\"best gaming mice\"), for a post its main keyword. Never \"click here\" or \"this page\":\n" . $links($brief['links']['must'])
         . "\n\nINTERNAL LINKS YOU MAY USE (3-6 of them, so the post has 5-10 internal links in all):\n" . $links($brief['links']['may'])
