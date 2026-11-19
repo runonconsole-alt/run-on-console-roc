@@ -36,7 +36,7 @@ function rocGpDeckPage(string $root, array $games, int $updated, string $headTop
 
     $item = function ($g) { return '<li data-n="' . rocH(strtolower($g['name'])) . '"><a href="' . rocGpPath($g) . '#steam-deck">' . rocH($g['name']) . '</a><small>' . (int)$g['y'] . '</small></li>'; };
     $m  = $mainOpen . '<div class="max-w-6xl mx-auto py-6 space-y-6">' . rocGpCrumbHtml($crumbs);
-    $m .= '<header class="gp-hero"><div><h1>Steam Deck games: what runs on Steam Deck</h1>'
+    $m .= '<header class="gp-hero" style="--hero-img:url(/images/handheld_console.jpg)"><div><h1>Steam Deck games: what runs on Steam Deck</h1>'
         . '<p>Valve\'s Steam Deck rating for ' . number_format($rated) . ' of the ' . number_format($n) . ' PC games on Run On Console: <b>' . number_format(count($by[3])) . ' Verified</b>, <b>'
         . number_format(count($by[2])) . ' Playable</b> and ' . number_format(count($by[1])) . ' Unsupported' . ($rated < $n ? ' (the rest are being checked)' : '') . '. '
         . 'Open a game to see the tests behind its rating and its full PC requirements.</p>'

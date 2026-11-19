@@ -120,7 +120,7 @@ export const WriteForUsView = () => {
     <div className="space-y-12 py-6 max-w-5xl mx-auto animate-page-in">
       
       {/* Hero Header with Cyber Matrix Background */}
-      <div className="gradient-hero-bg text-white rounded-3xl p-8 sm:p-12 shadow-2xl text-center relative overflow-hidden border border-emerald-500/30">
+      <div className="gradient-hero-bg text-white rounded-3xl p-8 sm:p-12 shadow-2xl text-center relative overflow-hidden border border-emerald-500/30" style={{ '--hero-img': 'url(/images/gaming_laptop.jpg)' }}>
         <CyberMatrixHoloBackground />
 
         <div className="relative z-10 space-y-3">

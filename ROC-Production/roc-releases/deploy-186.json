@@ -1,10 +1,11 @@
 {
  "deploy": 186,
  "date": "2026-11-19",
- "title": "GTA 6 launch day: 10+ GTA 6 posts today",
+ "title": "GTA 6 launch day: 10+ GTA 6 blogs, news and guides today",
  "changes": [
   "cli-gta6-now.php writes GTA 6 posts right away for today: it adds extra blog times for today only (45 minutes apart), writes the next GTA 6 plan topics into them with the checked fact sheet, then puts the normal 12:00 and 18:00 times back",
-  "It also publishes GTA 6 news stories that 2+ trusted sources report, with the GTA 6 fact sheet in the news brief"
+  "It also publishes GTA 6 news stories that 2+ trusted sources report, with the GTA 6 fact sheet in the news brief",
+  "And 4 GTA 6 how-to guides (download and install, free up 212 GB, TV or monitor setup, headset and sound), published at once with the fact sheet; the guide writer takes extra rules for a topic"
  ],
  "checks": [
   {

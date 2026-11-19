@@ -16,7 +16,7 @@ export const TermsAndConditionsView = () => {
   return (
     <div className="space-y-10 py-6 max-w-4xl mx-auto text-slate-800">
 
-      <div className="gradient-hero-bg text-white rounded-3xl p-8 sm:p-12 shadow-xl text-center">
+      <div className="gradient-hero-bg text-white rounded-3xl p-8 sm:p-12 shadow-xl text-center no-pic">
         <span className="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3 py-1 rounded-md tracking-wider inline-flex items-center gap-1.5">
           <FileText className="w-3.5 h-3.5" /> Terms of use
         </span>

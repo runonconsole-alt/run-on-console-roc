@@ -115,7 +115,7 @@ export const CategoriesView = () => {
         </div>
 
         {/* Dedicated Category Hub Hero Banner with BouncyText */}
-        <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">
+        <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30" style={{ '--hero-img': 'url(/images/handheld_console.jpg)' }}>
           <CyberMatrixHoloBackground />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
@@ -345,7 +345,7 @@ export const CategoriesView = () => {
     <div className="space-y-12 py-6 animate-page-in">
 
       {/* Visual Rich Categories Hero Banner with Live Cyber Matrix Wave Background & BouncyText */}
-      <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">
+      <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30" style={{ '--hero-img': 'url(/images/pro_controller.jpg)' }}>
 
         {/* Live Cyber Wave & Laser Matrix Background Effect */}
         <CyberMatrixHoloBackground />

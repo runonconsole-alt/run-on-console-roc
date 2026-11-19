@@ -47,7 +47,7 @@ export const AboutView = () => {
     <div className="space-y-12 py-6 max-w-5xl mx-auto animate-page-in">
 
       {/* Visually Rich About Hero Banner with BouncyText */}
-      <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30">
+      <div className="gradient-hero-bg text-white rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden border border-emerald-500/30" style={{ '--hero-img': 'url(/images/battlestation_pc.jpg)' }}>
 
         <CyberMatrixHoloBackground />
 

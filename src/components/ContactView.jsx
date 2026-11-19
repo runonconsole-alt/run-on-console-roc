@@ -11,10 +11,10 @@ import { FAQSection } from './FAQSection';
 
 const CONTACT_FAQS = [
   { q: 'How quickly does Run On Console reply?', a: 'We read every message and usually reply within 1-2 working days by email. You get a copy of your message with a reference number as soon as you send it, so you can quote it if you write again.' },
-  { q: 'Which email should I use?', a: 'Use contact@runonconsole.com for questions, corrections, review samples and partnerships, and support@runonconsole.com for help with your account, signing in or a problem on the site. Ideas for the site go to suggestions@runonconsole.com (or the suggestions page).' },
+  { q: 'Which email should I use?', a: 'Write to contact@runonconsole.com for everything: questions, corrections, help with your account or the site, ideas, review samples and partnerships. Ideas can also go on the suggestions page.' },
   { q: 'Can you tell me if my PC can run a game?', a: 'Yes, and faster than by email: the free Can I run it checker at /compatibility/ compares your graphics card, processor and RAM with the official requirements of 2,400+ games, and ROC, our AI assistant (the chat button), can check it with you in English or Roman Urdu.' },
   { q: 'Do you sell products or handle orders?', a: 'No. Run On Console recommends gear and links to Amazon, where you see the current price and stock and place the order. For an order, a delivery or a return, contact the store you bought from.' },
-  { q: 'I found a mistake on a page. What should I do?', a: 'Send it with the form above and choose Website Feedback / Bug Report, or write to support@runonconsole.com with the page address. We check every report and correct the page.' },
+  { q: 'I found a mistake on a page. What should I do?', a: 'Send it with the form above and choose Website Feedback / Bug Report, or write to contact@runonconsole.com with the page address. We check every report and correct the page.' },
 ];
 
 
@@ -51,7 +51,7 @@ export const ContactView = () => {
     <div className="space-y-12 py-6 max-w-5xl mx-auto animate-page-in">
       
       {/* Contact Hero Banner with BouncyText & Cyber Matrix Background */}
-      <div className="gradient-hero-bg text-white rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden text-center max-w-3xl mx-auto border border-emerald-500/30">
+      <div className="gradient-hero-bg text-white rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden text-center max-w-3xl mx-auto border border-emerald-500/30" style={{ '--hero-img': 'url(/images/tactical_headset.jpg)' }}>
         <CyberMatrixHoloBackground />
 
         <div className="relative z-10 space-y-3">
@@ -67,10 +67,10 @@ export const ContactView = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Left Form Box WITH PARTY POPPER SUBMISSION SUCCESS */}
-        <div className="lg:col-span-7">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:items-stretch">
+
+        {/* Left Form Box WITH PARTY POPPER SUBMISSION SUCCESS (Deploy 187: same height as the right column) */}
+        <div className="lg:col-span-7 flex flex-col [&>*]:flex-1">
           {submitted ? (
             <SubmissionSuccessCard 
               formType={/support|bug/i.test(subject) ? 'support' : 'contact'}
@@ -168,9 +168,9 @@ export const ContactView = () => {
         </div>
 
         {/* Right Info Cards: SPACIOUS & DE-CONGESTED WITH GENEROUS GAPS */}
-        <div className="lg:col-span-5 space-y-6">
-          
-          <Tilt3DCard className="bg-white border-2 border-emerald-500/20 rounded-3xl p-7 sm:p-8 shadow-sm space-y-5">
+        <div className="lg:col-span-5 flex flex-col gap-6">
+
+          <Tilt3DCard className="bg-white border-2 border-emerald-500/20 rounded-3xl p-7 sm:p-8 shadow-sm space-y-5 flex-1">
             <h2 className="font-display font-extrabold text-lg sm:text-xl text-emerald-950 border-b border-emerald-100 pb-3">
               <BouncyText text="Contact Details" />
             </h2>
@@ -185,29 +185,18 @@ export const ContactView = () => {
                   <a href={'mailto:' + CONTACT.email} className="text-xs sm:text-sm text-emerald-700 font-extrabold hover:underline block mt-0.5 truncate">
                     {CONTACT.email}
                   </a>
-                  <span className="text-[10px] text-slate-500 block mt-0.5">Questions, reviews and partnerships · reply within 2 working days</span>
+                  <span className="text-[10px] text-slate-500 block mt-0.5">Questions, help, reviews and partnerships · reply within 2 working days</span>
                 </div>
               </div>
-              <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/60 flex items-start gap-4 transition-all hover:bg-emerald-100/60 shadow-xs">
-                <div className="p-3 rounded-xl bg-emerald-800 text-emerald-300 shrink-0 shadow-sm">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div className="min-w-0">
-                  <div className="font-bold text-xs text-emerald-950 uppercase tracking-wider">Help &amp; Support</div>
-                  <a href="mailto:support@runonconsole.com" className="text-xs sm:text-sm text-emerald-700 font-extrabold hover:underline block mt-0.5 truncate">
-                    support@runonconsole.com
-                  </a>
-                  <span className="text-[10px] text-slate-500 block mt-0.5">Account, sign-in or a problem on the site</span>
-                </div>
-              </div>
+              {/* Deploy 187 (owner): one email on the contact page. */}
               <a href="/suggestions/" className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/60 flex items-start gap-4 transition-all hover:bg-emerald-100/60 shadow-xs no-underline">
                 <div className="p-3 rounded-xl bg-emerald-800 text-emerald-300 shrink-0 shadow-sm">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
                   <div className="font-bold text-xs text-emerald-950 uppercase tracking-wider">Ideas &amp; suggestions</div>
-                  <span className="text-xs sm:text-sm text-emerald-700 font-extrabold hover:underline block mt-0.5">suggestions@runonconsole.com</span>
-                  <span className="text-[10px] text-slate-500 block mt-0.5">Design, ROC, content: tell us on the suggestions page</span>
+                  <span className="text-xs sm:text-sm text-emerald-700 font-extrabold hover:underline block mt-0.5">Suggestions page</span>
+                  <span className="text-[10px] text-slate-500 block mt-0.5">Design, ROC, content: tell us what to add or change</span>
                 </div>
               </a>
               <a href={CONTACT.tel} className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/60 flex items-start gap-4 transition-all hover:bg-emerald-100/60 shadow-xs no-underline">

@@ -1196,7 +1196,7 @@ function rocRenderGuides(string $root, PDO $pdo, int $page, string $type): void 
     $h .= "    <script src=\"/roc-nav.js\" defer></script>\n  ";
 
     $m = $mainOpen . '<div class="space-y-8 py-6">'
-        . '<div class="gradient-hero-bg text-white rounded-3xl p-8 sm:p-12 shadow-xl"><span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3 py-1 rounded-md tracking-wider">Guides</span>'
+        . '<div style="--hero-img:url(/images/gaming_cables_accessories.jpg)" class="gradient-hero-bg text-white rounded-3xl p-8 sm:p-12 shadow-xl"><span class="bg-emerald-400 text-slate-950 text-xs font-extrabold uppercase px-3 py-1 rounded-md tracking-wider">Guides</span>'
         . '<h1 class="font-display font-extrabold text-3xl sm:text-5xl text-white my-3">' . rocH($typeName !== '' ? $typeName . ' guides' : 'Gaming guides') . '</h1>'
         . '<p class="text-emerald-100 text-sm sm:text-base max-w-2xl">How to choose and buy gear, set up your PC, console and accessories, and get the best settings in your games, step by step.</p></div>';
     if ($types) {

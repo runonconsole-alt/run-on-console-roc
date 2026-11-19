@@ -182,6 +182,7 @@ function rocGuideWrite(PDO $pdo, string $root, ?array $topic = null, ?string $pu
     if (!$topic) return ['ok' => false, 'error' => 'All planned guide topics are written.'];
     if (!rocBlogWriters($pdo)) return ['ok' => false, 'error' => 'No AI key saved (CMS > Updates writer > Blog).'];
     [$key, $idea, $type, $group, $cat, $kw] = $topic;
+    $extra = (string)($topic[6] ?? '');   // Deploy 186: extra facts and rules (the GTA 6 fact sheet)
     $S = rocBlogSite($pdo, true);
     $hub = $S['cats'][$cat] ?? null;
     $links = [];
@@ -206,7 +207,8 @@ function rocGuideWrite(PDO $pdo, string $root, ?array $topic = null, ?string $pu
         . "- Meta title at most 60 characters; meta description 120-155 characters; the focus keyword once in the title, in natural words.\n\n"
         . "Answer with ONLY a JSON object: {\"title\": \"40-70 characters with the focus keyword\", \"meta_title\": \"max 60 characters\", "
         . "\"meta_description\": \"120-155 characters\", \"excerpt\": \"1-2 sentences\", \"content_html\": \"the guide HTML\", \"image_alt\": \"short description of the cover\", "
-        . "\"image_prompt\": \"one sentence: a realistic photo for this guide, the gear or the setup, no text, no logos, no faces\", \"tags\": [\"4 to 6 short search words\"]}";
+        . "\"image_prompt\": \"one sentence: a realistic photo for this guide, the gear or the setup, no text, no logos, no faces\", \"tags\": [\"4 to 6 short search words\"]}"
+        . ($extra !== '' ? "\n\n" . $extra : '');
     // Deploy 127: the title and description check (seo-check-lib.php); a guide that fails goes back to the AI once.
     $used = null;
     // Deploy 171: a guide under 900 words goes back to the AI once, asking for the full length (on 10 November the
