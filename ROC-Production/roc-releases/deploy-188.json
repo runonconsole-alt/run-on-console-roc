@@ -1,0 +1,39 @@
+{
+ "deploy": 188,
+ "date": "2026-11-19",
+ "title": "GTA 6 topics until 31 December on the normal schedule, with blogs, news and guides linked together",
+ "changes": [
+  "The AI keeps writing until 31 December (was 30 November), on the normal weekly schedule: blog posts Monday, Wednesday, Friday and Sunday, guides Tuesday, Friday and Saturday, both at 12:00 and 18:00, and news every day",
+  "57 GTA 6 blog topics (33 new: comparisons, buying, storage, TVs, regions, PC readiness, Rockstar history) go first in the blog plan; cli-gta6-plan.php adds them and puts the normal blog days back",
+  "30 GTA 6 guides go first on the guide days (storage, HDR, 120 Hz, audio, controllers, Remote Play, recording, streaming, parental controls and more), each with the GTA 6 fact sheet",
+  "GTA 6 news stories go first when 2+ trusted sources report them, and the news writer gets the GTA 6 fact sheet",
+  "Every GTA 6 blog post, news story and guide ends with a More on GTA 6 box: the GTA 6 hub and the latest GTA 6 news, guides and posts; the writer also links 2-3 of them inside the text, and the GTA 6 hub lists every one with its right address"
+ ],
+ "checks": [
+  {
+   "label": "GTA 6 box",
+   "type": "contains",
+   "path": "api/v1/gta6-lib.php",
+   "text": "function rocGta6Box"
+  },
+  {
+   "label": "AI until 31 Dec",
+   "type": "contains",
+   "path": "api/v1/cms/blog-engine-lib.php",
+   "text": "ROC_AI_LAST_DAY = '2026-12-31'"
+  },
+  {
+   "label": "Page templates refreshed (cli-refresh-templates.php)",
+   "type": "contains",
+   "path": "cms-templates/product-page.html",
+   "text": "index-BNiRJyh3.js"
+  }
+ ],
+ "pr": "https://github.com/runonconsole-alt/run-on-console-roc/pull/189",
+ "steps": [
+  "Upload the zip to /home2/runoncon/, then unzip it and delete the zip.",
+  "php public_html/api/v1/cron/cli-gta6-plan.php (dry run), then the same with --apply",
+  "CMS Dashboard: Clear cache, then Cloudflare: Purge Everything."
+ ],
+ "build": "index-BNiRJyh3.js"
+}

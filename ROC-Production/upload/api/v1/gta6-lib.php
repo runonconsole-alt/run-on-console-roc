@@ -74,6 +74,40 @@ function rocGta6Topics(): array {
         ['cat-monitors', 'mofu', 'Gaming monitor or TV for GTA 6 on PS5 and Xbox: what to look for', 'best monitor for gta 6', ['4k monitor for ps5', 'gaming tv vs monitor']],
         ['cat-gpu', 'mofu', 'Getting your PC ready for a future GTA 6 PC release: GPU basics', 'pc for gta 6', ['graphics card for gta 6', 'upgrade pc for gta']],
         ['games', 'tofu', 'Red Dead Redemption 2 and GTA V on PC: can your PC run Rockstar\'s games?', 'can i run red dead redemption 2', ['gta v enhanced requirements', 'rockstar pc games']],
+        // Deploy 188 (owner, 19 November): GTA 6 topics until 31 December, on the normal blog days.
+        ['games', 'mofu', 'GTA 6 vs Red Dead Redemption 2: how Rockstar\'s two biggest worlds compare', 'gta 6 vs rdr2', ['rockstar open world', 'red dead redemption 2']],
+        ['games', 'tofu', 'Every GTA game in order: release dates from 1997 to GTA 6', 'gta games in order', ['gta release dates', 'gta series timeline']],
+        ['games', 'tofu', 'The history of Vice City: from GTA Vice City (2002) to GTA 6', 'vice city history', ['gta vice city', 'gta 6 vice city']],
+        ['games', 'mofu', 'GTA 6 Standard or Ultimate Edition: which one should you buy?', 'gta 6 standard vs ultimate', ['gta 6 which edition', 'gta 6 ultimate edition worth it']],
+        ['games', 'mofu', 'PS5 or Xbox Series X for GTA 6: which console should you buy?', 'ps5 or xbox for gta 6', ['best console for gta 6', 'ps5 vs xbox series x']],
+        ['games', 'tofu', 'Xbox Series S and GTA 6: what to know before you buy', 'gta 6 xbox series s', ['xbox series s gta 6', 'cheapest console for gta 6']],
+        ['games', 'tofu', 'How long does it take to download GTA 6? Internet speed and 212 GB explained', 'gta 6 download time', ['internet speed for gta 6', 'gta 6 212 gb']],
+        ['games', 'tofu', 'Adding storage to your PS5 for GTA 6: M.2 SSD basics', 'ps5 ssd for gta 6', ['ps5 storage upgrade', 'ps5 m.2 ssd']],
+        ['games', 'tofu', 'Xbox Series X|S storage for GTA 6: expansion cards and USB drives', 'xbox storage for gta 6', ['xbox expansion card', 'xbox external storage']],
+        ['games', 'tofu', 'Why GTA 6 is not on PC at launch: Rockstar\'s console-first history', 'why gta 6 not on pc', ['gta 6 pc delay', 'rockstar pc ports']],
+        ['games', 'tofu', 'GTA 6 PC release date: what history says, and what it does not', 'gta 6 pc release date', ['when is gta 6 coming to pc', 'gta 6 pc 2027']],
+        ['cat-gpu', 'mofu', 'What a strong gaming PC looks like in 2026, while GTA 6 is console only', 'gaming pc for gta 6', ['best pc for open world games', 'gta 6 pc build']],
+        ['cat-cpu', 'mofu', 'Best CPUs for big open-world games while you wait for GTA 6 on PC', 'best cpu for open world games', ['cpu for gta 6', 'gaming cpu 2026']],
+        ['cat-ram', 'tofu', 'How much RAM do big open-world games need? Rockstar games as the guide', 'ram for open world games', ['ram for gta 6', '16gb vs 32gb gaming']],
+        ['games', 'tofu', 'Rockstar games on PC ranked by how demanding they are', 'rockstar pc games requirements', ['gta v requirements', 'rdr2 requirements']],
+        ['games', 'tofu', 'GTA 5 Enhanced on PC: is it worth playing while you wait for GTA 6?', 'gta 5 enhanced worth it', ['gta v enhanced pc', 'gta 5 before gta 6']],
+        ['games', 'tofu', 'Open-world games with the biggest maps you can play on PC', 'biggest open world games pc', ['largest game maps', 'open world pc games']],
+        ['games', 'mofu', 'Mafia, Saints Row, Watch Dogs or Sleeping Dogs: GTA-style series on PC compared', 'games like gta comparison', ['gta alternatives pc', 'mafia vs saints row']],
+        ['games', 'tofu', 'GTA 6 vs GTA 4: how Rockstar\'s open worlds have changed', 'gta 6 vs gta 4', ['gta 4 vs gta 5', 'gta evolution']],
+        ['games', 'tofu', 'GTA 6 in India: release time, platforms and how to buy', 'gta 6 india', ['gta 6 release time india', 'gta 6 price india']],
+        ['games', 'tofu', 'GTA 6 in the UAE and the Gulf: release time and where to buy', 'gta 6 uae', ['gta 6 dubai', 'gta 6 release time uae']],
+        ['games', 'tofu', 'GTA 6 in Australia: launch time, platforms and where to buy', 'gta 6 australia', ['gta 6 release time australia', 'gta 6 australia price']],
+        ['games', 'tofu', 'GTA 6 file size compared with the biggest console games', 'gta 6 file size comparison', ['biggest game file sizes', 'largest ps5 games']],
+        ['cat-monitors', 'mofu', 'Is a 4K TV worth it for GTA 6 on PS5 and Xbox?', '4k tv for gta 6', ['4k vs 1440p console', 'tv for ps5']],
+        ['cat-monitors', 'tofu', 'HDR, 120 Hz and VRR explained for GTA 6 players on console', 'hdr 120hz vrr explained', ['tv settings for ps5', 'vrr gaming']],
+        ['cat-audio', 'mofu', 'Wireless or wired headset for GTA 6 on PS5 and Xbox?', 'wireless vs wired headset ps5', ['headset for gta 6', 'console headset']],
+        ['cat-chairs', 'bofu', 'Best gaming chairs for long GTA 6 sessions', 'gaming chair for long sessions', ['best gaming chair', 'comfortable gaming chair']],
+        ['cat-laptops', 'mofu', 'Gaming laptop or console for GTA 6: which makes sense right now?', 'gaming laptop or console for gta 6', ['laptop vs ps5', 'gta 6 laptop']],
+        ['cat-handhelds', 'tofu', 'Playing GTA 6 away from the TV: PlayStation Portal, Remote Play and cloud', 'play gta 6 remotely', ['playstation portal gta 6', 'ps5 remote play']],
+        ['games', 'tofu', 'How to stream GTA 6 from PS5 or Xbox to Twitch and YouTube', 'stream gta 6', ['stream ps5 to twitch', 'gta 6 streaming']],
+        ['cat-mice', 'bofu', 'Best gaming mice and keyboards for Rockstar games on PC', 'best mouse for rockstar games', ['gaming mouse for gta', 'keyboard for gta']],
+        ['cat-gpu', 'mofu', 'Upgrading from a GTX 1060: graphics cards ready for the next big open-world games', 'gtx 1060 upgrade', ['gpu upgrade 2026', 'graphics card for gta 6']],
+        ['games', 'tofu', 'Games to play after GTA 6: open-world picks on PC and console', 'games to play after gta 6', ['games like gta 6', 'open world games 2026']],
     ];
 }
 
@@ -327,9 +361,15 @@ function rocGta6Rows(): array {
 function rocGta6Posts(?PDO $pdo, int $limit = 30): array {
     if (!$pdo) return [];
     try {
-        $st = $pdo->prepare("SELECT title, slug, published_at FROM blogs WHERE status = 'published' AND published_at <= ? AND (LOWER(title) LIKE '%gta 6%' OR LOWER(title) LIKE '%gta vi%' OR LOWER(title) LIKE '%grand theft auto vi%' OR LOWER(title) LIKE '%gta6%') ORDER BY published_at DESC LIMIT " . (int)$limit);
+        $st = $pdo->prepare("SELECT title, slug, published_at, category FROM blogs WHERE status = 'published' AND published_at <= ? AND (LOWER(title) LIKE '%gta 6%' OR LOWER(title) LIKE '%gta vi%' OR LOWER(title) LIKE '%grand theft auto vi%' OR LOWER(title) LIKE '%gta6%') ORDER BY published_at DESC LIMIT " . (int)$limit);
         $st->execute([gmdate('Y-m-d H:i:s')]);
-        return $st->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $out = [];
+        foreach ($st->fetchAll(PDO::FETCH_ASSOC) ?: [] as $b) {
+            $c = trim((string)$b['category']);
+            $news = strcasecmp($c, 'News') === 0; $guide = (bool)preg_match('/^guides?\s*(:.*)?$/i', $c);
+            $out[] = $b + ['url' => ($news ? '/news/' : ($guide ? '/guides/' : '/blogs/')) . $b['slug'] . '/', 'kind' => $news ? 'News' : ($guide ? 'Guide' : 'Blog')];
+        }
+        return $out;
     } catch (\Throwable $e) { return []; }
 }
 
@@ -430,7 +470,7 @@ function rocGta6Page(string $root, ?PDO $pdo, string $lang): void {
     $m .= '<section class="g6-card"><h2>' . rocH($L['posts_h']) . '</h2>';
     if ($posts) {
         $m .= '<ul class="g6-posts" dir="ltr" lang="en">';
-        foreach ($posts as $b) $m .= '<li><a href="/blogs/' . rocH($b['slug']) . '/">' . rocH($b['title']) . '</a></li>';
+        foreach ($posts as $b) $m .= '<li><a href="' . rocH($b['url']) . '">' . rocH($b['title']) . '</a> <small class="text-slate-500">' . rocH($b['kind']) . '</small></li>';
         $m .= '</ul>';
     } else $m .= $p(rocH($L['posts_none']));
     $m .= '<p style="margin-top:.6rem"><a class="text-emerald-700 font-bold" href="/news/">' . rocH($lk[9]) . ' &rarr;</a></p></section>';
@@ -449,4 +489,70 @@ function rocGta6Page(string $root, ?PDO $pdo, string $lang): void {
     $m .= implode(' · ', $ls) . '</nav>';
     $m .= '</article>';
     rocSendHtml($headTop . $h . $bodyToMain . $m . $afterMain, $mod);
+}
+
+/* ------------------------------------------------------------- Deploy 188 */
+
+/** True when a title or keyword is about GTA 6. */
+function rocGta6Is(string $text): bool { return (bool)preg_match('/\b(gta ?(6|vi)|grand theft auto (6|vi))\b/i', $text); }
+
+/**
+ * GTA 6 guides for the guide writer (Tuesday, Friday and Saturday, 12:00 and 18:00) until 31 December:
+ * [key, title idea, type, hardware group, product category, focus keyword, extra rules]. Console, TV and audio
+ * steps that are true for every game, so the AI never has to invent GTA 6 menus.
+ */
+function rocGta6Guides(): array {
+    $x = ROC_GTA6_FACTS . "\nGUIDE RULES: link /gta-6/ once in the first two paragraphs (anchor \"GTA 6 release date, price and PC status\"). Explain only console, TV, network and audio steps that are true for every game; never invent GTA 6 menus, graphics modes or settings names.";
+    $g = [
+        ['gta6-guide-ps5-ssd', 'How to add an M.2 SSD to your PS5 for GTA 6 and other big games', 'Setup', 'gaming-hardware', 'handhelds', 'ps5 m.2 ssd install'],
+        ['gta6-guide-xbox-storage', 'How to add storage to Xbox Series X|S for GTA 6', 'Setup', 'gaming-hardware', 'handhelds', 'xbox series x storage expansion'],
+        ['gta6-guide-download-faster', 'How to download GTA 6 faster on PS5 and Xbox', 'How to use', 'gaming-hardware', 'handhelds', 'download gta 6 faster'],
+        ['gta6-guide-rest-mode', 'How to keep GTA 6 updated with Rest Mode and background downloads', 'How to use', 'gaming-hardware', 'handhelds', 'ps5 rest mode downloads'],
+        ['gta6-guide-ps5-hdr', 'How to set up HDR on PS5 for GTA 6', 'Setup', 'pc-hardware', 'monitors', 'ps5 hdr settings'],
+        ['gta6-guide-xbox-hdr', 'How to calibrate HDR on Xbox Series X|S for GTA 6', 'Setup', 'pc-hardware', 'monitors', 'xbox hdr calibration'],
+        ['gta6-guide-120hz-vrr', 'How to turn on 120 Hz and VRR on PS5 and Xbox for GTA 6', 'Setup', 'pc-hardware', 'monitors', 'ps5 120hz vrr settings'],
+        ['gta6-guide-tv-game-mode', 'How to turn on Game Mode on your TV to cut input lag in GTA 6', 'Setup', 'pc-hardware', 'monitors', 'tv game mode input lag'],
+        ['gta6-guide-ps5-3d-audio', 'How to set up 3D Audio on PS5 with a headset for GTA 6', 'Setup', 'gaming-hardware', 'audio', 'ps5 3d audio headset'],
+        ['gta6-guide-xbox-spatial', 'How to set up spatial sound on Xbox Series X|S for GTA 6', 'Setup', 'gaming-hardware', 'audio', 'xbox spatial sound'],
+        ['gta6-guide-dualsense', 'How to set up and customise your DualSense controller for GTA 6', 'Setup', 'gaming-hardware', 'handhelds', 'dualsense settings'],
+        ['gta6-guide-xbox-controller', 'How to update and remap an Xbox controller for GTA 6', 'Setup', 'gaming-hardware', 'handhelds', 'xbox controller remap'],
+        ['gta6-guide-remote-play', 'How to play GTA 6 on your phone with PS5 Remote Play', 'How to use', 'gaming-hardware', 'handhelds', 'ps5 remote play phone'],
+        ['gta6-guide-ps-portal', 'How to set up PlayStation Portal to play GTA 6 away from the TV', 'Setup', 'gaming-hardware', 'handhelds', 'playstation portal setup'],
+        ['gta6-guide-record-ps5', 'How to record and share GTA 6 clips on PS5', 'How to use', 'gaming-hardware', 'handhelds', 'record gameplay ps5'],
+        ['gta6-guide-record-xbox', 'How to capture and share GTA 6 clips on Xbox Series X|S', 'How to use', 'gaming-hardware', 'handhelds', 'capture clips xbox'],
+        ['gta6-guide-stream-ps5', 'How to stream GTA 6 from PS5 to Twitch or YouTube', 'Setup', 'gaming-hardware', 'audio', 'stream ps5 to twitch'],
+        ['gta6-guide-capture-card', 'How to record GTA 6 with a capture card from PS5 or Xbox', 'Setup', 'gaming-hardware', 'laptops', 'capture card setup'],
+        ['gta6-guide-parental-ps5', 'How to set up parental controls on PS5 for mature games like GTA 6', 'How to use', 'gaming-hardware', 'handhelds', 'ps5 parental controls'],
+        ['gta6-guide-parental-xbox', 'How to set up Xbox family settings for mature games like GTA 6', 'How to use', 'gaming-hardware', 'handhelds', 'xbox family settings'],
+        ['gta6-guide-ethernet', 'How to get a stable connection for GTA 6: Wi-Fi or Ethernet', 'Setup', 'gaming-hardware', 'handhelds', 'wifi vs ethernet gaming'],
+        ['gta6-guide-nat', 'How to fix NAT type on PS5 and Xbox before playing GTA 6 online', 'How to use', 'gaming-hardware', 'handhelds', 'fix nat type ps5'],
+        ['gta6-guide-stick-drift', 'How to fix stick drift on DualSense and Xbox controllers', 'How to use', 'gaming-hardware', 'handhelds', 'fix controller stick drift'],
+        ['gta6-guide-cooling', 'How to keep your PS5 or Xbox cool during long GTA 6 sessions', 'How to use', 'gaming-hardware', 'handhelds', 'keep ps5 cool'],
+        ['gta6-guide-accessibility', 'How to use accessibility settings on PS5 and Xbox: subtitles, text size and more', 'How to use', 'gaming-hardware', 'handhelds', 'ps5 accessibility settings'],
+        ['gta6-guide-soundbar', 'How to connect a soundbar to your TV for better GTA 6 sound', 'Setup', 'gaming-hardware', 'audio', 'connect soundbar to tv'],
+        ['gta6-guide-monitor', 'How to connect a gaming monitor to PS5 or Xbox for GTA 6', 'Setup', 'pc-hardware', 'monitors', 'connect monitor to ps5'],
+        ['gta6-guide-updates', 'How to update your PS5 or Xbox and GTA 6 the right way', 'How to use', 'gaming-hardware', 'handhelds', 'update ps5 system software'],
+        ['gta6-guide-gameshare', 'How to share games with family on PS5 and Xbox', 'How to use', 'gaming-hardware', 'handhelds', 'gameshare ps5'],
+        ['gta6-guide-screenshots', 'How to take and share GTA 6 screenshots on PS5 and Xbox', 'How to use', 'gaming-hardware', 'handhelds', 'take screenshots ps5'],
+    ];
+    return array_map(function ($t) use ($x) { $t[] = $x; return $t; }, $g);
+}
+
+/** The next GTA 6 guide not written yet, or null. */
+function rocGta6NextGuide(array $doneKeys, array $titles): ?array {
+    foreach (rocGta6Guides() as $t) if (!in_array($t[0], $doneKeys, true) && !in_array(strtolower($t[1]), $titles, true)) return $t;
+    return null;
+}
+
+/**
+ * "More on GTA 6" box under every GTA 6 blog post, news story and guide (blog-render.php): the hub and the latest
+ * GTA 6 posts of all three kinds, so readers (and Google) move between them.
+ */
+function rocGta6Box(?PDO $pdo, string $selfPath): string {
+    $all = array_values(array_filter(rocGta6Posts($pdo, 30), function ($b) use ($selfPath) { return $b['url'] !== $selfPath; }));
+    $pick = []; $n = ['News' => 0, 'Guide' => 0, 'Blog' => 0];
+    foreach ($all as $b) if ($n[$b['kind']] < 3 && count($pick) < 7) { $pick[] = $b; $n[$b['kind']]++; }
+    $h = '<h2>More on GTA 6</h2><ul><li><a href="/gta-6/">GTA 6 release date, price and PC status</a></li>';
+    foreach ($pick as $b) $h .= '<li><a href="' . htmlspecialchars($b['url'], ENT_QUOTES) . '">' . htmlspecialchars($b['title'], ENT_QUOTES) . '</a> (' . $b['kind'] . ')</li>';
+    return $h . '</ul>';
 }
