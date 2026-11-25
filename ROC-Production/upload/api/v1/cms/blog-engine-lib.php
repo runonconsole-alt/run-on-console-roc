@@ -97,7 +97,7 @@ function rocBlogPerDay(PDO $pdo): int { return max(1, min(6, (int)rocBlogGet($pd
  * Owner, 2026-11-05 (Deploy 166): 30 November 2026 is the last day the AI writes blog posts, guides and news and
  * makes cover pictures (it was 15 November, Deploy 145). CMS setting ai_last_day moves it ('' = no end).
  */
-const ROC_AI_LAST_DAY = '2026-11-30';
+const ROC_AI_LAST_DAY = '2026-12-31';   // Deploy 188 (owner, 19 November): until the end of December, topics around GTA 6
 function rocAiLastDay(PDO $pdo): string { $v = rocBlogGet($pdo, 'ai_last_day', null); return $v === null ? ROC_AI_LAST_DAY : (string)$v; }
 function rocAiEnded(PDO $pdo): bool {
     $last = rocAiLastDay($pdo);
@@ -1203,6 +1203,10 @@ function rocBlogBrief(PDO $pdo, ?array $topic = null): ?array {
         require_once dirname(__DIR__) . '/gta6-lib.php';
         $facts = rocGta6Facts();
         array_unshift($links['must'], ['url' => '/gta-6/', 'text' => 'GTA 6 release date, price and PC status', 'why' => 'the GTA 6 hub: link it in the first two paragraphs']);
+        // Deploy 188: GTA 6 news, guides and posts already on the site, so the cluster links together.
+        $more = [];
+        foreach (rocGta6Posts($pdo, 10) as $b) $more[] = ['url' => $b['url'], 'text' => $b['title'], 'why' => 'GTA 6 ' . strtolower($b['kind']) . ' on ROC: link 2-3 of these where they fit'];
+        $links['may'] = array_merge($more, $links['may']);
     }
     return ['topic_id' => $topic['id'], 'stage' => $topic['stage'], 'cluster' => $pillarName, 'title_idea' => $topic['title'],
             'focus_keyword' => $kw['focus'], 'secondary_keywords' => array_slice($secondary, 0, 8), 'keyword_source' => $kw['source'], 'intent' => $intent,
