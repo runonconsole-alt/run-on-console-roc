@@ -561,7 +561,8 @@ function rocSendHtml(string $html, ?int $modified = null): void {
         if ($modified && $lu && $lu > $modified) $modified = $lu;
     }
     header('Content-Type: text/html; charset=utf-8');
-    header('Cache-Control: public, max-age=0, must-revalidate');
+    // Deploy 190: game pages (page cache on) may stay 30 minutes at Cloudflare; everything else as before.
+    header('Cache-Control: ' . (!empty($GLOBALS['ROC_PAGE_CACHE']) ? 'public, max-age=0, s-maxage=1800, stale-while-revalidate=86400' : 'public, max-age=0, must-revalidate'));
     header('X-Content-Type-Options: nosniff');
     // Same rule as the page's robots meta tag, also as an HTTP header (some SEO tools look for it).
     if (preg_match('#<meta\s+name="robots"\s+content="([^"]+)"#i', $html, $rm)) header('X-Robots-Tag: ' . $rm[1]);
