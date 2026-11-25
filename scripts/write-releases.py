@@ -1310,6 +1310,18 @@ RELEASES = [
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.',
                 'rm -rf /home2/runoncon/roc-cms-cache/pages (so every game page is drawn again with the charts)',
                 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=190, date='2026-11-25', title='PC upgrade planner, and faster Can I run pages',
+         changes=['New page /can-i-run/upgrade-planner/: choose your graphics card, processor and RAM and see how many of the PC games run on high, medium, low or not at all (bar chart), every upgrade still sold new with the games it adds on high settings, a three-step plan (the part that unlocks the most games first, and the smallest upgrade of it that gets most of the gain), the matching part from our product guides, and the popular games the first step unlocks. No prices and no invented FPS',
+                  'Links to the planner on every game page (Plan an upgrade), on the Can I run page, in the tools box and in the sitemap',
+                  'Speed: the Google Maps frame in the footer loaded on every page (about 1 second); now a light card with Show the map and Open in Google Maps',
+                  'Speed: the Google fonts no longer block the first paint',
+                  'Speed: game pages tell Cloudflare it may keep them 30 minutes (works once the Cloudflare Cache Rule for /can-i-run/ is on)'],
+         checks=[dict(label='Upgrade planner', type='contains', path='api/v1/upgrade-lib.php', text='function rocGpUpgradePlanner')],
+         pr=REPO + '191',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.',
+                'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply',
+                'Cloudflare: Caching > Cache Rules > Create rule: URI Path starts with /can-i-run/ ; Eligible for cache ; Edge TTL: Use cache-control header if present',
+                'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

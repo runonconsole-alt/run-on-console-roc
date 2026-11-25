@@ -741,3 +741,22 @@ document.addEventListener('submit', function (e) {
   if (window.MutationObserver) new MutationObserver(function () { var b = document.querySelector('[data-roc-theme]:not([aria-pressed])'); if (b) label(); })
     .observe(document.documentElement, { childList: true, subtree: true });
 })();
+
+/* Deploy 190 (speed): the footer map loads only when the visitor asks for it (it was ~1 s on every page). */
+(function () {
+  document.addEventListener('click', function (e) {
+    var b = e.target && e.target.closest ? e.target.closest('[data-roc-map-show]') : null;
+    if (!b) return;
+    var box = b.closest('[data-roc-map]');
+    if (!box) return;
+    var f = document.createElement('iframe');
+    f.title = 'Run On Console location on Google Maps';
+    f.src = box.getAttribute('data-roc-map');
+    f.loading = 'lazy';
+    f.referrerPolicy = 'no-referrer-when-downgrade';
+    f.style.cssText = 'border:0;width:100%;height:100%;min-height:18rem;border-radius:1.5rem;display:block';
+    box.innerHTML = '';
+    box.style.padding = '0';
+    box.appendChild(f);
+  });
+})();

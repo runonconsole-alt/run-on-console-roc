@@ -160,14 +160,17 @@ export const ValuePropsFooter = () => {
           <p className="text-xs text-emerald-100/80 mt-1">Questions, corrections, review samples or partnerships: we read every message.</p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-          <iframe
-            title="Run On Console location on Google Maps"
-            src={CONTACT.embed}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            className="block w-full h-72 lg:h-full min-h-[18rem] rounded-3xl border border-emerald-600/50 bg-emerald-950/40"
-            style={{ border: 0 }}
-          />
+          {/* Deploy 190 (speed): the Google Maps frame was loaded on every page (about 1 s and many requests). Now a light
+              card; roc-nav.js puts the map in only when the visitor asks for it. */}
+          <div data-roc-map={CONTACT.embed}
+            className="w-full h-72 lg:h-full min-h-[18rem] rounded-3xl border border-emerald-600/50 bg-emerald-950/40 flex flex-col items-center justify-center gap-3 text-center p-6">
+            <span className="text-4xl" aria-hidden="true">📍</span>
+            <p className="m-0 font-display font-extrabold text-lg text-white">{CONTACT.address}</p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              <button type="button" data-roc-map-show="" className="bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-extrabold text-sm px-4 py-2 rounded-xl">Show the map</button>
+              <a href={CONTACT.map} target="_blank" rel="noopener" className="border border-emerald-400/60 text-emerald-100 hover:text-white font-bold text-sm px-4 py-2 rounded-xl no-underline">Open in Google Maps</a>
+            </div>
+          </div>
           <form data-roc-contact-form="" className="bg-white text-slate-800 rounded-3xl p-6 sm:p-7 shadow-xl space-y-3" noValidate>
             <p className="m-0 font-display font-extrabold text-lg text-emerald-950">Send us a message</p>
             <p className="m-0 text-[11px] text-slate-500">Please do not share sensitive personal details in this form.</p>
