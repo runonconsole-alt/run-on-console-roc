@@ -1300,6 +1300,16 @@ RELEASES = [
          steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.',
                 'php public_html/api/v1/cron/cli-gta6-plan.php (dry run), then the same with --apply',
                 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=189, date='2026-11-25', title='Charts on every Can I run page: graphics card chart, requirements ladder, FPS chart',
+         changes=['Graphics card chart on every game page: 20 common cards from integrated graphics to the RTX 4090, each with the settings level it reaches in that game (high, medium to high, low, below the minimum) from the same rules as the checker and the official Steam requirements; not an invented FPS. The player’s own card is marked after the quick check',
+                  'Requirements at a glance: the minimum and recommended graphics card, processor and RAM on a scale from the weakest to the strongest common part, with Your PC marked after the check',
+                  'Players’ FPS reports now show as a bar chart (typical FPS per card and settings)',
+                  'Plain HTML and CSS bars, no chart library, so the pages stay fast; works on phones and in night mode'],
+         checks=[dict(label='Game charts', type='contains', path='api/v1/game-charts-lib.php', text='function rocGcGpuChart')],
+         pr=REPO + '190',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.',
+                'rm -rf /home2/runoncon/roc-cms-cache/pages (so every game page is drawn again with the charts)',
+                'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'

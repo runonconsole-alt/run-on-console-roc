@@ -979,6 +979,12 @@ $m .= '</div><p style="margin-top:.9rem">How common PCs do: ' . implode('; ', ar
     }, array_values($runs))) . '.</p>'
     . '<p class="gp-src" style="margin-top:.6rem">Parts with the same speed (and newer, faster ones) work too. Laptop versions of a graphics card are usually a little slower.</p></section>';
 
+// Deploy 189 (owner): the answer as charts: graphics card chart and the requirements ladder (api/v1/game-charts-lib.php).
+if (is_file(__DIR__ . '/api/v1/game-charts-lib.php')) {
+    require_once __DIR__ . '/api/v1/game-charts-lib.php';
+    $m .= rocGcCss() . rocGcGpuChart($g, $name) . rocGcLadder($g, $name);
+}
+
 // Deploy 162: the best graphics cards for this game.
 if ($bestGpu) {
     $m .= '<section class="gp-card" id="best-gpu"><h2>Best graphics cards for ' . rocH($name) . '</h2>'
@@ -1096,6 +1102,7 @@ $m .= "<script>(function(){var box=document.querySelector('.gp-check'),res=docum
     . "try{var P=JSON.parse(localStorage.getItem(K)||'null');if(P){pk(sl('gpu'),P.gpu,P.gs);pk(sl('cpu'),P.cpu,P.cs);if(P.ram){var ro=[].filter.call(sl('ram').options,function(x){return +x.value===+P.ram})[0];if(ro)sl('ram').value=ro.value}note(true)}}catch(e){}"
     . "box.addEventListener('change',function(){try{var g=sl('gpu'),c=sl('cpu');localStorage.setItem(K,JSON.stringify({gpu:g.options[g.selectedIndex].text,cpu:c.options[c.selectedIndex].text,ram:+sl('ram').value,gs:+g.value,cs:+c.value}));note(true)}catch(e){}});"
     . "box.addEventListener('change',function(){run();if(window.rocTrack)rocTrack('roc_quick_check',document.title.split('?')[0].replace('Can I Run ',''),(res.querySelector('b')||{}).textContent||'');});run();})();</script>";
+if (function_exists('rocGcScript')) $m .= rocGcScript();   // Deploy 189: the player's PC on the charts
 $m .= <<<'ROCJS'
 <script>(function(){
 /* Deploy 181: "Did it run on your PC?" after the player's own check (not the default parts on load). */

@@ -36,6 +36,8 @@ function rocFpsSection(?PDO $pdo, string $slug, string $name, array $gpus, array
         foreach ($reps as $r) $grp[$r['gpu'] . '|' . $r['res'] . '|' . $r['preset']][] = $r['fps'];
         $typ = [];
         foreach ($grp as $k => $v) if (count($v) >= 2) { sort($v); $n = count($v); $typ[$k] = [$n % 2 ? $v[intdiv($n, 2)] : (int)round(($v[$n / 2 - 1] + $v[$n / 2]) / 2), $n]; }
+        // Deploy 189: the reports as a bar chart first (game-charts-lib.php).
+        if (is_file(__DIR__ . '/game-charts-lib.php')) { require_once __DIR__ . '/game-charts-lib.php'; $h .= rocGcFpsChart($reps); }
         if ($typ) {
             $h .= '<ul class="gp-qa" style="margin-bottom:.8rem">';
             foreach ($typ as $k => $t) { [$g, $res, $pre] = explode('|', $k); $h .= '<li><b>' . rocH($g) . ', ' . rocH($res) . ' ' . rocH($pre) . ':</b> about ' . $t[0] . ' FPS (' . $t[1] . ' players)</li>'; }
