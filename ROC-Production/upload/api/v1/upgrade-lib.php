@@ -70,8 +70,8 @@ function rocGpUpgradePlanner(string $root, ?PDO $pdo, array $games, int $updated
         . '<p>What should you upgrade first? Choose your parts and see, across ' . number_format($n) . ' PC games and their official Steam requirements, which upgrade unlocks the most games on high settings, '
         . 'and the best order to do it in. Settings levels from the requirements, not invented FPS.</p></div></header>';
     $m .= '<section class="gp-card"><h2>Your PC now</h2><div class="gp-check" style="margin-top:.6rem" id="up-box">'
-        . '<label>Graphics card<select data-k="gpu">' . $opt($gpus, 'GeForce GTX 1650') . '</select></label>'
-        . '<label>Processor<select data-k="cpu">' . $opt($cpus, 'Intel Core i5-8400') . '</select></label>'
+        . '<label>Graphics card<select data-k="gpu">' . rocPartsOptions('gpu', 'GeForce GTX 1650') . '</select></label>'
+        . '<label>Processor<select data-k="cpu">' . rocPartsOptions('cpu', 'Intel Core i5-8400') . '</select></label>'
         . '<label>Memory (RAM)<select data-k="ram">' . implode('', array_map(function ($r) { return '<option value="' . $r . '"' . ($r === 16 ? ' selected' : '') . '>' . $r . ' GB</option>'; }, [4, 6, 8, 12, 16, 24, 32, 64])) . '</select></label>'
         . '</div><p class="gp-src" style="margin-top:.6rem">Your saved PC from the game pages is filled in. <a href="/can-i-run/my-pc/">Which games can my PC run?</a></p>'
         . '<div id="up-now" aria-live="polite" style="margin-top:1rem"><p class="gp-src">Loading the games…</p></div>'

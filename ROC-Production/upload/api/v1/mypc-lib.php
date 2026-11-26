@@ -15,7 +15,8 @@ const ROC_GP_MYPC = '/can-i-run/my-pc/';
 /** The game list for the page: [slug, name, year, [min gpu, cpu, ram], [rec gpu, cpu, ram], nr], most popular first. */
 function rocGpMyPcData(array $games): void {
     $num = function ($v) { return is_numeric($v) ? (float)$v : 0; };
-    $out = ['gpu' => rocGpRefs('gpu'), 'cpu' => rocGpRefs('cpu'), 'shops' => ROC_GP_IN_SHOPS, 'g' => []];
+    // Deploy 191: every part of the long list (parts-lib.php), so the tools can look up any card or processor.
+    $out = ['gpu' => function_exists('rocGpRefsAll') ? rocGpRefsAll('gpu') : rocGpRefs('gpu'), 'cpu' => function_exists('rocGpRefsAll') ? rocGpRefsAll('cpu') : rocGpRefs('cpu'), 'shops' => ROC_GP_IN_SHOPS, 'g' => []];
     foreach ($games as $g) {
         $mn = (array)($g['req']['min'] ?? []); $rc = (array)($g['req']['rec'] ?? $mn);
         $out['g'][] = [$g['slug'], $g['name'], (int)($g['y'] ?? 0), [$num($mn['gpu'] ?? 0), $num($mn['cpu'] ?? 0), $num($mn['ram'] ?? 0)],
@@ -62,8 +63,8 @@ function rocGpMyPc(string $root, array $games, int $updated, string $headTop, st
         . 'Same rules as every game page, from the official Steam requirements. Your PC stays in this browser.</p></div></header>';
     $m .= '<section class="gp-card" id="check"><h2>Your PC</h2>'
         . '<div class="gp-check" style="margin-top:.6rem" id="mp-box">'
-        . '<label>Graphics card<select data-k="gpu">' . $opt(rocGpRefs('gpu'), 'GeForce GTX 1650') . '</select></label>'
-        . '<label>Processor<select data-k="cpu">' . $opt(rocGpRefs('cpu'), 'Intel Core i5-8400') . '</select></label>'
+        . '<label>Graphics card<select data-k="gpu">' . rocPartsOptions('gpu', 'GeForce GTX 1650') . '</select></label>'
+        . '<label>Processor<select data-k="cpu">' . rocPartsOptions('cpu', 'Intel Core i5-8400') . '</select></label>'
         . '<label>Memory (RAM)<select data-k="ram">' . implode('', array_map(function ($r) { return '<option value="' . $r . '"' . ($r === 16 ? ' selected' : '') . '>' . $r . ' GB</option>'; }, [4, 6, 8, 12, 16, 24, 32, 64])) . '</select></label>'
         . '</div><p style="margin-top:.7rem"><button type="button" class="gp-btn s" id="gp-detect">Detect my graphics card</button> <span class="gp-src" id="gp-detect-msg"></span></p>'
         . '<p class="mp-note" id="mp-saved"></p></section>';

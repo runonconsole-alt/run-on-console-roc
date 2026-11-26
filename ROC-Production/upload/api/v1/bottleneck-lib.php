@@ -82,8 +82,8 @@ function rocGpBottleneck(string $root, array $games, int $updated, string $headT
         . '<p>Is it your graphics card or your processor? Choose your parts and see, across ' . number_format($n) . ' PC games and their official Steam requirements, how many games each part keeps below high settings, '
         . 'and which single upgrade lifts the most games. No invented bottleneck percentage: just the games.</p></div></header>';
     $m .= '<section class="gp-card"><h2>Your PC</h2><div class="gp-check" style="margin-top:.6rem" id="bn-box">'
-        . '<label>Graphics card<select data-k="gpu">' . $opt($gpus, 'GeForce GTX 1650') . '</select></label>'
-        . '<label>Processor<select data-k="cpu">' . $opt($cpus, 'Intel Core i5-8400') . '</select></label>'
+        . '<label>Graphics card<select data-k="gpu">' . rocPartsOptions('gpu', 'GeForce GTX 1650') . '</select></label>'
+        . '<label>Processor<select data-k="cpu">' . rocPartsOptions('cpu', 'Intel Core i5-8400') . '</select></label>'
         . '<label>Memory (RAM)<select data-k="ram">' . implode('', array_map(function ($r) { return '<option value="' . $r . '"' . ($r === 16 ? ' selected' : '') . '>' . $r . ' GB</option>'; }, [4, 6, 8, 12, 16, 24, 32, 64])) . '</select></label>'
         . '</div><p class="gp-src" style="margin-top:.6rem">Your PC from <a href="/can-i-run/my-pc/">Which games can my PC run?</a> and the game pages is filled in when you saved one.</p></section>';
     $m .= '<section class="gp-card" aria-live="polite"><h2>What holds your games back</h2><div id="bn-out"><p class="gp-src">Loading the games…</p></div></section>';

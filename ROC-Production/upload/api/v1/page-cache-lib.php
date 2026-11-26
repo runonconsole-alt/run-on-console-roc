@@ -27,7 +27,7 @@ function rocPageCacheTry(string $root, ?PDO $pdo, array $extra = []): void {
     $files = ['/roc-steam-deck.json', '/game-render.php', '/game-i18n.php', '/blog-render.php', '/cms-templates/blog-post.html', '/cms-templates/site-layer.json',
               '/api/v1/game-pages-lib.php', '/api/v1/agent-lib.php', '/api/v1/fps-lib.php', '/api/v1/ram-pages-lib.php', '/api/v1/upcoming-lib.php', '/api/v1/gpu-vs-lib.php',
               '/api/v1/i18n-lib.php', '/api/v1/report-lib.php', '/api/v1/mypc-lib.php', '/api/v1/steam-deck-lib.php', '/api/v1/steam-deck-page.php', '/api/v1/link-boost-lib.php',
-              '/api/v1/bottleneck-lib.php', '/api/v1/game-votes-lib.php', '/api/v1/game-charts-lib.php', '/api/v1/upgrade-lib.php'];
+              '/api/v1/bottleneck-lib.php', '/api/v1/game-votes-lib.php', '/api/v1/game-charts-lib.php', '/api/v1/upgrade-lib.php', '/api/v1/parts-lib.php', '/api/v1/rate-lib.php'];
     $path = (string)parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH);
     // The game list by its date (Deploy 183): the file changes every 10 minutes while new Steam games are added.
     $key = [function_exists('rocGpUpdated') ? (int)rocGpUpdated($root) : (int)@filemtime($root . '/roc-steam-games.json')];

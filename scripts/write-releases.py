@@ -1322,6 +1322,15 @@ RELEASES = [
                 'php public_html/api/v1/cron/cli-refresh-templates.php --apply, then php public_html/api/v1/cron/cli-ai-files.php --apply',
                 'Cloudflare: Caching > Cache Rules > Create rule: URI Path starts with /can-i-run/ ; Eligible for cache ; Edge TTL: Use cache-control header if present',
                 'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.']),
+    dict(deploy=191, date='2026-11-26', title='Rate my PC, and 200 graphics cards and processors in the PC tools',
+         changes=['New page /can-i-run/rate-my-pc/: a gaming PC score out of 100 from the official Steam requirements (85 points from the demanding games, 15 for headroom), a gauge and tier (Low-end to Elite), the games per settings level, the PC next to popular PCs, a picture to save or share, a share link that opens the same PC, and an embed badge for blogs and forums (api/v1/pc-badge.php)',
+                  'The bottleneck calculator, upgrade planner, Rate my PC and Which games can my PC run? now offer 123 graphics cards (GT 710 to RTX 5090, RX 460 to RX 9070 XT, Intel Arc, integrated and laptop graphics) and 80 processors (Core 2 Quad to Core Ultra 9 and Ryzen 9 9950X), grouped by brand. Same scores as the checker; laptop graphics one step lower than the desktop card',
+                  'Rate my PC is linked from the Can I run page, the tools box and the sitemap'],
+         checks=[dict(label='Rate my PC', type='contains', path='api/v1/rate-lib.php', text='function rocGpRateMyPc')],
+         pr=REPO + '192',
+         steps=['Upload the zip to /home2/runoncon/, then unzip it and delete the zip.',
+                'CMS Dashboard: Clear cache, then Cloudflare: Purge Everything.',
+                'Search Console: request indexing for /can-i-run/rate-my-pc/']),
 ]
 
 STEPS = 'Upload the zip to /home2/runoncon/, unzip it, then run the installers listed in the deploy message.'
